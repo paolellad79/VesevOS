@@ -70,6 +70,8 @@ static void cmdHelp(Print& o) {
   o.println(tr("  cpu [auto|80|160|240]  velocita CPU"));
   o.println(tr("  hostname [nome] mostra o cambia il nome host"));
   o.println(tr("  domain [nome|-] mostra, cambia o toglie il dominio"));
+  o.println(tr("  info            riassunto: versione, chip, memoria, rete, MAC"));
+  o.println(tr("  net             rete: IP, MAC client e AP, segnale"));
   o.println(tr("  ip              rete e indirizzo"));
   o.println(tr("  wifi            stato wi-fi"));
   o.println(tr("  wifi-scan       cerca reti"));
@@ -228,6 +230,17 @@ void shellExec(const String& lineIn, Print& o, bool authed) {
     cfg.cpuMhz = m; cfgSave(); sysApplyCpuMode(); o.println(trf("Modo CPU: %s", a1.c_str()));
   }
   else if (c == "ip" || c == "wifi") o.println(netStatusJson());
+  else if (c == "net") o.print(netInfoText());
+  else if (c == "info") {
+    o.println(String(VOS_NAME) + " " + VOS_VERSION);
+    o.println(trf("Chip:        %s rev %d, %d core, %u MHz", ESP.getChipModel(), (int)ESP.getChipRevision(), (int)ESP.getChipCores(), (unsigned)getCpuFrequencyMhz()));
+    o.println(trf("Acceso da:   %s", uptimeStr(sysUptimeSec()).c_str()));
+    o.println(trf("RAM   libera %u KB su %u KB", (unsigned)(ESP.getFreeHeap() / 1024), (unsigned)(ESP.getHeapSize() / 1024)));
+    o.println(trf("PSRAM libera %u KB su %u KB", (unsigned)(ESP.getFreePsram() / 1024), (unsigned)(ESP.getPsramSize() / 1024)));
+    o.println(trf("/flash  usati %u KB su %u KB", (unsigned)(LittleFS.usedBytes() / 1024), (unsigned)(LittleFS.totalBytes() / 1024)));
+    o.println(trf("Temperatura CPU: %s", fmtTemp(sysCpuTemp()).c_str()));
+    o.print(netInfoText());
+  }
   else if (c == "wifi-scan") {
     netScanStart(); delay(300);
     for (int i = 0; i < 30 && netScanJson().indexOf("\"running\":true") >= 0; i++) delay(300);

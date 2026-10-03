@@ -13,5 +13,7 @@ bool   fsMkdir(const String& path, String& err);
 bool   fsRemove(const String& path, String& err);   // anche cartelle (con contenuto)
 bool   fsRename(const String& from, const String& to, String& err);
 bool   fsCopy(const String& from, const String& to, String& err);
-bool   fsWriteText(const String& path, const String& text, String& err);
-bool   fsReadText(const String& path, String& out, String& err);   // max 8000 caratteri
+bool   fsWriteText(const String& path, const String& text, String& err, bool mustBeNew = false);   // scrittura sicura
+bool   fsReadText(const String& path, String& out, String& err);   // max 32 KB, UTF-8, no binari
+String fsDirsJson();                             // ["/","/lang",...] tutte le cartelle
+size_t fsTextMax();                              // limite dell'editor in byte

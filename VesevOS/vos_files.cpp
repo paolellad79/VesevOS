@@ -6,7 +6,7 @@
 #include "vos_util.h"
 #include <LittleFS.h>
 
-#define MAX_TEXT 8000
+#define MAX_TEXT 32768        // editor della pagina: oltre si scarica soltanto
 
 String fsClean(const String& in) {
   String p = in; p.trim();
@@ -54,7 +54,8 @@ String fsListJson(const String& raw) {
     }
     f = d.openNextFile();
   }
-  j += "],\"used\":" + String((unsigned long)LittleFS.usedBytes()) + ",\"total\":" + String((unsigned long)LittleFS.totalBytes()) + "}";
+  j += "],\"used\":" + String((unsigned long)LittleFS.usedBytes()) + ",\"total\":" + String((unsigned long)LittleFS.totalBytes()) +
+       ",\"max\":" + String((unsigned long)MAX_TEXT) + "}";
   return j;
 }
 
@@ -107,6 +108,7 @@ bool fsCopy(const String& a, const String& b, String& err) {
   File in = LittleFS.open(pa, "r");
   if (!in || in.isDirectory()) { err = tr("Origine non e un file"); return false; }
   if (LittleFS.exists(pb)) { in.close(); err = tr("La destinazione esiste gia"); return false; }
+  if ((size_t)in.size() + 8192 > LittleFS.totalBytes() - LittleFS.usedBytes()) { in.close(); err = tr("Spazio esaurito"); return false; }
   File out = LittleFS.open(pb, "w");
   if (!out) { in.close(); err = tr("Impossibile creare la destinazione"); return false; }
   uint8_t buf[512]; bool ok = true;
@@ -119,27 +121,72 @@ bool fsCopy(const String& a, const String& b, String& err) {
   return true;
 }
 
-bool fsWriteText(const String& raw, const String& text, String& err) {
+// Scrittura sicura: prima un file temporaneo, poi lo scambio. Se manca la corrente
+// a meta, il file vecchio resta intero.
+bool fsWriteText(const String& raw, const String& text, String& err, bool mustBeNew) {
   String p; if (!okPath(raw, p, err)) return false;
   if (p == "/") { err = tr("Nome file mancante"); return false; }
-  if (text.length() > MAX_TEXT) { err = tr("Testo troppo lungo (max 8000)"); return false; }
-  File f = LittleFS.open(p, "w");
+  if (p.endsWith(".tmp~")) { err = tr("Nome non valido"); return false; }
+  if (text.length() > MAX_TEXT) { err = tr("Testo troppo lungo (max 32 KB)"); return false; }
+  bool exists = LittleFS.exists(p);
+  if (exists) { File d = LittleFS.open(p); bool dir = d && d.isDirectory(); d.close(); if (dir) { err = tr("Esiste una cartella con questo nome"); return false; } }
+  if (mustBeNew && exists) { err = tr("Esiste gia"); return false; }
+  size_t freeB = LittleFS.totalBytes() - LittleFS.usedBytes();
+  if (text.length() + 8192 > freeB) { err = tr("Spazio esaurito"); return false; }
+  int ls = p.lastIndexOf('/');
+  if (ls > 0 && !LittleFS.exists(p.substring(0, ls))) { err = tr("Cartella non trovata"); return false; }
+  String tmp = p + ".tmp~";
+  File f = LittleFS.open(tmp, "w");
   if (!f) { err = tr("Impossibile scrivere"); return false; }
   size_t w = f.print(text);
   f.close();
-  if (w != text.length()) { err = tr("Spazio esaurito"); return false; }
+  if (w != text.length()) { LittleFS.remove(tmp); err = tr("Spazio esaurito"); return false; }
+  if (exists && !LittleFS.remove(p)) { LittleFS.remove(tmp); err = tr("Impossibile scrivere"); return false; }
+  if (!LittleFS.rename(tmp, p)) { err = tr("Impossibile scrivere"); return false; }
   return true;
 }
 
+// Legge un file di testo (UTF-8 com'e, accenti compresi). Rifiuta file binari e troppo grandi.
 bool fsReadText(const String& raw, String& out, String& err) {
   String p; if (!okPath(raw, p, err)) return false;
   File f = LittleFS.open(p, "r");
   if (!f || f.isDirectory()) { err = tr("File non trovato"); return false; }
+  if (f.size() > MAX_TEXT) { f.close(); err = tr("File troppo grande per l'editor (max 32 KB): scaricalo"); return false; }
   out = "";
-  while (f.available() && out.length() < MAX_TEXT) {
-    char c = f.read();
-    out += (c == '\n' || c == '\t' || (c >= 32 && c < 127)) ? c : '?';
+  if (!out.reserve(f.size() + 1)) { f.close(); err = tr("Memoria insufficiente"); return false; }
+  uint8_t buf[256];
+  while (f.available()) {
+    size_t n = f.read(buf, sizeof(buf));
+    for (size_t i = 0; i < n; i++) {
+      if (buf[i] == 0) { f.close(); out = ""; err = tr("File binario: non si puo modificare, scaricalo"); return false; }
+      out += (char)buf[i];
+    }
   }
   f.close();
   return true;
 }
+
+// Elenco di tutte le cartelle (per "Sposta"): ["/","/lang",...]
+static void dirsRec(const String& p, String& j, int depth, int& n) {
+  if (depth > 8 || n >= 64) return;
+  File d = LittleFS.open(p);
+  if (!d || !d.isDirectory()) return;
+  File c = d.openNextFile();
+  while (c && n < 64) {
+    if (c.isDirectory()) {
+      String nm = String(c.name()); int sl = nm.lastIndexOf('/'); if (sl >= 0) nm = nm.substring(sl + 1);
+      String full = (p == "/") ? "/" + nm : p + "/" + nm;
+      j += ",\"" + jsonEscape(full) + "\""; n++;
+      dirsRec(full, j, depth + 1, n);
+    }
+    c = d.openNextFile();
+  }
+}
+
+String fsDirsJson() {
+  String j = "[\"/\""; int n = 0;
+  dirsRec("/", j, 0, n);
+  return j + "]";
+}
+
+size_t fsTextMax() { return MAX_TEXT; }

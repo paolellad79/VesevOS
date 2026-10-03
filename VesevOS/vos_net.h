@@ -10,6 +10,8 @@ void     netInit();                 // avvia il task di rete
 NetState netState();
 String   netStatusJson();           // oggetto JSON con modo, ssid, ip, rssi...
 String   netIpString();
+String   netMac(bool ap);           // MAC Wi-Fi client (false) o Access Point (true), "AA:BB:..."
+String   netInfoText();             // riassunto rete leggibile (comando net)
 void     netReconfigure();          // applica cfg (dopo salvataggio)
 void     netScanStart();            // avvia scansione asincrona
 String   netScanJson();             // {"running":bool,"list":[...]}

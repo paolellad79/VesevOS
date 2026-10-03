@@ -10,6 +10,7 @@
 #include "vos_web.h"
 #include <WiFi.h>
 #include <ESPmDNS.h>
+#include <esp_mac.h>
 
 static volatile NetState g_state = NET_BOOT;
 static volatile bool g_reconf = true;
@@ -50,9 +51,33 @@ String netStatusJson() {
   j += ",\"gw\":\"" + gw + "\",\"mask\":\"" + mk + "\",\"dns\":\"" + d1 + "\",\"dns2\":\"" + d2 + "\"";
   j += ",\"ch\":" + String((int)WiFi.channel());
   if (g_state == NET_AP) j += ",\"clients\":" + String((int)WiFi.softAPgetStationNum());
-  j += ",\"mac\":\"" + WiFi.macAddress() + "\"";
+  j += ",\"mac\":\"" + netMac(false) + "\",\"apMac\":\"" + netMac(true) + "\"";
   j += "}";
   return j;
+}
+
+// MAC letto dalla eFuse: funziona anche con il Wi-Fi spento o in un altro modo.
+String netMac(bool ap) {
+  uint8_t m[6] = {0};
+  if (esp_read_mac(m, ap ? ESP_MAC_WIFI_SOFTAP : ESP_MAC_WIFI_STA) != ESP_OK) return "";
+  char b[18];
+  snprintf(b, sizeof(b), "%02X:%02X:%02X:%02X:%02X:%02X", m[0], m[1], m[2], m[3], m[4], m[5]);
+  return String(b);
+}
+
+String netInfoText() {
+  String t;
+  const char* modo = g_state == NET_AP ? "Access Point" : g_state == NET_CLIENT_OK ? "Client" : "-";
+  t += trf("Modo:        %s", modo) + "\n";
+  t += trf("Nome host:   %s", cfg.hostname.c_str()) + "\n";
+  t += trf("IP:          %s", netIpString().c_str()) + "\n";
+  if (g_state == NET_CLIENT_OK) {
+    t += trf("Rete:        %s (%d dBm, canale %d)", WiFi.SSID().c_str(), (int)WiFi.RSSI(), (int)WiFi.channel()) + "\n";
+    t += trf("Gateway:     %s", WiFi.gatewayIP().toString().c_str()) + "\n";
+  }
+  t += trf("MAC client:  %s", netMac(false).c_str()) + "\n";
+  t += trf("MAC AP:      %s", netMac(true).c_str()) + "\n";
+  return t;
 }
 
 String netScanJson() {

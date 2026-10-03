@@ -38,8 +38,10 @@ class P(HTMLParser):
     def __init__(self): super().__init__(convert_charrefs=True); self.skip = False
     def handle_starttag(self, tag, attrs):
         if tag in ('script', 'style'): self.skip = True
+        tt = any(k == 'data-tt' for k, v in attrs)
         for k, v in attrs:
             if k == 'placeholder' and v: addw(v)
+            if tt and k in ('title', 'aria-label') and v: addw(v)
     def handle_endtag(self, tag):
         if tag in ('script', 'style'): self.skip = False
     def handle_data(self, d):

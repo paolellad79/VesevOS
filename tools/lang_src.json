@@ -140,13 +140,6 @@
    "scope": "fw"
   },
   {
-   "it": "Testo troppo lungo (max 8000)",
-   "en": "Text too long (max 8000)",
-   "es": "Texto demasiado largo (max 8000)",
-   "de": "Text zu lang (max 8000)",
-   "scope": "fw"
-  },
-  {
    "it": "Impossibile scrivere",
    "en": "Cannot write",
    "es": "No se puede escribir",
@@ -1687,20 +1680,6 @@
    "scope": "web"
   },
   {
-   "it": "Nuovo file di testo",
-   "en": "New text file",
-   "es": "Nuevo archivo de texto",
-   "de": "Neue Textdatei",
-   "scope": "web"
-  },
-  {
-   "it": "Carica",
-   "en": "Upload",
-   "es": "Subir",
-   "de": "Hochladen",
-   "scope": "web"
-  },
-  {
    "it": "Modifica",
    "en": "Edit",
    "es": "Editar",
@@ -2125,48 +2104,6 @@
    "en": "Used {0} of {1}",
    "es": "Usados {0} de {1}",
    "de": "Belegt {0} von {1}",
-   "scope": "web"
-  },
-  {
-   "it": "Nome della nuova cartella:",
-   "en": "Name of the new folder:",
-   "es": "Nombre de la nueva carpeta:",
-   "de": "Name des neuen Ordners:",
-   "scope": "web"
-  },
-  {
-   "it": "Nome del nuovo file:",
-   "en": "Name of the new file:",
-   "es": "Nombre del nuevo archivo:",
-   "de": "Name der neuen Datei:",
-   "scope": "web"
-  },
-  {
-   "it": "Nuovo file:",
-   "en": "New file:",
-   "es": "Nuevo archivo:",
-   "de": "Neue Datei:",
-   "scope": "web"
-  },
-  {
-   "it": "Modifica:",
-   "en": "Edit:",
-   "es": "Editar:",
-   "de": "Bearbeiten:",
-   "scope": "web"
-  },
-  {
-   "it": "Nuovo nome o percorso:",
-   "en": "New name or path:",
-   "es": "Nuevo nombre o ruta:",
-   "de": "Neuer Name oder Pfad:",
-   "scope": "web"
-  },
-  {
-   "it": "Eliminare {0}?",
-   "en": "Delete {0}?",
-   "es": "¿Eliminar {0}?",
-   "de": "{0} löschen?",
    "scope": "web"
   },
   {
@@ -4443,6 +4380,762 @@
    "es": "Wi-Fi: up o down",
    "de": "WLAN: up oder down",
    "scope": "fw"
+  },
+  {
+   "it": "  info            riassunto: versione, chip, memoria, rete, MAC",
+   "en": "  info            summary: version, chip, memory, network, MAC",
+   "es": "  info            resumen: version, chip, memoria, red, MAC",
+   "de": "  info            Uebersicht: Version, Chip, Speicher, Netz, MAC",
+   "scope": "fw"
+  },
+  {
+   "it": "  net             rete: IP, MAC client e AP, segnale",
+   "en": "  net             network: IP, client and AP MAC, signal",
+   "es": "  net             red: IP, MAC cliente y AP, senal",
+   "de": "  net             Netz: IP, MAC Client und AP, Signal",
+   "scope": "fw"
+  },
+  {
+   "it": "Acceso da:   %s",
+   "en": "Uptime:      %s",
+   "es": "Encendido:   %s",
+   "de": "Laufzeit:    %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Chip:        %s rev %d, %d core, %u MHz",
+   "en": "Chip:        %s rev %d, %d cores, %u MHz",
+   "es": "Chip:        %s rev %d, %d nucleos, %u MHz",
+   "de": "Chip:        %s Rev %d, %d Kerne, %u MHz",
+   "scope": "fw"
+  },
+  {
+   "it": "Esiste una cartella con questo nome",
+   "en": "A folder with this name exists",
+   "es": "Ya existe una carpeta con este nombre",
+   "de": "Es gibt einen Ordner mit diesem Namen",
+   "scope": "fw"
+  },
+  {
+   "it": "File binario: non si puo modificare, scaricalo",
+   "en": "Binary file: cannot be edited, download it",
+   "es": "Archivo binario: no se puede editar, descargalo",
+   "de": "Binaerdatei: nicht bearbeitbar, bitte herunterladen",
+   "scope": "fw"
+  },
+  {
+   "it": "File troppo grande per l'editor (max 32 KB): scaricalo",
+   "en": "File too large for the editor (max 32 KB): download it",
+   "es": "Archivo demasiado grande para el editor (max 32 KB): descargalo",
+   "de": "Datei zu gross fuer den Editor (max 32 KB): bitte herunterladen",
+   "scope": "fw"
+  },
+  {
+   "it": "Gateway:     %s",
+   "en": "Gateway:     %s",
+   "es": "Puerta:      %s",
+   "de": "Gateway:     %s",
+   "scope": "fw"
+  },
+  {
+   "it": "IP:          %s",
+   "en": "IP:          %s",
+   "es": "IP:          %s",
+   "de": "IP:          %s",
+   "scope": "fw"
+  },
+  {
+   "it": "MAC AP:      %s",
+   "en": "AP MAC:      %s",
+   "es": "MAC AP:      %s",
+   "de": "AP-MAC:      %s",
+   "scope": "fw"
+  },
+  {
+   "it": "MAC client:  %s",
+   "en": "Client MAC:  %s",
+   "es": "MAC cliente: %s",
+   "de": "Client-MAC:  %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Memoria insufficiente",
+   "en": "Not enough memory",
+   "es": "Memoria insuficiente",
+   "de": "Nicht genug Speicher",
+   "scope": "fw"
+  },
+  {
+   "it": "Modo:        %s",
+   "en": "Mode:        %s",
+   "es": "Modo:        %s",
+   "de": "Modus:       %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Nome host:   %s",
+   "en": "Host name:   %s",
+   "es": "Nombre host: %s",
+   "de": "Hostname:    %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Nome non valido",
+   "en": "Invalid name",
+   "es": "Nombre no valido",
+   "de": "Ungueltiger Name",
+   "scope": "fw"
+  },
+  {
+   "it": "Rete:        %s (%d dBm, canale %d)",
+   "en": "Network:     %s (%d dBm, channel %d)",
+   "es": "Red:         %s (%d dBm, canal %d)",
+   "de": "Netz:        %s (%d dBm, Kanal %d)",
+   "scope": "fw"
+  },
+  {
+   "it": "Testo troppo lungo (max 32 KB)",
+   "en": "Text too long (max 32 KB)",
+   "es": "Texto demasiado largo (max 32 KB)",
+   "de": "Text zu lang (max 32 KB)",
+   "scope": "fw"
+  },
+  {
+   "it": "Accessibilita",
+   "en": "Accessibility",
+   "es": "Accesibilidad",
+   "de": "Barrierefreiheit",
+   "scope": "web"
+  },
+  {
+   "it": "Apri la cartella",
+   "en": "Open folder",
+   "es": "Abrir carpeta",
+   "de": "Ordner öffnen",
+   "scope": "web"
+  },
+  {
+   "it": "Apri nell'editor",
+   "en": "Open in editor",
+   "es": "Abrir en el editor",
+   "de": "Im Editor öffnen",
+   "scope": "web"
+  },
+  {
+   "it": "Attenzione",
+   "en": "Warning",
+   "es": "Atención",
+   "de": "Achtung",
+   "scope": "web"
+  },
+  {
+   "it": "Attivo (blu, arancione, giallo)",
+   "en": "On (blue, orange, yellow)",
+   "es": "Activo (azul, naranja, amarillo)",
+   "de": "An (Blau, Orange, Gelb)",
+   "scope": "web"
+  },
+  {
+   "it": "Automatico (come il dispositivo)",
+   "en": "Automatic (like the device)",
+   "es": "Automático (como el dispositivo)",
+   "de": "Automatisch (wie das Gerät)",
+   "scope": "web"
+  },
+  {
+   "it": "Azioni",
+   "en": "Actions",
+   "es": "Acciones",
+   "de": "Aktionen",
+   "scope": "web"
+  },
+  {
+   "it": "Azioni per {0}",
+   "en": "Actions for {0}",
+   "es": "Acciones para {0}",
+   "de": "Aktionen für {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Carica file",
+   "en": "Upload file",
+   "es": "Subir archivo",
+   "de": "Datei hochladen",
+   "scope": "web"
+  },
+  {
+   "it": "Carico {0}...",
+   "en": "Uploading {0}...",
+   "es": "Subiendo {0}...",
+   "de": "Lade {0} hoch...",
+   "scope": "web"
+  },
+  {
+   "it": "Cartella",
+   "en": "Folder",
+   "es": "Carpeta",
+   "de": "Ordner",
+   "scope": "web"
+  },
+  {
+   "it": "Cartella creata",
+   "en": "Folder created",
+   "es": "Carpeta creada",
+   "de": "Ordner erstellt",
+   "scope": "web"
+  },
+  {
+   "it": "Cartella vuota",
+   "en": "Empty folder",
+   "es": "Carpeta vacía",
+   "de": "Leerer Ordner",
+   "scope": "web"
+  },
+  {
+   "it": "Chiudi l'editor",
+   "en": "Close editor",
+   "es": "Cerrar el editor",
+   "de": "Editor schließen",
+   "scope": "web"
+  },
+  {
+   "it": "Colori adatti ai daltonici",
+   "en": "Color-blind friendly colors",
+   "es": "Colores para daltónicos",
+   "de": "Farben für Farbenblinde",
+   "scope": "web"
+  },
+  {
+   "it": "Contenuto del file",
+   "en": "File content",
+   "es": "Contenido del archivo",
+   "de": "Dateiinhalt",
+   "scope": "web"
+  },
+  {
+   "it": "Contrasto alto",
+   "en": "High contrast",
+   "es": "Alto contraste",
+   "de": "Hoher Kontrast",
+   "scope": "web"
+  },
+  {
+   "it": "Copia",
+   "en": "Copy",
+   "es": "Copiar",
+   "de": "Kopieren",
+   "scope": "web"
+  },
+  {
+   "it": "Copia di {0}",
+   "en": "Copy of {0}",
+   "es": "Copia de {0}",
+   "de": "Kopie von {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Copia {0}",
+   "en": "Copy {0}",
+   "es": "Copiar {0}",
+   "de": "{0} kopieren",
+   "scope": "web"
+  },
+  {
+   "it": "Crea",
+   "en": "Create",
+   "es": "Crear",
+   "de": "Erstellen",
+   "scope": "web"
+  },
+  {
+   "it": "Crea e apri",
+   "en": "Create and open",
+   "es": "Crear y abrir",
+   "de": "Erstellen und öffnen",
+   "scope": "web"
+  },
+  {
+   "it": "Dimensione del testo",
+   "en": "Text size",
+   "es": "Tamaño del texto",
+   "de": "Textgröße",
+   "scope": "web"
+  },
+  {
+   "it": "Duplica",
+   "en": "Duplicate",
+   "es": "Duplicar",
+   "de": "Duplizieren",
+   "scope": "web"
+  },
+  {
+   "it": "Duplica file",
+   "en": "Duplicate file",
+   "es": "Duplicar archivo",
+   "de": "Datei duplizieren",
+   "scope": "web"
+  },
+  {
+   "it": "Duplicato",
+   "en": "Duplicated",
+   "es": "Duplicado",
+   "de": "Dupliziert",
+   "scope": "web"
+  },
+  {
+   "it": "Eliminare?",
+   "en": "Delete?",
+   "es": "¿Eliminar?",
+   "de": "Löschen?",
+   "scope": "web"
+  },
+  {
+   "it": "Esiste gia un file con questo nome",
+   "en": "A file with this name already exists",
+   "es": "Ya existe un archivo con este nombre",
+   "de": "Eine Datei mit diesem Namen existiert bereits",
+   "scope": "web"
+  },
+  {
+   "it": "File di sistema: un errore puo cambiare il comportamento della scheda.",
+   "en": "System file: a mistake can change how the board behaves.",
+   "es": "Archivo de sistema: un error puede cambiar el comportamiento de la placa.",
+   "de": "Systemdatei: ein Fehler kann das Verhalten der Platine ändern.",
+   "scope": "web"
+  },
+  {
+   "it": "Grande",
+   "en": "Large",
+   "es": "Grande",
+   "de": "Groß",
+   "scope": "web"
+  },
+  {
+   "it": "Il JSON ha un errore",
+   "en": "The JSON has an error",
+   "es": "El JSON tiene un error",
+   "de": "Das JSON hat einen Fehler",
+   "scope": "web"
+  },
+  {
+   "it": "Il browser non permette di leggere gli appunti: usa Ctrl+V",
+   "en": "The browser does not allow reading the clipboard: use Ctrl+V",
+   "es": "El navegador no permite leer el portapapeles: usa Ctrl+V",
+   "de": "Der Browser erlaubt kein Lesen der Zwischenablage: Strg+V verwenden",
+   "scope": "web"
+  },
+  {
+   "it": "Il file {0} verra eliminato.",
+   "en": "The file {0} will be deleted.",
+   "es": "El archivo {0} será eliminado.",
+   "de": "Die Datei {0} wird gelöscht.",
+   "scope": "web"
+  },
+  {
+   "it": "Il nome non puo contenere / \\ o ..",
+   "en": "The name cannot contain / \\ or ..",
+   "es": "El nombre no puede contener / \\ o ..",
+   "de": "Der Name darf / \\ oder .. nicht enthalten",
+   "scope": "web"
+  },
+  {
+   "it": "Il testo viene cancellato dall'editor. Il file cambia solo quando premi Salva.",
+   "en": "The text is cleared from the editor. The file changes only when you press Save.",
+   "es": "El texto se borra del editor. El archivo cambia solo al pulsar Guardar.",
+   "de": "Der Text wird im Editor gelöscht. Die Datei ändert sich erst beim Speichern.",
+   "scope": "web"
+  },
+  {
+   "it": "Incolla",
+   "en": "Paste",
+   "es": "Pegar",
+   "de": "Einfügen",
+   "scope": "web"
+  },
+  {
+   "it": "JSON corretto",
+   "en": "Valid JSON",
+   "es": "JSON correcto",
+   "de": "JSON gültig",
+   "scope": "web"
+  },
+  {
+   "it": "La cartella {0} e tutto il suo contenuto verranno eliminati.",
+   "en": "The folder {0} and all its content will be deleted.",
+   "es": "La carpeta {0} y todo su contenido serán eliminados.",
+   "de": "Der Ordner {0} und sein gesamter Inhalt werden gelöscht.",
+   "scope": "web"
+  },
+  {
+   "it": "Le scelte valgono per questo browser e restano salvate.",
+   "en": "Settings apply to this browser and are remembered.",
+   "es": "Las opciones valen para este navegador y se guardan.",
+   "de": "Die Einstellungen gelten für diesen Browser und bleiben gespeichert.",
+   "scope": "web"
+  },
+  {
+   "it": "MAC client",
+   "en": "Client MAC",
+   "es": "MAC cliente",
+   "de": "Client-MAC",
+   "scope": "web"
+  },
+  {
+   "it": "MAC punto di accesso",
+   "en": "Access point MAC",
+   "es": "MAC punto de acceso",
+   "de": "Access-Point-MAC",
+   "scope": "web"
+  },
+  {
+   "it": "Memoria interna",
+   "en": "Internal memory",
+   "es": "Memoria interna",
+   "de": "Interner Speicher",
+   "scope": "web"
+  },
+  {
+   "it": "Modificato",
+   "en": "Modified",
+   "es": "Modificado",
+   "de": "Geändert",
+   "scope": "web"
+  },
+  {
+   "it": "Modifiche non salvate",
+   "en": "Unsaved changes",
+   "es": "Cambios sin guardar",
+   "de": "Ungespeicherte Änderungen",
+   "scope": "web"
+  },
+  {
+   "it": "Molto grande",
+   "en": "Very large",
+   "es": "Muy grande",
+   "de": "Sehr groß",
+   "scope": "web"
+  },
+  {
+   "it": "Nome del file",
+   "en": "File name",
+   "es": "Nombre del archivo",
+   "de": "Dateiname",
+   "scope": "web"
+  },
+  {
+   "it": "Nome del file (es. note.txt)",
+   "en": "File name (e.g. notes.txt)",
+   "es": "Nombre del archivo (ej. notas.txt)",
+   "de": "Dateiname (z. B. notizen.txt)",
+   "scope": "web"
+  },
+  {
+   "it": "Nome della cartella",
+   "en": "Folder name",
+   "es": "Nombre de la carpeta",
+   "de": "Ordnername",
+   "scope": "web"
+  },
+  {
+   "it": "Nome della copia",
+   "en": "Name of the copy",
+   "es": "Nombre de la copia",
+   "de": "Name der Kopie",
+   "scope": "web"
+  },
+  {
+   "it": "Nome riservato al sistema",
+   "en": "Name reserved for the system",
+   "es": "Nombre reservado al sistema",
+   "de": "Für das System reservierter Name",
+   "scope": "web"
+  },
+  {
+   "it": "Nome troppo lungo (max 60)",
+   "en": "Name too long (max 60)",
+   "es": "Nombre demasiado largo (máx 60)",
+   "de": "Name zu lang (max 60)",
+   "scope": "web"
+  },
+  {
+   "it": "Non salvare",
+   "en": "Don't save",
+   "es": "No guardar",
+   "de": "Nicht speichern",
+   "scope": "web"
+  },
+  {
+   "it": "Non si puo annullare.",
+   "en": "This cannot be undone.",
+   "es": "No se puede deshacer.",
+   "de": "Kann nicht rückgängig gemacht werden.",
+   "scope": "web"
+  },
+  {
+   "it": "Normale",
+   "en": "Normal",
+   "es": "Normal",
+   "de": "Normal",
+   "scope": "web"
+  },
+  {
+   "it": "Nuovo file",
+   "en": "New file",
+   "es": "Nuevo archivo",
+   "de": "Neue Datei",
+   "scope": "web"
+  },
+  {
+   "it": "Nuovo nome",
+   "en": "New name",
+   "es": "Nuevo nombre",
+   "de": "Neuer Name",
+   "scope": "web"
+  },
+  {
+   "it": "Nuovo, non ancora salvato",
+   "en": "New, not saved yet",
+   "es": "Nuevo, aún sin guardar",
+   "de": "Neu, noch nicht gespeichert",
+   "scope": "web"
+  },
+  {
+   "it": "OK",
+   "en": "OK",
+   "es": "OK",
+   "de": "OK",
+   "scope": "web"
+  },
+  {
+   "it": "Percorso",
+   "en": "Path",
+   "es": "Ruta",
+   "de": "Pfad",
+   "scope": "web"
+  },
+  {
+   "it": "Riduci le animazioni",
+   "en": "Reduce animations",
+   "es": "Reducir animaciones",
+   "de": "Animationen reduzieren",
+   "scope": "web"
+  },
+  {
+   "it": "Riga {0}, colonna {1}",
+   "en": "Line {0}, column {1}",
+   "es": "Línea {0}, columna {1}",
+   "de": "Zeile {0}, Spalte {1}",
+   "scope": "web"
+  },
+  {
+   "it": "Rinomina cartella",
+   "en": "Rename folder",
+   "es": "Renombrar carpeta",
+   "de": "Ordner umbenennen",
+   "scope": "web"
+  },
+  {
+   "it": "Rinomina file",
+   "en": "Rename file",
+   "es": "Renombrar archivo",
+   "de": "Datei umbenennen",
+   "scope": "web"
+  },
+  {
+   "it": "Rinominato",
+   "en": "Renamed",
+   "es": "Renombrado",
+   "de": "Umbenannt",
+   "scope": "web"
+  },
+  {
+   "it": "Salva come",
+   "en": "Save as",
+   "es": "Guardar como",
+   "de": "Speichern unter",
+   "scope": "web"
+  },
+  {
+   "it": "Salva lo stesso",
+   "en": "Save anyway",
+   "es": "Guardar igualmente",
+   "de": "Trotzdem speichern",
+   "scope": "web"
+  },
+  {
+   "it": "Scegli un'altra cartella",
+   "en": "Choose another folder",
+   "es": "Elige otra carpeta",
+   "de": "Wähle einen anderen Ordner",
+   "scope": "web"
+  },
+  {
+   "it": "Se lo salvi cosi, chi lo legge potrebbe non funzionare.",
+   "en": "If you save it like this, whatever reads it may not work.",
+   "es": "Si lo guardas así, quien lo lea podría no funcionar.",
+   "de": "Wenn du es so speicherst, funktioniert das lesende Programm vielleicht nicht.",
+   "scope": "web"
+  },
+  {
+   "it": "Sostituire il file?",
+   "en": "Replace the file?",
+   "es": "¿Reemplazar el archivo?",
+   "de": "Datei ersetzen?",
+   "scope": "web"
+  },
+  {
+   "it": "Sostituisci",
+   "en": "Replace",
+   "es": "Reemplazar",
+   "de": "Ersetzen",
+   "scope": "web"
+  },
+  {
+   "it": "Sposta",
+   "en": "Move",
+   "es": "Mover",
+   "de": "Verschieben",
+   "scope": "web"
+  },
+  {
+   "it": "Sposta cartella",
+   "en": "Move folder",
+   "es": "Mover carpeta",
+   "de": "Ordner verschieben",
+   "scope": "web"
+  },
+  {
+   "it": "Sposta file",
+   "en": "Move file",
+   "es": "Mover archivo",
+   "de": "Datei verschieben",
+   "scope": "web"
+  },
+  {
+   "it": "Sposta nella cartella",
+   "en": "Move to folder",
+   "es": "Mover a la carpeta",
+   "de": "In Ordner verschieben",
+   "scope": "web"
+  },
+  {
+   "it": "Spostato",
+   "en": "Moved",
+   "es": "Movido",
+   "de": "Verschoben",
+   "scope": "web"
+  },
+  {
+   "it": "Svuota",
+   "en": "Clear",
+   "es": "Vaciar",
+   "de": "Leeren",
+   "scope": "web"
+  },
+  {
+   "it": "Svuotare il file?",
+   "en": "Clear the file?",
+   "es": "¿Vaciar el archivo?",
+   "de": "Datei leeren?",
+   "scope": "web"
+  },
+  {
+   "it": "Tab: inserisce spazi (Ctrl+M per cambiare)",
+   "en": "Tab: inserts spaces (Ctrl+M to change)",
+   "es": "Tab: inserta espacios (Ctrl+M para cambiar)",
+   "de": "Tab: fügt Leerzeichen ein (Strg+M zum Wechseln)",
+   "scope": "web"
+  },
+  {
+   "it": "Tab: passa al pulsante successivo (Ctrl+M per cambiare)",
+   "en": "Tab: moves to the next button (Ctrl+M to change)",
+   "es": "Tab: pasa al siguiente botón (Ctrl+M para cambiar)",
+   "de": "Tab: springt zur nächsten Schaltfläche (Strg+M zum Wechseln)",
+   "scope": "web"
+  },
+  {
+   "it": "Tastiera: Tab per spostarti, Invio per premere, Esc per chiudere finestre e menu, Ctrl + ` per il terminale. Nell'editor dei file: Ctrl+S salva, Ctrl+M cambia il comportamento del tasto Tab.",
+   "en": "Keyboard: Tab to move, Enter to press, Esc to close windows and menus, Ctrl + ` for the terminal. In the file editor: Ctrl+S saves, Ctrl+M changes what the Tab key does.",
+   "es": "Teclado: Tab para moverte, Intro para pulsar, Esc para cerrar ventanas y menús, Ctrl + ` para el terminal. En el editor: Ctrl+S guarda, Ctrl+M cambia el comportamiento de Tab.",
+   "de": "Tastatur: Tab zum Bewegen, Enter zum Drücken, Esc schließt Fenster und Menüs, Strg + ` für das Terminal. Im Editor: Strg+S speichert, Strg+M ändert die Tab-Taste.",
+   "scope": "web"
+  },
+  {
+   "it": "Testo grande, contrasto, colori",
+   "en": "Large text, contrast, colors",
+   "es": "Texto grande, contraste, colores",
+   "de": "Großer Text, Kontrast, Farben",
+   "scope": "web"
+  },
+  {
+   "it": "Tocca un nome per aprirlo. Per le altre azioni usa il pulsante con i tre puntini, il tasto destro del mouse o tieni premuto sul telefono.",
+   "en": "Tap a name to open it. For other actions use the three-dots button, the right mouse button or press and hold on a phone.",
+   "es": "Toca un nombre para abrirlo. Para otras acciones usa el botón de tres puntos, el botón derecho del ratón o mantén pulsado en el teléfono.",
+   "de": "Tippe auf einen Namen zum Öffnen. Für weitere Aktionen die Drei-Punkte-Schaltfläche, die rechte Maustaste oder langes Drücken am Handy verwenden.",
+   "scope": "web"
+  },
+  {
+   "it": "Troppo grande: massimo {0}",
+   "en": "Too large: maximum {0}",
+   "es": "Demasiado grande: máximo {0}",
+   "de": "Zu groß: maximal {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Usa solo lettere senza accenti, numeri, spazio . - _",
+   "en": "Use only plain letters, numbers, space . - _",
+   "es": "Usa solo letras sin acentos, números, espacio . - _",
+   "de": "Nur Buchstaben ohne Akzente, Ziffern, Leerzeichen . - _",
+   "scope": "web"
+  },
+  {
+   "it": "Vai al contenuto",
+   "en": "Skip to content",
+   "es": "Ir al contenido",
+   "de": "Zum Inhalt springen",
+   "scope": "web"
+  },
+  {
+   "it": "Vuoi salvare {0} prima di chiudere?",
+   "en": "Save {0} before closing?",
+   "es": "¿Guardar {0} antes de cerrar?",
+   "de": "{0} vor dem Schließen speichern?",
+   "scope": "web"
+  },
+  {
+   "it": "errore alla riga {0}, colonna {1}",
+   "en": "error at line {0}, column {1}",
+   "es": "error en la línea {0}, columna {1}",
+   "de": "Fehler in Zeile {0}, Spalte {1}",
+   "scope": "web"
+  },
+  {
+   "it": "errore nel JSON",
+   "en": "error in the JSON",
+   "es": "error en el JSON",
+   "de": "Fehler im JSON",
+   "scope": "web"
+  },
+  {
+   "it": "liberi {0}",
+   "en": "{0} free",
+   "es": "{0} libres",
+   "de": "{0} frei",
+   "scope": "web"
+  },
+  {
+   "it": "{0} esiste gia in questa cartella.",
+   "en": "{0} already exists in this folder.",
+   "es": "{0} ya existe en esta carpeta.",
+   "de": "{0} existiert bereits in diesem Ordner.",
+   "scope": "web"
+  },
+  {
+   "it": "{0} esiste gia.",
+   "en": "{0} already exists.",
+   "es": "{0} ya existe.",
+   "de": "{0} existiert bereits.",
+   "scope": "web"
   }
  ]
 }

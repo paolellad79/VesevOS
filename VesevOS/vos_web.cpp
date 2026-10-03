@@ -354,7 +354,9 @@ void webInit() {
   server.on("/api/fs/mkdir", HTTP_POST, [](AsyncWebServerRequest* r) { if (!checkAuth(r)) return; String e; if (fsMkdir(P(r, "path"), e)) ok(r); else ko(r, e); });
   server.on("/api/fs/del", HTTP_POST, [](AsyncWebServerRequest* r) { if (!checkAuth(r)) return; String e; if (fsRemove(P(r, "path"), e)) ok(r); else ko(r, e); });
   server.on("/api/fs/ren", HTTP_POST, [](AsyncWebServerRequest* r) { if (!checkAuth(r)) return; String e; if (fsRename(P(r, "from"), P(r, "to"), e)) ok(r); else ko(r, e); });
-  server.on("/api/fs/save", HTTP_POST, [](AsyncWebServerRequest* r) { if (!checkAuth(r)) return; String e; if (fsWriteText(P(r, "path"), P(r, "text"), e)) ok(r); else ko(r, e); });
+  server.on("/api/fs/save", HTTP_POST, [](AsyncWebServerRequest* r) { if (!checkAuth(r)) return; String e; if (fsWriteText(P(r, "path"), P(r, "text"), e, P(r, "new") == "1")) ok(r); else ko(r, e); });
+  server.on("/api/fs/copy", HTTP_POST, [](AsyncWebServerRequest* r) { if (!checkAuth(r)) return; String e; if (fsCopy(P(r, "from"), P(r, "to"), e)) ok(r); else ko(r, e); });
+  server.on("/api/fs/dirs", HTTP_GET, [](AsyncWebServerRequest* r) { if (!checkAuth(r)) return; sendJson(r, fsDirsJson()); });
   server.on("/api/fs/up", HTTP_POST,
     [](AsyncWebServerRequest* r) {
       if (!authSessionValid(token(r))) { r->send(401, "application/json", "{\"ok\":false,\"err\":\"non autorizzato\"}"); return; }

@@ -1,5 +1,23 @@
 # Cronologia delle versioni
 
+## 1.6.1 (3 ottobre 2026)
+- **Indirizzo MAC**: si vedono il MAC Wi-Fi (client) e quello del punto di accesso nella Home, in Rete > Indirizzo IP e in Rete > Punto di accesso.
+  Un tocco lo copia. Il MAC si legge dal chip, quindi c'e anche con il Wi-Fi spento. Nuovi comandi shell `net` (rete leggibile) e `info` (riassunto della scheda).
+- **Tab File rifatto**: percorso cliccabile, icone per cartelle e tipi di file (testo, JSON, immagine, binario), barra dello spazio usato.
+  Su ogni voce un menu (pulsante con tre puntini, tasto destro o tocco lungo sul telefono) con Apri/Modifica, Scarica, Rinomina, Duplica, Sposta, Elimina.
+  Finestre di conferma vere al posto dei vecchi riquadri del browser; avviso prima di sostituire un file che esiste gia.
+- **Editor di file**: nuovo file con scelta della cartella, editor a tutto schermo con numeri di riga, riga/colonna, dimensione e spazio libero.
+  Ctrl+S salva, Tab inserisce spazi (Ctrl+M per cambiare), Salva come, Incolla, Svuota, Scarica. Avviso se chiudi senza salvare.
+  Controllo dei file .json prima di salvare (dice la riga dell'errore). Avviso sui file di sistema (`/rules.txt`, `/lang/`). Limite 32 KB.
+- **Firmware dei file**: salvataggio sicuro (prima un file temporaneo, poi lo scambio: un calo di corrente non rovina il file), controllo dello spazio libero,
+  lettura in UTF-8 (gli accenti non diventano piu "?"), i file binari non si aprono nell'editor. Nuove API `/api/fs/copy` e `/api/fs/dirs`.
+- **Accessibilita** (Config > Accessibilita, oppure dal menu del tema): testo grande e molto grande, contrasto alto, colori adatti ai daltonici,
+  riduci animazioni (contrasto e animazioni possono seguire il dispositivo). Link "Vai al contenuto", contorno ben visibile quando usi la tastiera,
+  Esc chiude menu e finestre, pulsanti con nome per i lettori di schermo, messaggi annunciati, pulsanti piu grandi sui telefoni.
+- **Icone nuove**: termometro (temperatura), banco di memoria (RAM e PSRAM), dischi sovrapposti (file), ruota dentata (Sistema), scheda SD (pronta per il futuro).
+  Nel tab File un'icona per ogni tipo: cartella, testo, JSON, codice (html, js, cpp...), immagine, binario.
+- Corretto: aprire un file in modifica non mostrava il titolo (errore JavaScript).
+
 ## 1.6.0 (3 ottobre 2026)
 - **Terminale a pannello**: la shell web esce dalla scheda e diventa un pannello in basso, sempre disponibile da ogni scheda,
   ridimensionabile (si trascina la barra; pulsanti piccolo / medio / grande) e ricordato nel browser. Si apre dal pulsante in alto o con Ctrl + `.
