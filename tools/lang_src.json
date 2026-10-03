@@ -1484,13 +1484,6 @@
    "scope": "web"
   },
   {
-   "it": "Shell",
-   "en": "Shell",
-   "es": "Shell",
-   "de": "Shell",
-   "scope": "web"
-  },
-  {
    "it": "Task in esecuzione",
    "en": "Running tasks",
    "es": "Tareas en ejecución",
@@ -3323,6 +3316,1133 @@
    "es": "{0} nucleos a {1} MHz",
    "de": "{0} Kerne mit {1} MHz",
    "scope": "web"
+  },
+  {
+   "it": "A tutto schermo",
+   "en": "Full screen",
+   "es": "Pantalla completa",
+   "de": "Vollbild",
+   "scope": "web"
+  },
+  {
+   "it": "Aggiorna l'ora",
+   "en": "Update the time",
+   "es": "Actualizar la hora",
+   "de": "Uhrzeit aktualisieren",
+   "scope": "web"
+  },
+  {
+   "it": "Aggiorna ora dalla rete",
+   "en": "Update time from the network",
+   "es": "Actualizar la hora desde la red",
+   "de": "Uhrzeit aus dem Netzwerk aktualisieren",
+   "scope": "web"
+  },
+  {
+   "it": "Aggiungi almeno un'azione",
+   "en": "Add at least one action",
+   "es": "Anade al menos una accion",
+   "de": "Fuege mindestens eine Aktion hinzu",
+   "scope": "web"
+  },
+  {
+   "it": "Aggiungi azione",
+   "en": "Add action",
+   "es": "Anadir accion",
+   "de": "Aktion hinzufuegen",
+   "scope": "web"
+  },
+  {
+   "it": "All'avvio",
+   "en": "At startup",
+   "es": "Al arrancar",
+   "de": "Beim Start",
+   "scope": "web"
+  },
+  {
+   "it": "Allarme temperatura",
+   "en": "Temperature alarm",
+   "es": "Alarma de temperatura",
+   "de": "Temperaturalarm",
+   "scope": "web"
+  },
+  {
+   "it": "Alle {0}, {1}",
+   "en": "At {0}, {1}",
+   "es": "A las {0}, {1}",
+   "de": "Um {0}, {1}",
+   "scope": "web"
+  },
+  {
+   "it": "Allora",
+   "en": "Then",
+   "es": "Entonces",
+   "de": "Dann",
+   "scope": "web"
+  },
+  {
+   "it": "Annulla",
+   "en": "Cancel",
+   "es": "Cancelar",
+   "de": "Abbrechen",
+   "scope": "web"
+  },
+  {
+   "it": "Apri il terminale",
+   "en": "Open the terminal",
+   "es": "Abrir el terminal",
+   "de": "Terminal oeffnen",
+   "scope": "web"
+  },
+  {
+   "it": "Aspetta",
+   "en": "Wait",
+   "es": "Esperar",
+   "de": "Warten",
+   "scope": "web"
+  },
+  {
+   "it": "Automazioni",
+   "en": "Automations",
+   "es": "Automatizaciones",
+   "de": "Automatisierungen",
+   "scope": "web"
+  },
+  {
+   "it": "Dalle",
+   "en": "From",
+   "es": "Desde las",
+   "de": "Von",
+   "scope": "web"
+  },
+  {
+   "it": "Dom",
+   "en": "Sun",
+   "es": "Dom",
+   "de": "So",
+   "scope": "web"
+  },
+  {
+   "it": "Dopo l'avvio",
+   "en": "After startup",
+   "es": "Despues del arranque",
+   "de": "Nach dem Start",
+   "scope": "web"
+  },
+  {
+   "it": "Dopo l'avvio (una volta)",
+   "en": "After startup (once)",
+   "es": "Despues del arranque (una vez)",
+   "de": "Nach dem Start (einmal)",
+   "scope": "web"
+  },
+  {
+   "it": "Eliminare la regola \"{0}\"?",
+   "en": "Delete the rule \"{0}\"?",
+   "es": "Eliminar la regla \"{0}\"?",
+   "de": "Regel \"{0}\" loeschen?",
+   "scope": "web"
+  },
+  {
+   "it": "Eseguita {0} volte",
+   "en": "Run {0} times",
+   "es": "Ejecutada {0} veces",
+   "de": "{0} Mal ausgefuehrt",
+   "scope": "web"
+  },
+  {
+   "it": "Fermata (troppe esecuzioni)",
+   "en": "Stopped (too many runs)",
+   "es": "Detenida (demasiadas ejecuciones)",
+   "de": "Gestoppt (zu viele Ausfuehrungen)",
+   "scope": "web"
+  },
+  {
+   "it": "File e configurazione",
+   "en": "Files and configuration",
+   "es": "Archivos y configuracion",
+   "de": "Dateien und Konfiguration",
+   "scope": "web"
+  },
+  {
+   "it": "Gio",
+   "en": "Thu",
+   "es": "Jue",
+   "de": "Do",
+   "scope": "web"
+  },
+  {
+   "it": "Giorni",
+   "en": "Days",
+   "es": "Dias",
+   "de": "Tage",
+   "scope": "web"
+  },
+  {
+   "it": "Giu",
+   "en": "Down",
+   "es": "Bajar",
+   "de": "Runter",
+   "scope": "web"
+  },
+  {
+   "it": "Il terminale e un pannello in basso, sempre disponibile da ogni scheda. Trascina la barra del pannello per cambiare l'altezza.",
+   "en": "The terminal is a panel at the bottom, always available from every tab. Drag the panel bar to change its height.",
+   "es": "El terminal es un panel inferior, siempre disponible desde cualquier pestana. Arrastra la barra del panel para cambiar la altura.",
+   "de": "Das Terminal ist ein Panel am unteren Rand, auf jeder Seite verfuegbar. Ziehe die Leiste des Panels, um die Hoehe zu aendern.",
+   "scope": "web"
+  },
+  {
+   "it": "Il timer ripetuto parte da 5 secondi",
+   "en": "The repeating timer starts from 5 seconds",
+   "es": "El temporizador repetido empieza en 5 segundos",
+   "de": "Der wiederholte Timer beginnt bei 5 Sekunden",
+   "scope": "web"
+  },
+  {
+   "it": "In corso",
+   "en": "Running",
+   "es": "En curso",
+   "de": "Laeuft",
+   "scope": "web"
+  },
+  {
+   "it": "L'ora non e impostata: le regole a orario aspettano. Imposta l'ora nella scheda Ora.",
+   "en": "The time is not set: time-based rules wait. Set the time in the Time tab.",
+   "es": "La hora no esta ajustada: las reglas con horario esperan. Ajusta la hora en la pestana Hora.",
+   "de": "Die Uhrzeit ist nicht eingestellt: zeitgesteuerte Regeln warten. Stelle die Zeit im Tab Zeit ein.",
+   "scope": "web"
+  },
+  {
+   "it": "L'ordine scelto non ha funzionato: e stato ripristinato quello predefinito.",
+   "en": "The chosen order did not work: the default order was restored.",
+   "es": "El orden elegido no funciono: se restauro el orden predeterminado.",
+   "de": "Die gewaehlte Reihenfolge hat nicht funktioniert: die Standardreihenfolge wurde wiederhergestellt.",
+   "scope": "web"
+  },
+  {
+   "it": "LED aggiuntivo",
+   "en": "Extra LED",
+   "es": "LED adicional",
+   "de": "Zusaetzliche LED",
+   "scope": "web"
+  },
+  {
+   "it": "LED aggiuntivo: {0}",
+   "en": "Extra LED: {0}",
+   "es": "LED adicional: {0}",
+   "de": "Zusaetzliche LED: {0}",
+   "scope": "web"
+  },
+  {
+   "it": "LED colore #{0}",
+   "en": "LED color #{0}",
+   "es": "LED color #{0}",
+   "de": "LED-Farbe #{0}",
+   "scope": "web"
+  },
+  {
+   "it": "LED: colore",
+   "en": "LED: color",
+   "es": "LED: color",
+   "de": "LED: Farbe",
+   "scope": "web"
+  },
+  {
+   "it": "LED: luminosita",
+   "en": "LED: brightness",
+   "es": "LED: brillo",
+   "de": "LED: Helligkeit",
+   "scope": "web"
+  },
+  {
+   "it": "LED: modo",
+   "en": "LED: mode",
+   "es": "LED: modo",
+   "de": "LED: Modus",
+   "scope": "web"
+  },
+  {
+   "it": "LED: {0}",
+   "en": "LED: {0}",
+   "es": "LED: {0}",
+   "de": "LED: {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Lun",
+   "en": "Mon",
+   "es": "Lun",
+   "de": "Mo",
+   "scope": "web"
+  },
+  {
+   "it": "Mai eseguita",
+   "en": "Never run",
+   "es": "Nunca ejecutada",
+   "de": "Nie ausgefuehrt",
+   "scope": "web"
+  },
+  {
+   "it": "Mar",
+   "en": "Tue",
+   "es": "Mar",
+   "de": "Di",
+   "scope": "web"
+  },
+  {
+   "it": "Mer",
+   "en": "Wed",
+   "es": "Mie",
+   "de": "Mi",
+   "scope": "web"
+  },
+  {
+   "it": "Modelli pronti:",
+   "en": "Ready-made templates:",
+   "es": "Plantillas listas:",
+   "de": "Fertige Vorlagen:",
+   "scope": "web"
+  },
+  {
+   "it": "Modifica regola",
+   "en": "Edit rule",
+   "es": "Editar regla",
+   "de": "Regel bearbeiten",
+   "scope": "web"
+  },
+  {
+   "it": "Nessuna regola. Creane una o parti da un modello.",
+   "en": "No rules. Create one or start from a template.",
+   "es": "Sin reglas. Crea una o empieza con una plantilla.",
+   "de": "Keine Regeln. Erstelle eine oder beginne mit einer Vorlage.",
+   "scope": "web"
+  },
+  {
+   "it": "Non richiede altri servizi",
+   "en": "Does not need other services",
+   "es": "No requiere otros servicios",
+   "de": "Benoetigt keine anderen Dienste",
+   "scope": "web"
+  },
+  {
+   "it": "Nuova regola",
+   "en": "New rule",
+   "es": "Nueva regla",
+   "de": "Neue Regel",
+   "scope": "web"
+  },
+  {
+   "it": "Ogni tanto (timer ripetuto)",
+   "en": "Every so often (repeating timer)",
+   "es": "Cada cierto tiempo (temporizador repetido)",
+   "de": "Alle X Zeit (wiederholter Timer)",
+   "scope": "web"
+  },
+  {
+   "it": "Ogni {0}",
+   "en": "Every {0}",
+   "es": "Cada {0}",
+   "de": "Alle {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Orario (sveglia)",
+   "en": "Time of day (alarm)",
+   "es": "Hora del dia (despertador)",
+   "de": "Uhrzeit (Wecker)",
+   "scope": "web"
+  },
+  {
+   "it": "Ordine di avvio",
+   "en": "Startup order",
+   "es": "Orden de arranque",
+   "de": "Startreihenfolge",
+   "scope": "web"
+  },
+  {
+   "it": "Ordine personalizzato attivo.",
+   "en": "Custom order active.",
+   "es": "Orden personalizado activo.",
+   "de": "Eigene Reihenfolge aktiv.",
+   "scope": "web"
+  },
+  {
+   "it": "Ordine predefinito (vale dal prossimo riavvio)",
+   "en": "Default order (applies from the next restart)",
+   "es": "Orden predeterminado (vale desde el proximo reinicio)",
+   "de": "Standardreihenfolge (gilt ab dem naechsten Neustart)",
+   "scope": "web"
+  },
+  {
+   "it": "Pagina web e API",
+   "en": "Web page and API",
+   "es": "Pagina web y API",
+   "de": "Webseite und API",
+   "scope": "web"
+  },
+  {
+   "it": "Pin e risorse",
+   "en": "Pins and resources",
+   "es": "Pines y recursos",
+   "de": "Pins und Ressourcen",
+   "scope": "web"
+  },
+  {
+   "it": "Pin: acceso o spento",
+   "en": "Pin: on or off",
+   "es": "Pin: encendido o apagado",
+   "de": "Pin: ein oder aus",
+   "scope": "web"
+  },
+  {
+   "it": "Prova ora",
+   "en": "Run now",
+   "es": "Probar ahora",
+   "de": "Jetzt testen",
+   "scope": "web"
+  },
+  {
+   "it": "Quando",
+   "en": "When",
+   "es": "Cuando",
+   "de": "Wenn",
+   "scope": "web"
+  },
+  {
+   "it": "Quando il Wi-Fi si collega",
+   "en": "When Wi-Fi connects",
+   "es": "Cuando el Wi-Fi se conecta",
+   "de": "Wenn das WLAN verbunden wird",
+   "scope": "web"
+  },
+  {
+   "it": "Quando il Wi-Fi si scollega",
+   "en": "When Wi-Fi disconnects",
+   "es": "Cuando el Wi-Fi se desconecta",
+   "de": "Wenn das WLAN getrennt wird",
+   "scope": "web"
+  },
+  {
+   "it": "Quando la temperatura supera",
+   "en": "When the temperature exceeds",
+   "es": "Cuando la temperatura supera",
+   "de": "Wenn die Temperatur ueberschreitet",
+   "scope": "web"
+  },
+  {
+   "it": "Quando la temperatura supera {0} C",
+   "en": "When the temperature exceeds {0} C",
+   "es": "Cuando la temperatura supera {0} C",
+   "de": "Wenn die Temperatur {0} C ueberschreitet",
+   "scope": "web"
+  },
+  {
+   "it": "Registro (log)",
+   "en": "Log",
+   "es": "Registro (log)",
+   "de": "Protokoll (Log)",
+   "scope": "web"
+  },
+  {
+   "it": "Regola avviata",
+   "en": "Rule started",
+   "es": "Regla iniciada",
+   "de": "Regel gestartet",
+   "scope": "web"
+  },
+  {
+   "it": "Regola eliminata",
+   "en": "Rule deleted",
+   "es": "Regla eliminada",
+   "de": "Regel geloescht",
+   "scope": "web"
+  },
+  {
+   "it": "Regola salvata",
+   "en": "Rule saved",
+   "es": "Regla guardada",
+   "de": "Regel gespeichert",
+   "scope": "web"
+  },
+  {
+   "it": "Regole \"Quando... Se... Allora...\" che la scheda esegue da sola, anche senza rete: sveglie, timer, allarmi di temperatura.",
+   "en": "\"When... If... Then...\" rules the board runs by itself, even without a network: alarms, timers, temperature alerts.",
+   "es": "Reglas \"Cuando... Si... Entonces...\" que la placa ejecuta sola, incluso sin red: despertadores, temporizadores, alarmas de temperatura.",
+   "de": "Regeln \"Wenn... Falls... Dann...\", die das Board selbst ausfuehrt, auch ohne Netzwerk: Wecker, Timer, Temperaturalarme.",
+   "scope": "web"
+  },
+  {
+   "it": "Riavvia la scheda",
+   "en": "Restart the board",
+   "es": "Reiniciar la placa",
+   "de": "Board neu starten",
+   "scope": "web"
+  },
+  {
+   "it": "Riavvia ora",
+   "en": "Restart now",
+   "es": "Reiniciar ahora",
+   "de": "Jetzt neu starten",
+   "scope": "web"
+  },
+  {
+   "it": "Richiede: {0}",
+   "en": "Needs: {0}",
+   "es": "Requiere: {0}",
+   "de": "Benoetigt: {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Ripristina predefinito",
+   "en": "Restore default",
+   "es": "Restaurar predeterminado",
+   "de": "Standard wiederherstellen",
+   "scope": "web"
+  },
+  {
+   "it": "Sab",
+   "en": "Sat",
+   "es": "Sab",
+   "de": "Sa",
+   "scope": "web"
+  },
+  {
+   "it": "Salva ordine",
+   "en": "Save order",
+   "es": "Guardar orden",
+   "de": "Reihenfolge speichern",
+   "scope": "web"
+  },
+  {
+   "it": "Salvato: vale dal prossimo riavvio",
+   "en": "Saved: applies from the next restart",
+   "es": "Guardado: vale desde el proximo reinicio",
+   "de": "Gespeichert: gilt ab dem naechsten Neustart",
+   "scope": "web"
+  },
+  {
+   "it": "Scegli almeno un giorno",
+   "en": "Choose at least one day",
+   "es": "Elige al menos un dia",
+   "de": "Waehle mindestens einen Tag",
+   "scope": "web"
+  },
+  {
+   "it": "Scegli in che ordine partono i servizi: trascina per la maniglia oppure usa le frecce. Quello che dipende da un altro servizio resta attaccato a lui e parte dopo. Vale dal prossimo riavvio.",
+   "en": "Choose the order in which services start: drag the handle or use the arrows. A service that depends on another stays attached to it and starts after it. Applies from the next restart.",
+   "es": "Elige el orden en que arrancan los servicios: arrastra el asa o usa las flechas. Lo que depende de otro servicio queda unido a el y arranca despues. Vale desde el proximo reinicio.",
+   "de": "Waehle die Startreihenfolge der Dienste: ziehe am Griff oder nutze die Pfeile. Ein Dienst, der von einem anderen abhaengt, bleibt an ihn gebunden und startet danach. Gilt ab dem naechsten Neustart.",
+   "scope": "web"
+  },
+  {
+   "it": "Scorciatoia da tastiera: Ctrl + `",
+   "en": "Keyboard shortcut: Ctrl + `",
+   "es": "Atajo de teclado: Ctrl + `",
+   "de": "Tastenkombination: Strg + `",
+   "scope": "web"
+  },
+  {
+   "it": "Scrivi nel registro",
+   "en": "Write to the log",
+   "es": "Escribir en el registro",
+   "de": "Ins Protokoll schreiben",
+   "scope": "web"
+  },
+  {
+   "it": "Scrivi un nome",
+   "en": "Write a name",
+   "es": "Escribe un nombre",
+   "de": "Gib einen Namen ein",
+   "scope": "web"
+  },
+  {
+   "it": "Se (facoltativo)",
+   "en": "If (optional)",
+   "es": "Si (opcional)",
+   "de": "Falls (optional)",
+   "scope": "web"
+  },
+  {
+   "it": "Segue il tema del dispositivo",
+   "en": "Follows the device theme",
+   "es": "Sigue el tema del dispositivo",
+   "de": "Folgt dem Geraete-Design",
+   "scope": "web"
+  },
+  {
+   "it": "Sempre",
+   "en": "Always",
+   "es": "Siempre",
+   "de": "Immer",
+   "scope": "web"
+  },
+  {
+   "it": "Sempre per primi",
+   "en": "Always first",
+   "es": "Siempre primero",
+   "de": "Immer zuerst",
+   "scope": "web"
+  },
+  {
+   "it": "Servizi che puoi spostare",
+   "en": "Services you can move",
+   "es": "Servicios que puedes mover",
+   "de": "Dienste, die du verschieben kannst",
+   "scope": "web"
+  },
+  {
+   "it": "Sfondo chiaro",
+   "en": "Light background",
+   "es": "Fondo claro",
+   "de": "Heller Hintergrund",
+   "scope": "web"
+  },
+  {
+   "it": "Sfondo scuro",
+   "en": "Dark background",
+   "es": "Fondo oscuro",
+   "de": "Dunkler Hintergrund",
+   "scope": "web"
+  },
+  {
+   "it": "Sincronizzazione richiesta: controllo l'ora tra pochi secondi",
+   "en": "Sync requested: checking the time in a few seconds",
+   "es": "Sincronizacion solicitada: compruebo la hora en unos segundos",
+   "de": "Synchronisierung angefordert: pruefe die Zeit in wenigen Sekunden",
+   "scope": "web"
+  },
+  {
+   "it": "Sistema e monitor",
+   "en": "System and monitor",
+   "es": "Sistema y monitor",
+   "de": "System und Monitor",
+   "scope": "web"
+  },
+  {
+   "it": "Solo in certi giorni",
+   "en": "Only on certain days",
+   "es": "Solo en ciertos dias",
+   "de": "Nur an bestimmten Tagen",
+   "scope": "web"
+  },
+  {
+   "it": "Solo in una fascia oraria",
+   "en": "Only within a time range",
+   "es": "Solo en un intervalo horario",
+   "de": "Nur in einem Zeitfenster",
+   "scope": "web"
+  },
+  {
+   "it": "Sono passati 10 minuti dall'avvio",
+   "en": "10 minutes have passed since startup",
+   "es": "Han pasado 10 minutos desde el arranque",
+   "de": "10 Minuten seit dem Start vergangen",
+   "scope": "web"
+  },
+  {
+   "it": "Sveglia",
+   "en": "Alarm",
+   "es": "Despertador",
+   "de": "Wecker",
+   "scope": "web"
+  },
+  {
+   "it": "Temperatura (gradi C)",
+   "en": "Temperature (degrees C)",
+   "es": "Temperatura (grados C)",
+   "de": "Temperatur (Grad C)",
+   "scope": "web"
+  },
+  {
+   "it": "Temperatura alta",
+   "en": "High temperature",
+   "es": "Temperatura alta",
+   "de": "Hohe Temperatur",
+   "scope": "web"
+  },
+  {
+   "it": "Tempo",
+   "en": "Time",
+   "es": "Tiempo",
+   "de": "Zeit",
+   "scope": "web"
+  },
+  {
+   "it": "Terminale",
+   "en": "Terminal",
+   "es": "Terminal",
+   "de": "Terminal",
+   "scope": "web"
+  },
+  {
+   "it": "Testo della nota",
+   "en": "Note text",
+   "es": "Texto de la nota",
+   "de": "Notiztext",
+   "scope": "web"
+  },
+  {
+   "it": "Ultima volta: {0} ({1} volte)",
+   "en": "Last time: {0} ({1} times)",
+   "es": "Ultima vez: {0} ({1} veces)",
+   "de": "Zuletzt: {0} ({1} Mal)",
+   "scope": "web"
+  },
+  {
+   "it": "Ven",
+   "en": "Fri",
+   "es": "Vie",
+   "de": "Fr",
+   "scope": "web"
+  },
+  {
+   "it": "acceso",
+   "en": "on",
+   "es": "encendido",
+   "de": "ein",
+   "scope": "web"
+  },
+  {
+   "it": "aggiorna l'ora",
+   "en": "update the time",
+   "es": "actualizar la hora",
+   "de": "Uhrzeit aktualisieren",
+   "scope": "web"
+  },
+  {
+   "it": "alle",
+   "en": "to",
+   "es": "hasta las",
+   "de": "bis",
+   "scope": "web"
+  },
+  {
+   "it": "aspetta {0}",
+   "en": "wait {0}",
+   "es": "esperar {0}",
+   "de": "warte {0}",
+   "scope": "web"
+  },
+  {
+   "it": "battito",
+   "en": "heartbeat",
+   "es": "latido",
+   "de": "Herzschlag",
+   "scope": "web"
+  },
+  {
+   "it": "colore fisso",
+   "en": "fixed color",
+   "es": "color fijo",
+   "de": "feste Farbe",
+   "scope": "web"
+  },
+  {
+   "it": "dal lunedi al venerdi",
+   "en": "Monday to Friday",
+   "es": "de lunes a viernes",
+   "de": "Montag bis Freitag",
+   "scope": "web"
+  },
+  {
+   "it": "luminosita LED {0}",
+   "en": "LED brightness {0}",
+   "es": "brillo del LED {0}",
+   "de": "LED-Helligkeit {0}",
+   "scope": "web"
+  },
+  {
+   "it": "minuti",
+   "en": "minutes",
+   "es": "minutos",
+   "de": "Minuten",
+   "scope": "web"
+  },
+  {
+   "it": "ogni giorno",
+   "en": "every day",
+   "es": "todos los dias",
+   "de": "jeden Tag",
+   "scope": "web"
+  },
+  {
+   "it": "ore",
+   "en": "hours",
+   "es": "horas",
+   "de": "Stunden",
+   "scope": "web"
+  },
+  {
+   "it": "partito a +{0} ms, ha impiegato {1} ms",
+   "en": "started at +{0} ms, took {1} ms",
+   "es": "arranco a +{0} ms, tardo {1} ms",
+   "de": "gestartet bei +{0} ms, dauerte {1} ms",
+   "scope": "web"
+  },
+  {
+   "it": "pin {0} {1}",
+   "en": "pin {0} {1}",
+   "es": "pin {0} {1}",
+   "de": "Pin {0} {1}",
+   "scope": "web"
+  },
+  {
+   "it": "riavvia la scheda",
+   "en": "restart the board",
+   "es": "reiniciar la placa",
+   "de": "Board neu starten",
+   "scope": "web"
+  },
+  {
+   "it": "sabato e domenica",
+   "en": "Saturday and Sunday",
+   "es": "sabado y domingo",
+   "de": "Samstag und Sonntag",
+   "scope": "web"
+  },
+  {
+   "it": "scrivi \"{0}\" nel registro",
+   "en": "write \"{0}\" to the log",
+   "es": "escribir \"{0}\" en el registro",
+   "de": "\"{0}\" ins Protokoll schreiben",
+   "scope": "web"
+  },
+  {
+   "it": "secondi",
+   "en": "seconds",
+   "es": "segundos",
+   "de": "Sekunden",
+   "scope": "web"
+  },
+  {
+   "it": "solo dalle {0} alle {1}",
+   "en": "only from {0} to {1}",
+   "es": "solo de {0} a {1}",
+   "de": "nur von {0} bis {1}",
+   "scope": "web"
+  },
+  {
+   "it": "solo: {0}",
+   "en": "only: {0}",
+   "es": "solo: {0}",
+   "de": "nur: {0}",
+   "scope": "web"
+  },
+  {
+   "it": "spento",
+   "en": "off",
+   "es": "apagado",
+   "de": "aus",
+   "scope": "web"
+  },
+  {
+   "it": "stato del sistema",
+   "en": "system status",
+   "es": "estado del sistema",
+   "de": "Systemstatus",
+   "scope": "web"
+  },
+  {
+   "it": "{0} dopo l'avvio",
+   "en": "{0} after startup",
+   "es": "{0} despues del arranque",
+   "de": "{0} nach dem Start",
+   "scope": "web"
+  },
+  {
+   "it": "{0} h",
+   "en": "{0} h",
+   "es": "{0} h",
+   "de": "{0} Std",
+   "scope": "web"
+  },
+  {
+   "it": "{0} min",
+   "en": "{0} min",
+   "es": "{0} min",
+   "de": "{0} Min",
+   "scope": "web"
+  },
+  {
+   "it": "{0} s",
+   "en": "{0} s",
+   "es": "{0} s",
+   "de": "{0} s",
+   "scope": "web"
+  },
+  {
+   "it": "▁",
+   "en": "▁",
+   "es": "▁",
+   "de": "▁",
+   "scope": "web"
+  },
+  {
+   "it": "▣",
+   "en": "▣",
+   "es": "▣",
+   "de": "▣",
+   "scope": "web"
+  },
+  {
+   "it": "✓",
+   "en": "✓",
+   "es": "✓",
+   "de": "✓",
+   "scope": "web"
+  },
+  {
+   "it": "✕",
+   "en": "✕",
+   "es": "✕",
+   "de": "✕",
+   "scope": "web"
+  },
+  {
+   "it": "⤢",
+   "en": "⤢",
+   "es": "⤢",
+   "de": "⤢",
+   "scope": "web"
+  },
+  {
+   "it": "  boot-order [lista|reset]  ordine di avvio dei servizi",
+   "en": "  boot-order [list|reset]  startup order of the services",
+   "es": "  boot-order [lista|reset]  orden de arranque de los servicios",
+   "de": "  boot-order [lista|reset]  Startreihenfolge der Dienste",
+   "scope": "fw"
+  },
+  {
+   "it": "  rules [run <n>] automazioni: elenco, oppure esegui la regola n",
+   "en": "  rules [run <n>] automations: list, or run rule n",
+   "es": "  rules [run <n>] automatizaciones: lista, o ejecuta la regla n",
+   "de": "  rules [run <n>] Automatisierungen: Liste oder Regel n ausfuehren",
+   "scope": "fw"
+  },
+  {
+   "it": "Al massimo %d regole",
+   "en": "At most %d rules",
+   "es": "Como maximo %d reglas",
+   "de": "Hoechstens %d Regeln",
+   "scope": "fw"
+  },
+  {
+   "it": "Attesa da 1 a 3600 secondi",
+   "en": "Wait from 1 to 3600 seconds",
+   "es": "Espera de 1 a 3600 segundos",
+   "de": "Wartezeit von 1 bis 3600 Sekunden",
+   "scope": "fw"
+  },
+  {
+   "it": "Azione LED non valida",
+   "en": "Invalid LED action",
+   "es": "Accion de LED no valida",
+   "de": "Ungueltige LED-Aktion",
+   "scope": "fw"
+  },
+  {
+   "it": "Azione non ammessa",
+   "en": "Action not allowed",
+   "es": "Accion no permitida",
+   "de": "Aktion nicht erlaubt",
+   "scope": "fw"
+  },
+  {
+   "it": "Colore non valido (6 cifre esadecimali)",
+   "en": "Invalid color (6 hex digits)",
+   "es": "Color no valido (6 digitos hexadecimales)",
+   "de": "Ungueltige Farbe (6 Hex-Ziffern)",
+   "scope": "fw"
+  },
+  {
+   "it": "Condizione non riconosciuta",
+   "en": "Condition not recognized",
+   "es": "Condicion no reconocida",
+   "de": "Bedingung nicht erkannt",
+   "scope": "fw"
+  },
+  {
+   "it": "Da 1 a 8 azioni",
+   "en": "From 1 to 8 actions",
+   "es": "De 1 a 8 acciones",
+   "de": "1 bis 8 Aktionen",
+   "scope": "fw"
+  },
+  {
+   "it": "Dopo: da 1 a 86400 secondi",
+   "en": "After: 1 to 86400 seconds",
+   "es": "Despues: de 1 a 86400 segundos",
+   "de": "Nach: 1 bis 86400 Sekunden",
+   "scope": "fw"
+  },
+  {
+   "it": "Evento non riconosciuto",
+   "en": "Event not recognized",
+   "es": "Evento no reconocido",
+   "de": "Ereignis nicht erkannt",
+   "scope": "fw"
+  },
+  {
+   "it": "Fascia oraria non valida",
+   "en": "Invalid time range",
+   "es": "Intervalo horario no valido",
+   "de": "Ungueltiges Zeitfenster",
+   "scope": "fw"
+  },
+  {
+   "it": "File troppo grande",
+   "en": "File too large",
+   "es": "Archivo demasiado grande",
+   "de": "Datei zu gross",
+   "scope": "fw"
+  },
+  {
+   "it": "Giorni non validi",
+   "en": "Invalid days",
+   "es": "Dias no validos",
+   "de": "Ungueltige Tage",
+   "scope": "fw"
+  },
+  {
+   "it": "Il primo campo e 1 o 0",
+   "en": "The first field is 1 or 0",
+   "es": "El primer campo es 1 o 0",
+   "de": "Das erste Feld ist 1 oder 0",
+   "scope": "fw"
+  },
+  {
+   "it": "La riga deve avere 5 campi",
+   "en": "The line must have 5 fields",
+   "es": "La linea debe tener 5 campos",
+   "de": "Die Zeile muss 5 Felder haben",
+   "scope": "fw"
+  },
+  {
+   "it": "La sincronizzazione NTP e spenta",
+   "en": "NTP synchronization is off",
+   "es": "La sincronizacion NTP esta apagada",
+   "de": "Die NTP-Synchronisierung ist aus",
+   "scope": "fw"
+  },
+  {
+   "it": "Luminosita da 0 a 255",
+   "en": "Brightness from 0 to 255",
+   "es": "Brillo de 0 a 255",
+   "de": "Helligkeit von 0 bis 255",
+   "scope": "fw"
+  },
+  {
+   "it": "Manca il testo della nota",
+   "en": "The note text is missing",
+   "es": "Falta el texto de la nota",
+   "de": "Der Notiztext fehlt",
+   "scope": "fw"
+  },
+  {
+   "it": "Nessuna regola",
+   "en": "No rules",
+   "es": "Sin reglas",
+   "de": "Keine Regeln",
+   "scope": "fw"
+  },
+  {
+   "it": "Nome da 1 a 24 caratteri",
+   "en": "Name from 1 to 24 characters",
+   "es": "Nombre de 1 a 24 caracteres",
+   "de": "Name mit 1 bis 24 Zeichen",
+   "scope": "fw"
+  },
+  {
+   "it": "Ogni: da 5 a 86400 secondi",
+   "en": "Every: 5 to 86400 seconds",
+   "es": "Cada: de 5 a 86400 segundos",
+   "de": "Alle: 5 bis 86400 Sekunden",
+   "scope": "fw"
+  },
+  {
+   "it": "Orario non valido (HH:MM e 7 cifre per i giorni)",
+   "en": "Invalid time (HH:MM and 7 digits for the days)",
+   "es": "Hora no valida (HH:MM y 7 cifras para los dias)",
+   "de": "Ungueltige Uhrzeit (HH:MM und 7 Ziffern fuer die Tage)",
+   "scope": "fw"
+  },
+  {
+   "it": "Ordine di avvio predefinito (vale dal prossimo riavvio)",
+   "en": "Default startup order (applies from the next restart)",
+   "es": "Orden de arranque predeterminado (vale desde el proximo reinicio)",
+   "de": "Standard-Startreihenfolge (gilt ab dem naechsten Neustart)",
+   "scope": "fw"
+  },
+  {
+   "it": "Ordine salvato: %s (vale dal prossimo riavvio)",
+   "en": "Order saved: %s (applies from the next restart)",
+   "es": "Orden guardado: %s (vale desde el proximo reinicio)",
+   "de": "Reihenfolge gespeichert: %s (gilt ab dem naechsten Neustart)",
+   "scope": "fw"
+  },
+  {
+   "it": "Regola %d avviata",
+   "en": "Rule %d started",
+   "es": "Regla %d iniciada",
+   "de": "Regel %d gestartet",
+   "scope": "fw"
+  },
+  {
+   "it": "Regola inesistente",
+   "en": "Rule does not exist",
+   "es": "La regla no existe",
+   "de": "Regel existiert nicht",
+   "scope": "fw"
+  },
+  {
+   "it": "Regola spenta",
+   "en": "Rule is off",
+   "es": "La regla esta apagada",
+   "de": "Regel ist aus",
+   "scope": "fw"
+  },
+  {
+   "it": "Riga %d: %s",
+   "en": "Line %d: %s",
+   "es": "Linea %d: %s",
+   "de": "Zeile %d: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Scrittura non riuscita",
+   "en": "Write failed",
+   "es": "Escritura fallida",
+   "de": "Schreiben fehlgeschlagen",
+   "scope": "fw"
+  },
+  {
+   "it": "Serve la connessione a una rete Wi-Fi",
+   "en": "A Wi-Fi network connection is needed",
+   "es": "Se necesita conexion a una red Wi-Fi",
+   "de": "Eine WLAN-Verbindung ist erforderlich",
+   "scope": "fw"
+  },
+  {
+   "it": "Temperatura da 30 a 110",
+   "en": "Temperature from 30 to 110",
+   "es": "Temperatura de 30 a 110",
+   "de": "Temperatur von 30 bis 110",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: gpio <pin> 0|1",
+   "en": "Usage: gpio <pin> 0|1",
+   "es": "Uso: gpio <pin> 0|1",
+   "de": "Verwendung: gpio <pin> 0|1",
+   "scope": "fw"
+  },
+  {
+   "it": "Wi-Fi: up oppure down",
+   "en": "Wi-Fi: up or down",
+   "es": "Wi-Fi: up o down",
+   "de": "WLAN: up oder down",
+   "scope": "fw"
   }
  ]
 }

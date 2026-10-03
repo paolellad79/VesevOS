@@ -1,5 +1,25 @@
 # Cronologia delle versioni
 
+## 1.6.0 (3 ottobre 2026)
+- **Terminale a pannello**: la shell web esce dalla scheda e diventa un pannello in basso, sempre disponibile da ogni scheda,
+  ridimensionabile (si trascina la barra; pulsanti piccolo / medio / grande) e ricordato nel browser. Si apre dal pulsante in alto o con Ctrl + `.
+  Su telefono sta sopra la barra delle icone. La scheda "Terminale" resta come scorciatoia.
+- **Automazioni** (nuova scheda in Sistema): regole "Quando... Se... Allora..." che la scheda esegue da sola, anche senza rete.
+  Quando: orario con giorni (sveglia), ogni N tempo, dopo N dall'avvio, all'avvio, Wi-Fi collegato/perso, temperatura sopra una soglia.
+  Se: sempre, fascia oraria, certi giorni. Allora: colore/modo/luminosita del LED, LED aggiuntivo, pin acceso/spento, attesa,
+  nota nel registro, aggiorna l'ora, riavvia. Editor a menu con frase di anteprima, modelli pronti (Sveglia, Dopo l'avvio, Allarme temperatura),
+  "Prova ora", interruttore per ogni regola, protezione antiloop (oltre 10 esecuzioni al minuto la regola si ferma).
+  Le regole stanno in `/rules.txt` (una riga per regola). Nuovo comando shell `rules [run <n>]`.
+- **Ordine di avvio** (nuova scheda in Sistema): si sceglie in che ordine partono i servizi (Sistema, LED, Rete, Ora, Pagina web, Automazioni),
+  trascinando o con le frecce. Ogni servizio dichiara cosa richiede e resta attaccato ad esso (vista ad albero); il firmware corregge sempre
+  l'ordine perche nessun servizio parta prima di quelli che richiede. I servizi fissi (registro, pin, file e configurazione, lingua) partono sempre per primi.
+  Se l'avvio con l'ordine scelto non riesce per 2 volte, la scheda torna da sola a quello predefinito. Comando shell `boot-order`.
+- **Menu del tema** con scelta chiara e scritta del tema in uso (Automatico, Chiaro, Scuro), al posto del pulsante che girava tra i tre.
+- **Scheda Ora**: nuovo pulsante "Aggiorna ora dalla rete" (richiede NTP acceso e Wi-Fi collegato).
+- **Tema scuro corretto**: alcune variabili di colore (campi, bordi, riquadri dei messaggi) non erano definite e ora hanno i colori giusti.
+- Pagina: link legali e GitHub in fondo, con versione e copyright.
+- Nuove traduzioni (en, es, de) per tutte le novita; il controllo `mklang.py` ora verifica anche le liste di testi nei menu.
+
 ## 1.5.0 (3 ottobre 2026)
 - README: tolta la sezione "Problemi noti" (nota sul LED del pin 38).
 - **Scheda Task dinamica**: tabella che si aggiorna da sola ogni 2 secondi, ordinabile cliccando i titoli

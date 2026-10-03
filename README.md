@@ -23,12 +23,14 @@ rete Wi-Fi, ora, file, LED, pin, shell e tante altre cose, tutto protetto da una
 **Niente cloud, niente account, niente abbonamenti.** La pagina e le lingue vivono dentro la scheda.
 
 <p align="center">
-  <img src="assets/screenshot-pin.png" alt="La scheda Pin: pin cliccabili per fare prove" width="48%">
-  <img src="assets/screenshot-stato.png" alt="La scheda Stato: CPU, memoria e temperatura" width="48%">
+  <img src="assets/screenshot-home.png" alt="La Home: anelli di stato, carta d'identità della scheda e risorse" width="48%">
+  <img src="assets/screenshot-auto.png" alt="Automazioni: regole Quando, Se, Allora" width="48%">
+  <img src="assets/screenshot-avvio.png" alt="Ordine di avvio dei servizi e terminale a pannello" width="48%">
+  <img src="assets/screenshot-telefono.png" alt="La pagina sul telefono, con la barra delle icone in basso" width="24%">
 </p>
-<p align="center"><sub>Schermate della pagina di controllo (con dati di esempio).</sub></p>
+<p align="center"><sub>Schermate della pagina di controllo (con dati di esempio): Home in tema scuro, Automazioni, ordine di avvio con il terminale a pannello, e la versione per telefono.</sub></p>
 
-> **Stato:** in sviluppo (versione 1.5.0). Il progetto cresce a fasi: guarda "Dove stiamo andando".
+> **Stato:** in sviluppo (versione 1.6.0). Il progetto cresce a fasi: guarda "Dove stiamo andando".
 
 ## Perché si chiama VesevOS
 

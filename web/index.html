@@ -4,7 +4,7 @@
 <title>VesevOS</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%22-8 -8 216 216%22%3E%3Cdefs%3E%3ClinearGradient id=%22g%22 x1=%220%22 y1=%220%22 x2=%221%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%233fa7ff%22/%3E%3Cstop offset=%221%22 stop-color=%22%2337e0b0%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg stroke=%22url(%23g)%22 stroke-width=%226%22 stroke-linecap=%22round%22 fill=%22none%22%3E%3Cpath d=%22M40 -6V22M80 -6V22M120 -6V22M40 178V206M80 178V206M120 178V206M-6 40H22M-6 80H22M-6 120H22M178 40H206M178 80H206M178 120H206%22/%3E%3Crect x=%2220%22 y=%2220%22 width=%22160%22 height=%22160%22 rx=%2222%22 fill=%22%230b1220%22/%3E%3Ccircle cx=%22100%22 cy=%22100%22 r=%2244%22/%3E%3Cpath d=%22M100 56V30M100 170V144M56 100H30M170 100H144%22/%3E%3C/g%3E%3Ccircle cx=%22100%22 cy=%22100%22 r=%2214%22 fill=%22url(%23g)%22/%3E%3C/svg%3E">
 <style>
-:root{--bg:#10151c;--card:#1a222d;--side:#151c26;--tx:#e6edf3;--mut:#8b98a8;--ac:#3fa7ff;--ac2:#37e0b0;--ok:#3ddc84;--wa:#ffcc4d;--ko:#ff5c5c;--in:var(--in);--g2:var(--g2);--bd:var(--bd);--trk:#26303e;--okbg:var(--okbg);--kobg:var(--kobg);--vbg:var(--vbg)}
+:root{--bg:#10151c;--card:#1a222d;--side:#151c26;--tx:#e6edf3;--mut:#8b98a8;--ac:#3fa7ff;--ac2:#37e0b0;--ok:#3ddc84;--wa:#ffcc4d;--ko:#ff5c5c;--in:#121921;--g2:#2a3442;--bd:#263140;--trk:#26303e;--okbg:#14382a;--kobg:#3c1f24;--vbg:#12304a}
 :root[data-theme=light]{--bg:#eef3f6;--card:#fff;--side:#fff;--tx:#1d2a36;--mut:#6b7b8c;--ac:#1796e8;--ac2:#14c9a0;--ok:#16a765;--wa:#d99a00;--ko:#e5484d;--in:#f3f6f9;--g2:#e3eaf0;--bd:#e3eaf0;--trk:#e3eaf0;--okbg:#dff5e9;--kobg:#fde6e7;--vbg:#dcefff}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px system-ui,Arial,sans-serif}
@@ -20,6 +20,28 @@ svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .alerts{position:fixed;right:16px;top:64px;width:300px;max-width:calc(100vw - 32px);background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:10px 14px;z-index:9;box-shadow:0 8px 30px rgba(0,0,0,.35)}
 .alerts div{padding:7px 0;border-bottom:1px solid var(--bd);font-size:14px}.alerts div:last-child{border:0}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px}
 .gsub{position:sticky;top:60px;z-index:5;background:var(--bg);margin-left:72px;padding:10px 20px 8px;margin-bottom:0}.gsub.hide{display:none}
+.pop{position:fixed;right:12px;top:60px;z-index:10;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:6px;min-width:250px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.pop button{width:100%;display:flex;align-items:center;gap:10px;text-align:left;border:0;background:none;color:var(--tx);padding:9px 10px;border-radius:10px;cursor:pointer;font:inherit;margin:0}
+.pop button:hover{background:var(--trk)}.pop button.on{background:var(--vbg)}.pop button small{display:block;color:var(--mut);font-size:12px}.pop .ck{margin-left:auto;color:var(--ac);font-style:normal;visibility:hidden}.pop button.on .ck{visibility:visible}
+.ib.wide{width:auto;padding:0 10px;gap:6px;grid-auto-flow:column}.ib.wide span{font-size:13px}
+.cp{--tx:#d6e2f0;--mut:#8b98a8;--bg:#0d1117;--in:#121921;--bd:#263140;--g2:#2a3442;--card:#0d1117;position:fixed;left:72px;right:0;bottom:0;height:var(--ph,280px);background:#0d1117;color:var(--tx);border-top:2px solid var(--ac);z-index:30;display:none;flex-direction:column}
+body.cpo .cp{display:flex}body.cpo main{padding-bottom:calc(var(--ph,280px) + 24px)}
+.cph{height:36px;display:flex;align-items:center;gap:6px;padding:0 10px;background:#161b22;cursor:ns-resize;touch-action:none;flex:none;user-select:none}
+.cph b{flex:1;font-size:13px}.cph button{border:0;background:#222b38;color:#d6e2f0;border-radius:6px;min-width:30px;height:26px;cursor:pointer;font-size:14px;padding:0 6px;margin:0}.cph button:hover{background:#2f3b4d}
+.cpb{flex:1;min-height:0;display:flex;flex-direction:column;padding:8px 12px}
+.cp .term{flex:1;height:auto;min-height:0;overflow:auto;margin:0;border:0;padding:0;background:transparent}
+.cp .trow{margin-top:6px}.cp .keys{margin-top:6px}.cp .keys .btn{margin-bottom:0}
+.ru{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--bd)}.ru .rb{flex:1;min-width:0}.ru .rb b{display:block}.ru .rbt{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.ru .rbt .btn{margin:0;padding:6px 12px;font-size:13px}
+.dsel{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0 10px}.dsel button{border:1px solid var(--g2);background:var(--in);color:var(--mut);border-radius:8px;padding:6px 9px;cursor:pointer;font:inherit;font-size:13px;margin:0}.dsel button.on{background:var(--ac);color:#06121c;border-color:var(--ac);font-weight:700}
+.arow{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap}.arow select,.arow input{margin:0;width:auto;flex:1;min-width:90px}.arow select.ak{flex:0 0 190px}.arow input[type=color]{flex:0 0 70px;min-width:70px;height:38px;padding:2px;cursor:pointer}.arow input[type=range]{padding:0;height:38px}.arow .ib{width:34px;height:34px;flex:none}
+.rcard h4{margin:14px 0 4px;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--mut)}
+.bg{border:1px solid var(--bd);border-radius:12px;margin-bottom:10px;background:var(--in)}.bg.drag,.bc.drag{opacity:.55}
+.brow{display:flex;align-items:center;gap:10px;padding:10px 12px}.brow .bn{flex:1;min-width:0}.brow .bn small{display:block;color:var(--mut);font-size:12px}
+.grip{cursor:grab;touch-action:none;color:var(--mut);width:22px;height:30px;display:grid;place-items:center;flex:none}.grip svg{width:18px;height:18px}
+.bch{margin:0 0 8px 28px;border-left:2px solid var(--ac);padding-left:8px}.bc{border:1px solid var(--bd);border-radius:10px;margin-top:6px;background:var(--card)}
+.bfix{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px dashed var(--bd);border-radius:12px;margin-bottom:8px;color:var(--mut)}.bfix svg{width:18px;height:18px}
+.bi{width:30px;height:30px;border:0;border-radius:8px;background:var(--g2);color:var(--tx);cursor:pointer;margin:0;padding:0}
+@media(max-width:820px){.cp{left:0;bottom:62px}body.cpo main{padding-bottom:calc(var(--ph,280px) + 90px)!important}.ru{flex-wrap:wrap}.ru .rbt{justify-content:flex-start}.ib.wide span{display:none}.pop{right:8px;top:56px}.arow select.ak{flex:1 1 100%}}
 #rsub{position:sticky;top:60px;z-index:4;background:var(--bg);padding:8px 0}
 .hl{display:grid;gap:14px;grid-template-columns:repeat(12,1fr)}
 .rings{grid-column:1/-1;display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
@@ -88,6 +110,9 @@ td,th{text-align:left;padding:6px;border-bottom:1px solid var(--bd);font-size:14
 <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
 <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></symbol>
 <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"/></symbol>
+<symbol id="i-term" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><path d="M7 10l3 2.2L7 14.4M12.5 15h4.5"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5.5" y="10.5" width="13" height="9" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+<symbol id="i-grip" viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></g></symbol>
 <symbol id="i-auto" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17a8.5 8.5 0 0 0 0-17z" fill="currentColor"/></symbol>
 <symbol id="i-out" viewBox="0 0 24 24"><path d="M9 4H5.5A1.5 1.5 0 0 0 4 5.5v13A1.5 1.5 0 0 0 5.5 20H9"/><path d="M15 8l4 4-4 4M19 12H9"/></symbol>
 <symbol id="i-vesuvio" viewBox="-6 330 852 170"><g fill="none" stroke="url(#vg)" stroke-linecap="round" stroke-linejoin="round"><path d="M0 456C70 452 130 444 200 432C270 420 340 398 420 370C440 362 452 350 468 347C484 345 492 356 510 362C525 366 536 358 552 349C568 339 584 337 600 338C620 339 635 346 650 354C675 367 705 380 740 388C775 395 805 402 838 410" stroke-width="9"/><path d="M208 464C280 458 380 456 470 455C520 455 560 454 592 454M208 464C300 470 380 474 440 477C520 481 610 485 692 488" stroke-width="7" stroke-opacity=".8"/><path d="M478 451C520 446 570 445 620 445C690 444 760 444 805 449" stroke-width="7" stroke-opacity=".55"/></g></symbol></svg>
@@ -107,7 +132,8 @@ td,th{text-align:left;padding:6px;border-bottom:1px solid var(--bd);font-size:14
 <header class="top"><b class="tname"><svg class="hlogo" aria-hidden="true"><use href="#i-chip"/></svg>VesevOS</b><span class="bchip" id="bchip"></span><span class="sp"></span><span id="hd" style="color:var(--mut);font-size:13px"></span>
  <select class="lsel" onchange="setLang(this.value)" style="width:auto;margin:0 4px;padding:4px 8px"></select>
  <button class="ib" id="bellb" onclick="bellTog()"><svg class="i"><use href="#i-bell"/></svg><span class="bdg hide" id="bdg"></span></button>
- <button class="ib" id="thb" onclick="themeCycle()"><svg class="i"><use id="thu" href="#i-auto"/></svg></button>
+ <button class="ib" id="tbt" onclick="cpToggle()"><svg class="i"><use href="#i-term"/></svg></button>
+ <button class="ib wide" id="thb" onclick="thMenu(event)"><svg class="i"><use id="thu" href="#i-auto"/></svg><span id="thl"></span></button>
  <button class="ib" id="outb" onclick="logout()"><svg class="i"><use href="#i-out"/></svg></button></header>
 <div class="alerts hide" id="alerts"></div>
 <div class="sub gsub hide" id="gsub"></div>
@@ -161,10 +187,32 @@ td,th{text-align:left;padding:6px;border-bottom:1px solid var(--bd);font-size:14
  </div>
 </section>
 <section id="t_shell" class="hide">
- <div class="card"><h3>Shell</h3><pre id="so" class="term" onclick="$('si').focus()"></pre>
-  <div class="trow"><b>vesevos&gt;</b><input id="si" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="help" onkeydown="shKey(event)" onpaste="shPaste(event)"></div>
-  <div class="keys"><button class="btn gray" onclick="shTab()">Tab</button><button class="btn gray" onclick="shHist(-1)">&uarr;</button><button class="btn gray" onclick="shHist(1)">&darr;</button><button class="btn gray" onclick="shCancel()">Ctrl+C</button><button class="btn gray" onclick="shClear()">Pulisci</button><button class="btn gray" onclick="shCopy()">Copia tutto</button></div>
-  <div id="shm" class="msg"></div></div>
+ <div class="card"><h3>Terminale</h3>
+  <p style="color:var(--mut)">Il terminale e un pannello in basso, sempre disponibile da ogni scheda. Trascina la barra del pannello per cambiare l'altezza.</p>
+  <button class="btn" onclick="cpToggle(true)">Apri il terminale</button><button class="btn gray" onclick="cpSize(2)">A tutto schermo</button>
+  <p style="color:var(--mut)">Scorciatoia da tastiera: Ctrl + `</p></div>
+</section>
+<section id="t_auto" class="hide">
+ <div class="card"><h3>Automazioni</h3>
+  <p style="color:var(--mut)">Regole "Quando... Se... Allora..." che la scheda esegue da sola, anche senza rete: sveglie, timer, allarmi di temperatura.</p>
+  <div id="atime" class="msg"></div>
+  <div id="rlist"></div>
+  <button class="btn" onclick="rNew()">Nuova regola</button>
+  <p class="subt" style="margin-top:12px">Modelli pronti:</p>
+  <button class="btn gray" onclick="rTpl(0)">Sveglia</button><button class="btn gray" onclick="rTpl(1)">Dopo l'avvio</button><button class="btn gray" onclick="rTpl(2)">Allarme temperatura</button>
+  <div id="rm" class="msg"></div></div>
+ <div class="card rcard hide" id="redit"></div>
+</section>
+<section id="t_boot" class="hide">
+ <div class="card"><h3>Ordine di avvio</h3>
+  <p style="color:var(--mut)">Scegli in che ordine partono i servizi: trascina per la maniglia oppure usa le frecce. Quello che dipende da un altro servizio resta attaccato a lui e parte dopo. Vale dal prossimo riavvio.</p>
+  <div id="bwarn" class="msg"></div>
+  <h4 style="margin:10px 0 6px;color:var(--mut)">Sempre per primi</h4>
+  <div id="bfix"></div>
+  <h4 style="margin:14px 0 6px;color:var(--mut)">Servizi che puoi spostare</h4>
+  <div id="bl"></div>
+  <button class="btn" onclick="bSave()">Salva ordine</button><button class="btn gray" onclick="bReset()">Ripristina predefinito</button><button class="btn gray" onclick="bReboot()">Riavvia ora</button>
+  <div id="bm" class="msg"></div></div>
 </section>
 <section id="t_task" class="hide">
  <div class="card"><h3>Task in esecuzione</h3>
@@ -174,7 +222,7 @@ td,th{text-align:left;padding:6px;border-bottom:1px solid var(--bd);font-size:14
 </section>
 <section id="t_ora" class="hide">
  <div class="card"><h3>Data e ora</h3><div id="oranow" style="font-size:22px;margin-bottom:8px"></div>
-  <button class="btn gray" onclick="setFromBrowser()">Usa l'ora di questo dispositivo</button><div id="om2" class="msg"></div></div>
+  <button class="btn" onclick="syncNow()">Aggiorna ora dalla rete</button><button class="btn gray" onclick="setFromBrowser()">Usa l'ora di questo dispositivo</button><div id="om2" class="msg"></div></div>
  <div class="card"><h3>Impostazioni</h3>
   <label>Sincronizzazione automatica (NTP)</label>
   <select id="o_ntp"><option value="1">Attiva</option><option value="0">Spenta (ora a mano)</option></select>
@@ -245,7 +293,6 @@ td,th{text-align:left;padding:6px;border-bottom:1px solid var(--bd);font-size:14
   <p style="color:var(--mut)">I testi legali sono dentro il firmware e si leggono anche dalla seriale con il comando license.</p></div>
  <div class="card"><h3>Log</h3><pre id="lg"></pre><button class="btn" onclick="loadLog()">Aggiorna</button></div>
 </section>
-<div class="foot"><a href="/api/license?id=notice" target="_blank">Note legali e licenze</a> &middot; <a href="https://github.com/paolellad79/VesevOS" target="_blank" rel="noopener">GitHub</a></div>
 <section id="t_sec" class="hide">
  <div class="card"><h3>Cambia password</h3>
   <label>Vecchia</label><input type="password" id="p_old"><label>Nuova (min 6)</label><input type="password" id="p_new">
@@ -256,18 +303,38 @@ td,th{text-align:left;padding:6px;border-bottom:1px solid var(--bd);font-size:14
   <p style="color:var(--mut)">Pagina web, shell web e API sono sempre protette dalla password. Se spegni questo interruttore, chi collega il cavo USB ottiene subito la shell. Il tasto BOOT premuto 8 secondi azzera la password e riaccende la protezione.</p>
   <div id="serm" class="msg"></div></div>
 </section>
+<div class="foot"><a href="/api/license?id=notice" target="_blank">Note legali e licenze</a> &middot; <a href="https://github.com/paolellad79/VesevOS" target="_blank" rel="noopener">GitHub</a><div id="fver" style="margin-top:4px"></div></div>
 </main></div>
+<div class="pop hide" id="thm" role="menu">
+ <button onclick="themeSet('auto')" id="tm_auto"><svg class="i"><use href="#i-auto"/></svg><span><b>Automatico</b><small>Segue il tema del dispositivo</small></span><i class="ck">&#10003;</i></button>
+ <button onclick="themeSet('light')" id="tm_light"><svg class="i"><use href="#i-sun"/></svg><span><b>Chiaro</b><small>Sfondo chiaro</small></span><i class="ck">&#10003;</i></button>
+ <button onclick="themeSet('dark')" id="tm_dark"><svg class="i"><use href="#i-moon"/></svg><span><b>Scuro</b><small>Sfondo scuro</small></span><i class="ck">&#10003;</i></button>
+</div>
+<div class="cp" id="cp">
+ <div class="cph" id="cph"><svg class="i" style="width:18px;height:18px"><use href="#i-term"/></svg><b>Terminale</b>
+  <button id="cps0" onclick="cpSize(0)">&#9601;</button><button id="cps1" onclick="cpSize(1)">&#9635;</button><button id="cps2" onclick="cpSize(2)">&#10530;</button><button id="cpx" onclick="cpToggle(false)">&#10005;</button></div>
+ <div class="cpb"><pre id="so" class="term" onclick="$('si').focus()"></pre>
+  <div class="trow"><b>vesevos&gt;</b><input id="si" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="help" onkeydown="shKey(event)" onpaste="shPaste(event)"></div>
+  <div class="keys"><button class="btn gray" onclick="shTab()">Tab</button><button class="btn gray" onclick="shHist(-1)">&uarr;</button><button class="btn gray" onclick="shHist(1)">&darr;</button><button class="btn gray" onclick="shCancel()">Ctrl+C</button><button class="btn gray" onclick="shClear()">Pulisci</button><button class="btn gray" onclick="shCopy()">Copia tutto</button></div>
+  <div id="shm" class="msg"></div></div>
+</div>
 <script>
 var GRP=[["home","Home"],["rete","Rete"],["hw","Hardware"],["sys","Sistema"],["sec","Sicurezza"]];
-var GMAP={home:["sum"],rete:["wifi"],hw:["pin","led"],sys:["task","stato","file","ora","shell","conf"],sec:["sec"]};
+var GMAP={home:["sum"],rete:["wifi"],hw:["pin","led"],sys:["task","stato","file","ora","auto","boot","shell","conf"],sec:["sec"]};
 var GICO={home:"i-home",rete:"i-wifi",hw:"i-chipn",sys:"i-gear",sec:"i-shield"};
-var TABS=[["sum","Home"],["wifi","Rete"],["pin","Pin"],["led","LED"],["task","Task"],["stato","Stato"],["file","File"],["ora","Ora"],["shell","Shell"],["conf","Config"],["sec","Password"]];
+var TABS=[["sum","Home"],["wifi","Rete"],["pin","Pin"],["led","LED"],["task","Task"],["stato","Stato"],["file","File"],["ora","Ora"],["auto","Automazioni"],["boot","Avvio"],["shell","Terminale"],["conf","Config"],["sec","Password"]];
 var LASTG={};
 function gOf(id){for(var g in GMAP)if(GMAP[g].indexOf(id)>=0)return g;return"home"}
 var THEME="auto";try{THEME=localStorage.getItem("vth")||"auto"}catch(e){}
 function themeApply(){var m=THEME;if(m=="auto")m=(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches)?"light":"dark";document.documentElement.setAttribute("data-theme",m);
- var u=$("thu");if(u)u.setAttribute("href",THEME=="auto"?"#i-auto":THEME=="light"?"#i-sun":"#i-moon");var b=$("thb");if(b)b.title=t("Tema")+": "+(THEME=="auto"?t("Automatico"):THEME=="light"?t("Chiaro"):t("Scuro"))}
-function themeCycle(){THEME=THEME=="auto"?"light":THEME=="light"?"dark":"auto";try{localStorage.setItem("vth",THEME)}catch(e){}themeApply()}
+ var nm=THEME=="auto"?t("Automatico"):THEME=="light"?t("Chiaro"):t("Scuro");
+ var u=$("thu");if(u)u.setAttribute("href",THEME=="auto"?"#i-auto":THEME=="light"?"#i-sun":"#i-moon");var b=$("thb");if(b)b.title=t("Tema")+": "+nm;var l=$("thl");if(l)l.textContent=nm;
+ ["auto","light","dark"].forEach(function(k){var e=$("tm_"+k);if(e)e.className=k==THEME?"on":""})}
+function themeSet(m){THEME=m;try{localStorage.setItem("vth",THEME)}catch(e){}themeApply();$("thm").className="pop hide"}
+function thMenu(e){e.stopPropagation();var m=$("thm");m.className=m.classList.contains("hide")?"pop":"pop hide"}
+document.addEventListener("click",function(e){var m=$("thm");if(m&&!m.classList.contains("hide")&&!e.target.closest("#thm"))m.className="pop hide"});
+document.addEventListener("keydown",function(e){if(e.key=="Escape"){var m=$("thm");if(m)m.className="pop hide"}
+ if(e.ctrlKey&&(e.key=="`"||e.code=="Backquote")&&loggedIn()){e.preventDefault();cpToggle()}});
 if(window.matchMedia)try{matchMedia("(prefers-color-scheme: light)").addEventListener("change",function(){if(THEME=="auto")themeApply()})}catch(e){}
 var DICT={},LANG="it",LANGS=[{code:"it",name:"Italiano"}];
 function t(s){var v=DICT[s];return v?v:s}
@@ -297,34 +364,197 @@ function setLang(code,noSave){LANG=code;try{localStorage.setItem("vl",code)}catc
 function initLang(dev){var c=dev||"it";try{c=localStorage.getItem("vl")||c}catch(e){}
  fetch("/api/langs").then(function(r){return r.json()}).then(function(l){LANGS=l;if(!l.some(function(x){return x.code==c}))c="it";setLang(c,true)}).catch(function(){setLang("it",true)})}
 var cur="sum",S=null,timer=null;
+var CP={o:false,h:280};try{CP.h=+localStorage.getItem("vph")||280;CP.o=localStorage.getItem("vpo")=="1"}catch(e){}
+function cpApply(){var mx=Math.max(140,innerHeight-130);CP.h=Math.max(120,Math.min(mx,CP.h));document.documentElement.style.setProperty("--ph",CP.h+"px");
+ document.body.classList.toggle("cpo",CP.o&&loggedIn());try{localStorage.setItem("vph",CP.h);localStorage.setItem("vpo",CP.o?"1":"0")}catch(e){}
+ var o=$("tbt");if(o)o.style.color=CP.o?"var(--ac)":""}
+function cpToggle(f){CP.o=f===undefined?!CP.o:f;cpApply();if(CP.o){shLoadCmds();var i=$("si");if(i)i.focus()}}
+function cpSize(k){CP.h=k==0?170:k==1?Math.round(innerHeight*.45):innerHeight-130;if(!CP.o)CP.o=true;cpApply()}
+function cpTitles(){var m={tbt:"Terminale",cps0:"Piccolo",cps1:"Medio",cps2:"Quasi a tutto schermo",cpx:"Chiudi"};for(var k in m){var e=$(k);if(e){e.title=t(m[k]);e.setAttribute("aria-label",t(m[k]))}}}
+(function(){var h=$("cph"),y0=0,h0=0,dr=false;
+ h.addEventListener("pointerdown",function(e){if(e.target.closest("button"))return;dr=true;y0=e.clientY;h0=CP.h;try{h.setPointerCapture(e.pointerId)}catch(x){}});
+ h.addEventListener("pointermove",function(e){if(!dr)return;CP.h=h0+(y0-e.clientY);cpApply()});
+ function up(){dr=false}h.addEventListener("pointerup",up);h.addEventListener("pointercancel",up);
+ window.addEventListener("resize",cpApply)})();
+
 function $(i){return document.getElementById(i)}
 function api(u,o){return fetch(u,o).then(function(r){if(r.status==401){showLogin();throw 0}return r})}
 function post(u,d){var b=new URLSearchParams(d).toString();return api(u,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:b})}
 function msg(id,t,ok){var e=$(id);clearTimeout(e._tm);e.className="msg";void e.offsetWidth;e.textContent=t;e.className="msg "+(ok?"ok":"ko");
  if(ok)e._tm=setTimeout(function(){e.classList.add("out");e._tm=setTimeout(function(){e.className="msg";e.textContent=""},400)},3000)}
 function buildNav(){var h='<svg class="i slogo" style="stroke:url(#vg)"><use href="#i-chipn"/></svg>';
- GRP.forEach(function(g){h+='<button class="nb" id="n_'+g[0]+'" onclick="gGo(\''+g[0]+'\')"><svg class="i"><use href="#'+GICO[g[0]]+'"/></svg>'+esc(t(g[1]))+'</button>'});$("nav").innerHTML=h;$("bellb").title=t("Allarmi");$("outb").title=t("Esci");themeApply();show(cur)}
+ GRP.forEach(function(g){h+='<button class="nb" id="n_'+g[0]+'" onclick="gGo(\''+g[0]+'\')"><svg class="i"><use href="#'+GICO[g[0]]+'"/></svg>'+esc(t(g[1]))+'</button>'});$("nav").innerHTML=h;$("bellb").title=t("Allarmi");$("outb").title=t("Esci");themeApply();cpTitles();show(cur)}
 function gGo(g){show(LASTG[g]||GMAP[g][0])}
 function show(id){cur=id;var g=gOf(id);LASTG[g]=id;
  TABS.forEach(function(x){$("t_"+x[0]).className=x[0]==id?"":"hide"});
  GRP.forEach(function(x){$("n_"+x[0]).className="nb"+(x[0]==g?" on":"")});
  var L=GMAP[g],h="";if(L.length>1){TABS.forEach(function(x){if(L.indexOf(x[0])>=0)h+='<button class="'+(x[0]==id?"on":"")+'" onclick="show(\''+x[0]+'\')">'+esc(t(x[1]))+'</button>'})}
  $("gsub").innerHTML=h;$("gsub").className="sub gsub"+(h?"":" hide");$("alerts").className="alerts hide";
- if(id=="shell"){shLoadCmds();$("si").focus()}if(id!="task")clearInterval(TK.tm);if(id=="task")loadTasks();if(id=="pin")loadPins();if(id=="conf"){loadLog();loadLangs();loadLic()};if(id=="wifi")fillNet();if(id=="led")fillLed();if(id=="ora")loadTime();if(id=="file")fList(fp);
+ if(id=="shell")cpToggle(true);if(id!="auto"){clearInterval(RU.tm)}if(id=="auto")rLoad();if(id=="boot")bLoad();if(id!="task")clearInterval(TK.tm);if(id=="task")loadTasks();if(id=="pin")loadPins();if(id=="conf"){loadLog();loadLangs();loadLic()};if(id=="wifi")fillNet();if(id=="led")fillLed();if(id=="ora")loadTime();if(id=="file")fList(fp);
  if(id=="sec")fillSec();if(id=="sum")homeDraw()}
+/* ===== Automazioni ===== */
+var RU={list:[],st:[],ed:null,edi:-1,tm:null,txt:""};
+var DAYS=[["0","Lun"],["1","Mar"],["2","Mer"],["3","Gio"],["4","Ven"],["5","Sab"],["6","Dom"]];
+var LEDM=[["state","stato del sistema"],["heartbeat","battito"],["fixed","colore fisso"],["off","spento"]];
+var LED2=[["on","acceso"],["off","spento"],["heartbeat","battito"]];
+var UNITS=[["1","secondi"],["60","minuti"],["3600","ore"]];
+var ONOFF=[["1","acceso"],["0","spento"]];
+function lk(a,v){for(var i=0;i<a.length;i++)if(String(a[i][0])==String(v))return t(a[i][1]);return v}
+function rClean(x){return String(x).replace(/[|;\n\r]/g," ").replace(/\s+/g," ").trim()}
+function aParse(a){var w=a.split(" "),k=w[0],v=w.slice(1).join(" ");
+ if(k=="led-color")return{k:"color",v:v};if(k=="led")return{k:"ledmode",v:v};if(k=="led-bright")return{k:"bright",v:+v};if(k=="led2")return{k:"led2",v:v};
+ if(k=="gpio")return{k:"gpio",p:+w[1],v:+w[2]};if(k=="wait")return{k:"wait",v:+v};if(k=="note")return{k:"note",v:v};if(k=="reboot")return{k:"reboot"};if(k=="ntp")return{k:"ntp"};return null}
+function aSer(a){switch(a.k){case"color":return"led-color "+String(a.v).replace("#","").toLowerCase();case"ledmode":return"led "+a.v;case"bright":return"led-bright "+a.v;case"led2":return"led2 "+a.v;
+ case"gpio":return"gpio "+a.p+" "+a.v;case"wait":return"wait "+a.v;case"note":return"note "+rClean(a.v);case"reboot":return"reboot";case"ntp":return"ntp sync"}return""}
+function rParse(line){var f=line.split("|");if(f.length!=5)return null;
+ var r={on:f[0].trim()=="1",name:f[1].trim(),tk:"time",h:"07:00",d:"1111111",n:60,tmp:70,ck:"-",c1:"22:00",c2:"06:00",cd:"1111111",acts:[]};
+ var w=f[2].trim().split(/\s+/);
+ if(w[0]=="time"){r.tk="time";r.h=w[1];r.d=w[2]}else if(w[0]=="every"||w[0]=="after"){r.tk=w[0];r.n=+w[1]}else if(w[0]=="boot")r.tk="boot";
+ else if(w[0]=="wifi")r.tk=w[1]=="up"?"wifiup":"wifidown";else if(w[0]=="temp"){r.tk="temp";r.tmp=+w[1]}else return null;
+ var c=f[3].trim().split(/\s+/);if(c[0]=="between"){r.ck="between";r.c1=c[1];r.c2=c[2]}else if(c[0]=="day"){r.ck="day";r.cd=c[1]}
+ r.acts=f[4].split(";").map(function(a){return aParse(a.trim())}).filter(Boolean);return r}
+function rSer(r){var tg=r.tk=="time"?"time "+r.h+" "+r.d:r.tk=="every"||r.tk=="after"?r.tk+" "+r.n:r.tk=="boot"?"boot":r.tk=="wifiup"?"wifi up":r.tk=="wifidown"?"wifi down":"temp "+r.tmp;
+ var cd=r.ck=="between"?"between "+r.c1+" "+r.c2:r.ck=="day"?"day "+r.cd:"-";
+ return(r.on?1:0)+"|"+rClean(r.name)+"|"+tg+"|"+cd+"|"+r.acts.map(aSer).join(";")}
+function dayText(m){if(m=="1111111")return t("ogni giorno");if(m=="1111100")return t("dal lunedi al venerdi");if(m=="0000011")return t("sabato e domenica");
+ var o=[];for(var i=0;i<7;i++)if(m[i]=="1")o.push(t(DAYS[i][1]));return o.join(", ")}
+function durText(n){return n%3600==0?tf("{0} h",n/3600):n%60==0?tf("{0} min",n/60):tf("{0} s",n)}
+function aText(a){switch(a.k){case"color":return tf("LED colore #{0}",String(a.v).replace("#",""));
+ case"ledmode":return tf("LED: {0}",lk(LEDM,a.v));
+ case"bright":return tf("luminosita LED {0}",a.v);case"led2":return tf("LED aggiuntivo: {0}",lk(LED2,a.v));
+ case"gpio":return tf("pin {0} {1}",a.p,lk(ONOFF,a.v));case"wait":return tf("aspetta {0}",durText(a.v));
+ case"note":return tf("scrivi \"{0}\" nel registro",a.v);case"reboot":return t("riavvia la scheda");case"ntp":return t("aggiorna l'ora")}return""}
+function rSum(r){var q;
+ if(r.tk=="time")q=tf("Alle {0}, {1}",r.h,dayText(r.d));else if(r.tk=="every")q=tf("Ogni {0}",durText(r.n));else if(r.tk=="after")q=tf("{0} dopo l'avvio",durText(r.n));
+ else if(r.tk=="boot")q=t("All'avvio");else if(r.tk=="wifiup")q=t("Quando il Wi-Fi si collega");else if(r.tk=="wifidown")q=t("Quando il Wi-Fi si scollega");else q=tf("Quando la temperatura supera {0} C",r.tmp);
+ if(r.ck=="between")q+=" - "+tf("solo dalle {0} alle {1}",r.c1,r.c2);else if(r.ck=="day")q+=" - "+tf("solo: {0}",dayText(r.cd));
+ return q+": "+(r.acts.map(aText).join(", ")||"-")}
+function rLoad(){clearInterval(RU.tm);api("/api/rules").then(function(r){return r.json()}).then(function(j){RU.txt=j.text;RU.st=j.st;
+  RU.list=j.text.split("\n").map(function(l){return l.trim()}).filter(function(l){return l&&l[0]!="#"}).map(rParse).filter(Boolean);rDraw()}).catch(function(){});
+ api("/api/time").then(function(r){return r.json()}).then(function(j){var e=$("atime");if(!j.valid){e.className="msg ko";e.textContent=t("L'ora non e impostata: le regole a orario aspettano. Imposta l'ora nella scheda Ora.")}else{e.className="msg";e.textContent=""}}).catch(function(){});
+ RU.tm=setInterval(function(){if(RU.ed)return;api("/api/rules").then(function(r){return r.json()}).then(function(j){RU.st=j.st;if(!RU.ed)rDraw()}).catch(function(){})},3000)}
+function rDraw(){var h="";if(!RU.list.length)h='<p style="color:var(--mut)">'+esc(t("Nessuna regola. Creane una o parti da un modello."))+'</p>';
+ RU.list.forEach(function(r,i){var st=RU.st[i]||{},ex="";
+  if(st.off)ex='<span class="pill" style="background:var(--kobg);color:var(--ko)">'+esc(t("Fermata (troppe esecuzioni)"))+'</span> ';else if(st.run)ex='<span class="pill v">'+esc(t("In corso"))+'</span> ';
+  var last=st.last?tf("Ultima volta: {0} ({1} volte)",st.last,st.n):(st.n?tf("Eseguita {0} volte",st.n):t("Mai eseguita"));
+  h+='<div class="ru"><button class="sw1'+(r.on?" on":"")+'" onclick="rToggle('+i+')" aria-label="'+esc(r.name)+'"></button><div class="rb"><b>'+esc(r.name)+'</b><div class="subt">'+esc(rSum(r))+'</div><div class="subt">'+ex+esc(last)+'</div></div>'+
+  '<div class="rbt"><button class="btn gray" onclick="rRun('+i+')">'+esc(t("Prova ora"))+'</button><button class="btn gray" onclick="rEdit('+i+')">'+esc(t("Modifica"))+'</button><button class="btn gray" onclick="rDel('+i+')">'+esc(t("Elimina"))+'</button></div></div>'});
+ $("rlist").innerHTML=h}
+function rPush(okMsg){var txt=RU.list.map(rSer).join("\n");return post("/api/rules",{text:txt}).then(function(r){return r.json()}).then(function(j){
+  if(j.ok){if(okMsg)msg("rm",okMsg,true);return rLoad(),true}msg("rm",j.err||t("Errore"),false);rLoad();return false})}
+function rToggle(i){RU.list[i].on=!RU.list[i].on;rPush(t("Salvato"))}
+function rDel(i){if(!confirm(tf("Eliminare la regola \"{0}\"?",RU.list[i].name)))return;RU.list.splice(i,1);rPush(t("Regola eliminata"))}
+function rRun(i){post("/api/rules/run",{i:i}).then(function(r){return r.json()}).then(function(j){msg("rm",j.ok?t("Regola avviata"):j.err,j.ok);setTimeout(rLoad,1500)})}
+function rBlank(){return{on:true,name:t("Nuova regola"),tk:"time",h:"07:00",d:"1111100",n:60,tmp:70,ck:"-",c1:"22:00",c2:"06:00",cd:"1111111",acts:[{k:"color",v:"ffcc00"}]}}
+function rNew(){RU.edi=-1;RU.ed=rBlank();rEditDraw()}
+function rEdit(i){RU.edi=i;RU.ed=JSON.parse(JSON.stringify(RU.list[i]));rEditDraw()}
+function rTpl(k){var r=rBlank();
+ if(k==0){r.name=t("Sveglia");r.tk="time";r.h="07:00";r.d="1111100";r.acts=[{k:"color",v:"ffcc00"},{k:"ledmode",v:"fixed"},{k:"note",v:t("Sveglia")}]}
+ else if(k==1){r.name=t("Dopo l'avvio");r.tk="after";r.n=600;r.acts=[{k:"note",v:t("Sono passati 10 minuti dall'avvio")}]}
+ else{r.name=t("Allarme temperatura");r.tk="temp";r.tmp=70;r.acts=[{k:"color",v:"ff0000"},{k:"ledmode",v:"heartbeat"},{k:"note",v:t("Temperatura alta")}]}
+ RU.edi=-1;RU.ed=r;rEditDraw()}
+function selOpts(list,cur){return list.map(function(o){return'<option value="'+o[0]+'"'+(o[0]==cur?" selected":"")+'>'+esc(t(o[1]))+'</option>'}).join("")}
+function dayBtns(id,m){var h='<div class="dsel" id="'+id+'">';for(var i=0;i<7;i++)h+='<button type="button" class="'+(m[i]=="1"?"on":"")+'" onclick="this.classList.toggle(\'on\');rPrev()">'+esc(t(DAYS[i][1]))+'</button>';return h+'</div>'}
+function dayMask(id){var o="";var b=$(id).children;for(var i=0;i<7;i++)o+=b[i].classList.contains("on")?"1":"0";return o}
+var TKS=[["time","Orario (sveglia)"],["every","Ogni tanto (timer ripetuto)"],["after","Dopo l'avvio (una volta)"],["boot","All'avvio"],["wifiup","Quando il Wi-Fi si collega"],["wifidown","Quando il Wi-Fi si scollega"],["temp","Quando la temperatura supera"]];
+var CKS=[["-","Sempre"],["between","Solo in una fascia oraria"],["day","Solo in certi giorni"]];
+var AKS=[["color","LED: colore"],["ledmode","LED: modo"],["bright","LED: luminosita"],["led2","LED aggiuntivo"],["gpio","Pin: acceso o spento"],["wait","Aspetta"],["note","Scrivi nel registro"],["ntp","Aggiorna l'ora"],["reboot","Riavvia la scheda"]];
+function unitOf(n){return n%3600==0?3600:n%60==0?60:1}
+function rEditDraw(){var r=RU.ed;
+ $("redit").innerHTML='<h3>'+esc(RU.edi<0?t("Nuova regola"):t("Modifica regola"))+'</h3>'+
+ '<label>'+esc(t("Nome"))+'</label><input id="r_name" maxlength="24" value="'+esc(r.name)+'" oninput="rPrev()">'+
+ '<h4>'+esc(t("Quando"))+'</h4><select id="r_tk" onchange="rTrigUi()">'+selOpts(TKS,r.tk)+'</select><div id="r_tf"></div>'+
+ '<h4>'+esc(t("Se (facoltativo)"))+'</h4><select id="r_ck" onchange="rCondUi()">'+selOpts(CKS,r.ck)+'</select><div id="r_cf"></div>'+
+ '<h4>'+esc(t("Allora"))+'</h4><div id="racts"></div><button class="btn gray" onclick="aAdd()">'+esc(t("Aggiungi azione"))+'</button>'+
+ '<p id="rprev" class="subt" style="margin-top:12px"></p>'+
+ '<button class="btn" onclick="rSave()">'+esc(t("Salva"))+'</button><button class="btn gray" onclick="rCancel()">'+esc(t("Annulla"))+'</button><div id="rem" class="msg"></div>';
+ rTrigUi();rCondUi();aDraw();$("redit").className="card rcard";$("redit").scrollIntoView({behavior:"smooth",block:"start"})}
+function rTrigUi(){var r=RU.ed,k=$("r_tk").value,h="";r.tk=k;
+ if(k=="time")h='<label>'+esc(t("Ora"))+'</label><input type="time" id="r_h" value="'+esc(r.h)+'" oninput="rPrev()"><label>'+esc(t("Giorni"))+'</label>'+dayBtns("r_d",r.d);
+ else if(k=="every"||k=="after"){var u=unitOf(r.n);h='<label>'+esc(t("Tempo"))+'</label><div class="arow"><input type="number" id="r_n" min="1" value="'+(r.n/u)+'" oninput="rPrev()"><select id="r_u" onchange="rPrev()">'+selOpts(UNITS,u)+'</select></div>'}
+ else if(k=="temp")h='<label>'+esc(t("Temperatura (gradi C)"))+'</label><input type="number" id="r_tmp" min="30" max="110" value="'+r.tmp+'" oninput="rPrev()">';
+ $("r_tf").innerHTML=h;rPrev()}
+function rCondUi(){var r=RU.ed,k=$("r_ck").value,h="";r.ck=k;
+ if(k=="between")h='<div class="arow"><span>'+esc(t("Dalle"))+'</span><input type="time" id="r_c1" value="'+esc(r.c1)+'" oninput="rPrev()"><span>'+esc(t("alle"))+'</span><input type="time" id="r_c2" value="'+esc(r.c2)+'" oninput="rPrev()"></div>';
+ else if(k=="day")h=dayBtns("r_cd",r.cd);
+ $("r_cf").innerHTML=h;rPrev()}
+function aDefault(k){return k=="color"?{k:k,v:"ff0000"}:k=="ledmode"?{k:k,v:"fixed"}:k=="bright"?{k:k,v:128}:k=="led2"?{k:k,v:"on"}:k=="gpio"?{k:k,p:4,v:1}:k=="wait"?{k:k,v:5}:k=="note"?{k:k,v:""}:{k:k}}
+function aAdd(){RU.ed.acts.push(aDefault("color"));aDraw()}
+function aDraw(){var h="";RU.ed.acts.forEach(function(a,i){h+='<div class="arow"><select class="ak" onchange="aKind('+i+',this.value)">'+selOpts(AKS,a.k)+'</select>';
+  if(a.k=="color")h+='<input type="color" value="#'+esc(String(a.v).replace("#",""))+'" oninput="aSet('+i+',\'v\',this.value.replace(\'#\',\'\'))">';
+  else if(a.k=="ledmode")h+='<select onchange="aSet('+i+',\'v\',this.value)">'+selOpts(LEDM,a.v)+'</select>';
+  else if(a.k=="bright")h+='<input type="range" min="0" max="255" value="'+a.v+'" oninput="aSet('+i+',\'v\',+this.value)">';
+  else if(a.k=="led2")h+='<select onchange="aSet('+i+',\'v\',this.value)">'+selOpts(LED2,a.v)+'</select>';
+  else if(a.k=="gpio")h+='<input type="number" min="0" max="48" value="'+a.p+'" oninput="aSet('+i+',\'p\',+this.value)" style="max-width:90px"><select onchange="aSet('+i+',\'v\',+this.value)">'+selOpts(ONOFF,a.v)+'</select>';
+  else if(a.k=="wait")h+='<input type="number" min="1" max="3600" value="'+a.v+'" oninput="aSet('+i+',\'v\',+this.value)" style="max-width:110px"><span>'+esc(t("secondi"))+'</span>';
+  else if(a.k=="note")h+='<input maxlength="60" value="'+esc(a.v)+'" placeholder="'+esc(t("Testo della nota"))+'" oninput="aSet('+i+',\'v\',this.value)">';
+  h+='<button class="ib" onclick="aMove('+i+',-1)" aria-label="'+esc(t("Su"))+'">&uarr;</button><button class="ib" onclick="aMove('+i+',1)" aria-label="'+esc(t("Giu"))+'">&darr;</button><button class="ib" onclick="aDel('+i+')" aria-label="'+esc(t("Elimina"))+'">&#10005;</button></div>'});
+ $("racts").innerHTML=h;rPrev()}
+function aKind(i,k){RU.ed.acts[i]=aDefault(k);aDraw()}
+function aSet(i,f,v){RU.ed.acts[i][f]=v;rPrev()}
+function aMove(i,d){var a=RU.ed.acts,j=i+d;if(j<0||j>=a.length)return;var x=a[i];a[i]=a[j];a[j]=x;aDraw()}
+function aDel(i){RU.ed.acts.splice(i,1);aDraw()}
+function rCollect(){var r=RU.ed;r.name=rClean($("r_name").value);r.tk=$("r_tk").value;
+ if(r.tk=="time"){r.h=$("r_h").value||"07:00";r.d=dayMask("r_d")}
+ else if(r.tk=="every"||r.tk=="after")r.n=Math.max(1,Math.round((+$("r_n").value||1)*(+$("r_u").value)));
+ else if(r.tk=="temp")r.tmp=+$("r_tmp").value||70;
+ r.ck=$("r_ck").value;if(r.ck=="between"){r.c1=$("r_c1").value||"22:00";r.c2=$("r_c2").value||"06:00"}else if(r.ck=="day")r.cd=dayMask("r_cd");return r}
+function rPrev(){if(!RU.ed||!$("r_tk")||!$("rprev"))return;var r=rCollect();$("rprev").textContent=rSum(r)}
+function rCancel(){RU.ed=null;$("redit").className="card rcard hide"}
+function rSave(){var r=rCollect(),e="";
+ if(!r.name)e=t("Scrivi un nome");else if(!r.acts.length)e=t("Aggiungi almeno un'azione");else if(r.tk=="time"&&r.d=="0000000")e=t("Scegli almeno un giorno");else if(r.ck=="day"&&r.cd=="0000000")e=t("Scegli almeno un giorno");
+ else if((r.tk=="every")&&r.n<5)e=t("Il timer ripetuto parte da 5 secondi");
+ if(e){msg("rem",e,false);return}
+ if(RU.edi<0)RU.list.push(r);else RU.list[RU.edi]=r;
+ var txt=RU.list.map(rSer).join("\n");
+ post("/api/rules",{text:txt}).then(function(x){return x.json()}).then(function(j){if(j.ok){RU.ed=null;$("redit").className="card rcard hide";msg("rm",t("Regola salvata"),true);rLoad()}else{if(RU.edi<0)RU.list.pop();msg("rem",j.err||t("Errore"),false)}})}
+
+/* ===== Ordine di avvio ===== */
+var BT={d:null,roots:[],ch:{}};
+var BN=[["sys","Sistema e monitor"],["led","LED"],["net","Rete"],["time","Ora"],["web","Pagina web e API"],["rules","Automazioni"]];
+var BFIX=[["log","Registro (log)"],["pin","Pin e risorse"],["fs","File e configurazione"],["lang","Lingua"]];
+function bn(id){return lk(BN,id)}
+function bLoad(){api("/api/boot").then(function(r){return r.json()}).then(function(d){BT.d=d;var pos={};d.order.forEach(function(x,i){pos[x]=i});
+  BT.roots=[];BT.ch={};d.svc.forEach(function(x){if(!x.parent)BT.roots.push(x.id);else{(BT.ch[x.parent]=BT.ch[x.parent]||[]).push(x.id)}});
+  BT.roots.sort(function(a,b){return pos[a]-pos[b]});for(var k in BT.ch)BT.ch[k].sort(function(a,b){return pos[a]-pos[b]});bDraw()}).catch(function(){})}
+function bSvc(id){return BT.d.svc.filter(function(x){return x.id==id})[0]}
+function bRow(id,child){var x=bSvc(id),rq=x.req.length?tf("Richiede: {0}",x.req.map(function(q){return bn(q)}).join(", ")):t("Non richiede altri servizi");
+ var tm=tf("partito a +{0} ms, ha impiegato {1} ms",x.at,x.ms);
+ return'<div class="brow"><span class="grip" data-g="'+id+'"><svg class="i"><use href="#i-grip"/></svg></span><div class="bn"><b>'+esc(bn(id))+'</b><small>'+esc(rq)+'</small><small>'+esc(tm)+'</small></div>'+
+ '<button class="bi" onclick="bMove(\''+id+'\',-1)" aria-label="'+esc(t("Su"))+'">&uarr;</button><button class="bi" onclick="bMove(\''+id+'\',1)" aria-label="'+esc(t("Giu"))+'">&darr;</button></div>'}
+function bNode(id,lv){var h='<div class="'+(lv?'bc':'bg')+'" data-id="'+id+'">'+bRow(id)+'<div class="bch">';(BT.ch[id]||[]).forEach(function(c){h+=bNode(c,lv+1)});return h+'</div></div>'}
+function bDraw(){var f="";BFIX.forEach(function(x){f+='<div class="bfix"><svg class="i"><use href="#i-lock"/></svg>'+esc(t(x[1]))+'</div>'});$("bfix").innerHTML=f;
+ var h="";BT.roots.forEach(function(r){h+=bNode(r,0)});$("bl").innerHTML=h;
+ var w=$("bwarn");if(BT.d.fell){w.className="msg ko";w.textContent=t("L'ordine scelto non ha funzionato: e stato ripristinato quello predefinito.")}else if(BT.d.custom){w.className="msg ok";w.textContent=t("Ordine personalizzato attivo.")}else{w.className="msg";w.textContent=""}
+ bGrips()}
+function bFlat(){var o=[];function w(id){o.push(id);(BT.ch[id]||[]).forEach(w)}BT.roots.forEach(w);return o}
+function bRead(box,pid){var ids=[].filter.call(box.children,function(c){return c.hasAttribute("data-id")}).map(function(c){return c.getAttribute("data-id")});
+ if(pid)BT.ch[pid]=ids;else BT.roots=ids;ids.forEach(function(id){bRead(box.querySelector('[data-id="'+id+'"]>.bch'),id)})}
+function bMove(id,d){var a=BT.roots.indexOf(id)>=0?BT.roots:BT.ch[bSvc(id).parent];var i=a.indexOf(id),j=i+d;if(j<0||j>=a.length)return;var x=a[i];a[i]=a[j];a[j]=x;bDraw()}
+function bGrips(){var gs=$("bl").querySelectorAll(".grip");
+ for(var i=0;i<gs.length;i++)(function(g){
+  g.addEventListener("pointerdown",function(e){var el=g.closest(".bc,.bg");el.classList.add("drag");e.preventDefault();
+   function mv(ev){if(ev.clientY>innerHeight-70)scrollBy(0,18);else if(ev.clientY<130)scrollBy(0,-18);var par=el.parentNode,sib=[].filter.call(par.children,function(c){return c!==el&&c.hasAttribute("data-id")}),ins=null;
+    for(var k=0;k<sib.length;k++){var r=sib[k].getBoundingClientRect();if(ev.clientY<r.top+r.height/2){ins=sib[k];break}}
+    if(ins)par.insertBefore(el,ins);else par.appendChild(el)}
+   function up(){document.removeEventListener("pointermove",mv);document.removeEventListener("pointerup",up);document.removeEventListener("pointercancel",up);el.classList.remove("drag");bRead($("bl"),null);bDraw()}
+   document.addEventListener("pointermove",mv);document.addEventListener("pointerup",up);document.addEventListener("pointercancel",up)})})(gs[i])}
+function bSave(){post("/api/boot",{order:bFlat().join(",")}).then(function(r){return r.json()}).then(function(j){if(j.ok){msg("bm",t("Salvato: vale dal prossimo riavvio"),true);bLoad()}else msg("bm",j.err||t("Errore"),false)})}
+function bReset(){post("/api/boot/reset",{}).then(function(){msg("bm",t("Ordine predefinito (vale dal prossimo riavvio)"),true);bLoad()})}
+function bReboot(){if(!confirm(t("Riavviare la scheda?")))return;post("/api/shell",{c:"reboot"}).catch(function(){});msg("bm",t("Riavvio..."),true);setTimeout(function(){location.reload()},9000)}
 var AUTHSET=true;
 function showLoginText(){$("lt").textContent=AUTHSET?t("Accesso"):t("Imposta password")}
-function showLogin(){clearInterval(timer);$("app").className="hide";$("login").className="card";
+function showLogin(){clearInterval(timer);$("app").className="hide";$("login").className="card";document.body.classList.remove("cpo");
  fetch("/api/auth").then(function(r){return r.json()}).then(function(j){AUTHSET=j.set;$("lnew").className=j.set?"hide":"";showLoginText()})}
 function doLogin(){post("/api/login",{p:$("lp").value}).then(function(r){return r.json()}).then(function(j){
  if(j.ok){$("lp").value="";start()}else msg("lm",j.err||t("Errore"),false)}).catch(function(){})}
 function logout(){post("/api/logout",{}).then(showLogin)}
-function start(){$("login").className="hide";$("app").className="";buildNav();poll();timer=setInterval(poll,2000)}
+function start(){$("login").className="hide";$("app").className="";buildNav();cpApply();poll();timer=setInterval(poll,2000)}
 function row(a,b){return '<div class="row"><span>'+a+'</span><span>'+b+'</span></div>'}
 function bar(p){return '<div class="bar"><i style="width:'+p+'%"></i></div>'}
 function tmp(c,u){return u?(c*9/5+32).toFixed(1)+" &deg;F":c.toFixed(1)+" &deg;C"}
 function kb(n){return Math.round(n/1024)+" KB"}
-function poll(){api("/api/status").then(function(r){return r.json()}).then(function(s){S=s;
+function poll(){api("/api/status").then(function(r){return r.json()}).then(function(s){S=s;if($("fver"))$("fver").textContent="VesevOS "+s.version+" \u00b7 (C) 2026 Domenico Paolella";
  $("hd").textContent=s.net.ip;$("bchip").textContent=s.net.host+" · "+boardId(s);
  var hp=Math.round(100-100*s.heapFree/s.heapTotal),pp=s.psramTotal?Math.round(100-100*s.psramFree/s.psramTotal):0,fp=s.flashTotal?Math.round(100*s.flashUsed/s.flashTotal):0;
  $("res").innerHTML=row(t("CPU"),s.cpu+"%")+bar(s.cpu)+row("RAM",kb(s.heapTotal-s.heapFree)+" / "+kb(s.heapTotal))+bar(hp)+
@@ -392,6 +622,7 @@ function loadTime(){api("/api/time").then(function(r){return r.json()}).then(fun
  var h="",f=-1;TZS.forEach(function(z,i){h+='<option value="'+i+'">'+z[0]+'</option>';if(z[1]==t.tz)f=i});h+='<option value="-1">'+esc(window.t("Personalizzato"))+'</option>';$("o_tzs").innerHTML=h;$("o_tzs").value=f})}
 function saveTime(){post("/api/time",{ntp:$("o_ntp").value,server:$("o_srv").value,tz:$("o_tz").value,tzname:$("o_tzn").value,serve:$("o_serve").value,datefmt:$("o_df").value,timefmt:$("o_tf").value,tempunit:$("o_tu").value})
  .then(function(r){return r.json()}).then(function(j){msg("om",j.ok?t("Salvato"):j.err,j.ok);if(j.ok)setTimeout(loadTime,1500)})}
+function syncNow(){post("/api/time/sync",{}).then(function(r){return r.json()}).then(function(j){msg("om2",j.ok?t("Sincronizzazione richiesta: controllo l'ora tra pochi secondi"):j.err,j.ok);if(j.ok){setTimeout(loadTime,3000);setTimeout(loadTime,8000)}})}
 function setFromBrowser(){post("/api/time/set",{epoch:Math.floor(Date.now()/1000)}).then(function(r){return r.json()}).then(function(j){msg("om2",j.ok?t("Ora impostata"):j.err,j.ok);if(j.ok)loadTime()})}
 function setCpu(){post("/api/cpu",{mode:$("cpumode").value}).then(function(r){return r.json()}).then(function(j){msg("cpum",j.ok?t("Salvato"):j.err,j.ok)})}
 function enc(s){return encodeURIComponent(s)}

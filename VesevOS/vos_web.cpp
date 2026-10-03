@@ -15,6 +15,8 @@
 #include "vos_util.h"
 #include "vos_files.h"
 #include "vos_time.h"
+#include "vos_rules.h"
+#include "vos_boot.h"
 #include <LittleFS.h>
 #include "vos_log.h"
 #include <ESPAsyncWebServer.h>
@@ -168,6 +170,29 @@ void webInit() {
     if (sysTaskKill(P(r, "name"), err)) ok(r); else ko(r, err);
   });
 
+  // Automazioni
+  server.on("/api/rules", HTTP_GET, [](AsyncWebServerRequest* r) {
+    if (!checkAuth(r)) return;
+    sendJson(r, "{\"text\":\"" + jsonEscape(rulesText()) + "\",\"st\":" + rulesStatusJson() + "}");
+  });
+  server.on("/api/rules", HTTP_POST, [](AsyncWebServerRequest* r) {
+    if (!checkAuth(r)) return;
+    String e;
+    if (rulesSave(P(r, "text"), e)) ok(r); else ko(r, e);
+  });
+  server.on("/api/rules/run", HTTP_POST, [](AsyncWebServerRequest* r) {
+    if (!checkAuth(r)) return;
+    String e;
+    if (rulesRunNow(P(r, "i").toInt(), e)) ok(r); else ko(r, e);
+  });
+  // Ordine di avvio
+  server.on("/api/boot", HTTP_GET, [](AsyncWebServerRequest* r) { if (checkAuth(r)) sendJson(r, bootJson()); });
+  server.on("/api/boot", HTTP_POST, [](AsyncWebServerRequest* r) {
+    if (!checkAuth(r)) return;
+    String res, e;
+    if (bootSetOrder(P(r, "order"), res, e)) sendJson(r, "{\"ok\":true,\"order\":\"" + jsonEscape(res) + "\"}"); else ko(r, e);
+  });
+  server.on("/api/boot/reset", HTTP_POST, [](AsyncWebServerRequest* r) { if (!checkAuth(r)) return; bootResetOrder(); ok(r); });
   server.on("/api/wifi/scan", HTTP_GET, [](AsyncWebServerRequest* r) { if (checkAuth(r)) sendJson(r, netScanJson()); });
   server.on("/api/wifi/scan", HTTP_POST, [](AsyncWebServerRequest* r) { if (checkAuth(r)) { netScanStart(); ok(r); } });
 
@@ -288,6 +313,12 @@ void webInit() {
     cfg.ntpServer = srv; cfg.tz = tz; cfg.tzName = tzn.length() ? cleanAscii(tzn) : String("Personalizzato");
     setenv("TZ", cfg.tz.c_str(), 1); tzset();
     cfgSave(); timeApply(); ok(r);
+  });
+  server.on("/api/time/sync", HTTP_POST, [](AsyncWebServerRequest* r) {
+    if (!checkAuth(r)) return;
+    if (!cfg.ntpOn) { ko(r, tr("La sincronizzazione NTP e spenta")); return; }
+    if (netState() != NET_CLIENT_OK) { ko(r, tr("Serve la connessione a una rete Wi-Fi")); return; }
+    timeApply(); vlog("TIME: sincronizzazione richiesta dalla pagina"); ok(r);
   });
   server.on("/api/time/set", HTTP_POST, [](AsyncWebServerRequest* r) {
     if (!checkAuth(r)) return;

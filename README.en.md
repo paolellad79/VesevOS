@@ -23,10 +23,12 @@ Wi-Fi, clock, files, LEDs, pins, a shell and much more, all protected by a passw
 **No cloud, no account, no subscription.** The web page and the languages live inside the board.
 
 <p align="center">
-  <img src="assets/screenshot-pin.png" alt="The Pins tab: clickable pins for quick tests" width="48%">
-  <img src="assets/screenshot-stato.png" alt="The Status tab: CPU, memory and temperature" width="48%">
+  <img src="assets/screenshot-home.en.png" alt="The Home: status rings, board identity card and resources" width="48%">
+  <img src="assets/screenshot-auto.en.png" alt="Automations: When, If, Then rules" width="48%">
+  <img src="assets/screenshot-avvio.en.png" alt="Startup order of the services and the bottom terminal panel" width="48%">
+  <img src="assets/screenshot-telefono.en.png" alt="The page on a phone, with the icon bar at the bottom" width="24%">
 </p>
-<p align="center"><sub>Screenshots of the control page (with sample data; the interface language shown is Italian).</sub></p>
+<p align="center"><sub>Screenshots of the control page (with sample data): Home in dark theme, Automations, startup order with the bottom terminal panel, and the phone layout.</sub></p>
 
 > **Status:** in development (version 1.5.0). The project grows in stages: see "Where we are going".
 

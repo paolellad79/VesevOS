@@ -23,6 +23,7 @@
 #include "vos_web.h"
 #include "vos_shell.h"
 #include "vos_i18n.h"
+#include "vos_boot.h"
 
 static void resetPasswordIfBootHeld() {
   // Tieni premuto BOOT (GPIO0) per 8 secondi a sistema acceso: azzera la password.
@@ -53,11 +54,7 @@ void setup() {
   if (!cfgLoad()) { vlog("CFG: nessun file, uso i valori iniziali"); cfgSave(); }
 
   langInit();
-  sysInit();
-  ledInit();
-  netInit();
-  timeInit();
-  webInit();
+  bootRun();   // sys, led, net, time, web, rules: nell'ordine scelto (con le dipendenze)
   vlog("Pronto. Primo accesso: rete '%s' -> http://192.168.4.1", cfg.apSsid.c_str());
 }
 
@@ -65,5 +62,6 @@ void loop() {
   shellSerialPoll();
   resetPasswordIfBootHeld();
   pinTestTick();
+  bootStable();
   delay(10);
 }

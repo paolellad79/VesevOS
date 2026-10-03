@@ -6,7 +6,7 @@
 #include <Arduino.h>
 
 #define VOS_NAME     "VesevOS"
-#define VOS_VERSION  "1.5.0"
+#define VOS_VERSION  "1.6.0"
 #define VOS_GITHUB   "https://github.com/paolellad79/VesevOS"
 
 // Pin predefiniti per ESP32-S3 SuperMini

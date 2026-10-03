@@ -2,6 +2,8 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_shell.cpp
 #include "vos_shell.h"
+#include "vos_rules.h"
+#include "vos_boot.h"
 #include "vos_common.h"
 #include "vos_config.h"
 #include "vos_auth.h"
@@ -54,6 +56,8 @@ static void cmdHelp(Print& o) {
   o.println(tr("  top             CPU, RAM, temperatura"));
   o.println(tr("  ps              elenco task"));
   o.println(tr("  kill <nome>     ferma un task (solo quelli consentiti, vedi ps)"));
+  o.println(tr("  rules [run <n>] automazioni: elenco, oppure esegui la regola n"));
+  o.println(tr("  boot-order [lista|reset]  ordine di avvio dei servizi"));
   o.println(tr("  ls [cartella]   elenco file (flash)"));
   o.println(tr("  cat <file>      mostra un file"));
   o.println(tr("  mkdir <nome>    crea cartella"));
@@ -140,6 +144,36 @@ void shellExec(const String& lineIn, Print& o, bool authed) {
     if (a1.length() == 0) o.println(tr("Uso: kill <nome task>"));
     else if (sysTaskKill(a1, err)) o.println(trf("Task '%s' fermato (riparte al riavvio)", a1.c_str()));
     else o.println(err);
+  }
+  else if (c == "rules") {
+    String a2 = argAt(line, 2);
+    if (a1 == "run") {
+      String err;
+      if (rulesRunNow(a2.toInt() - 1, err)) o.println(trf("Regola %d avviata", (int)a2.toInt()));
+      else o.println(trf("Errore: %s", err.c_str()));
+    } else {
+      String t = rulesText();
+      if (t.length() == 0) o.println(tr("Nessuna regola"));
+      else {
+        int n = 0, p = 0;
+        while (p < (int)t.length()) {
+          int e = t.indexOf('\n', p); if (e < 0) e = t.length();
+          String l = t.substring(p, e); l.trim(); p = e + 1;
+          if (!l.length() || l[0] == '#') continue;
+          n++;
+          o.println(String(n) + "  " + l);
+        }
+      }
+    }
+  }
+  else if (c == "boot-order") {
+    if (a1 == "reset") { bootResetOrder(); o.println(tr("Ordine di avvio predefinito (vale dal prossimo riavvio)")); }
+    else if (a1 == "" || a1 == "lista") o.println(bootJson());
+    else {
+      String res, err;
+      if (bootSetOrder(a1, res, err)) o.println(trf("Ordine salvato: %s (vale dal prossimo riavvio)", res.c_str()));
+      else o.println(trf("Errore: %s", err.c_str()));
+    }
   }
   else if (c == "ls") {
     String j = fsListJson(a1.length() ? a1 : "/");
