@@ -10,5 +10,7 @@ void   timeApply();                 // rilegge cfg (server, fuso, server NTP)
 bool   timeValid();                 // l'ora e affidabile?
 String timeNowStr();                // "AAAA-MM-GG HH:MM:SS" (ora locale)
 void   timeSetEpoch(uint32_t t);    // imposta l'ora a mano (dal browser)
+bool   timeSetLocal(const String& s, String& err);   // "AAAA-MM-GG HH:MM[:SS]" ora locale (fuso della scheda)
+bool   timeEveryValid(long minutes);  // valori ammessi per la frequenza NTP
 String timeJson();                  // stato per la pagina
 String fmtTemp(float celsius);        // temperatura nell'unita scelta (C o F)

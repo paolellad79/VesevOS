@@ -10,6 +10,17 @@ struct VosConfig {
   String hostname, domain;
   String apSsid, apPass;
   bool   staEnabled;
+  bool     mqttAuto;             // MQTT: parte da solo all'avvio
+  String   mqttHost, mqttUser, mqttPass, mqttPrefix;
+  uint16_t mqttPort;
+  uint16_t mqttEvery;            // secondi tra due invii dello stato
+  bool     mqttHa;               // Home Assistant: presentazione automatica
+  uint8_t  banFails;             // password sbagliate prima del blocco (3-20)
+  uint32_t banSecs;              // durata del primo blocco in secondi (poi raddoppia, max 1 ora)
+  uint8_t  airOn;                // modalita aereo: 1 = radio spenta
+  uint8_t  airExit;              // come si riattiva: 0 al prossimo avvio, 1 dopo un tempo, 2 a un orario, 3 solo a mano
+  uint32_t airUntil;             // airExit 1: epoch di fine (se l'ora c'era) oppure secondi dall'avvio
+  uint16_t airAt;                // airExit 2: minuti dalla mezzanotte (HH*60+MM)
   String staSsid, staPass;
   bool   staDhcp;
   String ip, mask, gw, dns1, dns2;
@@ -19,11 +30,8 @@ struct VosConfig {
   uint32_t ledColor;             // 0xRRGGBB
   uint8_t  ledBrightness;        // 0..255
   uint8_t  ledPin;
-  uint8_t  led2Mode;             // LED aggiuntivo (rosso): 0 spento 1 acceso 2 battito
-  uint8_t  led2Pin;              // pin del LED aggiuntivo
-  bool     led2Invert;           // true = si accende con livello basso
-  uint8_t  led2Bright;           // 0..255
   bool   ntpOn, ntpServe;        // client NTP, server NTP per altri dispositivi
+  uint32_t ntpEvery;             // minuti tra due sincronizzazioni NTP (0 = solo all'avvio)
   String ntpServer, tz, tzName;  // server, fuso (formato POSIX), nome
   uint8_t dateFmt, timeFmt, tempUnit;   // data: 0 GG/MM/AAAA 1 AAAA-MM-GG 2 MM/GG/AAAA; ora: 0=24h 1=12h; temp: 0=C 1=F
   uint16_t cpuMhz;               // 0 = automatico, altrimenti 80/160/240

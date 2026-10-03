@@ -28,3 +28,4 @@ bool   pinTestRequest(int gpio, const String& action, const String& pull, String
 void   pinTestTick();          // da chiamare spesso (nel loop)
 String pinTestJson();          // pin in prova, azione, secondi rimasti, livello letto
 String pinMapJson();           // per ogni GPIO: provabile oppure no, e perche
+String pinBoardJson();         // chip, numero GPIO del chip, nome scheda (rilevamento automatico)

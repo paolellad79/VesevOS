@@ -7,8 +7,8 @@
 //   attiva : 1 oppure 0
 //   quando : time HH:MM LMMGVSD (7 cifre 0/1, lunedi..domenica) | every N | after N | boot | wifi up | wifi down | temp N
 //   se     : -  |  between HH:MM HH:MM  |  day LMMGVSD
-//   azioni : separate da ";" -> led-color RRGGBB | led state|heartbeat|fixed|off | led-bright N | led2 on|off|heartbeat
-//            | gpio N 0|1 | wait N | note testo | reboot | ntp sync
+//   azioni : separate da ";" -> led-color RRGGBB | led state|heartbeat|fixed|off | led-bright N
+//            | gpio N 0|1 | wait N | note testo | reboot | ntp sync | airplane on|off ... | mqtt <argomento> <testo>
 #pragma once
 #include <Arduino.h>
 
@@ -18,3 +18,4 @@ bool   rulesSave(const String& text, String& err);   // controlla, salva e ricar
 String rulesStatusJson();                            // stato di ogni regola (ultima esecuzione, conteggio, antiloop)
 bool   rulesRunNow(int index, String& err);          // "prova ora"
 int    rulesCount();
+bool   rulesAction(const String& action, String& err);   // esegue subito UNA azione (controllata; "wait" non ammessa) - usata da MQTT

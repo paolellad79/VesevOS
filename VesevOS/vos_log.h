@@ -8,3 +8,4 @@
 void   logInit();
 void   vlog(const char* fmt, ...);     // scrive su seriale + buffer
 String logGet(int maxLines);           // ultime righe, separate da \n
+void   logClear();                     // svuota il registro in RAM

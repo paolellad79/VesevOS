@@ -308,20 +308,6 @@
    "scope": "fw"
   },
   {
-   "it": "  date            data e ora",
-   "en": "  date            date and time",
-   "es": "  date            fecha y hora",
-   "de": "  date            Datum und Uhrzeit",
-   "scope": "fw"
-  },
-  {
-   "it": "  ntp [sync]      stato NTP / risincronizza",
-   "en": "  ntp [sync]      NTP status / resync",
-   "es": "  ntp [sync]      estado NTP / resincroniza",
-   "de": "  ntp [sync]      NTP-Status / neu synchronisieren",
-   "scope": "fw"
-  },
-  {
    "it": "  cpu [auto|80|160|240]  velocita CPU",
    "en": "  cpu [auto|80|160|240]  CPU speed",
    "es": "  cpu [auto|80|160|240]  velocidad de la CPU",
@@ -385,34 +371,6 @@
    "scope": "fw"
   },
   {
-   "it": "  led2 <modo>     LED aggiuntivo: off|on|heartbeat",
-   "en": "  led2 <mode>     extra LED: off|on|heartbeat",
-   "es": "  led2 <modo>     LED adicional: off|on|heartbeat",
-   "de": "  led2 <Modus>    Zusatz-LED: off|on|heartbeat",
-   "scope": "fw"
-  },
-  {
-   "it": "  led2-pin <n>    pin del LED aggiuntivo",
-   "en": "  led2-pin <n>    extra LED pin",
-   "es": "  led2-pin <n>    pin del LED adicional",
-   "de": "  led2-pin <n>    Pin der Zusatz-LED",
-   "scope": "fw"
-  },
-  {
-   "it": "  led2-bright <0-255>  luminosita LED aggiuntivo",
-   "en": "  led2-bright <0-255>  extra LED brightness",
-   "es": "  led2-bright <0-255>  brillo del LED adicional",
-   "de": "  led2-bright <0-255>  Helligkeit der Zusatz-LED",
-   "scope": "fw"
-  },
-  {
-   "it": "  led2-invert on|off   on = si accende con livello basso",
-   "en": "  led2-invert on|off   on = lights up on low level",
-   "es": "  led2-invert on|off   on = se enciende con nivel bajo",
-   "de": "  led2-invert on|off   on = leuchtet bei niedrigem Pegel",
-   "scope": "fw"
-  },
-  {
    "it": "  lang [codice]   mostra o cambia la lingua (it, en, ...)",
    "en": "  lang [code]     show or change the language (it, en, ...)",
    "es": "  lang [codigo]   muestra o cambia el idioma (it, en, ...)",
@@ -445,13 +403,6 @@
    "en": "  logout          log out (serial only)",
    "es": "  logout          cierra sesion (solo serie)",
    "de": "  logout          abmelden (nur seriell)",
-   "scope": "fw"
-  },
-  {
-   "it": "  log             ultime righe di log",
-   "en": "  log             last log lines",
-   "es": "  log             ultimas lineas del registro",
-   "de": "  log             letzte Logzeilen",
    "scope": "fw"
   },
   {
@@ -676,90 +627,6 @@
    "en": "Brightness: %d",
    "es": "Brillo: %d",
    "de": "Helligkeit: %d",
-   "scope": "fw"
-  },
-  {
-   "it": "Stato: %s, pin %u, luminosita %u, livello %s",
-   "en": "Status: %s, pin %u, brightness %u, level %s",
-   "es": "Estado: %s, pin %u, brillo %u, nivel %s",
-   "de": "Status: %s, Pin %u, Helligkeit %u, Pegel %s",
-   "scope": "fw"
-  },
-  {
-   "it": "BASSO (invertito)",
-   "en": "LOW (inverted)",
-   "es": "BAJO (invertido)",
-   "de": "NIEDRIG (invertiert)",
-   "scope": "fw"
-  },
-  {
-   "it": "alto (normale)",
-   "en": "high (normal)",
-   "es": "alto (normal)",
-   "de": "hoch (normal)",
-   "scope": "fw"
-  },
-  {
-   "it": "Uso: led2 off|on|heartbeat   (led2-pin <n>, led2-bright <0-255>, led2-invert on|off)",
-   "en": "Usage: led2 off|on|heartbeat   (led2-pin <n>, led2-bright <0-255>, led2-invert on|off)",
-   "es": "Uso: led2 off|on|heartbeat   (led2-pin <n>, led2-bright <0-255>, led2-invert on|off)",
-   "de": "Verwendung: led2 off|on|heartbeat   (led2-pin <n>, led2-bright <0-255>, led2-invert on|off)",
-   "scope": "fw"
-  },
-  {
-   "it": "LED aggiuntivo: %s (pin %u)",
-   "en": "Extra LED: %s (pin %u)",
-   "es": "LED adicional: %s (pin %u)",
-   "de": "Zusatz-LED: %s (Pin %u)",
-   "scope": "fw"
-  },
-  {
-   "it": "Uso: led2-invert on|off   (on = si accende con livello basso)",
-   "en": "Usage: led2-invert on|off   (on = lights up on low level)",
-   "es": "Uso: led2-invert on|off   (on = se enciende con nivel bajo)",
-   "de": "Verwendung: led2-invert on|off   (on = leuchtet bei niedrigem Pegel)",
-   "scope": "fw"
-  },
-  {
-   "it": "Livello LED aggiuntivo: %s",
-   "en": "Extra LED level: %s",
-   "es": "Nivel del LED adicional: %s",
-   "de": "Pegel der Zusatz-LED: %s",
-   "scope": "fw"
-  },
-  {
-   "it": "Pin non ammesso (usa 1-18, 21 oppure 38-47)",
-   "en": "Pin not allowed (use 1-18, 21 or 38-47)",
-   "es": "Pin no permitido (usa 1-18, 21 o 38-47)",
-   "de": "Pin nicht erlaubt (1-18, 21 oder 38-47 verwenden)",
-   "scope": "fw"
-  },
-  {
-   "it": "Pin gia usato da altro",
-   "en": "Pin already used by something else",
-   "es": "Pin ya usado por otro",
-   "de": "Pin wird bereits anderweitig verwendet",
-   "scope": "fw"
-  },
-  {
-   "it": "Pin LED aggiuntivo: %d",
-   "en": "Extra LED pin: %d",
-   "es": "Pin del LED adicional: %d",
-   "de": "Pin der Zusatz-LED: %d",
-   "scope": "fw"
-  },
-  {
-   "it": "Uso: led2-bright 0-255",
-   "en": "Usage: led2-bright 0-255",
-   "es": "Uso: led2-bright 0-255",
-   "de": "Verwendung: led2-bright 0-255",
-   "scope": "fw"
-  },
-  {
-   "it": "Luminosita LED aggiuntivo: %d",
-   "en": "Extra LED brightness: %d",
-   "es": "Brillo del LED adicional: %d",
-   "de": "Helligkeit der Zusatz-LED: %d",
    "scope": "fw"
   },
   {
@@ -994,13 +861,6 @@
    "scope": "fw"
   },
   {
-   "it": "Troppi errori: riprova tra un minuto",
-   "en": "Too many errors: try again in a minute",
-   "es": "Demasiados errores: reintenta en un minuto",
-   "de": "Zu viele Fehler: in einer Minute erneut versuchen",
-   "scope": "fw"
-  },
-  {
    "it": "Password errata",
    "en": "Wrong password",
    "es": "Contrasena incorrecta",
@@ -1075,13 +935,6 @@
    "en": "Invalid values",
    "es": "Valores no validos",
    "de": "Ungueltige Werte",
-   "scope": "fw"
-  },
-  {
-   "it": "Questo pin e gia usato da altro (vedi scheda Pin)",
-   "en": "This pin is already used by something else (see the Pin tab)",
-   "es": "Este pin ya esta en uso (ver pestana Pin)",
-   "de": "Dieser Pin wird bereits verwendet (siehe Tab Pin)",
    "scope": "fw"
   },
   {
@@ -1204,24 +1057,10 @@
    "scope": "fw"
   },
   {
-   "it": "Pulsante BOOT (8 s = reset password)",
-   "en": "BOOT button (8 s = reset password)",
-   "es": "Boton BOOT (8 s = reset de contrasena)",
-   "de": "BOOT-Taste (8 s = Passwort zuruecksetzen)",
-   "scope": "fw"
-  },
-  {
    "it": "LED RGB WS2812",
    "en": "WS2812 RGB LED",
    "es": "LED RGB WS2812",
    "de": "WS2812-RGB-LED",
-   "scope": "fw"
-  },
-  {
-   "it": "LED aggiuntivo (rosso)",
-   "en": "Extra LED (red)",
-   "es": "LED adicional (rojo)",
-   "de": "Zusatz-LED (rot)",
    "scope": "fw"
   },
   {
@@ -1754,55 +1593,6 @@
    "en": "Status colours: orange = starting, blue = AP, yellow = connecting, green = client connected, flashing red = error.",
    "es": "Colores de estado: naranja = arranque, azul = AP, amarillo = conectando, verde = cliente conectado, rojo parpadeante = error.",
    "de": "Statusfarben: orange = Start, blau = AP, gelb = Verbindung, grün = Client verbunden, rot blinkend = Fehler.",
-   "scope": "web"
-  },
-  {
-   "it": "Acceso fisso",
-   "en": "Always on",
-   "es": "Encendido fijo",
-   "de": "Dauerhaft an",
-   "scope": "web"
-  },
-  {
-   "it": "Battito (heartbeat) legato alla CPU",
-   "en": "Heartbeat linked to the CPU",
-   "es": "Latido (heartbeat) ligado a la CPU",
-   "de": "Herzschlag (Heartbeat) an die CPU gekoppelt",
-   "scope": "web"
-  },
-  {
-   "it": "Pin (GPIO)",
-   "en": "Pin (GPIO)",
-   "es": "Pin (GPIO)",
-   "de": "Pin (GPIO)",
-   "scope": "web"
-  },
-  {
-   "it": "Si accende con",
-   "en": "Lights up with",
-   "es": "Se enciende con",
-   "de": "Leuchtet bei",
-   "scope": "web"
-  },
-  {
-   "it": "Livello alto (normale)",
-   "en": "High level (normal)",
-   "es": "Nivel alto (normal)",
-   "de": "Hoher Pegel (normal)",
-   "scope": "web"
-  },
-  {
-   "it": "Livello basso (invertito)",
-   "en": "Low level (inverted)",
-   "es": "Nivel bajo (invertido)",
-   "de": "Niedriger Pegel (invertiert)",
-   "scope": "web"
-  },
-  {
-   "it": "Pin ammessi: 1-18, 21 e 38-47. Se il LED non reagisce prova un altro pin o il livello invertito. Il pin scelto compare nella scheda Pin.",
-   "en": "Allowed pins: 1-18, 21 and 38-47. If the LED does not react, try another pin or the inverted level. The chosen pin appears in the Pin tab.",
-   "es": "Pines permitidos: 1-18, 21 y 38-47. Si el LED no reacciona, prueba otro pin o el nivel invertido. El pin elegido aparece en la pestaña Pin.",
-   "de": "Erlaubte Pins: 1-18, 21 und 38-47. Reagiert die LED nicht, probiere einen anderen Pin oder den invertierten Pegel. Der gewählte Pin erscheint im Tab Pin.",
    "scope": "web"
   },
   {
@@ -2429,20 +2219,6 @@
    "scope": "web"
   },
   {
-   "it": "Tocca un pin verde per provarlo. Blu = pin in uso, grigio = vietato.",
-   "en": "Tap a green pin to test it. Blue = pin in use, grey = forbidden.",
-   "es": "Toca un pin verde para probarlo. Azul = pin en uso, gris = prohibido.",
-   "de": "Tippe auf einen gruenen Pin, um ihn zu testen. Blau = in Benutzung, grau = gesperrt.",
-   "scope": "web"
-  },
-  {
-   "it": "Verde = provabile, arancio = in prova",
-   "en": "Green = testable, orange = under test",
-   "es": "Verde = se puede probar, naranja = en prueba",
-   "de": "Gruen = testbar, orange = im Test",
-   "scope": "web"
-  },
-  {
    "it": "Altro GPIO",
    "en": "Other GPIO",
    "es": "Otro GPIO",
@@ -2877,13 +2653,6 @@
    "scope": "fw"
   },
   {
-   "it": "Task '%s' fermato (riparte al riavvio)",
-   "en": "Task '%s' stopped (restarts on reboot)",
-   "es": "Tarea '%s' detenida (se reinicia al reiniciar)",
-   "de": "Task '%s' gestoppt (startet beim Neustart wieder)",
-   "scope": "fw"
-  },
-  {
    "it": "Task non trovato",
    "en": "Task not found",
    "es": "Tarea no encontrada",
@@ -2909,13 +2678,6 @@
    "en": "Stop",
    "es": "Detener",
    "de": "Stoppen",
-   "scope": "web"
-  },
-  {
-   "it": "Fermare il task '{0}'? Resta fermo fino al riavvio della scheda e alcune funzioni possono smettere di funzionare.",
-   "en": "Stop task '{0}'? It stays stopped until the board restarts and some functions may stop working.",
-   "es": "¿Detener la tarea '{0}'? Queda detenida hasta reiniciar la placa y algunas funciones pueden dejar de funcionar.",
-   "de": "Task '{0}' stoppen? Er bleibt bis zum Neustart des Boards gestoppt und einige Funktionen koennen ausfallen.",
    "scope": "web"
   },
   {
@@ -3455,20 +3217,6 @@
    "en": "The chosen order did not work: the default order was restored.",
    "es": "El orden elegido no funciono: se restauro el orden predeterminado.",
    "de": "Die gewaehlte Reihenfolge hat nicht funktioniert: die Standardreihenfolge wurde wiederhergestellt.",
-   "scope": "web"
-  },
-  {
-   "it": "LED aggiuntivo",
-   "en": "Extra LED",
-   "es": "LED adicional",
-   "de": "Zusaetzliche LED",
-   "scope": "web"
-  },
-  {
-   "it": "LED aggiuntivo: {0}",
-   "en": "Extra LED: {0}",
-   "es": "LED adicional: {0}",
-   "de": "Zusaetzliche LED: {0}",
    "scope": "web"
   },
   {
@@ -4620,24 +4368,10 @@
    "scope": "web"
   },
   {
-   "it": "Copia",
-   "en": "Copy",
-   "es": "Copiar",
-   "de": "Kopieren",
-   "scope": "web"
-  },
-  {
    "it": "Copia di {0}",
    "en": "Copy of {0}",
    "es": "Copia de {0}",
    "de": "Kopie von {0}",
-   "scope": "web"
-  },
-  {
-   "it": "Copia {0}",
-   "en": "Copy {0}",
-   "es": "Copiar {0}",
-   "de": "{0} kopieren",
    "scope": "web"
   },
   {
@@ -5135,6 +4869,1329 @@
    "en": "{0} already exists.",
    "es": "{0} ya existe.",
    "de": "{0} existiert bereits.",
+   "scope": "web"
+  },
+  {
+   "it": "  airplane [on <come>|off]  modalita aereo (come: boot, 30s, 10m, 2h, 07:30, fisso)",
+   "en": "  airplane [on <how>|off]  airplane mode (how: boot, 30s, 10m, 2h, 07:30, fisso)",
+   "es": "  airplane [on <como>|off]  modo avion (como: boot, 30s, 10m, 2h, 07:30, fisso)",
+   "de": "  airplane [on <wie>|off]  Flugmodus (wie: boot, 30s, 10m, 2h, 07:30, fisso)",
+   "scope": "fw"
+  },
+  {
+   "it": "  ban             indirizzi bloccati o sospetti",
+   "en": "  ban             blocked or suspicious addresses",
+   "es": "  ban             direcciones bloqueadas o sospechosas",
+   "de": "  ban             gesperrte oder verdaechtige Adressen",
+   "scope": "fw"
+  },
+  {
+   "it": "  date [set AAAA-MM-GG HH:MM]  data e ora (mostra o imposta)",
+   "en": "  date [set YYYY-MM-DD HH:MM]  date and time (show or set)",
+   "es": "  date [set AAAA-MM-DD HH:MM]  fecha y hora (mostrar o ajustar)",
+   "de": "  date [set JJJJ-MM-TT HH:MM]  Datum und Uhrzeit (anzeigen oder setzen)",
+   "scope": "fw"
+  },
+  {
+   "it": "  log [n|clear]   ultime righe del registro (n righe) o svuota",
+   "en": "  log [n|clear]   last log lines (n lines) or clear",
+   "es": "  log [n|clear]   ultimas lineas del registro (n lineas) o vaciar",
+   "de": "  log [n|clear]   letzte Logzeilen (n Zeilen) oder leeren",
+   "scope": "fw"
+  },
+  {
+   "it": "  mqtt [start|stop|restart|pub]  servizio MQTT",
+   "en": "  mqtt [start|stop|restart|pub]  MQTT service",
+   "es": "  mqtt [start|stop|restart|pub]  servicio MQTT",
+   "de": "  mqtt [start|stop|restart|pub]  MQTT-Dienst",
+   "scope": "fw"
+  },
+  {
+   "it": "  ntp [sync|every <min>]  stato NTP / risincronizza / frequenza",
+   "en": "  ntp [sync|every <min>]  NTP status / resync / interval",
+   "es": "  ntp [sync|every <min>]  estado NTP / resincronizar / frecuencia",
+   "de": "  ntp [sync|every <min>]  NTP-Status / neu synchronisieren / Intervall",
+   "scope": "fw"
+  },
+  {
+   "it": "  sleep           sonno profondo (si riaccende con RESET)",
+   "en": "  sleep           deep sleep (wakes up with RESET)",
+   "es": "  sleep           sueno profundo (se enciende con RESET)",
+   "de": "  sleep           Tiefschlaf (Aufwachen mit RESET)",
+   "scope": "fw"
+  },
+  {
+   "it": "  start <nome>    avvia o riavvia un task fermato (restart = uguale)",
+   "en": "  start <name>    start or restart a stopped task (restart = same)",
+   "es": "  start <nombre>  inicia o reinicia una tarea parada (restart = igual)",
+   "de": "  start <Name>    gestoppten Task starten oder neu starten (restart = gleich)",
+   "scope": "fw"
+  },
+  {
+   "it": "  unban <ip|all>  sblocca un indirizzo (o tutti)",
+   "en": "  unban <ip|all>  unblock an address (or all)",
+   "es": "  unban <ip|all>  desbloquea una direccion (o todas)",
+   "de": "  unban <ip|all>  Adresse entsperren (oder alle)",
+   "scope": "fw"
+  },
+  {
+   "it": "%u errori",
+   "en": "%u errors",
+   "es": "%u errores",
+   "de": "%u Fehler",
+   "scope": "fw"
+  },
+  {
+   "it": "Argomenti: %s/state, %s/cmd",
+   "en": "Topics: %s/state, %s/cmd",
+   "es": "Temas: %s/state, %s/cmd",
+   "de": "Topics: %s/state, %s/cmd",
+   "scope": "fw"
+  },
+  {
+   "it": "BLOCCATO ancora %lu s",
+   "en": "BLOCKED for %lu s more",
+   "es": "BLOQUEADA %lu s mas",
+   "de": "GESPERRT noch %lu s",
+   "scope": "fw"
+  },
+  {
+   "it": "Broker non raggiungibile",
+   "en": "Broker not reachable",
+   "es": "Broker no accesible",
+   "de": "Broker nicht erreichbar",
+   "scope": "fw"
+  },
+  {
+   "it": "Broker: %s:%u  avvio automatico: %s",
+   "en": "Broker: %s:%u  autostart: %s",
+   "es": "Broker: %s:%u  inicio automatico: %s",
+   "de": "Broker: %s:%u  Autostart: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Broker: accesso rifiutato (utente o password?)",
+   "en": "Broker: access refused (user or password?)",
+   "es": "Broker: acceso rechazado (usuario o contrasena?)",
+   "de": "Broker: Zugriff verweigert (Benutzer oder Passwort?)",
+   "scope": "fw"
+  },
+  {
+   "it": "Broker: solo lettere, numeri, punto e trattino",
+   "en": "Broker: only letters, numbers, dot and dash",
+   "es": "Broker: solo letras, numeros, punto y guion",
+   "de": "Broker: nur Buchstaben, Ziffern, Punkt und Bindestrich",
+   "scope": "fw"
+  },
+  {
+   "it": "Data o ora non valida (AAAA-MM-GG HH:MM)",
+   "en": "Invalid date or time (YYYY-MM-DD HH:MM)",
+   "es": "Fecha u hora no valida (AAAA-MM-DD HH:MM)",
+   "de": "Ungueltiges Datum oder Uhrzeit (JJJJ-MM-TT HH:MM)",
+   "scope": "fw"
+  },
+  {
+   "it": "Frequenza non valida",
+   "en": "Invalid interval",
+   "es": "Frecuencia no valida",
+   "de": "Ungueltiges Intervall",
+   "scope": "fw"
+  },
+  {
+   "it": "Indirizzo non trovato",
+   "en": "Address not found",
+   "es": "Direccion no encontrada",
+   "de": "Adresse nicht gefunden",
+   "scope": "fw"
+  },
+  {
+   "it": "Inviati %lu, ricevuti %lu",
+   "en": "Sent %lu, received %lu",
+   "es": "Enviados %lu, recibidos %lu",
+   "de": "Gesendet %lu, empfangen %lu",
+   "scope": "fw"
+  },
+  {
+   "it": "Inviato",
+   "en": "Sent",
+   "es": "Enviado",
+   "de": "Gesendet",
+   "scope": "fw"
+  },
+  {
+   "it": "MQTT avviato",
+   "en": "MQTT started",
+   "es": "MQTT iniciado",
+   "de": "MQTT gestartet",
+   "scope": "fw"
+  },
+  {
+   "it": "MQTT fermato",
+   "en": "MQTT stopped",
+   "es": "MQTT detenido",
+   "de": "MQTT gestoppt",
+   "scope": "fw"
+  },
+  {
+   "it": "MQTT non collegato",
+   "en": "MQTT not connected",
+   "es": "MQTT no conectado",
+   "de": "MQTT nicht verbunden",
+   "scope": "fw"
+  },
+  {
+   "it": "MQTT: %s, %s",
+   "en": "MQTT: %s, %s",
+   "es": "MQTT: %s, %s",
+   "de": "MQTT: %s, %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Manca l'indirizzo del broker",
+   "en": "Broker address missing",
+   "es": "Falta la direccion del broker",
+   "de": "Broker-Adresse fehlt",
+   "scope": "fw"
+  },
+  {
+   "it": "Modalita aereo spenta: la rete riparte",
+   "en": "Airplane mode off: network restarting",
+   "es": "Modo avion apagado: la red se reinicia",
+   "de": "Flugmodus aus: Netzwerk startet neu",
+   "scope": "fw"
+  },
+  {
+   "it": "Modalita aereo: ATTIVA (si riattiva %s; sempre: 'airplane off' dalla seriale o tasto BOOT)",
+   "en": "Airplane mode: ON (network returns %s; always: 'airplane off' from serial or BOOT button)",
+   "es": "Modo avion: ACTIVO (la red vuelve %s; siempre: 'airplane off' desde el serie o boton BOOT)",
+   "de": "Flugmodus: AN (Netz kehrt zurueck %s; immer: 'airplane off' seriell oder BOOT-Taste)",
+   "scope": "fw"
+  },
+  {
+   "it": "Modalita aereo: spenta",
+   "en": "Airplane mode: off",
+   "es": "Modo avion: apagado",
+   "de": "Flugmodus: aus",
+   "scope": "fw"
+  },
+  {
+   "it": "Modo aereo",
+   "en": "Airplane mode",
+   "es": "Modo avion",
+   "de": "Flugmodus",
+   "scope": "fw"
+  },
+  {
+   "it": "Modo di uscita non valido",
+   "en": "Invalid exit mode",
+   "es": "Modo de salida no valido",
+   "de": "Ungueltiger Beendigungsmodus",
+   "scope": "fw"
+  },
+  {
+   "it": "Nessun indirizzo bloccato o sospetto",
+   "en": "No blocked or suspicious address",
+   "es": "Ninguna direccion bloqueada o sospechosa",
+   "de": "Keine gesperrte oder verdaechtige Adresse",
+   "scope": "fw"
+  },
+  {
+   "it": "Orario non valido",
+   "en": "Invalid time",
+   "es": "Hora no valida",
+   "de": "Ungueltige Uhrzeit",
+   "scope": "fw"
+  },
+  {
+   "it": "Prefisso: niente spazi, # o +",
+   "en": "Prefix: no spaces, # or +",
+   "es": "Prefijo: sin espacios, # o +",
+   "de": "Praefix: keine Leerzeichen, # oder +",
+   "scope": "fw"
+  },
+  {
+   "it": "Questo task non si puo riavviare",
+   "en": "This task cannot be restarted",
+   "es": "Esta tarea no se puede reiniciar",
+   "de": "Dieser Task kann nicht neu gestartet werden",
+   "scope": "fw"
+  },
+  {
+   "it": "Registro svuotato",
+   "en": "Log cleared",
+   "es": "Registro vaciado",
+   "de": "Log geleert",
+   "scope": "fw"
+  },
+  {
+   "it": "Sbloccato",
+   "en": "Unblocked",
+   "es": "Desbloqueado",
+   "de": "Entsperrt",
+   "scope": "fw"
+  },
+  {
+   "it": "Sincronizzazione NTP ogni %ld minuti",
+   "en": "NTP sync every %ld minutes",
+   "es": "Sincronizacion NTP cada %ld minutos",
+   "de": "NTP-Synchronisierung alle %ld Minuten",
+   "scope": "fw"
+  },
+  {
+   "it": "Sonno profondo: si riaccende con il tasto RESET",
+   "en": "Deep sleep: wakes up with the RESET button",
+   "es": "Sueno profundo: se enciende con el boton RESET",
+   "de": "Tiefschlaf: Aufwachen mit der RESET-Taste",
+   "scope": "fw"
+  },
+  {
+   "it": "Task '%s' avviato",
+   "en": "Task '%s' started",
+   "es": "Tarea '%s' iniciada",
+   "de": "Task '%s' gestartet",
+   "scope": "fw"
+  },
+  {
+   "it": "Task '%s' fermato (start %s per farlo ripartire)",
+   "en": "Task '%s' stopped (start %s to run it again)",
+   "es": "Tarea '%s' detenida (start %s para reiniciarla)",
+   "de": "Task '%s' gestoppt (start %s zum Neustart)",
+   "scope": "fw"
+  },
+  {
+   "it": "Tempo da 10 secondi a 7 giorni",
+   "en": "Time from 10 seconds to 7 days",
+   "es": "Tiempo de 10 segundos a 7 dias",
+   "de": "Zeit von 10 Sekunden bis 7 Tage",
+   "scope": "fw"
+  },
+  {
+   "it": "Troppi errori da questo indirizzo: riprova tra %lu secondi",
+   "en": "Too many errors from this address: try again in %lu seconds",
+   "es": "Demasiados errores desde esta direccion: reintenta en %lu segundos",
+   "de": "Zu viele Fehler von dieser Adresse: erneut in %lu Sekunden",
+   "scope": "fw"
+  },
+  {
+   "it": "Ultimo errore: %s",
+   "en": "Last error: %s",
+   "es": "Ultimo error: %s",
+   "de": "Letzter Fehler: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: airplane on <come> | airplane off",
+   "en": "Usage: airplane on <how> | airplane off",
+   "es": "Uso: airplane on <como> | airplane off",
+   "de": "Nutzung: airplane on <wie> | airplane off",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: airplane on [boot|<N>s|<N>m|<N>h|HH:MM|fisso]  /  airplane off",
+   "en": "Usage: airplane on [boot|<N>s|<N>m|<N>h|HH:MM|fisso]  /  airplane off",
+   "es": "Uso: airplane on [boot|<N>s|<N>m|<N>h|HH:MM|fisso]  /  airplane off",
+   "de": "Nutzung: airplane on [boot|<N>s|<N>m|<N>h|HH:MM|fisso]  /  airplane off",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: mqtt <argomento> <testo>",
+   "en": "Usage: mqtt <topic> <text>",
+   "es": "Uso: mqtt <tema> <texto>",
+   "de": "Nutzung: mqtt <Topic> <Text>",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: mqtt [status|start|stop|restart|pub <argomento> <testo>]",
+   "en": "Usage: mqtt [status|start|stop|restart|pub <topic> <text>]",
+   "es": "Uso: mqtt [status|start|stop|restart|pub <tema> <texto>]",
+   "de": "Nutzung: mqtt [status|start|stop|restart|pub <Topic> <Text>]",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: mqtt pub <argomento> <testo>",
+   "en": "Usage: mqtt pub <topic> <text>",
+   "es": "Uso: mqtt pub <tema> <texto>",
+   "de": "Nutzung: mqtt pub <Topic> <Text>",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: ntp every 0|15|60|360|720|1440|10080  (minuti, 0 = solo all'avvio)",
+   "en": "Usage: ntp every 0|15|60|360|720|1440|10080  (minutes, 0 = only at boot)",
+   "es": "Uso: ntp every 0|15|60|360|720|1440|10080  (minutos, 0 = solo al arrancar)",
+   "de": "Nutzung: ntp every 0|15|60|360|720|1440|10080  (Minuten, 0 = nur beim Start)",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: start <nome task>  /  restart <nome task>",
+   "en": "Usage: start <task name>  /  restart <task name>",
+   "es": "Uso: start <nombre tarea>  /  restart <nombre tarea>",
+   "de": "Nutzung: start <Taskname>  /  restart <Taskname>",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: unban <indirizzo IP> | unban all",
+   "en": "Usage: unban <IP address> | unban all",
+   "es": "Uso: unban <direccion IP> | unban all",
+   "de": "Nutzung: unban <IP-Adresse> | unban all",
+   "scope": "fw"
+  },
+  {
+   "it": "Valori troppo lunghi",
+   "en": "Values too long",
+   "es": "Valores demasiado largos",
+   "de": "Werte zu lang",
+   "scope": "fw"
+  },
+  {
+   "it": "al prossimo avvio",
+   "en": "at next boot",
+   "es": "al proximo arranque",
+   "de": "beim naechsten Start",
+   "scope": "fw"
+  },
+  {
+   "it": "alle %s",
+   "en": "at %s",
+   "es": "a las %s",
+   "de": "um %s",
+   "scope": "fw"
+  },
+  {
+   "it": "attivo",
+   "en": "active",
+   "es": "activo",
+   "de": "aktiv",
+   "scope": "fw"
+  },
+  {
+   "it": "collegato",
+   "en": "connected",
+   "es": "conectado",
+   "de": "verbunden",
+   "scope": "fw"
+  },
+  {
+   "it": "fermo",
+   "en": "stopped",
+   "es": "detenido",
+   "de": "gestoppt",
+   "scope": "fw"
+  },
+  {
+   "it": "non collegato",
+   "en": "not connected",
+   "es": "no conectado",
+   "de": "nicht verbunden",
+   "scope": "fw"
+  },
+  {
+   "it": "solo a mano",
+   "en": "only manually",
+   "es": "solo a mano",
+   "de": "nur manuell",
+   "scope": "fw"
+  },
+  {
+   "it": "tra %ld s",
+   "en": "in %ld s",
+   "es": "en %ld s",
+   "de": "in %ld s",
+   "scope": "fw"
+  },
+  {
+   "it": "Pulsante BOOT (breve = esce dal modo aereo, 8 s = reset password)",
+   "en": "BOOT button (short = exit airplane mode, 8 s = reset password)",
+   "es": "Boton BOOT (corto = sale del modo avion, 8 s = reset contrasena)",
+   "de": "BOOT-Taste (kurz = Flugmodus beenden, 8 s = Passwort zuruecksetzen)",
+   "scope": "fw"
+  },
+  {
+   "it": "(comandi, es. led-color ff0000, gpio 4 1, reboot)",
+   "en": "(commands, e.g. led-color ff0000, gpio 4 1, reboot)",
+   "es": "(comandos, ej. led-color ff0000, gpio 4 1, reboot)",
+   "de": "(Befehle, z. B. led-color ff0000, gpio 4 1, reboot)",
+   "scope": "web"
+  },
+  {
+   "it": "(salvata: lascia vuoto per non cambiarla)",
+   "en": "(saved: leave empty to keep it)",
+   "es": "(guardada: deja vacío para no cambiarla)",
+   "de": "(gespeichert: leer lassen, um sie zu behalten)",
+   "scope": "web"
+  },
+  {
+   "it": "(stato)",
+   "en": "(status)",
+   "es": "(estado)",
+   "de": "(Status)",
+   "scope": "web"
+  },
+  {
+   "it": "A un certo orario",
+   "en": "At a set time",
+   "es": "A una hora concreta",
+   "de": "Zu einer bestimmten Uhrzeit",
+   "scope": "web"
+  },
+  {
+   "it": "Aereo",
+   "en": "Airplane",
+   "es": "Avión",
+   "de": "Flugmodus",
+   "scope": "web"
+  },
+  {
+   "it": "Aggiornamento automatico",
+   "en": "Auto refresh",
+   "es": "Actualización automática",
+   "de": "Automatisch aktualisieren",
+   "scope": "web"
+  },
+  {
+   "it": "Al prossimo avvio della scheda",
+   "en": "At the next board start",
+   "es": "En el próximo arranque de la placa",
+   "de": "Beim nächsten Start der Platine",
+   "scope": "web"
+  },
+  {
+   "it": "Alcune funzioni smettono di funzionare finche non lo riavvii (pulsante Avvia o comando start).",
+   "en": "Some functions stop working until you restart it (Start button or start command).",
+   "es": "Algunas funciones dejan de funcionar hasta que la reinicies (botón Iniciar o comando start).",
+   "de": "Einige Funktionen arbeiten nicht, bis du ihn neu startest (Start-Schaltfläche oder Befehl start).",
+   "scope": "web"
+  },
+  {
+   "it": "Altri GPIO (piazzole sotto la scheda o non collegati)",
+   "en": "Other GPIOs (pads under the board or not connected)",
+   "es": "Otros GPIO (pads bajo la placa o no conectados)",
+   "de": "Weitere GPIOs (Pads unter der Platine oder nicht verbunden)",
+   "scope": "web"
+  },
+  {
+   "it": "Altri file",
+   "en": "Other files",
+   "es": "Otros archivos",
+   "de": "Weitere Dateien",
+   "scope": "web"
+  },
+  {
+   "it": "Argomenti:",
+   "en": "Topics:",
+   "es": "Temas:",
+   "de": "Topics:",
+   "scope": "web"
+  },
+  {
+   "it": "Attiva modo aereo",
+   "en": "Turn on airplane mode",
+   "es": "Activar modo avión",
+   "de": "Flugmodus einschalten",
+   "scope": "web"
+  },
+  {
+   "it": "Attivare il modo aereo?",
+   "en": "Turn on airplane mode?",
+   "es": "¿Activar el modo avión?",
+   "de": "Flugmodus einschalten?",
+   "scope": "web"
+  },
+  {
+   "it": "Avvia",
+   "en": "Start",
+   "es": "Iniciar",
+   "de": "Starten",
+   "scope": "web"
+  },
+  {
+   "it": "Avviato, non collegato",
+   "en": "Started, not connected",
+   "es": "Iniciado, no conectado",
+   "de": "Gestartet, nicht verbunden",
+   "scope": "web"
+  },
+  {
+   "it": "Avvio automatico (parte all'accensione della scheda)",
+   "en": "Autostart (starts when the board powers on)",
+   "es": "Inicio automático (arranca al encender la placa)",
+   "de": "Autostart (startet beim Einschalten der Platine)",
+   "scope": "web"
+  },
+  {
+   "it": "Blocco degli accessi",
+   "en": "Access blocking",
+   "es": "Bloqueo de accesos",
+   "de": "Zugriffssperre",
+   "scope": "web"
+  },
+  {
+   "it": "Broker (indirizzo)",
+   "en": "Broker (address)",
+   "es": "Broker (dirección)",
+   "de": "Broker (Adresse)",
+   "scope": "web"
+  },
+  {
+   "it": "Chiudi la sessione su questo browser",
+   "en": "Close the session in this browser",
+   "es": "Cierra la sesión en este navegador",
+   "de": "Sitzung in diesem Browser beenden",
+   "scope": "web"
+  },
+  {
+   "it": "Collegato",
+   "en": "Connected",
+   "es": "Conectado",
+   "de": "Verbunden",
+   "scope": "web"
+  },
+  {
+   "it": "Come si riattiva la rete",
+   "en": "How the network comes back",
+   "es": "Cómo vuelve la red",
+   "de": "Wie das Netz zurückkehrt",
+   "scope": "web"
+  },
+  {
+   "it": "Dalla seriale:",
+   "en": "From serial:",
+   "es": "Desde el puerto serie:",
+   "de": "Seriell:",
+   "scope": "web"
+  },
+  {
+   "it": "Data",
+   "en": "Date",
+   "es": "Fecha",
+   "de": "Datum",
+   "scope": "web"
+  },
+  {
+   "it": "Disegno della scheda vista dall'alto, presa USB in alto. Confronta i numeri con la scritta stampata sulla tua scheda: alcune serie hanno un ordine diverso.",
+   "en": "Board seen from above, USB socket at the top. Compare the numbers with the print on your board: some batches use a different order.",
+   "es": "Placa vista desde arriba, conector USB arriba. Compara los números con lo impreso en tu placa: algunas series tienen otro orden.",
+   "de": "Platine von oben, USB-Buchse oben. Vergleiche die Nummern mit dem Aufdruck deiner Platine: manche Serien haben eine andere Reihenfolge.",
+   "scope": "web"
+  },
+  {
+   "it": "Dopo troppe password sbagliate dallo stesso indirizzo, la scheda lo blocca per un po'. Ogni nuovo blocco dura il doppio (massimo 1 ora). Anche troppe richieste senza accesso contano come errore.",
+   "en": "After too many wrong passwords from the same address, the board blocks it for a while. Each new block lasts twice as long (max 1 hour). Too many requests without login also count as errors.",
+   "es": "Tras demasiadas contraseñas erróneas desde la misma dirección, la placa la bloquea un rato. Cada nuevo bloqueo dura el doble (máx. 1 hora). Demasiadas peticiones sin acceso también cuentan como error.",
+   "de": "Nach zu vielen falschen Passwörtern von derselben Adresse sperrt die Platine sie eine Weile. Jede neue Sperre dauert doppelt so lange (max. 1 Stunde). Zu viele Anfragen ohne Anmeldung zählen ebenfalls als Fehler.",
+   "scope": "web"
+  },
+  {
+   "it": "Dopo un tempo",
+   "en": "After some time",
+   "es": "Tras un tiempo",
+   "de": "Nach einer Zeit",
+   "scope": "web"
+  },
+  {
+   "it": "Esci, riavvia o sleep",
+   "en": "Log out, restart or sleep",
+   "es": "Salir, reiniciar o sleep",
+   "de": "Abmelden, neu starten oder Sleep",
+   "scope": "web"
+  },
+  {
+   "it": "Fermare il task {0}?",
+   "en": "Stop task {0}?",
+   "es": "¿Detener la tarea {0}?",
+   "de": "Task {0} stoppen?",
+   "scope": "web"
+  },
+  {
+   "it": "Fermato",
+   "en": "Stopped",
+   "es": "Detenido",
+   "de": "Gestoppt",
+   "scope": "web"
+  },
+  {
+   "it": "Fermo",
+   "en": "Stopped",
+   "es": "Detenido",
+   "de": "Gestoppt",
+   "scope": "web"
+  },
+  {
+   "it": "Filtra (es. NET, errore)",
+   "en": "Filter (e.g. NET, error)",
+   "es": "Filtrar (ej. NET, error)",
+   "de": "Filtern (z. B. NET, Fehler)",
+   "scope": "web"
+  },
+  {
+   "it": "Fisso: solo a mano",
+   "en": "Fixed: only manually",
+   "es": "Fijo: solo a mano",
+   "de": "Fest: nur manuell",
+   "scope": "web"
+  },
+  {
+   "it": "Fuori da questa cartella",
+   "en": "Outside this folder",
+   "es": "Fuera de esta carpeta",
+   "de": "Außerhalb dieses Ordners",
+   "scope": "web"
+  },
+  {
+   "it": "Home Assistant: presenta la scheda da sola (sensori e pulsante Riavvia)",
+   "en": "Home Assistant: announce the board automatically (sensors and Restart button)",
+   "es": "Home Assistant: presentar la placa sola (sensores y botón Reiniciar)",
+   "de": "Home Assistant: Platine automatisch anmelden (Sensoren und Neustart-Schaltfläche)",
+   "scope": "web"
+  },
+  {
+   "it": "Il Wi-Fi si spegne subito e questa pagina non si raggiunge piu.",
+   "en": "Wi-Fi turns off immediately and this page can no longer be reached.",
+   "es": "El Wi-Fi se apaga enseguida y esta página ya no se puede alcanzar.",
+   "de": "WLAN schaltet sofort ab und diese Seite ist nicht mehr erreichbar.",
+   "scope": "web"
+  },
+  {
+   "it": "Imposta",
+   "en": "Set",
+   "es": "Ajustar",
+   "de": "Setzen",
+   "scope": "web"
+  },
+  {
+   "it": "Imposta a mano",
+   "en": "Set manually",
+   "es": "Ajustar a mano",
+   "de": "Manuell setzen",
+   "scope": "web"
+  },
+  {
+   "it": "Impostazioni MQTT",
+   "en": "MQTT settings",
+   "es": "Ajustes MQTT",
+   "de": "MQTT-Einstellungen",
+   "scope": "web"
+  },
+  {
+   "it": "Indirizzi bloccati o sospetti",
+   "en": "Blocked or suspicious addresses",
+   "es": "Direcciones bloqueadas o sospechosas",
+   "de": "Gesperrte oder verdächtige Adressen",
+   "scope": "web"
+  },
+  {
+   "it": "Indirizzo",
+   "en": "Address",
+   "es": "Dirección",
+   "de": "Adresse",
+   "scope": "web"
+  },
+  {
+   "it": "Inviati {0}, ricevuti {1}",
+   "en": "Sent {0}, received {1}",
+   "es": "Enviados {0}, recibidos {1}",
+   "de": "Gesendet {0}, empfangen {1}",
+   "scope": "web"
+  },
+  {
+   "it": "Invio dello stato ogni (secondi)",
+   "en": "Send status every (seconds)",
+   "es": "Enviar estado cada (segundos)",
+   "de": "Status senden alle (Sekunden)",
+   "scope": "web"
+  },
+  {
+   "it": "L'ora usa il fuso orario della scheda. Se la sincronizzazione NTP e attiva, alla prossima sincronizzazione l'ora torna quella della rete.",
+   "en": "The time uses the board's time zone. If NTP sync is on, the next sync sets the network time again.",
+   "es": "La hora usa la zona horaria de la placa. Si la sincronización NTP está activa, en la próxima vuelve la hora de la red.",
+   "de": "Die Uhrzeit nutzt die Zeitzone der Platine. Ist NTP aktiv, gilt nach der nächsten Synchronisierung wieder die Netzwerkzeit.",
+   "scope": "web"
+  },
+  {
+   "it": "La pagina resta irraggiungibile per qualche secondo.",
+   "en": "The page is unreachable for a few seconds.",
+   "es": "La página queda inaccesible unos segundos.",
+   "de": "Die Seite ist einige Sekunden nicht erreichbar.",
+   "scope": "web"
+  },
+  {
+   "it": "La pagina si ricarica da sola quando la scheda e pronta.",
+   "en": "The page reloads by itself when the board is ready.",
+   "es": "La página se recarga sola cuando la placa está lista.",
+   "de": "Die Seite lädt neu, wenn die Platine bereit ist.",
+   "scope": "web"
+  },
+  {
+   "it": "La rete torna {0}.",
+   "en": "The network comes back {0}.",
+   "es": "La red vuelve {0}.",
+   "de": "Das Netz kehrt zurück {0}.",
+   "scope": "web"
+  },
+  {
+   "it": "La rete torna {0}. Poi ricarica la pagina.",
+   "en": "The network comes back {0}. Then reload the page.",
+   "es": "La red vuelve {0}. Después recarga la página.",
+   "de": "Das Netz kehrt zurück {0}. Dann Seite neu laden.",
+   "scope": "web"
+  },
+  {
+   "it": "La scheda entra in sonno profondo: Wi-Fi e LED spenti, consuma pochissimo.",
+   "en": "The board goes into deep sleep: Wi-Fi and LED off, very low power.",
+   "es": "La placa entra en sueño profundo: Wi-Fi y LED apagados, consume muy poco.",
+   "de": "Die Platine geht in den Tiefschlaf: WLAN und LED aus, sehr geringer Verbrauch.",
+   "scope": "web"
+  },
+  {
+   "it": "La scheda riparte in pochi secondi",
+   "en": "The board restarts in a few seconds",
+   "es": "La placa se reinicia en pocos segundos",
+   "de": "Die Platine startet in wenigen Sekunden neu",
+   "scope": "web"
+  },
+  {
+   "it": "Le righe vengono cancellate dalla memoria della scheda. Se ti servono, prima premi Scarica.",
+   "en": "The lines are deleted from the board's memory. If you need them, press Download first.",
+   "es": "Las líneas se borran de la memoria de la placa. Si las necesitas, primero pulsa Descargar.",
+   "de": "Die Zeilen werden aus dem Speicher der Platine gelöscht. Falls nötig, zuerst Herunterladen drücken.",
+   "scope": "web"
+  },
+  {
+   "it": "Libero",
+   "en": "Free",
+   "es": "Libre",
+   "de": "Frei",
+   "scope": "web"
+  },
+  {
+   "it": "MQTT",
+   "en": "MQTT",
+   "es": "MQTT",
+   "de": "MQTT",
+   "scope": "web"
+  },
+  {
+   "it": "MQTT: invia \"{1}\" su {0}",
+   "en": "MQTT: send \"{1}\" on {0}",
+   "es": "MQTT: enviar \"{1}\" en {0}",
+   "de": "MQTT: \"{1}\" auf {0} senden",
+   "scope": "web"
+  },
+  {
+   "it": "MQTT: invia un messaggio",
+   "en": "MQTT: send a message",
+   "es": "MQTT: enviar un mensaje",
+   "de": "MQTT: Nachricht senden",
+   "scope": "web"
+  },
+  {
+   "it": "Messaggio di prova",
+   "en": "Test message",
+   "es": "Mensaje de prueba",
+   "de": "Testnachricht",
+   "scope": "web"
+  },
+  {
+   "it": "Messaggio inviato",
+   "en": "Message sent",
+   "es": "Mensaje enviado",
+   "de": "Nachricht gesendet",
+   "scope": "web"
+  },
+  {
+   "it": "Mettere la scheda in sleep?",
+   "en": "Put the board to sleep?",
+   "es": "¿Poner la placa en sleep?",
+   "de": "Platine in den Sleep versetzen?",
+   "scope": "web"
+  },
+  {
+   "it": "Modo aereo attivo",
+   "en": "Airplane mode on",
+   "es": "Modo avión activo",
+   "de": "Flugmodus an",
+   "scope": "web"
+  },
+  {
+   "it": "Nessuna sincronizzazione ancora",
+   "en": "No sync yet",
+   "es": "Aún sin sincronización",
+   "de": "Noch keine Synchronisierung",
+   "scope": "web"
+  },
+  {
+   "it": "Ogni 12 ore",
+   "en": "Every 12 hours",
+   "es": "Cada 12 horas",
+   "de": "Alle 12 Stunden",
+   "scope": "web"
+  },
+  {
+   "it": "Ogni 15 minuti",
+   "en": "Every 15 minutes",
+   "es": "Cada 15 minutos",
+   "de": "Alle 15 Minuten",
+   "scope": "web"
+  },
+  {
+   "it": "Ogni 6 ore",
+   "en": "Every 6 hours",
+   "es": "Cada 6 horas",
+   "de": "Alle 6 Stunden",
+   "scope": "web"
+  },
+  {
+   "it": "Ogni giorno",
+   "en": "Every day",
+   "es": "Cada día",
+   "de": "Täglich",
+   "scope": "web"
+  },
+  {
+   "it": "Ogni ora",
+   "en": "Every hour",
+   "es": "Cada hora",
+   "de": "Stündlich",
+   "scope": "web"
+  },
+  {
+   "it": "Ogni settimana",
+   "en": "Every week",
+   "es": "Cada semana",
+   "de": "Wöchentlich",
+   "scope": "web"
+  },
+  {
+   "it": "Orario",
+   "en": "Time",
+   "es": "Hora",
+   "de": "Uhrzeit",
+   "scope": "web"
+  },
+  {
+   "it": "Password (facoltativa)",
+   "en": "Password (optional)",
+   "es": "Contraseña (opcional)",
+   "de": "Passwort (optional)",
+   "scope": "web"
+  },
+  {
+   "it": "Password sbagliate prima del blocco",
+   "en": "Wrong passwords before blocking",
+   "es": "Contraseñas erróneas antes del bloqueo",
+   "de": "Falsche Passwörter vor der Sperre",
+   "scope": "web"
+  },
+  {
+   "it": "Per riaccenderla premi il tasto RESET sulla scheda (o togli e ridai corrente).",
+   "en": "To wake it up press the RESET button on the board (or unplug and replug power).",
+   "es": "Para encenderla pulsa el botón RESET de la placa (o quita y vuelve a dar corriente).",
+   "de": "Zum Aufwecken die RESET-Taste drücken (oder Strom aus und wieder an).",
+   "scope": "web"
+  },
+  {
+   "it": "Per tornare prima: airplane off dalla seriale o tasto BOOT.",
+   "en": "To come back earlier: airplane off from serial or BOOT button.",
+   "es": "Para volver antes: airplane off desde el serie o botón BOOT.",
+   "de": "Früher zurück: airplane off seriell oder BOOT-Taste.",
+   "scope": "web"
+  },
+  {
+   "it": "Porta",
+   "en": "Port",
+   "es": "Puerto",
+   "de": "Port",
+   "scope": "web"
+  },
+  {
+   "it": "Portale automatico",
+   "en": "Captive portal",
+   "es": "Portal automático",
+   "de": "Captive Portal",
+   "scope": "web"
+  },
+  {
+   "it": "Prefisso degli argomenti",
+   "en": "Topic prefix",
+   "es": "Prefijo de los temas",
+   "de": "Topic-Präfix",
+   "scope": "web"
+  },
+  {
+   "it": "Premi RESET sulla scheda, poi ricarica questa pagina.",
+   "en": "Press RESET on the board, then reload this page.",
+   "es": "Pulsa RESET en la placa y recarga esta página.",
+   "de": "RESET an der Platine drücken, dann diese Seite neu laden.",
+   "scope": "web"
+  },
+  {
+   "it": "Primo blocco (secondi)",
+   "en": "First block (seconds)",
+   "es": "Primer bloqueo (segundos)",
+   "de": "Erste Sperre (Sekunden)",
+   "scope": "web"
+  },
+  {
+   "it": "Quanto spesso sincronizzare",
+   "en": "How often to sync",
+   "es": "Cada cuánto sincronizar",
+   "de": "Wie oft synchronisieren",
+   "scope": "web"
+  },
+  {
+   "it": "Riavvia",
+   "en": "Restart",
+   "es": "Reiniciar",
+   "de": "Neu starten",
+   "scope": "web"
+  },
+  {
+   "it": "Ricarica",
+   "en": "Reload",
+   "es": "Recargar",
+   "de": "Neu laden",
+   "scope": "web"
+  },
+  {
+   "it": "Rilevato: {0} rev {1}, {2} core, {3} GPIO nel chip ({4} usabili come uscita). Scheda: {5}.",
+   "en": "Detected: {0} rev {1}, {2} cores, {3} GPIOs in the chip ({4} usable as output). Board: {5}.",
+   "es": "Detectado: {0} rev {1}, {2} núcleos, {3} GPIO en el chip ({4} usables como salida). Placa: {5}.",
+   "de": "Erkannt: {0} Rev {1}, {2} Kerne, {3} GPIOs im Chip ({4} als Ausgang nutzbar). Platine: {5}.",
+   "scope": "web"
+  },
+  {
+   "it": "Sblocca",
+   "en": "Unblock",
+   "es": "Desbloquear",
+   "de": "Entsperren",
+   "scope": "web"
+  },
+  {
+   "it": "Sblocca tutti",
+   "en": "Unblock all",
+   "es": "Desbloquear todas",
+   "de": "Alle entsperren",
+   "scope": "web"
+  },
+  {
+   "it": "Scarica SVG",
+   "en": "Download SVG",
+   "es": "Descargar SVG",
+   "de": "SVG herunterladen",
+   "scope": "web"
+  },
+  {
+   "it": "Scegli data e ora",
+   "en": "Choose date and time",
+   "es": "Elige fecha y hora",
+   "de": "Datum und Uhrzeit wählen",
+   "scope": "web"
+  },
+  {
+   "it": "Scegli l'orario",
+   "en": "Choose the time",
+   "es": "Elige la hora",
+   "de": "Uhrzeit wählen",
+   "scope": "web"
+  },
+  {
+   "it": "Scheda in sleep",
+   "en": "Board asleep",
+   "es": "Placa en sleep",
+   "de": "Platine im Sleep",
+   "scope": "web"
+  },
+  {
+   "it": "Si spegne sempre anche a mano: comando",
+   "en": "It can always be turned off manually: command",
+   "es": "Siempre se apaga también a mano: comando",
+   "de": "Lässt sich immer auch manuell beenden: Befehl",
+   "scope": "web"
+  },
+  {
+   "it": "Sincronizzazione spenta: ora a mano",
+   "en": "Sync off: manual time",
+   "es": "Sincronización apagada: hora a mano",
+   "de": "Synchronisierung aus: manuelle Zeit",
+   "scope": "web"
+  },
+  {
+   "it": "Sistema (struttura del disco)",
+   "en": "System (disk structure)",
+   "es": "Sistema (estructura del disco)",
+   "de": "System (Dateisystem-Struktur)",
+   "scope": "web"
+  },
+  {
+   "it": "Sleep",
+   "en": "Sleep",
+   "es": "Sleep",
+   "de": "Sleep",
+   "scope": "web"
+  },
+  {
+   "it": "Solo all'avvio",
+   "en": "Only at boot",
+   "es": "Solo al arrancar",
+   "de": "Nur beim Start",
+   "scope": "web"
+  },
+  {
+   "it": "Sonno profondo: si riaccende con RESET",
+   "en": "Deep sleep: wakes up with RESET",
+   "es": "Sueño profundo: se enciende con RESET",
+   "de": "Tiefschlaf: Aufwachen mit RESET",
+   "scope": "web"
+  },
+  {
+   "it": "Spazio: usati {0} su {1}",
+   "en": "Space: {0} of {1} used",
+   "es": "Espacio: usados {0} de {1}",
+   "de": "Speicher: {0} von {1} belegt",
+   "scope": "web"
+  },
+  {
+   "it": "Spegne il Wi-Fi della scheda. Le Automazioni continuano a funzionare. Mentre e attivo la pagina NON si raggiunge.",
+   "en": "Turns off the board's Wi-Fi. Automations keep working. While it is on, the page CANNOT be reached.",
+   "es": "Apaga el Wi-Fi de la placa. Las Automatizaciones siguen funcionando. Mientras está activo la página NO se alcanza.",
+   "de": "Schaltet das WLAN der Platine aus. Automationen laufen weiter. Solange er aktiv ist, ist die Seite NICHT erreichbar.",
+   "scope": "web"
+  },
+  {
+   "it": "Spento: la rete funziona",
+   "en": "Off: network working",
+   "es": "Apagado: la red funciona",
+   "de": "Aus: Netz funktioniert",
+   "scope": "web"
+  },
+  {
+   "it": "Svuotare il registro?",
+   "en": "Clear the log?",
+   "es": "¿Vaciar el registro?",
+   "de": "Log leeren?",
+   "scope": "web"
+  },
+  {
+   "it": "Task '{0}' avviato",
+   "en": "Task '{0}' started",
+   "es": "Tarea '{0}' iniciada",
+   "de": "Task '{0}' gestartet",
+   "scope": "web"
+  },
+  {
+   "it": "Tempo minimo 10 secondi",
+   "en": "Minimum time 10 seconds",
+   "es": "Tiempo mínimo 10 segundos",
+   "de": "Mindestzeit 10 Sekunden",
+   "scope": "web"
+  },
+  {
+   "it": "Tocca un pin verde per provarlo. Blu = pin in uso (la linea porta a chi lo usa), grigio = vietato.",
+   "en": "Tap a green pin to test it. Blue = pin in use (the line leads to its user), grey = forbidden.",
+   "es": "Toca un pin verde para probarlo. Azul = pin en uso (la línea lleva a quien lo usa), gris = prohibido.",
+   "de": "Tippe auf einen grünen Pin zum Testen. Blau = belegt (die Linie führt zum Nutzer), grau = verboten.",
+   "scope": "web"
+  },
+  {
+   "it": "Ultima sincronizzazione: {0}",
+   "en": "Last sync: {0}",
+   "es": "Última sincronización: {0}",
+   "de": "Letzte Synchronisierung: {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Unita",
+   "en": "Unit",
+   "es": "Unidad",
+   "de": "Einheit",
+   "scope": "web"
+  },
+  {
+   "it": "Utente (facoltativo)",
+   "en": "User (optional)",
+   "es": "Usuario (opcional)",
+   "de": "Benutzer (optional)",
+   "scope": "web"
+  },
+  {
+   "it": "airplane off",
+   "en": "airplane off",
+   "es": "airplane off",
+   "de": "airplane off",
+   "scope": "web"
+  },
+  {
+   "it": "alle {0}",
+   "en": "at {0}",
+   "es": "a las {0}",
+   "de": "um {0}",
+   "scope": "web"
+  },
+  {
+   "it": "argomento",
+   "en": "topic",
+   "es": "tema",
+   "de": "Topic",
+   "scope": "web"
+  },
+  {
+   "it": "attivo fino al prossimo avvio",
+   "en": "on until the next start",
+   "es": "activo hasta el próximo arranque",
+   "de": "an bis zum nächsten Start",
+   "scope": "web"
+  },
+  {
+   "it": "attivo per 1 ora",
+   "en": "on for 1 hour",
+   "es": "activo durante 1 hora",
+   "de": "1 Stunde an",
+   "scope": "web"
+  },
+  {
+   "it": "attivo per 10 minuti",
+   "en": "on for 10 minutes",
+   "es": "activo durante 10 minutos",
+   "de": "10 Minuten an",
+   "scope": "web"
+  },
+  {
+   "it": "attivo, si spegne solo a mano",
+   "en": "on, turned off only manually",
+   "es": "activo, se apaga solo a mano",
+   "de": "an, nur manuell aus",
+   "scope": "web"
+  },
+  {
+   "it": "ban",
+   "en": "ban",
+   "es": "ban",
+   "de": "ban",
+   "scope": "web"
+  },
+  {
+   "it": "bloccato ancora {0}",
+   "en": "blocked for {0} more",
+   "es": "bloqueada {0} más",
+   "de": "noch {0} gesperrt",
+   "scope": "web"
+  },
+  {
+   "it": "dalla seriale (USB) oppure pressione breve del tasto BOOT.",
+   "en": "from serial (USB) or a short press of the BOOT button.",
+   "es": "desde el serie (USB) o pulsación corta del botón BOOT.",
+   "de": "seriell (USB) oder kurzer Druck auf die BOOT-Taste.",
+   "scope": "web"
+  },
+  {
+   "it": "dopo {0}",
+   "en": "after {0}",
+   "es": "tras {0}",
+   "de": "nach {0}",
+   "scope": "web"
+  },
+  {
+   "it": "es. 192.168.1.10 o broker.casa.lan",
+   "en": "e.g. 192.168.1.10 or broker.home.lan",
+   "es": "ej. 192.168.1.10 o broker.casa.lan",
+   "de": "z. B. 192.168.1.10 oder broker.home.lan",
+   "scope": "web"
+  },
+  {
+   "it": "in prova",
+   "en": "testing",
+   "es": "en prueba",
+   "de": "im Test",
+   "scope": "web"
+  },
+  {
+   "it": "in uso",
+   "en": "in use",
+   "es": "en uso",
+   "de": "belegt",
+   "scope": "web"
+  },
+  {
+   "it": "modo aereo: {0}",
+   "en": "airplane mode: {0}",
+   "es": "modo avión: {0}",
+   "de": "Flugmodus: {0}",
+   "scope": "web"
+  },
+  {
+   "it": "mostra l'elenco,",
+   "en": "shows the list,",
+   "es": "muestra la lista,",
+   "de": "zeigt die Liste,",
+   "scope": "web"
+  },
+  {
+   "it": "provabile",
+   "en": "testable",
+   "es": "se puede probar",
+   "de": "testbar",
+   "scope": "web"
+  },
+  {
+   "it": "sblocca tutti.",
+   "en": "unblocks all.",
+   "es": "desbloquea todas.",
+   "de": "entsperrt alle.",
+   "scope": "web"
+  },
+  {
+   "it": "spento (rete accesa)",
+   "en": "off (network on)",
+   "es": "apagado (red encendida)",
+   "de": "aus (Netz an)",
+   "scope": "web"
+  },
+  {
+   "it": "testo",
+   "en": "text",
+   "es": "texto",
+   "de": "Text",
+   "scope": "web"
+  },
+  {
+   "it": "unban all",
+   "en": "unban all",
+   "es": "unban all",
+   "de": "unban all",
+   "scope": "web"
+  },
+  {
+   "it": "usato",
+   "en": "used",
+   "es": "usado",
+   "de": "belegt",
+   "scope": "web"
+  },
+  {
+   "it": "vietato",
+   "en": "forbidden",
+   "es": "prohibido",
+   "de": "verboten",
+   "scope": "web"
+  },
+  {
+   "it": "{0} errori",
+   "en": "{0} errors",
+   "es": "{0} errores",
+   "de": "{0} Fehler",
+   "scope": "web"
+  },
+  {
+   "it": "{0} righe",
+   "en": "{0} lines",
+   "es": "{0} líneas",
+   "de": "{0} Zeilen",
+   "scope": "web"
+  },
+  {
+   "it": "{0} righe su {1}",
+   "en": "{0} of {1} lines",
+   "es": "{0} de {1} líneas",
+   "de": "{0} von {1} Zeilen",
    "scope": "web"
   }
  ]

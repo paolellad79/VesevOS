@@ -33,6 +33,23 @@ static bool okPath(const String& raw, String& p, String& err) {
   return true;
 }
 
+// dimensione di una cartella (somma dei file dentro, fino a 8 livelli)
+static size_t dirSize(const String& p, int depth) {
+  if (depth > 8) return 0;
+  File d = LittleFS.open(p);
+  if (!d || !d.isDirectory()) return 0;
+  size_t t = 0;
+  File c = d.openNextFile();
+  while (c) {
+    if (c.isDirectory()) {
+      String nm = String(c.name()); int sl = nm.lastIndexOf('/'); if (sl >= 0) nm = nm.substring(sl + 1);
+      t += dirSize((p == "/") ? "/" + nm : p + "/" + nm, depth + 1);
+    } else t += c.size();
+    c = d.openNextFile();
+  }
+  return t;
+}
+
 String fsListJson(const String& raw) {
   String p = fsClean(raw);
   if (p.length() == 0) return String("{\"ok\":false,\"err\":\"") + jsonEscape(tr("Percorso non valido")) + "\"}";
@@ -50,7 +67,7 @@ String fsListJson(const String& raw) {
       if (!first) j += ",";
       first = false;
       j += "{\"n\":\"" + jsonEscape(name) + "\",\"d\":" + String(f.isDirectory() ? "true" : "false") +
-           ",\"s\":" + String((unsigned long)f.size()) + "}";
+           ",\"s\":" + String((unsigned long)(f.isDirectory() ? dirSize(full, 1) : f.size())) + "}";
     }
     f = d.openNextFile();
   }

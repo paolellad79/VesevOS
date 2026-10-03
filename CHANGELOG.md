@@ -1,5 +1,27 @@
 # Cronologia delle versioni
 
+## 1.7.0 (3 ottobre 2026)
+- **MQTT** (Rete > MQTT): la scheda invia il suo stato (CPU, temperatura, RAM, segnale, IP...) a un broker e riceve comandi
+  sull'argomento `<prefisso>/cmd` (le stesse azioni delle Automazioni: `led-color ff0000`, `gpio 4 1`, `reboot`...), con risposta su `cmd/result`.
+  Messaggio online/offline, Home Assistant la riconosce da solo (sensori e pulsante Riavvia). E un servizio: avvio automatico o a mano,
+  compare in Ordine di avvio e nel tab Task (Ferma / Riavvia). Shell `mqtt [status|start|stop|restart|pub]`, azione "MQTT: invia un messaggio" nelle Automazioni.
+  Usa il client MQTT gia dentro il core ESP32: nessuna libreria in piu.
+- **Modo aereo** (Rete > Modo aereo): spegne il Wi-Fi, le Automazioni continuano. Si sceglie come riaccendere la rete: al prossimo avvio,
+  dopo un tempo, a un orario oppure solo a mano. Sempre: `airplane off` dalla seriale o pressione breve del tasto BOOT. LED viola. Anche nelle Automazioni.
+- **Portale automatico**: in modalita hotspot, collegandoti alla rete della scheda la pagina si apre da sola (Android, iPhone, Windows, Mac).
+- **Blocco degli accessi** (Sicurezza): dopo N password sbagliate dallo stesso indirizzo IP la scheda lo blocca; ogni blocco dura il doppio (max 1 ora).
+  Troppe richieste senza accesso contano come errore. Elenco degli indirizzi, sblocco dalla pagina o dalla seriale (`ban`, `unban all`).
+- **Pin**: rilevamento automatico del chip (modello, revisione, numero di GPIO) e schema SVG della scheda vista dall'alto, con pin colorati e cliccabili,
+  linee verso chi usa un pin e pulsante Scarica SVG.
+- **Task**: pulsante Riavvia accanto a Ferma; un task fermato resta in elenco con il pulsante Avvia. Shell `start <nome>`.
+- **Registro (Log)**: scheda propria in Sistema, aggiornamento automatico, filtro, righe colorate, Scarica e Svuota. Fino a 150 righe con data e ora vere.
+- **Ora**: data e ora a mano (anche `date set AAAA-MM-GG HH:MM`) e frequenza della sincronizzazione NTP (15 minuti ... ogni settimana, oppure solo all'avvio).
+- **Menu del tasto in alto a destra**: Esci, Riavvia, Sleep (sonno profondo: si riaccende con RESET), con icone. Shell `sleep`.
+- **File**: grafico a torta dello spazio (file della cartella, sistema, libero); le cartelle mostrano la loro dimensione.
+- Tolto il LED aggiuntivo (pagina, shell, configurazione); le regole vecchie con `led2` vengono ignorate senza errore.
+- Il MAC si vede senza pulsante copia.
+- Corretto: nella 1.6.1 lo stile del pulsante copia rovinava il pannello del terminale.
+
 ## 1.6.1 (3 ottobre 2026)
 - **Indirizzo MAC**: si vedono il MAC Wi-Fi (client) e quello del punto di accesso nella Home, in Rete > Indirizzo IP e in Rete > Punto di accesso.
   Un tocco lo copia. Il MAC si legge dal chip, quindi c'e anche con il Wi-Fi spento. Nuovi comandi shell `net` (rete leggibile) e `info` (riassunto della scheda).

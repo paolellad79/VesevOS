@@ -9,6 +9,7 @@
 #include "vos_auth.h"
 #include "vos_sys.h"
 #include "vos_net.h"
+#include "vos_mqtt.h"
 #include "vos_led.h"
 #include "vos_pins.h"
 #include "vos_util.h"
@@ -56,6 +57,7 @@ static void cmdHelp(Print& o) {
   o.println(tr("  top             CPU, RAM, temperatura"));
   o.println(tr("  ps              elenco task"));
   o.println(tr("  kill <nome>     ferma un task (solo quelli consentiti, vedi ps)"));
+  o.println(tr("  start <nome>    avvia o riavvia un task fermato (restart = uguale)"));
   o.println(tr("  rules [run <n>] automazioni: elenco, oppure esegui la regola n"));
   o.println(tr("  boot-order [lista|reset]  ordine di avvio dei servizi"));
   o.println(tr("  ls [cartella]   elenco file (flash)"));
@@ -65,8 +67,8 @@ static void cmdHelp(Print& o) {
   o.println(tr("  mv <da> <a>     sposta o rinomina"));
   o.println(tr("  cp <da> <a>     copia un file"));
   o.println(tr("  write <file> <testo>   scrive un file di testo"));
-  o.println(tr("  date            data e ora"));
-  o.println(tr("  ntp [sync]      stato NTP / risincronizza"));
+  o.println(tr("  date [set AAAA-MM-GG HH:MM]  data e ora (mostra o imposta)"));
+  o.println(tr("  ntp [sync|every <min>]  stato NTP / risincronizza / frequenza"));
   o.println(tr("  cpu [auto|80|160|240]  velocita CPU"));
   o.println(tr("  hostname [nome] mostra o cambia il nome host"));
   o.println(tr("  domain [nome|-] mostra, cambia o toglie il dominio"));
@@ -75,23 +77,24 @@ static void cmdHelp(Print& o) {
   o.println(tr("  ip              rete e indirizzo"));
   o.println(tr("  wifi            stato wi-fi"));
   o.println(tr("  wifi-scan       cerca reti"));
+  o.println(tr("  mqtt [start|stop|restart|pub]  servizio MQTT"));
+  o.println(tr("  airplane [on <come>|off]  modalita aereo (come: boot, 30s, 10m, 2h, 07:30, fisso)"));
   o.println(tr("  led <modo>      state|heartbeat|fixed|off"));
   o.println(tr("  led-color <RRGGBB>   colore (esadecimale)"));
   o.println(tr("  led-bright <0-255>   luminosita"));
-  o.println(tr("  led2 <modo>     LED aggiuntivo: off|on|heartbeat"));
-  o.println(tr("  led2-pin <n>    pin del LED aggiuntivo"));
-  o.println(tr("  led2-bright <0-255>  luminosita LED aggiuntivo"));
-  o.println(tr("  led2-invert on|off   on = si accende con livello basso"));
   o.println(tr("  lang [codice]   mostra o cambia la lingua (it, en, ...)"));
   o.println(tr("  license [id]    note legali e licenze (notice, gpl3, lgpl3, lgpl21, apache2)"));
   o.println(tr("  pins            pin usati"));
   o.println(tr("  pin <n> [high|low|blink|read [up|down]|off]  prova un pin (si spegne da solo)"));
   o.println(tr("  config          mostra configurazione (senza password)"));
   o.println(tr("  passwd <nuova>  cambia password (min 6 caratteri)"));
+  o.println(tr("  ban             indirizzi bloccati o sospetti"));
+  o.println(tr("  unban <ip|all>  sblocca un indirizzo (o tutti)"));
   o.println(tr("  logout          esce (solo seriale)"));
-  o.println(tr("  log             ultime righe di log"));
+  o.println(tr("  log [n|clear]   ultime righe del registro (n righe) o svuota"));
   o.println(tr("  factory-reset   azzera tutto (poi riavvia)"));
   o.println(tr("  reboot          riavvia"));
+  o.println(tr("  sleep           sonno profondo (si riaccende con RESET)"));
 }
 
 static String hex6(uint32_t c) {
@@ -144,7 +147,13 @@ void shellExec(const String& lineIn, Print& o, bool authed) {
   else if (c == "kill") {
     String err;
     if (a1.length() == 0) o.println(tr("Uso: kill <nome task>"));
-    else if (sysTaskKill(a1, err)) o.println(trf("Task '%s' fermato (riparte al riavvio)", a1.c_str()));
+    else if (sysTaskKill(a1, err)) o.println(trf("Task '%s' fermato (start %s per farlo ripartire)", a1.c_str(), a1.c_str()));
+    else o.println(err);
+  }
+  else if (c == "start" || c == "restart") {
+    String err;
+    if (a1.length() == 0) o.println(tr("Uso: start <nome task>  /  restart <nome task>"));
+    else if (sysTaskRestart(a1, err)) o.println(trf("Task '%s' avviato", a1.c_str()));
     else o.println(err);
   }
   else if (c == "rules") {
@@ -218,9 +227,17 @@ void shellExec(const String& lineIn, Print& o, bool authed) {
     if (!a1.length()) { o.println(tr("Uso: write <file> <testo>")); return; }
     o.println(fsWriteText(a1, txt, err) ? String(tr("Scritto")) : err);
   }
-  else if (c == "date") o.println(timeNowStr() + "  (" + cfg.tzName + ")");
+  else if (c == "date") {
+    if (a1 == "set") { String err; if (timeSetLocal(restFrom(line, 2), err)) o.println(timeNowStr()); else o.println(err); }
+    else o.println(timeNowStr() + "  (" + cfg.tzName + ")");
+  }
   else if (c == "ntp") {
     if (a1 == "sync") { timeApply(); o.println(tr("Sincronizzazione NTP richiesta")); }
+    else if (a1 == "every") {
+      long m = argAt(line, 2).toInt();
+      if (!argAt(line, 2).length() || !timeEveryValid(m)) { o.println(tr("Uso: ntp every 0|15|60|360|720|1440|10080  (minuti, 0 = solo all'avvio)")); return; }
+      cfg.ntpEvery = m; cfgSave(); timeApply(); o.println(trf("Sincronizzazione NTP ogni %ld minuti", m));
+    }
     else o.println(timeJson());
   }
   else if (c == "cpu") {
@@ -263,34 +280,6 @@ void shellExec(const String& lineIn, Print& o, bool authed) {
     int v = a1.toInt();
     if (!a1.length() || v < 0 || v > 255) { o.println(tr("Uso: led-bright 0-255")); return; }
     cfg.ledBrightness = v; cfgSave(); o.println(trf("Luminosita: %d", v));
-  }
-  else if (c == "led2") {
-    if (a1 == "off") cfg.led2Mode = 0;
-    else if (a1 == "on") cfg.led2Mode = 1;
-    else if (a1 == "heartbeat") cfg.led2Mode = 2;
-    else {
-      const char* md[] = {"off", "on", "heartbeat"};
-      o.println(trf("Stato: %s, pin %u, luminosita %u, livello %s", md[cfg.led2Mode < 3 ? cfg.led2Mode : 0], (unsigned)cfg.led2Pin, (unsigned)cfg.led2Bright, cfg.led2Invert ? tr("BASSO (invertito)") : tr("alto (normale)")));
-      o.println(tr("Uso: led2 off|on|heartbeat   (led2-pin <n>, led2-bright <0-255>, led2-invert on|off)"));
-      return;
-    }
-    ledApplyConfig(); cfgSave(); o.println(trf("LED aggiuntivo: %s (pin %u)", a1.c_str(), (unsigned)cfg.led2Pin));
-  }
-  else if (c == "led2-invert") {
-    if (a1 != "on" && a1 != "off") { o.println(tr("Uso: led2-invert on|off   (on = si accende con livello basso)")); return; }
-    cfg.led2Invert = (a1 == "on"); ledApplyConfig(); cfgSave();
-    o.println(trf("Livello LED aggiuntivo: %s", cfg.led2Invert ? tr("BASSO (invertito)") : tr("alto (normale)")));
-  }
-  else if (c == "led2-pin") {
-    int p = a1.toInt();
-    if (!a1.length() || !led2PinAllowed(p)) { o.println(tr("Pin non ammesso (usa 1-18, 21 oppure 38-47)")); return; }
-    if (p != cfg.led2Pin && pinIsUsed(p)) { o.println(tr("Pin gia usato da altro")); return; }
-    cfg.led2Pin = p; ledApplyConfig(); cfgSave(); o.println(trf("Pin LED aggiuntivo: %d", p));
-  }
-  else if (c == "led2-bright") {
-    int v = a1.toInt();
-    if (!a1.length() || v < 0 || v > 255) { o.println(tr("Uso: led2-bright 0-255")); return; }
-    cfg.led2Bright = v; cfgSave(); o.println(trf("Luminosita LED aggiuntivo: %d", v));
   }
   else if (c == "hostname") {
     if (!a1.length()) { o.println(cfg.hostname); return; }
@@ -355,11 +344,43 @@ void shellExec(const String& lineIn, Print& o, bool authed) {
     serialAuthSet(true);
     o.println(tr("Password cambiata"));
   }
-  else if (c == "log") o.print(logGet(30));
+  else if (c == "log") { if (a1 == "clear") { logClear(); o.println(tr("Registro svuotato")); } else o.print(logGet(a1.length() ? constrain((int)a1.toInt(), 1, 150) : 30)); }
   else if (c == "factory-reset") {
     o.println(tr("Azzero tutto e riavvio..."));
     cfgFactoryReset(); delay(300); ESP.restart();
   }
+  else if (c == "airplane" || c == "aereo") {
+    if (a1 == "off") { netAirplaneOff("dalla shell"); o.println(tr("Modalita aereo spenta: la rete riparte")); }
+    else if (a1 == "on") {
+      String m = argAt(line, 2); m.toLowerCase();
+      int ex = 0; uint32_t par = 0;
+      if (m == "" || m == "boot") ex = 0;
+      else if (m == "fisso" || m == "fixed" || m == "manual") ex = 3;
+      else if (m.indexOf(':') > 0) { int h = m.toInt(), mi = m.substring(m.indexOf(':') + 1).toInt(); ex = 2; par = (h >= 0 && h < 24 && mi >= 0 && mi < 60) ? h * 60 + mi : 9999; }
+      else { long n = m.toInt(); char u = m[m.length() - 1]; ex = 1; par = (u == 'm') ? n * 60 : (u == 'h') ? n * 3600 : n; }
+      String err;
+      if (netAirplaneOn(ex, par, err)) o.println(netAirplaneText()); else o.println(err);
+    }
+    else if (a1 == "") o.println(netAirplaneText());
+    else o.println(tr("Uso: airplane on [boot|<N>s|<N>m|<N>h|HH:MM|fisso]  /  airplane off"));
+  }
+  else if (c == "mqtt") {
+    if (a1 == "start" || a1 == "restart") { if (!cfg.mqttHost.length()) { o.println(tr("Manca l'indirizzo del broker")); return; } mqttStart(); o.println(tr("MQTT avviato")); }
+    else if (a1 == "stop") { mqttStop(); o.println(tr("MQTT fermato")); }
+    else if (a1 == "pub") {
+      String tp = argAt(line, 2), msg = restFrom(line, 3);
+      if (!tp.length()) { o.println(tr("Uso: mqtt pub <argomento> <testo>")); return; }
+      o.println(mqttPublishRel(tp, msg) ? tr("Inviato") : tr("MQTT non collegato"));
+    }
+    else if (a1 == "" || a1 == "status") o.print(mqttStatusText());
+    else o.println(tr("Uso: mqtt [status|start|stop|restart|pub <argomento> <testo>]"));
+  }
+  else if (c == "ban") o.print(authBanText());
+  else if (c == "unban") {
+    if (!a1.length()) { o.println(tr("Uso: unban <indirizzo IP> | unban all")); return; }
+    o.println(authUnban(a1) ? tr("Sbloccato") : tr("Indirizzo non trovato"));
+  }
+  else if (c == "sleep") { o.println(tr("Sonno profondo: si riaccende con il tasto RESET")); delay(300); sysSleep(); }
   else if (c == "reboot") { o.println(tr("Riavvio...")); delay(300); ESP.restart(); }
   else o.println(tr("Comando sconosciuto. Scrivi 'help'."));
 }

@@ -38,7 +38,11 @@ static void resetPasswordIfBootHeld() {
       since = 0;
       ledSetFault(true); delay(1500); ledSetFault(false);
     }
-  } else since = 0;
+  } else {
+    // pressione breve (da 50 ms a 2 s): spegne la modalita aereo
+    if (since && millis() - since >= 50 && millis() - since < 2000 && netAirplane()) netAirplaneOff("tasto BOOT");
+    since = 0;
+  }
 }
 
 void setup() {
@@ -48,7 +52,7 @@ void setup() {
   vlog("%s %s in avvio", VOS_NAME, VOS_VERSION);
   pinsInit();
   pinMode(VOS_PIN_BOOT, INPUT_PULLUP);
-  pinClaim(VOS_PIN_BOOT, "Sistema", "Pulsante BOOT (8 s = reset password)", true);
+  pinClaim(VOS_PIN_BOOT, "Sistema", "Pulsante BOOT (breve = esce dal modo aereo, 8 s = reset password)", true);
 
   if (!LittleFS.begin(true)) { vlog("FS: LittleFS non parte"); }
   if (!cfgLoad()) { vlog("CFG: nessun file, uso i valori iniziali"); cfgSave(); }

@@ -6,8 +6,9 @@
 #include <Arduino.h>
 
 #define VOS_NAME     "VesevOS"
-#define VOS_VERSION  "1.6.1"
+#define VOS_VERSION  "1.7.0"
 #define VOS_GITHUB   "https://github.com/paolellad79/VesevOS"
+#define VOS_BOARD    "ESP32-S3 SuperMini"   // scheda (tabella dei piedini nella pagina)
 
 // Pin predefiniti per ESP32-S3 SuperMini
 #define VOS_PIN_LED_RGB   48   // LED WS2812 integrato
@@ -18,7 +19,8 @@ enum NetState : uint8_t {
   NET_BOOT = 0,
   NET_AP,
   NET_CLIENT_TRY,
-  NET_CLIENT_OK
+  NET_CLIENT_OK,
+  NET_AIR          // modalita aereo: radio spenta
 };
 
 // Modalita del LED

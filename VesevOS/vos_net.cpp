@@ -11,6 +11,8 @@
 #include <WiFi.h>
 #include <ESPmDNS.h>
 #include <esp_mac.h>
+#include <DNSServer.h>
+#include <time.h>
 
 static volatile NetState g_state = NET_BOOT;
 static volatile bool g_reconf = true;
@@ -24,13 +26,88 @@ void netScanStart() { g_scanReq = true; }
 
 static void setState(NetState s) { g_state = s; ledSetNetState(s); }
 
+// ---- portale automatico (captive portal): in modo AP ogni nome DNS punta alla scheda ----
+static DNSServer* g_dns = nullptr;
+static void dnsStart() {
+  if (g_dns) return;
+  g_dns = new DNSServer();
+  g_dns->setErrorReplyCode(DNSReplyCode::NoError);
+  if (g_dns->start(53, "*", IPAddress(192, 168, 4, 1))) vlog("NET: portale automatico attivo");
+  else { delete g_dns; g_dns = nullptr; }
+}
+static void dnsStop() {
+  if (!g_dns) return;
+  g_dns->stop(); delete g_dns; g_dns = nullptr;
+}
+bool netCaptive() { return g_dns != nullptr; }
+
+// ---- modalita aereo ----
+static volatile bool g_airReq = false, g_airOffReq = false;
+bool netAirplane() { return cfg.airOn; }
+
+bool netAirplaneOn(int ex, uint32_t param, String& err) {
+  if (ex < 0 || ex > 3) { err = tr("Modo di uscita non valido"); return false; }
+  if (ex == 1 && (param < 10 || param > 7UL * 86400UL)) { err = tr("Tempo da 10 secondi a 7 giorni"); return false; }
+  if (ex == 2 && param > 1439) { err = tr("Orario non valido"); return false; }
+  cfg.airExit = ex; cfg.airAt = (ex == 2) ? param : 0;
+  time_t now = time(NULL);
+  cfg.airUntil = (ex == 1) ? (now > 1700000000 ? (uint32_t)now + param : (uint32_t)(millis() / 1000) + param) : 0;
+  cfg.airOn = 1;
+  cfgSave();
+  g_airReq = true;
+  static const char* const EX[] = {"al prossimo avvio", "dopo un tempo", "a un orario", "solo a mano"};
+  vlog("NET: modalita aereo ATTIVA (riattivazione: %s)", EX[ex]);
+  return true;
+}
+
+void netAirplaneOff(const char* why) {
+  if (!cfg.airOn) return;
+  cfg.airOn = 0; cfgSave();
+  g_airOffReq = true;
+  vlog("NET: modalita aereo spenta (%s)", why);
+}
+
+String netAirplaneText() {
+  if (!cfg.airOn) return tr("Modalita aereo: spenta");
+  String w;
+  if (cfg.airExit == 0) w = tr("al prossimo avvio");
+  else if (cfg.airExit == 1) {
+    time_t now = time(NULL);
+    long left = (cfg.airUntil > 1700000000UL) ? (long)cfg.airUntil - (long)now : (long)cfg.airUntil - (long)(millis() / 1000);
+    w = trf("tra %ld s", left < 0 ? 0L : left);
+  } else if (cfg.airExit == 2) { char b[8]; snprintf(b, sizeof(b), "%02u:%02u", cfg.airAt / 60, cfg.airAt % 60); w = trf("alle %s", b); }
+  else w = tr("solo a mano");
+  return trf("Modalita aereo: ATTIVA (si riattiva %s; sempre: 'airplane off' dalla seriale o tasto BOOT)", w.c_str());
+}
+
+// controllo ogni secondo: e ora di riaccendere?
+static void airCheck() {
+  if (!cfg.airOn) return;
+  time_t now = time(NULL);
+  if (cfg.airExit == 1) {
+    bool due = (cfg.airUntil > 1700000000UL) ? ((uint32_t)now >= cfg.airUntil) : ((uint32_t)(millis() / 1000) >= cfg.airUntil);
+    if (due) netAirplaneOff("tempo scaduto");
+  } else if (cfg.airExit == 2 && now > 1700000000) {
+    struct tm t; localtime_r(&now, &t);
+    if ((uint16_t)(t.tm_hour * 60 + t.tm_min) == cfg.airAt) netAirplaneOff("orario raggiunto");
+  }
+}
+
+static void airEnter() {
+  dnsStop();
+  MDNS.end();
+  WiFi.disconnect(true);
+  WiFi.mode(WIFI_OFF);
+  setState(NET_AIR);
+}
+
 String netIpString() {
   if (g_state == NET_AP) return WiFi.softAPIP().toString();   // anche durante la scansione (modo AP+STA)
   return WiFi.localIP().toString();
 }
 
 String netStatusJson() {
-  String mode = (g_state == NET_AP) ? String("AP") : (g_state == NET_CLIENT_OK ? String("Client") : (g_state == NET_CLIENT_TRY ? String(tr("Connessione...")) : String(tr("Avvio"))));
+  String mode = (g_state == NET_AIR) ? String(tr("Modo aereo")) : (g_state == NET_AP) ? String("AP") : (g_state == NET_CLIENT_OK ? String("Client") : (g_state == NET_CLIENT_TRY ? String(tr("Connessione...")) : String(tr("Avvio"))));
   String j = "{\"mode\":\"" + mode + "\"";
   j += ",\"ip\":\"" + netIpString() + "\"";
   j += ",\"host\":\"" + jsonEscape(cfg.hostname) + "\"";
@@ -51,6 +128,8 @@ String netStatusJson() {
   j += ",\"gw\":\"" + gw + "\",\"mask\":\"" + mk + "\",\"dns\":\"" + d1 + "\",\"dns2\":\"" + d2 + "\"";
   j += ",\"ch\":" + String((int)WiFi.channel());
   if (g_state == NET_AP) j += ",\"clients\":" + String((int)WiFi.softAPgetStationNum());
+  j += ",\"captive\":" + String(g_dns ? "true" : "false") + ",\"air\":" + String(cfg.airOn ? "true" : "false") +
+       ",\"airExit\":" + String(cfg.airExit) + ",\"airAt\":" + String(cfg.airAt);
   j += ",\"mac\":\"" + netMac(false) + "\",\"apMac\":\"" + netMac(true) + "\"";
   j += "}";
   return j;
@@ -92,6 +171,7 @@ static void startAp() {
   WiFi.softAP(cfg.apSsid.c_str(), cfg.apPass.c_str());
   setState(NET_AP);
   vlog("NET: AP '%s' su 192.168.4.1", cfg.apSsid.c_str());
+  dnsStart();
 }
 
 static bool applyStaticIp() {
@@ -108,6 +188,7 @@ static bool applyStaticIp() {
 }
 
 static bool tryClient() {
+  dnsStop();
   setState(NET_CLIENT_TRY);
   WiFi.disconnect(true);
   delay(200);
@@ -147,7 +228,14 @@ static void doScan() {
 
 static void netTask(void*) {
   int fails = 0;
+  if (cfg.airOn && cfg.airExit == 0) netAirplaneOff("nuovo avvio");   // "al prossimo avvio"
   for (;;) {
+    if (g_airOffReq) { g_airOffReq = false; g_reconf = true; }
+    if (g_airReq || (cfg.airOn && g_state != NET_AIR)) {
+      g_airReq = false;
+      if (cfg.airOn) { airEnter(); webStart(); }
+    }
+    if (cfg.airOn) { airCheck(); vTaskDelay(pdMS_TO_TICKS(1000)); continue; }
     if (g_reconf) {
       g_reconf = false; fails = 0;
       if (cfg.staEnabled && cfg.staSsid.length()) {
@@ -166,6 +254,7 @@ static void netTask(void*) {
       if (WiFi.status() == WL_CONNECTED) setState(NET_CLIENT_OK);
       else if (++fails >= 60) { fails = 0; vlog("NET: troppi tentativi, torno in AP"); startAp(); }
     } else fails = 0;
+    if (g_dns) g_dns->processNextRequest();
     vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }

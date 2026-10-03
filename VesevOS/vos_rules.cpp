@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_rules.cpp
 #include "vos_rules.h"
+#include "vos_mqtt.h"
 #include "vos_i18n.h"
 #include "vos_util.h"
 #include "vos_log.h"
@@ -148,7 +149,7 @@ static bool actionCheck(const String& a, String& err) {
   if (w == "led-color") { if (!hex6ok(a1)) { err = tr("Colore non valido (6 cifre esadecimali)"); return false; } }
   else if (w == "led") { if (!(a1 == "state" || a1 == "heartbeat" || a1 == "fixed" || a1 == "off")) { err = tr("Azione LED non valida"); return false; } }
   else if (w == "led-bright") { int v = a1.toInt(); if (a1 == "" || v < 0 || v > 255) { err = tr("Luminosita da 0 a 255"); return false; } }
-  else if (w == "led2") { if (!(a1 == "on" || a1 == "off" || a1 == "heartbeat")) { err = tr("Azione LED non valida"); return false; } }
+  else if (w == "led2") { }   // LED aggiuntivo tolto nella 1.7.0: azione vecchia accettata e ignorata
   else if (w == "gpio") {
     int g = a1.toInt();
     if (a1 == "" || !(a2 == "0" || a2 == "1")) { err = tr("Uso: gpio <pin> 0|1"); return false; }
@@ -157,9 +158,11 @@ static bool actionCheck(const String& a, String& err) {
       if (why) { err = String("GPIO") + g + ": " + why; return false; }
     }
   }
+  else if (w == "airplane") { if (!(a1 == "on" || a1 == "off")) { err = tr("Uso: airplane on <come> | airplane off"); return false; } }
   else if (w == "wait") { int v = a1.toInt(); if (a1 == "" || v < 1 || v > 3600) { err = tr("Attesa da 1 a 3600 secondi"); return false; } }
   else if (w == "note") { if (restOf(a, 1).length() < 1) { err = tr("Manca il testo della nota"); return false; } }
   else if (w == "reboot") { }
+  else if (w == "mqtt") { if (a1.length() < 1 || a1.length() > 60) { err = tr("Uso: mqtt <argomento> <testo>"); return false; } }
   else if (w == "ntp") { if (a1 != "sync") { err = tr("Azione non ammessa"); return false; } }
   else { err = tr("Azione non ammessa"); return false; }
   return true;
@@ -311,8 +314,10 @@ static void doGpio(int g, int v, const char* rn) {
 static uint32_t doAction(const String& a, const char* rn) {
   String w = word(a, 0);
   if (w == "wait") return (uint32_t)word(a, 1).toInt() * 1000UL;
+  if (w == "led2") return 0;   // tolto nella 1.7.0
   if (w == "note") { vlog("RULES %s: %s", rn, restOf(a, 1).c_str()); return 0; }
   if (w == "gpio") { doGpio(word(a, 1).toInt(), word(a, 2).toInt(), rn); return 0; }
+  if (w == "mqtt") { if (!mqttPublishRel(word(a, 1), restOf(a, 2))) vlog("RULES %s: MQTT non collegato", rn); return 0; }
   if (w == "reboot") {
     if (millis() < 60000UL) { vlog("RULES %s: riavvio ignorato (meno di 60 s dall'avvio)", rn); return 0; }
     vlog("RULES %s: riavvio", rn);
@@ -458,6 +463,14 @@ String rulesStatusJson() {
   }
   xSemaphoreGive(g_mx);
   return j + "]";
+}
+
+bool rulesAction(const String& action, String& err) {
+  String a = action; a.trim();
+  if (word(a, 0) == "wait") { err = tr("Azione non ammessa"); return false; }
+  if (!actionCheck(a, err)) return false;
+  doAction(a, "MQTT");
+  return true;
 }
 
 void rulesInit() {

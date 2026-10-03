@@ -4,6 +4,8 @@
 #include "vos_auth.h"
 #include "vos_config.h"
 #include "vos_util.h"
+#include "vos_log.h"
+#include "vos_i18n.h"
 
 #define MAX_SESSIONS 4
 #define SESSION_MS   (30UL * 60UL * 1000UL)
@@ -86,3 +88,98 @@ String authCookieFromHeader(const String& c) {
 
 bool serialAuthed() { return g_serialAuthed; }
 void serialAuthSet(bool v) { g_serialAuthed = v; }
+
+// ---------- blocco per indirizzo IP (pagina web) ----------
+// Dopo cfg.banFails password sbagliate l'IP aspetta cfg.banSecs secondi; ogni nuovo blocco raddoppia (max 1 ora).
+// Limite richieste: oltre 60 richieste senza sessione valida in un minuto conta come un errore.
+#define BAN_SLOTS 8
+struct Ban { uint32_t ip; uint8_t fails; uint8_t level; uint32_t until; uint32_t last; uint16_t denied; uint32_t deniedT0; };
+static Ban g_ban[BAN_SLOTS];
+
+String ipToStr(uint32_t ip) {
+  char b[16]; snprintf(b, sizeof(b), "%u.%u.%u.%u", (unsigned)(ip & 255), (unsigned)((ip >> 8) & 255), (unsigned)((ip >> 16) & 255), (unsigned)(ip >> 24));
+  return String(b);
+}
+
+static Ban* banSlot(uint32_t ip, bool create) {
+  Ban* old = &g_ban[0];
+  for (int i = 0; i < BAN_SLOTS; i++) {
+    if (g_ban[i].ip == ip && ip) return &g_ban[i];
+    if (g_ban[i].last < old->last) old = &g_ban[i];
+  }
+  if (!create) return nullptr;
+  for (int i = 0; i < BAN_SLOTS; i++) if (!g_ban[i].ip) { old = &g_ban[i]; break; }
+  memset(old, 0, sizeof(Ban)); old->ip = ip;
+  return old;
+}
+
+static bool banActive(Ban* b, uint32_t& wait) {
+  if (!b || !b->until) return false;
+  int32_t left = (int32_t)(b->until - millis());
+  if (left <= 0) { b->until = 0; return false; }
+  wait = (uint32_t)left / 1000 + 1;
+  return true;
+}
+
+static void banFail(Ban* b, const char* why) {
+  b->last = millis();
+  uint8_t maxF = cfg.banFails < 3 ? 3 : cfg.banFails;
+  if (++b->fails < maxF) { vlog("SICUREZZA: %s da %s (%u/%u)", why, ipToStr(b->ip).c_str(), b->fails, maxF); return; }
+  uint32_t secs = (cfg.banSecs < 10 ? 10 : cfg.banSecs) << (b->level > 6 ? 6 : b->level);
+  if (secs > 3600) secs = 3600;
+  b->until = millis() + secs * 1000UL; if (!b->until) b->until = 1;
+  b->fails = 0; if (b->level < 10) b->level++;
+  vlog("SICUREZZA: IP %s bloccato per %lu s (blocco n. %u)", ipToStr(b->ip).c_str(), (unsigned long)secs, b->level);
+}
+
+bool authIpBlocked(uint32_t ip, uint32_t& wait) { return banActive(banSlot(ip, false), wait); }
+
+int authCheckFrom(uint32_t ip, const String& pass, uint32_t& wait) {
+  Ban* b = banSlot(ip, true);
+  if (banActive(b, wait)) return 2;
+  if (millis() - b->last < 1000 && b->fails) { banFail(b, "tentativi troppo veloci"); return banActive(b, wait) ? 2 : 1; }
+  if (authCheck(pass)) { b->fails = 0; b->level = 0; b->last = millis(); return 0; }
+  banFail(b, "password errata");
+  return banActive(b, wait) ? 2 : 1;
+}
+
+void authNoteDenied(uint32_t ip) {
+  Ban* b = banSlot(ip, true);
+  uint32_t now = millis();
+  if (now - b->deniedT0 > 60000UL) { b->deniedT0 = now; b->denied = 0; }
+  if (++b->denied > 60) { b->denied = 0; b->deniedT0 = now; banFail(b, "troppe richieste senza accesso"); }
+}
+
+String authBanJson() {
+  String j = "{\"fails\":" + String(cfg.banFails) + ",\"secs\":" + String((unsigned long)cfg.banSecs) + ",\"list\":[";
+  bool first = true;
+  for (int i = 0; i < BAN_SLOTS; i++) {
+    Ban* b = &g_ban[i]; if (!b->ip || (!b->fails && !b->until && !b->level)) continue;
+    uint32_t w = 0; banActive(b, w);
+    if (!first) j += ","; first = false;
+    j += "{\"ip\":\"" + ipToStr(b->ip) + "\",\"fails\":" + String(b->fails) + ",\"wait\":" + String((unsigned long)w) + ",\"level\":" + String(b->level) + "}";
+  }
+  return j + "]}";
+}
+
+String authBanText() {
+  String t; int n = 0;
+  for (int i = 0; i < BAN_SLOTS; i++) {
+    Ban* b = &g_ban[i]; if (!b->ip || (!b->fails && !b->until && !b->level)) continue;
+    uint32_t w = 0; bool on = banActive(b, w);
+    t += ipToStr(b->ip) + "  " + (on ? trf("BLOCCATO ancora %lu s", (unsigned long)w) : trf("%u errori", b->fails)) + "\n"; n++;
+  }
+  if (!n) t = String(tr("Nessun indirizzo bloccato o sospetto")) + "\n";
+  return t;
+}
+
+bool authUnban(const String& ip) {
+  bool any = false;
+  for (int i = 0; i < BAN_SLOTS; i++) {
+    if (!g_ban[i].ip) continue;
+    if (ip == "all" || ipToStr(g_ban[i].ip) == ip) { memset(&g_ban[i], 0, sizeof(Ban)); any = true; }
+  }
+  if (ip == "all") { g_fails = 0; g_lockUntil = 0; any = true; }
+  if (any) vlog("SICUREZZA: sblocco %s", ip.c_str());
+  return any;
+}

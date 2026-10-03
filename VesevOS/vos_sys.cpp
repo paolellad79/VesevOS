@@ -2,10 +2,14 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_sys.cpp
 #include "vos_sys.h"
+#include "vos_led.h"
+#include <WiFi.h>
+#include <esp_sleep.h>
 #include "vos_i18n.h"
 #include "vos_util.h"
 #include "vos_log.h"
 #include "vos_net.h"
+#include "vos_mqtt.h"
 #include "vos_led.h"
 #include "vos_config.h"
 #include "esp_timer.h"
@@ -58,6 +62,9 @@ static void lifeSave() {
   Preferences p;
   if (p.begin("vos", false)) { p.putUInt("life", g_lifeBase); p.end(); }
 }
+
+static void monitorTask(void*);
+static void monitorStart() { xTaskCreatePinnedToCore(monitorTask, "monitor", 3072, NULL, 1, NULL, 0); }
 
 static void monitorTask(void*) {
   uint32_t last[2] = {0, 0};
@@ -122,7 +129,8 @@ void sysInit() {
   esp_register_freertos_idle_hook_for_cpu(idle0, 0);
   esp_register_freertos_idle_hook_for_cpu(idle1, 1);
   g_temp = temperatureRead();
-  xTaskCreatePinnedToCore(monitorTask, "monitor", 3072, NULL, 1, NULL, 0);
+  sysTaskRegister("monitor", monitorStart);
+  monitorStart();
 }
 
 int sysCpuPercent() { return g_cpu; }
@@ -170,6 +178,7 @@ String sysStatusJson() {
   j += "\"flashUsed\":" + String((unsigned long)flashU) + ",";
   j += "\"flashTotal\":" + String((unsigned long)flashT) + ",";
   j += "\"net\":" + netStatusJson() + ",";
+  j += "\"mqtt\":" + String(mqttConnected() ? 2 : mqttRunning() ? 1 : 0) + ",";
   j += "\"cpuHist\":" + sysCpuHistoryJson() + ",";
   j += "\"tempHist\":" + sysTempHistoryJson();
   j += "}";
@@ -193,8 +202,20 @@ String sysTasksText() {
 // ---- Task per la pagina (JSON) e arresto dei task consentiti ----
 // Tipo: 0 = sistema (protetto), 1 = VesevOS, 2 = app (futuro)
 // Si possono fermare solo i task della lista qui sotto (lista consentita, non lista dei vietati).
-static const char* const KILLABLE[] = {"led", "time", "monitor"};
-static const char* const OURS[] = {"led", "time", "monitor", "net"};
+// Lista consentita: i moduli registrano i loro task con sysTaskRegister (nome + funzione che lo avvia).
+struct TaskDef { const char* n; SysTaskStart f; SysTaskStart stop; };
+static TaskDef g_defs[8]; static int g_ndefs = 0;
+static const char* const OURS[] = {"led", "time", "monitor", "net", "rules", "mqtt"};
+
+void sysTaskRegister(const char* name, SysTaskStart start, SysTaskStart stop) {
+  for (int i = 0; i < g_ndefs; i++) if (strcmp(g_defs[i].n, name) == 0) { g_defs[i].f = start; g_defs[i].stop = stop; return; }
+  if (g_ndefs < 8) { g_defs[g_ndefs].n = name; g_defs[g_ndefs].f = start; g_defs[g_ndefs].stop = stop; g_ndefs++; }
+}
+static int defOf(const char* name) {
+  for (int i = 0; i < g_ndefs; i++) if (strcmp(g_defs[i].n, name) == 0) return i;
+  return -1;
+}
+bool sysTaskRunning(const char* name) { return xTaskGetHandle(name) != NULL; }
 
 static bool inList(const char* name, const char* const* list, int n) {
   for (int i = 0; i < n; i++) if (strcmp(name, list[i]) == 0) return true;
@@ -211,8 +232,8 @@ String sysTasksJson() {
   String j = "{\"ok\":true,\"total\":" + String((unsigned long)total) + ",\"tasks\":[";
   for (UBaseType_t i = 0; i < n; i++) {
     const char* nm = a[i].pcTaskName;
-    int type = inList(nm, OURS, 4) ? 1 : 0;
-    bool kill = inList(nm, KILLABLE, 3);
+    int type = inList(nm, OURS, 6) ? 1 : 0;
+    bool kill = defOf(nm) >= 0;
     if (i) j += ",";
     j += "{\"n\":\"" + jsonEscape(String(nm)) + "\",\"id\":" + String((unsigned)a[i].xTaskNumber) +
          ",\"s\":" + String((int)a[i].eCurrentState) + ",\"p\":" + String((unsigned)a[i].uxCurrentPriority) +
@@ -220,6 +241,13 @@ String sysTasksJson() {
          ",\"t\":" + String(type) + ",\"k\":" + String(kill ? "true" : "false") + "}";
   }
   free(a);
+  // task registrati ma fermati: compaiono con stato 9 (fermato) per poterli riavviare
+  for (int d = 0; d < g_ndefs; d++) {
+    if (xTaskGetHandle(g_defs[d].n)) continue;
+    if (n) j += ",";
+    n++;
+    j += "{\"n\":\"" + String(g_defs[d].n) + "\",\"id\":0,\"s\":9,\"p\":0,\"stk\":0,\"rt\":0,\"t\":1,\"k\":true}";
+  }
   return j + "]}";
 #else
   return "{\"ok\":false}";
@@ -228,10 +256,35 @@ String sysTasksJson() {
 
 bool sysTaskKill(const String& name, String& err) {
   if (name.length() == 0 || name.length() > 16) { err = tr("Nome task non valido"); return false; }
-  if (!inList(name.c_str(), KILLABLE, 3)) { err = tr("Questo task e protetto: non si puo fermare"); return false; }
+  if (defOf(name.c_str()) < 0) { err = tr("Questo task e protetto: non si puo fermare"); return false; }
   TaskHandle_t h = xTaskGetHandle(name.c_str());
   if (!h) { err = tr("Task non trovato"); return false; }
-  vlog("TASK: fermato '%s' su richiesta (resta fermo fino al riavvio)", name.c_str());
-  vTaskDelete(h);
+  vlog("TASK: fermato '%s' su richiesta", name.c_str());
+  int d = defOf(name.c_str());
+  if (d >= 0 && g_defs[d].stop) g_defs[d].stop(); else vTaskDelete(h);
   return true;
+}
+
+bool sysTaskRestart(const String& name, String& err) {
+  if (name.length() == 0 || name.length() > 16) { err = tr("Nome task non valido"); return false; }
+  int d = defOf(name.c_str());
+  if (d < 0) { err = tr("Questo task non si puo riavviare"); return false; }
+  TaskHandle_t h = xTaskGetHandle(name.c_str());
+  if (h) { if (g_defs[d].stop) g_defs[d].stop(); else vTaskDelete(h); vTaskDelay(pdMS_TO_TICKS(50)); }
+  g_defs[d].f();
+  vlog("TASK: %s '%s' su richiesta", h ? "riavviato" : "avviato", name.c_str());
+  return true;
+}
+
+// Sonno profondo: consuma pochissimo. Nessuna sveglia programmata: si riaccende con il tasto RESET
+// (il tasto BOOT no: tenuto premuto al risveglio porterebbe la scheda in modo programmazione).
+void sysSleep() {
+  vlog("SISTEMA: sonno profondo (si riaccende con RESET)");
+  Serial.flush();
+  ledShutdown();
+  WiFi.disconnect(true);
+  WiFi.mode(WIFI_OFF);
+  delay(100);
+  esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
+  esp_deep_sleep_start();
 }

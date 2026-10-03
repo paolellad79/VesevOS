@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_time.cpp
 #include "vos_time.h"
+#include "vos_sys.h"
 #include "vos_i18n.h"
 #include "vos_config.h"
 #include "vos_net.h"
@@ -11,6 +12,7 @@
 #include <AsyncUDP.h>
 #include <sys/time.h>
 #include <time.h>
+#include <esp_sntp.h>
 
 static volatile bool g_apply = true;
 static bool g_ntpStarted = false;
@@ -22,6 +24,30 @@ static bool g_serving = false;
 bool timeValid() { return time(nullptr) > 1700000000; }   // dopo novembre 2023
 
 void timeApply() { g_apply = true; }
+
+static volatile uint32_t g_lastSync = 0;        // epoch dell'ultima sincronizzazione riuscita
+static void onSync(struct timeval* tv) { g_lastSync = (uint32_t)tv->tv_sec; vlog("TIME: ora sincronizzata con NTP"); }
+
+bool timeEveryValid(long m) {
+  static const long ok[] = {0, 15, 60, 360, 720, 1440, 10080};
+  for (long v : ok) if (v == m) return true;
+  return false;
+}
+
+// "AAAA-MM-GG HH:MM" o "AAAA-MM-GG HH:MM:SS" nell'ora locale della scheda
+bool timeSetLocal(const String& s, String& err) {
+  int Y, M, D, h, mi, se = 0;
+  int n = sscanf(s.c_str(), "%d-%d-%d %d:%d:%d", &Y, &M, &D, &h, &mi, &se);
+  if (n < 5 || Y < 2024 || Y > 2099 || M < 1 || M > 12 || D < 1 || D > 31 || h < 0 || h > 23 || mi < 0 || mi > 59 || se < 0 || se > 59) {
+    err = tr("Data o ora non valida (AAAA-MM-GG HH:MM)"); return false;
+  }
+  setenv("TZ", cfg.tz.c_str(), 1); tzset();
+  struct tm tmv = {}; tmv.tm_year = Y - 1900; tmv.tm_mon = M - 1; tmv.tm_mday = D; tmv.tm_hour = h; tmv.tm_min = mi; tmv.tm_sec = se; tmv.tm_isdst = -1;
+  time_t t = mktime(&tmv);
+  if (t < 1700000000) { err = tr("Data o ora non valida (AAAA-MM-GG HH:MM)"); return false; }
+  timeSetEpoch((uint32_t)t);
+  return true;
+}
 
 String timeNowStr() {
   if (!timeValid()) return tr("non impostata");
@@ -49,6 +75,7 @@ String timeJson() {
   j += "\"ntp\":" + String(cfg.ntpOn ? "true" : "false") + ",";
   j += "\"server\":\"" + jsonEscape(cfg.ntpServer) + "\",";
   j += "\"serve\":" + String(cfg.ntpServe ? "true" : "false") + ",";
+  j += "\"every\":" + String((unsigned long)cfg.ntpEvery) + ",\"last\":" + String((unsigned long)g_lastSync) + ",";
   j += "\"tz\":\"" + jsonEscape(cfg.tz) + "\",";
   j += "\"dateFmt\":" + String(cfg.dateFmt) + ",\"timeFmt\":" + String(cfg.timeFmt) + ",\"tempUnit\":" + String(cfg.tempUnit) + ",";
   j += "\"tzName\":\"" + jsonEscape(cfg.tzName) + "\"";
@@ -100,6 +127,9 @@ static void timeTask(void*) {
     }
     NetState ns = netState();
     if (cfg.ntpOn && ns == NET_CLIENT_OK && !g_ntpStarted) {
+      // frequenza: 0 = solo all'avvio (intervallo massimo, circa 49 giorni)
+      sntp_set_sync_interval(cfg.ntpEvery ? cfg.ntpEvery * 60000UL : 0xFFFFFFF0UL);
+      sntp_set_time_sync_notification_cb(onSync);
       configTzTime(cfg.tz.c_str(), cfg.ntpServer.c_str(), "time.google.com");
       g_ntpStarted = true;
       vlog("TIME: NTP avviato (%s, %s)", cfg.ntpServer.c_str(), cfg.tzName.c_str());
@@ -112,8 +142,11 @@ static void timeTask(void*) {
   }
 }
 
+static void timeStart() { xTaskCreatePinnedToCore(timeTask, "time", 4096, NULL, 1, NULL, 0); }
+
 void timeInit() {
-  xTaskCreatePinnedToCore(timeTask, "time", 4096, NULL, 1, NULL, 0);
+  sysTaskRegister("time", timeStart);
+  timeStart();
 }
 
 // Temperatura nell'unita scelta (C o F)

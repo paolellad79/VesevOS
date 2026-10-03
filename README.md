@@ -30,7 +30,7 @@ rete Wi-Fi, ora, file, LED, pin, shell e tante altre cose, tutto protetto da una
 </p>
 <p align="center"><sub>Schermate della pagina di controllo (con dati di esempio): Home in tema scuro, Automazioni, ordine di avvio con il terminale a pannello, e la versione per telefono.</sub></p>
 
-> **Stato:** in sviluppo (versione 1.6.1). Il progetto cresce a fasi: guarda "Dove stiamo andando".
+> **Stato:** in sviluppo (versione 1.7.0). Il progetto cresce a fasi: guarda "Dove stiamo andando".
 
 ## Perché si chiama VesevOS
 
@@ -74,11 +74,13 @@ una situazione di emergenza, in silenzio radio quando serve, o comunicando in mo
 - **Pagina web** con schede: Riepilogo, Stato, Wi-Fi, Shell, Task, Ora, File, LED, Pin, Config.
 - **Prova dei pin**: tocca un pin per mettere un'uscita alta o bassa, farla lampeggiare o leggerla, con avvisi sui rischi. La prova si spegne da sola.
 - **Shell** web e seriale con molti comandi (digita `help`).
-- **Sicurezza**: password con SHA-256 salato e ripetuto, blocco dopo 5 errori, sessioni a tempo. La password protegge pagina, API e shell.
+- **Sicurezza**: password con SHA-256 salato e ripetuto, sessioni a tempo, blocco per indirizzo IP dopo troppe password sbagliate (tempo che raddoppia) e limite alle richieste. La password protegge pagina, API e shell.
+- **MQTT**: invia lo stato della scheda a un broker e riceve comandi; Home Assistant la riconosce da solo. Servizio con avvio automatico o manuale.
+- **Modo aereo** con scelta di come riaccendere la rete, **portale automatico** in modalità hotspot, **sleep** profondo e **registro** con filtro.
 - **Ora**: NTP, fusi orari, formati data/ora, temperatura in C o F, server NTP locale.
 - **File**: memoria interna (LittleFS) con cartelle, carica/scarica/modifica.
 - **CPU**: velocità automatica o fissa (80/160/240 MHz), temperatura interna, allarme se troppo calda.
-- **LED**: LED RGB WS2812 (stato del sistema, battito legato al carico CPU, colore fisso) e un LED aggiuntivo.
+- **LED**: LED RGB WS2812 (stato del sistema, battito legato al carico CPU, colore fisso).
 - **Configurazione** in stile OpenWrt (`/vesevos.conf`), scaricabile e ripristinabile.
 - **Lingue**: italiano nel firmware; inglese, spagnolo e tedesco come file separati (`lang/`), caricabili dalla pagina senza ricompilare.
 - **Licenze e note legali** consultabili dalla pagina e dalla shell (`license`).
@@ -90,7 +92,6 @@ Queste sono idee e progetti, non promesse: l'ordine può cambiare.
 **Prossimi rilasci**
 - [ ] **Home a "sala di controllo"**: riquadri con CPU, memoria, disco, temperatura, segnale Wi-Fi e allarmi; un clic porta alla scheda giusta. Grafica curata con icone SVG leggere, tema chiaro, scuro o automatico.
 - [ ] **Scheda Rete** unica (Wi-Fi, IP, nome, punto di accesso) e **Task** dinamico e ordinabile.
-- [ ] **Firewall** semplice: blocco dei tentativi sbagliati, regole per indirizzi e limiti alle connessioni.
 - [ ] **Pin avanzati**: misure di tensione e frequenza, PWM, correzione dei valori con il tester, animazione dei pin.
 - [ ] **Shell web** più comoda (cronologia, completamento, colori).
 - [ ] **Aggiornamento del firmware dalla pagina** (OTA).

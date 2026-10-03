@@ -13,9 +13,10 @@
 #include "vos_time.h"
 #include "vos_web.h"
 #include "vos_rules.h"
+#include "vos_mqtt.h"
 #include <Preferences.h>
 
-#define NSVC 6
+#define NSVC 7
 
 struct Svc {
   const char* id;
@@ -24,7 +25,7 @@ struct Svc {
   uint8_t parent;    // genitore nella vista ad albero (255 = nessuno)
 };
 
-enum { S_SYS = 0, S_LED, S_NET, S_TIME, S_WEB, S_RULES };
+enum { S_SYS = 0, S_LED, S_NET, S_TIME, S_WEB, S_RULES, S_MQTT };
 
 static const Svc SV[NSVC] = {
   { "sys",   sysInit,   0,                                  255 },
@@ -33,9 +34,10 @@ static const Svc SV[NSVC] = {
   { "time",  timeInit,  (uint8_t)(1 << S_NET),              S_NET },
   { "web",   webInit,   (uint8_t)((1 << S_NET) | (1 << S_SYS)), S_NET },
   { "rules", rulesInit, (uint8_t)((1 << S_TIME) | (1 << S_SYS)), S_TIME },
+  { "mqtt",  mqttInit,  (uint8_t)((1 << S_NET) | (1 << S_SYS)), S_NET },
 };
 
-static const char* DEF_ORDER = "sys,led,net,time,web,rules";
+static const char* DEF_ORDER = "sys,led,net,time,web,rules,mqtt";
 
 static int   g_ord[NSVC];
 static uint32_t g_at[NSVC], g_ms[NSVC];

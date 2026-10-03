@@ -7,6 +7,7 @@
 
 void     sysApplyCpuMode();         // applica il modo CPU (auto/fisso) della config
 void     sysInit();                 // idle hook, task monitor, boot counter
+void     sysSleep();                // sonno profondo: LED e Wi-Fi spenti, si riaccende solo con RESET
 int      sysCpuPercent();           // 0..100
 float    sysCpuTemp();              // gradi C (sensore interno del chip)
 uint64_t sysUptimeSec();            // dall'avvio del sistema
@@ -19,3 +20,7 @@ String   sysStatusJson();           // tutto lo stato per la pagina
 String   sysTasksText();            // elenco task per shell/web (testo)
 String   sysTasksJson();            // elenco task per la pagina (JSON)
 bool     sysTaskKill(const String& name, String& err);   // ferma un task della lista consentita
+typedef void (*SysTaskStart)();
+void     sysTaskRegister(const char* name, SysTaskStart start, SysTaskStart stop = nullptr);   // task che si puo fermare e riavviare (stop = arresto pulito)
+bool     sysTaskRestart(const String& name, String& err);  // ferma (se gira) e fa ripartire
+bool     sysTaskRunning(const char* name);

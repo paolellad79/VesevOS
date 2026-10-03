@@ -4,8 +4,9 @@
 #include "vos_log.h"
 #include "vos_util.h"
 #include <stdarg.h>
+#include <time.h>
 
-#define LOG_LINES 60
+#define LOG_LINES 150
 #define LOG_LEN   120
 
 static char     g_lines[LOG_LINES][LOG_LEN];
@@ -30,8 +31,12 @@ void vlog(const char* fmt, ...) {
   Serial.println(buf);
   if (!g_mx) return;
   if (xSemaphoreTake(g_mx, pdMS_TO_TICKS(50)) == pdTRUE) {
-    char stamp[16];
-    snprintf(stamp, sizeof(stamp), "[%lus] ", (unsigned long)(millis() / 1000));
+    char stamp[24];
+    time_t now = time(NULL);
+    if (now > 1700000000) {                       // ora valida: data e ora vere
+      struct tm tmv; localtime_r(&now, &tmv);
+      strftime(stamp, sizeof(stamp), "%d/%m %H:%M:%S ", &tmv);
+    } else snprintf(stamp, sizeof(stamp), "[%lus] ", (unsigned long)(millis() / 1000));
     snprintf(g_lines[g_head], LOG_LEN, "%s%s", stamp, buf);
     g_head = (g_head + 1) % LOG_LINES;
     if (g_count < LOG_LINES) g_count++;
@@ -51,4 +56,12 @@ String logGet(int maxLines) {
   }
   xSemaphoreGive(g_mx);
   return r;
+}
+
+void logClear() {
+  if (!g_mx) return;
+  if (xSemaphoreTake(g_mx, pdMS_TO_TICKS(100)) != pdTRUE) return;
+  g_head = 0; g_count = 0;
+  xSemaphoreGive(g_mx);
+  vlog("LOG: registro svuotato");
 }

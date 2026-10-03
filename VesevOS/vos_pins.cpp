@@ -3,6 +3,8 @@
 // VesevOS - vos_pins.cpp
 #include "vos_i18n.h"
 #include "vos_pins.h"
+#include "vos_common.h"
+#include <driver/gpio.h>
 #include "vos_util.h"
 
 #define MAX_PINS 24
@@ -153,5 +155,23 @@ String pinMapJson() {
          ",\"why\":\"" + jsonEscape(why ? why : "") + "\",\"owner\":\"" + jsonEscape(own) + "\"}";
   }
   j += "]";
+  return j;
+}
+
+// ---- rilevamento: il chip si interroga, la scheda no (i piedini saldati li conosce solo la tabella) ----
+#ifndef SOC_GPIO_PIN_COUNT
+#define SOC_GPIO_PIN_COUNT 49
+#endif
+String pinBoardJson() {
+  int valid = 0, out = 0;
+  for (int g = 0; g < SOC_GPIO_PIN_COUNT; g++) {
+    if (GPIO_IS_VALID_GPIO(g)) valid++;
+    if (GPIO_IS_VALID_OUTPUT_GPIO(g)) out++;
+  }
+  String j = "{\"chip\":\"" + String(ESP.getChipModel()) + "\",\"rev\":" + String((int)ESP.getChipRevision()) +
+             ",\"cores\":" + String((int)ESP.getChipCores()) + ",\"gpioCount\":" + String(SOC_GPIO_PIN_COUNT) +
+             ",\"gpioValid\":" + String(valid) + ",\"gpioOut\":" + String(out) +
+             ",\"board\":\"" VOS_BOARD "\",\"flash\":" + String((unsigned long)ESP.getFlashChipSize()) +
+             ",\"psram\":" + String((unsigned long)ESP.getPsramSize()) + "}";
   return j;
 }

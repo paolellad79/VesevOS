@@ -9,6 +9,7 @@
 #include "vos_auth.h"
 #include "vos_sys.h"
 #include "vos_net.h"
+#include "vos_mqtt.h"
 #include "vos_led.h"
 #include "vos_pins.h"
 #include "vos_shell.h"
@@ -41,6 +42,7 @@ static String token(AsyncWebServerRequest* r) {
 
 static bool checkAuth(AsyncWebServerRequest* r) {
   if (authSessionValid(token(r))) return true;
+  authNoteDenied((uint32_t)r->remoteIP());
   r->send(401, "application/json", "{\"ok\":false,\"err\":\"non autorizzato\"}");
   return false;
 }
@@ -67,13 +69,13 @@ static String settingsJson() {
   j += "\"staDhcp\":" + String(cfg.staDhcp ? "true" : "false") + ",";
   j += "\"ip\":\"" + jsonEscape(cfg.ip) + "\",\"mask\":\"" + jsonEscape(cfg.mask) + "\",";
   j += "\"gw\":\"" + jsonEscape(cfg.gw) + "\",\"dns1\":\"" + jsonEscape(cfg.dns1) + "\",\"dns2\":\"" + jsonEscape(cfg.dns2) + "\",";
-  j += "\"led2Mode\":" + String(cfg.led2Mode) + ",\"led2Pin\":" + String(cfg.led2Pin) + ",\"led2Invert\":" + String(cfg.led2Invert ? "true" : "false") + ",\"led2Bright\":" + String(cfg.led2Bright) + ",";
   j += "\"ledMode\":" + String(cfg.ledMode) + ",\"ledColor\":" + String(cfg.ledColor) + ",\"ledBrightness\":" + String(cfg.ledBrightness);
   j += "}";
   return j;
 }
 
 static void delayedRestart(void*) { vTaskDelay(pdMS_TO_TICKS(800)); ESP.restart(); }
+static void delayedSleep(void*) { vTaskDelay(pdMS_TO_TICKS(800)); sysSleep(); }
 
 void webInit() {
   // Pagina (senza autenticazione: contiene solo il login)
@@ -119,8 +121,10 @@ void webInit() {
       if (p.length() < 6) { ko(r, tr("Password troppo corta (min 6)")); return; }
       authSetPassword(p); cfgSave();
     } else {
-      if (authLocked()) { ko(r, tr("Troppi errori: riprova tra un minuto")); return; }
-      if (!authCheck(p)) { ko(r, tr("Password errata")); return; }
+      uint32_t wait = 0;
+      int res = authCheckFrom((uint32_t)r->remoteIP(), p, wait);
+      if (res == 2) { ko(r, trf("Troppi errori da questo indirizzo: riprova tra %lu secondi", (unsigned long)wait)); return; }
+      if (res != 0) { ko(r, tr("Password errata")); return; }
     }
     String t = authNewSession();
     AsyncWebServerResponse* resp = r->beginResponse(200, "application/json", "{\"ok\":true}");
@@ -128,6 +132,14 @@ void webInit() {
     r->send(resp);
   });
 
+  server.on("/api/ban", HTTP_GET, [](AsyncWebServerRequest* r) { if (checkAuth(r)) sendJson(r, authBanJson()); });
+  server.on("/api/ban/unban", HTTP_POST, [](AsyncWebServerRequest* r) { if (!checkAuth(r)) return; authUnban(P(r, "ip")); ok(r); });
+  server.on("/api/ban/set", HTTP_POST, [](AsyncWebServerRequest* r) {
+    if (!checkAuth(r)) return;
+    int f = P(r, "fails").toInt(); long sc = P(r, "secs").toInt();
+    if (f < 3 || f > 20 || sc < 10 || sc > 3600) { ko(r, tr("Valori non validi")); return; }
+    cfg.banFails = f; cfg.banSecs = sc; cfgSave(); ok(r);
+  });
   server.on("/api/logout", HTTP_POST, [](AsyncWebServerRequest* r) {
     authLogout(token(r));
     AsyncWebServerResponse* resp = r->beginResponse(200, "application/json", "{\"ok\":true}");
@@ -138,6 +150,7 @@ void webInit() {
   server.on("/api/status", HTTP_GET, [](AsyncWebServerRequest* r) { if (checkAuth(r)) sendJson(r, sysStatusJson()); });
   server.on("/api/settings", HTTP_GET, [](AsyncWebServerRequest* r) { if (checkAuth(r)) sendJson(r, settingsJson()); });
   server.on("/api/pins", HTTP_GET, [](AsyncWebServerRequest* r) { if (checkAuth(r)) sendJson(r, pinsJson()); });
+  server.on("/api/pins/info", HTTP_GET, [](AsyncWebServerRequest* r) { if (checkAuth(r)) sendJson(r, pinBoardJson()); });
   server.on("/api/pinmap", HTTP_GET, [](AsyncWebServerRequest* r) { if (checkAuth(r)) sendJson(r, pinMapJson()); });
   server.on("/api/pintest", HTTP_GET, [](AsyncWebServerRequest* r) { if (checkAuth(r)) sendJson(r, pinTestJson()); });
   server.on("/api/pintest", HTTP_POST, [](AsyncWebServerRequest* r) {
@@ -148,8 +161,9 @@ void webInit() {
   });
   server.on("/api/log", HTTP_GET, [](AsyncWebServerRequest* r) {
     if (!checkAuth(r)) return;
-    r->send(200, "text/plain; charset=utf-8", logGet(60));
+    r->send(200, "text/plain; charset=utf-8", logGet(150));
   });
+  server.on("/api/log/clear", HTTP_POST, [](AsyncWebServerRequest* r) { if (!checkAuth(r)) return; logClear(); ok(r); });
   server.on("/api/tasks", HTTP_GET, [](AsyncWebServerRequest* r) {
     if (!checkAuth(r)) return;
     r->send(200, "text/plain; charset=utf-8", sysTasksText());
@@ -168,6 +182,11 @@ void webInit() {
     if (!checkAuth(r)) return;
     String err;
     if (sysTaskKill(P(r, "name"), err)) ok(r); else ko(r, err);
+  });
+  server.on("/api/taskrestart", HTTP_POST, [](AsyncWebServerRequest* r) {
+    if (!checkAuth(r)) return;
+    String err;
+    if (sysTaskRestart(P(r, "name"), err)) ok(r); else ko(r, err);
   });
 
   // Automazioni
@@ -242,19 +261,6 @@ void webInit() {
     ledApplyConfig(); cfgSave(); ok(r);
   });
 
-  server.on("/api/led2", HTTP_POST, [](AsyncWebServerRequest* r) {
-    if (!checkAuth(r)) return;
-    int m = P(r, "mode").toInt(), p = P(r, "pin").toInt(), b = P(r, "br").toInt();
-    if (m < 0 || m > 2 || b < 0 || b > 255) { ko(r, tr("Valori non validi")); return; }
-    if (m != 0) {
-      if (!led2PinAllowed(p)) { ko(r, tr("Pin non ammesso (usa 1-18, 21 oppure 38-47)")); return; }
-      if (p != cfg.led2Pin && pinIsUsed(p)) { ko(r, tr("Questo pin e gia usato da altro (vedi scheda Pin)")); return; }
-    }
-    cfg.led2Mode = m; cfg.led2Bright = b; cfg.led2Invert = P(r, "inv") == "1";
-    if (led2PinAllowed(p)) cfg.led2Pin = p;
-    ledApplyConfig(); cfgSave(); ok(r);
-  });
-
   server.on("/api/system", HTTP_POST, [](AsyncWebServerRequest* r) {
     if (!checkAuth(r)) return;
     String hn = P(r, "hostname"), dm = P(r, "domain");
@@ -291,6 +297,51 @@ void webInit() {
     cfgSave(); ledApplyConfig(); netReconfigure(); ok(r);
   });
 
+  server.on("/api/airplane", HTTP_POST, [](AsyncWebServerRequest* r) {
+    if (!checkAuth(r)) return;
+    if (P(r, "on") != "1") { netAirplaneOff("dalla pagina"); ok(r); return; }
+    String err;
+    if (netAirplaneOn(P(r, "exit").toInt(), strtoul(P(r, "param").c_str(), NULL, 10), err)) ok(r); else ko(r, err);
+  });
+  // ---- MQTT ----
+  server.on("/api/mqtt", HTTP_GET, [](AsyncWebServerRequest* r) { if (checkAuth(r)) sendJson(r, mqttStatusJson()); });
+  server.on("/api/mqtt", HTTP_POST, [](AsyncWebServerRequest* r) {
+    if (!checkAuth(r)) return;
+    String host = P(r, "host"), pre = P(r, "prefix"), user = P(r, "user");
+    long port = P(r, "port").toInt(), ev = P(r, "every").toInt();
+    host.trim(); pre.trim(); user.trim();
+    if (host.length() > 80 || user.length() > 60 || pre.length() > 60) { ko(r, tr("Valori troppo lunghi")); return; }
+    for (size_t i = 0; i < host.length(); i++) { char c = host[i]; if (!(isAlphaNumeric(c) || c == '.' || c == '-')) { ko(r, tr("Broker: solo lettere, numeri, punto e trattino")); return; } }
+    for (size_t i = 0; i < pre.length(); i++) { char c = pre[i]; if (c == '#' || c == '+' || c < 33 || c > 126) { ko(r, tr("Prefisso: niente spazi, # o +")); return; } }
+    if (port < 1 || port > 65535 || ev < 5 || ev > 3600) { ko(r, tr("Valori non validi")); return; }
+    cfg.mqttHost = host; cfg.mqttPort = port; cfg.mqttUser = user; cfg.mqttPrefix = pre; cfg.mqttEvery = ev;
+    if (r->hasParam("pass", true) && P(r, "pass").length()) cfg.mqttPass = P(r, "pass");
+    if (P(r, "clearpass") == "1") cfg.mqttPass = "";
+    cfg.mqttAuto = P(r, "auto") == "1"; cfg.mqttHa = P(r, "ha") == "1";
+    cfgSave();
+    if (mqttRunning()) mqttStart();      // riparte con i valori nuovi
+    ok(r);
+  });
+  server.on("/api/mqtt/run", HTTP_POST, [](AsyncWebServerRequest* r) {
+    if (!checkAuth(r)) return;
+    String a = P(r, "a");
+    if (a == "start" || a == "restart") { if (!cfg.mqttHost.length()) { ko(r, tr("Manca l'indirizzo del broker")); return; } mqttStart(); }
+    else if (a == "stop") mqttStop();
+    else if (a == "test") { if (!mqttPublishRel("test", "VesevOS " VOS_VERSION)) { ko(r, tr("MQTT non collegato")); return; } }
+    else { ko(r, tr("Azione non valida")); return; }
+    ok(r);
+  });
+  server.on("/api/reboot", HTTP_POST, [](AsyncWebServerRequest* r) {
+    if (!checkAuth(r)) return;
+    vlog("SISTEMA: riavvio dalla pagina"); ok(r);
+    xTaskCreate(delayedRestart, "rst", 2048, NULL, 1, NULL);
+  });
+  server.on("/api/sleep", HTTP_POST, [](AsyncWebServerRequest* r) {
+    if (!checkAuth(r)) return;
+    ok(r);
+    xTaskCreate(delayedSleep, "slp", 3072, NULL, 1, NULL);
+  });
+
   server.on("/api/factory", HTTP_POST, [](AsyncWebServerRequest* r) {
     if (!checkAuth(r)) return;
     cfgFactoryReset(); ok(r);
@@ -309,6 +360,9 @@ void webInit() {
     int df = P(r, "datefmt").toInt(), tf = P(r, "timefmt").toInt(), tu = P(r, "tempunit").toInt();
     if (df < 0 || df > 2 || tf < 0 || tf > 1 || tu < 0 || tu > 1) { ko(r, tr("Formato non valido")); return; }
     cfg.dateFmt = df; cfg.timeFmt = tf; cfg.tempUnit = tu;
+    long ev = r->hasParam("every", true) ? P(r, "every").toInt() : (long)cfg.ntpEvery;
+    if (!timeEveryValid(ev)) { ko(r, tr("Frequenza non valida")); return; }
+    cfg.ntpEvery = ev;
     cfg.ntpOn = P(r, "ntp") == "1"; cfg.ntpServe = P(r, "serve") == "1";
     cfg.ntpServer = srv; cfg.tz = tz; cfg.tzName = tzn.length() ? cleanAscii(tzn) : String("Personalizzato");
     setenv("TZ", cfg.tz.c_str(), 1); tzset();
@@ -322,6 +376,7 @@ void webInit() {
   });
   server.on("/api/time/set", HTTP_POST, [](AsyncWebServerRequest* r) {
     if (!checkAuth(r)) return;
+    if (r->hasParam("local", true)) { String err; if (timeSetLocal(P(r, "local"), err)) ok(r); else ko(r, err); return; }
     unsigned long e = strtoul(P(r, "epoch").c_str(), NULL, 10);
     if (e < 1700000000UL) { ko(r, tr("Ora non valida")); return; }
     timeSetEpoch(e); ok(r);
@@ -382,7 +437,12 @@ void webInit() {
       }
     });
 
-  server.onNotFound([](AsyncWebServerRequest* r) { r->send(404, "text/plain", tr("Non trovato")); });
+  // Portale automatico: in modo AP ogni indirizzo sconosciuto (anche i controlli di Android, iPhone,
+  // Windows: generate_204, hotspot-detect.html, connecttest.txt...) porta alla pagina della scheda.
+  server.onNotFound([](AsyncWebServerRequest* r) {
+    if (netCaptive() && !r->url().startsWith("/api/")) { r->redirect("http://192.168.4.1/"); return; }
+    r->send(404, "text/plain", tr("Non trovato"));
+  });
   vlog("WEB: percorsi pronti");
 }
 

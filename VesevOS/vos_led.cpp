@@ -12,15 +12,6 @@ static volatile NetState g_net = NET_BOOT;
 static volatile bool g_fault = false;
 static volatile bool g_reconf = true;
 static uint8_t g_pin = VOS_PIN_LED_RGB;
-static int g_pin2 = -1;                 // pin attuale del LED aggiuntivo (-1 = nessuno)
-
-// Pin permessi per il LED aggiuntivo: liberi, non flash/PSRAM, non USB, non BOOT, non RGB
-bool led2PinAllowed(int p) {
-  if (p == 21) return true;
-  if (p >= 1 && p <= 18) return true;
-  if (p >= 38 && p <= 47) return true;
-  return false;
-}
 
 // forma del battito: due impulsi ravvicinati, valore 0..1
 static float beat(uint32_t t, uint32_t period) {
@@ -29,30 +20,6 @@ static float beat(uint32_t t, uint32_t period) {
   float b = expf(-powf((x - 0.26f) / 0.06f, 2)) * 0.7f;
   float v = a + b;
   return v > 1.0f ? 1.0f : v;
-}
-
-static void led2Setup() {
-  int want = (cfg.led2Mode != 0 && led2PinAllowed(cfg.led2Pin)) ? cfg.led2Pin : -1;
-  if (want == g_pin2) return;
-  if (g_pin2 >= 0) { pinMode(g_pin2, INPUT); pinRelease(g_pin2); }
-  g_pin2 = -1;
-  if (want >= 0) {
-    if (pinIsUsed(want)) { vlog("LED2: pin %d gia usato da altri", want); return; }
-    pinMode(want, OUTPUT);   // semplice acceso/spento (come nello sketch che funzionava), niente PWM
-    pinClaim(want, "LED2", "LED aggiuntivo (rosso)", false);
-    g_pin2 = want;
-  }
-}
-
-static void led2Update(uint32_t now) {
-  if (g_pin2 < 0) return;
-  bool on = false;
-  if (cfg.led2Mode == 1) on = true;
-  else if (cfg.led2Mode == 2) {
-    uint32_t period = 1600 - 11 * constrain(sysCpuPercent(), 0, 100);
-    on = beat(now, period) > 0.5f;   // battito: due impulsi, LED solo acceso/spento
-  }
-  digitalWrite(g_pin2, (on != cfg.led2Invert) ? HIGH : LOW);
 }
 
 void ledSetNetState(NetState s) { g_net = s; }
@@ -74,6 +41,7 @@ static void stateColor(NetState s, uint8_t& r, uint8_t& g, uint8_t& b) {
     case NET_AP:         r = 0;   g = 0;   b = 255; break;  // blu
     case NET_CLIENT_TRY: r = 255; g = 255; b = 0;   break;  // giallo
     case NET_CLIENT_OK:  r = 0;   g = 255; b = 0;   break;  // verde
+    case NET_AIR:        r = 170; g = 0;   b = 255; break;  // viola (modalita aereo)
   }
 }
 
@@ -83,10 +51,8 @@ static void ledTask(void*) {
       g_reconf = false;
       if (g_pin != cfg.ledPin) { pinRelease(g_pin); g_pin = cfg.ledPin; }
       pinClaim(g_pin, "LED", "LED RGB WS2812", g_pin == VOS_PIN_LED_RGB);
-      led2Setup();
     }
     uint32_t now = millis();
-    led2Update(now);
     if (g_identUntil) {
       if ((int32_t)(g_identUntil - now) > 0) {
         // arcobaleno: tinta che gira (0..5 settori da 60 gradi)
@@ -132,8 +98,17 @@ static void ledTask(void*) {
   }
 }
 
+static void ledStart() { g_reconf = true; xTaskCreatePinnedToCore(ledTask, "led", 3072, NULL, 1, NULL, 1); }
+
 void ledInit() {
   g_pin = cfg.ledPin;
   pinClaim(g_pin, "LED", "LED RGB WS2812", g_pin == VOS_PIN_LED_RGB);
-  xTaskCreatePinnedToCore(ledTask, "led", 3072, NULL, 1, NULL, 1);
+  sysTaskRegister("led", ledStart);
+  ledStart();
+}
+
+void ledShutdown() {
+  TaskHandle_t h = xTaskGetHandle("led");
+  if (h) vTaskDelete(h);
+  rgbLedWrite(g_pin, 0, 0, 0);
 }

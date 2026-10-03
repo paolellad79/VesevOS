@@ -15,3 +15,9 @@ String   netInfoText();             // riassunto rete leggibile (comando net)
 void     netReconfigure();          // applica cfg (dopo salvataggio)
 void     netScanStart();            // avvia scansione asincrona
 String   netScanJson();             // {"running":bool,"list":[...]}
+// Modalita aereo. exitMode: 0 al prossimo avvio, 1 dopo "param" secondi, 2 all'orario "param" (minuti dalla mezzanotte), 3 solo a mano
+bool     netAirplaneOn(int exitMode, uint32_t param, String& err);
+void     netAirplaneOff(const char* why);
+bool     netAirplane();             // true se attiva
+String   netAirplaneText();         // stato leggibile (shell)
+bool     netCaptive();              // portale automatico attivo (modo AP)

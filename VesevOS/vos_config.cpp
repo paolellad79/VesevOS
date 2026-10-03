@@ -28,8 +28,10 @@ void cfgDefaults() {
   cfg.ledColor = 0x0000FF;
   cfg.ledBrightness = 40;
   cfg.ledPin = VOS_PIN_LED_RGB;
-  cfg.led2Mode = 0; cfg.led2Pin = 38; cfg.led2Invert = false; cfg.led2Bright = 128;
-  cfg.ntpOn = true; cfg.ntpServe = false;
+  cfg.banFails = 5; cfg.banSecs = 60;
+  cfg.mqttAuto = false; cfg.mqttHost = ""; cfg.mqttUser = ""; cfg.mqttPass = ""; cfg.mqttPrefix = ""; cfg.mqttPort = 1883; cfg.mqttEvery = 30; cfg.mqttHa = true;
+  cfg.airOn = 0; cfg.airExit = 0; cfg.airUntil = 0; cfg.airAt = 0;
+  cfg.ntpOn = true; cfg.ntpServe = false; cfg.ntpEvery = 60;
   cfg.ntpServer = "pool.ntp.org";
   cfg.tz = "CET-1CEST,M3.5.0,M10.5.0/3"; cfg.tzName = "Europe/Rome";
   cfg.cpuMhz = 0;
@@ -72,20 +74,32 @@ String cfgExport(bool withSecrets) {
   opt(s, "salt", withSecrets ? cfg.authSalt : String(""));
   opt(s, "hash", withSecrets ? cfg.authHash : String(""));
   opt(s, "serial", cfg.serialAuth ? "1" : "0");
+  opt(s, "banfails", String(cfg.banFails));
+  opt(s, "bansecs", String((unsigned long)cfg.banSecs));
   s += "\nconfig led 'led'\n";
   opt(s, "mode", String(cfg.ledMode));
   opt(s, "color", String(cfg.ledColor));
   opt(s, "brightness", String(cfg.ledBrightness));
   opt(s, "pin", String(cfg.ledPin));
-  s += "\nconfig led 'led2'\n";
-  opt(s, "mode", String(cfg.led2Mode));
-  opt(s, "pin", String(cfg.led2Pin));
-  opt(s, "invert", cfg.led2Invert ? "1" : "0");
-  opt(s, "brightness", String(cfg.led2Bright));
+  s += "\nconfig mqtt 'mqtt'\n";
+  opt(s, "auto", cfg.mqttAuto ? "1" : "0");
+  opt(s, "host", cfg.mqttHost);
+  opt(s, "port", String(cfg.mqttPort));
+  opt(s, "user", cfg.mqttUser);
+  opt(s, "pass", withSecrets ? cfg.mqttPass : String(""));
+  opt(s, "prefix", cfg.mqttPrefix);
+  opt(s, "every", String(cfg.mqttEvery));
+  opt(s, "ha", cfg.mqttHa ? "1" : "0");
+  s += "\nconfig airplane 'airplane'\n";
+  opt(s, "on", String(cfg.airOn));
+  opt(s, "exit", String(cfg.airExit));
+  opt(s, "until", String((unsigned long)cfg.airUntil));
+  opt(s, "at", String(cfg.airAt));
   s += "\nconfig time 'time'\n";
   opt(s, "ntp", cfg.ntpOn ? "1" : "0");
   opt(s, "server", cfg.ntpServer);
   opt(s, "serve", cfg.ntpServe ? "1" : "0");
+  opt(s, "every", String((unsigned long)cfg.ntpEvery));
   opt(s, "tz", cfg.tz);
   opt(s, "tzname", cfg.tzName);
   opt(s, "datefmt", String(cfg.dateFmt));
@@ -116,19 +130,33 @@ static void applyKey(const String& sec, const String& k, const String& v) {
     if (k == "salt" && v.length()) cfg.authSalt = v;
     else if (k == "hash" && v.length()) cfg.authHash = v;
     else if (k == "serial") cfg.serialAuth = (v != "0");
+    else if (k == "banfails") cfg.banFails = constrain(v.toInt(), 3, 20);
+    else if (k == "bansecs") cfg.banSecs = constrain(v.toInt(), 10, 3600);
   } else if (sec == "led") {
     if (k == "mode") cfg.ledMode = constrain(v.toInt(), 0, 3);
     else if (k == "color") cfg.ledColor = (uint32_t)strtoul(v.c_str(), NULL, 10) & 0xFFFFFF;
     else if (k == "brightness") cfg.ledBrightness = constrain(v.toInt(), 0, 255);
     else if (k == "pin") { int p = v.toInt(); if (p >= 0 && p <= 48) cfg.ledPin = p; }
   } else if (sec == "led2") {
-    if (k == "mode") cfg.led2Mode = constrain(v.toInt(), 0, 2);
-    else if (k == "pin") { int p = v.toInt(); if (p >= 1 && p <= 47) cfg.led2Pin = p; }
-    else if (k == "invert") cfg.led2Invert = (v == "1");
-    else if (k == "brightness") cfg.led2Bright = constrain(v.toInt(), 0, 255);
+    // LED aggiuntivo tolto nella 1.7.0: la sezione dei file vecchi si ignora
+  } else if (sec == "mqtt") {
+    if (k == "auto") cfg.mqttAuto = (v == "1");
+    else if (k == "host") cfg.mqttHost = v;
+    else if (k == "port") { long p = v.toInt(); if (p > 0 && p < 65536) cfg.mqttPort = p; }
+    else if (k == "user") cfg.mqttUser = v;
+    else if (k == "pass") { if (v.length()) cfg.mqttPass = v; }
+    else if (k == "prefix") cfg.mqttPrefix = v;
+    else if (k == "every") cfg.mqttEvery = constrain(v.toInt(), 5, 3600);
+    else if (k == "ha") cfg.mqttHa = (v == "1");
+  } else if (sec == "airplane") {
+    if (k == "on") cfg.airOn = (v == "1");
+    else if (k == "exit") cfg.airExit = constrain(v.toInt(), 0, 3);
+    else if (k == "until") cfg.airUntil = strtoul(v.c_str(), NULL, 10);
+    else if (k == "at") cfg.airAt = constrain(v.toInt(), 0, 1439);
   } else if (sec == "time") {
     if (k == "ntp") cfg.ntpOn = (v == "1");
     else if (k == "serve") cfg.ntpServe = (v == "1");
+    else if (k == "every") { long m = v.toInt(); if (m >= 0 && m <= 10080) cfg.ntpEvery = m; }
     else if (k == "server" && v.length()) cfg.ntpServer = v;
     else if (k == "tz" && v.length()) cfg.tz = v;
     else if (k == "tzname" && v.length()) cfg.tzName = v;
