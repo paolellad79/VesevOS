@@ -28,7 +28,7 @@ Wi-Fi, clock, files, LEDs, pins, a shell and much more, all protected by a passw
 </p>
 <p align="center"><sub>Screenshots of the control page (with sample data; the interface language shown is Italian).</sub></p>
 
-> **Status:** in development (version 1.4.3). The project grows in stages: see "Where we are going".
+> **Status:** in development (version 1.5.0). The project grows in stages: see "Where we are going".
 
 ## Why "VesevOS"?
 
@@ -179,10 +179,6 @@ Each language takes about 17 KB of internal memory. **To add a language**: copy 
 
 Ideas, tests on real boards and fixes are welcome. A translation too: it is just one file in `lang/`.
 For code, read `CONTRIBUTING.md`.
-
-## Known issues
-
-- The extra LED on pin 38 does not light up on the test board: under investigation (it may be GPIO2).
 
 ## License
 

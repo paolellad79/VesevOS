@@ -28,7 +28,7 @@ rete Wi-Fi, ora, file, LED, pin, shell e tante altre cose, tutto protetto da una
 </p>
 <p align="center"><sub>Schermate della pagina di controllo (con dati di esempio).</sub></p>
 
-> **Stato:** in sviluppo (versione 1.4.3). Il progetto cresce a fasi: guarda "Dove stiamo andando".
+> **Stato:** in sviluppo (versione 1.5.0). Il progetto cresce a fasi: guarda "Dove stiamo andando".
 
 ## Perché si chiama VesevOS
 
@@ -179,10 +179,6 @@ poi esegui `python3 tools/mklang.py`. Il controllo avvisa se manca qualche testo
 
 Le idee, le prove sulla scheda e le correzioni sono benvenute. Anche una traduzione: basta un file in `lang/`.
 Per il codice leggi `CONTRIBUTING.md`.
-
-## Problemi noti
-
-- Il LED aggiuntivo sul pin 38 non si accende sulla scheda di prova: in verifica (potrebbe essere il GPIO2).
 
 ## Licenza
 

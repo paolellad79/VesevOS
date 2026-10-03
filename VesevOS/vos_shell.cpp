@@ -46,12 +46,14 @@ static void cmdHelp(Print& o) {
   o.println(tr("  help            questo elenco"));
   o.println(tr("  uname           versione sistema"));
   o.println(tr("  about           chi siamo e indirizzo GitHub"));
+  o.println(tr("  serial-auth [on|off]  password sulla seriale: mostra o cambia"));
   o.println(tr("  uptime          da quanto e acceso (+ motivo reset, avvii)"));
   o.println(tr("  free            memoria RAM/PSRAM"));
   o.println(tr("  df              spazio su flash"));
   o.println(tr("  temp            temperatura CPU"));
   o.println(tr("  top             CPU, RAM, temperatura"));
   o.println(tr("  ps              elenco task"));
+  o.println(tr("  kill <nome>     ferma un task (solo quelli consentiti, vedi ps)"));
   o.println(tr("  ls [cartella]   elenco file (flash)"));
   o.println(tr("  cat <file>      mostra un file"));
   o.println(tr("  mkdir <nome>    crea cartella"));
@@ -106,6 +108,14 @@ void shellExec(const String& lineIn, Print& o, bool authed) {
     o.println(String("GitHub: ") + VOS_GITHUB);
     o.println(String("(C) 2026 Domenico Paolella - GPL-3.0-or-later / ") + tr("licenza commerciale"));
   }
+  else if (c == "serial-auth") {
+    String a = a1; a.toLowerCase();
+    if (a == "on" || a == "off") {
+      cfg.serialAuth = (a == "on"); cfgSave();
+      vlog("SICUREZZA: password sulla seriale %s", cfg.serialAuth ? "attivata" : "disattivata");
+    } else if (a.length()) { o.println(tr("Uso: serial-auth on|off")); return; }
+    o.println(cfg.serialAuth ? tr("Password sulla seriale: ACCESA") : tr("Password sulla seriale: SPENTA"));
+  }
   else if (c == "uptime") {
     o.println(trf("Acceso da: %s", uptimeStr(sysUptimeSec()).c_str()));
     o.println(trf("Ultimo reset: %s", sysResetReason().c_str()));
@@ -125,6 +135,12 @@ void shellExec(const String& lineIn, Print& o, bool authed) {
     o.println(trf("RAM libera %u KB  PSRAM libera %u KB", (unsigned)(ESP.getFreeHeap() / 1024), (unsigned)(ESP.getFreePsram() / 1024)));
   }
   else if (c == "ps") o.print(sysTasksText());
+  else if (c == "kill") {
+    String err;
+    if (a1.length() == 0) o.println(tr("Uso: kill <nome task>"));
+    else if (sysTaskKill(a1, err)) o.println(trf("Task '%s' fermato (riparte al riavvio)", a1.c_str()));
+    else o.println(err);
+  }
   else if (c == "ls") {
     String j = fsListJson(a1.length() ? a1 : "/");
     if (j.indexOf("\"ok\":true") < 0) { o.println(tr("Cartella non trovata")); }
@@ -306,7 +322,10 @@ static String g_buf;
 static bool g_waitPass = false;
 static bool g_waitNew = false;
 
-static void prompt() { Serial.print(serialAuthed() || !authIsSet() ? "vesevos> " : "password: "); }
+// La seriale chiede la password solo se: password impostata, interruttore acceso, non ancora autenticata
+static bool serialLocked() { return authIsSet() && cfg.serialAuth && !serialAuthed(); }
+
+static void prompt() { Serial.print(serialLocked() ? "password: " : "vesevos> "); }
 
 void shellSerialPoll() {
   static bool first = true;
@@ -319,7 +338,7 @@ void shellSerialPoll() {
       String l = g_buf; g_buf = "";
       if (l.length() == 0 && ch == '\n') continue;
       Serial.println();
-      if (authIsSet() && !serialAuthed()) {
+      if (serialLocked()) {
         if (authLocked()) Serial.println(tr("Bloccato per troppi errori, riprova tra un minuto."));
         else if (authCheck(l)) { serialAuthSet(true); Serial.println(tr("Accesso eseguito.")); }
         else Serial.println(tr("Password errata."));
@@ -329,7 +348,7 @@ void shellSerialPoll() {
     } else if (ch == 8 || ch == 127) { if (g_buf.length()) g_buf.remove(g_buf.length() - 1); }
     else if (ch >= 32 && ch < 127 && g_buf.length() < 200) {
       g_buf += ch;
-      if (serialAuthed() || !authIsSet()) Serial.print(ch);   // niente eco della password
+      if (!serialLocked()) Serial.print(ch);   // niente eco della password
     }
   }
 }

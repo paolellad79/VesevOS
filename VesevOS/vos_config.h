@@ -14,6 +14,7 @@ struct VosConfig {
   bool   staDhcp;
   String ip, mask, gw, dns1, dns2;
   String authSalt, authHash;     // password (mai in chiaro)
+  bool   serialAuth;             // true = la shell seriale chiede la password (predefinito)
   uint8_t  ledMode;
   uint32_t ledColor;             // 0xRRGGBB
   uint8_t  ledBrightness;        // 0..255

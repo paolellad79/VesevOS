@@ -16,4 +16,6 @@ String   sysResetReason();
 String   sysTempHistoryJson();      // ultimi 60 secondi
 String   sysCpuHistoryJson();
 String   sysStatusJson();           // tutto lo stato per la pagina
-String   sysTasksText();            // elenco task per shell/web
+String   sysTasksText();            // elenco task per shell/web (testo)
+String   sysTasksJson();            // elenco task per la pagina (JSON)
+bool     sysTaskKill(const String& name, String& err);   // ferma un task della lista consentita

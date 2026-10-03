@@ -1316,13 +1316,6 @@
    "scope": "web"
   },
   {
-   "it": "Riepilogo",
-   "en": "Summary",
-   "es": "Resumen",
-   "de": "Übersicht",
-   "scope": "web"
-  },
-  {
    "it": "Uso risorse",
    "en": "Resource usage",
    "es": "Uso de recursos",
@@ -2027,27 +2020,6 @@
    "en": "CPU",
    "es": "CPU",
    "de": "CPU",
-   "scope": "web"
-  },
-  {
-   "it": "{0}% a {1} MHz",
-   "en": "{0}% at {1} MHz",
-   "es": "{0}% a {1} MHz",
-   "de": "{0}% bei {1} MHz",
-   "scope": "web"
-  },
-  {
-   "it": "Temperatura CPU",
-   "en": "CPU temperature",
-   "es": "Temperatura de la CPU",
-   "de": "CPU-Temperatur",
-   "scope": "web"
-  },
-  {
-   "it": "TROPPO CALDO",
-   "en": "TOO HOT",
-   "es": "DEMASIADO CALIENTE",
-   "de": "ZU HEISS",
    "scope": "web"
   },
   {
@@ -2951,6 +2923,405 @@
    "en": "With DHCP the router does not tell the board its domain: type it yourself if needed.",
    "es": "Con DHCP el router no comunica el dominio a la placa: escribelo tu si hace falta.",
    "de": "Bei DHCP teilt der Router dem Board die Domain nicht mit: bei Bedarf selbst eintragen.",
+   "scope": "web"
+  },
+  {
+   "it": "  kill <nome>     ferma un task (solo quelli consentiti, vedi ps)",
+   "en": "  kill <name>     stop a task (allowed ones only, see ps)",
+   "es": "  kill <nombre>   detiene una tarea (solo las permitidas, ver ps)",
+   "de": "  kill <Name>     Task stoppen (nur erlaubte, siehe ps)",
+   "scope": "fw"
+  },
+  {
+   "it": "Nome task non valido",
+   "en": "Invalid task name",
+   "es": "Nombre de tarea no valido",
+   "de": "Ungueltiger Task-Name",
+   "scope": "fw"
+  },
+  {
+   "it": "Questo task e protetto: non si puo fermare",
+   "en": "This task is protected: it cannot be stopped",
+   "es": "Esta tarea esta protegida: no se puede detener",
+   "de": "Dieser Task ist geschuetzt: er kann nicht gestoppt werden",
+   "scope": "fw"
+  },
+  {
+   "it": "Task '%s' fermato (riparte al riavvio)",
+   "en": "Task '%s' stopped (restarts on reboot)",
+   "es": "Tarea '%s' detenida (se reinicia al reiniciar)",
+   "de": "Task '%s' gestoppt (startet beim Neustart wieder)",
+   "scope": "fw"
+  },
+  {
+   "it": "Task non trovato",
+   "en": "Task not found",
+   "es": "Tarea no encontrada",
+   "de": "Task nicht gefunden",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: kill <nome task>",
+   "en": "Usage: kill <task name>",
+   "es": "Uso: kill <nombre de tarea>",
+   "de": "Verwendung: kill <Task-Name>",
+   "scope": "fw"
+  },
+  {
+   "it": "App",
+   "en": "App",
+   "es": "App",
+   "de": "App",
+   "scope": "web"
+  },
+  {
+   "it": "Ferma",
+   "en": "Stop",
+   "es": "Detener",
+   "de": "Stoppen",
+   "scope": "web"
+  },
+  {
+   "it": "Fermare il task '{0}'? Resta fermo fino al riavvio della scheda e alcune funzioni possono smettere di funzionare.",
+   "en": "Stop task '{0}'? It stays stopped until the board restarts and some functions may stop working.",
+   "es": "¿Detener la tarea '{0}'? Queda detenida hasta reiniciar la placa y algunas funciones pueden dejar de funcionar.",
+   "de": "Task '{0}' stoppen? Er bleibt bis zum Neustart des Boards gestoppt und einige Funktionen koennen ausfallen.",
+   "scope": "web"
+  },
+  {
+   "it": "In attesa",
+   "en": "Waiting",
+   "es": "En espera",
+   "de": "Wartend",
+   "scope": "web"
+  },
+  {
+   "it": "In esecuzione",
+   "en": "Running",
+   "es": "En ejecucion",
+   "de": "Laeuft",
+   "scope": "web"
+  },
+  {
+   "it": "Pronto",
+   "en": "Ready",
+   "es": "Listo",
+   "de": "Bereit",
+   "scope": "web"
+  },
+  {
+   "it": "Protetto",
+   "en": "Protected",
+   "es": "Protegido",
+   "de": "Geschuetzt",
+   "scope": "web"
+  },
+  {
+   "it": "Sospeso",
+   "en": "Suspended",
+   "es": "Suspendido",
+   "de": "Angehalten",
+   "scope": "web"
+  },
+  {
+   "it": "Task '{0}' fermato",
+   "en": "Task '{0}' stopped",
+   "es": "Tarea '{0}' detenida",
+   "de": "Task '{0}' gestoppt",
+   "scope": "web"
+  },
+  {
+   "it": "{0} task. Clicca un titolo per ordinare.",
+   "en": "{0} tasks. Click a heading to sort.",
+   "es": "{0} tareas. Pulsa un titulo para ordenar.",
+   "de": "{0} Tasks. Auf eine Ueberschrift klicken zum Sortieren.",
+   "scope": "web"
+  },
+  {
+   "it": "Tipo",
+   "en": "Type",
+   "es": "Tipo",
+   "de": "Typ",
+   "scope": "web"
+  },
+  {
+   "it": "Priorita",
+   "en": "Priority",
+   "es": "Prioridad",
+   "de": "Prioritaet",
+   "scope": "web"
+  },
+  {
+   "it": "Stack libero",
+   "en": "Free stack",
+   "es": "Pila libre",
+   "de": "Freier Stack",
+   "scope": "web"
+  },
+  {
+   "it": "  serial-auth [on|off]  password sulla seriale: mostra o cambia",
+   "en": "  serial-auth [on|off]  password on the serial port: show or change",
+   "es": "  serial-auth [on|off]  contrasena en el puerto serie: ver o cambiar",
+   "de": "  serial-auth [on|off]  Passwort auf der seriellen Schnittstelle: anzeigen/aendern",
+   "scope": "fw"
+  },
+  {
+   "it": "Password sulla seriale: ACCESA",
+   "en": "Serial port password: ON",
+   "es": "Contrasena en el puerto serie: ACTIVADA",
+   "de": "Passwort auf der seriellen Schnittstelle: AN",
+   "scope": "fw"
+  },
+  {
+   "it": "Password sulla seriale: SPENTA",
+   "en": "Serial port password: OFF",
+   "es": "Contrasena en el puerto serie: DESACTIVADA",
+   "de": "Passwort auf der seriellen Schnittstelle: AUS",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: serial-auth on|off",
+   "en": "Usage: serial-auth on|off",
+   "es": "Uso: serial-auth on|off",
+   "de": "Verwendung: serial-auth on|off",
+   "scope": "fw"
+  },
+  {
+   "it": "Allarmi",
+   "en": "Alerts",
+   "es": "Alarmas",
+   "de": "Warnungen",
+   "scope": "web"
+  },
+  {
+   "it": "Attenzione: la seriale e aperta, chi ha il cavo USB puo usare la shell senza password.",
+   "en": "Warning: the serial port is open, anyone with the USB cable can use the shell without a password.",
+   "es": "Atencion: el puerto serie esta abierto, quien tenga el cable USB puede usar la shell sin contrasena.",
+   "de": "Achtung: Die serielle Schnittstelle ist offen, wer das USB-Kabel hat, kann die Shell ohne Passwort benutzen.",
+   "scope": "web"
+  },
+  {
+   "it": "Automatico",
+   "en": "Automatic",
+   "es": "Automatico",
+   "de": "Automatisch",
+   "scope": "web"
+  },
+  {
+   "it": "Chiaro",
+   "en": "Light",
+   "es": "Claro",
+   "de": "Hell",
+   "scope": "web"
+  },
+  {
+   "it": "Scuro",
+   "en": "Dark",
+   "es": "Oscuro",
+   "de": "Dunkel",
+   "scope": "web"
+  },
+  {
+   "it": "Tema",
+   "en": "Theme",
+   "es": "Tema",
+   "de": "Design",
+   "scope": "web"
+  },
+  {
+   "it": "Chip",
+   "en": "Chip",
+   "es": "Chip",
+   "de": "Chip",
+   "scope": "web"
+  },
+  {
+   "it": "Collegamento Wi-Fi in corso",
+   "en": "Wi-Fi connection in progress",
+   "es": "Conexion Wi-Fi en curso",
+   "de": "WLAN-Verbindung laeuft",
+   "scope": "web"
+  },
+  {
+   "it": "Dispositivi collegati",
+   "en": "Connected devices",
+   "es": "Dispositivos conectados",
+   "de": "Verbundene Geraete",
+   "scope": "web"
+  },
+  {
+   "it": "File in flash",
+   "en": "Files in flash",
+   "es": "Archivos en flash",
+   "de": "Dateien im Flash",
+   "scope": "web"
+  },
+  {
+   "it": "Guarda il LED: lampeggia a colori per 10 secondi",
+   "en": "Look at the LED: it flashes in colors for 10 seconds",
+   "es": "Mira el LED: parpadea en colores durante 10 segundos",
+   "de": "Schau auf die LED: sie blinkt 10 Sekunden lang bunt",
+   "scope": "web"
+  },
+  {
+   "it": "Hardware",
+   "en": "Hardware",
+   "es": "Hardware",
+   "de": "Hardware",
+   "scope": "web"
+  },
+  {
+   "it": "Home",
+   "en": "Home",
+   "es": "Inicio",
+   "de": "Start",
+   "scope": "web"
+  },
+  {
+   "it": "Memoria",
+   "en": "Memory",
+   "es": "Memoria",
+   "de": "Speicher",
+   "scope": "web"
+  },
+  {
+   "it": "Modo punto di accesso: la scheda non e collegata a una rete",
+   "en": "Access point mode: the board is not connected to a network",
+   "es": "Modo punto de acceso: la placa no esta conectada a una red",
+   "de": "Access-Point-Modus: Das Board ist mit keinem Netzwerk verbunden",
+   "scope": "web"
+  },
+  {
+   "it": "Nessun allarme",
+   "en": "No alerts",
+   "es": "Ninguna alarma",
+   "de": "Keine Warnungen",
+   "scope": "web"
+  },
+  {
+   "it": "Pagina web, shell web e API sono sempre protette dalla password. Se spegni questo interruttore, chi collega il cavo USB ottiene subito la shell. Il tasto BOOT premuto 8 secondi azzera la password e riaccende la protezione.",
+   "en": "The web page, web shell and API are always protected by the password. If you turn this switch off, anyone who plugs in the USB cable gets the shell right away. Holding the BOOT button for 8 seconds clears the password and turns the protection back on.",
+   "es": "La pagina web, la shell web y la API siempre estan protegidas por la contrasena. Si apagas este interruptor, quien conecte el cable USB obtiene la shell al instante. Mantener el boton BOOT 8 segundos borra la contrasena y reactiva la proteccion.",
+   "de": "Webseite, Web-Shell und API sind immer durch das Passwort geschuetzt. Schaltest du diesen Schalter aus, bekommt jeder mit USB-Kabel sofort die Shell. BOOT-Taste 8 Sekunden gedrueckt loescht das Passwort und schaltet den Schutz wieder ein.",
+   "scope": "web"
+  },
+  {
+   "it": "Password sulla seriale",
+   "en": "Serial port password",
+   "es": "Contrasena del puerto serie",
+   "de": "Passwort der seriellen Schnittstelle",
+   "scope": "web"
+  },
+  {
+   "it": "Processore",
+   "en": "Processor",
+   "es": "Procesador",
+   "de": "Prozessor",
+   "scope": "web"
+  },
+  {
+   "it": "Proteggi la seriale (cavo USB) con la password",
+   "en": "Protect the serial port (USB cable) with the password",
+   "es": "Proteger el puerto serie (cable USB) con la contrasena",
+   "de": "Serielle Schnittstelle (USB-Kabel) mit Passwort schuetzen",
+   "scope": "web"
+  },
+  {
+   "it": "RAM molto usata",
+   "en": "RAM heavily used",
+   "es": "RAM muy usada",
+   "de": "RAM stark belegt",
+   "scope": "web"
+  },
+  {
+   "it": "RAM quasi esaurita",
+   "en": "RAM almost full",
+   "es": "RAM casi agotada",
+   "de": "RAM fast voll",
+   "scope": "web"
+  },
+  {
+   "it": "Risorse",
+   "en": "Resources",
+   "es": "Recursos",
+   "de": "Ressourcen",
+   "scope": "web"
+  },
+  {
+   "it": "Segnale Wi-Fi debole",
+   "en": "Weak Wi-Fi signal",
+   "es": "Senal Wi-Fi debil",
+   "de": "Schwaches WLAN-Signal",
+   "scope": "web"
+  },
+  {
+   "it": "Sicurezza",
+   "en": "Security",
+   "es": "Seguridad",
+   "de": "Sicherheit",
+   "scope": "web"
+  },
+  {
+   "it": "Spazio file quasi pieno",
+   "en": "File space almost full",
+   "es": "Espacio de archivos casi lleno",
+   "de": "Dateispeicher fast voll",
+   "scope": "web"
+  },
+  {
+   "it": "Spegnere la password sulla seriale? Chi collega il cavo USB potra usare la shell senza password.",
+   "en": "Turn off the serial port password? Anyone who plugs in the USB cable will be able to use the shell without a password.",
+   "es": "¿Apagar la contrasena del puerto serie? Quien conecte el cable USB podra usar la shell sin contrasena.",
+   "de": "Passwort der seriellen Schnittstelle ausschalten? Jeder mit USB-Kabel kann die Shell ohne Passwort benutzen.",
+   "scope": "web"
+  },
+  {
+   "it": "Stai usando",
+   "en": "You are using",
+   "es": "Estas usando",
+   "de": "Du benutzt",
+   "scope": "web"
+  },
+  {
+   "it": "Temperatura",
+   "en": "Temperature",
+   "es": "Temperatura",
+   "de": "Temperatur",
+   "scope": "web"
+  },
+  {
+   "it": "Temperatura CPU troppo alta",
+   "en": "CPU temperature too high",
+   "es": "Temperatura de la CPU demasiado alta",
+   "de": "CPU-Temperatur zu hoch",
+   "scope": "web"
+  },
+  {
+   "it": "Trova questa scheda",
+   "en": "Find this board",
+   "es": "Encontrar esta placa",
+   "de": "Dieses Board finden",
+   "scope": "web"
+  },
+  {
+   "it": "liberi",
+   "en": "free",
+   "es": "libres",
+   "de": "frei",
+   "scope": "web"
+  },
+  {
+   "it": "{0} MB flash · {1} MB PSRAM",
+   "en": "{0} MB flash · {1} MB PSRAM",
+   "es": "{0} MB flash · {1} MB PSRAM",
+   "de": "{0} MB Flash · {1} MB PSRAM",
+   "scope": "web"
+  },
+  {
+   "it": "{0} core a {1} MHz",
+   "en": "{0} cores at {1} MHz",
+   "es": "{0} nucleos a {1} MHz",
+   "de": "{0} Kerne mit {1} MHz",
    "scope": "web"
   }
  ]

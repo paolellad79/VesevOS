@@ -1,5 +1,24 @@
 # Cronologia delle versioni
 
+## 1.5.0 (3 ottobre 2026)
+- README: tolta la sezione "Problemi noti" (nota sul LED del pin 38).
+- **Scheda Task dinamica**: tabella che si aggiorna da sola ogni 2 secondi, ordinabile cliccando i titoli
+  (nome, tipo, stato, priorita, stack libero, CPU se disponibile). Il tipo distingue Sistema, VesevOS e App.
+  Si possono fermare solo i task consentiti (led, time, monitor), con conferma; gli altri hanno il lucchetto.
+  Il task fermato riparte al riavvio. Nuovo comando shell `kill <nome>`. L'azione finisce nel log.
+
+- **Nuova interfaccia a 5 tab con icone**: Home, Rete, Hardware, Sistema, Sicurezza. Barra laterale sul computer,
+  barra fissa in basso sul telefono, sotto-schede dentro Hardware (Pin, LED) e Sistema (Task, Stato, File, Ora, Shell, Config).
+- **Home control room**: anelli colorati verde/giallo/rosso (CPU, RAM, PSRAM, File, Wi-Fi, Temperatura) cliccabili,
+  carta d'identita della scheda (chip, core, memoria, ID unico dal MAC, ore di vita), risorse, rete, grafici CPU e temperatura,
+  campanella con gli allarmi, pulsante "Trova questa scheda" (il LED fa l'arcobaleno per 10 secondi).
+- **Tema** automatico / chiaro / scuro, ricordato nel browser.
+- **Tab Sicurezza**: cambio password (spostato da Config) e **interruttore per la password sulla seriale**
+  (predefinito acceso; comando `serial-auth on|off`; BOOT 8 s e ripristino di fabbrica la riaccendono).
+- Sul telefono restano fissi la barra in alto, la barra in basso e le sotto-schede.
+- I messaggi verdi di conferma (Salvato, Copiato...) compaiono con una dissolvenza e spariscono da soli dopo 3 secondi; gli errori restano.
+- Il firmware ora fornisce alla pagina chip, revisione, core, flash, canale Wi-Fi e dispositivi collegati all'AP.
+
 ## 1.4.3 (3 ottobre 2026)
 - README rinnovato: banner, missione, visione, filosofia, schermate, mappa del progetto.
 - README in inglese (`README.en.md`), banner con il Vesuvio, `assets/vesuvio.svg`.

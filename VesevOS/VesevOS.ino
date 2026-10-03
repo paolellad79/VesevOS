@@ -31,7 +31,7 @@ static void resetPasswordIfBootHeld() {
     if (since == 0) since = millis();
     else if (millis() - since > 8000) {
       vlog("AUTH: reset password da pulsante BOOT");
-      cfg.authSalt = ""; cfg.authHash = "";
+      cfg.authSalt = ""; cfg.authHash = ""; cfg.serialAuth = true;
       cfgSave();
       serialAuthSet(false);
       since = 0;

@@ -8,48 +8,93 @@ R"VOSPAGE(<!DOCTYPE html>
 <title>VesevOS</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%22-8 -8 216 216%22%3E%3Cdefs%3E%3ClinearGradient id=%22g%22 x1=%220%22 y1=%220%22 x2=%221%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%233fa7ff%22/%3E%3Cstop offset=%221%22 stop-color=%22%2337e0b0%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg stroke=%22url(%23g)%22 stroke-width=%226%22 stroke-linecap=%22round%22 fill=%22none%22%3E%3Cpath d=%22M40 -6V22M80 -6V22M120 -6V22M40 178V206M80 178V206M120 178V206M-6 40H22M-6 80H22M-6 120H22M178 40H206M178 80H206M178 120H206%22/%3E%3Crect x=%2220%22 y=%2220%22 width=%22160%22 height=%22160%22 rx=%2222%22 fill=%22%230b1220%22/%3E%3Ccircle cx=%22100%22 cy=%22100%22 r=%2244%22/%3E%3Cpath d=%22M100 56V30M100 170V144M56 100H30M170 100H144%22/%3E%3C/g%3E%3Ccircle cx=%22100%22 cy=%22100%22 r=%2214%22 fill=%22url(%23g)%22/%3E%3C/svg%3E">
 <style>
-:root{--bg:#10151c;--card:#1a222d;--tx:#e6edf3;--mut:#8b98a8;--ac:#3fa7ff;--ok:#3ddc84;--ko:#ff5c5c}
+:root{--bg:#10151c;--card:#1a222d;--side:#151c26;--tx:#e6edf3;--mut:#8b98a8;--ac:#3fa7ff;--ac2:#37e0b0;--ok:#3ddc84;--wa:#ffcc4d;--ko:#ff5c5c;--in:var(--in);--g2:var(--g2);--bd:var(--bd);--trk:#26303e;--okbg:var(--okbg);--kobg:var(--kobg);--vbg:var(--vbg)}
+:root[data-theme=light]{--bg:#eef3f6;--card:#fff;--side:#fff;--tx:#1d2a36;--mut:#6b7b8c;--ac:#1796e8;--ac2:#14c9a0;--ok:#16a765;--wa:#d99a00;--ko:#e5484d;--in:#f3f6f9;--g2:#e3eaf0;--bd:#e3eaf0;--trk:#e3eaf0;--okbg:#dff5e9;--kobg:#fde6e7;--vbg:#dcefff}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px system-ui,Arial,sans-serif}
-header{padding:12px 16px;background:var(--card);display:flex;justify-content:space-between;align-items:center}
-header b{font-size:18px}
-nav{display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;background:#141b24}
-nav button{background:transparent;color:var(--mut);border:0;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:14px}
-nav button.on{background:var(--ac);color:#06121c}
-main{padding:12px;max-width:900px;margin:auto}
+svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
+.side{position:fixed;left:0;top:0;bottom:0;width:72px;background:var(--side);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:6px;border-right:1px solid var(--bd);z-index:5}
+.side .slogo{width:38px;height:38px;margin-bottom:14px}
+.nb{position:relative;width:60px;padding:10px 0 6px;border:0;background:none;color:var(--mut);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;border-radius:12px;font-size:10.5px}
+.nb:hover{color:var(--tx)}.nb.on{color:var(--ac)}.nb.on::before{content:"";position:absolute;left:-6px;top:10px;bottom:10px;width:3px;border-radius:2px;background:linear-gradient(var(--ac),var(--ac2))}
+.top{position:sticky;top:0;z-index:6;margin-left:72px;height:60px;display:flex;align-items:center;gap:10px;padding:0 20px;background:var(--side);border-bottom:1px solid var(--bd)}
+.top b{font-size:17px}.top .sp{flex:1}.bchip{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:50vw;padding:3px 10px;border-radius:14px;background:linear-gradient(90deg,var(--ac),var(--ac2));color:#06121c;font-size:12.5px;font-weight:700}
+.ib{position:relative;width:38px;height:38px;border:0;border-radius:10px;background:none;color:var(--mut);display:grid;place-items:center;cursor:pointer;margin:0;padding:0}.ib:hover{background:var(--trk);color:var(--tx)}
+.bdg{position:absolute;top:2px;right:2px;min-width:16px;height:16px;border-radius:8px;background:var(--wa);color:#111;font-size:10px;font-weight:700;display:grid;place-items:center}.bdg.k{background:var(--ko);color:#fff}
+.alerts{position:fixed;right:16px;top:64px;width:300px;max-width:calc(100vw - 32px);background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:10px 14px;z-index:9;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.alerts div{padding:7px 0;border-bottom:1px solid var(--bd);font-size:14px}.alerts div:last-child{border:0}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px}
+.gsub{position:sticky;top:60px;z-index:5;background:var(--bg);margin-left:72px;padding:10px 20px 8px;margin-bottom:0}.gsub.hide{display:none}
+#rsub{position:sticky;top:60px;z-index:4;background:var(--bg);padding:8px 0}
+.hl{display:grid;gap:14px;grid-template-columns:repeat(12,1fr)}
+.rings{grid-column:1/-1;display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+.ring{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px 8px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:transform .15s}.ring:hover{transform:translateY(-2px);border-color:var(--ac)}
+.ring>svg{width:84px;height:84px}.ring .v{font-size:19px;font-weight:700}.ring .l{font-size:12px;color:var(--mut)}
+.hid{grid-column:span 5}.hres{grid-column:span 7}.hnet{grid-column:span 5}.htmp{grid-column:span 7}
+.hl .card{margin:0}.hl h3{text-transform:uppercase;letter-spacing:.04em;font-size:12.5px;color:var(--mut)}
+.big{font-size:20px;font-weight:700}.subt{color:var(--mut);font-size:13px}
+.pb{margin:10px 0}.pb .t{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px}.pb .t span:first-child{color:var(--mut)}.pb .tr{height:9px;border-radius:5px;background:var(--trk);overflow:hidden}.pb i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--ac),var(--ac2))}
+.pb.w i{background:var(--wa)}.pb.k i{background:var(--ko)}
+.sw1{width:42px;height:24px;border-radius:12px;background:var(--trk);position:relative;flex:none;cursor:pointer;border:0;padding:0;margin:0}.sw1::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s}.sw1.on{background:linear-gradient(90deg,var(--ac),var(--ac2))}.sw1.on::after{left:21px}
+.tog{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0}
+.sig{display:inline-flex;gap:3px;align-items:flex-end;height:20px;vertical-align:middle}.sig i{width:5px;background:var(--trk);border-radius:2px}.sig i.on{background:var(--ok)}
+@media(max-width:820px){
+ .side{top:auto;right:0;width:auto;height:62px;flex-direction:row;justify-content:space-around;padding:4px 6px;border-right:0;border-top:1px solid var(--bd)}.side .slogo{display:none}
+ .nb{width:auto;flex:1;padding:6px 0}.nb.on::before{left:25%;right:25%;top:-5px;bottom:auto;width:auto;height:3px}
+ #hd{display:none}
+ .top,.gsub,main{margin-left:0!important}.top{padding:0 12px;height:54px}.gsub{top:54px;padding:8px 12px 6px}#rsub{top:54px}.gsub{gap:4px}#gsub button,#rsub button{padding:6px 9px;font-size:12.5px}.top .lsel{max-width:84px}.top{gap:6px}.top .tname{display:none}main{padding:12px 12px 82px!important}.gsub{padding:10px 12px 0}
+ .rings{grid-template-columns:repeat(3,1fr);gap:10px}.ring>svg{width:68px;height:68px}.ring .v{font-size:15px}
+ .hid,.hres,.hnet,.htmp{grid-column:1/-1}}
+main{padding:16px 20px;max-width:1180px;margin-left:72px}
 .card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:12px}
 .card h3{margin:0 0 10px;font-size:15px;color:var(--ac)}
-.row{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid #222c39}
+.row{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--bd)}
 .row span:first-child{color:var(--mut)}
-.bar{height:10px;background:#0c1118;border-radius:6px;overflow:hidden}
+.bar{height:10px;background:var(--in);border-radius:6px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--ac)}
-input,select,textarea{width:100%;padding:9px;margin:4px 0 10px;background:#0c1118;color:var(--tx);border:1px solid #2a3647;border-radius:8px;font:inherit}
+input,select,textarea{width:100%;padding:9px;margin:4px 0 10px;background:var(--in);color:var(--tx);border:1px solid var(--g2);border-radius:8px;font:inherit}
 label{color:var(--mut);font-size:13px}
 .btn{background:var(--ac);color:#06121c;border:0;padding:9px 16px;border-radius:8px;cursor:pointer;font-weight:600;margin-right:6px}
 .btn.red{background:var(--ko);color:#fff}
-.btn.gray{background:#2a3647;color:var(--tx)}
-pre{background:#0c1118;padding:10px;border-radius:8px;overflow:auto;max-height:340px;white-space:pre-wrap;word-break:break-all;margin:0}
+.btn.gray{background:var(--g2);color:var(--tx)}
+pre{background:var(--in);padding:10px;border-radius:8px;overflow:auto;max-height:340px;white-space:pre-wrap;word-break:break-all;margin:0}
 .term{height:calc(100vh - 300px);min-height:240px;max-height:none;font:13px/1.45 ui-monospace,Consolas,Menlo,monospace;word-break:break-word}
 .term .e{color:var(--ko)}.term .w{color:#ffcc4d}.term .g{color:var(--ok)}.term .c{color:var(--ac)}.term .m{color:var(--mut)}
-.trow{display:flex;align-items:center;gap:6px;margin-top:8px}.trow b{color:var(--ok);font:13px ui-monospace,Consolas,monospace}
+)VOSPAGE"
+R"VOSPAGE(.trow{display:flex;align-items:center;gap:6px;margin-top:8px}.trow b{color:var(--ok);font:13px ui-monospace,Consolas,monospace}
 .trow input{margin:0;font:14px ui-monospace,Consolas,monospace}
 .keys{margin-top:8px}.keys .btn{padding:6px 12px;font-size:13px;margin-bottom:4px}
-.sub{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.sub button{background:#2a3647;color:var(--tx);border:0;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:14px}.sub button.on{background:var(--ac);color:#06121c}
+.sub{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.sub button{background:var(--g2);color:var(--tx);border:0;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:14px}.sub button.on{background:var(--ac);color:#06121c}
 input:disabled,select:disabled{opacity:.55;cursor:not-allowed}
+.sortable th{cursor:pointer;user-select:none;white-space:nowrap}.sortable th:hover{color:var(--ac)}
+.pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;background:var(--g2)}.pill.v{background:var(--vbg);color:var(--ac)}.pill.a{background:var(--okbg);color:var(--ok)}
+.cbar{display:inline-block;width:50px;height:8px;background:var(--in);border-radius:4px;vertical-align:middle;margin-right:6px;overflow:hidden}.cbar i{display:block;height:100%;background:var(--ac)}
+.btn.sm{padding:3px 10px;font-size:12px;margin:0}
+@keyframes mf{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.msg.ok,.msg.ko{animation:mf .3s ease}.msg.out{opacity:0;transition:opacity .4s}
 table{width:100%;border-collapse:collapse}
-td,th{text-align:left;padding:6px;border-bottom:1px solid #222c39;font-size:14px}
+td,th{text-align:left;padding:6px;border-bottom:1px solid var(--bd);font-size:14px}
 .msg{padding:8px;border-radius:8px;margin:8px 0;display:none}
-.msg.ok{display:block;background:#12301f;color:var(--ok)}
-.msg.ko{display:block;background:#3a1717;color:var(--ko)}
+.msg.ok{display:block;background:var(--okbg);color:var(--ok)}
+.msg.ko{display:block;background:var(--kobg);color:var(--ko)}
 #login{max-width:340px;margin:60px auto}
 .hide{display:none}
 .foot{text-align:center;font-size:12px;color:var(--mut);margin:14px 0}
 .foot a{color:var(--mut)}
-.hero{text-align:center;margin:6px 0 10px}.hero .logo{width:56px;height:56px;display:block;margin:0 0 6px}.hero .mount{width:100%;max-width:300px;aspect-ratio:852/170;display:block;margin:0 auto}.hlogo{width:26px;height:26px;vertical-align:-6px;margin-right:8px}
+.hero{text-align:center;margin:6px 0 10px}.hero .logo{width:56px;height:56px;display:block;margin:0 0 6px}.hero .mount{width:100%;max-width:300px;aspect-ratio:852/170;display:block;margin:0 auto}.hlogo{width:26px;height:26px;display:inline-block;vertical-align:-6px;margin-right:8px}
 </style></head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="vg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3fa7ff"/><stop offset="1" stop-color="#37e0b0"/></linearGradient></defs>
 <symbol id="i-chip" viewBox="-8 -8 216 216"><g stroke="url(#vg)" stroke-width="6" stroke-linecap="round" fill="none"><path d="M40 -6V22M80 -6V22M120 -6V22M40 178V206M80 178V206M120 178V206M-6 40H22M-6 80H22M-6 120H22M178 40H206M178 80H206M178 120H206"/><rect x="20" y="20" width="160" height="160" rx="22" fill="#0b1220"/><circle cx="100" cy="100" r="44"/><path d="M100 56V30M100 170V144M56 100H30M170 100H144"/></g><circle cx="100" cy="100" r="14" fill="url(#vg)"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></symbol>
+<symbol id="i-wifi" viewBox="0 0 24 24"><path d="M2.5 9.2a14 14 0 0 1 19 0"/><path d="M5.7 12.6a9.4 9.4 0 0 1 12.6 0"/><path d="M8.9 16a4.8 4.8 0 0 1 6.2 0"/><circle cx="12" cy="19.2" r=".9"/></symbol>
+<symbol id="i-chipn" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/><rect x="9" y="10.5" width="6" height="5" rx="1"/><path d="M10.2 10.5V9a1.8 1.8 0 0 1 3.6 0v1.5"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"/></symbol>
+<symbol id="i-auto" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17a8.5 8.5 0 0 0 0-17z" fill="currentColor"/></symbol>
+<symbol id="i-out" viewBox="0 0 24 24"><path d="M9 4H5.5A1.5 1.5 0 0 0 4 5.5v13A1.5 1.5 0 0 0 5.5 20H9"/><path d="M15 8l4 4-4 4M19 12H9"/></symbol>
 <symbol id="i-vesuvio" viewBox="-6 330 852 170"><g fill="none" stroke="url(#vg)" stroke-linecap="round" stroke-linejoin="round"><path d="M0 456C70 452 130 444 200 432C270 420 340 398 420 370C440 362 452 350 468 347C484 345 492 356 510 362C525 366 536 358 552 349C568 339 584 337 600 338C620 339 635 346 650 354C675 367 705 380 740 388C775 395 805 402 838 410" stroke-width="9"/><path d="M208 464C280 458 380 456 470 455C520 455 560 454 592 454M208 464C300 470 380 474 440 477C520 481 610 485 692 488" stroke-width="7" stroke-opacity=".8"/><path d="M478 451C520 446 570 445 620 445C690 444 760 444 805 449" stroke-width="7" stroke-opacity=".55"/></g></symbol></svg>
 <div id="login" class="card hide">
  <select class="lsel" onchange="setLang(this.value)" style="width:auto;float:right;margin:0;padding:4px 8px"></select>
@@ -63,11 +108,17 @@ td,th{text-align:left;padding:6px;border-bottom:1px solid #222c39;font-size:14px
 </div>
 
 <div id="app" class="hide">
-<header><b><svg class="hlogo" aria-hidden="true"><use href="#i-chip"/></svg>VesevOS</b><span id="hd" style="color:var(--mut)"></span><span><select class="lsel" onchange="setLang(this.value)" style="width:auto;margin:0 8px 0 0;padding:4px 8px"></select><button class="btn gray" onclick="logout()">Esci</button></span></header>
-<nav id="nav"></nav>
+<nav class="side" id="nav"></nav>
+<header class="top"><b class="tname"><svg class="hlogo" aria-hidden="true"><use href="#i-chip"/></svg>VesevOS</b><span class="bchip" id="bchip"></span><span class="sp"></span><span id="hd" style="color:var(--mut);font-size:13px"></span>
+ <select class="lsel" onchange="setLang(this.value)" style="width:auto;margin:0 4px;padding:4px 8px"></select>
+ <button class="ib" id="bellb" onclick="bellTog()"><svg class="i"><use href="#i-bell"/></svg><span class="bdg hide" id="bdg"></span></button>
+ <button class="ib" id="thb" onclick="themeCycle()"><svg class="i"><use id="thu" href="#i-auto"/></svg></button>
+ <button class="ib" id="outb" onclick="logout()"><svg class="i"><use href="#i-out"/></svg></button></header>
+<div class="alerts hide" id="alerts"></div>
+<div class="sub gsub hide" id="gsub"></div>
 <main>
 <section id="t_sum">
- <div class="card"><h3>Riepilogo</h3><div id="sum"></div></div>
+ <div class="hl" id="home"></div>
 </section>
 <section id="t_stato" class="hide">
  <div class="card"><h3>Uso risorse</h3><div id="res"></div></div>
@@ -122,7 +173,10 @@ R"VOSPAGE(   <label>Password Wi-Fi</label><input type="password" id="w_pass" pla
   <div id="shm" class="msg"></div></div>
 </section>
 <section id="t_task" class="hide">
- <div class="card"><h3>Task in esecuzione</h3><pre id="tk"></pre><button class="btn" onclick="loadTasks()">Aggiorna</button></div>
+ <div class="card"><h3>Task in esecuzione</h3>
+  <div id="tkinfo" style="color:var(--mut);margin-bottom:8px"></div>
+  <div style="overflow-x:auto"><table id="tktab" class="sortable"></table></div>
+  <div id="tkm" class="msg"></div></div>
 </section>
 <section id="t_ora" class="hide">
  <div class="card"><h3>Data e ora</h3><div id="oranow" style="font-size:22px;margin-bottom:8px"></div>
@@ -185,14 +239,11 @@ R"VOSPAGE(   <label>Password Wi-Fi</label><input type="password" id="w_pass" pla
   <button class="btn gray" onclick="restoreCfg()">Ripristina</button>
   <button class="btn red" onclick="factory()">Azzera tutto</button>
   <div id="cm" class="msg"></div></div>
- <div class="card"><h3>Cambia password</h3>
-  <label>Vecchia</label><input type="password" id="p_old"><label>Nuova (min 6)</label><input type="password" id="p_new">
-  <button class="btn" onclick="chPass()">Cambia</button><div id="pm" class="msg"></div></div>
  <div class="card"><h3>Lingue</h3>
   <div id="lglist"></div>
+  <label style="display:block;margin-top:12px">Carica un file di lingua (.json)</label><input type="file" id="lgf" accept=".json">
 )VOSPAGE"
-R"VOSPAGE(  <label style="display:block;margin-top:12px">Carica un file di lingua (.json)</label><input type="file" id="lgf" accept=".json">
-  <button class="btn" onclick="upLang()">Carica lingua</button><div id="lgm" class="msg"></div>
+R"VOSPAGE(  <button class="btn" onclick="upLang()">Carica lingua</button><div id="lgm" class="msg"></div>
   <p style="color:var(--mut)">Un file per lingua, con il nome uguale al codice (per esempio en.json). Lo stesso file traduce la pagina e i messaggi della shell.</p>
   <div id="lgsp" style="color:var(--mut)"></div></div>
  <div class="card"><h3>Licenze e note legali</h3>
@@ -202,9 +253,29 @@ R"VOSPAGE(  <label style="display:block;margin-top:12px">Carica un file di lingu
  <div class="card"><h3>Log</h3><pre id="lg"></pre><button class="btn" onclick="loadLog()">Aggiorna</button></div>
 </section>
 <div class="foot"><a href="/api/license?id=notice" target="_blank">Note legali e licenze</a> &middot; <a href="https://github.com/paolellad79/VesevOS" target="_blank" rel="noopener">GitHub</a></div>
+<section id="t_sec" class="hide">
+ <div class="card"><h3>Cambia password</h3>
+  <label>Vecchia</label><input type="password" id="p_old"><label>Nuova (min 6)</label><input type="password" id="p_new">
+  <button class="btn" onclick="chPass()">Cambia</button><div id="pm" class="msg"></div></div>
+ <div class="card"><h3>Password sulla seriale</h3>
+  <div class="tog"><div>Proteggi la seriale (cavo USB) con la password</div><button class="sw1" id="sw_ser" onclick="serToggle()" aria-label="Seriale"></button></div>
+  <div id="serwarn" class="msg ko" style="margin-top:8px"></div>
+  <p style="color:var(--mut)">Pagina web, shell web e API sono sempre protette dalla password. Se spegni questo interruttore, chi collega il cavo USB ottiene subito la shell. Il tasto BOOT premuto 8 secondi azzera la password e riaccende la protezione.</p>
+  <div id="serm" class="msg"></div></div>
+</section>
 </main></div>
 <script>
-var TABS=[["sum","Riepilogo"],["stato","Stato"],["wifi","Rete"],["shell","Shell"],["task","Task"],["ora","Ora"],["file","File"],["led","LED"],["pin","Pin"],["conf","Config"]];
+var GRP=[["home","Home"],["rete","Rete"],["hw","Hardware"],["sys","Sistema"],["sec","Sicurezza"]];
+var GMAP={home:["sum"],rete:["wifi"],hw:["pin","led"],sys:["task","stato","file","ora","shell","conf"],sec:["sec"]};
+var GICO={home:"i-home",rete:"i-wifi",hw:"i-chipn",sys:"i-gear",sec:"i-shield"};
+var TABS=[["sum","Home"],["wifi","Rete"],["pin","Pin"],["led","LED"],["task","Task"],["stato","Stato"],["file","File"],["ora","Ora"],["shell","Shell"],["conf","Config"],["sec","Password"]];
+var LASTG={};
+function gOf(id){for(var g in GMAP)if(GMAP[g].indexOf(id)>=0)return g;return"home"}
+var THEME="auto";try{THEME=localStorage.getItem("vth")||"auto"}catch(e){}
+function themeApply(){var m=THEME;if(m=="auto")m=(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches)?"light":"dark";document.documentElement.setAttribute("data-theme",m);
+ var u=$("thu");if(u)u.setAttribute("href",THEME=="auto"?"#i-auto":THEME=="light"?"#i-sun":"#i-moon");var b=$("thb");if(b)b.title=t("Tema")+": "+(THEME=="auto"?t("Automatico"):THEME=="light"?t("Chiaro"):t("Scuro"))}
+function themeCycle(){THEME=THEME=="auto"?"light":THEME=="light"?"dark":"auto";try{localStorage.setItem("vth",THEME)}catch(e){}themeApply()}
+if(window.matchMedia)try{matchMedia("(prefers-color-scheme: light)").addEventListener("change",function(){if(THEME=="auto")themeApply()})}catch(e){}
 var DICT={},LANG="it",LANGS=[{code:"it",name:"Italiano"}];
 function t(s){var v=DICT[s];return v?v:s}
 function tf(s){var a=arguments;return t(s).replace(/\{(\d)\}/g,function(m,i){return a[+i+1]})}
@@ -236,10 +307,18 @@ var cur="sum",S=null,timer=null;
 function $(i){return document.getElementById(i)}
 function api(u,o){return fetch(u,o).then(function(r){if(r.status==401){showLogin();throw 0}return r})}
 function post(u,d){var b=new URLSearchParams(d).toString();return api(u,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:b})}
-function msg(id,t,ok){var e=$(id);e.textContent=t;e.className="msg "+(ok?"ok":"ko")}
-function buildNav(){var h="";TABS.forEach(function(x){h+='<button id="n_'+x[0]+'" onclick="show(\''+x[0]+'\')">'+esc(t(x[1]))+'</button>'});$("nav").innerHTML=h;show(cur)}
-function show(t){cur=t;TABS.forEach(function(x){$("t_"+x[0]).className=x[0]==t?"":"hide";$("n_"+x[0]).className=x[0]==t?"on":""});
- if(t=="shell"){shLoadCmds();$("si").focus()}if(t=="task")loadTasks();if(t=="pin")loadPins();if(t=="conf"){loadLog();loadLangs();loadLic()};if(t=="wifi")fillNet();if(t=="led")fillLed();if(t=="ora")loadTime();if(t=="file")fList(fp)}
+function msg(id,t,ok){var e=$(id);clearTimeout(e._tm);e.className="msg";void e.offsetWidth;e.textContent=t;e.className="msg "+(ok?"ok":"ko");
+ if(ok)e._tm=setTimeout(function(){e.classList.add("out");e._tm=setTimeout(function(){e.className="msg";e.textContent=""},400)},3000)}
+function buildNav(){var h='<svg class="i slogo" style="stroke:url(#vg)"><use href="#i-chipn"/></svg>';
+ GRP.forEach(function(g){h+='<button class="nb" id="n_'+g[0]+'" onclick="gGo(\''+g[0]+'\')"><svg class="i"><use href="#'+GICO[g[0]]+'"/></svg>'+esc(t(g[1]))+'</button>'});$("nav").innerHTML=h;$("bellb").title=t("Allarmi");$("outb").title=t("Esci");themeApply();show(cur)}
+function gGo(g){show(LASTG[g]||GMAP[g][0])}
+function show(id){cur=id;var g=gOf(id);LASTG[g]=id;
+ TABS.forEach(function(x){$("t_"+x[0]).className=x[0]==id?"":"hide"});
+ GRP.forEach(function(x){$("n_"+x[0]).className="nb"+(x[0]==g?" on":"")});
+ var L=GMAP[g],h="";if(L.length>1){TABS.forEach(function(x){if(L.indexOf(x[0])>=0)h+='<button class="'+(x[0]==id?"on":"")+'" onclick="show(\''+x[0]+'\')">'+esc(t(x[1]))+'</button>'})}
+ $("gsub").innerHTML=h;$("gsub").className="sub gsub"+(h?"":" hide");$("alerts").className="alerts hide";
+ if(id=="shell"){shLoadCmds();$("si").focus()}if(id!="task")clearInterval(TK.tm);if(id=="task")loadTasks();if(id=="pin")loadPins();if(id=="conf"){loadLog();loadLangs();loadLic()};if(id=="wifi")fillNet();if(id=="led")fillLed();if(id=="ora")loadTime();if(id=="file")fList(fp);
+ if(id=="sec")fillSec();if(id=="sum")homeDraw()}
 var AUTHSET=true;
 function showLoginText(){$("lt").textContent=AUTHSET?t("Accesso"):t("Imposta password")}
 function showLogin(){clearInterval(timer);$("app").className="hide";$("login").className="card";
@@ -249,17 +328,58 @@ function doLogin(){post("/api/login",{p:$("lp").value}).then(function(r){return 
 function logout(){post("/api/logout",{}).then(showLogin)}
 function start(){$("login").className="hide";$("app").className="";buildNav();poll();timer=setInterval(poll,2000)}
 function row(a,b){return '<div class="row"><span>'+a+'</span><span>'+b+'</span></div>'}
-function bar(p){return '<div class="bar"><i style="width:'+p+'%"></i></div>'}
+)VOSPAGE"
+R"VOSPAGE(function bar(p){return '<div class="bar"><i style="width:'+p+'%"></i></div>'}
 function tmp(c,u){return u?(c*9/5+32).toFixed(1)+" &deg;F":c.toFixed(1)+" &deg;C"}
 function kb(n){return Math.round(n/1024)+" KB"}
 function poll(){api("/api/status").then(function(r){return r.json()}).then(function(s){S=s;
- $("hd").textContent=s.net.ip;
- $("sum").innerHTML=row(t("Sistema"),s.name+" "+s.version)+row(t("Acceso da"),s.uptime)+row(t("Ultimo reset"),s.reset)+row(t("Avvii totali"),s.boots)+row(t("Ore di vita"),tf("{0} h {1} min",Math.floor(s.lifeSec/3600),Math.floor(s.lifeSec/60)%60))+
-  row(t("Rete"),s.net.mode+" - "+s.net.ssid)+row(t("Nome"),s.net.fqdn)+row(t("Indirizzo IP"),s.net.ip)+row(t("CPU"),tf("{0}% a {1} MHz",s.cpu,s.cpuMhz))+row(t("Temperatura CPU"),tmp(s.temp,s.tempUnit)+(s.hot?" - "+t("TROPPO CALDO"):""));
+ $("hd").textContent=s.net.ip;$("bchip").textContent=s.net.host+" &#183; "+boardId(s);
  var hp=Math.round(100-100*s.heapFree/s.heapTotal),pp=s.psramTotal?Math.round(100-100*s.psramFree/s.psramTotal):0,fp=s.flashTotal?Math.round(100*s.flashUsed/s.flashTotal):0;
  $("res").innerHTML=row(t("CPU"),s.cpu+"%")+bar(s.cpu)+row("RAM",kb(s.heapTotal-s.heapFree)+" / "+kb(s.heapTotal))+bar(hp)+
   row("PSRAM",kb(s.psramTotal-s.psramFree)+" / "+kb(s.psramTotal))+bar(pp)+row(t("Flash (file)"),kb(s.flashUsed)+" / "+kb(s.flashTotal))+bar(fp);
- if(document.activeElement!=$("cpumode"))$("cpumode").value=s.cpuMode;draw("cc",s.cpuHist,0,100);draw("tc",s.tempUnit?s.tempHist.map(function(c){return c*9/5+32}):s.tempHist,null,null)}).catch(function(){})}
+ if(document.activeElement!=$("cpumode"))$("cpumode").value=s.cpuMode;draw("cc",s.cpuHist,0,100);draw("tc",s.tempUnit?s.tempHist.map(function(c){return c*9/5+32}):s.tempHist,null,null);
+ alertsCalc(s,hp,pp,fp);if(cur=="sum")homeDraw()}).catch(function(){})}
+function boardId(s){var m=(s.net.mac||"").split(":");return m.length==6?(m[4]+m[5]).toUpperCase():"----"}
+function hcol(p,w,k){return p>=k?"var(--ko)":p>=w?"var(--wa)":"var(--ok)"}
+function hring(l,txt,p,c,icon,go){var R=38,C=2*Math.PI*R;return'<div class="ring" onclick="show(\''+go+'\')"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="'+R+'" fill="none" stroke="var(--trk)" stroke-width="9"/><circle cx="50" cy="50" r="'+R+'" fill="none" stroke="'+c+'" stroke-width="9" stroke-linecap="round" stroke-dasharray="'+(C*Math.max(0,Math.min(100,p))/100)+' '+C+'" transform="rotate(-90 50 50)"/><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--mut)"><use href="#'+icon+'" x="35" y="35" width="30" height="30"/></g></svg><div class="v">'+txt+'</div><div class="l">'+esc(l)+'</div></div>'}
+function hbar(l,v,p,w,k){var c=p>=k?" k":p>=w?" w":"";return'<div class="pb'+c+'"><div class="t"><span>'+esc(l)+'</span><span>'+v+'</span></div><div class="tr"><i style="width:'+Math.min(100,p)+'%"></i></div></div>'}
+function harea(a,mn,mx,color,id){var w=600,h=120,n=a.length;if(n<2)return"";if(mn===null){mn=Math.min.apply(null,a)-2;mx=Math.max.apply(null,a)+2}
+ var pts=a.map(function(v,i){return[i*w/59,h-6-((v-mn)/(mx-mn))*(h-14)]}),l=pts.map(function(q,i){return(i?"L":"M")+q[0].toFixed(1)+" "+q[1].toFixed(1)}).join(" "),g="";
+ for(var i=1;i<4;i++)g+='<line x1="0" x2="'+w+'" y1="'+i*h/4+'" y2="'+i*h/4+'" stroke="var(--bd)"/>';
+ return'<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" style="width:100%;height:110px;display:block"><defs><linearGradient id="'+id+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+color+'" stop-opacity=".35"/><stop offset="1" stop-color="'+color+'" stop-opacity="0"/></linearGradient></defs>'+g+'<path d="'+l+" L"+(pts[n-1][0]).toFixed(1)+" "+h+" L0 "+h+'Z" fill="url(#'+id+')"/><path d="'+l+'" fill="none" stroke="'+color+'" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>'}
+var AL=[];
+function alertsCalc(s,hp,pp,fp){AL=[];var n=s.net;
+ if(s.hot)AL.push(["k",t("Temperatura CPU troppo alta")]);
+ if(hp>=90)AL.push(["k",t("RAM quasi esaurita")]);else if(hp>=80)AL.push(["w",t("RAM molto usata")]);
+ if(fp>=90)AL.push(["w",t("Spazio file quasi pieno")]);
+ if(n.st==3&&n.rssi<-75)AL.push(["w",t("Segnale Wi-Fi debole")]);
+ if(n.st==1)AL.push(["i",t("Modo punto di accesso: la scheda non e collegata a una rete")]);
+ if(n.st==2)AL.push(["w",t("Collegamento Wi-Fi in corso")]);
+ var b=$("bdg"),k=AL.filter(function(x){return x[0]!="i"}).length;b.textContent=AL.length;b.className="bdg"+(AL.some(function(x){return x[0]=="k"})?" k":"")+(AL.length?"":" hide");void k;
+ if(!$("alerts").classList.contains("hide"))bellDraw()}
+function bellDraw(){var h="";if(!AL.length)h="<div style='color:var(--mut)'>"+esc(t("Nessun allarme"))+"</div>";AL.forEach(function(a){h+="<div><span class='dot' style='background:"+(a[0]=="k"?"var(--ko)":a[0]=="w"?"var(--wa)":"var(--ac)")+"'></span>"+esc(a[1])+"</div>"});$("alerts").innerHTML=h}
+function bellTog(){var e=$("alerts");if(e.classList.contains("hide")){bellDraw();e.className="alerts"}else e.className="alerts hide"}
+function homeDraw(){var s=S;if(!s||!$("home"))return;var n=s.net,hp=Math.round(100-100*s.heapFree/s.heapTotal),pp=s.psramTotal?Math.round(100-100*s.psramFree/s.psramTotal):0,fp=s.flashTotal?Math.round(100*s.flashUsed/s.flashTotal):0;
+ var wp=n.st==3?2*(n.rssi+100):100,wt=n.st==3?n.rssi+" dBm":(n.st==1?"AP":"..."),wc=n.st==3?(n.rssi>-67?"var(--ok)":n.rssi>-75?"var(--wa)":"var(--ko)"):"var(--ac)";
+ var rv=s.rev,revs=Math.floor(rv/100)+"."+rv%100,mhz=s.cpuMhz,tc=s.tempUnit?s.temp*9/5+32:s.temp;
+ var h='<section class="rings">'+hring("CPU",s.cpu+"%",s.cpu,hcol(s.cpu,60,85),"i-chipn","stato")+hring("RAM",hp+"%",hp,hcol(hp,80,92),"i-chipn","stato")+hring("PSRAM",pp+"%",pp,hcol(pp,80,92),"i-chipn","stato")+hring(t("File"),fp+"%",fp,hcol(fp,75,90),"i-gear","file")+hring(t("Wi-Fi"),wt,wp,wc,"i-wifi","wifi")+hring(t("Temperatura"),tmp(s.temp,s.tempUnit),s.temp,hcol(s.temp,70,80),"i-sun","stato")+'</section>';
+ h+='<section class="card hid"><h3>'+esc(t("Stai usando"))+'</h3><div class="big">'+esc(n.host)+'</div><div class="subt">'+esc(s.chip)+" &#183; ID "+boardId(s)+'</div><div style="height:8px"></div>'+
+  row(t("Chip"),esc(s.chip)+" rev "+revs)+row(t("Processore"),tf("{0} core a {1} MHz",s.cores,mhz))+row(t("Memoria"),tf("{0} MB flash &#183; {1} MB PSRAM",Math.round(s.flashChip/1048576),Math.round(s.psramTotal/1048576)))+
+  row(t("Acceso da"),esc(s.uptime))+row(t("Ore di vita"),tf("{0} h {1} min",Math.floor(s.lifeSec/3600),Math.floor(s.lifeSec/60)%60))+row(t("Avvii totali"),s.boots)+row(t("Ultimo reset"),esc(s.reset))+row(t("Sistema"),esc(s.name+" "+s.version))+
+  '<button class="btn" style="margin-top:10px" onclick="identify()">'+esc(t("Trova questa scheda"))+'</button><div id="idm" class="msg"></div></section>';
+ h+='<section class="card hres"><h3>'+esc(t("Risorse"))+'</h3>'+hbar("RAM",kb(s.heapFree)+" "+t("liberi"),hp,80,92)+hbar("PSRAM",kb(s.psramFree)+" "+t("liberi"),pp,80,92)+hbar(t("File in flash"),kb(s.flashUsed)+" / "+kb(s.flashTotal),fp,75,90)+
+  '<h3 style="margin-top:14px">'+esc(t("CPU (ultimi 60 s)"))+'</h3>'+harea(s.cpuHist,0,100,"#3fa7ff","hc1")+'</section>';
+ var sg=n.st==3?'<span class="sig" style="margin-left:10px">'+[6,10,15,20].map(function(x,i){return'<i class="'+(n.rssi>[-90,-80,-70,-60][i]?"on":"")+'" style="height:'+x+'px"></i>'}).join("")+'</span>':"";
+ h+='<section class="card hnet"><h3>'+esc(t("Rete"))+'</h3><div class="big">'+esc(n.ssid)+sg+'</div><div style="height:6px"></div>'+row(t("Modo"),esc(n.mode))+row(t("Indirizzo IP"),esc(n.ip))+(n.gw?row("Gateway",esc(n.gw)):"")+row(t("Canale"),n.ch||"-")+(n.clients!==undefined?row(t("Dispositivi collegati"),n.clients):"")+row(t("Nome"),esc(n.fqdn))+'</section>';
+ h+='<section class="card htmp"><h3>'+esc(t("Temperatura CPU (ultimi 60 s)"))+'</h3>'+harea(s.tempUnit?s.tempHist.map(function(c){return c*9/5+32}):s.tempHist,null,null,"#37e0b0","hc2")+'</section>';
+ $("home").innerHTML=h}
+function identify(){post("/api/identify",{}).then(function(r){return r.json()}).then(function(j){msg("idm",j.ok?t("Guarda il LED: lampeggia a colori per 10 secondi"):j.err,j.ok);setTimeout(function(){var e=$("idm");if(e)e.className="msg"},5000)}).catch(function(){})}
+function fillSec(){api("/api/settings").then(function(r){return r.json()}).then(function(c){SER=c.serialAuth;serDraw()})}
+var SER=true;
+function serDraw(){$("sw_ser").className="sw1"+(SER?" on":"");var w=$("serwarn");if(SER){w.className="msg";w.textContent=""}else{w.className="msg ko";w.textContent=t("Attenzione: la seriale e aperta, chi ha il cavo USB puo usare la shell senza password.")}}
+)VOSPAGE"
+R"VOSPAGE(function serToggle(){var nv=!SER;if(!nv&&!confirm(t("Spegnere la password sulla seriale? Chi collega il cavo USB potra usare la shell senza password.")))return;
+ post("/api/serialauth",{on:nv?"1":"0"}).then(function(r){return r.json()}).then(function(j){if(j.ok){SER=nv;serDraw();msg("serm",t("Salvato"),true);setTimeout(function(){$("serm").className="msg"},3000)}else msg("serm",j.err,false)}).catch(function(){})}
 function draw(id,a,mn,mx){var c=$(id),x=c.getContext("2d");x.clearRect(0,0,c.width,c.height);if(!a||a.length<2)return;
  if(mn===null){mn=Math.min.apply(null,a)-2;mx=Math.max.apply(null,a)+2}
  x.strokeStyle="#3fa7ff";x.lineWidth=2;x.beginPath();
@@ -273,8 +393,7 @@ function scanRes(){api("/api/wifi/scan").then(function(r){return r.json()}).then
  $("scanlist").innerHTML=h;window._sc=j.list})}
 function pick(i){$("w_ssid").value=window._sc[i].ssid;$("w_pass").focus()}
 
-)VOSPAGE"
-R"VOSPAGE(var TZS=[["Europe/Rome","CET-1CEST,M3.5.0,M10.5.0/3"],["Europe/London","GMT0BST,M3.5.0/1,M10.5.0"],["Europe/Athens","EET-2EEST,M3.5.0/3,M10.5.0/4"],["Europe/Moscow","MSK-3"],["UTC","UTC0"],["America/New_York","EST5EDT,M3.2.0,M11.1.0"],["America/Chicago","CST6CDT,M3.2.0,M11.1.0"],["America/Los_Angeles","PST8PDT,M3.2.0,M11.1.0"],["Asia/Tokyo","JST-9"],["Australia/Sydney","AEST-10AEDT,M10.1.0,M4.1.0/3"]];
+var TZS=[["Europe/Rome","CET-1CEST,M3.5.0,M10.5.0/3"],["Europe/London","GMT0BST,M3.5.0/1,M10.5.0"],["Europe/Athens","EET-2EEST,M3.5.0/3,M10.5.0/4"],["Europe/Moscow","MSK-3"],["UTC","UTC0"],["America/New_York","EST5EDT,M3.2.0,M11.1.0"],["America/Chicago","CST6CDT,M3.2.0,M11.1.0"],["America/Los_Angeles","PST8PDT,M3.2.0,M11.1.0"],["Asia/Tokyo","JST-9"],["Australia/Sydney","AEST-10AEDT,M10.1.0,M4.1.0/3"]];
 var fp="/",fedp="";
 function tzPick(){var v=$("o_tzs").value;if(v!="-1"){$("o_tz").value=TZS[v][1];$("o_tzn").value=TZS[v][0]}}
 function loadTime(){api("/api/time").then(function(r){return r.json()}).then(function(t){
@@ -321,7 +440,8 @@ function ipFill(ch){var n=RN.n,c=RN.c,ap=n.st==1,dh=$("w_dhcp").value=="1",ids=[
  ids.forEach(function(id,i){ipv(id,v[i],!ap&&!dh)})}
 function dh(){ipFill(true)}
 function drawAp(){var n=RN.n;$("apinfo").innerHTML=row(esc(t("Stato")),esc(n.st==1?t("Attivo"):t("Non attivo (sei collegato a una rete)")))+row(esc(t("Nome rete (SSID)")),esc(n.apSsid))+row(esc(t("Indirizzo IP")),"192.168.4.1")+row(esc(t("Subnet mask")),"255.255.255.0")}
-function fillNet(){Promise.all([api("/api/settings").then(function(r){return r.json()}),api("/api/status").then(function(r){return r.json()})]).then(function(a){
+)VOSPAGE"
+R"VOSPAGE(function fillNet(){Promise.all([api("/api/settings").then(function(r){return r.json()}),api("/api/status").then(function(r){return r.json()})]).then(function(a){
  RN.c=a[0];RN.n=a[1].net;$("w_ssid").value=RN.c.staSsid;$("w_dhcp").value=RN.c.staDhcp?"1":"0";ipFill(false);drawAp();buildSub();fillSys()}).catch(function(){})}
 function saveWifi(){var mid=RN.s=="ip"?"wm2":"wm";if(!$("w_ssid").value){msg(mid,t("Prima scegli la rete nella scheda Wi-Fi"),false);return}
  post("/api/wifi/save",{ssid:$("w_ssid").value,pass:$("w_pass").value,dhcp:$("w_dhcp").value,ip:$("w_ip").value,mask:$("w_mask").value,gw:$("w_gw").value,d1:$("w_d1").value,d2:$("w_d2").value})
@@ -332,8 +452,7 @@ var SHOPT={led:["state","heartbeat","fixed","off"],led2:["off","on","heartbeat"]
 try{SH.h=JSON.parse(localStorage.getItem("vos_hist")||"[]")}catch(e){SH.h=[]}
 function shSave(){try{localStorage.setItem("vos_hist",JSON.stringify(SH.h.slice(-100)))}catch(e){}}
 function shOut(txt,cls){var o=$("so"),d=document.createElement("div");d.textContent=txt===""?"&#160;":txt;if(cls)d.className=cls;o.appendChild(d);while(o.childNodes.length>600)o.removeChild(o.firstChild);o.scrollTop=o.scrollHeight}
-)VOSPAGE"
-R"VOSPAGE(function shKind(l){if(/errore|error|non valid|invalid|non autorizzat|unauthor|fallit|failed|sconosciut|unknown|nicht|ung.ltig|desconocid/i.test(l))return"e";
+function shKind(l){if(/errore|error|non valid|invalid|non autorizzat|unauthor|fallit|failed|sconosciut|unknown|nicht|ung.ltig|desconocid/i.test(l))return"e";
  if(/attenzione|avviso|warning|achtung|aviso/i.test(l))return"w";if(/^\s*(ok|fatto|done|salvato|saved|gespeichert|guardado)\b/i.test(l))return"g";return""}
 function shLoadCmds(){if(SH.loaded)return;SH.loaded=true;post("/api/shell",{c:"help"}).then(function(r){return r.text()}).then(function(x){var m={};
  x.split("\n").forEach(function(l){var k=/^ {2}([a-z0-9-]+)/.exec(l);if(k)m[k[1]]=1});SH.cmds=Object.keys(m).concat(["clear","history"]).sort()}).catch(function(){SH.loaded=false})}
@@ -372,7 +491,28 @@ function shClear(){$("so").textContent=""}
 function shCopy(){var x=$("so").innerText;var ok=function(){msg("shm",t("Copiato"),true);setTimeout(function(){$("shm").className="msg"},3000)};
  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(x).then(ok).catch(function(){});
  else{var a=document.createElement("textarea");a.value=x;document.body.appendChild(a);a.select();try{document.execCommand("copy");ok()}catch(e){}document.body.removeChild(a)}}
-function loadTasks(){api("/api/tasks").then(function(r){return r.text()}).then(function(t){$("tk").textContent=t})}
+var TK={d:[],prev:null,col:"n",asc:true,tm:null,total:0};
+var TKCOLS=[["n","Nome"],["t","Tipo"],["s","Stato"],["p","Priorita"],["stk","Stack libero"],["cpu","CPU"]];
+function loadTasks(){clearInterval(TK.tm);if(cur!="task")return;tkPoll();TK.tm=setInterval(function(){if(cur!="task"){clearInterval(TK.tm);TK.prev=null;return}tkPoll()},2000)}
+function tkPoll(){api("/api/tasklist").then(function(r){return r.json()}).then(function(j){
+ if(!j.ok){$("tkinfo").textContent=t("(dettagli non disponibili in questa build)");$("tktab").innerHTML="";return}
+ var dt=TK.prev?j.total-TK.prev.total:0,hasRt=j.total>0;
+ j.tasks.forEach(function(x){x.cpu=-1;if(hasRt&&TK.prev&&dt>0&&TK.prev.m[x.id]!==undefined){x.cpu=Math.min(100,Math.max(0,100*(x.rt-TK.prev.m[x.id])/dt))}});
+ var m={};j.tasks.forEach(function(x){m[x.id]=x.rt});TK.prev={total:j.total,m:m};TK.hasCpu=hasRt;TK.d=j.tasks;TK.total=j.total;tkDraw()}).catch(function(){})}
+function tkSort(c){if(TK.col==c)TK.asc=!TK.asc;else{TK.col=c;TK.asc=(c=="n"||c=="t"||c=="s")}tkDraw()}
+function tkState(s){return[t("In esecuzione"),t("Pronto"),t("In attesa"),t("Sospeso"),t("Eliminato"),"?"][s]||"?"}
+function tkType(x){return x.t==2?t("App"):x.t==1?t("VesevOS"):t("Sistema")}
+function tkDraw(){var c=TK.col,k=TK.asc?1:-1,d=TK.d.slice();
+ d.sort(function(a,b){var x=a[c],y=b[c];if(c=="n"){x=a.n.toLowerCase();y=b.n.toLowerCase()}return(x<y?-1:x>y?1:0)*k||(a.id-b.id)});
+ var h="<tr>";TKCOLS.forEach(function(x){if(x[0]=="cpu"&&!TK.hasCpu)return;h+='<th onclick="tkSort(\''+x[0]+'\')">'+esc(t(x[1]))+(TK.col==x[0]?(TK.asc?" &#9650;":" &#9660;"):"")+"</th>"});
+ h+="<th></th></tr>";
+ d.forEach(function(x){h+="<tr><td>"+esc(x.n)+"</td><td><span class='pill "+(x.t==2?"a":x.t==1?"v":"")+"'>"+esc(tkType(x))+"</span></td><td>"+esc(tkState(x.s))+"</td><td>"+x.p+"</td><td>"+x.stk+" B</td>"+
+)VOSPAGE"
+R"VOSPAGE(  (TK.hasCpu?"<td>"+(x.cpu<0?"-":"<span class='cbar'><i style='width:"+x.cpu+"%'></i></span>"+x.cpu.toFixed(0)+"%")+"</td>":"")+
+  "<td>"+(x.k?"<button class='btn red sm' onclick=\"tkKill('"+esc(x.n)+"')\">"+esc(t("Ferma"))+"</button>":"<span title='"+esc(t("Protetto"))+"' style='color:var(--mut)'>&#128274;</span>")+"</td></tr>"});
+ $("tktab").innerHTML=h;$("tkinfo").textContent=tf("{0} task. Clicca un titolo per ordinare.",d.length)}
+function tkKill(n){if(!confirm(tf("Fermare il task '{0}'? Resta fermo fino al riavvio della scheda e alcune funzioni possono smettere di funzionare.",n)))return;
+ post("/api/taskkill",{name:n}).then(function(r){return r.json()}).then(function(j){msg("tkm",j.ok?tf("Task '{0}' fermato",n):j.err,j.ok);setTimeout(function(){$("tkm").className="msg"},4000);tkPoll()}).catch(function(){})}
 function fillLed(){api("/api/settings").then(function(r){return r.json()}).then(function(c){$("l_mode").value=c.ledMode;
  $("l_col").value="#"+("000000"+c.ledColor.toString(16)).slice(-6);$("l_br").value=c.ledBrightness;$("m_mode").value=c.led2Mode;$("m_pin").value=c.led2Pin;$("m_br").value=c.led2Bright;$("m_inv").value=c.led2Invert?"1":"0"})}
 function saveLed(){post("/api/led",{mode:$("l_mode").value,color:parseInt($("l_col").value.slice(1),16),br:$("l_br").value})
@@ -410,8 +550,7 @@ function pinPanel(){var e=$("pinpanel"),h="";
   h+='<div id="pnm" class="msg"></div>'}
  e.innerHTML=h;pinLevel()}
 function pinWarn(){if(PWARN)return true;
-)VOSPAGE"
-R"VOSPAGE( var w=[t("ATTENZIONE: una prova sbagliata puo danneggiare la scheda."),"",t("- Usa solo 3,3 V. Mai 5 V o tensioni piu alte su un pin."),t("- Ogni pin regge pochi mA: un LED vuole una resistenza da 220-470 ohm."),t("- Motori, rel&#232; e carichi grandi vanno pilotati con un transistor."),t("- Non collegare due uscite insieme e non toccare i pin di alimentazione."),"",t("Vuoi continuare?")].join("\n");
+ var w=[t("ATTENZIONE: una prova sbagliata puo danneggiare la scheda."),"",t("- Usa solo 3,3 V. Mai 5 V o tensioni piu alte su un pin."),t("- Ogni pin regge pochi mA: un LED vuole una resistenza da 220-470 ohm."),t("- Motori, rel&#232; e carichi grandi vanno pilotati con un transistor."),t("- Non collegare due uscite insieme e non toccare i pin di alimentazione."),"",t("Vuoi continuare?")].join("\n");
  if(!confirm(w))return false;PWARN=true;return true}
 function pinGo(a){if(PSEL<0)return;if(a!="off"&&!pinWarn())return;
  var d={gpio:PSEL,action:a};if(a=="read")d.pull=$("pn_pull").value;
@@ -441,7 +580,8 @@ function upLang(){var f=$("lgf").files[0];if(!f){msg("lgm",t("Scegli un file"),f
   if(code==LANG)setLang(code);else loadLangs()})}
 function delLang(c){if(!confirm(tf("Eliminare la lingua {0}?",c)))return;
  var go=function(){post("/api/fs/del",{path:"/lang/"+c+".json"}).then(function(r){return r.json()}).then(function(j){msg("lgm",j.ok?t("Fatto"):j.err,j.ok);loadLangs()})};
- if(c==LANG){post("/api/lang",{code:"it"}).then(function(){LANG="it";DICT={};try{localStorage.setItem("vl","it")}catch(e){}refreshView();go()})}else go()}
+)VOSPAGE"
+R"VOSPAGE( if(c==LANG){post("/api/lang",{code:"it"}).then(function(){LANG="it";DICT={};try{localStorage.setItem("vl","it")}catch(e){}refreshView();go()})}else go()}
 function loadLic(){fetch("/api/license").then(function(r){return r.json()}).then(function(l){
   var h="";l.forEach(function(x){h+='<button class="btn gray" onclick="showLic(\''+esc(x.id)+'\')">'+esc(x.title)+'</button>'});$("licbtn").innerHTML=h}).catch(function(){})}
 function showLic(id){fetch("/api/license?id="+encodeURIComponent(id)).then(function(r){return r.text()}).then(function(x){var e=$("licx");e.textContent=x;e.className="";e.scrollTop=0})}
@@ -452,5 +592,6 @@ function factory(){if(!confirm(t("Azzerare TUTTO (anche la password)?")))return;
 function chPass(){post("/api/passwd",{o:$("p_old").value,n:$("p_new").value}).then(function(r){return r.json()}).then(function(j){msg("pm",j.ok?t("Password cambiata"):j.err,j.ok)})}
 fetch("/api/auth").then(function(r){return r.json()}).then(function(j){AUTHSET=j.set;initLang(j.lang)}).catch(function(){initLang("it")});
 api("/api/status").then(function(){start()}).catch(function(){});
+themeApply();
 </script></body></html>
 )VOSPAGE";

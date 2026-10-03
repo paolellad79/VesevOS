@@ -47,7 +47,7 @@ class P(HTMLParser):
 P().feed(static)
 for m in re.finditer(r'\b(?:window\.)?tf?\(\s*"((?:[^"\\]|\\.)*)"', js):
     addw(json.loads('"' + m.group(1) + '"'))
-for arr in ('TABS', 'RSUB'):
+for arr in ('TABS', 'RSUB', 'TKCOLS', 'GRP'):
     for m in re.finditer(r'\["(\w+)","([^"]+)"\]', re.search(r'var %s=.*?;' % arr, js).group(0)):
         addw(m.group(2))
 web_keys.discard('VesevOS')

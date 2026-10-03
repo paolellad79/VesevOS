@@ -10,4 +10,5 @@ void ledInit();                       // avvia il task LED
 void ledSetNetState(NetState s);      // colore = stato rete
 void ledApplyConfig();                // rilegge cfg (modo/colore/luminosita/pin)
 void ledSetFault(bool on);            // rosso lampeggiante (errore grave)
+void ledIdentify(uint32_t ms);        // arcobaleno per ms millisecondi ("trova questa scheda")
 bool led2PinAllowed(int pin);        // pin ammesso per il LED aggiuntivo

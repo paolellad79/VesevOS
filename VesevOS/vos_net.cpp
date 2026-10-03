@@ -48,6 +48,8 @@ String netStatusJson() {
     if (g_state == NET_AP) { gw = WiFi.softAPIP().toString(); mk = "255.255.255.0"; }
   }
   j += ",\"gw\":\"" + gw + "\",\"mask\":\"" + mk + "\",\"dns\":\"" + d1 + "\",\"dns2\":\"" + d2 + "\"";
+  j += ",\"ch\":" + String((int)WiFi.channel());
+  if (g_state == NET_AP) j += ",\"clients\":" + String((int)WiFi.softAPgetStationNum());
   j += ",\"mac\":\"" + WiFi.macAddress() + "\"";
   j += "}";
   return j;

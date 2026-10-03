@@ -153,6 +153,9 @@ String sysStatusJson() {
   j += "\"uptimeSec\":" + String((unsigned long)sysUptimeSec()) + ",";
   j += "\"boots\":" + String(g_boot) + ",";
   j += "\"lifeSec\":" + String((unsigned long)sysLifeSec()) + ",";
+  j += "\"chip\":\"" + jsonEscape(String(ESP.getChipModel())) + "\",\"rev\":" + String((int)ESP.getChipRevision()) +
+       ",\"cores\":" + String((int)ESP.getChipCores()) + ",\"flashChip\":" + String((unsigned long)ESP.getFlashChipSize()) +
+       ",\"idf\":\"" + jsonEscape(String(ESP.getSdkVersion())) + "\",";
   j += "\"reset\":\"" + jsonEscape(g_reset) + "\",";
   j += "\"cpu\":" + String(g_cpu) + ",";
   j += "\"temp\":" + String(g_temp, 1) + ",";
@@ -185,4 +188,50 @@ String sysTasksText() {
   r += String(tr("(dettagli non disponibili in questa build)")) + "\n";
 #endif
   return r;
+}
+
+// ---- Task per la pagina (JSON) e arresto dei task consentiti ----
+// Tipo: 0 = sistema (protetto), 1 = VesevOS, 2 = app (futuro)
+// Si possono fermare solo i task della lista qui sotto (lista consentita, non lista dei vietati).
+static const char* const KILLABLE[] = {"led", "time", "monitor"};
+static const char* const OURS[] = {"led", "time", "monitor", "net"};
+
+static bool inList(const char* name, const char* const* list, int n) {
+  for (int i = 0; i < n; i++) if (strcmp(name, list[i]) == 0) return true;
+  return false;
+}
+
+String sysTasksJson() {
+#if (configUSE_TRACE_FACILITY == 1)
+  UBaseType_t n = uxTaskGetNumberOfTasks();
+  TaskStatus_t* a = (TaskStatus_t*)malloc((n + 2) * sizeof(TaskStatus_t));
+  if (!a) return "{\"ok\":false}";
+  uint32_t total = 0;
+  n = uxTaskGetSystemState(a, n + 2, &total);
+  String j = "{\"ok\":true,\"total\":" + String((unsigned long)total) + ",\"tasks\":[";
+  for (UBaseType_t i = 0; i < n; i++) {
+    const char* nm = a[i].pcTaskName;
+    int type = inList(nm, OURS, 4) ? 1 : 0;
+    bool kill = inList(nm, KILLABLE, 3);
+    if (i) j += ",";
+    j += "{\"n\":\"" + jsonEscape(String(nm)) + "\",\"id\":" + String((unsigned)a[i].xTaskNumber) +
+         ",\"s\":" + String((int)a[i].eCurrentState) + ",\"p\":" + String((unsigned)a[i].uxCurrentPriority) +
+         ",\"stk\":" + String((unsigned long)a[i].usStackHighWaterMark) + ",\"rt\":" + String((unsigned long)a[i].ulRunTimeCounter) +
+         ",\"t\":" + String(type) + ",\"k\":" + String(kill ? "true" : "false") + "}";
+  }
+  free(a);
+  return j + "]}";
+#else
+  return "{\"ok\":false}";
+#endif
+}
+
+bool sysTaskKill(const String& name, String& err) {
+  if (name.length() == 0 || name.length() > 16) { err = tr("Nome task non valido"); return false; }
+  if (!inList(name.c_str(), KILLABLE, 3)) { err = tr("Questo task e protetto: non si puo fermare"); return false; }
+  TaskHandle_t h = xTaskGetHandle(name.c_str());
+  if (!h) { err = tr("Task non trovato"); return false; }
+  vlog("TASK: fermato '%s' su richiesta (resta fermo fino al riavvio)", name.c_str());
+  vTaskDelete(h);
+  return true;
 }

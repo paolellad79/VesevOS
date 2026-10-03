@@ -57,6 +57,8 @@ static void led2Update(uint32_t now) {
 
 void ledSetNetState(NetState s) { g_net = s; }
 void ledSetFault(bool on) { g_fault = on; }
+static volatile uint32_t g_identUntil = 0;   // 0 = spento, altrimenti millis() di fine
+void ledIdentify(uint32_t ms) { g_identUntil = millis() + ms; if (!g_identUntil) g_identUntil = 1; }
 void ledApplyConfig() { g_reconf = true; }
 
 static void put(uint8_t r, uint8_t g, uint8_t b, uint8_t bright) {
@@ -85,6 +87,24 @@ static void ledTask(void*) {
     }
     uint32_t now = millis();
     led2Update(now);
+    if (g_identUntil) {
+      if ((int32_t)(g_identUntil - now) > 0) {
+        // arcobaleno: tinta che gira (0..5 settori da 60 gradi)
+        uint32_t h = (now / 4) % 360, f = h % 60, q = 255 * f / 60;
+        uint8_t r, g, b;
+        switch (h / 60) {
+          case 0: r = 255; g = q; b = 0; break;
+          case 1: r = 255 - q; g = 255; b = 0; break;
+          case 2: r = 0; g = 255; b = q; break;
+          case 3: r = 0; g = 255 - q; b = 255; break;
+          case 4: r = q; g = 0; b = 255; break;
+          default: r = 255; g = 0; b = 255 - q; break;
+        }
+        put(r, g, b, cfg.ledBrightness < 80 ? 80 : cfg.ledBrightness);
+        vTaskDelay(pdMS_TO_TICKS(20)); continue;
+      }
+      g_identUntil = 0;
+    }
     if (g_fault) {
       put(255, 0, 0, ((now / 150) & 1) ? cfg.ledBrightness : 0);
       vTaskDelay(pdMS_TO_TICKS(30)); continue;

@@ -60,6 +60,7 @@ static void ko(AsyncWebServerRequest* r, const String& e) { sendJson(r, "{\"ok\"
 static String settingsJson() {
   String j = "{";
   j += "\"hostname\":\"" + jsonEscape(cfg.hostname) + "\",\"domain\":\"" + jsonEscape(cfg.domain) + "\",";
+  j += "\"serialAuth\":" + String(cfg.serialAuth ? "true" : "false") + ",";
   j += "\"staSsid\":\"" + jsonEscape(cfg.staSsid) + "\",";
   j += "\"staDhcp\":" + String(cfg.staDhcp ? "true" : "false") + ",";
   j += "\"ip\":\"" + jsonEscape(cfg.ip) + "\",\"mask\":\"" + jsonEscape(cfg.mask) + "\",";
@@ -150,6 +151,21 @@ void webInit() {
   server.on("/api/tasks", HTTP_GET, [](AsyncWebServerRequest* r) {
     if (!checkAuth(r)) return;
     r->send(200, "text/plain; charset=utf-8", sysTasksText());
+  });
+
+  server.on("/api/serialauth", HTTP_POST, [](AsyncWebServerRequest* r) {
+    if (!checkAuth(r)) return;
+    cfg.serialAuth = (P(r, "on") != "0");
+    cfgSave();
+    vlog("SICUREZZA: password sulla seriale %s", cfg.serialAuth ? "attivata" : "disattivata");
+    ok(r);
+  });
+  server.on("/api/identify", HTTP_POST, [](AsyncWebServerRequest* r) { if (!checkAuth(r)) return; ledIdentify(10000); ok(r); });
+  server.on("/api/tasklist", HTTP_GET, [](AsyncWebServerRequest* r) { if (checkAuth(r)) sendJson(r, sysTasksJson()); });
+  server.on("/api/taskkill", HTTP_POST, [](AsyncWebServerRequest* r) {
+    if (!checkAuth(r)) return;
+    String err;
+    if (sysTaskKill(P(r, "name"), err)) ok(r); else ko(r, err);
   });
 
   server.on("/api/wifi/scan", HTTP_GET, [](AsyncWebServerRequest* r) { if (checkAuth(r)) sendJson(r, netScanJson()); });

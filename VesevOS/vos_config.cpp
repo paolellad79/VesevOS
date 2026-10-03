@@ -16,6 +16,7 @@ VosConfig cfg;
 void cfgDefaults() {
   cfg.hostname = "vesevos"; cfg.domain = ""; cfg.lang = "it";
   cfg.apSsid = "VesevOS";
+  cfg.serialAuth = true;
   cfg.apPass = "vesevos123";
   cfg.staEnabled = false;
   cfg.staSsid = ""; cfg.staPass = "";
@@ -70,6 +71,7 @@ String cfgExport(bool withSecrets) {
   s += "\nconfig auth 'auth'\n";
   opt(s, "salt", withSecrets ? cfg.authSalt : String(""));
   opt(s, "hash", withSecrets ? cfg.authHash : String(""));
+  opt(s, "serial", cfg.serialAuth ? "1" : "0");
   s += "\nconfig led 'led'\n";
   opt(s, "mode", String(cfg.ledMode));
   opt(s, "color", String(cfg.ledColor));
@@ -113,6 +115,7 @@ static void applyKey(const String& sec, const String& k, const String& v) {
   } else if (sec == "auth") {
     if (k == "salt" && v.length()) cfg.authSalt = v;
     else if (k == "hash" && v.length()) cfg.authHash = v;
+    else if (k == "serial") cfg.serialAuth = (v != "0");
   } else if (sec == "led") {
     if (k == "mode") cfg.ledMode = constrain(v.toInt(), 0, 3);
     else if (k == "color") cfg.ledColor = (uint32_t)strtoul(v.c_str(), NULL, 10) & 0xFFFFFF;
