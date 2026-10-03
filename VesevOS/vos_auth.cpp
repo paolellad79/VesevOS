@@ -96,7 +96,7 @@ void serialAuthSet(bool v) { g_serialAuthed = v; }
 struct Ban { uint32_t ip; uint8_t fails; uint8_t level; uint32_t until; uint32_t last; uint16_t denied; uint32_t deniedT0; };
 static Ban g_ban[BAN_SLOTS];
 
-String ipToStr(uint32_t ip) {
+static String banIpStr(uint32_t ip) {   // ordine dei byte di IPAddress (primo numero nel byte basso)
   char b[16]; snprintf(b, sizeof(b), "%u.%u.%u.%u", (unsigned)(ip & 255), (unsigned)((ip >> 8) & 255), (unsigned)((ip >> 16) & 255), (unsigned)(ip >> 24));
   return String(b);
 }
@@ -124,12 +124,12 @@ static bool banActive(Ban* b, uint32_t& wait) {
 static void banFail(Ban* b, const char* why) {
   b->last = millis();
   uint8_t maxF = cfg.banFails < 3 ? 3 : cfg.banFails;
-  if (++b->fails < maxF) { vlog("SICUREZZA: %s da %s (%u/%u)", why, ipToStr(b->ip).c_str(), b->fails, maxF); return; }
+  if (++b->fails < maxF) { vlog("SICUREZZA: %s da %s (%u/%u)", why, banIpStr(b->ip).c_str(), b->fails, maxF); return; }
   uint32_t secs = (cfg.banSecs < 10 ? 10 : cfg.banSecs) << (b->level > 6 ? 6 : b->level);
   if (secs > 3600) secs = 3600;
   b->until = millis() + secs * 1000UL; if (!b->until) b->until = 1;
   b->fails = 0; if (b->level < 10) b->level++;
-  vlog("SICUREZZA: IP %s bloccato per %lu s (blocco n. %u)", ipToStr(b->ip).c_str(), (unsigned long)secs, b->level);
+  vlog("SICUREZZA: IP %s bloccato per %lu s (blocco n. %u)", banIpStr(b->ip).c_str(), (unsigned long)secs, b->level);
 }
 
 bool authIpBlocked(uint32_t ip, uint32_t& wait) { return banActive(banSlot(ip, false), wait); }
@@ -157,7 +157,7 @@ String authBanJson() {
     Ban* b = &g_ban[i]; if (!b->ip || (!b->fails && !b->until && !b->level)) continue;
     uint32_t w = 0; banActive(b, w);
     if (!first) j += ","; first = false;
-    j += "{\"ip\":\"" + ipToStr(b->ip) + "\",\"fails\":" + String(b->fails) + ",\"wait\":" + String((unsigned long)w) + ",\"level\":" + String(b->level) + "}";
+    j += "{\"ip\":\"" + banIpStr(b->ip) + "\",\"fails\":" + String(b->fails) + ",\"wait\":" + String((unsigned long)w) + ",\"level\":" + String(b->level) + "}";
   }
   return j + "]}";
 }
@@ -167,7 +167,7 @@ String authBanText() {
   for (int i = 0; i < BAN_SLOTS; i++) {
     Ban* b = &g_ban[i]; if (!b->ip || (!b->fails && !b->until && !b->level)) continue;
     uint32_t w = 0; bool on = banActive(b, w);
-    t += ipToStr(b->ip) + "  " + (on ? trf("BLOCCATO ancora %lu s", (unsigned long)w) : trf("%u errori", b->fails)) + "\n"; n++;
+    t += banIpStr(b->ip) + "  " + (on ? trf("BLOCCATO ancora %lu s", (unsigned long)w) : trf("%u errori", b->fails)) + "\n"; n++;
   }
   if (!n) t = String(tr("Nessun indirizzo bloccato o sospetto")) + "\n";
   return t;
@@ -177,7 +177,7 @@ bool authUnban(const String& ip) {
   bool any = false;
   for (int i = 0; i < BAN_SLOTS; i++) {
     if (!g_ban[i].ip) continue;
-    if (ip == "all" || ipToStr(g_ban[i].ip) == ip) { memset(&g_ban[i], 0, sizeof(Ban)); any = true; }
+    if (ip == "all" || banIpStr(g_ban[i].ip) == ip) { memset(&g_ban[i], 0, sizeof(Ban)); any = true; }
   }
   if (ip == "all") { g_fails = 0; g_lockUntil = 0; any = true; }
   if (any) vlog("SICUREZZA: sblocco %s", ip.c_str());

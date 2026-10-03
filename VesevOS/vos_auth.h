@@ -15,7 +15,6 @@ void   authNoteDenied(uint32_t ip);                // richiesta senza sessione v
 String authBanJson();                              // {"fails":5,"secs":60,"list":[{ip,fails,wait,level}]}
 String authBanText();
 bool   authUnban(const String& ip);                // "all" o un indirizzo
-String ipToStr(uint32_t ip);
 bool   authLocked();                              // bloccato ora?
 String authNewSession();                          // crea token
 bool   authSessionValid(const String& token);
