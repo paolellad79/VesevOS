@@ -1,0 +1,121 @@
+// SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
+// VesevOS - vos_time.cpp
+#include "vos_time.h"
+#include "vos_config.h"
+#include "vos_net.h"
+#include "vos_util.h"
+#include "vos_log.h"
+#include <WiFi.h>
+#include <AsyncUDP.h>
+#include <sys/time.h>
+#include <time.h>
+
+static volatile bool g_apply = true;
+static bool g_ntpStarted = false;
+static AsyncUDP* g_udp = nullptr;      // creato solo se serve
+static bool g_serving = false;
+
+#define NTP_UNIX_OFFSET 2208988800UL   // secondi tra 1900 e 1970
+
+bool timeValid() { return time(nullptr) > 1700000000; }   // dopo novembre 2023
+
+void timeApply() { g_apply = true; }
+
+String timeNowStr() {
+  if (!timeValid()) return "non impostata";
+  time_t t = time(nullptr);
+  struct tm tmv;
+  localtime_r(&t, &tmv);
+  static const char* dfmt[3] = { "%d/%m/%Y", "%Y-%m-%d", "%m/%d/%Y" };
+  char d[16], h[16];
+  strftime(d, sizeof(d), dfmt[cfg.dateFmt > 2 ? 0 : cfg.dateFmt], &tmv);
+  strftime(h, sizeof(h), cfg.timeFmt ? "%I:%M:%S %p" : "%H:%M:%S", &tmv);
+  return String(d) + " " + String(h);
+}
+
+void timeSetEpoch(uint32_t t) {
+  struct timeval tv; tv.tv_sec = t; tv.tv_usec = 0;
+  settimeofday(&tv, NULL);
+  vlog("TIME: ora impostata a mano");
+}
+
+String timeJson() {
+  String j = "{";
+  j += "\"valid\":" + String(timeValid() ? "true" : "false") + ",";
+  j += "\"now\":\"" + timeNowStr() + "\",";
+  j += "\"epoch\":" + String((unsigned long)time(nullptr)) + ",";
+  j += "\"ntp\":" + String(cfg.ntpOn ? "true" : "false") + ",";
+  j += "\"server\":\"" + jsonEscape(cfg.ntpServer) + "\",";
+  j += "\"serve\":" + String(cfg.ntpServe ? "true" : "false") + ",";
+  j += "\"tz\":\"" + jsonEscape(cfg.tz) + "\",";
+  j += "\"dateFmt\":" + String(cfg.dateFmt) + ",\"timeFmt\":" + String(cfg.timeFmt) + ",\"tempUnit\":" + String(cfg.tempUnit) + ",";
+  j += "\"tzName\":\"" + jsonEscape(cfg.tzName) + "\"";
+  j += "}";
+  return j;
+}
+
+// ---- server NTP (SNTP semplice) ----
+static void stopServer() {
+  if (g_serving && g_udp) { g_udp->close(); g_serving = false; }
+}
+
+static void put32(uint8_t* p, uint32_t v) { p[0] = v >> 24; p[1] = v >> 16; p[2] = v >> 8; p[3] = v; }
+
+static void startServer() {
+  if (g_serving) return;
+  if (!g_udp) g_udp = new AsyncUDP();
+  if (!g_udp->listen(123)) { vlog("TIME: porta 123 non disponibile"); return; }
+  g_udp->onPacket([](AsyncUDPPacket pk) {
+    if (pk.length() < 48 || !timeValid()) return;      // se l'ora non e sicura non risponde
+    uint8_t out[48];
+    memset(out, 0, sizeof(out));
+    uint8_t vn = (pk.data()[0] >> 3) & 7;
+    if (vn < 1 || vn > 4) vn = 4;
+    out[0] = (0 << 6) | (vn << 3) | 4;                  // LI=0, versione, modo server
+    out[1] = 3;                                         // livello (stratum)
+    out[2] = 6; out[3] = 0xEC;                          // intervallo e precisione
+    memcpy(out + 12, "VOS", 3);
+    struct timeval tv; gettimeofday(&tv, NULL);
+    uint32_t sec = (uint32_t)tv.tv_sec + NTP_UNIX_OFFSET;
+    uint32_t frac = (uint32_t)(((uint64_t)tv.tv_usec << 32) / 1000000ULL);
+    put32(out + 16, sec); put32(out + 20, frac);        // riferimento
+    memcpy(out + 24, pk.data() + 40, 8);                // originale = trasmissione del client
+    put32(out + 32, sec); put32(out + 36, frac);        // ricezione
+    put32(out + 40, sec); put32(out + 44, frac);        // trasmissione
+    pk.write(out, sizeof(out));
+  });
+  g_serving = true;
+  vlog("TIME: server NTP attivo (UDP 123)");
+}
+
+static void timeTask(void*) {
+  setenv("TZ", cfg.tz.c_str(), 1);
+  tzset();
+  for (;;) {
+    if (g_apply) {
+      g_apply = false; g_ntpStarted = false;
+      if (!cfg.ntpServe) stopServer();
+    }
+    NetState ns = netState();
+    if (cfg.ntpOn && ns == NET_CLIENT_OK && !g_ntpStarted) {
+      configTzTime(cfg.tz.c_str(), cfg.ntpServer.c_str(), "time.google.com");
+      g_ntpStarted = true;
+      vlog("TIME: NTP avviato (%s, %s)", cfg.ntpServer.c_str(), cfg.tzName.c_str());
+    } else if (!cfg.ntpOn && !g_ntpStarted) {
+      setenv("TZ", cfg.tz.c_str(), 1); tzset();           // solo il fuso, ora a mano
+      g_ntpStarted = true;
+    }
+    if (cfg.ntpServe && !g_serving && (ns == NET_CLIENT_OK || ns == NET_AP)) startServer();
+    vTaskDelay(pdMS_TO_TICKS(3000));
+  }
+}
+
+void timeInit() {
+  xTaskCreatePinnedToCore(timeTask, "time", 4096, NULL, 1, NULL, 0);
+}
+
+// Temperatura nell'unita scelta (C o F)
+String fmtTemp(float c) {
+  if (cfg.tempUnit) return String(c * 9.0f / 5.0f + 32.0f, 1) + " F";
+  return String(c, 1) + " C";
+}
