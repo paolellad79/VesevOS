@@ -24,6 +24,8 @@ static uint8_t g_cpuH[HIST], g_cpuHn = 0;
 static int16_t g_tempH[HIST];            // decimi di grado
 static uint8_t g_tempHn = 0;
 static uint32_t g_boot = 0;
+static uint32_t g_lifeBase = 0;       // secondi di vita accumulati fino all'ultimo salvataggio (contaore, come un contachilometri)
+static uint32_t g_lifeSaved = 0;      // uptime (s) al momento dell'ultimo salvataggio
 static String g_reset;
 static bool g_hot = false;      // allarme temperatura
 
@@ -44,6 +46,17 @@ static String resetName(int r) {
     case 12: return tr("Reset da JTAG");
     default: return trf("Sconosciuto (%d)", (int)r);
   }
+}
+
+uint32_t sysLifeSec() { return g_lifeBase + (uint32_t)(esp_timer_get_time() / 1000000ULL) - g_lifeSaved; }
+
+// Salva il contaore nella memoria NVS (separata dai file: non si azzera col ripristino di fabbrica)
+static void lifeSave() {
+  uint32_t up = (uint32_t)(esp_timer_get_time() / 1000000ULL);
+  g_lifeBase += up - g_lifeSaved;
+  g_lifeSaved = up;
+  Preferences p;
+  if (p.begin("vos", false)) { p.putUInt("life", g_lifeBase); p.end(); }
 }
 
 static void monitorTask(void*) {
@@ -69,6 +82,7 @@ static void monitorTask(void*) {
     }
     skip = false;
     g_temp = temperatureRead();
+    { static uint32_t lifeTick = 0; if (++lifeTick >= 600) { lifeTick = 0; lifeSave(); } }   // ogni 10 minuti
     // allarme: sopra 80 C LED rosso lampeggiante, torna normale sotto 75 C
     if (!g_hot && g_temp > 80.0f) { g_hot = true; ledSetFault(true); vlog("ATTENZIONE: temperatura CPU alta (%.1f C)", g_temp); }
     else if (g_hot && g_temp < 75.0f) { g_hot = false; ledSetFault(false); vlog("Temperatura CPU tornata normale (%.1f C)", g_temp); }
@@ -101,6 +115,8 @@ void sysInit() {
   p.begin("vos", false);
   g_boot = p.getUInt("boots", 0) + 1;
   p.putUInt("boots", g_boot);
+  g_lifeBase = p.getUInt("life", 0);
+  g_lifeSaved = 0;
   p.end();
   g_reset = resetName((int)esp_reset_reason());
   esp_register_freertos_idle_hook_for_cpu(idle0, 0);
@@ -136,6 +152,7 @@ String sysStatusJson() {
   j += "\"uptime\":\"" + uptimeStr(sysUptimeSec()) + "\",";
   j += "\"uptimeSec\":" + String((unsigned long)sysUptimeSec()) + ",";
   j += "\"boots\":" + String(g_boot) + ",";
+  j += "\"lifeSec\":" + String((unsigned long)sysLifeSec()) + ",";
   j += "\"reset\":\"" + jsonEscape(g_reset) + "\",";
   j += "\"cpu\":" + String(g_cpu) + ",";
   j += "\"temp\":" + String(g_temp, 1) + ",";

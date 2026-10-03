@@ -2,6 +2,7 @@
 <html lang="it"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>VesevOS</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%22-8 -8 216 216%22%3E%3Cdefs%3E%3ClinearGradient id=%22g%22 x1=%220%22 y1=%220%22 x2=%221%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%233fa7ff%22/%3E%3Cstop offset=%221%22 stop-color=%22%2337e0b0%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg stroke=%22url(%23g)%22 stroke-width=%226%22 stroke-linecap=%22round%22 fill=%22none%22%3E%3Cpath d=%22M40 -6V22M80 -6V22M120 -6V22M40 178V206M80 178V206M120 178V206M-6 40H22M-6 80H22M-6 120H22M178 40H206M178 80H206M178 120H206%22/%3E%3Crect x=%2220%22 y=%2220%22 width=%22160%22 height=%22160%22 rx=%2222%22 fill=%22%230b1220%22/%3E%3Ccircle cx=%22100%22 cy=%22100%22 r=%2244%22/%3E%3Cpath d=%22M100 56V30M100 170V144M56 100H30M170 100H144%22/%3E%3C/g%3E%3Ccircle cx=%22100%22 cy=%22100%22 r=%2214%22 fill=%22url(%23g)%22/%3E%3C/svg%3E">
 <style>
 :root{--bg:#10151c;--card:#1a222d;--tx:#e6edf3;--mut:#8b98a8;--ac:#3fa7ff;--ok:#3ddc84;--ko:#ff5c5c}
 *{box-sizing:border-box}
@@ -24,6 +25,13 @@ label{color:var(--mut);font-size:13px}
 .btn.red{background:var(--ko);color:#fff}
 .btn.gray{background:#2a3647;color:var(--tx)}
 pre{background:#0c1118;padding:10px;border-radius:8px;overflow:auto;max-height:340px;white-space:pre-wrap;word-break:break-all;margin:0}
+.term{height:calc(100vh - 300px);min-height:240px;max-height:none;font:13px/1.45 ui-monospace,Consolas,Menlo,monospace;word-break:break-word}
+.term .e{color:var(--ko)}.term .w{color:#ffcc4d}.term .g{color:var(--ok)}.term .c{color:var(--ac)}.term .m{color:var(--mut)}
+.trow{display:flex;align-items:center;gap:6px;margin-top:8px}.trow b{color:var(--ok);font:13px ui-monospace,Consolas,monospace}
+.trow input{margin:0;font:14px ui-monospace,Consolas,monospace}
+.keys{margin-top:8px}.keys .btn{padding:6px 12px;font-size:13px;margin-bottom:4px}
+.sub{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.sub button{background:#2a3647;color:var(--tx);border:0;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:14px}.sub button.on{background:var(--ac);color:#06121c}
+input:disabled,select:disabled{opacity:.55;cursor:not-allowed}
 table{width:100%;border-collapse:collapse}
 td,th{text-align:left;padding:6px;border-bottom:1px solid #222c39;font-size:14px}
 .msg{padding:8px;border-radius:8px;margin:8px 0;display:none}
@@ -33,20 +41,25 @@ td,th{text-align:left;padding:6px;border-bottom:1px solid #222c39;font-size:14px
 .hide{display:none}
 .foot{text-align:center;font-size:12px;color:var(--mut);margin:14px 0}
 .foot a{color:var(--mut)}
+.hero{text-align:center;margin:6px 0 10px}.hero .logo{width:56px;height:56px;display:block;margin:0 0 6px}.hero .mount{width:100%;max-width:300px;aspect-ratio:852/170;display:block;margin:0 auto}.hlogo{width:26px;height:26px;vertical-align:-6px;margin-right:8px}
 </style></head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="vg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3fa7ff"/><stop offset="1" stop-color="#37e0b0"/></linearGradient></defs>
+<symbol id="i-chip" viewBox="-8 -8 216 216"><g stroke="url(#vg)" stroke-width="6" stroke-linecap="round" fill="none"><path d="M40 -6V22M80 -6V22M120 -6V22M40 178V206M80 178V206M120 178V206M-6 40H22M-6 80H22M-6 120H22M178 40H206M178 80H206M178 120H206"/><rect x="20" y="20" width="160" height="160" rx="22" fill="#0b1220"/><circle cx="100" cy="100" r="44"/><path d="M100 56V30M100 170V144M56 100H30M170 100H144"/></g><circle cx="100" cy="100" r="14" fill="url(#vg)"/></symbol>
+<symbol id="i-vesuvio" viewBox="-6 330 852 170"><g fill="none" stroke="url(#vg)" stroke-linecap="round" stroke-linejoin="round"><path d="M0 456C70 452 130 444 200 432C270 420 340 398 420 370C440 362 452 350 468 347C484 345 492 356 510 362C525 366 536 358 552 349C568 339 584 337 600 338C620 339 635 346 650 354C675 367 705 380 740 388C775 395 805 402 838 410" stroke-width="9"/><path d="M208 464C280 458 380 456 470 455C520 455 560 454 592 454M208 464C300 470 380 474 440 477C520 481 610 485 692 488" stroke-width="7" stroke-opacity=".8"/><path d="M478 451C520 446 570 445 620 445C690 444 760 444 805 449" stroke-width="7" stroke-opacity=".55"/></g></symbol></svg>
 <div id="login" class="card hide">
  <select class="lsel" onchange="setLang(this.value)" style="width:auto;float:right;margin:0;padding:4px 8px"></select>
+ <div class="hero"><svg class="logo" aria-hidden="true"><use href="#i-chip"/></svg><svg class="mount" aria-hidden="true"><use href="#i-vesuvio"/></svg></div>
  <h3 id="lt">Accesso</h3>
  <div id="lnew" class="hide"><p>Primo accesso: scegli una password (almeno 6 caratteri).</p></div>
  <label>Password</label><input type="password" id="lp" autocomplete="current-password">
  <button class="btn" onclick="doLogin()">Entra</button>
  <div id="lm" class="msg"></div>
- <div class="foot"><a href="/api/license?id=notice" target="_blank">Note legali e licenze</a></div>
+ <div class="foot"><a href="/api/license?id=notice" target="_blank">Note legali e licenze</a> &middot; <a href="https://github.com/paolellad79/VesevOS" target="_blank" rel="noopener">GitHub</a></div>
 </div>
 
 <div id="app" class="hide">
-<header><b>VesevOS</b><span id="hd" style="color:var(--mut)"></span><span><select class="lsel" onchange="setLang(this.value)" style="width:auto;margin:0 8px 0 0;padding:4px 8px"></select><button class="btn gray" onclick="logout()">Esci</button></span></header>
+<header><b><svg class="hlogo" aria-hidden="true"><use href="#i-chip"/></svg>VesevOS</b><span id="hd" style="color:var(--mut)"></span><span><select class="lsel" onchange="setLang(this.value)" style="width:auto;margin:0 8px 0 0;padding:4px 8px"></select><button class="btn gray" onclick="logout()">Esci</button></span></header>
 <nav id="nav"></nav>
 <main>
 <section id="t_sum">
@@ -59,25 +72,49 @@ td,th{text-align:left;padding:6px;border-bottom:1px solid #222c39;font-size:14px
  <div class="card"><h3>Temperatura CPU (ultimi 60 s)</h3><canvas id="tc" width="600" height="110" style="width:100%"></canvas></div>
 </section>
 <section id="t_wifi" class="hide">
- <div class="card"><h3>Reti Wi-Fi</h3>
-  <button class="btn" onclick="scan()">Cerca reti</button><div id="scanmsg" style="color:var(--mut);margin-top:6px"></div>
-  <table id="scanlist"></table></div>
- <div class="card"><h3>Connessione client</h3>
-  <label>Rete (SSID)</label><input id="w_ssid">
-  <label>Password Wi-Fi</label><input type="password" id="w_pass" placeholder="(lascia vuoto per non cambiare)">
-  <label>Indirizzo IP</label>
-  <select id="w_dhcp" onchange="dh()"><option value="1">Automatico (DHCP)</option><option value="0">Statico</option></select>
-  <div id="stat" class="hide">
+ <div class="sub" id="rsub"></div>
+ <div id="r_wifi">
+  <div class="card"><h3>Reti Wi-Fi</h3>
+   <button class="btn" onclick="scan()">Cerca reti</button><div id="scanmsg" style="color:var(--mut);margin-top:6px"></div>
+   <table id="scanlist"></table></div>
+  <div class="card"><h3>Connessione client</h3>
+   <label>Rete (SSID)</label><input id="w_ssid">
+   <label>Password Wi-Fi</label><input type="password" id="w_pass" placeholder="(lascia vuoto per non cambiare)">
+   <button class="btn" onclick="saveWifi()">Salva e collega</button>
+   <div id="wm" class="msg"></div></div>
+ </div>
+ <div id="r_ip" class="hide">
+  <div class="card"><h3>Indirizzo IP</h3>
+   <label>Indirizzo IP</label>
+   <select id="w_dhcp" onchange="dh()"><option value="1">Automatico (DHCP)</option><option value="0">Statico</option></select>
+   <div id="ipnote" style="color:var(--mut);margin-bottom:8px"></div>
    <label>IP</label><input id="w_ip"><label>Subnet mask</label><input id="w_mask">
    <label>Gateway</label><input id="w_gw"><label>DNS 1</label><input id="w_d1"><label>DNS 2</label><input id="w_d2">
-  </div>
-  <button class="btn" onclick="saveWifi()">Salva e collega</button>
-  <button class="btn gray" onclick="apOnly()">Torna in modo AP</button>
-  <div id="wm" class="msg"></div></div>
+   <button class="btn" id="ipsave" onclick="saveWifi()">Salva e collega</button>
+   <div id="wm2" class="msg"></div></div>
+ </div>
+ <div id="r_nome" class="hide">
+  <div class="card"><h3>Nome del dispositivo</h3>
+   <label>Nome host</label><input id="s_host" maxlength="32">
+   <label>Dominio DNS (facoltativo, es. casa.lan)</label><input id="s_dom" maxlength="60">
+   <div id="s_dn" style="color:var(--mut);margin:-6px 0 8px"></div>
+   <div id="s_fq" style="color:var(--mut);margin-bottom:8px"></div>
+   <button class="btn" onclick="saveSys()">Salva</button><div id="sm" class="msg"></div>
+   <p style="color:var(--mut)">Dopo il cambio la scheda si raggiunge anche come NOME.local (se il tuo computer supporta mDNS). La rete si riconnette per un momento.</p></div>
+ </div>
+ <div id="r_ap" class="hide">
+  <div class="card"><h3>Punto di accesso (AP)</h3>
+   <div id="apinfo"></div>
+   <p style="color:var(--mut)">Il punto di accesso serve quando la scheda non e collegata a nessuna rete: ti colleghi direttamente alla scheda con il Wi-Fi. Se il collegamento alla tua rete fallisce, la scheda torna da sola in questo modo.</p>
+   <button class="btn gray" onclick="apOnly()">Torna in modo AP</button>
+   <div id="wm3" class="msg"></div></div>
+ </div>
 </section>
 <section id="t_shell" class="hide">
- <div class="card"><h3>Shell</h3><pre id="so" style="height:260px"></pre>
-  <input id="si" placeholder="scrivi un comando, es. help" onkeydown="if(event.key=='Enter')runCmd()"></div>
+ <div class="card"><h3>Shell</h3><pre id="so" class="term" onclick="$('si').focus()"></pre>
+  <div class="trow"><b>vesevos&gt;</b><input id="si" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="help" onkeydown="shKey(event)" onpaste="shPaste(event)"></div>
+  <div class="keys"><button class="btn gray" onclick="shTab()">Tab</button><button class="btn gray" onclick="shHist(-1)">&uarr;</button><button class="btn gray" onclick="shHist(1)">&darr;</button><button class="btn gray" onclick="shCancel()">Ctrl+C</button><button class="btn gray" onclick="shClear()">Pulisci</button><button class="btn gray" onclick="shCopy()">Copia tutto</button></div>
+  <div id="shm" class="msg"></div></div>
 </section>
 <section id="t_task" class="hide">
  <div class="card"><h3>Task in esecuzione</h3><pre id="tk"></pre><button class="btn" onclick="loadTasks()">Aggiorna</button></div>
@@ -137,12 +174,6 @@ td,th{text-align:left;padding:6px;border-bottom:1px solid #222c39;font-size:14px
  <div class="card"><h3>Pin usati</h3><table id="pintab"></table></div>
 </section>
 <section id="t_conf" class="hide">
- <div class="card"><h3>Nome del dispositivo</h3>
-  <label>Nome host</label><input id="s_host" maxlength="32">
-  <label>Dominio DNS (facoltativo, es. casa.lan)</label><input id="s_dom" maxlength="60">
-  <div id="s_fq" style="color:var(--mut);margin-bottom:8px"></div>
-  <button class="btn" onclick="saveSys()">Salva</button><div id="sm" class="msg"></div>
-  <p style="color:var(--mut)">Dopo il cambio la scheda si raggiunge anche come NOME.local (se il tuo computer supporta mDNS). La rete si riconnette per un momento.</p></div>
  <div class="card"><h3>Configurazione</h3>
   <button class="btn" onclick="location.href='/api/config/download'">Scarica file</button>
   <label style="display:block;margin-top:12px">Ripristina da file</label><input type="file" id="cf">
@@ -164,10 +195,10 @@ td,th{text-align:left;padding:6px;border-bottom:1px solid #222c39;font-size:14px
   <p style="color:var(--mut)">I testi legali sono dentro il firmware e si leggono anche dalla seriale con il comando license.</p></div>
  <div class="card"><h3>Log</h3><pre id="lg"></pre><button class="btn" onclick="loadLog()">Aggiorna</button></div>
 </section>
-<div class="foot"><a href="/api/license?id=notice" target="_blank">Note legali e licenze</a></div>
+<div class="foot"><a href="/api/license?id=notice" target="_blank">Note legali e licenze</a> &middot; <a href="https://github.com/paolellad79/VesevOS" target="_blank" rel="noopener">GitHub</a></div>
 </main></div>
 <script>
-var TABS=[["sum","Riepilogo"],["stato","Stato"],["wifi","Wi-Fi"],["shell","Shell"],["task","Task"],["ora","Ora"],["file","File"],["led","LED"],["pin","Pin"],["conf","Config"]];
+var TABS=[["sum","Riepilogo"],["stato","Stato"],["wifi","Rete"],["shell","Shell"],["task","Task"],["ora","Ora"],["file","File"],["led","LED"],["pin","Pin"],["conf","Config"]];
 var DICT={},LANG="it",LANGS=[{code:"it",name:"Italiano"}];
 function t(s){var v=DICT[s];return v?v:s}
 function tf(s){var a=arguments;return t(s).replace(/\{(\d)\}/g,function(m,i){return a[+i+1]})}
@@ -202,7 +233,7 @@ function post(u,d){var b=new URLSearchParams(d).toString();return api(u,{method:
 function msg(id,t,ok){var e=$(id);e.textContent=t;e.className="msg "+(ok?"ok":"ko")}
 function buildNav(){var h="";TABS.forEach(function(x){h+='<button id="n_'+x[0]+'" onclick="show(\''+x[0]+'\')">'+esc(t(x[1]))+'</button>'});$("nav").innerHTML=h;show(cur)}
 function show(t){cur=t;TABS.forEach(function(x){$("t_"+x[0]).className=x[0]==t?"":"hide";$("n_"+x[0]).className=x[0]==t?"on":""});
- if(t=="task")loadTasks();if(t=="pin")loadPins();if(t=="conf"){loadLog();fillSys();loadLangs();loadLic()};if(t=="wifi")fillWifi();if(t=="led")fillLed();if(t=="ora")loadTime();if(t=="file")fList(fp)}
+ if(t=="shell"){shLoadCmds();$("si").focus()}if(t=="task")loadTasks();if(t=="pin")loadPins();if(t=="conf"){loadLog();loadLangs();loadLic()};if(t=="wifi")fillNet();if(t=="led")fillLed();if(t=="ora")loadTime();if(t=="file")fList(fp)}
 var AUTHSET=true;
 function showLoginText(){$("lt").textContent=AUTHSET?t("Accesso"):t("Imposta password")}
 function showLogin(){clearInterval(timer);$("app").className="hide";$("login").className="card";
@@ -217,7 +248,7 @@ function tmp(c,u){return u?(c*9/5+32).toFixed(1)+" &deg;F":c.toFixed(1)+" &deg;C
 function kb(n){return Math.round(n/1024)+" KB"}
 function poll(){api("/api/status").then(function(r){return r.json()}).then(function(s){S=s;
  $("hd").textContent=s.net.ip;
- $("sum").innerHTML=row(t("Sistema"),s.name+" "+s.version)+row(t("Acceso da"),s.uptime)+row(t("Ultimo reset"),s.reset)+row(t("Avvii totali"),s.boots)+
+ $("sum").innerHTML=row(t("Sistema"),s.name+" "+s.version)+row(t("Acceso da"),s.uptime)+row(t("Ultimo reset"),s.reset)+row(t("Avvii totali"),s.boots)+row(t("Ore di vita"),tf("{0} h {1} min",Math.floor(s.lifeSec/3600),Math.floor(s.lifeSec/60)%60))+
   row(t("Rete"),s.net.mode+" - "+s.net.ssid)+row(t("Nome"),s.net.fqdn)+row(t("Indirizzo IP"),s.net.ip)+row(t("CPU"),tf("{0}% a {1} MHz",s.cpu,s.cpuMhz))+row(t("Temperatura CPU"),tmp(s.temp,s.tempUnit)+(s.hot?" - "+t("TROPPO CALDO"):""));
  var hp=Math.round(100-100*s.heapFree/s.heapTotal),pp=s.psramTotal?Math.round(100-100*s.psramFree/s.psramTotal):0,fp=s.flashTotal?Math.round(100*s.flashUsed/s.flashTotal):0;
  $("res").innerHTML=row(t("CPU"),s.cpu+"%")+bar(s.cpu)+row("RAM",kb(s.heapTotal-s.heapFree)+" / "+kb(s.heapTotal))+bar(hp)+
@@ -269,14 +300,70 @@ function fUpload(){var f=$("fup").files[0];if(!f){msg("fm",t("Scegli un file"),f
  var fd=new FormData();fd.append("file",f,f.name);
  api("/api/fs/up?dir="+enc(fp),{method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){msg("fm",j.ok?t("Caricato"):j.err,j.ok);if(j.ok)fList(fp)})}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-function dh(){$("stat").className=$("w_dhcp").value=="0"?"":"hide"}
-function fillWifi(){api("/api/settings").then(function(r){return r.json()}).then(function(c){
- $("w_ssid").value=c.staSsid;$("w_dhcp").value=c.staDhcp?"1":"0";$("w_ip").value=c.ip;$("w_mask").value=c.mask;$("w_gw").value=c.gw;$("w_d1").value=c.dns1;$("w_d2").value=c.dns2;dh()})}
-function saveWifi(){post("/api/wifi/save",{ssid:$("w_ssid").value,pass:$("w_pass").value,dhcp:$("w_dhcp").value,ip:$("w_ip").value,mask:$("w_mask").value,gw:$("w_gw").value,d1:$("w_d1").value,d2:$("w_d2").value})
- .then(function(r){return r.json()}).then(function(j){msg("wm",j.ok?t("Salvato. La scheda si sta collegando: se cambia indirizzo riconnettiti."):j.err,j.ok)})}
-function apOnly(){post("/api/wifi/ap",{}).then(function(r){return r.json()}).then(function(j){msg("wm",j.ok?t("Modo AP attivo (192.168.4.1)"):j.err,j.ok)})}
-function runCmd(){var v=$("si").value;$("si").value="";$("so").textContent+="> "+v+"\n";
- post("/api/shell",{c:v}).then(function(r){return r.text()}).then(function(t){var o=$("so");o.textContent+=t+"\n";o.scrollTop=o.scrollHeight})}
+var RN={c:null,n:null,s:"wifi"};
+var RSUB=[["wifi","Wi-Fi"],["ip","Indirizzo IP"],["nome","Nome"],["ap","Punto di accesso"]];
+function buildSub(){var h="";RSUB.forEach(function(x){h+='<button class="'+(RN.s==x[0]?"on":"")+'" onclick="rsub(\''+x[0]+'\')">'+esc(t(x[1]))+'</button>'});$("rsub").innerHTML=h;
+ RSUB.forEach(function(x){$("r_"+x[0]).className=RN.s==x[0]?"":"hide"})}
+function rsub(x){RN.s=x;buildSub()}
+function ipv(id,v,on){var e=$(id);e.value=v||"";e.disabled=!on}
+function ipFill(ch){var n=RN.n,c=RN.c,ap=n.st==1,dh=$("w_dhcp").value=="1",ids=["w_ip","w_mask","w_gw","w_d1","w_d2"],v;
+ $("w_dhcp").disabled=ap;$("ipsave").disabled=ap;
+ if(ap){v=[n.ip,n.mask,n.gw,"",""];$("ipnote").textContent=t("Punto di accesso attivo: indirizzo fisso, non modificabile. Per cambiarlo collega la scheda a una rete (scheda Wi-Fi).")}
+ else if(dh){v=n.st==3?[n.ip,n.mask,n.gw,n.dns,n.dns2]:["","","","",""];$("ipnote").textContent=n.st==3?t("Valori assegnati dal router (DHCP): non modificabili."):t("Non connesso: nessun indirizzo assegnato.")}
+ else{v=(ch&&n.st==3&&(c.staDhcp||!c.ip))?[n.ip,n.mask,n.gw,n.dns,n.dns2]:[c.ip,c.mask,c.gw,c.dns1,c.dns2];$("ipnote").textContent=t("Indirizzo fisso: scrivi i valori.")}
+ ids.forEach(function(id,i){ipv(id,v[i],!ap&&!dh)})}
+function dh(){ipFill(true)}
+function drawAp(){var n=RN.n;$("apinfo").innerHTML=row(esc(t("Stato")),esc(n.st==1?t("Attivo"):t("Non attivo (sei collegato a una rete)")))+row(esc(t("Nome rete (SSID)")),esc(n.apSsid))+row(esc(t("Indirizzo IP")),"192.168.4.1")+row(esc(t("Subnet mask")),"255.255.255.0")}
+function fillNet(){Promise.all([api("/api/settings").then(function(r){return r.json()}),api("/api/status").then(function(r){return r.json()})]).then(function(a){
+ RN.c=a[0];RN.n=a[1].net;$("w_ssid").value=RN.c.staSsid;$("w_dhcp").value=RN.c.staDhcp?"1":"0";ipFill(false);drawAp();buildSub();fillSys()}).catch(function(){})}
+function saveWifi(){var mid=RN.s=="ip"?"wm2":"wm";if(!$("w_ssid").value){msg(mid,t("Prima scegli la rete nella scheda Wi-Fi"),false);return}
+ post("/api/wifi/save",{ssid:$("w_ssid").value,pass:$("w_pass").value,dhcp:$("w_dhcp").value,ip:$("w_ip").value,mask:$("w_mask").value,gw:$("w_gw").value,d1:$("w_d1").value,d2:$("w_d2").value})
+ .then(function(r){return r.json()}).then(function(j){msg(mid,j.ok?t("Salvato. La scheda si sta collegando: se cambia indirizzo riconnettiti."):j.err,j.ok);if(j.ok)setTimeout(fillNet,9000)}).catch(function(){})}
+function apOnly(){post("/api/wifi/ap",{}).then(function(r){return r.json()}).then(function(j){msg("wm3",j.ok?t("Modo AP attivo (192.168.4.1)"):j.err,j.ok);if(j.ok)setTimeout(fillNet,5000)}).catch(function(){})}
+var SH={h:[],i:0,cmds:[],q:[],busy:false,loaded:false};
+var SHOPT={led:["state","heartbeat","fixed","off"],led2:["off","on","heartbeat"],"led2-invert":["on","off"],cpu:["auto","80","160","240"],ntp:["sync"],pin:["high","low","blink","read","off"],license:["notice","gpl3","lgpl3","lgpl21","apache2"],help:[],wifi:[]};
+try{SH.h=JSON.parse(localStorage.getItem("vos_hist")||"[]")}catch(e){SH.h=[]}
+function shSave(){try{localStorage.setItem("vos_hist",JSON.stringify(SH.h.slice(-100)))}catch(e){}}
+function shOut(txt,cls){var o=$("so"),d=document.createElement("div");d.textContent=txt===""?" ":txt;if(cls)d.className=cls;o.appendChild(d);while(o.childNodes.length>600)o.removeChild(o.firstChild);o.scrollTop=o.scrollHeight}
+function shKind(l){if(/errore|error|non valid|invalid|non autorizzat|unauthor|fallit|failed|sconosciut|unknown|nicht|ung.ltig|desconocid/i.test(l))return"e";
+ if(/attenzione|avviso|warning|achtung|aviso/i.test(l))return"w";if(/^\s*(ok|fatto|done|salvato|saved|gespeichert|guardado)\b/i.test(l))return"g";return""}
+function shLoadCmds(){if(SH.loaded)return;SH.loaded=true;post("/api/shell",{c:"help"}).then(function(r){return r.text()}).then(function(x){var m={};
+ x.split("\n").forEach(function(l){var k=/^ {2}([a-z0-9-]+)/.exec(l);if(k)m[k[1]]=1});SH.cmds=Object.keys(m).concat(["clear","history"]).sort()}).catch(function(){SH.loaded=false})}
+function shPipe(txt,parts){for(var i=0;i<parts.length;i++){var p=parts[i].trim(),m=/^(grep|head|tail)\s*(-i\s+|-v\s+)?(.*)$/.exec(p);if(!m)continue;var ls=txt.split("\n");
+ if(m[1]=="grep"){var f=m[2]?m[2].trim():"",q=m[3].trim().toLowerCase();ls=ls.filter(function(l){var h=l.toLowerCase().indexOf(q)>=0;return f=="-v"?!h:h})}
+ else{var n=parseInt(m[3])||10;ls=m[1]=="head"?ls.slice(0,n):ls.slice(-n)}txt=ls.join("\n")}return txt}
+function shRun(v){v=v.replace(/\s+$/,"");if(!v)return Promise.resolve();
+ var parts=v.split("|"),cmd=parts[0].trim(),w=cmd.split(/\s+/)[0].toLowerCase();
+ shOut("vesevos> "+(/^passwd\b/i.test(cmd)?"passwd ****":v),"c");
+ if(!/^(passwd|password)\b/i.test(cmd)){var k=SH.h.indexOf(v);if(k>=0)SH.h.splice(k,1);SH.h.push(v);shSave()}SH.i=SH.h.length;
+ if(w=="clear"){shClear();return Promise.resolve()}
+ if(w=="history"){SH.h.forEach(function(x,i){shOut((i+1)+"  "+x,"m")});return Promise.resolve()}
+ if((w=="reboot"||w=="factory-reset")&&!confirm(w=="reboot"?t("Riavviare la scheda?"):t("Azzerare TUTTO e riavviare?"))){shOut(t("Annullato"),"w");return Promise.resolve()}
+ return post("/api/shell",{c:cmd}).then(function(r){return r.text()}).then(function(x){x=shPipe(x.replace(/\n+$/,""),parts.slice(1));
+  x.split("\n").forEach(function(l){shOut(l,shKind(l))})}).catch(function(){shOut(t("Errore di rete"),"e")})}
+function shNext(){if(SH.busy||!SH.q.length)return;SH.busy=true;shRun(SH.q.shift()).then(function(){SH.busy=false;shNext()})}
+function runCmd(){var i=$("si"),v=i.value;i.value="";SH.i=SH.h.length;if(!v.trim())return;SH.q.push(v);shNext()}
+function shHist(d){var i=$("si");if(!SH.h.length)return;SH.i=Math.max(0,Math.min(SH.h.length,SH.i+d));i.value=SH.i>=SH.h.length?"":SH.h[SH.i];i.focus()}
+function shTab(){var i=$("si"),v=i.value,sp=v.lastIndexOf(" "),head=v.slice(0,sp+1),w=v.slice(sp+1),words=v.trim().split(/\s+/),pool;
+ if(sp<0)pool=SH.cmds;else pool=SHOPT[words[0].toLowerCase()]||[];
+ var m=pool.filter(function(x){return x.indexOf(w)==0});if(!m.length)return;
+ if(m.length==1){i.value=head+m[0]+" ";return}
+ var c=m[0];m.forEach(function(x){while(x.indexOf(c)!=0)c=c.slice(0,-1)});i.value=head+c;shOut(m.join("   "),"m")}
+function shKey(e){var i=$("si");
+ if(e.key=="Enter"){runCmd()}
+ else if(e.key=="ArrowUp"){e.preventDefault();shHist(-1)}
+ else if(e.key=="ArrowDown"){e.preventDefault();shHist(1)}
+ else if(e.key=="Tab"){e.preventDefault();shTab()}
+ else if(e.ctrlKey&&(e.key=="l"||e.key=="L")){e.preventDefault();shClear()}
+ else if(e.ctrlKey&&(e.key=="c"||e.key=="C")&&i.selectionStart==i.selectionEnd){e.preventDefault();shCancel()}}
+function shPaste(e){var x=(e.clipboardData||window.clipboardData).getData("text");if(x.indexOf("\n")<0)return;e.preventDefault();
+ var ls=x.split(/\r?\n/).filter(function(l){return l.trim()});if(ls.length>20){shOut(t("Troppe righe incollate (massimo 20)"),"e");return}
+ if(ls.length&&!confirm(t("Eseguire queste righe?")+"\n\n"+ls.join("\n")))return;ls.forEach(function(l){SH.q.push(l)});shNext()}
+function shCancel(){var i=$("si");if(i.value)shOut("vesevos> "+i.value+"^C","m");i.value="";SH.q=[];SH.i=SH.h.length}
+function shClear(){$("so").textContent=""}
+function shCopy(){var x=$("so").innerText;var ok=function(){msg("shm",t("Copiato"),true);setTimeout(function(){$("shm").className="msg"},3000)};
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(x).then(ok).catch(function(){});
+ else{var a=document.createElement("textarea");a.value=x;document.body.appendChild(a);a.select();try{document.execCommand("copy");ok()}catch(e){}document.body.removeChild(a)}}
 function loadTasks(){api("/api/tasks").then(function(r){return r.text()}).then(function(t){$("tk").textContent=t})}
 function fillLed(){api("/api/settings").then(function(r){return r.json()}).then(function(c){$("l_mode").value=c.ledMode;
  $("l_col").value="#"+("000000"+c.ledColor.toString(16)).slice(-6);$("l_br").value=c.ledBrightness;$("m_mode").value=c.led2Mode;$("m_pin").value=c.led2Pin;$("m_br").value=c.led2Bright;$("m_inv").value=c.led2Invert?"1":"0"})}
@@ -328,7 +415,7 @@ function pinLevel(){var e=$("pnlv");if(!e)return;
  if(PT.gpio!=PSEL){e.textContent=t("Nessuna prova in corso su questo pin");return}
  var an={high:t("Alto"),low:t("Basso"),blink:t("Lampeggia"),read:t("Lettura")}[PT.action];
  e.innerHTML=esc(an)+" - "+esc(t("livello letto"))+": <b>"+(PT.level?t("ALTO"):t("BASSO"))+"</b> - "+esc(tf("si spegne tra {0} s",PT.left))}
-function fillSys(){api("/api/settings").then(function(r){return r.json()}).then(function(c){$("s_host").value=c.hostname;$("s_dom").value=c.domain;$("s_fq").textContent=t("Nome completo:")+" "+c.hostname+(c.domain?"."+c.domain:"")})}
+function fillSys(){api("/api/settings").then(function(r){return r.json()}).then(function(c){$("s_host").value=c.hostname;$("s_dom").value=c.domain;$("s_dn").textContent=c.staDhcp?t("In DHCP il router non comunica il dominio alla scheda: scrivilo tu se serve."):"";$("s_fq").textContent=t("Nome completo:")+" "+c.hostname+(c.domain?"."+c.domain:"")})}
 function saveSys(){post("/api/system",{hostname:$("s_host").value,domain:$("s_dom").value}).then(function(r){return r.json()}).then(function(j){msg("sm",j.ok?t("Salvato"):j.err,j.ok);if(j.ok)fillSys()})}
 function loadLangs(){
  api("/api/langs").then(function(r){return r.json()}).then(function(l){LANGS=l;fillLangSel();

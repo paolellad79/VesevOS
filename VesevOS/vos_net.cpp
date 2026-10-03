@@ -24,7 +24,7 @@ void netScanStart() { g_scanReq = true; }
 static void setState(NetState s) { g_state = s; ledSetNetState(s); }
 
 String netIpString() {
-  if (WiFi.getMode() == WIFI_AP) return WiFi.softAPIP().toString();
+  if (g_state == NET_AP) return WiFi.softAPIP().toString();   // anche durante la scansione (modo AP+STA)
   return WiFi.localIP().toString();
 }
 
@@ -34,15 +34,20 @@ String netStatusJson() {
   j += ",\"ip\":\"" + netIpString() + "\"";
   j += ",\"host\":\"" + jsonEscape(cfg.hostname) + "\"";
   j += ",\"fqdn\":\"" + jsonEscape(cfg.domain.length() ? cfg.hostname + "." + cfg.domain : cfg.hostname) + "\"";
+  j += ",\"st\":" + String((int)g_state);                 // 0 avvio, 1 AP, 2 provo client, 3 client ok
+  j += ",\"apSsid\":\"" + jsonEscape(cfg.apSsid) + "\"";
+  // Valori IP reali (stringa vuota se non disponibili)
+  auto ipS = [](IPAddress a) { return (uint32_t)a == 0 ? String("") : a.toString(); };
+  String gw = "", mk = "", d1 = "", d2 = "";
   if (g_state == NET_CLIENT_OK) {
     j += ",\"ssid\":\"" + jsonEscape(WiFi.SSID()) + "\"";
     j += ",\"rssi\":" + String(WiFi.RSSI());
-    j += ",\"gw\":\"" + WiFi.gatewayIP().toString() + "\"";
-    j += ",\"mask\":\"" + WiFi.subnetMask().toString() + "\"";
-    j += ",\"dns\":\"" + WiFi.dnsIP().toString() + "\"";
+    gw = ipS(WiFi.gatewayIP()); mk = ipS(WiFi.subnetMask()); d1 = ipS(WiFi.dnsIP(0)); d2 = ipS(WiFi.dnsIP(1));
   } else {
     j += ",\"ssid\":\"" + jsonEscape(cfg.apSsid) + "\"";
+    if (g_state == NET_AP) { gw = WiFi.softAPIP().toString(); mk = "255.255.255.0"; }
   }
+  j += ",\"gw\":\"" + gw + "\",\"mask\":\"" + mk + "\",\"dns\":\"" + d1 + "\",\"dns2\":\"" + d2 + "\"";
   j += ",\"mac\":\"" + WiFi.macAddress() + "\"";
   j += "}";
   return j;

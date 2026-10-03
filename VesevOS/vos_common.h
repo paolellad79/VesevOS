@@ -6,7 +6,8 @@
 #include <Arduino.h>
 
 #define VOS_NAME     "VesevOS"
-#define VOS_VERSION  "1.4.0"
+#define VOS_VERSION  "1.4.3"
+#define VOS_GITHUB   "https://github.com/paolellad79/VesevOS"
 
 // Pin predefiniti per ESP32-S3 SuperMini
 #define VOS_PIN_LED_RGB   48   // LED WS2812 integrato

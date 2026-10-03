@@ -1498,13 +1498,6 @@
    "scope": "web"
   },
   {
-   "it": "scrivi un comando, es. help",
-   "en": "type a command, e.g. help",
-   "es": "escribe un comando, p. ej. help",
-   "de": "Befehl eingeben, z. B. help",
-   "scope": "web"
-  },
-  {
    "it": "Task in esecuzione",
    "en": "Running tasks",
    "es": "Tareas en ejecución",
@@ -2713,6 +2706,251 @@
    "en": "switches off in {0} s",
    "es": "se apaga en {0} s",
    "de": "schaltet sich in {0} s ab",
+   "scope": "web"
+  },
+  {
+   "it": "  about           chi siamo e indirizzo GitHub",
+   "en": "  about           about us and GitHub address",
+   "es": "  about           quienes somos y direccion de GitHub",
+   "de": "  about           ueber uns und GitHub-Adresse",
+   "scope": "fw"
+  },
+  {
+   "it": "Una piattaforma, mille schede.",
+   "en": "One platform, a thousand boards.",
+   "es": "Una plataforma, mil placas.",
+   "de": "Eine Plattform, tausend Boards.",
+   "scope": "fw"
+  },
+  {
+   "it": "licenza commerciale",
+   "en": "commercial license",
+   "es": "licencia comercial",
+   "de": "kommerzielle Lizenz",
+   "scope": "fw"
+  },
+  {
+   "it": "GitHub",
+   "en": "GitHub",
+   "es": "GitHub",
+   "de": "GitHub",
+   "scope": "web"
+  },
+  {
+   "it": "·",
+   "en": "·",
+   "es": "·",
+   "de": "·",
+   "scope": "web"
+  },
+  {
+   "it": "Pulisci",
+   "en": "Clear",
+   "es": "Limpiar",
+   "de": "Leeren",
+   "scope": "web"
+  },
+  {
+   "it": "Copia tutto",
+   "en": "Copy all",
+   "es": "Copiar todo",
+   "de": "Alles kopieren",
+   "scope": "web"
+  },
+  {
+   "it": "Copiato",
+   "en": "Copied",
+   "es": "Copiado",
+   "de": "Kopiert",
+   "scope": "web"
+  },
+  {
+   "it": "Riavviare la scheda?",
+   "en": "Restart the board?",
+   "es": "¿Reiniciar la placa?",
+   "de": "Board neu starten?",
+   "scope": "web"
+  },
+  {
+   "it": "Azzerare TUTTO e riavviare?",
+   "en": "Erase EVERYTHING and restart?",
+   "es": "¿Borrar TODO y reiniciar?",
+   "de": "ALLES löschen und neu starten?",
+   "scope": "web"
+  },
+  {
+   "it": "Annullato",
+   "en": "Cancelled",
+   "es": "Cancelado",
+   "de": "Abgebrochen",
+   "scope": "web"
+  },
+  {
+   "it": "Errore di rete",
+   "en": "Network error",
+   "es": "Error de red",
+   "de": "Netzwerkfehler",
+   "scope": "web"
+  },
+  {
+   "it": "Troppe righe incollate (massimo 20)",
+   "en": "Too many pasted lines (max 20)",
+   "es": "Demasiadas líneas pegadas (máximo 20)",
+   "de": "Zu viele eingefügte Zeilen (max. 20)",
+   "scope": "web"
+  },
+  {
+   "it": "Eseguire queste righe?",
+   "en": "Run these lines?",
+   "es": "¿Ejecutar estas líneas?",
+   "de": "Diese Zeilen ausführen?",
+   "scope": "web"
+  },
+  {
+   "it": "Tab",
+   "en": "Tab",
+   "es": "Tab",
+   "de": "Tab",
+   "scope": "web"
+  },
+  {
+   "it": "Ctrl+C",
+   "en": "Ctrl+C",
+   "es": "Ctrl+C",
+   "de": "Ctrl+C",
+   "scope": "web"
+  },
+  {
+   "it": "vesevos>",
+   "en": "vesevos>",
+   "es": "vesevos>",
+   "de": "vesevos>",
+   "scope": "web"
+  },
+  {
+   "it": "↑",
+   "en": "↑",
+   "es": "↑",
+   "de": "↑",
+   "scope": "web"
+  },
+  {
+   "it": "↓",
+   "en": "↓",
+   "es": "↓",
+   "de": "↓",
+   "scope": "web"
+  },
+  {
+   "it": "help",
+   "en": "help",
+   "es": "help",
+   "de": "help",
+   "scope": "web"
+  },
+  {
+   "it": "Attivo",
+   "en": "Active",
+   "es": "Activo",
+   "de": "Aktiv",
+   "scope": "web"
+  },
+  {
+   "it": "Non attivo (sei collegato a una rete)",
+   "en": "Not active (you are connected to a network)",
+   "es": "No activo (estas conectado a una red)",
+   "de": "Nicht aktiv (du bist mit einem Netzwerk verbunden)",
+   "scope": "web"
+  },
+  {
+   "it": "Il punto di accesso serve quando la scheda non e collegata a nessuna rete: ti colleghi direttamente alla scheda con il Wi-Fi. Se il collegamento alla tua rete fallisce, la scheda torna da sola in questo modo.",
+   "en": "The access point is used when the board is not connected to any network: you connect to the board directly over Wi-Fi. If the connection to your network fails, the board goes back to this mode by itself.",
+   "es": "El punto de acceso se usa cuando la placa no esta conectada a ninguna red: te conectas directamente a la placa por Wi-Fi. Si falla la conexion a tu red, la placa vuelve sola a este modo.",
+   "de": "Der Access Point wird benutzt, wenn das Board mit keinem Netzwerk verbunden ist: Du verbindest dich direkt per WLAN mit dem Board. Schlaegt die Verbindung zu deinem Netzwerk fehl, wechselt das Board von selbst in diesen Modus.",
+   "scope": "web"
+  },
+  {
+   "it": "Indirizzo fisso: scrivi i valori.",
+   "en": "Fixed address: type the values.",
+   "es": "Direccion fija: escribe los valores.",
+   "de": "Feste Adresse: Werte eintragen.",
+   "scope": "web"
+  },
+  {
+   "it": "Nome rete (SSID)",
+   "en": "Network name (SSID)",
+   "es": "Nombre de red (SSID)",
+   "de": "Netzwerkname (SSID)",
+   "scope": "web"
+  },
+  {
+   "it": "Non connesso: nessun indirizzo assegnato.",
+   "en": "Not connected: no address assigned.",
+   "es": "No conectado: ninguna direccion asignada.",
+   "de": "Nicht verbunden: keine Adresse zugewiesen.",
+   "scope": "web"
+  },
+  {
+   "it": "Prima scegli la rete nella scheda Wi-Fi",
+   "en": "First choose the network in the Wi-Fi tab",
+   "es": "Primero elige la red en la pestana Wi-Fi",
+   "de": "Waehle zuerst das Netzwerk im Tab WLAN",
+   "scope": "web"
+  },
+  {
+   "it": "Punto di accesso (AP)",
+   "en": "Access point (AP)",
+   "es": "Punto de acceso (AP)",
+   "de": "Access Point (AP)",
+   "scope": "web"
+  },
+  {
+   "it": "Punto di accesso attivo: indirizzo fisso, non modificabile. Per cambiarlo collega la scheda a una rete (scheda Wi-Fi).",
+   "en": "Access point active: fixed address, cannot be changed. To change it, connect the board to a network (Wi-Fi tab).",
+   "es": "Punto de acceso activo: direccion fija, no modificable. Para cambiarla conecta la placa a una red (pestana Wi-Fi).",
+   "de": "Access Point aktiv: feste Adresse, nicht aenderbar. Zum Aendern das Board mit einem Netzwerk verbinden (Tab WLAN).",
+   "scope": "web"
+  },
+  {
+   "it": "Valori assegnati dal router (DHCP): non modificabili.",
+   "en": "Values assigned by the router (DHCP): cannot be changed.",
+   "es": "Valores asignados por el router (DHCP): no modificables.",
+   "de": "Vom Router zugewiesene Werte (DHCP): nicht aenderbar.",
+   "scope": "web"
+  },
+  {
+   "it": "Punto di accesso",
+   "en": "Access point",
+   "es": "Punto de acceso",
+   "de": "Access Point",
+   "scope": "web"
+  },
+  {
+   "it": "Ore di vita: %lu h %lu min",
+   "en": "Lifetime hours: %lu h %lu min",
+   "es": "Horas de vida: %lu h %lu min",
+   "de": "Lebensdauer: %lu h %lu min",
+   "scope": "fw"
+  },
+  {
+   "it": "Ore di vita",
+   "en": "Lifetime hours",
+   "es": "Horas de vida",
+   "de": "Lebensdauer",
+   "scope": "web"
+  },
+  {
+   "it": "{0} h {1} min",
+   "en": "{0} h {1} min",
+   "es": "{0} h {1} min",
+   "de": "{0} h {1} min",
+   "scope": "web"
+  },
+  {
+   "it": "In DHCP il router non comunica il dominio alla scheda: scrivilo tu se serve.",
+   "en": "With DHCP the router does not tell the board its domain: type it yourself if needed.",
+   "es": "Con DHCP el router no comunica el dominio a la placa: escribelo tu si hace falta.",
+   "de": "Bei DHCP teilt der Router dem Board die Domain nicht mit: bei Bedarf selbst eintragen.",
    "scope": "web"
   }
  ]

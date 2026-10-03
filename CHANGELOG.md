@@ -1,5 +1,26 @@
 # Cronologia delle versioni
 
+## 1.4.3 (3 ottobre 2026)
+- README rinnovato: banner, missione, visione, filosofia, schermate, mappa del progetto.
+- README in inglese (`README.en.md`), banner con il Vesuvio, `assets/vesuvio.svg`.
+- Pagina: logo a chip in alto a sinistra (intestazione e login), Vesuvio nel login, icona SVG della scheda del browser.
+- Corretto il numero di versione scritto nel firmware (era rimasto 1.4.0).
+- Link al GitHub del progetto: in fondo alla pagina, nel saluto sulla seriale e nel nuovo comando `about`.
+- **Shell web migliorata** (solo pagina): aspetto da terminale con colori (errori rossi, avvisi gialli),
+  cronologia con le frecce su/giu salvata nel browser (`passwd` mai salvata), completamento con Tab
+  (comandi e opzioni), filtri `| grep`, `| head`, `| tail`, comandi `clear` e `history`, Ctrl+L e Ctrl+C,
+  incolla su piu righe con conferma, pulsante "Copia tutto", tasti rapidi per il telefono,
+  conferma prima di `reboot` e `factory-reset`.
+- **Scheda Rete** (prima "Wi-Fi") con quattro sotto-schede: Wi-Fi (cerca reti, SSID, password), Indirizzo IP,
+  Nome (nome host e dominio, spostati qui da Config), Punto di accesso.
+  I campi IP, mask, gateway e DNS sono sempre scritti ma disattivati quando non si possono cambiare
+  (DHCP: valori assegnati dal router; punto di accesso: indirizzo fisso; non connesso: vuoti).
+  Con "Statico" si attivano gia precompilati con i valori in uso.
+  Il firmware ora fornisce davvero mask, gateway, DNS 1 e DNS 2 e lo stato della rete.
+  Corretto: durante la scansione in modo AP l'indirizzo mostrato poteva essere 0.0.0.0.
+- **Contaore di vita** (come un contachilometri): ore totali di accensione della scheda, salvate ogni 10 minuti
+  in memoria NVS. Non si azzera col ripristino di fabbrica. Visibile nel Riepilogo e nel comando `uptime`.
+
 ## 1.4.2 (3 ottobre 2026)
 - Titolare del software: Domenico Paolella. Nome inserito nelle note legali, in `NOTICE.txt`
   e nelle intestazioni di copyright di tutti i sorgenti.

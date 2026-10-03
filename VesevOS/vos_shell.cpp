@@ -45,6 +45,7 @@ static void cmdHelp(Print& o) {
   o.println(tr("Comandi:"));
   o.println(tr("  help            questo elenco"));
   o.println(tr("  uname           versione sistema"));
+  o.println(tr("  about           chi siamo e indirizzo GitHub"));
   o.println(tr("  uptime          da quanto e acceso (+ motivo reset, avvii)"));
   o.println(tr("  free            memoria RAM/PSRAM"));
   o.println(tr("  df              spazio su flash"));
@@ -100,10 +101,16 @@ void shellExec(const String& lineIn, Print& o, bool authed) {
 
   if (c == "help" || c == "?") cmdHelp(o);
   else if (c == "uname") o.println(String(VOS_NAME) + " " + VOS_VERSION + " (ESP32-S3, core " + ESP.getSdkVersion() + ")");
+  else if (c == "about") {
+    o.println(String(VOS_NAME) + " " + VOS_VERSION + " - " + tr("Una piattaforma, mille schede."));
+    o.println(String("GitHub: ") + VOS_GITHUB);
+    o.println("(C) 2026 Domenico Paolella - GPL-3.0-or-later / " + tr("licenza commerciale"));
+  }
   else if (c == "uptime") {
     o.println(trf("Acceso da: %s", uptimeStr(sysUptimeSec()).c_str()));
     o.println(trf("Ultimo reset: %s", sysResetReason().c_str()));
     o.println(trf("Avvii totali: %lu", (unsigned long)sysBootCount()));
+    o.println(trf("Ore di vita: %lu h %lu min", (unsigned long)(sysLifeSec() / 3600UL), (unsigned long)((sysLifeSec() / 60UL) % 60UL)));
   }
   else if (c == "free") {
     o.println(trf("RAM   libera %u KB su %u KB", (unsigned)(ESP.getFreeHeap() / 1024), (unsigned)(ESP.getHeapSize() / 1024)));
@@ -304,6 +311,7 @@ static void prompt() { Serial.print(serialAuthed() || !authIsSet() ? "vesevos> "
 void shellSerialPoll() {
   static bool first = true;
   if (first) { first = false; Serial.println(); Serial.println(String(VOS_NAME) + " " + VOS_VERSION + " - " + tr("scrivi 'help'"));
+    Serial.println(String("GitHub: ") + VOS_GITHUB);
     if (!authIsSet()) Serial.println(tr("Nessuna password: impostala dalla pagina web (primo accesso).")); prompt(); }
   while (Serial.available()) {
     char ch = Serial.read();

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_sys.h
-// CPU, RAM, disco, temperatura CPU, uptime, motivo reset, contatore avvii.
+// CPU, RAM, disco, temperatura CPU, uptime, motivo reset, contatore avvii, contaore di vita.
 #pragma once
 #include <Arduino.h>
 
@@ -11,6 +11,7 @@ int      sysCpuPercent();           // 0..100
 float    sysCpuTemp();              // gradi C (sensore interno del chip)
 uint64_t sysUptimeSec();            // dall'avvio del sistema
 uint32_t sysBootCount();
+uint32_t sysLifeSec();              // contaore totale di vita della scheda (secondi, salvato ogni 10 min)
 String   sysResetReason();
 String   sysTempHistoryJson();      // ultimi 60 secondi
 String   sysCpuHistoryJson();
