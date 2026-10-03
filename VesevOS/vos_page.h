@@ -135,8 +135,11 @@ R"VOSPAGE(  <label>Colore</label><input type="color" id="l_col">
   <p style="color:var(--mut)">Pin ammessi: 1-18, 21 e 38-47. Se il LED non reagisce prova un altro pin o il livello invertito. Il pin scelto compare nella scheda Pin.</p></div>
 </section>
 <section id="t_pin" class="hide">
- <div class="card"><h3>Pin usati</h3><svg id="pinsvg" viewBox="0 0 300 200" style="width:100%;max-width:420px"></svg>
- <table id="pintab"></table></div>
+ <div class="card"><h3>Pin e prove</h3>
+  <p style="color:var(--mut);margin-top:0">Tocca un pin verde per provarlo. Blu = pin in uso, grigio = vietato.</p>
+  <svg id="pinsvg" viewBox="0 0 300 250" style="width:100%;max-width:420px"></svg>
+  <div id="pinpanel" style="margin-top:8px"></div></div>
+ <div class="card"><h3>Pin usati</h3><table id="pintab"></table></div>
 </section>
 <section id="t_conf" class="hide">
  <div class="card"><h3>Nome del dispositivo</h3>
@@ -214,11 +217,11 @@ function doLogin(){post("/api/login",{p:$("lp").value}).then(function(r){return 
 function logout(){post("/api/logout",{}).then(showLogin)}
 function start(){$("login").className="hide";$("app").className="";buildNav();poll();timer=setInterval(poll,2000)}
 function row(a,b){return '<div class="row"><span>'+a+'</span><span>'+b+'</span></div>'}
-function bar(p){return '<div class="bar"><i style="width:'+p+'%"></i></div>'}
+)VOSPAGE"
+R"VOSPAGE(function bar(p){return '<div class="bar"><i style="width:'+p+'%"></i></div>'}
 function tmp(c,u){return u?(c*9/5+32).toFixed(1)+" &deg;F":c.toFixed(1)+" &deg;C"}
 function kb(n){return Math.round(n/1024)+" KB"}
-)VOSPAGE"
-R"VOSPAGE(function poll(){api("/api/status").then(function(r){return r.json()}).then(function(s){S=s;
+function poll(){api("/api/status").then(function(r){return r.json()}).then(function(s){S=s;
  $("hd").textContent=s.net.ip;
  $("sum").innerHTML=row(t("Sistema"),s.name+" "+s.version)+row(t("Acceso da"),s.uptime)+row(t("Ultimo reset"),s.reset)+row(t("Avvii totali"),s.boots)+
   row(t("Rete"),s.net.mode+" - "+s.net.ssid)+row(t("Nome"),s.net.fqdn)+row(t("Indirizzo IP"),s.net.ip)+row(t("CPU"),tf("{0}% a {1} MHz",s.cpu,s.cpuMhz))+row(t("Temperatura CPU"),tmp(s.temp,s.tempUnit)+(s.hot?" - "+t("TROPPO CALDO"):""));
@@ -277,10 +280,10 @@ function fillWifi(){api("/api/settings").then(function(r){return r.json()}).then
  $("w_ssid").value=c.staSsid;$("w_dhcp").value=c.staDhcp?"1":"0";$("w_ip").value=c.ip;$("w_mask").value=c.mask;$("w_gw").value=c.gw;$("w_d1").value=c.dns1;$("w_d2").value=c.dns2;dh()})}
 function saveWifi(){post("/api/wifi/save",{ssid:$("w_ssid").value,pass:$("w_pass").value,dhcp:$("w_dhcp").value,ip:$("w_ip").value,mask:$("w_mask").value,gw:$("w_gw").value,d1:$("w_d1").value,d2:$("w_d2").value})
  .then(function(r){return r.json()}).then(function(j){msg("wm",j.ok?t("Salvato. La scheda si sta collegando: se cambia indirizzo riconnettiti."):j.err,j.ok)})}
-function apOnly(){post("/api/wifi/ap",{}).then(function(r){return r.json()}).then(function(j){msg("wm",j.ok?t("Modo AP attivo (192.168.4.1)"):j.err,j.ok)})}
-function runCmd(){var v=$("si").value;$("si").value="";$("so").textContent+="> "+v+"\n";
 )VOSPAGE"
-R"VOSPAGE( post("/api/shell",{c:v}).then(function(r){return r.text()}).then(function(t){var o=$("so");o.textContent+=t+"\n";o.scrollTop=o.scrollHeight})}
+R"VOSPAGE(function apOnly(){post("/api/wifi/ap",{}).then(function(r){return r.json()}).then(function(j){msg("wm",j.ok?t("Modo AP attivo (192.168.4.1)"):j.err,j.ok)})}
+function runCmd(){var v=$("si").value;$("si").value="";$("so").textContent+="> "+v+"\n";
+ post("/api/shell",{c:v}).then(function(r){return r.text()}).then(function(t){var o=$("so");o.textContent+=t+"\n";o.scrollTop=o.scrollHeight})}
 function loadTasks(){api("/api/tasks").then(function(r){return r.text()}).then(function(t){$("tk").textContent=t})}
 function fillLed(){api("/api/settings").then(function(r){return r.json()}).then(function(c){$("l_mode").value=c.ledMode;
  $("l_col").value="#"+("000000"+c.ledColor.toString(16)).slice(-6);$("l_br").value=c.ledBrightness;$("m_mode").value=c.led2Mode;$("m_pin").value=c.led2Pin;$("m_br").value=c.led2Bright;$("m_inv").value=c.led2Invert?"1":"0"})}
@@ -288,15 +291,50 @@ function saveLed(){post("/api/led",{mode:$("l_mode").value,color:parseInt($("l_c
  .then(function(r){return r.json()}).then(function(j){msg("lm2",j.ok?t("Salvato"):j.err,j.ok)})}
 function saveLed2(){post("/api/led2",{mode:$("m_mode").value,pin:$("m_pin").value,br:$("m_br").value,inv:$("m_inv").value})
  .then(function(r){return r.json()}).then(function(j){msg("lm3",j.ok?t("Salvato"):j.err,j.ok)})}
+var PM=[],PSEL=-1,PWARN=false,PTM=null,PT={gpio:-1};
+function pinPos(g){if(g<=10)return[20+g*26,40];if(g<=21)return[20+(g-11)*26,100];if(g<=47)return[20+(g-38)*26,160];return[150,215]}
 function loadPins(){api("/api/pins").then(function(r){return r.json()}).then(function(p){
- var h="<tr><th>GPIO</th><th>"+t("Usato da")+"</th><th>"+t("Descrizione")+"</th></tr>",s="",used={};
- p.forEach(function(x){h+="<tr><td>"+x.gpio+"</td><td>"+esc(x.owner)+"</td><td>"+esc(x.note)+"</td></tr>";used[x.gpio]=1});
- $("pintab").innerHTML=h;
- for(var g=0;g<=21;g++){var cx=20+(g%11)*26,cy=g<11?60:140;
-  s+='<circle cx="'+cx+'" cy="'+cy+'" r="9" fill="'+(used[g]?"#3fa7ff":"#2a3647")+'"/><text x="'+cx+'" y="'+(cy+3)+'" font-size="8" text-anchor="middle" fill="#fff">'+g+'</text>'}
- s+='<circle cx="150" cy="100" r="9" fill="'+(used[48]?"#3fa7ff":"#2a3647")+'"/><text x="150" y="103" font-size="7" text-anchor="middle" fill="#fff">48</text>';
- s+='<text x="150" y="20" font-size="11" text-anchor="middle" fill="#8b98a8">'+esc(t("Blu = pin in uso"))+'</text>';
- $("pinsvg").innerHTML=s})}
+ var h="<tr><th>GPIO</th><th>"+t("Usato da")+"</th><th>"+t("Descrizione")+"</th></tr>";
+ p.forEach(function(x){h+="<tr><td>"+x.gpio+"</td><td>"+esc(x.owner)+"</td><td>"+esc(x.note)+"</td></tr>"});
+ $("pintab").innerHTML=h});
+ api("/api/pinmap").then(function(r){return r.json()}).then(function(m){PM=m;drawPins();pinPanel()});
+ clearInterval(PTM);PTM=setInterval(pinPoll,1000);pinPoll()}
+function pinInfo(g){for(var i=0;i<PM.length;i++)if(PM[i].g==g)return PM[i];return null}
+function drawPins(){var s="";
+ PM.forEach(function(x){var q=pinPos(x.g),c=x.ok?"#2e9e5b":(x.owner&&x.g!=PT.gpio?"#3fa7ff":"#3a4352");
+  if(x.g==PT.gpio)c="#e0a020";
+  s+='<g style="cursor:pointer" onclick="pinSel('+x.g+')"><circle cx="'+q[0]+'" cy="'+q[1]+'" r="10" fill="'+c+'" stroke="'+(x.g==PSEL?"#fff":"none")+'" stroke-width="2"/><text x="'+q[0]+'" y="'+(q[1]+3)+'" font-size="8" text-anchor="middle" fill="#fff">'+x.g+'</text></g>'});
+ s+='<text x="150" y="240" font-size="10" text-anchor="middle" fill="#8b98a8">'+esc(t("Verde = provabile, arancio = in prova"))+'</text>';
+ $("pinsvg").innerHTML=s}
+function pinSel(g){PSEL=g;drawPins();pinPanel()}
+function pinPanel(){var e=$("pinpanel"),h="";
+ h+='<label>'+esc(t("Altro GPIO"))+'</label><input type="number" id="pn_g" min="0" max="48" value="'+(PSEL<0?"":PSEL)+'" style="width:90px" onchange="pinSel(parseInt(this.value))"> ';
+ var x=pinInfo(PSEL);
+ if(PSEL<0){e.innerHTML=h;return}
+ h+='<h3 style="margin-top:10px">GPIO'+PSEL+'</h3>';
+ if(!x){h+='<div class="msg ko">'+esc(t("Pin inesistente su questa scheda"))+'</div>'}
+ else if(!x.ok&&PSEL!=PT.gpio){h+='<div class="msg ko">'+esc(t("Non provabile:"))+" "+esc(x.why)+'</div>'}
+ else{
+  h+='<div id="pnlv" style="margin:6px 0"></div>';
+  h+='<button class="btn" onclick="pinGo(\'high\')">'+esc(t("Alto (3,3 V)"))+'</button><button class="btn gray" onclick="pinGo(\'low\')">'+esc(t("Basso (0 V)"))+'</button><button class="btn" onclick="pinGo(\'blink\')">'+esc(t("Lampeggia"))+'</button>';
+  h+='<div style="margin-top:8px"><button class="btn" onclick="pinGo(\'read\')">'+esc(t("Leggi"))+'</button> <select id="pn_pull"><option value="none">'+esc(t("senza resistenza"))+'</option><option value="up">'+esc(t("resistenza verso 3,3 V"))+'</option><option value="down">'+esc(t("resistenza verso massa"))+'</option></select></div>';
+  h+='<div style="margin-top:8px"><button class="btn red" onclick="pinGo(\'off\')">'+esc(t("Rilascia"))+'</button></div>';
+  h+='<div id="pnm" class="msg"></div>'}
+ e.innerHTML=h;pinLevel()}
+function pinWarn(){if(PWARN)return true;
+ var w=[t("ATTENZIONE: una prova sbagliata puo danneggiare la scheda."),"",t("- Usa solo 3,3 V. Mai 5 V o tensioni piu alte su un pin."),t("- Ogni pin regge pochi mA: un LED vuole una resistenza da 220-470 ohm."),t("- Motori, rel&#232; e carichi grandi vanno pilotati con un transistor."),t("- Non collegare due uscite insieme e non toccare i pin di alimentazione."),"",t("Vuoi continuare?")].join("\n");
+ if(!confirm(w))return false;PWARN=true;return true}
+function pinGo(a){if(PSEL<0)return;if(a!="off"&&!pinWarn())return;
+ var d={gpio:PSEL,action:a};if(a=="read")d.pull=$("pn_pull").value;
+ post("/api/pintest",d).then(function(r){return r.json()}).then(function(j){
+  if(!j.ok){msg("pnm",j.err,false);return}setTimeout(pinPoll,300)})}
+function pinPoll(){if(cur!="pin"){clearInterval(PTM);return}
+ api("/api/pintest").then(function(r){return r.json()}).then(function(j){var ch=(j.gpio!=PT.gpio);PT=j;
+  if(ch){api("/api/pinmap").then(function(r){return r.json()}).then(function(m){PM=m;drawPins();pinPanel()})}else pinLevel()}).catch(function(){})}
+function pinLevel(){var e=$("pnlv");if(!e)return;
+ if(PT.gpio!=PSEL){e.textContent=t("Nessuna prova in corso su questo pin");return}
+ var an={high:t("Alto"),low:t("Basso"),blink:t("Lampeggia"),read:t("Lettura")}[PT.action];
+ e.innerHTML=esc(an)+" - "+esc(t("livello letto"))+": <b>"+(PT.level?t("ALTO"):t("BASSO"))+"</b> - "+esc(tf("si spegne tra {0} s",PT.left))}
 function fillSys(){api("/api/settings").then(function(r){return r.json()}).then(function(c){$("s_host").value=c.hostname;$("s_dom").value=c.domain;$("s_fq").textContent=t("Nome completo:")+" "+c.hostname+(c.domain?"."+c.domain:"")})}
 function saveSys(){post("/api/system",{hostname:$("s_host").value,domain:$("s_dom").value}).then(function(r){return r.json()}).then(function(j){msg("sm",j.ok?t("Salvato"):j.err,j.ok);if(j.ok)fillSys()})}
 function loadLangs(){
@@ -317,7 +355,8 @@ function delLang(c){if(!confirm(tf("Eliminare la lingua {0}?",c)))return;
  if(c==LANG){post("/api/lang",{code:"it"}).then(function(){LANG="it";DICT={};try{localStorage.setItem("vl","it")}catch(e){}refreshView();go()})}else go()}
 function loadLic(){fetch("/api/license").then(function(r){return r.json()}).then(function(l){
   var h="";l.forEach(function(x){h+='<button class="btn gray" onclick="showLic(\''+esc(x.id)+'\')">'+esc(x.title)+'</button>'});$("licbtn").innerHTML=h}).catch(function(){})}
-function showLic(id){fetch("/api/license?id="+encodeURIComponent(id)).then(function(r){return r.text()}).then(function(x){var e=$("licx");e.textContent=x;e.className="";e.scrollTop=0})}
+)VOSPAGE"
+R"VOSPAGE(function showLic(id){fetch("/api/license?id="+encodeURIComponent(id)).then(function(r){return r.text()}).then(function(x){var e=$("licx");e.textContent=x;e.className="";e.scrollTop=0})}
 function loadLog(){api("/api/log").then(function(r){return r.text()}).then(function(t){$("lg").textContent=t})}
 function restoreCfg(){var f=$("cf").files[0];if(!f){msg("cm",t("Scegli un file"),false);return}
  f.text().then(function(t){return post("/api/config/restore",{t:t})}).then(function(r){return r.json()}).then(function(j){msg("cm",j.ok?t("Ripristinato"):j.err,j.ok)})}

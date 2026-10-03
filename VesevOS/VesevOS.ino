@@ -63,5 +63,6 @@ void setup() {
 void loop() {
   shellSerialPoll();
   resetPasswordIfBootHeld();
+  pinTestTick();
   delay(10);
 }

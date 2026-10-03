@@ -134,6 +134,14 @@ void webInit() {
   server.on("/api/status", HTTP_GET, [](AsyncWebServerRequest* r) { if (checkAuth(r)) sendJson(r, sysStatusJson()); });
   server.on("/api/settings", HTTP_GET, [](AsyncWebServerRequest* r) { if (checkAuth(r)) sendJson(r, settingsJson()); });
   server.on("/api/pins", HTTP_GET, [](AsyncWebServerRequest* r) { if (checkAuth(r)) sendJson(r, pinsJson()); });
+  server.on("/api/pinmap", HTTP_GET, [](AsyncWebServerRequest* r) { if (checkAuth(r)) sendJson(r, pinMapJson()); });
+  server.on("/api/pintest", HTTP_GET, [](AsyncWebServerRequest* r) { if (checkAuth(r)) sendJson(r, pinTestJson()); });
+  server.on("/api/pintest", HTTP_POST, [](AsyncWebServerRequest* r) {
+    if (!checkAuth(r)) return;
+    String err;
+    if (!pinTestRequest(P(r, "gpio").toInt(), P(r, "action"), P(r, "pull"), err)) { ko(r, err); return; }
+    ok(r);
+  });
   server.on("/api/log", HTTP_GET, [](AsyncWebServerRequest* r) {
     if (!checkAuth(r)) return;
     r->send(200, "text/plain; charset=utf-8", logGet(60));

@@ -18,3 +18,12 @@ int    pinCount();
 const PinInfo* pinAt(int i);
 bool   pinIsUsed(uint8_t gpio);
 String pinsJson();
+
+// ---- Prova dei pin (un solo pin alla volta, si spegne da solo) ----
+// Se il pin non si puo provare, restituisce il motivo (gia tradotto); altrimenti nullptr.
+const char* pinTestBlock(int gpio);
+// action: "high" "low" "blink" "read" "off"; pull (solo per read): "up" "down" "none"
+bool   pinTestRequest(int gpio, const String& action, const String& pull, String& err);
+void   pinTestTick();          // da chiamare spesso (nel loop)
+String pinTestJson();          // pin in prova, azione, secondi rimasti, livello letto
+String pinMapJson();           // per ogni GPIO: provabile oppure no, e perche

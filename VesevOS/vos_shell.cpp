@@ -75,6 +75,7 @@ static void cmdHelp(Print& o) {
   o.println(tr("  lang [codice]   mostra o cambia la lingua (it, en, ...)"));
   o.println(tr("  license [id]    note legali e licenze (notice, gpl3, lgpl3, lgpl21, apache2)"));
   o.println(tr("  pins            pin usati"));
+  o.println(tr("  pin <n> [high|low|blink|read [up|down]|off]  prova un pin (si spegne da solo)"));
   o.println(tr("  config          mostra configurazione (senza password)"));
   o.println(tr("  passwd <nuova>  cambia password (min 6 caratteri)"));
   o.println(tr("  logout          esce (solo seriale)"));
@@ -255,6 +256,19 @@ void shellExec(const String& lineIn, Print& o, bool authed) {
       o.write((const uint8_t*)(tx + off), k);
     }
     o.println();
+  }
+  else if (c == "pin") {
+    String a1 = argAt(line, 1), a2 = argAt(line, 2), a3 = argAt(line, 3);
+    if (a1 == "") { o.println(tr("Uso: pin <numero> [high|low|blink|read [up|down]|off]")); return; }
+    int g = a1.toInt();
+    if (a2 == "") {
+      const char* why = pinTestBlock(g);
+      o.println(why ? trf("GPIO%d: non provabile (%s)", g, why) : trf("GPIO%d: libero, si puo provare", g));
+      return;
+    }
+    String err;
+    if (!pinTestRequest(g, a2, a3, err)) { o.println(trf("Errore: %s", err.c_str())); return; }
+    o.println(trf("GPIO%d: %s - si spegne da solo dopo qualche secondo", g, a2.c_str()));
   }
   else if (c == "pins") {
     for (int i = 0; i < pinCount(); i++) {

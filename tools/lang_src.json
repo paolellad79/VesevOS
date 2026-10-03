@@ -2254,13 +2254,6 @@
    "scope": "web"
   },
   {
-   "it": "Blu = pin in uso",
-   "en": "Blue = pin in use",
-   "es": "Azul = pin en uso",
-   "de": "Blau = Pin belegt",
-   "scope": "web"
-  },
-  {
    "it": "Nome completo:",
    "en": "Full name:",
    "es": "Nombre completo:",
@@ -2426,6 +2419,300 @@
    "en": "The legal texts are inside the firmware and can also be read from the serial port with the license command.",
    "es": "Los textos legales estan dentro del firmware y tambien se leen desde el puerto serie con el comando license.",
    "de": "Die rechtlichen Texte sind in der Firmware enthalten und lassen sich auch ueber die serielle Schnittstelle mit dem Befehl license lesen.",
+   "scope": "web"
+  },
+  {
+   "it": "Prova temporanea",
+   "en": "Temporary test",
+   "es": "Prueba temporal",
+   "de": "Temporaerer Test",
+   "scope": "fw"
+  },
+  {
+   "it": "Pin inesistente su questa scheda",
+   "en": "Pin does not exist on this board",
+   "es": "El pin no existe en esta placa",
+   "de": "Pin existiert auf dieser Platine nicht",
+   "scope": "fw"
+  },
+  {
+   "it": "USB: serve al collegamento con il PC",
+   "en": "USB: needed for the connection to the PC",
+   "es": "USB: necesario para la conexion con el PC",
+   "de": "USB: wird fuer die Verbindung zum PC gebraucht",
+   "scope": "fw"
+  },
+  {
+   "it": "LED RGB della scheda",
+   "en": "Board RGB LED",
+   "es": "LED RGB de la placa",
+   "de": "RGB-LED der Platine",
+   "scope": "fw"
+  },
+  {
+   "it": "Tasto BOOT",
+   "en": "BOOT button",
+   "es": "Boton BOOT",
+   "de": "BOOT-Taste",
+   "scope": "fw"
+  },
+  {
+   "it": "Pin di avvio: meglio non toccarlo",
+   "en": "Boot pin: better not to touch it",
+   "es": "Pin de arranque: mejor no tocarlo",
+   "de": "Boot-Pin: besser nicht beruehren",
+   "scope": "fw"
+  },
+  {
+   "it": "Gia usato dal sistema",
+   "en": "Already used by the system",
+   "es": "Ya usado por el sistema",
+   "de": "Bereits vom System benutzt",
+   "scope": "fw"
+  },
+  {
+   "it": "Azione non valida",
+   "en": "Invalid action",
+   "es": "Accion no valida",
+   "de": "Ungueltige Aktion",
+   "scope": "fw"
+  },
+  {
+   "it": "Questo pin non e in prova",
+   "en": "This pin is not under test",
+   "es": "Este pin no esta en prueba",
+   "de": "Dieser Pin ist nicht im Test",
+   "scope": "fw"
+  },
+  {
+   "it": "  pin <n> [high|low|blink|read [up|down]|off]  prova un pin (si spegne da solo)",
+   "en": "  pin <n> [high|low|blink|read [up|down]|off]  test a pin (switches off by itself)",
+   "es": "  pin <n> [high|low|blink|read [up|down]|off]  prueba un pin (se apaga solo)",
+   "de": "  pin <n> [high|low|blink|read [up|down]|off]  Pin testen (schaltet sich selbst ab)",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: pin <numero> [high|low|blink|read [up|down]|off]",
+   "en": "Usage: pin <number> [high|low|blink|read [up|down]|off]",
+   "es": "Uso: pin <numero> [high|low|blink|read [up|down]|off]",
+   "de": "Verwendung: pin <Nummer> [high|low|blink|read [up|down]|off]",
+   "scope": "fw"
+  },
+  {
+   "it": "GPIO%d: non provabile (%s)",
+   "en": "GPIO%d: cannot be tested (%s)",
+   "es": "GPIO%d: no se puede probar (%s)",
+   "de": "GPIO%d: nicht testbar (%s)",
+   "scope": "fw"
+  },
+  {
+   "it": "GPIO%d: libero, si puo provare",
+   "en": "GPIO%d: free, can be tested",
+   "es": "GPIO%d: libre, se puede probar",
+   "de": "GPIO%d: frei, kann getestet werden",
+   "scope": "fw"
+  },
+  {
+   "it": "Errore: %s",
+   "en": "Error: %s",
+   "es": "Error: %s",
+   "de": "Fehler: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "GPIO%d: %s - si spegne da solo dopo qualche secondo",
+   "en": "GPIO%d: %s - switches off by itself after a few seconds",
+   "es": "GPIO%d: %s - se apaga solo tras unos segundos",
+   "de": "GPIO%d: %s - schaltet sich nach einigen Sekunden selbst ab",
+   "scope": "fw"
+  },
+  {
+   "it": "Pin e prove",
+   "en": "Pins and tests",
+   "es": "Pines y pruebas",
+   "de": "Pins und Tests",
+   "scope": "web"
+  },
+  {
+   "it": "Tocca un pin verde per provarlo. Blu = pin in uso, grigio = vietato.",
+   "en": "Tap a green pin to test it. Blue = pin in use, grey = forbidden.",
+   "es": "Toca un pin verde para probarlo. Azul = pin en uso, gris = prohibido.",
+   "de": "Tippe auf einen gruenen Pin, um ihn zu testen. Blau = in Benutzung, grau = gesperrt.",
+   "scope": "web"
+  },
+  {
+   "it": "Verde = provabile, arancio = in prova",
+   "en": "Green = testable, orange = under test",
+   "es": "Verde = se puede probar, naranja = en prueba",
+   "de": "Gruen = testbar, orange = im Test",
+   "scope": "web"
+  },
+  {
+   "it": "Altro GPIO",
+   "en": "Other GPIO",
+   "es": "Otro GPIO",
+   "de": "Anderer GPIO",
+   "scope": "web"
+  },
+  {
+   "it": "Non provabile:",
+   "en": "Cannot be tested:",
+   "es": "No se puede probar:",
+   "de": "Nicht testbar:",
+   "scope": "web"
+  },
+  {
+   "it": "Alto (3,3 V)",
+   "en": "High (3.3 V)",
+   "es": "Alto (3,3 V)",
+   "de": "Hoch (3,3 V)",
+   "scope": "web"
+  },
+  {
+   "it": "Basso (0 V)",
+   "en": "Low (0 V)",
+   "es": "Bajo (0 V)",
+   "de": "Niedrig (0 V)",
+   "scope": "web"
+  },
+  {
+   "it": "Lampeggia",
+   "en": "Blink",
+   "es": "Parpadea",
+   "de": "Blinken",
+   "scope": "web"
+  },
+  {
+   "it": "Leggi",
+   "en": "Read",
+   "es": "Leer",
+   "de": "Lesen",
+   "scope": "web"
+  },
+  {
+   "it": "senza resistenza",
+   "en": "no resistor",
+   "es": "sin resistencia",
+   "de": "ohne Widerstand",
+   "scope": "web"
+  },
+  {
+   "it": "resistenza verso 3,3 V",
+   "en": "pull-up to 3.3 V",
+   "es": "resistencia a 3,3 V",
+   "de": "Pull-up zu 3,3 V",
+   "scope": "web"
+  },
+  {
+   "it": "resistenza verso massa",
+   "en": "pull-down to ground",
+   "es": "resistencia a masa",
+   "de": "Pull-down zu Masse",
+   "scope": "web"
+  },
+  {
+   "it": "Rilascia",
+   "en": "Release",
+   "es": "Liberar",
+   "de": "Freigeben",
+   "scope": "web"
+  },
+  {
+   "it": "ATTENZIONE: una prova sbagliata puo danneggiare la scheda.",
+   "en": "WARNING: a wrong test can damage the board.",
+   "es": "ATENCION: una prueba incorrecta puede danar la placa.",
+   "de": "ACHTUNG: Ein falscher Test kann die Platine beschaedigen.",
+   "scope": "web"
+  },
+  {
+   "it": "- Usa solo 3,3 V. Mai 5 V o tensioni piu alte su un pin.",
+   "en": "- Use 3.3 V only. Never 5 V or higher voltages on a pin.",
+   "es": "- Usa solo 3,3 V. Nunca 5 V ni tensiones mayores en un pin.",
+   "de": "- Nur 3,3 V verwenden. Niemals 5 V oder mehr an einem Pin.",
+   "scope": "web"
+  },
+  {
+   "it": "- Ogni pin regge pochi mA: un LED vuole una resistenza da 220-470 ohm.",
+   "en": "- Each pin handles only a few mA: an LED needs a 220-470 ohm resistor.",
+   "es": "- Cada pin aguanta pocos mA: un LED necesita una resistencia de 220-470 ohmios.",
+   "de": "- Jeder Pin vertraegt nur wenige mA: eine LED braucht einen Widerstand von 220-470 Ohm.",
+   "scope": "web"
+  },
+  {
+   "it": "- Motori, relè e carichi grandi vanno pilotati con un transistor.",
+   "en": "- Motors, relays and large loads must be driven with a transistor.",
+   "es": "- Motores, rele y cargas grandes se controlan con un transistor.",
+   "de": "- Motoren, Relais und grosse Lasten werden ueber einen Transistor geschaltet.",
+   "scope": "web"
+  },
+  {
+   "it": "- Non collegare due uscite insieme e non toccare i pin di alimentazione.",
+   "en": "- Do not connect two outputs together and do not touch the power pins.",
+   "es": "- No conectes dos salidas juntas ni toques los pines de alimentacion.",
+   "de": "- Zwei Ausgaenge nicht verbinden und die Stromversorgungs-Pins nicht beruehren.",
+   "scope": "web"
+  },
+  {
+   "it": "Vuoi continuare?",
+   "en": "Do you want to continue?",
+   "es": "Quieres continuar?",
+   "de": "Moechtest du fortfahren?",
+   "scope": "web"
+  },
+  {
+   "it": "Nessuna prova in corso su questo pin",
+   "en": "No test running on this pin",
+   "es": "Ninguna prueba en curso en este pin",
+   "de": "Auf diesem Pin laeuft kein Test",
+   "scope": "web"
+  },
+  {
+   "it": "Alto",
+   "en": "High",
+   "es": "Alto",
+   "de": "Hoch",
+   "scope": "web"
+  },
+  {
+   "it": "Basso",
+   "en": "Low",
+   "es": "Bajo",
+   "de": "Niedrig",
+   "scope": "web"
+  },
+  {
+   "it": "Lettura",
+   "en": "Reading",
+   "es": "Lectura",
+   "de": "Lesen (Eingang)",
+   "scope": "web"
+  },
+  {
+   "it": "livello letto",
+   "en": "level read",
+   "es": "nivel leido",
+   "de": "gelesener Pegel",
+   "scope": "web"
+  },
+  {
+   "it": "ALTO",
+   "en": "HIGH",
+   "es": "ALTO",
+   "de": "HOCH",
+   "scope": "web"
+  },
+  {
+   "it": "BASSO",
+   "en": "LOW",
+   "es": "BAJO",
+   "de": "NIEDRIG",
+   "scope": "web"
+  },
+  {
+   "it": "si spegne tra {0} s",
+   "en": "switches off in {0} s",
+   "es": "se apaga en {0} s",
+   "de": "schaltet sich in {0} s ab",
    "scope": "web"
   }
  ]
