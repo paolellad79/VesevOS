@@ -104,7 +104,7 @@ void shellExec(const String& lineIn, Print& o, bool authed) {
   else if (c == "about") {
     o.println(String(VOS_NAME) + " " + VOS_VERSION + " - " + tr("Una piattaforma, mille schede."));
     o.println(String("GitHub: ") + VOS_GITHUB);
-    o.println("(C) 2026 Domenico Paolella - GPL-3.0-or-later / " + tr("licenza commerciale"));
+    o.println(String("(C) 2026 Domenico Paolella - GPL-3.0-or-later / ") + tr("licenza commerciale"));
   }
   else if (c == "uptime") {
     o.println(trf("Acceso da: %s", uptimeStr(sysUptimeSec()).c_str()));
