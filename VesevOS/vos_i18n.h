@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
+// Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_i18n.h
 // Traduzioni SEPARATE dal firmware. Il firmware contiene solo l'italiano: nel codice si scrive
 // tr("testo italiano") e il testo italiano fa da chiave. Le altre lingue sono file nella memoria

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
+// Copyright (C) 2026 Domenico Paolella
 // VesevOS v1.3.4 - ESP32-S3 SuperMini
 // Fase 1 + 2: base, sicurezza, ora/NTP, file. Progetto diviso in piu file (.h/.cpp nella stessa cartella).
 //

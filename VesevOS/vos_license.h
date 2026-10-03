@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
+// Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_license.h
 // Testi legali e licenze, memorizzati nel firmware (flash). Generati da tools/mklicense.py.
 #pragma once

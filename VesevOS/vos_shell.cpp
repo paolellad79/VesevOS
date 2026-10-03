@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
+// Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_shell.cpp
 #include "vos_shell.h"
 #include "vos_common.h"

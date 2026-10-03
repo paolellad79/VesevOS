@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
+// Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_util.h
 // Funzioni di utilita: IP, uptime, testo pulito (solo ASCII), hash.
 #pragma once

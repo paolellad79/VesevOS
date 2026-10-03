@@ -5,8 +5,8 @@
 static const char LIC_TEXT_0[] PROGMEM =
 R"VOSLIC(VesevOS - note legali e licenze
 
-Titolare dei diritti: [NOME E COGNOME DEL TITOLARE]
-Copyright (C) 2026 [NOME E COGNOME DEL TITOLARE]. Tutti i diritti riservati salvo quanto
+Titolare dei diritti: Domenico Paolella
+Copyright (C) 2026 Domenico Paolella. Tutti i diritti riservati salvo quanto
 concesso dalle licenze indicate sotto.
 Contatto per licenze commerciali: paolellad79@gmail.com
 Progetto: https://github.com/paolellad79/VesevOS
@@ -1624,7 +1624,7 @@ R"VOSLIC(      for use, reproduction, or distribution of Your modifications, or
 
 struct LicDoc { const char* id; const char* title; const char* text; size_t size; };
 static const LicDoc LIC_DOCS[] = {
-  { "notice", "Note legali e licenza di VesevOS", LIC_TEXT_0, 2984 },
+  { "notice", "Note legali e licenza di VesevOS", LIC_TEXT_0, 2960 },
   { "gpl3", "GNU General Public License v3.0", LIC_TEXT_1, 35149 },
   { "lgpl3", "GNU Lesser General Public License v3.0", LIC_TEXT_2, 7652 },
   { "lgpl21", "GNU Lesser General Public License v2.1", LIC_TEXT_3, 26530 },

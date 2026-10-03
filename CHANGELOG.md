@@ -1,5 +1,9 @@
 # Cronologia delle versioni
 
+## 1.4.2 (3 ottobre 2026)
+- Titolare del software: Domenico Paolella. Nome inserito nelle note legali, in `NOTICE.txt`
+  e nelle intestazioni di copyright di tutti i sorgenti.
+
 ## 1.4.1 (3 ottobre 2026)
 - **Prova dei pin**: nella scheda Pin i pin sono cliccabili (verde = provabile, blu = in uso, grigio = vietato).
   Si puo mettere un pin Alto, Basso, farlo Lampeggiare o Leggerlo (con resistenza verso 3,3 V o massa).

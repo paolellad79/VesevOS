@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
+// Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_net.h
 // Wi-Fi: AP fisso 192.168.4.1 al primo avvio, client con DHCP o IP statico.
 #pragma once

@@ -3,7 +3,7 @@
 Piccolo sistema operativo (firmware) per **ESP32-S3 SuperMini**, scritto per Arduino IDE.
 Pagina web di controllo, shell (web e seriale), Wi-Fi, ora via NTP, file, LED, tutto protetto da password.
 
-> Stato: in sviluppo (versione 1.4.1). Il progetto cresce a fasi, vedi "Prossimi passi".
+> Stato: in sviluppo (versione 1.4.2). Il progetto cresce a fasi, vedi "Prossimi passi".
 
 ## Cosa fa oggi
 

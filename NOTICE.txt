@@ -1,7 +1,7 @@
 VesevOS - note legali e licenze
 
-Titolare dei diritti: [NOME E COGNOME DEL TITOLARE]
-Copyright (C) 2026 [NOME E COGNOME DEL TITOLARE]. Tutti i diritti riservati salvo quanto
+Titolare dei diritti: Domenico Paolella
+Copyright (C) 2026 Domenico Paolella. Tutti i diritti riservati salvo quanto
 concesso dalle licenze indicate sotto.
 Contatto per licenze commerciali: paolellad79@gmail.com
 Progetto: https://github.com/paolellad79/VesevOS

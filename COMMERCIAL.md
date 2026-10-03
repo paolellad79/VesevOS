@@ -25,3 +25,6 @@ licenza commerciale. Vedi `CONTRIBUTING.md`.
 VesevOS usa librerie con licenze proprie (per esempio ESPAsyncWebServer e AsyncTCP, che
 risultano LGPL, e il core Arduino-ESP32). Restano sotto la loro licenza e non fanno parte
 della licenza commerciale di VesevOS. Chi distribuisce un firmware compilato deve rispettarle.
+
+## Titolare e contatto
+Titolare dei diritti: Domenico Paolella - paolellad79@gmail.com

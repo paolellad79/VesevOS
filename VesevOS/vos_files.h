@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
+// Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_files.h
 // Gestione file e cartelle sulla memoria interna (LittleFS).
 // Il file di configurazione (con le password) e protetto: non si vede e non si tocca.
