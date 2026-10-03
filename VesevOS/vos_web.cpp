@@ -42,7 +42,7 @@ static String token(AsyncWebServerRequest* r) {
 
 static bool checkAuth(AsyncWebServerRequest* r) {
   if (authSessionValid(token(r))) return true;
-  authNoteDenied((uint32_t)r->remoteIP());
+  authNoteDenied((uint32_t)r->client()->remoteIP());
   r->send(401, "application/json", "{\"ok\":false,\"err\":\"non autorizzato\"}");
   return false;
 }
@@ -122,7 +122,7 @@ void webInit() {
       authSetPassword(p); cfgSave();
     } else {
       uint32_t wait = 0;
-      int res = authCheckFrom((uint32_t)r->remoteIP(), p, wait);
+      int res = authCheckFrom((uint32_t)r->client()->remoteIP(), p, wait);
       if (res == 2) { ko(r, trf("Troppi errori da questo indirizzo: riprova tra %lu secondi", (unsigned long)wait)); return; }
       if (res != 0) { ko(r, tr("Password errata")); return; }
     }
