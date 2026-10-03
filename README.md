@@ -3,7 +3,7 @@
 Piccolo sistema operativo (firmware) per **ESP32-S3 SuperMini**, scritto per Arduino IDE.
 Pagina web di controllo, shell (web e seriale), Wi-Fi, ora via NTP, file, LED, tutto protetto da password.
 
-> Stato: in sviluppo (versione 1.3.6). Il progetto cresce a fasi, vedi "Prossimi passi".
+> Stato: in sviluppo (versione 1.4.0). Il progetto cresce a fasi, vedi "Prossimi passi".
 
 ## Cosa fa oggi
 
@@ -17,6 +17,8 @@ Pagina web di controllo, shell (web e seriale), Wi-Fi, ora via NTP, file, LED, t
 - **LED**: LED RGB WS2812 (stato del sistema, battito legato al carico CPU, colore fisso) e un LED aggiuntivo.
 - **Configurazione** in stile OpenWrt (`/vesevos.conf`), scaricabile e ripristinabile.
 - **Pin**: elenco dei pin in uso.
+- **Lingue**: italiano nel firmware; inglese, spagnolo e tedesco come file separati (`lang/`), caricabili dalla pagina senza ricompilare. Si puo aggiungere una lingua con un solo file.
+- **Licenze e note legali** consultabili dalla pagina e dalla shell (`license`).
 
 ## Requisiti
 
@@ -64,7 +66,10 @@ Non tenerlo premuto all'accensione: la scheda entrerebbe in modo download.
 ```
 VesevOS/      sketch Arduino (VesevOS.ino + file .h/.cpp)
 web/          pagina web in HTML (sorgente di vos_page.h)
-tools/        mkpage.py: genera VesevOS/vos_page.h da web/index.html
+lang/         file di lingua pronti da caricare (en, es, de) - GENERATI da tools/lang_src.json
+licenses/     testi delle licenze (GPL, LGPL, Apache) e modello della nota legale
+tools/        mkpage.py (pagina), mklang.py (lingue), mklicense.py (testi legali)
+NOTICE.txt    note legali: titolarita, licenze, riferimenti normativi
 CHANGELOG.md  cronologia delle versioni
 ```
 
@@ -75,6 +80,18 @@ python3 tools/mkpage.py
 ```
 
 I sorgenti usano solo caratteri ASCII (le lettere accentate nella pagina sono entita HTML).
+
+## Lingue
+
+L'italiano e dentro il firmware. Per le altre lingue:
+
+1. Apri la pagina, scheda **Config > Lingue**.
+2. Scegli il file (`en.json`, `es.json` o `de.json` dalla cartella `lang/`) e premi **Carica lingua**.
+3. Scegli la lingua dal menu in alto a destra. La scheda la ricorda; da shell: `lang en`.
+
+Ogni lingua occupa circa 17 KB della memoria interna. **Per aggiungere una lingua**: copia una
+voce di `tools/lang_src.json`, aggiungi la colonna con il nuovo codice in `langs` e nelle voci,
+poi esegui `python3 tools/mklang.py`. Il controllo avvisa se manca qualche testo.
 
 ## Problemi noti
 
@@ -94,5 +111,8 @@ Doppia licenza:
 - **GPL v3 o successiva** (file `LICENSE`): gratuita. Chi distribuisce VesevOS modificato, o dentro un
   prodotto, deve pubblicare il proprio codice con la stessa licenza.
 - **Licenza commerciale**: per usare VesevOS in prodotti chiusi. Vedi `COMMERCIAL.md`.
+
+Titolarita, licenze delle librerie di terzi e riferimenti normativi: vedi `NOTICE.txt` (anche nella
+pagina, scheda Config > Licenze, e nella shell con `license`).
 
 Per contribuire con codice leggi `CONTRIBUTING.md`.

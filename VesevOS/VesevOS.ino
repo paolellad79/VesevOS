@@ -21,6 +21,7 @@
 #include "vos_time.h"
 #include "vos_web.h"
 #include "vos_shell.h"
+#include "vos_i18n.h"
 
 static void resetPasswordIfBootHeld() {
   // Tieni premuto BOOT (GPIO0) per 8 secondi a sistema acceso: azzera la password.
@@ -50,6 +51,7 @@ void setup() {
   if (!LittleFS.begin(true)) { vlog("FS: LittleFS non parte"); }
   if (!cfgLoad()) { vlog("CFG: nessun file, uso i valori iniziali"); cfgSave(); }
 
+  langInit();
   sysInit();
   ledInit();
   netInit();

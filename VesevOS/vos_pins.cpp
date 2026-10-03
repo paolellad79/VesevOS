@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // VesevOS - vos_pins.cpp
+#include "vos_i18n.h"
 #include "vos_pins.h"
 #include "vos_util.h"
 
@@ -47,8 +48,8 @@ String pinsJson() {
   for (int i = 0; i < g_n; i++) {
     if (i) j += ",";
     j += "{\"gpio\":" + String(g_pins[i].gpio) +
-         ",\"owner\":\"" + jsonEscape(g_pins[i].owner) +
-         "\",\"note\":\"" + jsonEscape(g_pins[i].note) +
+         ",\"owner\":\"" + jsonEscape(tr(g_pins[i].owner)) +
+         "\",\"note\":\"" + jsonEscape(tr(g_pins[i].note)) +
          "\",\"fixed\":" + (g_pins[i].fixed ? "true" : "false") + "}";
   }
   j += "]";

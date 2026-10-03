@@ -1,0 +1,2432 @@
+{
+ "_comment": "Sorgente delle traduzioni. 'it' e la chiave (testo italiano nel codice). scope fw = usato dal firmware (solo ASCII, stessi segnaposto %s %d...); web = solo pagina (Unicode ok, segnaposto {0} {1}). Genera i file lang/*.json con: python3 tools/mklang.py",
+ "langs": {
+  "en": "English",
+  "es": "Español",
+  "de": "Deutsch"
+ },
+ "entries": [
+  {
+   "it": "riga %d: option senza valore",
+   "en": "line %d: option without value",
+   "es": "linea %d: option sin valor",
+   "de": "Zeile %d: option ohne Wert",
+   "scope": "fw"
+  },
+  {
+   "it": "riga %d: apici non chiusi",
+   "en": "line %d: unclosed quotes",
+   "es": "linea %d: comillas sin cerrar",
+   "de": "Zeile %d: Anfuehrungszeichen nicht geschlossen",
+   "scope": "fw"
+  },
+  {
+   "it": "riga %d: non capisco",
+   "en": "line %d: not understood",
+   "es": "linea %d: no se entiende",
+   "de": "Zeile %d: nicht verstanden",
+   "scope": "fw"
+  },
+  {
+   "it": "nessuna opzione trovata",
+   "en": "no option found",
+   "es": "no se encontro ninguna opcion",
+   "de": "keine Option gefunden",
+   "scope": "fw"
+  },
+  {
+   "it": "Percorso non valido",
+   "en": "Invalid path",
+   "es": "Ruta no valida",
+   "de": "Ungueltiger Pfad",
+   "scope": "fw"
+  },
+  {
+   "it": "File di sistema protetto",
+   "en": "Protected system file",
+   "es": "Archivo de sistema protegido",
+   "de": "Geschuetzte Systemdatei",
+   "scope": "fw"
+  },
+  {
+   "it": "Cartella non trovata",
+   "en": "Folder not found",
+   "es": "Carpeta no encontrada",
+   "de": "Ordner nicht gefunden",
+   "scope": "fw"
+  },
+  {
+   "it": "Esiste gia",
+   "en": "Already exists",
+   "es": "Ya existe",
+   "de": "Existiert bereits",
+   "scope": "fw"
+  },
+  {
+   "it": "Impossibile creare la cartella",
+   "en": "Cannot create the folder",
+   "es": "No se puede crear la carpeta",
+   "de": "Ordner kann nicht erstellt werden",
+   "scope": "fw"
+  },
+  {
+   "it": "Non si puo eliminare la radice",
+   "en": "The root cannot be deleted",
+   "es": "No se puede eliminar la raiz",
+   "de": "Das Stammverzeichnis kann nicht geloescht werden",
+   "scope": "fw"
+  },
+  {
+   "it": "Non trovato",
+   "en": "Not found",
+   "es": "No encontrado",
+   "de": "Nicht gefunden",
+   "scope": "fw"
+  },
+  {
+   "it": "Eliminazione non riuscita",
+   "en": "Delete failed",
+   "es": "Error al eliminar",
+   "de": "Loeschen fehlgeschlagen",
+   "scope": "fw"
+  },
+  {
+   "it": "Origine non trovata",
+   "en": "Source not found",
+   "es": "Origen no encontrado",
+   "de": "Quelle nicht gefunden",
+   "scope": "fw"
+  },
+  {
+   "it": "La destinazione esiste gia",
+   "en": "The destination already exists",
+   "es": "El destino ya existe",
+   "de": "Das Ziel existiert bereits",
+   "scope": "fw"
+  },
+  {
+   "it": "Rinomina non riuscita",
+   "en": "Rename failed",
+   "es": "Error al renombrar",
+   "de": "Umbenennen fehlgeschlagen",
+   "scope": "fw"
+  },
+  {
+   "it": "Origine non e un file",
+   "en": "Source is not a file",
+   "es": "El origen no es un archivo",
+   "de": "Quelle ist keine Datei",
+   "scope": "fw"
+  },
+  {
+   "it": "Impossibile creare la destinazione",
+   "en": "Cannot create the destination",
+   "es": "No se puede crear el destino",
+   "de": "Ziel kann nicht erstellt werden",
+   "scope": "fw"
+  },
+  {
+   "it": "Spazio esaurito",
+   "en": "Out of space",
+   "es": "Espacio agotado",
+   "de": "Kein Speicherplatz mehr",
+   "scope": "fw"
+  },
+  {
+   "it": "Nome file mancante",
+   "en": "File name missing",
+   "es": "Falta el nombre del archivo",
+   "de": "Dateiname fehlt",
+   "scope": "fw"
+  },
+  {
+   "it": "Testo troppo lungo (max 8000)",
+   "en": "Text too long (max 8000)",
+   "es": "Texto demasiado largo (max 8000)",
+   "de": "Text zu lang (max 8000)",
+   "scope": "fw"
+  },
+  {
+   "it": "Impossibile scrivere",
+   "en": "Cannot write",
+   "es": "No se puede escribir",
+   "de": "Schreiben nicht moeglich",
+   "scope": "fw"
+  },
+  {
+   "it": "File non trovato",
+   "en": "File not found",
+   "es": "Archivo no encontrado",
+   "de": "Datei nicht gefunden",
+   "scope": "fw"
+  },
+  {
+   "it": "Lingua non installata",
+   "en": "Language not installed",
+   "es": "Idioma no instalado",
+   "de": "Sprache nicht installiert",
+   "scope": "fw"
+  },
+  {
+   "it": "File di lingua non valido",
+   "en": "Invalid language file",
+   "es": "Archivo de idioma no valido",
+   "de": "Ungueltige Sprachdatei",
+   "scope": "fw"
+  },
+  {
+   "it": "Memoria esaurita",
+   "en": "Out of memory",
+   "es": "Memoria agotada",
+   "de": "Speicher erschoepft",
+   "scope": "fw"
+  },
+  {
+   "it": "Lingua non valida",
+   "en": "Invalid language",
+   "es": "Idioma no valido",
+   "de": "Ungueltige Sprache",
+   "scope": "fw"
+  },
+  {
+   "it": "Connessione...",
+   "en": "Connecting...",
+   "es": "Conectando...",
+   "de": "Verbinde...",
+   "scope": "fw"
+  },
+  {
+   "it": "Avvio",
+   "en": "Starting",
+   "es": "Arranque",
+   "de": "Start",
+   "scope": "fw"
+  },
+  {
+   "it": "Comandi:",
+   "en": "Commands:",
+   "es": "Comandos:",
+   "de": "Befehle:",
+   "scope": "fw"
+  },
+  {
+   "it": "  help            questo elenco",
+   "en": "  help            this list",
+   "es": "  help            esta lista",
+   "de": "  help            diese Liste",
+   "scope": "fw"
+  },
+  {
+   "it": "  uname           versione sistema",
+   "en": "  uname           system version",
+   "es": "  uname           version del sistema",
+   "de": "  uname           Systemversion",
+   "scope": "fw"
+  },
+  {
+   "it": "  uptime          da quanto e acceso (+ motivo reset, avvii)",
+   "en": "  uptime          time since power on (+ reset reason, boots)",
+   "es": "  uptime          tiempo encendido (+ motivo de reset, arranques)",
+   "de": "  uptime          Laufzeit (+ Reset-Grund, Starts)",
+   "scope": "fw"
+  },
+  {
+   "it": "  free            memoria RAM/PSRAM",
+   "en": "  free            RAM/PSRAM memory",
+   "es": "  free            memoria RAM/PSRAM",
+   "de": "  free            RAM/PSRAM-Speicher",
+   "scope": "fw"
+  },
+  {
+   "it": "  df              spazio su flash",
+   "en": "  df              flash space",
+   "es": "  df              espacio en flash",
+   "de": "  df              Flash-Speicher",
+   "scope": "fw"
+  },
+  {
+   "it": "  temp            temperatura CPU",
+   "en": "  temp            CPU temperature",
+   "es": "  temp            temperatura de la CPU",
+   "de": "  temp            CPU-Temperatur",
+   "scope": "fw"
+  },
+  {
+   "it": "  top             CPU, RAM, temperatura",
+   "en": "  top             CPU, RAM, temperature",
+   "es": "  top             CPU, RAM, temperatura",
+   "de": "  top             CPU, RAM, Temperatur",
+   "scope": "fw"
+  },
+  {
+   "it": "  ps              elenco task",
+   "en": "  ps              task list",
+   "es": "  ps              lista de tareas",
+   "de": "  ps              Taskliste",
+   "scope": "fw"
+  },
+  {
+   "it": "  ls [cartella]   elenco file (flash)",
+   "en": "  ls [folder]     list files (flash)",
+   "es": "  ls [carpeta]    lista de archivos (flash)",
+   "de": "  ls [Ordner]     Dateiliste (Flash)",
+   "scope": "fw"
+  },
+  {
+   "it": "  cat <file>      mostra un file",
+   "en": "  cat <file>      show a file",
+   "es": "  cat <archivo>   muestra un archivo",
+   "de": "  cat <Datei>     zeigt eine Datei",
+   "scope": "fw"
+  },
+  {
+   "it": "  mkdir <nome>    crea cartella",
+   "en": "  mkdir <name>    create folder",
+   "es": "  mkdir <nombre>  crea una carpeta",
+   "de": "  mkdir <Name>    Ordner erstellen",
+   "scope": "fw"
+  },
+  {
+   "it": "  rm <nome>       elimina file o cartella",
+   "en": "  rm <name>       delete file or folder",
+   "es": "  rm <nombre>     elimina archivo o carpeta",
+   "de": "  rm <Name>       Datei oder Ordner loeschen",
+   "scope": "fw"
+  },
+  {
+   "it": "  mv <da> <a>     sposta o rinomina",
+   "en": "  mv <from> <to>  move or rename",
+   "es": "  mv <de> <a>     mueve o renombra",
+   "de": "  mv <von> <nach> verschieben oder umbenennen",
+   "scope": "fw"
+  },
+  {
+   "it": "  cp <da> <a>     copia un file",
+   "en": "  cp <from> <to>  copy a file",
+   "es": "  cp <de> <a>     copia un archivo",
+   "de": "  cp <von> <nach> Datei kopieren",
+   "scope": "fw"
+  },
+  {
+   "it": "  write <file> <testo>   scrive un file di testo",
+   "en": "  write <file> <text>    write a text file",
+   "es": "  write <archivo> <texto>   escribe un archivo de texto",
+   "de": "  write <Datei> <Text>   Textdatei schreiben",
+   "scope": "fw"
+  },
+  {
+   "it": "  date            data e ora",
+   "en": "  date            date and time",
+   "es": "  date            fecha y hora",
+   "de": "  date            Datum und Uhrzeit",
+   "scope": "fw"
+  },
+  {
+   "it": "  ntp [sync]      stato NTP / risincronizza",
+   "en": "  ntp [sync]      NTP status / resync",
+   "es": "  ntp [sync]      estado NTP / resincroniza",
+   "de": "  ntp [sync]      NTP-Status / neu synchronisieren",
+   "scope": "fw"
+  },
+  {
+   "it": "  cpu [auto|80|160|240]  velocita CPU",
+   "en": "  cpu [auto|80|160|240]  CPU speed",
+   "es": "  cpu [auto|80|160|240]  velocidad de la CPU",
+   "de": "  cpu [auto|80|160|240]  CPU-Takt",
+   "scope": "fw"
+  },
+  {
+   "it": "  hostname [nome] mostra o cambia il nome host",
+   "en": "  hostname [name] show or change the host name",
+   "es": "  hostname [nombre] muestra o cambia el nombre de host",
+   "de": "  hostname [Name] Hostnamen anzeigen oder aendern",
+   "scope": "fw"
+  },
+  {
+   "it": "  domain [nome|-] mostra, cambia o toglie il dominio",
+   "en": "  domain [name|-] show, change or remove the domain",
+   "es": "  domain [nombre|-] muestra, cambia o quita el dominio",
+   "de": "  domain [Name|-] Domain anzeigen, aendern oder entfernen",
+   "scope": "fw"
+  },
+  {
+   "it": "  ip              rete e indirizzo",
+   "en": "  ip              network and address",
+   "es": "  ip              red y direccion",
+   "de": "  ip              Netzwerk und Adresse",
+   "scope": "fw"
+  },
+  {
+   "it": "  wifi            stato wi-fi",
+   "en": "  wifi            Wi-Fi status",
+   "es": "  wifi            estado del Wi-Fi",
+   "de": "  wifi            WLAN-Status",
+   "scope": "fw"
+  },
+  {
+   "it": "  wifi-scan       cerca reti",
+   "en": "  wifi-scan       search networks",
+   "es": "  wifi-scan       busca redes",
+   "de": "  wifi-scan       Netzwerke suchen",
+   "scope": "fw"
+  },
+  {
+   "it": "  led <modo>      state|heartbeat|fixed|off",
+   "en": "  led <mode>      state|heartbeat|fixed|off",
+   "es": "  led <modo>      state|heartbeat|fixed|off",
+   "de": "  led <Modus>     state|heartbeat|fixed|off",
+   "scope": "fw"
+  },
+  {
+   "it": "  led-color <RRGGBB>   colore (esadecimale)",
+   "en": "  led-color <RRGGBB>   colour (hexadecimal)",
+   "es": "  led-color <RRGGBB>   color (hexadecimal)",
+   "de": "  led-color <RRGGBB>   Farbe (hexadezimal)",
+   "scope": "fw"
+  },
+  {
+   "it": "  led-bright <0-255>   luminosita",
+   "en": "  led-bright <0-255>   brightness",
+   "es": "  led-bright <0-255>   brillo",
+   "de": "  led-bright <0-255>   Helligkeit",
+   "scope": "fw"
+  },
+  {
+   "it": "  led2 <modo>     LED aggiuntivo: off|on|heartbeat",
+   "en": "  led2 <mode>     extra LED: off|on|heartbeat",
+   "es": "  led2 <modo>     LED adicional: off|on|heartbeat",
+   "de": "  led2 <Modus>    Zusatz-LED: off|on|heartbeat",
+   "scope": "fw"
+  },
+  {
+   "it": "  led2-pin <n>    pin del LED aggiuntivo",
+   "en": "  led2-pin <n>    extra LED pin",
+   "es": "  led2-pin <n>    pin del LED adicional",
+   "de": "  led2-pin <n>    Pin der Zusatz-LED",
+   "scope": "fw"
+  },
+  {
+   "it": "  led2-bright <0-255>  luminosita LED aggiuntivo",
+   "en": "  led2-bright <0-255>  extra LED brightness",
+   "es": "  led2-bright <0-255>  brillo del LED adicional",
+   "de": "  led2-bright <0-255>  Helligkeit der Zusatz-LED",
+   "scope": "fw"
+  },
+  {
+   "it": "  led2-invert on|off   on = si accende con livello basso",
+   "en": "  led2-invert on|off   on = lights up on low level",
+   "es": "  led2-invert on|off   on = se enciende con nivel bajo",
+   "de": "  led2-invert on|off   on = leuchtet bei niedrigem Pegel",
+   "scope": "fw"
+  },
+  {
+   "it": "  lang [codice]   mostra o cambia la lingua (it, en, ...)",
+   "en": "  lang [code]     show or change the language (it, en, ...)",
+   "es": "  lang [codigo]   muestra o cambia el idioma (it, en, ...)",
+   "de": "  lang [Code]     Sprache anzeigen oder aendern (it, en, ...)",
+   "scope": "fw"
+  },
+  {
+   "it": "  pins            pin usati",
+   "en": "  pins            pins in use",
+   "es": "  pins            pines en uso",
+   "de": "  pins            belegte Pins",
+   "scope": "fw"
+  },
+  {
+   "it": "  config          mostra configurazione (senza password)",
+   "en": "  config          show configuration (no passwords)",
+   "es": "  config          muestra la configuracion (sin contrasenas)",
+   "de": "  config          Konfiguration anzeigen (ohne Passwoerter)",
+   "scope": "fw"
+  },
+  {
+   "it": "  passwd <nuova>  cambia password (min 6 caratteri)",
+   "en": "  passwd <new>    change password (min 6 characters)",
+   "es": "  passwd <nueva>  cambia la contrasena (min 6 caracteres)",
+   "de": "  passwd <neu>    Passwort aendern (min 6 Zeichen)",
+   "scope": "fw"
+  },
+  {
+   "it": "  logout          esce (solo seriale)",
+   "en": "  logout          log out (serial only)",
+   "es": "  logout          cierra sesion (solo serie)",
+   "de": "  logout          abmelden (nur seriell)",
+   "scope": "fw"
+  },
+  {
+   "it": "  log             ultime righe di log",
+   "en": "  log             last log lines",
+   "es": "  log             ultimas lineas del registro",
+   "de": "  log             letzte Logzeilen",
+   "scope": "fw"
+  },
+  {
+   "it": "  factory-reset   azzera tutto (poi riavvia)",
+   "en": "  factory-reset   erase everything (then reboot)",
+   "es": "  factory-reset   borra todo (luego reinicia)",
+   "de": "  factory-reset   alles loeschen (dann Neustart)",
+   "scope": "fw"
+  },
+  {
+   "it": "  reboot          riavvia",
+   "en": "  reboot          restart",
+   "es": "  reboot          reinicia",
+   "de": "  reboot          Neustart",
+   "scope": "fw"
+  },
+  {
+   "it": "Non autorizzato. Fai login.",
+   "en": "Not authorized. Please log in.",
+   "es": "No autorizado. Inicia sesion.",
+   "de": "Nicht autorisiert. Bitte anmelden.",
+   "scope": "fw"
+  },
+  {
+   "it": "Acceso da: %s",
+   "en": "Up for: %s",
+   "es": "Encendido desde hace: %s",
+   "de": "Laufzeit: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Ultimo reset: %s",
+   "en": "Last reset: %s",
+   "es": "Ultimo reset: %s",
+   "de": "Letzter Reset: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Avvii totali: %lu",
+   "en": "Total boots: %lu",
+   "es": "Arranques totales: %lu",
+   "de": "Starts gesamt: %lu",
+   "scope": "fw"
+  },
+  {
+   "it": "RAM   libera %u KB su %u KB",
+   "en": "RAM   free %u KB of %u KB",
+   "es": "RAM   libre %u KB de %u KB",
+   "de": "RAM   frei %u KB von %u KB",
+   "scope": "fw"
+  },
+  {
+   "it": "PSRAM libera %u KB su %u KB",
+   "en": "PSRAM free %u KB of %u KB",
+   "es": "PSRAM libre %u KB de %u KB",
+   "de": "PSRAM frei %u KB von %u KB",
+   "scope": "fw"
+  },
+  {
+   "it": "/flash  usati %u KB su %u KB",
+   "en": "/flash  used %u KB of %u KB",
+   "es": "/flash  usados %u KB de %u KB",
+   "de": "/flash  belegt %u KB von %u KB",
+   "scope": "fw"
+  },
+  {
+   "it": "Temperatura CPU: %s",
+   "en": "CPU temperature: %s",
+   "es": "Temperatura de la CPU: %s",
+   "de": "CPU-Temperatur: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "CPU %d%%  Temp %s  %u MHz",
+   "en": "CPU %d%%  Temp %s  %u MHz",
+   "es": "CPU %d%%  Temp %s  %u MHz",
+   "de": "CPU %d%%  Temp %s  %u MHz",
+   "scope": "fw"
+  },
+  {
+   "it": "RAM libera %u KB  PSRAM libera %u KB",
+   "en": "RAM free %u KB  PSRAM free %u KB",
+   "es": "RAM libre %u KB  PSRAM libre %u KB",
+   "de": "RAM frei %u KB  PSRAM frei %u KB",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: cat <file>",
+   "en": "Usage: cat <file>",
+   "es": "Uso: cat <archivo>",
+   "de": "Verwendung: cat <Datei>",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: mkdir <cartella>",
+   "en": "Usage: mkdir <folder>",
+   "es": "Uso: mkdir <carpeta>",
+   "de": "Verwendung: mkdir <Ordner>",
+   "scope": "fw"
+  },
+  {
+   "it": "Creata",
+   "en": "Created",
+   "es": "Creada",
+   "de": "Erstellt",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: rm <file o cartella>",
+   "en": "Usage: rm <file or folder>",
+   "es": "Uso: rm <archivo o carpeta>",
+   "de": "Verwendung: rm <Datei oder Ordner>",
+   "scope": "fw"
+  },
+  {
+   "it": "Eliminato",
+   "en": "Deleted",
+   "es": "Eliminado",
+   "de": "Geloescht",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: %s <da> <a>",
+   "en": "Usage: %s <from> <to>",
+   "es": "Uso: %s <de> <a>",
+   "de": "Verwendung: %s <von> <nach>",
+   "scope": "fw"
+  },
+  {
+   "it": "Fatto",
+   "en": "Done",
+   "es": "Hecho",
+   "de": "Fertig",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: write <file> <testo>",
+   "en": "Usage: write <file> <text>",
+   "es": "Uso: write <archivo> <texto>",
+   "de": "Verwendung: write <Datei> <Text>",
+   "scope": "fw"
+  },
+  {
+   "it": "Scritto",
+   "en": "Written",
+   "es": "Escrito",
+   "de": "Geschrieben",
+   "scope": "fw"
+  },
+  {
+   "it": "Sincronizzazione NTP richiesta",
+   "en": "NTP sync requested",
+   "es": "Sincronizacion NTP solicitada",
+   "de": "NTP-Synchronisierung angefordert",
+   "scope": "fw"
+  },
+  {
+   "it": "CPU a %u MHz, modo %u fisso",
+   "en": "CPU at %u MHz, fixed mode %u",
+   "es": "CPU a %u MHz, modo fijo %u",
+   "de": "CPU mit %u MHz, fester Modus %u",
+   "scope": "fw"
+  },
+  {
+   "it": "CPU a %u MHz, modo automatico",
+   "en": "CPU at %u MHz, automatic mode",
+   "es": "CPU a %u MHz, modo automatico",
+   "de": "CPU mit %u MHz, Automatikmodus",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: cpu auto|80|160|240",
+   "en": "Usage: cpu auto|80|160|240",
+   "es": "Uso: cpu auto|80|160|240",
+   "de": "Verwendung: cpu auto|80|160|240",
+   "scope": "fw"
+  },
+  {
+   "it": "Modo CPU: %s",
+   "en": "CPU mode: %s",
+   "es": "Modo de CPU: %s",
+   "de": "CPU-Modus: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: led state|heartbeat|fixed|off",
+   "en": "Usage: led state|heartbeat|fixed|off",
+   "es": "Uso: led state|heartbeat|fixed|off",
+   "de": "Verwendung: led state|heartbeat|fixed|off",
+   "scope": "fw"
+  },
+  {
+   "it": "LED: %s",
+   "en": "LED: %s",
+   "es": "LED: %s",
+   "de": "LED: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: led-color RRGGBB",
+   "en": "Usage: led-color RRGGBB",
+   "es": "Uso: led-color RRGGBB",
+   "de": "Verwendung: led-color RRGGBB",
+   "scope": "fw"
+  },
+  {
+   "it": "Colore: %s",
+   "en": "Colour: %s",
+   "es": "Color: %s",
+   "de": "Farbe: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: led-bright 0-255",
+   "en": "Usage: led-bright 0-255",
+   "es": "Uso: led-bright 0-255",
+   "de": "Verwendung: led-bright 0-255",
+   "scope": "fw"
+  },
+  {
+   "it": "Luminosita: %d",
+   "en": "Brightness: %d",
+   "es": "Brillo: %d",
+   "de": "Helligkeit: %d",
+   "scope": "fw"
+  },
+  {
+   "it": "Stato: %s, pin %u, luminosita %u, livello %s",
+   "en": "Status: %s, pin %u, brightness %u, level %s",
+   "es": "Estado: %s, pin %u, brillo %u, nivel %s",
+   "de": "Status: %s, Pin %u, Helligkeit %u, Pegel %s",
+   "scope": "fw"
+  },
+  {
+   "it": "BASSO (invertito)",
+   "en": "LOW (inverted)",
+   "es": "BAJO (invertido)",
+   "de": "NIEDRIG (invertiert)",
+   "scope": "fw"
+  },
+  {
+   "it": "alto (normale)",
+   "en": "high (normal)",
+   "es": "alto (normal)",
+   "de": "hoch (normal)",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: led2 off|on|heartbeat   (led2-pin <n>, led2-bright <0-255>, led2-invert on|off)",
+   "en": "Usage: led2 off|on|heartbeat   (led2-pin <n>, led2-bright <0-255>, led2-invert on|off)",
+   "es": "Uso: led2 off|on|heartbeat   (led2-pin <n>, led2-bright <0-255>, led2-invert on|off)",
+   "de": "Verwendung: led2 off|on|heartbeat   (led2-pin <n>, led2-bright <0-255>, led2-invert on|off)",
+   "scope": "fw"
+  },
+  {
+   "it": "LED aggiuntivo: %s (pin %u)",
+   "en": "Extra LED: %s (pin %u)",
+   "es": "LED adicional: %s (pin %u)",
+   "de": "Zusatz-LED: %s (Pin %u)",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: led2-invert on|off   (on = si accende con livello basso)",
+   "en": "Usage: led2-invert on|off   (on = lights up on low level)",
+   "es": "Uso: led2-invert on|off   (on = se enciende con nivel bajo)",
+   "de": "Verwendung: led2-invert on|off   (on = leuchtet bei niedrigem Pegel)",
+   "scope": "fw"
+  },
+  {
+   "it": "Livello LED aggiuntivo: %s",
+   "en": "Extra LED level: %s",
+   "es": "Nivel del LED adicional: %s",
+   "de": "Pegel der Zusatz-LED: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Pin non ammesso (usa 1-18, 21 oppure 38-47)",
+   "en": "Pin not allowed (use 1-18, 21 or 38-47)",
+   "es": "Pin no permitido (usa 1-18, 21 o 38-47)",
+   "de": "Pin nicht erlaubt (1-18, 21 oder 38-47 verwenden)",
+   "scope": "fw"
+  },
+  {
+   "it": "Pin gia usato da altro",
+   "en": "Pin already used by something else",
+   "es": "Pin ya usado por otro",
+   "de": "Pin wird bereits anderweitig verwendet",
+   "scope": "fw"
+  },
+  {
+   "it": "Pin LED aggiuntivo: %d",
+   "en": "Extra LED pin: %d",
+   "es": "Pin del LED adicional: %d",
+   "de": "Pin der Zusatz-LED: %d",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: led2-bright 0-255",
+   "en": "Usage: led2-bright 0-255",
+   "es": "Uso: led2-bright 0-255",
+   "de": "Verwendung: led2-bright 0-255",
+   "scope": "fw"
+  },
+  {
+   "it": "Luminosita LED aggiuntivo: %d",
+   "en": "Extra LED brightness: %d",
+   "es": "Brillo del LED adicional: %d",
+   "de": "Helligkeit der Zusatz-LED: %d",
+   "scope": "fw"
+  },
+  {
+   "it": "Nome non valido (1-32: lettere, numeri, trattino)",
+   "en": "Invalid name (1-32: letters, numbers, hyphen)",
+   "es": "Nombre no valido (1-32: letras, numeros, guion)",
+   "de": "Ungueltiger Name (1-32: Buchstaben, Zahlen, Bindestrich)",
+   "scope": "fw"
+  },
+  {
+   "it": "Nome host: %s",
+   "en": "Host name: %s",
+   "es": "Nombre de host: %s",
+   "de": "Hostname: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "(nessun dominio)",
+   "en": "(no domain)",
+   "es": "(sin dominio)",
+   "de": "(keine Domain)",
+   "scope": "fw"
+  },
+  {
+   "it": "Dominio non valido",
+   "en": "Invalid domain",
+   "es": "Dominio no valido",
+   "de": "Ungueltige Domain",
+   "scope": "fw"
+  },
+  {
+   "it": "Dominio: %s",
+   "en": "Domain: %s",
+   "es": "Dominio: %s",
+   "de": "Domain: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Dominio tolto",
+   "en": "Domain removed",
+   "es": "Dominio quitado",
+   "de": "Domain entfernt",
+   "scope": "fw"
+  },
+  {
+   "it": "Lingua: %s",
+   "en": "Language: %s",
+   "es": "Idioma: %s",
+   "de": "Sprache: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Lingue installate: %s",
+   "en": "Installed languages: %s",
+   "es": "Idiomas instalados: %s",
+   "de": "Installierte Sprachen: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Password troppo corta (min 6)",
+   "en": "Password too short (min 6)",
+   "es": "Contrasena demasiado corta (min 6)",
+   "de": "Passwort zu kurz (min 6)",
+   "scope": "fw"
+  },
+  {
+   "it": "Password cambiata",
+   "en": "Password changed",
+   "es": "Contrasena cambiada",
+   "de": "Passwort geaendert",
+   "scope": "fw"
+  },
+  {
+   "it": "Azzero tutto e riavvio...",
+   "en": "Erasing everything and restarting...",
+   "es": "Borro todo y reinicio...",
+   "de": "Alles wird geloescht, Neustart...",
+   "scope": "fw"
+  },
+  {
+   "it": "Riavvio...",
+   "en": "Restarting...",
+   "es": "Reiniciando...",
+   "de": "Neustart...",
+   "scope": "fw"
+  },
+  {
+   "it": "Comando sconosciuto. Scrivi 'help'.",
+   "en": "Unknown command. Type 'help'.",
+   "es": "Comando desconocido. Escribe 'help'.",
+   "de": "Unbekannter Befehl. 'help' eingeben.",
+   "scope": "fw"
+  },
+  {
+   "it": "scrivi 'help'",
+   "en": "type 'help'",
+   "es": "escribe 'help'",
+   "de": "'help' eingeben",
+   "scope": "fw"
+  },
+  {
+   "it": "Nessuna password: impostala dalla pagina web (primo accesso).",
+   "en": "No password: set it from the web page (first access).",
+   "es": "Sin contrasena: configurala desde la pagina web (primer acceso).",
+   "de": "Kein Passwort: ueber die Webseite festlegen (Erstzugriff).",
+   "scope": "fw"
+  },
+  {
+   "it": "Bloccato per troppi errori, riprova tra un minuto.",
+   "en": "Locked after too many errors, try again in a minute.",
+   "es": "Bloqueado por demasiados errores, reintenta en un minuto.",
+   "de": "Wegen zu vieler Fehler gesperrt, in einer Minute erneut versuchen.",
+   "scope": "fw"
+  },
+  {
+   "it": "Accesso eseguito.",
+   "en": "Logged in.",
+   "es": "Sesion iniciada.",
+   "de": "Angemeldet.",
+   "scope": "fw"
+  },
+  {
+   "it": "Password errata.",
+   "en": "Wrong password.",
+   "es": "Contrasena incorrecta.",
+   "de": "Falsches Passwort.",
+   "scope": "fw"
+  },
+  {
+   "it": "Uscito.",
+   "en": "Logged out.",
+   "es": "Sesion cerrada.",
+   "de": "Abgemeldet.",
+   "scope": "fw"
+  },
+  {
+   "it": "Accensione",
+   "en": "Power on",
+   "es": "Encendido",
+   "de": "Einschalten",
+   "scope": "fw"
+  },
+  {
+   "it": "Reset software",
+   "en": "Software reset",
+   "es": "Reset por software",
+   "de": "Software-Reset",
+   "scope": "fw"
+  },
+  {
+   "it": "Crash (panic)",
+   "en": "Crash (panic)",
+   "es": "Fallo (panic)",
+   "de": "Absturz (Panic)",
+   "scope": "fw"
+  },
+  {
+   "it": "Interrupt watchdog",
+   "en": "Interrupt watchdog",
+   "es": "Watchdog de interrupcion",
+   "de": "Interrupt-Watchdog",
+   "scope": "fw"
+  },
+  {
+   "it": "Task watchdog",
+   "en": "Task watchdog",
+   "es": "Watchdog de tarea",
+   "de": "Task-Watchdog",
+   "scope": "fw"
+  },
+  {
+   "it": "Altro watchdog",
+   "en": "Other watchdog",
+   "es": "Otro watchdog",
+   "de": "Anderer Watchdog",
+   "scope": "fw"
+  },
+  {
+   "it": "Uscita da deep sleep",
+   "en": "Wake from deep sleep",
+   "es": "Salida de deep sleep",
+   "de": "Aufwachen aus Deep Sleep",
+   "scope": "fw"
+  },
+  {
+   "it": "Brownout (poca tensione)",
+   "en": "Brownout (low voltage)",
+   "es": "Brownout (poca tension)",
+   "de": "Brownout (zu niedrige Spannung)",
+   "scope": "fw"
+  },
+  {
+   "it": "USB (apertura monitor seriale)",
+   "en": "USB (serial monitor opened)",
+   "es": "USB (monitor serie abierto)",
+   "de": "USB (serieller Monitor geoeffnet)",
+   "scope": "fw"
+  },
+  {
+   "it": "Reset da JTAG",
+   "en": "JTAG reset",
+   "es": "Reset por JTAG",
+   "de": "JTAG-Reset",
+   "scope": "fw"
+  },
+  {
+   "it": "Sconosciuto (%d)",
+   "en": "Unknown (%d)",
+   "es": "Desconocido (%d)",
+   "de": "Unbekannt (%d)",
+   "scope": "fw"
+  },
+  {
+   "it": "Task attivi: %u",
+   "en": "Active tasks: %u",
+   "es": "Tareas activas: %u",
+   "de": "Aktive Tasks: %u",
+   "scope": "fw"
+  },
+  {
+   "it": "(dettagli non disponibili in questa build)",
+   "en": "(details not available in this build)",
+   "es": "(detalles no disponibles en esta compilacion)",
+   "de": "(Details in diesem Build nicht verfuegbar)",
+   "scope": "fw"
+  },
+  {
+   "it": "non impostata",
+   "en": "not set",
+   "es": "sin configurar",
+   "de": "nicht gesetzt",
+   "scope": "fw"
+  },
+  {
+   "it": "Troppi errori: riprova tra un minuto",
+   "en": "Too many errors: try again in a minute",
+   "es": "Demasiados errores: reintenta en un minuto",
+   "de": "Zu viele Fehler: in einer Minute erneut versuchen",
+   "scope": "fw"
+  },
+  {
+   "it": "Password errata",
+   "en": "Wrong password",
+   "es": "Contrasena incorrecta",
+   "de": "Falsches Passwort",
+   "scope": "fw"
+  },
+  {
+   "it": "Nome rete non valido",
+   "en": "Invalid network name",
+   "es": "Nombre de red no valido",
+   "de": "Ungueltiger Netzwerkname",
+   "scope": "fw"
+  },
+  {
+   "it": "Password Wi-Fi: da 8 a 63 caratteri",
+   "en": "Wi-Fi password: 8 to 63 characters",
+   "es": "Contrasena Wi-Fi: de 8 a 63 caracteres",
+   "de": "WLAN-Passwort: 8 bis 63 Zeichen",
+   "scope": "fw"
+  },
+  {
+   "it": "IP non valido",
+   "en": "Invalid IP",
+   "es": "IP no valida",
+   "de": "Ungueltige IP",
+   "scope": "fw"
+  },
+  {
+   "it": "Subnet mask non valida",
+   "en": "Invalid subnet mask",
+   "es": "Mascara de subred no valida",
+   "de": "Ungueltige Subnetzmaske",
+   "scope": "fw"
+  },
+  {
+   "it": "Gateway non valido",
+   "en": "Invalid gateway",
+   "es": "Puerta de enlace no valida",
+   "de": "Ungueltiges Gateway",
+   "scope": "fw"
+  },
+  {
+   "it": "Il gateway non e nella stessa rete dell'IP",
+   "en": "The gateway is not in the same network as the IP",
+   "es": "La puerta de enlace no esta en la misma red que la IP",
+   "de": "Das Gateway liegt nicht im selben Netz wie die IP",
+   "scope": "fw"
+  },
+  {
+   "it": "DNS 1 non valido",
+   "en": "Invalid DNS 1",
+   "es": "DNS 1 no valido",
+   "de": "Ungueltiger DNS 1",
+   "scope": "fw"
+  },
+  {
+   "it": "DNS 2 non valido",
+   "en": "Invalid DNS 2",
+   "es": "DNS 2 no valido",
+   "de": "Ungueltiger DNS 2",
+   "scope": "fw"
+  },
+  {
+   "it": "Comando troppo lungo",
+   "en": "Command too long",
+   "es": "Comando demasiado largo",
+   "de": "Befehl zu lang",
+   "scope": "fw"
+  },
+  {
+   "it": "Valori non validi",
+   "en": "Invalid values",
+   "es": "Valores no validos",
+   "de": "Ungueltige Werte",
+   "scope": "fw"
+  },
+  {
+   "it": "Questo pin e gia usato da altro (vedi scheda Pin)",
+   "en": "This pin is already used by something else (see the Pin tab)",
+   "es": "Este pin ya esta en uso (ver pestana Pin)",
+   "de": "Dieser Pin wird bereits verwendet (siehe Tab Pin)",
+   "scope": "fw"
+  },
+  {
+   "it": "Nome host non valido (1-32 caratteri: lettere, numeri, trattino; non all'inizio o alla fine)",
+   "en": "Invalid host name (1-32 characters: letters, numbers, hyphen; not at the start or end)",
+   "es": "Nombre de host no valido (1-32 caracteres: letras, numeros, guion; no al principio ni al final)",
+   "de": "Ungueltiger Hostname (1-32 Zeichen: Buchstaben, Zahlen, Bindestrich; nicht am Anfang oder Ende)",
+   "scope": "fw"
+  },
+  {
+   "it": "Dominio non valido (nomi separati da punti, solo lettere, numeri e trattino)",
+   "en": "Invalid domain (names separated by dots, only letters, numbers and hyphen)",
+   "es": "Dominio no valido (nombres separados por puntos, solo letras, numeros y guion)",
+   "de": "Ungueltige Domain (durch Punkte getrennte Namen, nur Buchstaben, Zahlen und Bindestrich)",
+   "scope": "fw"
+  },
+  {
+   "it": "Vecchia password errata",
+   "en": "Old password is wrong",
+   "es": "La contrasena anterior es incorrecta",
+   "de": "Altes Passwort ist falsch",
+   "scope": "fw"
+  },
+  {
+   "it": "Nuova password troppo corta (min 6)",
+   "en": "New password too short (min 6)",
+   "es": "Nueva contrasena demasiado corta (min 6)",
+   "de": "Neues Passwort zu kurz (min 6)",
+   "scope": "fw"
+  },
+  {
+   "it": "File vuoto o troppo grande",
+   "en": "File empty or too large",
+   "es": "Archivo vacio o demasiado grande",
+   "de": "Datei leer oder zu gross",
+   "scope": "fw"
+  },
+  {
+   "it": "Server NTP non valido",
+   "en": "Invalid NTP server",
+   "es": "Servidor NTP no valido",
+   "de": "Ungueltiger NTP-Server",
+   "scope": "fw"
+  },
+  {
+   "it": "Server NTP: solo lettere, numeri, punto e trattino",
+   "en": "NTP server: only letters, numbers, dot and hyphen",
+   "es": "Servidor NTP: solo letras, numeros, punto y guion",
+   "de": "NTP-Server: nur Buchstaben, Zahlen, Punkt und Bindestrich",
+   "scope": "fw"
+  },
+  {
+   "it": "Fuso orario non valido",
+   "en": "Invalid time zone",
+   "es": "Zona horaria no valida",
+   "de": "Ungueltige Zeitzone",
+   "scope": "fw"
+  },
+  {
+   "it": "Fuso orario: caratteri non validi",
+   "en": "Time zone: invalid characters",
+   "es": "Zona horaria: caracteres no validos",
+   "de": "Zeitzone: ungueltige Zeichen",
+   "scope": "fw"
+  },
+  {
+   "it": "Formato non valido",
+   "en": "Invalid format",
+   "es": "Formato no valido",
+   "de": "Ungueltiges Format",
+   "scope": "fw"
+  },
+  {
+   "it": "Ora non valida",
+   "en": "Invalid time",
+   "es": "Hora no valida",
+   "de": "Ungueltige Uhrzeit",
+   "scope": "fw"
+  },
+  {
+   "it": "Valore non valido",
+   "en": "Invalid value",
+   "es": "Valor no valido",
+   "de": "Ungueltiger Wert",
+   "scope": "fw"
+  },
+  {
+   "it": "Caricamento non riuscito",
+   "en": "Upload failed",
+   "es": "Error en la carga",
+   "de": "Hochladen fehlgeschlagen",
+   "scope": "fw"
+  },
+  {
+   "it": "Nome o percorso non valido",
+   "en": "Invalid name or path",
+   "es": "Nombre o ruta no validos",
+   "de": "Ungueltiger Name oder Pfad",
+   "scope": "fw"
+  },
+  {
+   "it": "Impossibile creare il file",
+   "en": "Cannot create the file",
+   "es": "No se puede crear el archivo",
+   "de": "Datei kann nicht erstellt werden",
+   "scope": "fw"
+  },
+  {
+   "it": "USB D-  (nativo)",
+   "en": "USB D-  (native)",
+   "es": "USB D-  (nativo)",
+   "de": "USB D-  (nativ)",
+   "scope": "fw"
+  },
+  {
+   "it": "USB D+  (nativo)",
+   "en": "USB D+  (native)",
+   "es": "USB D+  (nativo)",
+   "de": "USB D+  (nativ)",
+   "scope": "fw"
+  },
+  {
+   "it": "Pulsante BOOT (8 s = reset password)",
+   "en": "BOOT button (8 s = reset password)",
+   "es": "Boton BOOT (8 s = reset de contrasena)",
+   "de": "BOOT-Taste (8 s = Passwort zuruecksetzen)",
+   "scope": "fw"
+  },
+  {
+   "it": "LED RGB WS2812",
+   "en": "WS2812 RGB LED",
+   "es": "LED RGB WS2812",
+   "de": "WS2812-RGB-LED",
+   "scope": "fw"
+  },
+  {
+   "it": "LED aggiuntivo (rosso)",
+   "en": "Extra LED (red)",
+   "es": "LED adicional (rojo)",
+   "de": "Zusatz-LED (rot)",
+   "scope": "fw"
+  },
+  {
+   "it": "Sistema",
+   "en": "System",
+   "es": "Sistema",
+   "de": "System",
+   "scope": "fw"
+  },
+  {
+   "it": "a",
+   "en": "y",
+   "es": "a",
+   "de": "J",
+   "scope": "fw"
+  },
+  {
+   "it": "m",
+   "en": "mo",
+   "es": "m",
+   "de": "Mo",
+   "scope": "fw"
+  },
+  {
+   "it": "g",
+   "en": "d",
+   "es": "d",
+   "de": "T",
+   "scope": "fw"
+  },
+  {
+   "it": "h",
+   "en": "h",
+   "es": "h",
+   "de": "Std",
+   "scope": "fw"
+  },
+  {
+   "it": "min",
+   "en": "min",
+   "es": "min",
+   "de": "Min",
+   "scope": "fw"
+  },
+  {
+   "it": "s",
+   "en": "s",
+   "es": "s",
+   "de": "s",
+   "scope": "fw"
+  },
+  {
+   "it": "Accesso",
+   "en": "Sign in",
+   "es": "Acceso",
+   "de": "Anmeldung",
+   "scope": "web"
+  },
+  {
+   "it": "Primo accesso: scegli una password (almeno 6 caratteri).",
+   "en": "First access: choose a password (at least 6 characters).",
+   "es": "Primer acceso: elige una contraseña (al menos 6 caracteres).",
+   "de": "Erstzugriff: Wähle ein Passwort (mindestens 6 Zeichen).",
+   "scope": "web"
+  },
+  {
+   "it": "Password",
+   "en": "Password",
+   "es": "Contraseña",
+   "de": "Passwort",
+   "scope": "web"
+  },
+  {
+   "it": "Entra",
+   "en": "Sign in",
+   "es": "Entrar",
+   "de": "Anmelden",
+   "scope": "web"
+  },
+  {
+   "it": "Esci",
+   "en": "Log out",
+   "es": "Salir",
+   "de": "Abmelden",
+   "scope": "web"
+  },
+  {
+   "it": "Riepilogo",
+   "en": "Summary",
+   "es": "Resumen",
+   "de": "Übersicht",
+   "scope": "web"
+  },
+  {
+   "it": "Uso risorse",
+   "en": "Resource usage",
+   "es": "Uso de recursos",
+   "de": "Ressourcennutzung",
+   "scope": "web"
+  },
+  {
+   "it": "Velocita CPU",
+   "en": "CPU speed",
+   "es": "Velocidad de la CPU",
+   "de": "CPU-Takt",
+   "scope": "web"
+  },
+  {
+   "it": "Automatica (scala da sola)",
+   "en": "Automatic (scales by itself)",
+   "es": "Automática (se ajusta sola)",
+   "de": "Automatisch (skaliert selbst)",
+   "scope": "web"
+  },
+  {
+   "it": "Fissa 80 MHz",
+   "en": "Fixed 80 MHz",
+   "es": "Fija 80 MHz",
+   "de": "Fest 80 MHz",
+   "scope": "web"
+  },
+  {
+   "it": "Fissa 160 MHz",
+   "en": "Fixed 160 MHz",
+   "es": "Fija 160 MHz",
+   "de": "Fest 160 MHz",
+   "scope": "web"
+  },
+  {
+   "it": "Fissa 240 MHz",
+   "en": "Fixed 240 MHz",
+   "es": "Fija 240 MHz",
+   "de": "Fest 240 MHz",
+   "scope": "web"
+  },
+  {
+   "it": "CPU (ultimi 60 s)",
+   "en": "CPU (last 60 s)",
+   "es": "CPU (últimos 60 s)",
+   "de": "CPU (letzte 60 s)",
+   "scope": "web"
+  },
+  {
+   "it": "Temperatura CPU (ultimi 60 s)",
+   "en": "CPU temperature (last 60 s)",
+   "es": "Temperatura de la CPU (últimos 60 s)",
+   "de": "CPU-Temperatur (letzte 60 s)",
+   "scope": "web"
+  },
+  {
+   "it": "Reti Wi-Fi",
+   "en": "Wi-Fi networks",
+   "es": "Redes Wi-Fi",
+   "de": "WLAN-Netzwerke",
+   "scope": "web"
+  },
+  {
+   "it": "Cerca reti",
+   "en": "Search networks",
+   "es": "Buscar redes",
+   "de": "Netzwerke suchen",
+   "scope": "web"
+  },
+  {
+   "it": "Connessione client",
+   "en": "Client connection",
+   "es": "Conexión cliente",
+   "de": "Client-Verbindung",
+   "scope": "web"
+  },
+  {
+   "it": "Rete (SSID)",
+   "en": "Network (SSID)",
+   "es": "Red (SSID)",
+   "de": "Netzwerk (SSID)",
+   "scope": "web"
+  },
+  {
+   "it": "Password Wi-Fi",
+   "en": "Wi-Fi password",
+   "es": "Contraseña Wi-Fi",
+   "de": "WLAN-Passwort",
+   "scope": "web"
+  },
+  {
+   "it": "(lascia vuoto per non cambiare)",
+   "en": "(leave empty to keep it)",
+   "es": "(déjalo vacío para no cambiar)",
+   "de": "(leer lassen, um es nicht zu ändern)",
+   "scope": "web"
+  },
+  {
+   "it": "Indirizzo IP",
+   "en": "IP address",
+   "es": "Dirección IP",
+   "de": "IP-Adresse",
+   "scope": "web"
+  },
+  {
+   "it": "Automatico (DHCP)",
+   "en": "Automatic (DHCP)",
+   "es": "Automático (DHCP)",
+   "de": "Automatisch (DHCP)",
+   "scope": "web"
+  },
+  {
+   "it": "Statico",
+   "en": "Static",
+   "es": "Estático",
+   "de": "Statisch",
+   "scope": "web"
+  },
+  {
+   "it": "IP",
+   "en": "IP",
+   "es": "IP",
+   "de": "IP",
+   "scope": "web"
+  },
+  {
+   "it": "Subnet mask",
+   "en": "Subnet mask",
+   "es": "Máscara de subred",
+   "de": "Subnetzmaske",
+   "scope": "web"
+  },
+  {
+   "it": "Gateway",
+   "en": "Gateway",
+   "es": "Puerta de enlace",
+   "de": "Gateway",
+   "scope": "web"
+  },
+  {
+   "it": "DNS 1",
+   "en": "DNS 1",
+   "es": "DNS 1",
+   "de": "DNS 1",
+   "scope": "web"
+  },
+  {
+   "it": "DNS 2",
+   "en": "DNS 2",
+   "es": "DNS 2",
+   "de": "DNS 2",
+   "scope": "web"
+  },
+  {
+   "it": "Salva e collega",
+   "en": "Save and connect",
+   "es": "Guardar y conectar",
+   "de": "Speichern und verbinden",
+   "scope": "web"
+  },
+  {
+   "it": "Torna in modo AP",
+   "en": "Back to AP mode",
+   "es": "Volver al modo AP",
+   "de": "Zurück in den AP-Modus",
+   "scope": "web"
+  },
+  {
+   "it": "Shell",
+   "en": "Shell",
+   "es": "Shell",
+   "de": "Shell",
+   "scope": "web"
+  },
+  {
+   "it": "scrivi un comando, es. help",
+   "en": "type a command, e.g. help",
+   "es": "escribe un comando, p. ej. help",
+   "de": "Befehl eingeben, z. B. help",
+   "scope": "web"
+  },
+  {
+   "it": "Task in esecuzione",
+   "en": "Running tasks",
+   "es": "Tareas en ejecución",
+   "de": "Laufende Tasks",
+   "scope": "web"
+  },
+  {
+   "it": "Aggiorna",
+   "en": "Refresh",
+   "es": "Actualizar",
+   "de": "Aktualisieren",
+   "scope": "web"
+  },
+  {
+   "it": "Data e ora",
+   "en": "Date and time",
+   "es": "Fecha y hora",
+   "de": "Datum und Uhrzeit",
+   "scope": "web"
+  },
+  {
+   "it": "Usa l'ora di questo dispositivo",
+   "en": "Use this device's time",
+   "es": "Usar la hora de este dispositivo",
+   "de": "Zeit dieses Geräts verwenden",
+   "scope": "web"
+  },
+  {
+   "it": "Impostazioni",
+   "en": "Settings",
+   "es": "Ajustes",
+   "de": "Einstellungen",
+   "scope": "web"
+  },
+  {
+   "it": "Sincronizzazione automatica (NTP)",
+   "en": "Automatic synchronisation (NTP)",
+   "es": "Sincronización automática (NTP)",
+   "de": "Automatische Synchronisierung (NTP)",
+   "scope": "web"
+  },
+  {
+   "it": "Attiva",
+   "en": "On",
+   "es": "Activa",
+   "de": "Aktiv",
+   "scope": "web"
+  },
+  {
+   "it": "Spenta (ora a mano)",
+   "en": "Off (set time by hand)",
+   "es": "Apagada (hora manual)",
+   "de": "Aus (Zeit von Hand)",
+   "scope": "web"
+  },
+  {
+   "it": "Server NTP",
+   "en": "NTP server",
+   "es": "Servidor NTP",
+   "de": "NTP-Server",
+   "scope": "web"
+  },
+  {
+   "it": "Fuso orario",
+   "en": "Time zone",
+   "es": "Zona horaria",
+   "de": "Zeitzone",
+   "scope": "web"
+  },
+  {
+   "it": "Regola del fuso (formato POSIX)",
+   "en": "Time zone rule (POSIX format)",
+   "es": "Regla de zona horaria (formato POSIX)",
+   "de": "Zeitzonenregel (POSIX-Format)",
+   "scope": "web"
+  },
+  {
+   "it": "Nome del fuso",
+   "en": "Time zone name",
+   "es": "Nombre de la zona",
+   "de": "Name der Zeitzone",
+   "scope": "web"
+  },
+  {
+   "it": "Formato data",
+   "en": "Date format",
+   "es": "Formato de fecha",
+   "de": "Datumsformat",
+   "scope": "web"
+  },
+  {
+   "it": "GG/MM/AAAA (31/12/2026)",
+   "en": "DD/MM/YYYY (31/12/2026)",
+   "es": "DD/MM/AAAA (31/12/2026)",
+   "de": "TT/MM/JJJJ (31/12/2026)",
+   "scope": "web"
+  },
+  {
+   "it": "AAAA-MM-GG (2026-12-31)",
+   "en": "YYYY-MM-DD (2026-12-31)",
+   "es": "AAAA-MM-DD (2026-12-31)",
+   "de": "JJJJ-MM-TT (2026-12-31)",
+   "scope": "web"
+  },
+  {
+   "it": "MM/GG/AAAA (12/31/2026)",
+   "en": "MM/DD/YYYY (12/31/2026)",
+   "es": "MM/DD/AAAA (12/31/2026)",
+   "de": "MM/TT/JJJJ (12/31/2026)",
+   "scope": "web"
+  },
+  {
+   "it": "Formato ora",
+   "en": "Time format",
+   "es": "Formato de hora",
+   "de": "Zeitformat",
+   "scope": "web"
+  },
+  {
+   "it": "24 ore (18:30:00)",
+   "en": "24 hours (18:30:00)",
+   "es": "24 horas (18:30:00)",
+   "de": "24 Stunden (18:30:00)",
+   "scope": "web"
+  },
+  {
+   "it": "12 ore (06:30:00 PM)",
+   "en": "12 hours (06:30:00 PM)",
+   "es": "12 horas (06:30:00 PM)",
+   "de": "12 Stunden (06:30:00 PM)",
+   "scope": "web"
+  },
+  {
+   "it": "Unita di temperatura",
+   "en": "Temperature unit",
+   "es": "Unidad de temperatura",
+   "de": "Temperatureinheit",
+   "scope": "web"
+  },
+  {
+   "it": "Gradi Celsius (C)",
+   "en": "Degrees Celsius (C)",
+   "es": "Grados Celsius (C)",
+   "de": "Grad Celsius (C)",
+   "scope": "web"
+  },
+  {
+   "it": "Gradi Fahrenheit (F)",
+   "en": "Degrees Fahrenheit (F)",
+   "es": "Grados Fahrenheit (F)",
+   "de": "Grad Fahrenheit (F)",
+   "scope": "web"
+  },
+  {
+   "it": "Questa scheda come server NTP per altri dispositivi",
+   "en": "This board as NTP server for other devices",
+   "es": "Esta placa como servidor NTP para otros dispositivos",
+   "de": "Dieses Board als NTP-Server für andere Geräte",
+   "scope": "web"
+  },
+  {
+   "it": "No",
+   "en": "No",
+   "es": "No",
+   "de": "Nein",
+   "scope": "web"
+  },
+  {
+   "it": "Si (UDP 123)",
+   "en": "Yes (UDP 123)",
+   "es": "Sí (UDP 123)",
+   "de": "Ja (UDP 123)",
+   "scope": "web"
+  },
+  {
+   "it": "Salva",
+   "en": "Save",
+   "es": "Guardar",
+   "de": "Speichern",
+   "scope": "web"
+  },
+  {
+   "it": "File - memoria interna",
+   "en": "Files - internal memory",
+   "es": "Archivos - memoria interna",
+   "de": "Dateien - interner Speicher",
+   "scope": "web"
+  },
+  {
+   "it": "Su",
+   "en": "Up",
+   "es": "Subir",
+   "de": "Hoch",
+   "scope": "web"
+  },
+  {
+   "it": "Nuova cartella",
+   "en": "New folder",
+   "es": "Nueva carpeta",
+   "de": "Neuer Ordner",
+   "scope": "web"
+  },
+  {
+   "it": "Nuovo file di testo",
+   "en": "New text file",
+   "es": "Nuevo archivo de texto",
+   "de": "Neue Textdatei",
+   "scope": "web"
+  },
+  {
+   "it": "Carica",
+   "en": "Upload",
+   "es": "Subir",
+   "de": "Hochladen",
+   "scope": "web"
+  },
+  {
+   "it": "Modifica",
+   "en": "Edit",
+   "es": "Editar",
+   "de": "Bearbeiten",
+   "scope": "web"
+  },
+  {
+   "it": "Chiudi",
+   "en": "Close",
+   "es": "Cerrar",
+   "de": "Schließen",
+   "scope": "web"
+  },
+  {
+   "it": "LED",
+   "en": "LED",
+   "es": "LED",
+   "de": "LED",
+   "scope": "web"
+  },
+  {
+   "it": "Modo",
+   "en": "Mode",
+   "es": "Modo",
+   "de": "Modus",
+   "scope": "web"
+  },
+  {
+   "it": "Colore = stato del sistema",
+   "en": "Colour = system status",
+   "es": "Color = estado del sistema",
+   "de": "Farbe = Systemstatus",
+   "scope": "web"
+  },
+  {
+   "it": "Battito (heartbeat) colore scelto",
+   "en": "Heartbeat in the chosen colour",
+   "es": "Latido (heartbeat) en el color elegido",
+   "de": "Herzschlag (Heartbeat) in gewählter Farbe",
+   "scope": "web"
+  },
+  {
+   "it": "Colore fisso",
+   "en": "Fixed colour",
+   "es": "Color fijo",
+   "de": "Feste Farbe",
+   "scope": "web"
+  },
+  {
+   "it": "Spento",
+   "en": "Off",
+   "es": "Apagado",
+   "de": "Aus",
+   "scope": "web"
+  },
+  {
+   "it": "Colore",
+   "en": "Colour",
+   "es": "Color",
+   "de": "Farbe",
+   "scope": "web"
+  },
+  {
+   "it": "Luminosita (0-255)",
+   "en": "Brightness (0-255)",
+   "es": "Brillo (0-255)",
+   "de": "Helligkeit (0-255)",
+   "scope": "web"
+  },
+  {
+   "it": "Colori di stato: arancio = avvio, blu = AP, giallo = connessione, verde = client collegato, rosso lampeggiante = errore.",
+   "en": "Status colours: orange = starting, blue = AP, yellow = connecting, green = client connected, flashing red = error.",
+   "es": "Colores de estado: naranja = arranque, azul = AP, amarillo = conectando, verde = cliente conectado, rojo parpadeante = error.",
+   "de": "Statusfarben: orange = Start, blau = AP, gelb = Verbindung, grün = Client verbunden, rot blinkend = Fehler.",
+   "scope": "web"
+  },
+  {
+   "it": "Acceso fisso",
+   "en": "Always on",
+   "es": "Encendido fijo",
+   "de": "Dauerhaft an",
+   "scope": "web"
+  },
+  {
+   "it": "Battito (heartbeat) legato alla CPU",
+   "en": "Heartbeat linked to the CPU",
+   "es": "Latido (heartbeat) ligado a la CPU",
+   "de": "Herzschlag (Heartbeat) an die CPU gekoppelt",
+   "scope": "web"
+  },
+  {
+   "it": "Pin (GPIO)",
+   "en": "Pin (GPIO)",
+   "es": "Pin (GPIO)",
+   "de": "Pin (GPIO)",
+   "scope": "web"
+  },
+  {
+   "it": "Si accende con",
+   "en": "Lights up with",
+   "es": "Se enciende con",
+   "de": "Leuchtet bei",
+   "scope": "web"
+  },
+  {
+   "it": "Livello alto (normale)",
+   "en": "High level (normal)",
+   "es": "Nivel alto (normal)",
+   "de": "Hoher Pegel (normal)",
+   "scope": "web"
+  },
+  {
+   "it": "Livello basso (invertito)",
+   "en": "Low level (inverted)",
+   "es": "Nivel bajo (invertido)",
+   "de": "Niedriger Pegel (invertiert)",
+   "scope": "web"
+  },
+  {
+   "it": "Pin ammessi: 1-18, 21 e 38-47. Se il LED non reagisce prova un altro pin o il livello invertito. Il pin scelto compare nella scheda Pin.",
+   "en": "Allowed pins: 1-18, 21 and 38-47. If the LED does not react, try another pin or the inverted level. The chosen pin appears in the Pin tab.",
+   "es": "Pines permitidos: 1-18, 21 y 38-47. Si el LED no reacciona, prueba otro pin o el nivel invertido. El pin elegido aparece en la pestaña Pin.",
+   "de": "Erlaubte Pins: 1-18, 21 und 38-47. Reagiert die LED nicht, probiere einen anderen Pin oder den invertierten Pegel. Der gewählte Pin erscheint im Tab Pin.",
+   "scope": "web"
+  },
+  {
+   "it": "Pin usati",
+   "en": "Pins in use",
+   "es": "Pines en uso",
+   "de": "Belegte Pins",
+   "scope": "web"
+  },
+  {
+   "it": "Nome del dispositivo",
+   "en": "Device name",
+   "es": "Nombre del dispositivo",
+   "de": "Gerätename",
+   "scope": "web"
+  },
+  {
+   "it": "Nome host",
+   "en": "Host name",
+   "es": "Nombre de host",
+   "de": "Hostname",
+   "scope": "web"
+  },
+  {
+   "it": "Dominio DNS (facoltativo, es. casa.lan)",
+   "en": "DNS domain (optional, e.g. home.lan)",
+   "es": "Dominio DNS (opcional, p. ej. casa.lan)",
+   "de": "DNS-Domain (optional, z. B. zuhause.lan)",
+   "scope": "web"
+  },
+  {
+   "it": "Dopo il cambio la scheda si raggiunge anche come NOME.local (se il tuo computer supporta mDNS). La rete si riconnette per un momento.",
+   "en": "After the change the board is also reachable as NAME.local (if your computer supports mDNS). The network reconnects for a moment.",
+   "es": "Tras el cambio, la placa también es accesible como NOMBRE.local (si tu ordenador admite mDNS). La red se reconecta un momento.",
+   "de": "Nach der Änderung ist das Board auch als NAME.local erreichbar (wenn dein Computer mDNS unterstützt). Das Netzwerk verbindet sich kurz neu.",
+   "scope": "web"
+  },
+  {
+   "it": "Configurazione",
+   "en": "Configuration",
+   "es": "Configuración",
+   "de": "Konfiguration",
+   "scope": "web"
+  },
+  {
+   "it": "Scarica file",
+   "en": "Download file",
+   "es": "Descargar archivo",
+   "de": "Datei herunterladen",
+   "scope": "web"
+  },
+  {
+   "it": "Ripristina da file",
+   "en": "Restore from file",
+   "es": "Restaurar desde archivo",
+   "de": "Aus Datei wiederherstellen",
+   "scope": "web"
+  },
+  {
+   "it": "Ripristina",
+   "en": "Restore",
+   "es": "Restaurar",
+   "de": "Wiederherstellen",
+   "scope": "web"
+  },
+  {
+   "it": "Azzera tutto",
+   "en": "Erase everything",
+   "es": "Borrar todo",
+   "de": "Alles löschen",
+   "scope": "web"
+  },
+  {
+   "it": "Cambia password",
+   "en": "Change password",
+   "es": "Cambiar contraseña",
+   "de": "Passwort ändern",
+   "scope": "web"
+  },
+  {
+   "it": "Vecchia",
+   "en": "Old",
+   "es": "Anterior",
+   "de": "Alt",
+   "scope": "web"
+  },
+  {
+   "it": "Nuova (min 6)",
+   "en": "New (min 6)",
+   "es": "Nueva (mín. 6)",
+   "de": "Neu (min. 6)",
+   "scope": "web"
+  },
+  {
+   "it": "Cambia",
+   "en": "Change",
+   "es": "Cambiar",
+   "de": "Ändern",
+   "scope": "web"
+  },
+  {
+   "it": "Lingue",
+   "en": "Languages",
+   "es": "Idiomas",
+   "de": "Sprachen",
+   "scope": "web"
+  },
+  {
+   "it": "Carica un file di lingua (.json)",
+   "en": "Upload a language file (.json)",
+   "es": "Subir un archivo de idioma (.json)",
+   "de": "Sprachdatei hochladen (.json)",
+   "scope": "web"
+  },
+  {
+   "it": "Carica lingua",
+   "en": "Upload language",
+   "es": "Subir idioma",
+   "de": "Sprache hochladen",
+   "scope": "web"
+  },
+  {
+   "it": "Un file per lingua, con il nome uguale al codice (per esempio en.json). Lo stesso file traduce la pagina e i messaggi della shell.",
+   "en": "One file per language, named after the code (for example en.json). The same file translates the page and the shell messages.",
+   "es": "Un archivo por idioma, con el nombre igual al código (por ejemplo en.json). El mismo archivo traduce la página y los mensajes de la shell.",
+   "de": "Eine Datei pro Sprache, benannt nach dem Code (zum Beispiel en.json). Dieselbe Datei übersetzt die Seite und die Shell-Meldungen.",
+   "scope": "web"
+  },
+  {
+   "it": "Log",
+   "en": "Log",
+   "es": "Registro",
+   "de": "Log",
+   "scope": "web"
+  },
+  {
+   "it": "Imposta password",
+   "en": "Set password",
+   "es": "Configurar contraseña",
+   "de": "Passwort festlegen",
+   "scope": "web"
+  },
+  {
+   "it": "Errore",
+   "en": "Error",
+   "es": "Error",
+   "de": "Fehler",
+   "scope": "web"
+  },
+  {
+   "it": "Acceso da",
+   "en": "Up for",
+   "es": "Encendido desde",
+   "de": "Laufzeit",
+   "scope": "web"
+  },
+  {
+   "it": "Ultimo reset",
+   "en": "Last reset",
+   "es": "Último reset",
+   "de": "Letzter Reset",
+   "scope": "web"
+  },
+  {
+   "it": "Avvii totali",
+   "en": "Total boots",
+   "es": "Arranques totales",
+   "de": "Starts gesamt",
+   "scope": "web"
+  },
+  {
+   "it": "Rete",
+   "en": "Network",
+   "es": "Red",
+   "de": "Netzwerk",
+   "scope": "web"
+  },
+  {
+   "it": "Nome",
+   "en": "Name",
+   "es": "Nombre",
+   "de": "Name",
+   "scope": "web"
+  },
+  {
+   "it": "CPU",
+   "en": "CPU",
+   "es": "CPU",
+   "de": "CPU",
+   "scope": "web"
+  },
+  {
+   "it": "{0}% a {1} MHz",
+   "en": "{0}% at {1} MHz",
+   "es": "{0}% a {1} MHz",
+   "de": "{0}% bei {1} MHz",
+   "scope": "web"
+  },
+  {
+   "it": "Temperatura CPU",
+   "en": "CPU temperature",
+   "es": "Temperatura de la CPU",
+   "de": "CPU-Temperatur",
+   "scope": "web"
+  },
+  {
+   "it": "TROPPO CALDO",
+   "en": "TOO HOT",
+   "es": "DEMASIADO CALIENTE",
+   "de": "ZU HEISS",
+   "scope": "web"
+  },
+  {
+   "it": "Flash (file)",
+   "en": "Flash (files)",
+   "es": "Flash (archivos)",
+   "de": "Flash (Dateien)",
+   "scope": "web"
+  },
+  {
+   "it": "Ricerca in corso...",
+   "en": "Searching...",
+   "es": "Buscando...",
+   "de": "Suche läuft...",
+   "scope": "web"
+  },
+  {
+   "it": "{0} reti trovate",
+   "en": "{0} networks found",
+   "es": "{0} redes encontradas",
+   "de": "{0} Netzwerke gefunden",
+   "scope": "web"
+  },
+  {
+   "it": "Segnale",
+   "en": "Signal",
+   "es": "Señal",
+   "de": "Signal",
+   "scope": "web"
+  },
+  {
+   "it": "Canale",
+   "en": "Channel",
+   "es": "Canal",
+   "de": "Kanal",
+   "scope": "web"
+  },
+  {
+   "it": "aperta",
+   "en": "open",
+   "es": "abierta",
+   "de": "offen",
+   "scope": "web"
+  },
+  {
+   "it": "Scegli",
+   "en": "Choose",
+   "es": "Elegir",
+   "de": "Wählen",
+   "scope": "web"
+  },
+  {
+   "it": "Ora non impostata",
+   "en": "Time not set",
+   "es": "Hora sin configurar",
+   "de": "Uhrzeit nicht gesetzt",
+   "scope": "web"
+  },
+  {
+   "it": "Personalizzato",
+   "en": "Custom",
+   "es": "Personalizado",
+   "de": "Benutzerdefiniert",
+   "scope": "web"
+  },
+  {
+   "it": "Salvato",
+   "en": "Saved",
+   "es": "Guardado",
+   "de": "Gespeichert",
+   "scope": "web"
+  },
+  {
+   "it": "Ora impostata",
+   "en": "Time set",
+   "es": "Hora configurada",
+   "de": "Uhrzeit gesetzt",
+   "scope": "web"
+  },
+  {
+   "it": "Dimensione",
+   "en": "Size",
+   "es": "Tamaño",
+   "de": "Größe",
+   "scope": "web"
+  },
+  {
+   "it": "Scarica",
+   "en": "Download",
+   "es": "Descargar",
+   "de": "Herunterladen",
+   "scope": "web"
+  },
+  {
+   "it": "Rinomina",
+   "en": "Rename",
+   "es": "Renombrar",
+   "de": "Umbenennen",
+   "scope": "web"
+  },
+  {
+   "it": "Elimina",
+   "en": "Delete",
+   "es": "Eliminar",
+   "de": "Löschen",
+   "scope": "web"
+  },
+  {
+   "it": "Usati {0} su {1}",
+   "en": "Used {0} of {1}",
+   "es": "Usados {0} de {1}",
+   "de": "Belegt {0} von {1}",
+   "scope": "web"
+  },
+  {
+   "it": "Nome della nuova cartella:",
+   "en": "Name of the new folder:",
+   "es": "Nombre de la nueva carpeta:",
+   "de": "Name des neuen Ordners:",
+   "scope": "web"
+  },
+  {
+   "it": "Nome del nuovo file:",
+   "en": "Name of the new file:",
+   "es": "Nombre del nuevo archivo:",
+   "de": "Name der neuen Datei:",
+   "scope": "web"
+  },
+  {
+   "it": "Nuovo file:",
+   "en": "New file:",
+   "es": "Nuevo archivo:",
+   "de": "Neue Datei:",
+   "scope": "web"
+  },
+  {
+   "it": "Modifica:",
+   "en": "Edit:",
+   "es": "Editar:",
+   "de": "Bearbeiten:",
+   "scope": "web"
+  },
+  {
+   "it": "Nuovo nome o percorso:",
+   "en": "New name or path:",
+   "es": "Nuevo nombre o ruta:",
+   "de": "Neuer Name oder Pfad:",
+   "scope": "web"
+  },
+  {
+   "it": "Eliminare {0}?",
+   "en": "Delete {0}?",
+   "es": "¿Eliminar {0}?",
+   "de": "{0} löschen?",
+   "scope": "web"
+  },
+  {
+   "it": "Scegli un file",
+   "en": "Choose a file",
+   "es": "Elige un archivo",
+   "de": "Wähle eine Datei",
+   "scope": "web"
+  },
+  {
+   "it": "Caricato",
+   "en": "Uploaded",
+   "es": "Subido",
+   "de": "Hochgeladen",
+   "scope": "web"
+  },
+  {
+   "it": "Salvato. La scheda si sta collegando: se cambia indirizzo riconnettiti.",
+   "en": "Saved. The board is connecting: if its address changes, reconnect.",
+   "es": "Guardado. La placa se está conectando: si cambia la dirección, vuelve a conectarte.",
+   "de": "Gespeichert. Das Board verbindet sich: ändert sich die Adresse, verbinde dich neu.",
+   "scope": "web"
+  },
+  {
+   "it": "Modo AP attivo (192.168.4.1)",
+   "en": "AP mode on (192.168.4.1)",
+   "es": "Modo AP activo (192.168.4.1)",
+   "de": "AP-Modus aktiv (192.168.4.1)",
+   "scope": "web"
+  },
+  {
+   "it": "Usato da",
+   "en": "Used by",
+   "es": "Usado por",
+   "de": "Verwendet von",
+   "scope": "web"
+  },
+  {
+   "it": "Descrizione",
+   "en": "Description",
+   "es": "Descripción",
+   "de": "Beschreibung",
+   "scope": "web"
+  },
+  {
+   "it": "Blu = pin in uso",
+   "en": "Blue = pin in use",
+   "es": "Azul = pin en uso",
+   "de": "Blau = Pin belegt",
+   "scope": "web"
+  },
+  {
+   "it": "Nome completo:",
+   "en": "Full name:",
+   "es": "Nombre completo:",
+   "de": "Vollständiger Name:",
+   "scope": "web"
+  },
+  {
+   "it": "Codice",
+   "en": "Code",
+   "es": "Código",
+   "de": "Code",
+   "scope": "web"
+  },
+  {
+   "it": "Lingua",
+   "en": "Language",
+   "es": "Idioma",
+   "de": "Sprache",
+   "scope": "web"
+  },
+  {
+   "it": "Predefinita (nel firmware)",
+   "en": "Default (in the firmware)",
+   "es": "Predeterminado (en el firmware)",
+   "de": "Standard (in der Firmware)",
+   "scope": "web"
+  },
+  {
+   "it": "Memoria interna: usati {0} su {1}",
+   "en": "Internal memory: used {0} of {1}",
+   "es": "Memoria interna: usados {0} de {1}",
+   "de": "Interner Speicher: belegt {0} von {1}",
+   "scope": "web"
+  },
+  {
+   "it": "Il nome deve essere come en.json (codice di 2-8 lettere minuscole)",
+   "en": "The name must look like en.json (code of 2-8 lowercase letters)",
+   "es": "El nombre debe ser como en.json (código de 2-8 letras minúsculas)",
+   "de": "Der Name muss wie en.json aussehen (Code aus 2-8 Kleinbuchstaben)",
+   "scope": "web"
+  },
+  {
+   "it": "Lingua caricata",
+   "en": "Language uploaded",
+   "es": "Idioma subido",
+   "de": "Sprache hochgeladen",
+   "scope": "web"
+  },
+  {
+   "it": "Eliminare la lingua {0}?",
+   "en": "Delete the language {0}?",
+   "es": "¿Eliminar el idioma {0}?",
+   "de": "Sprache {0} löschen?",
+   "scope": "web"
+  },
+  {
+   "it": "Ripristinato",
+   "en": "Restored",
+   "es": "Restaurado",
+   "de": "Wiederhergestellt",
+   "scope": "web"
+  },
+  {
+   "it": "Azzerare TUTTO (anche la password)?",
+   "en": "Erase EVERYTHING (including the password)?",
+   "es": "¿Borrar TODO (incluida la contraseña)?",
+   "de": "ALLES löschen (auch das Passwort)?",
+   "scope": "web"
+  },
+  {
+   "it": "Riavvio in corso...",
+   "en": "Restarting...",
+   "es": "Reiniciando...",
+   "de": "Neustart läuft...",
+   "scope": "web"
+  },
+  {
+   "it": "Stato",
+   "en": "Status",
+   "es": "Estado",
+   "de": "Status",
+   "scope": "web"
+  },
+  {
+   "it": "Wi-Fi",
+   "en": "Wi-Fi",
+   "es": "Wi-Fi",
+   "de": "WLAN",
+   "scope": "web"
+  },
+  {
+   "it": "Task",
+   "en": "Tasks",
+   "es": "Tareas",
+   "de": "Tasks",
+   "scope": "web"
+  },
+  {
+   "it": "Ora",
+   "en": "Time",
+   "es": "Hora",
+   "de": "Zeit",
+   "scope": "web"
+  },
+  {
+   "it": "File",
+   "en": "Files",
+   "es": "Archivos",
+   "de": "Dateien",
+   "scope": "web"
+  },
+  {
+   "it": "Pin",
+   "en": "Pins",
+   "es": "Pines",
+   "de": "Pins",
+   "scope": "web"
+  },
+  {
+   "it": "Config",
+   "en": "Settings",
+   "es": "Ajustes",
+   "de": "Konfig",
+   "scope": "web"
+  },
+  {
+   "it": "  license [id]    note legali e licenze (notice, gpl3, lgpl3, lgpl21, apache2)",
+   "en": "  license [id]    legal notices and licenses (notice, gpl3, lgpl3, lgpl21, apache2)",
+   "es": "  license [id]    avisos legales y licencias (notice, gpl3, lgpl3, lgpl21, apache2)",
+   "de": "  license [id]    rechtliche Hinweise und Lizenzen (notice, gpl3, lgpl3, lgpl21, apache2)",
+   "scope": "fw"
+  },
+  {
+   "it": "Licenza sconosciuta. Disponibili: %s",
+   "en": "Unknown license. Available: %s",
+   "es": "Licencia desconocida. Disponibles: %s",
+   "de": "Unbekannte Lizenz. Verfuegbar: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Il testo completo e troppo lungo per la shell web: usa la scheda Config > Licenze o la seriale.",
+   "en": "The full text is too long for the web shell: use the Settings > Licenses tab or the serial port.",
+   "es": "El texto completo es demasiado largo para la shell web: usa la pestana Ajustes > Licencias o el puerto serie.",
+   "de": "Der vollstaendige Text ist fuer die Web-Shell zu lang: Tab Konfig > Lizenzen oder die serielle Schnittstelle verwenden.",
+   "scope": "fw"
+  },
+  {
+   "it": "Note legali e licenze",
+   "en": "Legal notices and licenses",
+   "es": "Avisos legales y licencias",
+   "de": "Rechtliche Hinweise und Lizenzen",
+   "scope": "web"
+  },
+  {
+   "it": "Licenze e note legali",
+   "en": "Licenses and legal notices",
+   "es": "Licencias y avisos legales",
+   "de": "Lizenzen und rechtliche Hinweise",
+   "scope": "web"
+  },
+  {
+   "it": "I testi legali sono dentro il firmware e si leggono anche dalla seriale con il comando license.",
+   "en": "The legal texts are inside the firmware and can also be read from the serial port with the license command.",
+   "es": "Los textos legales estan dentro del firmware y tambien se leen desde el puerto serie con el comando license.",
+   "de": "Die rechtlichen Texte sind in der Firmware enthalten und lassen sich auch ueber die serielle Schnittstelle mit dem Befehl license lesen.",
+   "scope": "web"
+  }
+ ]
+}

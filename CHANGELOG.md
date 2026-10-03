@@ -1,5 +1,15 @@
 # Cronologia delle versioni
 
+## 1.4.0 (3 ottobre 2026)
+- **Traduzioni separate dal firmware**: italiano nel firmware, altre lingue come file `lang/<codice>.json`
+  caricabili dalla pagina (Config > Lingue). Incluse inglese, spagnolo e tedesco. Valgono per pagina,
+  shell e messaggi. Selettore di lingua nella pagina (anche al login), comando shell `lang`.
+- **Licenze e note legali nel firmware**: GPL v3, LGPL v3, LGPL v2.1, Apache 2.0 e nota legale con
+  titolarita e riferimenti normativi. Si leggono da Config > Licenze, dal piede di pagina e con il comando
+  shell `license`. File `NOTICE.txt`.
+- Doppia licenza GPL v3 + commerciale (vedi `COMMERCIAL.md`).
+- Strumenti: `tools/mklang.py` (genera e controlla le lingue), `tools/mklicense.py` (testi legali).
+
 ## Licenza
 - Doppia licenza: GPL v3 o successiva + licenza commerciale. Intestazione SPDX nei sorgenti.
 

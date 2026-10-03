@@ -1,0 +1,56 @@
+VesevOS - note legali e licenze
+
+Titolare dei diritti: [NOME E COGNOME DEL TITOLARE]
+Copyright (C) 2026 [NOME E COGNOME DEL TITOLARE]. Tutti i diritti riservati salvo quanto
+concesso dalle licenze indicate sotto.
+Contatto per licenze commerciali: paolellad79@gmail.com
+Progetto: https://github.com/paolellad79/VesevOS
+
+1. LICENZA DI VESEVOS (DOPPIA LICENZA)
+   VesevOS e offerto con due licenze, a scelta di chi lo usa:
+   a) GNU General Public License v3 o successiva (GPL-3.0-or-later).
+      Gratuita. Chi distribuisce VesevOS, anche modificato o dentro un
+      prodotto, deve fornire il codice sorgente completo con la stessa
+      licenza. Testo completo: comando "license gpl3".
+   b) Licenza commerciale, a pagamento e su richiesta, per usare VesevOS
+      in prodotti con codice non pubblicato. Scrivere a paolellad79@gmail.com.
+   Identificatore SPDX: GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial
+   Il programma e fornito "cosi com'e", senza alcuna garanzia, nei limiti
+   consentiti dalla legge applicabile.
+
+2. COMPONENTI DI TERZI
+   Indicati secondo i rispettivi progetti. Verifica sempre la licenza
+   della versione che usi. Le librerie restano sotto la loro licenza.
+   - Arduino-ESP32 (Espressif): LGPL-2.1 o successiva.
+     Testo: "license lgpl21"
+   - ESP-IDF e mbedTLS (Espressif): Apache-2.0.
+     Testo: "license apache2"
+   - ESPAsyncWebServer e AsyncTCP (ESP32Async): LGPL-3.0.
+     Testo: "license lgpl3" (la LGPL v3 rimanda alla GPL v3: "license gpl3")
+   - LittleFS (Arm): BSD-3-Clause.
+   Chi distribuisce un firmware compilato deve rispettare anche queste
+   licenze (per esempio fornire i testi e, per le LGPL, la possibilita di
+   ricompilare con una versione modificata della libreria).
+
+3. RIFERIMENTI NORMATIVI (informativi, non sono consulenza legale)
+   - Diritto d'autore: Legge 22 aprile 1941 n. 633 e successive modifiche;
+     D.Lgs. 29 dicembre 1992 n. 518 (programmi per elaboratore);
+     Direttiva 2009/24/CE (tutela giuridica dei programmi per elaboratore);
+     Convenzione di Berna.
+   - Protezione dei dati: Regolamento (UE) 2016/679 (GDPR); D.Lgs. 30 giugno
+     2003 n. 196 e successive modifiche. VesevOS non invia dati personali a
+     terzi. Eventuali funzioni statistiche future saranno facoltative
+     (opt-in) e descritte con precisione.
+   - Prodotti: chi costruisce o vende apparecchi con VesevOS e responsabile
+     della loro conformita (marcatura CE), tra cui: Direttiva 2014/53/UE
+     (apparecchiature radio), Direttiva 2014/30/UE (compatibilita
+     elettromagnetica), Direttiva 2011/65/UE (RoHS) e, se applicabile,
+     Regolamento (UE) 2024/2847 (Cyber Resilience Act).
+   - Marchi: "VesevOS" e il nome del progetto. Espressif, Arduino e gli
+     altri nomi citati sono marchi dei rispettivi titolari; il loro uso qui
+     non implica approvazione o collaborazione.
+
+4. CONTRIBUTI
+   Chi contribuisce con codice accetta le condizioni di CONTRIBUTING.md.
+
+Elenco dei testi: notice, gpl3, lgpl3, lgpl21, apache2

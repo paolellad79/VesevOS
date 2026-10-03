@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // VesevOS - vos_sys.cpp
 #include "vos_sys.h"
+#include "vos_i18n.h"
 #include "vos_util.h"
 #include "vos_log.h"
 #include "vos_net.h"
@@ -30,17 +31,17 @@ static bool idle1() { g_idle[1]++; return false; }
 
 static String resetName(int r) {
   switch (r) {
-    case 1:  return "Accensione";
-    case 3:  return "Reset software";
-    case 4:  return "Crash (panic)";
-    case 5:  return "Interrupt watchdog";
-    case 6:  return "Task watchdog";
-    case 7:  return "Altro watchdog";
-    case 8:  return "Uscita da deep sleep";
-    case 9:  return "Brownout (poca tensione)";
-    case 11: return "USB (apertura monitor seriale)";
-    case 12: return "Reset da JTAG";
-    default: return "Sconosciuto (" + String(r) + ")";
+    case 1:  return tr("Accensione");
+    case 3:  return tr("Reset software");
+    case 4:  return tr("Crash (panic)");
+    case 5:  return tr("Interrupt watchdog");
+    case 6:  return tr("Task watchdog");
+    case 7:  return tr("Altro watchdog");
+    case 8:  return tr("Uscita da deep sleep");
+    case 9:  return tr("Brownout (poca tensione)");
+    case 11: return tr("USB (apertura monitor seriale)");
+    case 12: return tr("Reset da JTAG");
+    default: return trf("Sconosciuto (%d)", (int)r);
   }
 }
 
@@ -156,14 +157,14 @@ String sysStatusJson() {
 
 String sysTasksText() {
   String r;
-  r += "Task attivi: " + String(uxTaskGetNumberOfTasks()) + "\n";
+  r += trf("Task attivi: %u", (unsigned)uxTaskGetNumberOfTasks()) + "\n";
 #if (configUSE_TRACE_FACILITY == 1) && (configUSE_STATS_FORMATTING_FUNCTIONS == 1)
   static char buf[1024];
   vTaskList(buf);
   r += "Nome          Stato Prio Stack Num\n";
   r += cleanAscii(String(buf));
 #else
-  r += "(dettagli non disponibili in questa build)\n";
+  r += String(tr("(dettagli non disponibili in questa build)")) + "\n";
 #endif
   return r;
 }

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // VesevOS - vos_net.cpp
 #include "vos_net.h"
+#include "vos_i18n.h"
 #include "vos_config.h"
 #include "vos_util.h"
 #include "vos_log.h"
@@ -27,7 +28,7 @@ String netIpString() {
 }
 
 String netStatusJson() {
-  String mode = (g_state == NET_AP) ? "AP" : (g_state == NET_CLIENT_OK ? "Client" : (g_state == NET_CLIENT_TRY ? "Connessione..." : "Avvio"));
+  String mode = (g_state == NET_AP) ? String("AP") : (g_state == NET_CLIENT_OK ? String("Client") : (g_state == NET_CLIENT_TRY ? String(tr("Connessione...")) : String(tr("Avvio"))));
   String j = "{\"mode\":\"" + mode + "\"";
   j += ",\"ip\":\"" + netIpString() + "\"";
   j += ",\"host\":\"" + jsonEscape(cfg.hostname) + "\"";

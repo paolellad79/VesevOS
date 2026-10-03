@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // VesevOS - vos_time.cpp
 #include "vos_time.h"
+#include "vos_i18n.h"
 #include "vos_config.h"
 #include "vos_net.h"
 #include "vos_util.h"
@@ -22,7 +23,7 @@ bool timeValid() { return time(nullptr) > 1700000000; }   // dopo novembre 2023
 void timeApply() { g_apply = true; }
 
 String timeNowStr() {
-  if (!timeValid()) return "non impostata";
+  if (!timeValid()) return tr("non impostata");
   time_t t = time(nullptr);
   struct tm tmv;
   localtime_r(&t, &tmv);

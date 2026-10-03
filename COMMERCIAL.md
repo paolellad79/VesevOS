@@ -11,8 +11,7 @@ VesevOS e disponibile con **due licenze**, a tua scelta:
 
 ## Come ottenere la licenza commerciale
 
-Scrivi aprendo una segnalazione (Issue) nel repository, oppure al contatto indicato
-dall'autore sulla pagina del profilo GitHub. Indica: nome dell'azienda, prodotto, quantita
+Scrivi all'indirizzo indicato in `NOTICE.txt` (oppure apri una segnalazione nel repository). Indica: nome dell'azienda, prodotto, quantita
 prevista.
 
 ## Per chi contribuisce con codice
@@ -23,6 +22,6 @@ licenza commerciale. Vedi `CONTRIBUTING.md`.
 
 ## Librerie di terzi
 
-VesevOS usa librerie con licenze proprie (per esempio ESPAsyncWebServer e AsyncTCP, che mi
+VesevOS usa librerie con licenze proprie (per esempio ESPAsyncWebServer e AsyncTCP, che
 risultano LGPL, e il core Arduino-ESP32). Restano sotto la loro licenza e non fanno parte
 della licenza commerciale di VesevOS. Chi distribuisce un firmware compilato deve rispettarle.

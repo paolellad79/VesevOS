@@ -25,6 +25,7 @@ struct VosConfig {
   String ntpServer, tz, tzName;  // server, fuso (formato POSIX), nome
   uint8_t dateFmt, timeFmt, tempUnit;   // data: 0 GG/MM/AAAA 1 AAAA-MM-GG 2 MM/GG/AAAA; ora: 0=24h 1=12h; temp: 0=C 1=F
   uint16_t cpuMhz;               // 0 = automatico, altrimenti 80/160/240
+  String lang;                   // codice lingua: "it" (predefinita) o file /lang/<codice>.json
   bool   sdEnabled;
   uint8_t sdCs, sdSck, sdMiso, sdMosi;
 };

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // VesevOS - vos_config.cpp
 #include "vos_config.h"
+#include "vos_i18n.h"
 #include "vos_util.h"
 #include "vos_log.h"
 #include <LittleFS.h>
@@ -12,7 +13,7 @@
 VosConfig cfg;
 
 void cfgDefaults() {
-  cfg.hostname = "vesevos"; cfg.domain = "";
+  cfg.hostname = "vesevos"; cfg.domain = ""; cfg.lang = "it";
   cfg.apSsid = "VesevOS";
   cfg.apPass = "vesevos123";
   cfg.staEnabled = false;
@@ -54,6 +55,7 @@ String cfgExport(bool withSecrets) {
   opt(s, "hostname", cfg.hostname);
   opt(s, "domain", cfg.domain);
   opt(s, "cpu", String(cfg.cpuMhz));
+  opt(s, "lang", cfg.lang);
   s += "\nconfig ap 'ap'\n";
   opt(s, "ssid", cfg.apSsid);
   opt(s, "pass", withSecrets ? cfg.apPass : String(""));
@@ -95,7 +97,7 @@ String cfgExport(bool withSecrets) {
 
 // Applica una chiave. section = nome sezione, k = chiave
 static void applyKey(const String& sec, const String& k, const String& v) {
-  if (sec == "system") { if (k == "hostname" && hostnameValid(v)) cfg.hostname = v; else if (k == "domain" && domainValid(v)) cfg.domain = v; else if (k == "cpu") { int m = v.toInt(); if (m == 0 || m == 80 || m == 160 || m == 240) cfg.cpuMhz = m; } }
+  if (sec == "system") { if (k == "hostname" && hostnameValid(v)) cfg.hostname = v; else if (k == "domain" && domainValid(v)) cfg.domain = v; else if (k == "cpu") { int m = v.toInt(); if (m == 0 || m == 80 || m == 160 || m == 240) cfg.cpuMhz = m; } else if (k == "lang") { if (langCodeValid(v)) cfg.lang = v; } }
   else if (sec == "ap") {
     if (k == "ssid" && v.length()) cfg.apSsid = v;
     else if (k == "pass" && v.length() >= 8) cfg.apPass = v;
@@ -179,16 +181,16 @@ bool cfgImport(const String& text, String& err) {
     if (t.startsWith("option ")) {
       String rest = t.substring(7); rest.trim();
       int sp = rest.indexOf(' ');
-      if (sp < 0) { err = "riga " + String(ln) + ": option senza valore"; return false; }
+      if (sp < 0) { err = trf("riga %d: option senza valore", ln); return false; }
       String k = rest.substring(0, sp), v;
-      if (!parseQuoted(rest, sp + 1, v)) { err = "riga " + String(ln) + ": apici non chiusi"; return false; }
+      if (!parseQuoted(rest, sp + 1, v)) { err = trf("riga %d: apici non chiusi", ln); return false; }
       applyKey(sec, k, v); applied++;
       continue;
     }
-    err = "riga " + String(ln) + ": non capisco";
+    err = trf("riga %d: non capisco", ln);
     return false;
   }
-  if (applied == 0) { err = "nessuna opzione trovata"; return false; }
+  if (applied == 0) { err = tr("nessuna opzione trovata"); return false; }
   return true;
 }
 

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // VesevOS - vos_util.cpp
 #include "vos_util.h"
+#include "vos_i18n.h"
 #include "mbedtls/sha256.h"
 #include "esp_system.h"
 
@@ -46,12 +47,12 @@ String uptimeStr(uint64_t s) {
   // si mostrano solo le unita da quella piu grande non zero in poi
   String r;
   bool started = false;
-  if (y)               { r += String((unsigned long)y) + "a "; started = true; }
-  if (started || mo)   { r += String((unsigned long)mo) + "m "; started = true; }
-  if (started || d)    { r += String((unsigned long)d) + "g "; started = true; }
-  if (started || h)    { r += String((unsigned long)h) + "h "; started = true; }
-  if (started || mi)   { r += String((unsigned long)mi) + "min "; }
-  r += String((unsigned long)s) + "s";
+  if (y)               { r += String((unsigned long)y) + tr("a") + " "; started = true; }
+  if (started || mo)   { r += String((unsigned long)mo) + tr("m") + " "; started = true; }
+  if (started || d)    { r += String((unsigned long)d) + tr("g") + " "; started = true; }
+  if (started || h)    { r += String((unsigned long)h) + tr("h") + " "; started = true; }
+  if (started || mi)   { r += String((unsigned long)mi) + tr("min") + " "; }
+  r += String((unsigned long)s) + tr("s");
   return r;
 }
 
