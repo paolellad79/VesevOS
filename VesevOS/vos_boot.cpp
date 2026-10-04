@@ -14,30 +14,34 @@
 #include "vos_web.h"
 #include "vos_rules.h"
 #include "vos_mqtt.h"
+#include "vos_mesh.h"
+#include "vos_wd.h"
 #include <Preferences.h>
 
-#define NSVC 7
+#define NSVC 9
 
 struct Svc {
   const char* id;
   void (*start)();
-  uint8_t req;       // maschera dei servizi richiesti
+  uint16_t req;      // maschera dei servizi richiesti
   uint8_t parent;    // genitore nella vista ad albero (255 = nessuno)
 };
 
-enum { S_SYS = 0, S_LED, S_NET, S_TIME, S_WEB, S_RULES, S_MQTT };
+enum { S_SYS = 0, S_LED, S_NET, S_TIME, S_WEB, S_RULES, S_MQTT, S_MESH, S_WD };
 
 static const Svc SV[NSVC] = {
   { "sys",   sysInit,   0,                                  255 },
   { "led",   ledInit,   0,                                  255 },
   { "net",   netInit,   0,                                  255 },
-  { "time",  timeInit,  (uint8_t)(1 << S_NET),              S_NET },
-  { "web",   webInit,   (uint8_t)((1 << S_NET) | (1 << S_SYS)), S_NET },
-  { "rules", rulesInit, (uint8_t)((1 << S_TIME) | (1 << S_SYS)), S_TIME },
-  { "mqtt",  mqttInit,  (uint8_t)((1 << S_NET) | (1 << S_SYS)), S_NET },
+  { "time",  timeInit,  (uint16_t)(1 << S_NET),              S_NET },
+  { "web",   webInit,   (uint16_t)((1 << S_NET) | (1 << S_SYS)), S_NET },
+  { "rules", rulesInit, (uint16_t)((1 << S_TIME) | (1 << S_SYS)), S_TIME },
+  { "mqtt",  mqttInit,  (uint16_t)((1 << S_NET) | (1 << S_SYS)), S_NET },
+  { "mesh",  meshInit,  (uint16_t)((1 << S_NET) | (1 << S_SYS)), S_NET },
+  { "wd",    wdInit,    (uint16_t)(1 << S_SYS),                 S_SYS },
 };
 
-static const char* DEF_ORDER = "sys,led,net,time,web,rules,mqtt";
+static const char* DEF_ORDER = "sys,led,net,time,web,rules,mqtt,mesh,wd";
 
 static int   g_ord[NSVC];
 static uint32_t g_at[NSVC], g_ms[NSVC];
@@ -52,7 +56,7 @@ static int svcIndex(const String& id) {
 // csv -> ordine finale (indici). Nomi sconosciuti o doppi si scartano, i mancanti si aggiungono.
 static void sortOrder(const String& csv, int* out) {
   int list[NSVC], n = 0;
-  uint8_t seen = 0;
+  uint16_t seen = 0;
   int p = 0;
   while (p <= (int)csv.length() && n < NSVC) {
     int e = csv.indexOf(',', p);
@@ -64,7 +68,7 @@ static void sortOrder(const String& csv, int* out) {
   }
   for (int i = 0; i < NSVC; i++) if (!(seen & (1 << i))) list[n++] = i;
   // ordinamento stabile: ogni servizio dopo quelli che richiede
-  uint8_t placed = 0; int m = 0;
+  uint16_t placed = 0; int m = 0;
   bool done[NSVC] = { false };
   while (m < NSVC) {
     bool moved = false;

@@ -6,6 +6,7 @@
 #include "vos_util.h"
 #include "vos_log.h"
 #include <LittleFS.h>
+#include "vos_lang_en.h"
 #include <stdarg.h>
 #include <stdio.h>
 
@@ -86,16 +87,24 @@ static char* readStr(char*& p) {
 
 // Carica /lang/<code>.json. Ritorna true se ha almeno una voce.
 static bool loadFile(const String& code, String& err) {
-  String path = String(LANG_DIR) + "/" + code + ".json";
-  File f = LittleFS.open(path, "r");
-  if (!f || f.isDirectory()) { err = tr("Lingua non installata"); return false; }
-  size_t sz = f.size();
-  if (sz < 2 || sz > LANG_MAX_SIZE) { f.close(); err = tr("File di lingua non valido"); return false; }
-  char* buf = (char*)bigAlloc(sz + 1);
-  if (!buf) { f.close(); err = tr("Memoria esaurita"); return false; }
-  size_t got = f.read((uint8_t*)buf, sz);
-  f.close();
-  buf[got] = 0;
+  char* buf = nullptr; size_t got = 0;
+  if (code == "en") {                                // inglese: dentro il firmware
+    got = sizeof(LANG_EN_JSON) - 1;
+    buf = (char*)bigAlloc(got + 1);
+    if (!buf) { err = tr("Memoria esaurita"); return false; }
+    memcpy(buf, LANG_EN_JSON, got); buf[got] = 0;
+  } else {
+    String path = String(LANG_DIR) + "/" + code + ".json";
+    File f = LittleFS.open(path, "r");
+    if (!f || f.isDirectory()) { err = tr("Lingua non installata"); return false; }
+    size_t sz = f.size();
+    if (sz < 2 || sz > LANG_MAX_SIZE) { f.close(); err = tr("File di lingua non valido"); return false; }
+    buf = (char*)bigAlloc(sz + 1);
+    if (!buf) { f.close(); err = tr("Memoria esaurita"); return false; }
+    got = f.read((uint8_t*)buf, sz);
+    f.close();
+    buf[got] = 0;
+  }
   // numero massimo di voci: ogni voce ha almeno 4 apici
   int cap = 1;
   for (size_t i = 0; i < got; i++) if (buf[i] == '"') cap++;
@@ -170,26 +179,53 @@ String trf(const char* it, ...) {
   return r;
 }
 
-// Nome della lingua letto dall'inizio del file ("_name"); se manca, il codice.
-static String langNameOf(const String& code) {
+bool langBuiltin(const String& c) { return c == "it" || c == "en"; }
+
+const char* langBuiltinJson(const String& code, size_t& len) {
+  if (code == "en") { len = sizeof(LANG_EN_JSON) - 1; return LANG_EN_JSON; }
+  len = 0; return nullptr;
+}
+
+// Valore di una chiave speciale ("_name", "_locale", "_flag") cercata nell'inizio del testo
+static String headKey(const char* txt, const char* key) {
+  const char* p = strstr(txt, key);
+  if (!p) return "";
+  p += strlen(key);
+  while (*p && *p != ':') p++;
+  while (*p && *p != '"') p++;
+  if (*p != '"') return "";
+  p++;
+  String out;
+  while (*p && *p != '"') {
+    if (*p == '\\' && p[1]) { p++; if (*p == 'u' && p[1] && p[2] && p[3] && p[4]) { p += 5; continue; } }   // la bandiera non usa caratteri speciali
+    out += *p++;
+  }
+  return out;
+}
+
+static void fileHead(const String& code, String& name, String& loc, String& flag) {
+  name = code; loc = ""; flag = "";
   File f = LittleFS.open(String(LANG_DIR) + "/" + code + ".json", "r");
-  if (!f) return code;
-  char b[320];
-  size_t n = f.read((uint8_t*)b, sizeof(b) - 1);
+  if (!f) return;
+  char* b = (char*)malloc(2049);
+  if (!b) { f.close(); return; }
+  size_t n = f.read((uint8_t*)b, 2048);
   f.close();
   b[n] = 0;
-  char* p = strstr(b, "\"_name\"");
-  if (!p) return code;
-  p += 7;
-  while (*p && *p != '"') p++;
-  if (*p != '"') return code;
-  p++;
-  char* s = readStr(p);
-  return (s && s[0]) ? String(s) : code;
+  String nm = headKey(b, "\"_name\"");
+  if (nm.length()) name = nm;
+  loc = headKey(b, "\"_locale\"");
+  flag = headKey(b, "\"_flag\"");
+  free(b);
+  if (flag.length() > 1024 || !flag.startsWith("<svg")) flag = "";   // la pagina la mostra come immagine (<img>): niente script
+}
+
+static String item(const String& code, const String& name, const String& loc, const String& flag) {
+  return "{\"code\":\"" + code + "\",\"name\":\"" + jsonEscape(name) + "\",\"loc\":\"" + jsonEscape(loc) + "\",\"flag\":\"" + jsonEscape(flag) + "\"}";
 }
 
 String langListJson() {
-  String j = "[{\"code\":\"it\",\"name\":\"Italiano\"}";
+  String j = "[" + item("it", "Italiano", "it-IT", LANG_FLAG_IT) + "," + item("en", LANG_EN_NAME, LANG_EN_LOCALE, LANG_EN_FLAG);
   File d = LittleFS.open(LANG_DIR);
   if (d && d.isDirectory()) {
     for (File e = d.openNextFile(); e; e = d.openNextFile()) {
@@ -198,11 +234,33 @@ String langListJson() {
       int sl = n.lastIndexOf('/'); if (sl >= 0) n = n.substring(sl + 1);
       if (!n.endsWith(".json")) continue;
       String code = n.substring(0, n.length() - 5);
-      if (code == "it" || !langCodeValid(code)) continue;
-      j += ",{\"code\":\"" + code + "\",\"name\":\"" + jsonEscape(langNameOf(code)) + "\"}";
+      if (langBuiltin(code) || !langCodeValid(code)) continue;
+      String nm, loc, fl; fileHead(code, nm, loc, fl);
+      j += "," + item(code, nm, loc, fl);
     }
     d.close();
   }
   j += "]";
   return j;
+}
+
+int langList(String* codes, String* names, int max) {
+  int n = 0;
+  if (n < max) { codes[n] = "it"; names[n] = "Italiano"; n++; }
+  if (n < max) { codes[n] = "en"; names[n] = LANG_EN_NAME; n++; }
+  File d = LittleFS.open(LANG_DIR);
+  if (d && d.isDirectory()) {
+    for (File e = d.openNextFile(); e && n < max; e = d.openNextFile()) {
+      if (e.isDirectory()) continue;
+      String fn = e.name();
+      int sl = fn.lastIndexOf('/'); if (sl >= 0) fn = fn.substring(sl + 1);
+      if (!fn.endsWith(".json")) continue;
+      String code = fn.substring(0, fn.length() - 5);
+      if (langBuiltin(code) || !langCodeValid(code)) continue;
+      String nm, loc, fl; fileHead(code, nm, loc, fl);
+      codes[n] = code; names[n] = nm; n++;
+    }
+    d.close();
+  }
+  return n;
 }

@@ -6,9 +6,19 @@
 #include <Arduino.h>
 
 #define VOS_NAME     "VesevOS"
-#define VOS_VERSION  "1.7.0"
+#define VOS_VERSION  "1.7.2"
 #define VOS_GITHUB   "https://github.com/paolellad79/VesevOS"
 #define VOS_BOARD    "ESP32-S3 SuperMini"   // scheda (tabella dei piedini nella pagina)
+
+// Moduli opzionali (1 = dentro il firmware, 0 = tolti). Il Bluetooth (BLE) occupa circa 300 KB di programma:
+// se lo spazio non basta, metti 0 e ricompila (la pagina nasconde la sezione BLE).
+#ifndef VOS_WITH_BLE
+#define VOS_WITH_BLE 1
+#endif
+
+// Ruoli degli utenti (multiutenza)
+enum UserRole : uint8_t { ROLE_GUEST = 0, ROLE_OPER = 1, ROLE_ADMIN = 2 };
+#define VOS_MAX_USERS 8
 
 // Pin predefiniti per ESP32-S3 SuperMini
 #define VOS_PIN_LED_RGB   48   // LED WS2812 integrato

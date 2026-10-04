@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Genera i file di lingua lang/<codice>.json da tools/lang_src.json e controlla che tutto torni.
+# L'inglese va DENTRO il firmware: VesevOS/vos_lang_en.h (con la bandiera). Le altre lingue restano file (lang/).
 # Uso: python3 tools/mklang.py        (esce con errore se qualcosa non va)
 import os, re, sys, json, glob
 from html.parser import HTMLParser
@@ -16,6 +17,9 @@ def err(m): errors.append(m)
 data = json.load(open(SRC, encoding='utf-8'))
 langs = data['langs']
 entries = data['entries']
+flags = data.get('flags', {})
+locales = data.get('locales', {})
+BUILTIN = ('en',)
 
 # ---- chiavi usate dal codice del firmware
 src_text = ''
@@ -52,6 +56,10 @@ for m in re.finditer(r'\b(?:window\.)?tf?\(\s*"((?:[^"\\]|\\.)*)"', js):
 for arr in ('TABS', 'RSUB', 'TKCOLS', 'GRP', 'DAYS', 'LEDM', 'AIRO', 'UNITS', 'ONOFF', 'TKS', 'CKS', 'AKS', 'BN', 'BFIX'):
     for m in re.finditer(r'\["([^"]+)","([^"]+)"\]', re.search(r'var %s=.*?;' % arr, js, re.S).group(0)):
         addw(m.group(2))
+for arr in ('SUSTEPS', 'MROLE', 'RNAME', 'WDD'):          # elenchi semplici di testi passati a t()
+    for m in re.finditer(r'"([^"]+)"', re.search(r'var %s=\[.*?\];' % arr, js, re.S).group(0)):
+        addw(m.group(1))
+for m in re.finditer(r'var APLAW="((?:[^"\\]|\\.)*)"', js): addw(json.loads('"' + m.group(1) + '"'))
 web_keys.discard('VesevOS')
 
 # ---- controlli sulle voci
@@ -85,6 +93,13 @@ for e in entries:
     if e['scope'] == 'web' and e['it'] not in web_keys:
         err('voce web non usata nella pagina: %r' % e['it'])
 
+for code in ['it'] + list(langs):
+    f = flags.get(code, '')
+    if not f.startswith('<svg') or 'xmlns=' not in f: err('bandiera mancante o non valida: %s' % code)
+    elif len(f.encode('utf-8')) > 1024: err('bandiera troppo grande (max 1 KB): %s' % code)
+    if '<script' in f.lower() or ' on' in f.lower(): err('bandiera con script o eventi: %s' % code)
+    if not locales.get(code): err('codice locale mancante: %s' % code)
+
 if errors:
     print('ERRORI (%d):' % len(errors))
     for x in errors: print(' -', x)
@@ -92,13 +107,30 @@ if errors:
 
 # ---- generazione
 os.makedirs(OUT, exist_ok=True)
-for code, name in langs.items():
-    d = {'_name': name}
+def build(code, name):
+    d = {'_name': name, '_locale': locales[code], '_flag': flags[code]}
     for e in entries:
         if e[code] != e['it']:        # se uguale all'italiano si risparmia spazio: manca = stesso testo
             d[e['it']] = e[code]
+    return d
+for code, name in langs.items():
+    d = build(code, name)
+    if code in BUILTIN:
+        old = os.path.join(OUT, code + '.json')
+        if os.path.exists(old): os.remove(old)       # e dentro il firmware: niente file
+        txt = json.dumps(d, ensure_ascii=True, separators=(',', ':'))
+        body = '\n'.join('R"VOSLANG(%s)VOSLANG"' % txt[i:i + 8000] for i in range(0, len(txt), 8000))
+        def cstr(x): return json.dumps(x, ensure_ascii=True)
+        h = ('// VesevOS - vos_lang_%s.h (GENERATO da tools/mklang.py, non modificare a mano)\n#pragma once\n#include <Arduino.h>\n'
+             'static const char LANG_EN_NAME[] = %s;\nstatic const char LANG_EN_LOCALE[] = %s;\nstatic const char LANG_EN_FLAG[] = %s;\n'
+             'static const char LANG_FLAG_IT[] = %s;\nstatic const char LANG_EN_JSON[] PROGMEM =\n%s;\n') % (
+            code, cstr(name), cstr(locales[code]), cstr(flags[code]), cstr(flags['it']), body)
+        assert all(ord(c) < 128 for c in h)
+        open(os.path.join(FWD, 'vos_lang_%s.h' % code), 'w', encoding='ascii', newline='\n').write(h)
+        print('VesevOS/vos_lang_%s.h: %d voci, %d byte (dentro il firmware)' % (code, len(d) - 3, len(txt)))
+        continue
     txt = json.dumps(d, ensure_ascii=False, separators=(',', ':'), indent=None)
     txt = txt.replace('","', '",\n"')  # una voce per riga: file leggibile e confrontabile
     open(os.path.join(OUT, code + '.json'), 'w', encoding='utf-8', newline='\n').write(txt + '\n')
-    print('lang/%s.json: %d voci, %d byte' % (code, len(d) - 1, len(txt.encode('utf-8'))))
+    print('lang/%s.json: %d voci, %d byte' % (code, len(d) - 3, len(txt.encode('utf-8'))))
 print('ok: %d chiavi firmware nel codice, %d testi pagina' % (len(tr_keys), len(web_keys)))

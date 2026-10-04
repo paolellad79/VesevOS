@@ -12,3 +12,6 @@ void ledSetNetState(NetState s);      // colore = stato rete
 void ledApplyConfig();                // rilegge cfg (modo/colore/luminosita/pin)
 void ledSetFault(bool on);            // rosso lampeggiante (errore grave)
 void ledIdentify(uint32_t ms);        // arcobaleno per ms millisecondi ("trova questa scheda")
+void ledSetSetup(bool on);            // arcobaleno lento finche la prima configurazione non e finita
+void ledSetAlarm(int level);          // 0 nessuno, 1 giallo (lampo arancione), 2 rosso (lampo rosso) - solo in modo stato
+void ledSetHold(int stage);           // tasto BOOT tenuto: 0 no, 1 >=2 s (azzurro), 2 >=8 s (giallo), 3 >=20 s (rosso)

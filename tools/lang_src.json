@@ -1,9 +1,21 @@
 {
- "_comment": "Sorgente delle traduzioni. 'it' e la chiave (testo italiano nel codice). scope fw = usato dal firmware (solo ASCII, stessi segnaposto %s %d...); web = solo pagina (Unicode ok, segnaposto {0} {1}). Genera i file lang/*.json con: python3 tools/mklang.py",
+ "_comment": "Sorgente delle traduzioni. 'it' e la chiave (testo italiano nel codice). scope fw = usato dal firmware (solo ASCII, stessi segnaposto %s %d...); web = solo pagina (Unicode ok, segnaposto {0} {1}). Genera i file lang/*.json con: python3 tools/mklang.py Italiano e inglese sono dentro il firmware. Ogni lingua ha bandiera (flags, SVG < 1 KB disegnata a mano) e codice locale (locales).",
  "langs": {
   "en": "English",
   "es": "Español",
   "de": "Deutsch"
+ },
+ "locales": {
+  "it": "it-IT",
+  "en": "en-GB",
+  "es": "es-ES",
+  "de": "de-DE"
+ },
+ "flags": {
+  "it": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 30 20\"><path fill=\"#009246\" d=\"M0 0h10v20H0z\"/><path fill=\"#fff\" d=\"M10 0h10v20H10z\"/><path fill=\"#ce2b37\" d=\"M20 0h10v20H20z\"/></svg>",
+  "en": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 30 20\"><path fill=\"#012169\" d=\"M0 0h30v20H0z\"/><path stroke=\"#fff\" stroke-width=\"4\" d=\"M0 0l30 20M30 0L0 20\"/><path stroke=\"#c8102e\" stroke-width=\"1.6\" d=\"M0 0l30 20M30 0L0 20\"/><path stroke=\"#fff\" stroke-width=\"6\" d=\"M15 0v20M0 10h30\"/><path stroke=\"#c8102e\" stroke-width=\"3.6\" d=\"M15 0v20M0 10h30\"/></svg>",
+  "es": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 30 20\"><path fill=\"#aa151b\" d=\"M0 0h30v20H0z\"/><path fill=\"#f1bf00\" d=\"M0 5h30v10H0z\"/></svg>",
+  "de": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 30 20\"><path fill=\"#000\" d=\"M0 0h30v7H0z\"/><path fill=\"#dd0000\" d=\"M0 7h30v6H0z\"/><path fill=\"#ffce00\" d=\"M0 13h30v7H0z\"/></svg>"
  },
  "entries": [
   {
@@ -392,13 +404,6 @@
    "scope": "fw"
   },
   {
-   "it": "  passwd <nuova>  cambia password (min 6 caratteri)",
-   "en": "  passwd <new>    change password (min 6 characters)",
-   "es": "  passwd <nueva>  cambia la contrasena (min 6 caracteres)",
-   "de": "  passwd <neu>    Passwort aendern (min 6 Zeichen)",
-   "scope": "fw"
-  },
-  {
    "it": "  logout          esce (solo seriale)",
    "en": "  logout          log out (serial only)",
    "es": "  logout          cierra sesion (solo serie)",
@@ -721,13 +726,6 @@
    "scope": "fw"
   },
   {
-   "it": "scrivi 'help'",
-   "en": "type 'help'",
-   "es": "escribe 'help'",
-   "de": "'help' eingeben",
-   "scope": "fw"
-  },
-  {
    "it": "Nessuna password: impostala dalla pagina web (primo accesso).",
    "en": "No password: set it from the web page (first access).",
    "es": "Sin contrasena: configurala desde la pagina web (primer acceso).",
@@ -861,13 +859,6 @@
    "scope": "fw"
   },
   {
-   "it": "Password errata",
-   "en": "Wrong password",
-   "es": "Contrasena incorrecta",
-   "de": "Falsches Passwort",
-   "scope": "fw"
-  },
-  {
    "it": "Nome rete non valido",
    "en": "Invalid network name",
    "es": "Nombre de red no valido",
@@ -959,13 +950,6 @@
    "scope": "fw"
   },
   {
-   "it": "Nuova password troppo corta (min 6)",
-   "en": "New password too short (min 6)",
-   "es": "Nueva contrasena demasiado corta (min 6)",
-   "de": "Neues Passwort zu kurz (min 6)",
-   "scope": "fw"
-  },
-  {
    "it": "File vuoto o troppo grande",
    "en": "File empty or too large",
    "es": "Archivo vacio o demasiado grande",
@@ -998,13 +982,6 @@
    "en": "Time zone: invalid characters",
    "es": "Zona horaria: caracteres no validos",
    "de": "Zeitzone: ungueltige Zeichen",
-   "scope": "fw"
-  },
-  {
-   "it": "Formato non valido",
-   "en": "Invalid format",
-   "es": "Formato no valido",
-   "de": "Ungueltiges Format",
    "scope": "fw"
   },
   {
@@ -1120,13 +1097,6 @@
    "scope": "web"
   },
   {
-   "it": "Primo accesso: scegli una password (almeno 6 caratteri).",
-   "en": "First access: choose a password (at least 6 characters).",
-   "es": "Primer acceso: elige una contraseña (al menos 6 caracteres).",
-   "de": "Erstzugriff: Wähle ein Passwort (mindestens 6 Zeichen).",
-   "scope": "web"
-  },
-  {
    "it": "Password",
    "en": "Password",
    "es": "Contraseña",
@@ -1138,13 +1108,6 @@
    "en": "Sign in",
    "es": "Entrar",
    "de": "Anmelden",
-   "scope": "web"
-  },
-  {
-   "it": "Esci",
-   "en": "Log out",
-   "es": "Salir",
-   "de": "Abmelden",
    "scope": "web"
   },
   {
@@ -1393,13 +1356,6 @@
    "scope": "web"
   },
   {
-   "it": "Nome del fuso",
-   "en": "Time zone name",
-   "es": "Nombre de la zona",
-   "de": "Name der Zeitzone",
-   "scope": "web"
-  },
-  {
    "it": "Formato data",
    "en": "Date format",
    "es": "Formato de fecha",
@@ -1596,13 +1552,6 @@
    "scope": "web"
   },
   {
-   "it": "Pin usati",
-   "en": "Pins in use",
-   "es": "Pines en uso",
-   "de": "Belegte Pins",
-   "scope": "web"
-  },
-  {
    "it": "Nome del dispositivo",
    "en": "Device name",
    "es": "Nombre del dispositivo",
@@ -1666,13 +1615,6 @@
    "scope": "web"
   },
   {
-   "it": "Cambia password",
-   "en": "Change password",
-   "es": "Cambiar contraseña",
-   "de": "Passwort ändern",
-   "scope": "web"
-  },
-  {
    "it": "Vecchia",
    "en": "Old",
    "es": "Anterior",
@@ -1715,13 +1657,6 @@
    "scope": "web"
   },
   {
-   "it": "Un file per lingua, con il nome uguale al codice (per esempio en.json). Lo stesso file traduce la pagina e i messaggi della shell.",
-   "en": "One file per language, named after the code (for example en.json). The same file translates the page and the shell messages.",
-   "es": "Un archivo por idioma, con el nombre igual al código (por ejemplo en.json). El mismo archivo traduce la página y los mensajes de la shell.",
-   "de": "Eine Datei pro Sprache, benannt nach dem Code (zum Beispiel en.json). Dieselbe Datei übersetzt die Seite und die Shell-Meldungen.",
-   "scope": "web"
-  },
-  {
    "it": "Log",
    "en": "Log",
    "es": "Registro",
@@ -1729,18 +1664,11 @@
    "scope": "web"
   },
   {
-   "it": "Imposta password",
-   "en": "Set password",
-   "es": "Configurar contraseña",
-   "de": "Passwort festlegen",
-   "scope": "web"
-  },
-  {
    "it": "Errore",
    "en": "Error",
    "es": "Error",
    "de": "Fehler",
-   "scope": "web"
+   "scope": "fw"
   },
   {
    "it": "Acceso da",
@@ -2065,10 +1993,10 @@
    "scope": "web"
   },
   {
-   "it": "  license [id]    note legali e licenze (notice, gpl3, lgpl3, lgpl21, apache2)",
-   "en": "  license [id]    legal notices and licenses (notice, gpl3, lgpl3, lgpl21, apache2)",
-   "es": "  license [id]    avisos legales y licencias (notice, gpl3, lgpl3, lgpl21, apache2)",
-   "de": "  license [id]    rechtliche Hinweise und Lizenzen (notice, gpl3, lgpl3, lgpl21, apache2)",
+   "it": "  license [id]    note legali e licenze (notice, gpl3, lgpl21, apache2, mit, bsd3)",
+   "en": "  license [id]    legal notices and licenses (notice, gpl3, lgpl21, apache2, mit, bsd3)",
+   "es": "  license [id]    avisos legales y licencias (notice, gpl3, lgpl21, apache2, mit, bsd3)",
+   "de": "  license [id]    rechtliche Hinweise und Lizenzen (notice, gpl3, lgpl21, apache2, mit, bsd3)",
    "scope": "fw"
   },
   {
@@ -2079,31 +2007,10 @@
    "scope": "fw"
   },
   {
-   "it": "Il testo completo e troppo lungo per la shell web: usa la scheda Config > Licenze o la seriale.",
-   "en": "The full text is too long for the web shell: use the Settings > Licenses tab or the serial port.",
-   "es": "El texto completo es demasiado largo para la shell web: usa la pestana Ajustes > Licencias o el puerto serie.",
-   "de": "Der vollstaendige Text ist fuer die Web-Shell zu lang: Tab Konfig > Lizenzen oder die serielle Schnittstelle verwenden.",
-   "scope": "fw"
-  },
-  {
    "it": "Note legali e licenze",
    "en": "Legal notices and licenses",
    "es": "Avisos legales y licencias",
    "de": "Rechtliche Hinweise und Lizenzen",
-   "scope": "web"
-  },
-  {
-   "it": "Licenze e note legali",
-   "en": "Licenses and legal notices",
-   "es": "Licencias y avisos legales",
-   "de": "Lizenzen und rechtliche Hinweise",
-   "scope": "web"
-  },
-  {
-   "it": "I testi legali sono dentro il firmware e si leggono anche dalla seriale con il comando license.",
-   "en": "The legal texts are inside the firmware and can also be read from the serial port with the license command.",
-   "es": "Los textos legales estan dentro del firmware y tambien se leen desde el puerto serie con el comando license.",
-   "de": "Die rechtlichen Texte sind in der Firmware enthalten und lassen sich auch ueber die serielle Schnittstelle mit dem Befehl license lesen.",
    "scope": "web"
   },
   {
@@ -2856,13 +2763,6 @@
    "scope": "web"
   },
   {
-   "it": "Hardware",
-   "en": "Hardware",
-   "es": "Hardware",
-   "de": "Hardware",
-   "scope": "web"
-  },
-  {
    "it": "Home",
    "en": "Home",
    "es": "Inicio",
@@ -2888,13 +2788,6 @@
    "en": "No alerts",
    "es": "Ninguna alarma",
    "de": "Keine Warnungen",
-   "scope": "web"
-  },
-  {
-   "it": "Pagina web, shell web e API sono sempre protette dalla password. Se spegni questo interruttore, chi collega il cavo USB ottiene subito la shell. Il tasto BOOT premuto 8 secondi azzera la password e riaccende la protezione.",
-   "en": "The web page, web shell and API are always protected by the password. If you turn this switch off, anyone who plugs in the USB cable gets the shell right away. Holding the BOOT button for 8 seconds clears the password and turns the protection back on.",
-   "es": "La pagina web, la shell web y la API siempre estan protegidas por la contrasena. Si apagas este interruptor, quien conecte el cable USB obtiene la shell al instante. Mantener el boton BOOT 8 segundos borra la contrasena y reactiva la proteccion.",
-   "de": "Webseite, Web-Shell und API sind immer durch das Passwort geschuetzt. Schaltest du diesen Schalter aus, bekommt jeder mit USB-Kabel sofort die Shell. BOOT-Taste 8 Sekunden gedrueckt loescht das Passwort und schaltet den Schutz wieder ein.",
    "scope": "web"
   },
   {
@@ -3684,9 +3577,9 @@
   {
    "it": "acceso",
    "en": "on",
-   "es": "encendido",
-   "de": "ein",
-   "scope": "web"
+   "es": "activo",
+   "de": "an",
+   "scope": "fw"
   },
   {
    "it": "aggiorna l'ora",
@@ -3819,7 +3712,7 @@
    "en": "off",
    "es": "apagado",
    "de": "aus",
-   "scope": "web"
+   "scope": "fw"
   },
   {
    "it": "stato del sistema",
@@ -4907,13 +4800,6 @@
    "scope": "fw"
   },
   {
-   "it": "  ntp [sync|every <min>]  stato NTP / risincronizza / frequenza",
-   "en": "  ntp [sync|every <min>]  NTP status / resync / interval",
-   "es": "  ntp [sync|every <min>]  estado NTP / resincronizar / frecuencia",
-   "de": "  ntp [sync|every <min>]  NTP-Status / neu synchronisieren / Intervall",
-   "scope": "fw"
-  },
-  {
    "it": "  sleep           sonno profondo (si riaccende con RESET)",
    "en": "  sleep           deep sleep (wakes up with RESET)",
    "es": "  sleep           sueno profundo (se enciende con RESET)",
@@ -5299,13 +5185,6 @@
    "scope": "fw"
   },
   {
-   "it": "Pulsante BOOT (breve = esce dal modo aereo, 8 s = reset password)",
-   "en": "BOOT button (short = exit airplane mode, 8 s = reset password)",
-   "es": "Boton BOOT (corto = sale del modo avion, 8 s = reset contrasena)",
-   "de": "BOOT-Taste (kurz = Flugmodus beenden, 8 s = Passwort zuruecksetzen)",
-   "scope": "fw"
-  },
-  {
    "it": "(comandi, es. led-color ff0000, gpio 4 1, reboot)",
    "en": "(commands, e.g. led-color ff0000, gpio 4 1, reboot)",
    "es": "(comandos, ej. led-color ff0000, gpio 4 1, reboot)",
@@ -5359,13 +5238,6 @@
    "en": "Some functions stop working until you restart it (Start button or start command).",
    "es": "Algunas funciones dejan de funcionar hasta que la reinicies (botón Iniciar o comando start).",
    "de": "Einige Funktionen arbeiten nicht, bis du ihn neu startest (Start-Schaltfläche oder Befehl start).",
-   "scope": "web"
-  },
-  {
-   "it": "Altri GPIO (piazzole sotto la scheda o non collegati)",
-   "en": "Other GPIOs (pads under the board or not connected)",
-   "es": "Otros GPIO (pads bajo la placa o no conectados)",
-   "de": "Weitere GPIOs (Pads unter der Platine oder nicht verbunden)",
    "scope": "web"
   },
   {
@@ -5467,13 +5339,6 @@
    "scope": "web"
   },
   {
-   "it": "Disegno della scheda vista dall'alto, presa USB in alto. Confronta i numeri con la scritta stampata sulla tua scheda: alcune serie hanno un ordine diverso.",
-   "en": "Board seen from above, USB socket at the top. Compare the numbers with the print on your board: some batches use a different order.",
-   "es": "Placa vista desde arriba, conector USB arriba. Compara los números con lo impreso en tu placa: algunas series tienen otro orden.",
-   "de": "Platine von oben, USB-Buchse oben. Vergleiche die Nummern mit dem Aufdruck deiner Platine: manche Serien haben eine andere Reihenfolge.",
-   "scope": "web"
-  },
-  {
    "it": "Dopo troppe password sbagliate dallo stesso indirizzo, la scheda lo blocca per un po'. Ogni nuovo blocco dura il doppio (massimo 1 ora). Anche troppe richieste senza accesso contano come errore.",
    "en": "After too many wrong passwords from the same address, the board blocks it for a while. Each new block lasts twice as long (max 1 hour). Too many requests without login also count as errors.",
    "es": "Tras demasiadas contraseñas erróneas desde la misma dirección, la placa la bloquea un rato. Cada nuevo bloqueo dura el doble (máx. 1 hora). Demasiadas peticiones sin acceso también cuentan como error.",
@@ -5485,13 +5350,6 @@
    "en": "After some time",
    "es": "Tras un tiempo",
    "de": "Nach einer Zeit",
-   "scope": "web"
-  },
-  {
-   "it": "Esci, riavvia o sleep",
-   "en": "Log out, restart or sleep",
-   "es": "Salir, reiniciar o sleep",
-   "de": "Abmelden, neu starten oder Sleep",
    "scope": "web"
   },
   {
@@ -6192,6 +6050,3842 @@
    "en": "{0} of {1} lines",
    "es": "{0} de {1} líneas",
    "de": "{0} von {1} Zeilen",
+   "scope": "web"
+  },
+  {
+   "it": "  %-8s ultimo segno di vita %lu s fa (limite %u s)",
+   "en": "  %-8s last sign of life %lu s ago (limit %u s)",
+   "es": "  %-8s ultima senal de vida hace %lu s (limite %u s)",
+   "de": "  %-8s letztes Lebenszeichen vor %lu s (Grenze %u s)",
+   "scope": "fw"
+  },
+  {
+   "it": "  %d salti  %lu s fa",
+   "en": "  %d hops  %lu s ago",
+   "es": "  %d saltos  hace %lu s",
+   "de": "  %d Spruenge  vor %lu s",
+   "scope": "fw"
+  },
+  {
+   "it": "  ap [show|new]   hotspot: mostra la password o creane una nuova",
+   "en": "  ap [show|new]   hotspot: show the password or create a new one",
+   "es": "  ap [show|new]   hotspot: muestra la contrasena o crea una nueva",
+   "de": "  ap [show|new]   Hotspot: Passwort zeigen oder neues erzeugen",
+   "scope": "fw"
+  },
+  {
+   "it": "  audit [ack [n]] allarmi della configurazione e registro modifiche",
+   "en": "  audit [ack [n]] configuration alarms and change log",
+   "es": "  audit [ack [n]] alarmas de configuracion y registro de cambios",
+   "de": "  audit [ack [n]] Konfigurationsalarme und Aenderungsprotokoll",
+   "scope": "fw"
+  },
+  {
+   "it": "  ble [on|off]    Bluetooth per configurare dal telefono (10 minuti)",
+   "en": "  ble [on|off]    Bluetooth to configure from a phone (10 minutes)",
+   "es": "  ble [on|off]    Bluetooth para configurar desde el movil (10 minutos)",
+   "de": "  ble [on|off]    Bluetooth zur Einrichtung per Handy (10 Minuten)",
+   "scope": "fw"
+  },
+  {
+   "it": "  cert [new]      certificato HTTPS: impronta o nuovo certificato",
+   "en": "  cert [new]      HTTPS certificate: fingerprint or new certificate",
+   "es": "  cert [new]      certificado HTTPS: huella o certificado nuevo",
+   "de": "  cert [new]      HTTPS-Zertifikat: Fingerabdruck oder neues Zertifikat",
+   "scope": "fw"
+  },
+  {
+   "it": "  firewall [off|confirm|mode <0-3>|add <ip|a-b|rete/nn> [nome]|del <n>|test <ip>]  filtro IP",
+   "en": "  firewall [off|confirm|mode <0-3>|add <ip|a-b|net/nn> [name]|del <n>|test <ip>]  IP filter",
+   "es": "  firewall [off|confirm|mode <0-3>|add <ip|a-b|red/nn> [nombre]|del <n>|test <ip>]  filtro IP",
+   "de": "  firewall [off|confirm|mode <0-3>|add <ip|a-b|netz/nn> [name]|del <n>|test <ip>]  IP-Filter",
+   "scope": "fw"
+  },
+  {
+   "it": "  legal           note legali: licenze, dati salvati, sicurezza",
+   "en": "  legal           legal notes: licenses, stored data, security",
+   "es": "  legal           avisos legales: licencias, datos guardados, seguridad",
+   "de": "  legal           Rechtliches: Lizenzen, gespeicherte Daten, Sicherheit",
+   "scope": "fw"
+  },
+  {
+   "it": "  locale [country XX|tx <dBm>|antenna int|ext <dBi>]  paese, potenza, antenna",
+   "en": "  locale [country XX|tx <dBm>|antenna int|ext <dBi>]  country, power, antenna",
+   "es": "  locale [country XX|tx <dBm>|antenna int|ext <dBi>]  pais, potencia, antena",
+   "de": "  locale [country XX|tx <dBm>|antenna int|ext <dBi>]  Land, Leistung, Antenne",
+   "scope": "fw"
+  },
+  {
+   "it": "  mesh [start|stop|send <scheda|*> <testo>|cmd <scheda> <azione>|key new|role <0|1|2>]  rete tra schede",
+   "en": "  mesh [start|stop|send <board|*> <text>|cmd <board> <action>|key new|role <0|1|2>]  board network",
+   "es": "  mesh [start|stop|send <placa|*> <texto>|cmd <placa> <accion>|key new|role <0|1|2>]  red entre placas",
+   "de": "  mesh [start|stop|send <board|*> <text>|cmd <board> <aktion>|key new|role <0|1|2>]  Board-Netz",
+   "scope": "fw"
+  },
+  {
+   "it": "  passwd <utente> <nuova>  cambia la password di un utente (min 6 caratteri)",
+   "en": "  passwd <user> <new>  change a user's password (min 6 characters)",
+   "es": "  passwd <usuario> <nueva>  cambia la contrasena de un usuario (min 6 caracteres)",
+   "de": "  passwd <benutzer> <neu>  Passwort eines Benutzers aendern (min. 6 Zeichen)",
+   "scope": "fw"
+  },
+  {
+   "it": "  user [add <nome> <admin|oper|guest> <password>|del <nome>|role <nome> <ruolo>|on <nome>|off <nome>]  utenti",
+   "en": "  user [add <name> <admin|oper|guest> <password>|del <name>|role <name> <role>|on <name>|off <name>]  users",
+   "es": "  user [add <nombre> <admin|oper|guest> <contrasena>|del <nombre>|role <nombre> <rol>|on <nombre>|off <nombre>]  usuarios",
+   "de": "  user [add <name> <admin|oper|guest> <passwort>|del <name>|role <name> <rolle>|on <name>|off <name>]  Benutzer",
+   "scope": "fw"
+  },
+  {
+   "it": "  watchdog        stato del watchdog",
+   "en": "  watchdog        watchdog status",
+   "es": "  watchdog        estado del watchdog",
+   "de": "  watchdog        Watchdog-Status",
+   "scope": "fw"
+  },
+  {
+   "it": "  welcome         schermata di benvenuto",
+   "en": "  welcome         welcome screen",
+   "es": "  welcome         pantalla de bienvenida",
+   "de": "  welcome         Willkommensbildschirm",
+   "scope": "fw"
+  },
+  {
+   "it": "%s.%s = %s (%s)",
+   "en": "%s.%s = %s (%s)",
+   "es": "%s.%s = %s (%s)",
+   "de": "%s.%s = %s (%s)",
+   "scope": "fw"
+  },
+  {
+   "it": "(bloccato)",
+   "en": "(blocked)",
+   "es": "(bloqueado)",
+   "de": "(gesperrt)",
+   "scope": "fw"
+  },
+  {
+   "it": "(di solito la pagina si apre da sola)",
+   "en": "(usually the page opens by itself)",
+   "es": "(normalmente la pagina se abre sola)",
+   "de": "(meist oeffnet sich die Seite von selbst)",
+   "scope": "fw"
+  },
+  {
+   "it": "(nessuna chiave)",
+   "en": "(no key)",
+   "es": "(sin clave)",
+   "de": "(kein Schluessel)",
+   "scope": "fw"
+  },
+  {
+   "it": "(paese diverso!)",
+   "en": "(different country!)",
+   "es": "(pais distinto!)",
+   "de": "(anderes Land!)",
+   "scope": "fw"
+  },
+  {
+   "it": "(premi il numero)",
+   "en": "(press the number)",
+   "es": "(pulsa el numero)",
+   "de": "(Zahl druecken)",
+   "scope": "fw"
+  },
+  {
+   "it": "(senza password)",
+   "en": "(no password)",
+   "es": "(sin contrasena)",
+   "de": "(ohne Passwort)",
+   "scope": "fw"
+  },
+  {
+   "it": "... e altre %d modifiche (%s)",
+   "en": "... and %d more changes (%s)",
+   "es": "... y otros %d cambios (%s)",
+   "de": "... und %d weitere Aenderungen (%s)",
+   "scope": "fw"
+  },
+  {
+   "it": "1. Collegati alla rete Wi-Fi:",
+   "en": "1. Connect to the Wi-Fi network:",
+   "es": "1. Conectate a la red Wi-Fi:",
+   "de": "1. Verbinde dich mit dem WLAN:",
+   "scope": "fw"
+  },
+  {
+   "it": "2. Apri:",
+   "en": "2. Open:",
+   "es": "2. Abre:",
+   "de": "2. Oeffne:",
+   "scope": "fw"
+  },
+  {
+   "it": "3. Segui la configurazione guidata.",
+   "en": "3. Follow the guided setup.",
+   "es": "3. Sigue la configuracion guiada.",
+   "de": "3. Folge der gefuehrten Einrichtung.",
+   "scope": "fw"
+  },
+  {
+   "it": "Aiuto: http://192.168.4.1/#aiuto   Comandi: scrivi  help",
+   "en": "Help: http://192.168.4.1/#aiuto   Commands: type  help",
+   "es": "Ayuda: http://192.168.4.1/#aiuto   Comandos: escribe  help",
+   "de": "Hilfe: http://192.168.4.1/#aiuto   Befehle: tippe  help",
+   "scope": "fw"
+  },
+  {
+   "it": "Allarmi: %d rossi, %d gialli -> scrivi audit",
+   "en": "Alarms: %d red, %d yellow -> type audit",
+   "es": "Alarmas: %d rojas, %d amarillas -> escribe audit",
+   "de": "Alarme: %d rot, %d gelb -> tippe audit",
+   "scope": "fw"
+  },
+  {
+   "it": "Allarmi: nessuno",
+   "en": "Alarms: none",
+   "es": "Alarmas: ninguna",
+   "de": "Alarme: keine",
+   "scope": "fw"
+  },
+  {
+   "it": "Amministratore",
+   "en": "Administrator",
+   "es": "Administrador",
+   "de": "Administrator",
+   "scope": "fw"
+  },
+  {
+   "it": "Antenna esterna %d dBi: potenza ridotta a %d dBm. Usa solo antenne adatte (responsabilita di chi la monta)",
+   "en": "External antenna %d dBi: power reduced to %d dBm. Use suitable antennas only (the installer is responsible)",
+   "es": "Antena externa %d dBi: potencia reducida a %d dBm. Usa solo antenas adecuadas (responsabilidad de quien la monta)",
+   "de": "Externe Antenne %d dBi: Leistung auf %d dBm reduziert. Nur geeignete Antennen verwenden (Verantwortung des Monteurs)",
+   "scope": "fw"
+  },
+  {
+   "it": "Antenna:   %s",
+   "en": "Antenna:   %s",
+   "es": "Antena:    %s",
+   "de": "Antenne:   %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Avvio: %s (n. %lu)",
+   "en": "Boot: %s (no. %lu)",
+   "es": "Arranque: %s (n. %lu)",
+   "de": "Start: %s (Nr. %lu)",
+   "scope": "fw"
+  },
+  {
+   "it": "Azione non ammessa (solo led, led-color, led-bright, gpio, note, reboot, ntp sync)",
+   "en": "Action not allowed (only led, led-color, led-bright, gpio, note, reboot, ntp sync)",
+   "es": "Accion no permitida (solo led, led-color, led-bright, gpio, note, reboot, ntp sync)",
+   "de": "Aktion nicht erlaubt (nur led, led-color, led-bright, gpio, note, reboot, ntp sync)",
+   "scope": "fw"
+  },
+  {
+   "it": "BENVENUTO! Questa scheda non e ancora configurata.",
+   "en": "WELCOME! This board is not configured yet.",
+   "es": "BIENVENIDO! Esta placa aun no esta configurada.",
+   "de": "WILLKOMMEN! Dieses Board ist noch nicht eingerichtet.",
+   "scope": "fw"
+  },
+  {
+   "it": "Bluetooth acceso: nome VesevOS-setup, codice %s, ancora %lu s",
+   "en": "Bluetooth on: name VesevOS-setup, code %s, %lu s left",
+   "es": "Bluetooth encendido: nombre VesevOS-setup, codigo %s, quedan %lu s",
+   "de": "Bluetooth an: Name VesevOS-setup, Code %s, noch %lu s",
+   "scope": "fw"
+  },
+  {
+   "it": "Bluetooth non incluso in questo firmware",
+   "en": "Bluetooth not included in this firmware",
+   "es": "Bluetooth no incluido en este firmware",
+   "de": "Bluetooth ist in dieser Firmware nicht enthalten",
+   "scope": "fw"
+  },
+  {
+   "it": "Bluetooth spento (ble on per accenderlo 10 minuti)",
+   "en": "Bluetooth off (ble on turns it on for 10 minutes)",
+   "es": "Bluetooth apagado (ble on lo enciende 10 minutos)",
+   "de": "Bluetooth aus (ble on schaltet es 10 Minuten ein)",
+   "scope": "fw"
+  },
+  {
+   "it": "Canale %d non ammesso nel paese: riportato a 1",
+   "en": "Channel %d not allowed in the country: set back to 1",
+   "es": "Canal %d no permitido en el pais: vuelto a 1",
+   "de": "Kanal %d im Land nicht erlaubt: auf 1 zurueckgesetzt",
+   "scope": "fw"
+  },
+  {
+   "it": "Canale non ammesso nel paese scelto",
+   "en": "Channel not allowed in the chosen country",
+   "es": "Canal no permitido en el pais elegido",
+   "de": "Kanal im gewaehlten Land nicht erlaubt",
+   "scope": "fw"
+  },
+  {
+   "it": "Canali:    1-%d",
+   "en": "Channels:  1-%d",
+   "es": "Canales:   1-%d",
+   "de": "Kanaele:   1-%d",
+   "scope": "fw"
+  },
+  {
+   "it": "Cancellare tutto: factory-reset oppure tasto BOOT 20 secondi.",
+   "en": "Erase everything: factory-reset or BOOT button for 20 seconds.",
+   "es": "Borrar todo: factory-reset o boton BOOT 20 segundos.",
+   "de": "Alles loeschen: factory-reset oder BOOT-Taste 20 Sekunden.",
+   "scope": "fw"
+  },
+  {
+   "it": "Certificato non valido",
+   "en": "Invalid certificate",
+   "es": "Certificado no valido",
+   "de": "Ungueltiges Zertifikat",
+   "scope": "fw"
+  },
+  {
+   "it": "Certificato non valido (formato PEM)",
+   "en": "Invalid certificate (PEM format)",
+   "es": "Certificado no valido (formato PEM)",
+   "de": "Ungueltiges Zertifikat (PEM-Format)",
+   "scope": "fw"
+  },
+  {
+   "it": "Certificato o chiave troppo grandi",
+   "en": "Certificate or key too large",
+   "es": "Certificado o clave demasiado grandes",
+   "de": "Zertifikat oder Schluessel zu gross",
+   "scope": "fw"
+  },
+  {
+   "it": "Chiave non valida (deve essere senza password)",
+   "en": "Invalid key (must have no password)",
+   "es": "Clave no valida (debe ser sin contrasena)",
+   "de": "Ungueltiger Schluessel (muss ohne Passwort sein)",
+   "scope": "fw"
+  },
+  {
+   "it": "Configurazione modificata fuori dal pannello: controllata e corretta",
+   "en": "Configuration changed outside the panel: checked and fixed",
+   "es": "Configuracion modificada fuera del panel: revisada y corregida",
+   "de": "Konfiguration ausserhalb des Panels geaendert: geprueft und korrigiert",
+   "scope": "fw"
+  },
+  {
+   "it": "Da capo?         Tieni premuto BOOT 20 s -> fabbrica",
+   "en": "Start over?      Hold BOOT 20 s -> factory",
+   "es": "Desde cero?      Manten BOOT 20 s -> fabrica",
+   "de": "Neu anfangen?    BOOT 20 s halten -> Werkszustand",
+   "scope": "fw"
+  },
+  {
+   "it": "Dati salvati sulla scheda: configurazione, utenti (solo impronta della password), registro (150 righe con indirizzi IP), allarmi. Nessun dato va fuori dalla scheda se non attivi tu MQTT o la rete tra schede.",
+   "en": "Data stored on the board: configuration, users (password fingerprint only), log (150 lines with IP addresses), alarms. No data leaves the board unless you turn on MQTT or the board network.",
+   "es": "Datos guardados en la placa: configuracion, usuarios (solo la huella de la contrasena), registro (150 lineas con direcciones IP), alarmas. Ningun dato sale de la placa si no activas MQTT o la red entre placas.",
+   "de": "Auf dem Board gespeicherte Daten: Konfiguration, Benutzer (nur Passwort-Fingerabdruck), Protokoll (150 Zeilen mit IP-Adressen), Alarme. Keine Daten verlassen das Board, ausser du schaltest MQTT oder das Board-Netz ein.",
+   "scope": "fw"
+  },
+  {
+   "it": "ESP-NOW non parte",
+   "en": "ESP-NOW does not start",
+   "es": "ESP-NOW no arranca",
+   "de": "ESP-NOW startet nicht",
+   "scope": "fw"
+  },
+  {
+   "it": "Filtro IP 'lista consentita' senza voci: entra solo chi e collegato all'hotspot",
+   "en": "IP filter 'allow list' with no entries: only hotspot clients can get in",
+   "es": "Filtro IP 'lista permitida' sin entradas: solo entra quien esta en el hotspot",
+   "de": "IP-Filter 'Erlaubt-Liste' ohne Eintraege: nur Hotspot-Geraete kommen rein",
+   "scope": "fw"
+  },
+  {
+   "it": "Filtro IP: %s",
+   "en": "IP filter: %s",
+   "es": "Filtro IP: %s",
+   "de": "IP-Filter: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Fuso:      %s",
+   "en": "Time zone: %s",
+   "es": "Huso:      %s",
+   "de": "Zeitzone:  %s",
+   "scope": "fw"
+  },
+  {
+   "it": "GIALLO",
+   "en": "YELLOW",
+   "es": "AMARILLO",
+   "de": "GELB  ",
+   "scope": "fw"
+  },
+  {
+   "it": "Guadagno dell'antenna: da 0 a 15 dBi",
+   "en": "Antenna gain: 0 to 15 dBi",
+   "es": "Ganancia de la antena: de 0 a 15 dBi",
+   "de": "Antennengewinn: 0 bis 15 dBi",
+   "scope": "fw"
+  },
+  {
+   "it": "HTTPS non partito (memoria?): la pagina resta senza cifratura",
+   "en": "HTTPS did not start (memory?): the page stays unencrypted",
+   "es": "HTTPS no arranco (memoria?): la pagina queda sin cifrado",
+   "de": "HTTPS nicht gestartet (Speicher?): Seite bleibt unverschluesselt",
+   "scope": "fw"
+  },
+  {
+   "it": "HTTPS spento: pagina e password viaggiano senza cifratura sulla rete di casa",
+   "en": "HTTPS off: page and passwords travel unencrypted on the home network",
+   "es": "HTTPS apagado: pagina y contrasenas viajan sin cifrar en la red de casa",
+   "de": "HTTPS aus: Seite und Passwoerter gehen unverschluesselt durchs Heimnetz",
+   "scope": "fw"
+  },
+  {
+   "it": "HTTPS: %s",
+   "en": "HTTPS: %s",
+   "es": "HTTPS: %s",
+   "de": "HTTPS: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Hotspot: %s  %s",
+   "en": "Hotspot: %s  %s",
+   "es": "Hotspot: %s  %s",
+   "de": "Hotspot: %s  %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Hotspot: %s  password: %s",
+   "en": "Hotspot: %s  password: %s",
+   "es": "Hotspot: %s  contrasena: %s",
+   "de": "Hotspot: %s  Passwort: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Il Wi-Fi non e acceso",
+   "en": "Wi-Fi is not on",
+   "es": "El Wi-Fi no esta encendido",
+   "de": "WLAN ist nicht an",
+   "scope": "fw"
+  },
+  {
+   "it": "Il canale in uso non e ammesso nel paese scelto",
+   "en": "The channel in use is not allowed in the chosen country",
+   "es": "El canal en uso no esta permitido en el pais elegido",
+   "de": "Der genutzte Kanal ist im gewaehlten Land nicht erlaubt",
+   "scope": "fw"
+  },
+  {
+   "it": "Il tuo ruolo non permette questa operazione",
+   "en": "Your role does not allow this operation",
+   "es": "Tu rol no permite esta operacion",
+   "de": "Deine Rolle erlaubt diesen Vorgang nicht",
+   "scope": "fw"
+  },
+  {
+   "it": "Il tuo ruolo non permette questo comando",
+   "en": "Your role does not allow this command",
+   "es": "Tu rol no permite este comando",
+   "de": "Deine Rolle erlaubt diesen Befehl nicht",
+   "scope": "fw"
+  },
+  {
+   "it": "Impronta HTTPS:",
+   "en": "HTTPS fingerprint:",
+   "es": "Huella HTTPS:",
+   "de": "HTTPS-Fingerabdruck:",
+   "scope": "fw"
+  },
+  {
+   "it": "Impronta SHA-256: %s",
+   "en": "SHA-256 fingerprint: %s",
+   "es": "Huella SHA-256: %s",
+   "de": "SHA-256-Fingerabdruck: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Indica una scheda (i comandi vanno a una sola scheda)",
+   "en": "Name one board (commands go to a single board)",
+   "es": "Indica una placa (los comandos van a una sola placa)",
+   "de": "Gib ein Board an (Befehle gehen an ein einzelnes Board)",
+   "scope": "fw"
+  },
+  {
+   "it": "Indirizzo non valido o lista piena",
+   "en": "Invalid address or list full",
+   "es": "Direccion no valida o lista llena",
+   "de": "Ungueltige Adresse oder Liste voll",
+   "scope": "fw"
+  },
+  {
+   "it": "La chiave deve avere 64 cifre esadecimali",
+   "en": "The key must have 64 hex digits",
+   "es": "La clave debe tener 64 cifras hexadecimales",
+   "de": "Der Schluessel muss 64 Hex-Ziffern haben",
+   "scope": "fw"
+  },
+  {
+   "it": "La password e gia impostata",
+   "en": "The password is already set",
+   "es": "La contrasena ya esta configurada",
+   "de": "Das Passwort ist bereits gesetzt",
+   "scope": "fw"
+  },
+  {
+   "it": "Lingua impostata: %s",
+   "en": "Language set: %s",
+   "es": "Idioma configurado: %s",
+   "de": "Sprache eingestellt: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Lingua:",
+   "en": "Language:",
+   "es": "Idioma:",
+   "de": "Sprache:",
+   "scope": "fw"
+  },
+  {
+   "it": "MQTT con password ma senza cifratura (mqtts): la password viaggia in chiaro",
+   "en": "MQTT with password but no encryption (mqtts): the password travels in clear text",
+   "es": "MQTT con contrasena pero sin cifrado (mqtts): la contrasena viaja en claro",
+   "de": "MQTT mit Passwort, aber ohne Verschluesselung (mqtts): das Passwort geht im Klartext",
+   "scope": "fw"
+  },
+  {
+   "it": "Manca la chiave comune (64 cifre esadecimali)",
+   "en": "Shared key missing (64 hex digits)",
+   "es": "Falta la clave comun (64 cifras hexadecimales)",
+   "de": "Gemeinsamer Schluessel fehlt (64 Hex-Ziffern)",
+   "scope": "fw"
+  },
+  {
+   "it": "Massimo %d utenti",
+   "en": "At most %d users",
+   "es": "Maximo %d usuarios",
+   "de": "Hoechstens %d Benutzer",
+   "scope": "fw"
+  },
+  {
+   "it": "Massimo %d voci",
+   "en": "At most %d entries",
+   "es": "Maximo %d entradas",
+   "de": "Hoechstens %d Eintraege",
+   "scope": "fw"
+  },
+  {
+   "it": "Memoria insufficiente per il Bluetooth",
+   "en": "Not enough memory for Bluetooth",
+   "es": "Memoria insuficiente para el Bluetooth",
+   "de": "Nicht genug Speicher fuer Bluetooth",
+   "scope": "fw"
+  },
+  {
+   "it": "Memoria non disponibile",
+   "en": "Memory not available",
+   "es": "Memoria no disponible",
+   "de": "Speicher nicht verfuegbar",
+   "scope": "fw"
+  },
+  {
+   "it": "Messaggio vuoto o troppo lungo (max 150)",
+   "en": "Message empty or too long (max 150)",
+   "es": "Mensaje vacio o demasiado largo (max 150)",
+   "de": "Nachricht leer oder zu lang (max. 150)",
+   "scope": "fw"
+  },
+  {
+   "it": "Modalita aereo attiva: radio spenta",
+   "en": "Airplane mode on: radio off",
+   "es": "Modo avion activo: radio apagada",
+   "de": "Flugmodus an: Funk aus",
+   "scope": "fw"
+  },
+  {
+   "it": "Modi: 0 spento, 1 solo la mia rete, 2 lista consentita, 3 lista bloccati",
+   "en": "Modes: 0 off, 1 my network only, 2 allow list, 3 block list",
+   "es": "Modos: 0 apagado, 1 solo mi red, 2 lista permitida, 3 lista bloqueada",
+   "de": "Modi: 0 aus, 1 nur mein Netz, 2 Erlaubt-Liste, 3 Sperrliste",
+   "scope": "fw"
+  },
+  {
+   "it": "Modo non valido",
+   "en": "Invalid mode",
+   "es": "Modo no valido",
+   "de": "Ungueltiger Modus",
+   "scope": "fw"
+  },
+  {
+   "it": "Nessun allarme: configurazione in regola",
+   "en": "No alarms: configuration is fine",
+   "es": "Ninguna alarma: configuracion en regla",
+   "de": "Keine Alarme: Konfiguration in Ordnung",
+   "scope": "fw"
+  },
+  {
+   "it": "Nessun amministratore attivo: tieni premuto BOOT 8 s per crearlo di nuovo",
+   "en": "No active administrator: hold BOOT 8 s to create one again",
+   "es": "Ningun administrador activo: manten BOOT 8 s para crearlo de nuevo",
+   "de": "Kein aktiver Administrator: BOOT 8 s halten, um ihn neu anzulegen",
+   "scope": "fw"
+  },
+  {
+   "it": "Nessun utente",
+   "en": "No users",
+   "es": "Ningun usuario",
+   "de": "Keine Benutzer",
+   "scope": "fw"
+  },
+  {
+   "it": "Nome gia usato",
+   "en": "Name already used",
+   "es": "Nombre ya usado",
+   "de": "Name bereits verwendet",
+   "scope": "fw"
+  },
+  {
+   "it": "Nome non valido (3-20: lettere, numeri, punto, trattino)",
+   "en": "Invalid name (3-20: letters, digits, dot, hyphen)",
+   "es": "Nombre no valido (3-20: letras, numeros, punto, guion)",
+   "de": "Ungueltiger Name (3-20: Buchstaben, Ziffern, Punkt, Bindestrich)",
+   "scope": "fw"
+  },
+  {
+   "it": "Nome o password errati",
+   "en": "Wrong name or password",
+   "es": "Nombre o contrasena incorrectos",
+   "de": "Falscher Name oder falsches Passwort",
+   "scope": "fw"
+  },
+  {
+   "it": "Nome:",
+   "en": "Name:",
+   "es": "Nombre:",
+   "de": "Name:",
+   "scope": "fw"
+  },
+  {
+   "it": "Non e consulenza legale: verifica le regole del tuo paese.",
+   "en": "Not legal advice: check the rules of your country.",
+   "es": "No es asesoria legal: verifica las normas de tu pais.",
+   "de": "Keine Rechtsberatung: pruefe die Regeln deines Landes.",
+   "scope": "fw"
+  },
+  {
+   "it": "Nuovo certificato pronto: vale dal prossimo riavvio (reboot)",
+   "en": "New certificate ready: active from the next restart (reboot)",
+   "es": "Certificado nuevo listo: vale desde el proximo reinicio (reboot)",
+   "de": "Neues Zertifikat bereit: gilt ab dem naechsten Neustart (reboot)",
+   "scope": "fw"
+  },
+  {
+   "it": "Operatore",
+   "en": "Operator",
+   "es": "Operador",
+   "de": "Bediener",
+   "scope": "fw"
+  },
+  {
+   "it": "Ospite",
+   "en": "Guest",
+   "es": "Invitado",
+   "de": "Gast",
+   "scope": "fw"
+  },
+  {
+   "it": "Paese '%s' sconosciuto: tolto, valgono le regole prudenti",
+   "en": "Unknown country '%s': removed, safe rules apply",
+   "es": "Pais '%s' desconocido: quitado, valen las reglas prudentes",
+   "de": "Unbekanntes Land '%s': entfernt, es gelten vorsichtige Regeln",
+   "scope": "fw"
+  },
+  {
+   "it": "Paese non scelto: radio con regole prudenti (canali 1-11). Sceglilo in Sistema > Localizzazione",
+   "en": "No country chosen: radio uses safe rules (channels 1-11). Choose it in System > Localization",
+   "es": "Pais no elegido: radio con reglas prudentes (canales 1-11). Eligelo en Sistema > Localizacion",
+   "de": "Kein Land gewaehlt: Funk mit vorsichtigen Regeln (Kanaele 1-11). In System > Lokalisierung waehlen",
+   "scope": "fw"
+  },
+  {
+   "it": "Paese sconosciuto",
+   "en": "Unknown country",
+   "es": "Pais desconocido",
+   "de": "Unbekanntes Land",
+   "scope": "fw"
+  },
+  {
+   "it": "Paese:     %s",
+   "en": "Country:   %s",
+   "es": "Pais:      %s",
+   "de": "Land:      %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Paese: %s   Ora: %s",
+   "en": "Country: %s   Time: %s",
+   "es": "Pais: %s   Hora: %s",
+   "de": "Land: %s   Zeit: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Pagina: https://%s   Comandi: help",
+   "en": "Page: https://%s   Commands: help",
+   "es": "Pagina: https://%s   Comandos: help",
+   "de": "Seite: https://%s   Befehle: help",
+   "scope": "fw"
+  },
+  {
+   "it": "Password dell'hotspot debole o uguale per tutti: sostituita con una nuova (vedi seriale o Rete > Punto di accesso)",
+   "en": "Hotspot password weak or the same for everyone: replaced with a new one (see serial or Network > Access point)",
+   "es": "Contrasena del hotspot debil o igual para todos: sustituida por una nueva (ver serie o Red > Punto de acceso)",
+   "de": "Hotspot-Passwort schwach oder fuer alle gleich: durch ein neues ersetzt (siehe seriell oder Netz > Zugangspunkt)",
+   "scope": "fw"
+  },
+  {
+   "it": "Password persa?  Tieni premuto BOOT 8 s  -> la riscrivo qui",
+   "en": "Lost password?   Hold BOOT 8 s  -> I write it here again",
+   "es": "Contrasena perdida? Manten BOOT 8 s -> la escribo aqui",
+   "de": "Passwort vergessen? BOOT 8 s halten -> ich schreibe es hier",
+   "scope": "fw"
+  },
+  {
+   "it": "Password troppo debole o di fabbrica: le leggi sulla sicurezza (UE RED/EN 18031, CRA; UK PSTI) vietano le password uguali per tutti",
+   "en": "Password too weak or factory default: security laws (EU RED/EN 18031, CRA; UK PSTI) forbid passwords that are the same for everyone",
+   "es": "Contrasena demasiado debil o de fabrica: las leyes de seguridad (UE RED/EN 18031, CRA; UK PSTI) prohiben contrasenas iguales para todos",
+   "de": "Passwort zu schwach oder Werkseinstellung: Sicherheitsgesetze (EU RED/EN 18031, CRA; UK PSTI) verbieten fuer alle gleiche Passwoerter",
+   "scope": "fw"
+  },
+  {
+   "it": "Password troppo lunga (max 64)",
+   "en": "Password too long (max 64)",
+   "es": "Contrasena demasiado larga (max 64)",
+   "de": "Passwort zu lang (max. 64)",
+   "scope": "fw"
+  },
+  {
+   "it": "Password:",
+   "en": "Password:",
+   "es": "Contrasena:",
+   "de": "Passwort:",
+   "scope": "fw"
+  },
+  {
+   "it": "Per sicurezza la prima password si sceglie dall'hotspot della scheda, oppure entro 10 minuti dal reset con il tasto BOOT",
+   "en": "For safety the first password is chosen from the board's hotspot, or within 10 minutes of a reset with the BOOT button",
+   "es": "Por seguridad la primera contrasena se elige desde el hotspot de la placa, o en los 10 minutos tras el reset con el boton BOOT",
+   "de": "Aus Sicherheitsgruenden wird das erste Passwort ueber den Hotspot des Boards gewaehlt, oder innerhalb von 10 Minuten nach dem Reset mit der BOOT-Taste",
+   "scope": "fw"
+  },
+  {
+   "it": "Perche una password diversa per ogni scheda? Lo chiedono le leggi sulla sicurezza dei dispositivi: UE (RED/EN 18031, Cyber Resilience Act) e Regno Unito (PSTI). Niente password uguali.",
+   "en": "Why a different password for every board? Device security laws require it: EU (RED/EN 18031, Cyber Resilience Act) and UK (PSTI). No shared passwords.",
+   "es": "Por que una contrasena distinta para cada placa? Lo exigen las leyes de seguridad de dispositivos: UE (RED/EN 18031, Cyber Resilience Act) y Reino Unido (PSTI). Nada de contrasenas iguales.",
+   "de": "Warum fuer jedes Board ein anderes Passwort? Das verlangen die Gesetze zur Geraetesicherheit: EU (RED/EN 18031, Cyber Resilience Act) und UK (PSTI). Keine gleichen Passwoerter.",
+   "scope": "fw"
+  },
+  {
+   "it": "Potenza %d dBm oltre il limite del paese: riportata a %d dBm",
+   "en": "Power %d dBm above the country limit: set back to %d dBm",
+   "es": "Potencia %d dBm por encima del limite del pais: vuelta a %d dBm",
+   "de": "Leistung %d dBm ueber dem Landeslimit: auf %d dBm zurueckgesetzt",
+   "scope": "fw"
+  },
+  {
+   "it": "Potenza non valida",
+   "en": "Invalid power",
+   "es": "Potencia no valida",
+   "de": "Ungueltige Leistung",
+   "scope": "fw"
+  },
+  {
+   "it": "Potenza:   %d dBm (massimo %d, limite del paese %d dBm EIRP)",
+   "en": "Power:     %d dBm (max %d, country limit %d dBm EIRP)",
+   "es": "Potencia:  %d dBm (maximo %d, limite del pais %d dBm EIRP)",
+   "de": "Leistung:  %d dBm (max. %d, Landeslimit %d dBm EIRP)",
+   "scope": "fw"
+  },
+  {
+   "it": "Potenza: da 2 a 20 dBm (0 = massima consentita)",
+   "en": "Power: 2 to 20 dBm (0 = highest allowed)",
+   "es": "Potencia: de 2 a 20 dBm (0 = maxima permitida)",
+   "de": "Leistung: 2 bis 20 dBm (0 = hoechste erlaubte)",
+   "scope": "fw"
+  },
+  {
+   "it": "RAM libera sotto %u KB",
+   "en": "Free RAM below %u KB",
+   "es": "RAM libre por debajo de %u KB",
+   "de": "Freier RAM unter %u KB",
+   "scope": "fw"
+  },
+  {
+   "it": "ROSSO ",
+   "en": "RED   ",
+   "es": "ROJO  ",
+   "de": "ROT   ",
+   "scope": "fw"
+  },
+  {
+   "it": "Radio: comando locale. Non e consulenza legale.",
+   "en": "Radio: locale command. Not legal advice.",
+   "es": "Radio: comando locale. No es asesoria legal.",
+   "de": "Funk: Befehl locale. Keine Rechtsberatung.",
+   "scope": "fw"
+  },
+  {
+   "it": "Regola in prova: %lu s rimasti (firewall confirm)",
+   "en": "Rule on trial: %lu s left (firewall confirm)",
+   "es": "Regla en prueba: quedan %lu s (firewall confirm)",
+   "de": "Regel im Test: noch %lu s (firewall confirm)",
+   "scope": "fw"
+  },
+  {
+   "it": "Rete schede spenta",
+   "en": "Board network off",
+   "es": "Red entre placas apagada",
+   "de": "Board-Netz aus",
+   "scope": "fw"
+  },
+  {
+   "it": "Rete schede: %s, canale %d, ruolo %s",
+   "en": "Board network: %s, channel %d, role %s",
+   "es": "Red entre placas: %s, canal %d, rol %s",
+   "de": "Board-Netz: %s, Kanal %d, Rolle %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Rete schede: una scheda ha un paese diverso. Imposta lo stesso paese su tutte",
+   "en": "Board network: a board has a different country. Set the same country on all",
+   "es": "Red entre placas: una placa tiene otro pais. Pon el mismo pais en todas",
+   "de": "Board-Netz: ein Board hat ein anderes Land. Stelle ueberall dasselbe Land ein",
+   "scope": "fw"
+  },
+  {
+   "it": "Riavvii automatici sospesi (troppi in un'ora)",
+   "en": "Automatic restarts suspended (too many in one hour)",
+   "es": "Reinicios automaticos suspendidos (demasiados en una hora)",
+   "de": "Automatische Neustarts ausgesetzt (zu viele in einer Stunde)",
+   "scope": "fw"
+  },
+  {
+   "it": "Ruoli: 0 nodo, 1 gateway, 2 sensore",
+   "en": "Roles: 0 node, 1 gateway, 2 sensor",
+   "es": "Roles: 0 nodo, 1 gateway, 2 sensor",
+   "de": "Rollen: 0 Knoten, 1 Gateway, 2 Sensor",
+   "scope": "fw"
+  },
+  {
+   "it": "Ruoli: admin, oper, guest",
+   "en": "Roles: admin, oper, guest",
+   "es": "Roles: admin, oper, guest",
+   "de": "Rollen: admin, oper, guest",
+   "scope": "fw"
+  },
+  {
+   "it": "Ruolo non valido",
+   "en": "Invalid role",
+   "es": "Rol no valido",
+   "de": "Ungueltige Rolle",
+   "scope": "fw"
+  },
+  {
+   "it": "Scheda non trovata nella rete",
+   "en": "Board not found in the network",
+   "es": "Placa no encontrada en la red",
+   "de": "Board im Netz nicht gefunden",
+   "scope": "fw"
+  },
+  {
+   "it": "Seriale senza password: chi collega il cavo USB entra senza password",
+   "en": "Serial without password: anyone with a USB cable gets in without a password",
+   "es": "Serie sin contrasena: quien conecta el cable USB entra sin contrasena",
+   "de": "Seriell ohne Passwort: wer ein USB-Kabel anschliesst, kommt ohne Passwort rein",
+   "scope": "fw"
+  },
+  {
+   "it": "Serve almeno un amministratore attivo",
+   "en": "At least one active administrator is needed",
+   "es": "Hace falta al menos un administrador activo",
+   "de": "Mindestens ein aktiver Administrator ist noetig",
+   "scope": "fw"
+  },
+  {
+   "it": "Servono certificato e chiave in formato PEM",
+   "en": "Certificate and key in PEM format are needed",
+   "es": "Hacen falta certificado y clave en formato PEM",
+   "de": "Zertifikat und Schluessel im PEM-Format noetig",
+   "scope": "fw"
+  },
+  {
+   "it": "Software di terzi e testi delle licenze: comando license, pagina Sistema > Note legali.",
+   "en": "Third-party software and license texts: license command, page System > Legal notes.",
+   "es": "Software de terceros y textos de licencias: comando license, pagina Sistema > Avisos legales.",
+   "de": "Software Dritter und Lizenztexte: Befehl license, Seite System > Rechtliches.",
+   "scope": "fw"
+  },
+  {
+   "it": "Ultimo riavvio automatico: %s",
+   "en": "Last automatic restart: %s",
+   "es": "Ultimo reinicio automatico: %s",
+   "de": "Letzter automatischer Neustart: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: ap [show|new]",
+   "en": "Usage: ap [show|new]",
+   "es": "Uso: ap [show|new]",
+   "de": "Aufruf: ap [show|new]",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: firewall [off|confirm|mode <0-3>|add <ip|a-b|rete/nn> [nome]|del <n>|test <ip>]",
+   "en": "Usage: firewall [off|confirm|mode <0-3>|add <ip|a-b|net/nn> [name]|del <n>|test <ip>]",
+   "es": "Uso: firewall [off|confirm|mode <0-3>|add <ip|a-b|red/nn> [nombre]|del <n>|test <ip>]",
+   "de": "Aufruf: firewall [off|confirm|mode <0-3>|add <ip|a-b|netz/nn> [name]|del <n>|test <ip>]",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: locale [country XX|tx <dBm>|antenna int|ext <dBi>]",
+   "en": "Usage: locale [country XX|tx <dBm>|antenna int|ext <dBi>]",
+   "es": "Uso: locale [country XX|tx <dBm>|antenna int|ext <dBi>]",
+   "de": "Aufruf: locale [country XX|tx <dBm>|antenna int|ext <dBi>]",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: locale antenna int | locale antenna ext <dBi>",
+   "en": "Usage: locale antenna int | locale antenna ext <dBi>",
+   "es": "Uso: locale antenna int | locale antenna ext <dBi>",
+   "de": "Aufruf: locale antenna int | locale antenna ext <dBi>",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: mesh [start|stop|send <scheda|*> <testo>|cmd <scheda> <azione>|key new|role <0|1|2>]",
+   "en": "Usage: mesh [start|stop|send <board|*> <text>|cmd <board> <action>|key new|role <0|1|2>]",
+   "es": "Uso: mesh [start|stop|send <placa|*> <texto>|cmd <placa> <accion>|key new|role <0|1|2>]",
+   "de": "Aufruf: mesh [start|stop|send <board|*> <text>|cmd <board> <aktion>|key new|role <0|1|2>]",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: passwd <utente> <nuova password>",
+   "en": "Usage: passwd <user> <new password>",
+   "es": "Uso: passwd <usuario> <nueva contrasena>",
+   "de": "Aufruf: passwd <benutzer> <neues passwort>",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: user [add <nome> <admin|oper|guest> <password>|del <nome>|role <nome> <ruolo>|on <nome>|off <nome>]",
+   "en": "Usage: user [add <name> <admin|oper|guest> <password>|del <name>|role <name> <role>|on <name>|off <name>]",
+   "es": "Uso: user [add <nombre> <admin|oper|guest> <contrasena>|del <nombre>|role <nombre> <rol>|on <nombre>|off <nombre>]",
+   "de": "Aufruf: user [add <name> <admin|oper|guest> <passwort>|del <name>|role <name> <rolle>|on <name>|off <name>]",
+   "scope": "fw"
+  },
+  {
+   "it": "Utente non trovato",
+   "en": "User not found",
+   "es": "Usuario no encontrado",
+   "de": "Benutzer nicht gefunden",
+   "scope": "fw"
+  },
+  {
+   "it": "Voce %d: indirizzo non valido",
+   "en": "Entry %d: invalid address",
+   "es": "Entrada %d: direccion no valida",
+   "de": "Eintrag %d: ungueltige Adresse",
+   "scope": "fw"
+  },
+  {
+   "it": "Voce non trovata",
+   "en": "Entry not found",
+   "es": "Entrada no encontrada",
+   "de": "Eintrag nicht gefunden",
+   "scope": "fw"
+  },
+  {
+   "it": "Watchdog spento: se un servizio si blocca la scheda non si riprende da sola",
+   "en": "Watchdog off: if a service hangs the board will not recover by itself",
+   "es": "Watchdog apagado: si un servicio se bloquea la placa no se recupera sola",
+   "de": "Watchdog aus: wenn ein Dienst haengt, erholt sich das Board nicht selbst",
+   "scope": "fw"
+  },
+  {
+   "it": "Watchdog: il servizio '%s' si era bloccato ed e stato riavviato",
+   "en": "Watchdog: service '%s' had hung and was restarted",
+   "es": "Watchdog: el servicio '%s' se habia bloqueado y se ha reiniciado",
+   "de": "Watchdog: Dienst '%s' hing und wurde neu gestartet",
+   "scope": "fw"
+  },
+  {
+   "it": "Watchdog: task %s, rete %s (%u min), RAM %s (%u KB)",
+   "en": "Watchdog: task %s, network %s (%u min), RAM %s (%u KB)",
+   "es": "Watchdog: task %s, red %s (%u min), RAM %s (%u KB)",
+   "de": "Watchdog: Task %s, Netz %s (%u min), RAM %s (%u KB)",
+   "scope": "fw"
+  },
+  {
+   "it": "Watchdog: troppi riavvii automatici in un'ora, riavvio sospeso. Controlla il registro",
+   "en": "Watchdog: too many automatic restarts in one hour, restart suspended. Check the log",
+   "es": "Watchdog: demasiados reinicios automaticos en una hora, reinicio suspendido. Revisa el registro",
+   "de": "Watchdog: zu viele automatische Neustarts in einer Stunde, Neustart ausgesetzt. Protokoll pruefen",
+   "scope": "fw"
+  },
+  {
+   "it": "Wi-Fi casa: %s  %s  %d dBm",
+   "en": "Home Wi-Fi: %s  %s  %d dBm",
+   "es": "Wi-Fi casa: %s  %s  %d dBm",
+   "de": "Heim-WLAN: %s  %s  %d dBm",
+   "scope": "fw"
+  },
+  {
+   "it": "accesa",
+   "en": "on",
+   "es": "encendida",
+   "de": "an",
+   "scope": "fw"
+  },
+  {
+   "it": "acceso da %u giorni",
+   "en": "on for %u days",
+   "es": "encendido desde hace %u dias",
+   "de": "seit %u Tagen an",
+   "scope": "fw"
+  },
+  {
+   "it": "ammesso",
+   "en": "allowed",
+   "es": "permitido",
+   "de": "erlaubt",
+   "scope": "fw"
+  },
+  {
+   "it": "azione non ammessa da un'altra scheda",
+   "en": "action not allowed from another board",
+   "es": "accion no permitida desde otra placa",
+   "de": "Aktion von einem anderen Board nicht erlaubt",
+   "scope": "fw"
+  },
+  {
+   "it": "comando sconosciuto (wifi, country, name, mesh, status, done)",
+   "en": "unknown command (wifi, country, name, mesh, status, done)",
+   "es": "comando desconocido (wifi, country, name, mesh, status, done)",
+   "de": "unbekannter Befehl (wifi, country, name, mesh, status, done)",
+   "scope": "fw"
+  },
+  {
+   "it": "esterna, %d dBi",
+   "en": "external, %d dBi",
+   "es": "externa, %d dBi",
+   "de": "extern, %d dBi",
+   "scope": "fw"
+  },
+  {
+   "it": "interna",
+   "en": "internal",
+   "es": "interna",
+   "de": "intern",
+   "scope": "fw"
+  },
+  {
+   "it": "nodo",
+   "en": "node",
+   "es": "nodo",
+   "de": "Knoten",
+   "scope": "fw"
+  },
+  {
+   "it": "nome non valido",
+   "en": "invalid name",
+   "es": "nombre no valido",
+   "de": "ungueltiger Name",
+   "scope": "fw"
+  },
+  {
+   "it": "non partito",
+   "en": "not started",
+   "es": "no arrancado",
+   "de": "nicht gestartet",
+   "scope": "fw"
+  },
+  {
+   "it": "non scelto (regole prudenti)",
+   "en": "not chosen (safe rules)",
+   "es": "no elegido (reglas prudentes)",
+   "de": "nicht gewaehlt (vorsichtige Regeln)",
+   "scope": "fw"
+  },
+  {
+   "it": "paese sconosciuto",
+   "en": "unknown country",
+   "es": "pais desconocido",
+   "de": "unbekanntes Land",
+   "scope": "fw"
+  },
+  {
+   "it": "registro svuotato (%s)",
+   "en": "log cleared (%s)",
+   "es": "registro vaciado (%s)",
+   "de": "Protokoll geleert (%s)",
+   "scope": "fw"
+  },
+  {
+   "it": "rete assente da %u minuti",
+   "en": "network missing for %u minutes",
+   "es": "red ausente desde hace %u minutos",
+   "de": "Netz fehlt seit %u Minuten",
+   "scope": "fw"
+  },
+  {
+   "it": "rete o password non valide",
+   "en": "invalid network or password",
+   "es": "red o contrasena no validas",
+   "de": "Netz oder Passwort ungueltig",
+   "scope": "fw"
+  },
+  {
+   "it": "riavvio programmato %s",
+   "en": "scheduled restart %s",
+   "es": "reinicio programado %s",
+   "de": "geplanter Neustart %s",
+   "scope": "fw"
+  },
+  {
+   "it": "rifiutato",
+   "en": "rejected",
+   "es": "rechazado",
+   "de": "abgelehnt",
+   "scope": "fw"
+  },
+  {
+   "it": "sensore",
+   "en": "sensor",
+   "es": "sensor",
+   "de": "Sensor",
+   "scope": "fw"
+  },
+  {
+   "it": "servizio '%s' bloccato",
+   "en": "service '%s' hung",
+   "es": "servicio '%s' bloqueado",
+   "de": "Dienst '%s' haengt",
+   "scope": "fw"
+  },
+  {
+   "it": "spenta",
+   "en": "off",
+   "es": "apagada",
+   "de": "aus",
+   "scope": "fw"
+  },
+  {
+   "it": "uso: mesh <0|1|2> <chiave di 64 cifre>",
+   "en": "usage: mesh <0|1|2> <64-digit key>",
+   "es": "uso: mesh <0|1|2> <clave de 64 cifras>",
+   "de": "Aufruf: mesh <0|1|2> <64-stelliger Schluessel>",
+   "scope": "fw"
+  },
+  {
+   "it": "solo la mia rete",
+   "en": "my network only",
+   "es": "solo mi red",
+   "de": "nur mein Netz",
+   "scope": "fw"
+  },
+  {
+   "it": "lista consentita",
+   "en": "allow list",
+   "es": "lista permitida",
+   "de": "Erlaubt-Liste",
+   "scope": "fw"
+  },
+  {
+   "it": "lista bloccati",
+   "en": "block list",
+   "es": "lista bloqueada",
+   "de": "Sperrliste",
+   "scope": "fw"
+  },
+  {
+   "it": "Pulsante BOOT (breve = modo aereo, 2 s = filtro IP, 8 s = password, 20 s = fabbrica)",
+   "en": "BOOT button (short = airplane mode, 2 s = IP filter, 8 s = password, 20 s = factory)",
+   "es": "Boton BOOT (corto = modo avion, 2 s = filtro IP, 8 s = contrasena, 20 s = fabrica)",
+   "de": "BOOT-Taste (kurz = Flugmodus, 2 s = IP-Filter, 8 s = Passwort, 20 s = Werkszustand)",
+   "scope": "fw"
+  },
+  {
+   "it": "(certificato salvato: incolla per sostituirlo, salva vuoto per toglierlo)",
+   "en": "(certificate saved: paste to replace it, save empty to remove it)",
+   "es": "(certificado guardado: pega para sustituirlo, guarda vacío para quitarlo)",
+   "de": "(Zertifikat gespeichert: zum Ersetzen einfügen, leer speichern zum Entfernen)",
+   "scope": "web"
+  },
+  {
+   "it": "(salvata: non la mostro)",
+   "en": "(saved: not shown)",
+   "es": "(guardada: no se muestra)",
+   "de": "(gespeichert: wird nicht angezeigt)",
+   "scope": "web"
+  },
+  {
+   "it": "-----BEGIN CERTIFICATE-----",
+   "en": "-----BEGIN CERTIFICATE-----",
+   "es": "-----BEGIN CERTIFICATE-----",
+   "de": "-----BEGIN CERTIFICATE-----",
+   "scope": "web"
+  },
+  {
+   "it": "A chi",
+   "en": "To",
+   "es": "A quién",
+   "de": "An",
+   "scope": "web"
+  },
+  {
+   "it": "ATTENZIONE: con questa regola resteresti fuori",
+   "en": "WARNING: with this rule you would be locked out",
+   "es": "ATENCIÓN: con esta regla te quedarías fuera",
+   "de": "ACHTUNG: mit dieser Regel wärst du ausgesperrt",
+   "scope": "web"
+  },
+  {
+   "it": "Accendi",
+   "en": "Turn on",
+   "es": "Encender",
+   "de": "Einschalten",
+   "scope": "web"
+  },
+  {
+   "it": "Accendi per 10 minuti",
+   "en": "Turn on for 10 minutes",
+   "es": "Encender 10 minutos",
+   "de": "10 Minuten einschalten",
+   "scope": "web"
+  },
+  {
+   "it": "Accesa",
+   "en": "On",
+   "es": "Encendida",
+   "de": "An",
+   "scope": "web"
+  },
+  {
+   "it": "Acceso per altri {0}. Nome: VesevOS-setup. Codice di accoppiamento: {1}",
+   "en": "On for another {0}. Name: VesevOS-setup. Pairing code: {1}",
+   "es": "Encendido otros {0}. Nombre: VesevOS-setup. Código de emparejamiento: {1}",
+   "de": "Noch {0} an. Name: VesevOS-setup. Kopplungscode: {1}",
+   "scope": "web"
+  },
+  {
+   "it": "Aggiungi",
+   "en": "Add",
+   "es": "Añadir",
+   "de": "Hinzufügen",
+   "scope": "web"
+  },
+  {
+   "it": "Aggiungi il mio indirizzo",
+   "en": "Add my address",
+   "es": "Añadir mi dirección",
+   "de": "Meine Adresse hinzufügen",
+   "scope": "web"
+  },
+  {
+   "it": "Aiuto",
+   "en": "Help",
+   "es": "Ayuda",
+   "de": "Hilfe",
+   "scope": "web"
+  },
+  {
+   "it": "Antenna",
+   "en": "Antenna",
+   "es": "Antena",
+   "de": "Antenne",
+   "scope": "web"
+  },
+  {
+   "it": "Apri",
+   "en": "Open",
+   "es": "Abrir",
+   "de": "Öffnen",
+   "scope": "web"
+  },
+  {
+   "it": "Attivo dal prossimo riavvio",
+   "en": "Active from the next restart",
+   "es": "Activo desde el próximo reinicio",
+   "de": "Aktiv ab dem nächsten Neustart",
+   "scope": "web"
+  },
+  {
+   "it": "Avanti",
+   "en": "Next",
+   "es": "Siguiente",
+   "de": "Weiter",
+   "scope": "web"
+  },
+  {
+   "it": "Avviso del browser su HTTPS",
+   "en": "Browser warning about HTTPS",
+   "es": "Aviso del navegador sobre HTTPS",
+   "de": "Browser-Warnung zu HTTPS",
+   "scope": "web"
+  },
+  {
+   "it": "Azione sull'altra scheda (es. led-color 00ff00, gpio 4 1, note ciao, reboot)",
+   "en": "Action on the other board (e.g. led-color 00ff00, gpio 4 1, note hello, reboot)",
+   "es": "Acción en la otra placa (ej. led-color 00ff00, gpio 4 1, note hola, reboot)",
+   "de": "Aktion auf dem anderen Board (z. B. led-color 00ff00, gpio 4 1, note hallo, reboot)",
+   "scope": "web"
+  },
+  {
+   "it": "Bluetooth",
+   "en": "Bluetooth",
+   "es": "Bluetooth",
+   "de": "Bluetooth",
+   "scope": "web"
+  },
+  {
+   "it": "Bluetooth per configurare dal telefono",
+   "en": "Bluetooth to configure from a phone",
+   "es": "Bluetooth para configurar desde el móvil",
+   "de": "Bluetooth zur Einrichtung per Handy",
+   "scope": "web"
+  },
+  {
+   "it": "Cambia paese",
+   "en": "Change country",
+   "es": "Cambiar país",
+   "de": "Land ändern",
+   "scope": "web"
+  },
+  {
+   "it": "Cambiare l'hotspot?",
+   "en": "Change the hotspot?",
+   "es": "¿Cambiar el hotspot?",
+   "de": "Hotspot ändern?",
+   "scope": "web"
+  },
+  {
+   "it": "Canale quando non c'e il Wi-Fi di casa",
+   "en": "Channel when there is no home Wi-Fi",
+   "es": "Canal cuando no hay Wi-Fi de casa",
+   "de": "Kanal ohne Heim-WLAN",
+   "scope": "web"
+  },
+  {
+   "it": "Canale {0} · inviati {1}, ricevuti {2}, scartati {3}",
+   "en": "Channel {0} · sent {1}, received {2}, dropped {3}",
+   "es": "Canal {0} · enviados {1}, recibidos {2}, descartados {3}",
+   "de": "Kanal {0} · gesendet {1}, empfangen {2}, verworfen {3}",
+   "scope": "web"
+  },
+  {
+   "it": "Canali",
+   "en": "Channels",
+   "es": "Canales",
+   "de": "Kanäle",
+   "scope": "web"
+  },
+  {
+   "it": "Canali e potenza massima vengono dal paese: non si possono superare. Con un'antenna esterna la potenza scende da sola per restare nel limite (potenza + guadagno dell'antenna). Montare un'antenna esterna e responsabilita di chi la monta.",
+   "en": "Channels and maximum power come from the country and cannot be exceeded. With an external antenna the power drops by itself to stay within the limit (power + antenna gain). Fitting an external antenna is the installer's responsibility.",
+   "es": "Canales y potencia máxima vienen del país: no se pueden superar. Con una antena externa la potencia baja sola para quedar dentro del límite (potencia + ganancia de la antena). Montar una antena externa es responsabilidad de quien la monta.",
+   "de": "Kanäle und Höchstleistung kommen vom Land und dürfen nicht überschritten werden. Mit externer Antenne sinkt die Leistung von selbst, um im Limit zu bleiben (Leistung + Antennengewinn). Das Anbringen einer externen Antenne liegt in der Verantwortung des Monteurs.",
+   "scope": "web"
+  },
+  {
+   "it": "Carica",
+   "en": "Upload",
+   "es": "Cargar",
+   "de": "Hochladen",
+   "scope": "web"
+  },
+  {
+   "it": "Carico...",
+   "en": "Loading...",
+   "es": "Cargando...",
+   "de": "Lade...",
+   "scope": "web"
+  },
+  {
+   "it": "Cerca (es. Italia, IT)",
+   "en": "Search (e.g. Italy, IT)",
+   "es": "Buscar (ej. España, ES)",
+   "de": "Suchen (z. B. Deutschland, DE)",
+   "scope": "web"
+  },
+  {
+   "it": "Certificato",
+   "en": "Certificate",
+   "es": "Certificado",
+   "de": "Zertifikat",
+   "scope": "web"
+  },
+  {
+   "it": "Certificato (PEM)",
+   "en": "Certificate (PEM)",
+   "es": "Certificado (PEM)",
+   "de": "Zertifikat (PEM)",
+   "scope": "web"
+  },
+  {
+   "it": "Certificato CA in formato PEM",
+   "en": "CA certificate in PEM format",
+   "es": "Certificado CA en formato PEM",
+   "de": "CA-Zertifikat im PEM-Format",
+   "scope": "web"
+  },
+  {
+   "it": "Certificato del broker (mqtts)",
+   "en": "Broker certificate (mqtts)",
+   "es": "Certificado del broker (mqtts)",
+   "de": "Broker-Zertifikat (mqtts)",
+   "scope": "web"
+  },
+  {
+   "it": "Certificato nuovo pronto: vale dal prossimo riavvio.",
+   "en": "New certificate ready: active from the next restart.",
+   "es": "Certificado nuevo listo: vale desde el próximo reinicio.",
+   "de": "Neues Zertifikat bereit: gilt ab dem nächsten Neustart.",
+   "scope": "web"
+  },
+  {
+   "it": "Certificato tuo (facoltativo)",
+   "en": "Your own certificate (optional)",
+   "es": "Tu certificado (opcional)",
+   "de": "Eigenes Zertifikat (optional)",
+   "scope": "web"
+  },
+  {
+   "it": "Chi e collegato all'hotspot viene scollegato e deve ricollegarsi con i dati nuovi.",
+   "en": "Anyone connected to the hotspot is disconnected and must reconnect with the new details.",
+   "es": "Quien está conectado al hotspot se desconecta y debe volver a conectarse con los datos nuevos.",
+   "de": "Wer mit dem Hotspot verbunden ist, wird getrennt und muss sich mit den neuen Daten neu verbinden.",
+   "scope": "web"
+  },
+  {
+   "it": "Chiave comune (64 cifre esadecimali, uguale su tutte le schede)",
+   "en": "Shared key (64 hex digits, the same on all boards)",
+   "es": "Clave común (64 cifras hexadecimales, igual en todas las placas)",
+   "de": "Gemeinsamer Schlüssel (64 Hex-Ziffern, auf allen Boards gleich)",
+   "scope": "web"
+  },
+  {
+   "it": "Chiave nuova creata: copiala sulle altre schede",
+   "en": "New key created: copy it to the other boards",
+   "es": "Clave nueva creada: cópiala en las otras placas",
+   "de": "Neuer Schlüssel erstellt: auf die anderen Boards kopieren",
+   "scope": "web"
+  },
+  {
+   "it": "Chiave privata (PEM)",
+   "en": "Private key (PEM)",
+   "es": "Clave privada (PEM)",
+   "de": "Privater Schlüssel (PEM)",
+   "scope": "web"
+  },
+  {
+   "it": "Collega la scheda al computer con il cavo USB e apri il monitor seriale (115200): la scheda scrive il nome della rete Wi-Fi e la sua password. Collegati a quella rete e apri http://192.168.4.1: parte la configurazione guidata.",
+   "en": "Connect the board to the computer with the USB cable and open the serial monitor (115200): the board prints the Wi-Fi network name and its password. Join that network and open http://192.168.4.1: the guided setup starts.",
+   "es": "Conecta la placa al ordenador con el cable USB y abre el monitor serie (115200): la placa escribe el nombre de la red Wi-Fi y su contraseña. Conéctate a esa red y abre http://192.168.4.1: empieza la configuración guiada.",
+   "de": "Verbinde das Board per USB-Kabel mit dem Computer und öffne den seriellen Monitor (115200): das Board zeigt WLAN-Name und Passwort. Verbinde dich mit diesem Netz und öffne http://192.168.4.1: die geführte Einrichtung startet.",
+   "scope": "web"
+  },
+  {
+   "it": "Collegamento cifrato (HTTPS). Impronta del certificato: {0}",
+   "en": "Encrypted connection (HTTPS). Certificate fingerprint: {0}",
+   "es": "Conexión cifrada (HTTPS). Huella del certificado: {0}",
+   "de": "Verschlüsselte Verbindung (HTTPS). Zertifikat-Fingerabdruck: {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Collegamento cifrato (mqtts, di solito porta 8883)",
+   "en": "Encrypted connection (mqtts, usually port 8883)",
+   "es": "Conexión cifrada (mqtts, normalmente puerto 8883)",
+   "de": "Verschlüsselte Verbindung (mqtts, meist Port 8883)",
+   "scope": "web"
+  },
+  {
+   "it": "Collegamento non cifrato: usi l'hotspot della scheda, protetto dalla sua password Wi-Fi.",
+   "en": "Unencrypted connection: you are on the board's hotspot, protected by its Wi-Fi password.",
+   "es": "Conexión sin cifrar: usas el hotspot de la placa, protegido por su contraseña Wi-Fi.",
+   "de": "Unverschlüsselte Verbindung: du nutzt den Hotspot des Boards, geschützt durch sein WLAN-Passwort.",
+   "scope": "web"
+  },
+  {
+   "it": "Come si chiama questa scheda?",
+   "en": "What is this board called?",
+   "es": "¿Cómo se llama esta placa?",
+   "de": "Wie heißt dieses Board?",
+   "scope": "web"
+  },
+  {
+   "it": "Con utente e password, senza cifratura la password viaggia in chiaro sulla rete.",
+   "en": "With user and password but no encryption, the password travels in clear text on the network.",
+   "es": "Con usuario y contraseña, sin cifrado la contraseña viaja en claro por la red.",
+   "de": "Mit Benutzer und Passwort, aber ohne Verschlüsselung geht das Passwort im Klartext durchs Netz.",
+   "scope": "web"
+  },
+  {
+   "it": "Conferma",
+   "en": "Confirm",
+   "es": "Confirmar",
+   "de": "Bestätigen",
+   "scope": "web"
+  },
+  {
+   "it": "Configurazione completata",
+   "en": "Setup complete",
+   "es": "Configuración completada",
+   "de": "Einrichtung abgeschlossen",
+   "scope": "web"
+  },
+  {
+   "it": "Configurazione, utenti (solo l'impronta della password, mai la password), registro di 150 righe (con gli indirizzi IP di chi accede), allarmi e ultime modifiche. Tutto resta sulla scheda: niente va fuori se non accendi tu MQTT o la rete tra schede. Il contaore e il numero di avvii non si cancellano: non sono dati personali.",
+   "en": "Configuration, users (only the password fingerprint, never the password), a 150-line log (with the IP addresses of those who sign in), alarms and recent changes. Everything stays on the board: nothing leaves unless you turn on MQTT or the board network. The hour counter and boot count are not erased: they are not personal data.",
+   "es": "Configuración, usuarios (solo la huella de la contraseña, nunca la contraseña), registro de 150 líneas (con las direcciones IP de quien accede), alarmas y últimos cambios. Todo queda en la placa: nada sale si no enciendes MQTT o la red entre placas. El contador de horas y el número de arranques no se borran: no son datos personales.",
+   "de": "Konfiguration, Benutzer (nur Passwort-Fingerabdruck, nie das Passwort), Protokoll mit 150 Zeilen (mit IP-Adressen der Anmeldenden), Alarme und letzte Änderungen. Alles bleibt auf dem Board: nichts geht hinaus, außer du schaltest MQTT oder das Board-Netz ein. Betriebsstundenzähler und Startzähler werden nicht gelöscht: sie sind keine personenbezogenen Daten.",
+   "scope": "web"
+  },
+  {
+   "it": "Controlla che la scheda non resti bloccata e, se serve, la fa ripartire da sola. Non piu di 3 riavvii automatici in un'ora: poi si ferma e avvisa.",
+   "en": "Checks that the board does not hang and restarts it by itself if needed. No more than 3 automatic restarts per hour: then it stops and warns.",
+   "es": "Comprueba que la placa no se quede bloqueada y, si hace falta, la reinicia sola. No más de 3 reinicios automáticos por hora: luego se detiene y avisa.",
+   "de": "Prüft, dass das Board nicht hängt, und startet es bei Bedarf selbst neu. Höchstens 3 automatische Neustarts pro Stunde: dann stoppt es und warnt.",
+   "scope": "web"
+  },
+  {
+   "it": "Controlli",
+   "en": "Checks",
+   "es": "Controles",
+   "de": "Prüfungen",
+   "scope": "web"
+  },
+  {
+   "it": "Controlli della configurazione",
+   "en": "Configuration checks",
+   "es": "Controles de la configuración",
+   "de": "Konfigurationsprüfungen",
+   "scope": "web"
+  },
+  {
+   "it": "Controllo...",
+   "en": "Checking...",
+   "es": "Comprobando...",
+   "de": "Prüfe...",
+   "scope": "web"
+  },
+  {
+   "it": "Copia la stessa chiave sulle altre schede. Usa solo canali ammessi nel tuo paese (Sistema > Localizzazione).",
+   "en": "Copy the same key to the other boards. Use only channels allowed in your country (System > Localization).",
+   "es": "Copia la misma clave en las otras placas. Usa solo canales permitidos en tu país (Sistema > Localización).",
+   "de": "Kopiere denselben Schlüssel auf die anderen Boards. Nur in deinem Land erlaubte Kanäle verwenden (System > Lokalisierung).",
+   "scope": "web"
+  },
+  {
+   "it": "Creare un certificato nuovo?",
+   "en": "Create a new certificate?",
+   "es": "¿Crear un certificado nuevo?",
+   "de": "Neues Zertifikat erstellen?",
+   "scope": "web"
+  },
+  {
+   "it": "Creare una chiave nuova?",
+   "en": "Create a new key?",
+   "es": "¿Crear una clave nueva?",
+   "de": "Neuen Schlüssel erstellen?",
+   "scope": "web"
+  },
+  {
+   "it": "Dati salvati sulla scheda",
+   "en": "Data stored on the board",
+   "es": "Datos guardados en la placa",
+   "de": "Auf dem Board gespeicherte Daten",
+   "scope": "web"
+  },
+  {
+   "it": "Decide chi puo parlare con la scheda. L'hotspot della scheda e la seriale USB sono sempre ammessi. Chi e fuori lista non riceve risposta. Una regola nuova vale 2 minuti: se non la confermi torna quella di prima.",
+   "en": "Decides who can talk to the board. The board's hotspot and the USB serial are always allowed. Anyone not on the list gets no answer. A new rule lasts 2 minutes: if you do not confirm it, the previous one comes back.",
+   "es": "Decide quién puede hablar con la placa. El hotspot de la placa y la serie USB siempre están permitidos. Quien está fuera de la lista no recibe respuesta. Una regla nueva vale 2 minutos: si no la confirmas vuelve la anterior.",
+   "de": "Legt fest, wer mit dem Board sprechen darf. Hotspot des Boards und USB-Seriell sind immer erlaubt. Wer nicht auf der Liste steht, bekommt keine Antwort. Eine neue Regel gilt 2 Minuten: ohne Bestätigung kommt die vorherige zurück.",
+   "scope": "web"
+  },
+  {
+   "it": "Domenica",
+   "en": "Sunday",
+   "es": "Domingo",
+   "de": "Sonntag",
+   "scope": "web"
+  },
+  {
+   "it": "Dove si trova la scheda?",
+   "en": "Where is the board?",
+   "es": "¿Dónde está la placa?",
+   "de": "Wo befindet sich das Board?",
+   "scope": "web"
+  },
+  {
+   "it": "Eliminare l'utente {0}?",
+   "en": "Delete user {0}?",
+   "es": "¿Eliminar el usuario {0}?",
+   "de": "Benutzer {0} löschen?",
+   "scope": "web"
+  },
+  {
+   "it": "Esegui sull'altra scheda",
+   "en": "Run on the other board",
+   "es": "Ejecutar en la otra placa",
+   "de": "Auf dem anderen Board ausführen",
+   "scope": "web"
+  },
+  {
+   "it": "Esterna",
+   "en": "External",
+   "es": "Externa",
+   "de": "Extern",
+   "scope": "web"
+  },
+  {
+   "it": "Filtra anche il server dell'ora (NTP)",
+   "en": "Also filter the time server (NTP)",
+   "es": "Filtrar también el servidor de hora (NTP)",
+   "de": "Auch den Zeitserver (NTP) filtern",
+   "scope": "web"
+  },
+  {
+   "it": "Filtro IP",
+   "en": "IP filter",
+   "es": "Filtro IP",
+   "de": "IP-Filter",
+   "scope": "web"
+  },
+  {
+   "it": "Fine",
+   "en": "Done",
+   "es": "Fin",
+   "de": "Fertig",
+   "scope": "web"
+  },
+  {
+   "it": "Fino a 8 utenti. Amministratore: tutto. Operatore: usa la scheda (LED, pin, automazioni, messaggi) ma non cambia rete, sicurezza e utenti. Ospite: solo guarda (Home, stato, registro). I permessi sono controllati dalla scheda, non solo dalla pagina.",
+   "en": "Up to 8 users. Administrator: everything. Operator: uses the board (LED, pins, automations, messages) but does not change network, security or users. Guest: view only (Home, status, log). Permissions are enforced by the board, not just the page.",
+   "es": "Hasta 8 usuarios. Administrador: todo. Operador: usa la placa (LED, pines, automatizaciones, mensajes) pero no cambia red, seguridad ni usuarios. Invitado: solo mira (Inicio, estado, registro). Los permisos los controla la placa, no solo la página.",
+   "de": "Bis zu 8 Benutzer. Administrator: alles. Bediener: nutzt das Board (LED, Pins, Automationen, Nachrichten), ändert aber nicht Netz, Sicherheit und Benutzer. Gast: nur ansehen (Home, Status, Protokoll). Die Rechte prüft das Board, nicht nur die Seite.",
+   "scope": "web"
+  },
+  {
+   "it": "Formati del paese: data {0}, ora {1}, temperatura {2}. Si cambiano poi in Sistema > Localizzazione.",
+   "en": "Country formats: date {0}, time {1}, temperature {2}. Change them later in System > Localization.",
+   "es": "Formatos del país: fecha {0}, hora {1}, temperatura {2}. Se cambian luego en Sistema > Localización.",
+   "de": "Landesformate: Datum {0}, Uhrzeit {1}, Temperatur {2}. Später änderbar unter System > Lokalisierung.",
+   "scope": "web"
+  },
+  {
+   "it": "Fuso orario, formati e unita: Sistema > Localizzazione.",
+   "en": "Time zone, formats and units: System > Localization.",
+   "es": "Huso horario, formatos y unidades: Sistema > Localización.",
+   "de": "Zeitzone, Formate und Einheiten: System > Lokalisierung.",
+   "scope": "web"
+  },
+  {
+   "it": "Gateway (annuncia il canale, invia tutto a MQTT)",
+   "en": "Gateway (announces the channel, sends everything to MQTT)",
+   "es": "Gateway (anuncia el canal, envía todo a MQTT)",
+   "de": "Gateway (kündigt den Kanal an, sendet alles an MQTT)",
+   "scope": "web"
+  },
+  {
+   "it": "Guadagno dell'antenna esterna (dBi)",
+   "en": "External antenna gain (dBi)",
+   "es": "Ganancia de la antena externa (dBi)",
+   "de": "Gewinn der externen Antenne (dBi)",
+   "scope": "web"
+  },
+  {
+   "it": "HTTPS",
+   "en": "HTTPS",
+   "es": "HTTPS",
+   "de": "HTTPS",
+   "scope": "web"
+  },
+  {
+   "it": "HTTPS attivo (consigliato)",
+   "en": "HTTPS on (recommended)",
+   "es": "HTTPS activo (recomendado)",
+   "de": "HTTPS an (empfohlen)",
+   "scope": "web"
+  },
+  {
+   "it": "Ho perso una password",
+   "en": "I lost a password",
+   "es": "He perdido una contraseña",
+   "de": "Ich habe ein Passwort verloren",
+   "scope": "web"
+  },
+  {
+   "it": "Ho visto tutto",
+   "en": "I've seen them all",
+   "es": "Lo he visto todo",
+   "de": "Alles gesehen",
+   "scope": "web"
+  },
+  {
+   "it": "Hotspot",
+   "en": "Hotspot",
+   "es": "Hotspot",
+   "de": "Hotspot",
+   "scope": "web"
+  },
+  {
+   "it": "Il firmware rispetta i limiti del paese scelto. La conformita del prodotto finito (marchi CE, UKCA, FCC...) e responsabilita di chi lo mette in commercio. Non e consulenza legale.",
+   "en": "The firmware respects the limits of the chosen country. Compliance of the finished product (CE, UKCA, FCC marks...) is the responsibility of whoever places it on the market. Not legal advice.",
+   "es": "El firmware respeta los límites del país elegido. La conformidad del producto final (marcas CE, UKCA, FCC...) es responsabilidad de quien lo comercializa. No es asesoría legal.",
+   "de": "Die Firmware hält die Grenzen des gewählten Landes ein. Die Konformität des Endprodukts (CE, UKCA, FCC...) liegt bei dem, der es in Verkehr bringt. Keine Rechtsberatung.",
+   "scope": "web"
+  },
+  {
+   "it": "Il paese decide canali e potenza della radio. Scegli quello dove la scheda si trova davvero.",
+   "en": "The country sets the radio channels and power. Choose the one where the board really is.",
+   "es": "El país decide canales y potencia de la radio. Elige aquel donde está realmente la placa.",
+   "de": "Das Land bestimmt Funkkanäle und Leistung. Wähle das Land, in dem das Board wirklich ist.",
+   "scope": "web"
+  },
+  {
+   "it": "Il paese decide i canali e la potenza della radio secondo le sue leggi: scegli quello dove la scheda si trova davvero. Non e consulenza legale.",
+   "en": "The country sets the radio channels and power according to its laws: choose the one where the board really is. Not legal advice.",
+   "es": "El país decide los canales y la potencia de la radio según sus leyes: elige aquel donde está realmente la placa. No es asesoría legal.",
+   "de": "Das Land bestimmt Funkkanäle und Leistung nach seinen Gesetzen: wähle das Land, in dem das Board wirklich ist. Keine Rechtsberatung.",
+   "scope": "web"
+  },
+  {
+   "it": "Il tuo indirizzo: {0}",
+   "en": "Your address: {0}",
+   "es": "Tu dirección: {0}",
+   "de": "Deine Adresse: {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Impronta SHA-256",
+   "en": "SHA-256 fingerprint",
+   "es": "Huella SHA-256",
+   "de": "SHA-256-Fingerabdruck",
+   "scope": "web"
+  },
+  {
+   "it": "Indietro",
+   "en": "Back",
+   "es": "Atrás",
+   "de": "Zurück",
+   "scope": "web"
+  },
+  {
+   "it": "Ingrandisci",
+   "en": "Zoom in",
+   "es": "Acercar",
+   "de": "Vergrößern",
+   "scope": "web"
+  },
+  {
+   "it": "Interna (sul circuito)",
+   "en": "Internal (on the board)",
+   "es": "Interna (en el circuito)",
+   "de": "Intern (auf der Platine)",
+   "scope": "web"
+  },
+  {
+   "it": "Invia messaggio",
+   "en": "Send message",
+   "es": "Enviar mensaje",
+   "de": "Nachricht senden",
+   "scope": "web"
+  },
+  {
+   "it": "Italiano e inglese sono dentro il firmware. Per le altre: un file per lingua, con il nome uguale al codice (per esempio es.json). Lo stesso file traduce la pagina e i messaggi della shell.",
+   "en": "Italian and English are built into the firmware. For others: one file per language, named after its code (for example es.json). The same file translates the page and the shell messages.",
+   "es": "Italiano e inglés están dentro del firmware. Para los demás: un archivo por idioma, con el nombre igual al código (por ejemplo es.json). El mismo archivo traduce la página y los mensajes de la shell.",
+   "de": "Italienisch und Englisch sind in der Firmware. Für weitere: eine Datei pro Sprache, benannt nach dem Code (z. B. es.json). Dieselbe Datei übersetzt Seite und Shell-Meldungen.",
+   "scope": "web"
+  },
+  {
+   "it": "La pagina e le password viaggiano cifrate. Il certificato e creato dalla scheda e unico: al primo accesso il browser avvisa \"connessione non privata\". E normale per i dispositivi di casa: confronta l'impronta qui sotto con quella che mostra il browser (lucchetto > certificato) e con quella scritta sulla seriale.",
+   "en": "The page and passwords travel encrypted. The certificate is created by the board and unique: on first access the browser warns \"connection not private\". This is normal for home devices: compare the fingerprint below with the one the browser shows (padlock > certificate) and with the one printed on the serial.",
+   "es": "La página y las contraseñas viajan cifradas. El certificado lo crea la placa y es único: en el primer acceso el navegador avisa \"conexión no privada\". Es normal en los dispositivos de casa: compara la huella de abajo con la que muestra el navegador (candado > certificado) y con la escrita en la serie.",
+   "de": "Seite und Passwörter werden verschlüsselt übertragen. Das Zertifikat erstellt das Board selbst, es ist einmalig: beim ersten Zugriff warnt der Browser \"Verbindung nicht privat\". Bei Heimgeräten ist das normal: vergleiche den Fingerabdruck unten mit dem im Browser (Schloss > Zertifikat) und mit dem auf der seriellen Ausgabe.",
+   "scope": "web"
+  },
+  {
+   "it": "La password e casuale e diversa per ogni scheda: una password uguale per tutti aprirebbe tutte le schede, e le leggi sulla sicurezza dei dispositivi lo vietano (UE: direttiva radio con EN 18031 e Cyber Resilience Act; Regno Unito: PSTI). Conservala: stampa l'etichetta o fotografa il QR.",
+   "en": "The password is random and different for every board: one password for everyone would open every board, and device security laws forbid it (EU: Radio Equipment Directive with EN 18031 and Cyber Resilience Act; UK: PSTI). Keep it: print the label or photograph the QR code.",
+   "es": "La contraseña es aleatoria y distinta para cada placa: una contraseña igual para todos abriría todas las placas, y las leyes de seguridad de dispositivos lo prohíben (UE: directiva de radio con EN 18031 y Cyber Resilience Act; Reino Unido: PSTI). Guárdala: imprime la etiqueta o fotografía el QR.",
+   "de": "Das Passwort ist zufällig und für jedes Board anders: ein Passwort für alle würde alle Boards öffnen, und Gesetze zur Gerätesicherheit verbieten das (EU: Funkanlagenrichtlinie mit EN 18031 und Cyber Resilience Act; UK: PSTI). Bewahre es auf: Etikett drucken oder QR-Code fotografieren.",
+   "scope": "web"
+  },
+  {
+   "it": "La scheda controlla da sola la configurazione. Rosso: valore vietato (legge o sicurezza), corretto subito. Giallo: permesso ma rischioso, resta con un avviso. Il registro dice chi ha cambiato cosa.",
+   "en": "The board checks its own configuration. Red: forbidden value (law or security), fixed at once. Yellow: allowed but risky, kept with a warning. The log says who changed what.",
+   "es": "La placa controla sola la configuración. Rojo: valor prohibido (ley o seguridad), corregido enseguida. Amarillo: permitido pero arriesgado, se mantiene con un aviso. El registro dice quién cambió qué.",
+   "de": "Das Board prüft seine Konfiguration selbst. Rot: verbotener Wert (Gesetz oder Sicherheit), sofort korrigiert. Gelb: erlaubt, aber riskant, bleibt mit Warnung. Das Protokoll zeigt, wer was geändert hat.",
+   "scope": "web"
+  },
+  {
+   "it": "La scheda e pronta. Puoi collegarla alla rete di casa quando vuoi da Rete > Wi-Fi.",
+   "en": "The board is ready. You can connect it to your home network any time from Network > Wi-Fi.",
+   "es": "La placa está lista. Puedes conectarla a la red de casa cuando quieras desde Red > Wi-Fi.",
+   "de": "Das Board ist bereit. Mit dem Heimnetz verbindest du es jederzeit unter Netz > WLAN.",
+   "scope": "web"
+  },
+  {
+   "it": "La tua password",
+   "en": "Your password",
+   "es": "Tu contraseña",
+   "de": "Dein Passwort",
+   "scope": "web"
+  },
+  {
+   "it": "Le altre schede smettono di capire questa finche non copi la chiave nuova anche su di loro.",
+   "en": "The other boards stop understanding this one until you copy the new key to them too.",
+   "es": "Las otras placas dejan de entender esta hasta que copies la clave nueva también en ellas.",
+   "de": "Die anderen Boards verstehen dieses nicht mehr, bis du den neuen Schlüssel auch dort einträgst.",
+   "scope": "web"
+  },
+  {
+   "it": "Le due password non sono uguali",
+   "en": "The two passwords do not match",
+   "es": "Las dos contraseñas no coinciden",
+   "de": "Die beiden Passwörter stimmen nicht überein",
+   "scope": "web"
+  },
+  {
+   "it": "Le schede parlano tra loro senza router, fino a 3 salti. Ogni messaggio e firmato con la chiave comune: chi non ha la chiave non puo comandare. Spenta di fabbrica.",
+   "en": "Boards talk to each other without a router, up to 3 hops. Every message is signed with the shared key: without the key nobody can give commands. Off by default.",
+   "es": "Las placas hablan entre sí sin router, hasta 3 saltos. Cada mensaje va firmado con la clave común: sin la clave nadie puede mandar. Apagada de fábrica.",
+   "de": "Die Boards sprechen ohne Router miteinander, bis zu 3 Sprünge. Jede Nachricht ist mit dem gemeinsamen Schlüssel signiert: ohne Schlüssel kann niemand steuern. Ab Werk aus.",
+   "scope": "web"
+  },
+  {
+   "it": "Lettere, numeri e trattino. La ritrovi come NOME.local sulla rete di casa.",
+   "en": "Letters, digits and hyphen. You will find it as NAME.local on your home network.",
+   "es": "Letras, números y guion. La encuentras como NOMBRE.local en la red de casa.",
+   "de": "Buchstaben, Ziffern und Bindestrich. Im Heimnetz findest du es als NAME.local.",
+   "scope": "web"
+  },
+  {
+   "it": "Licenza",
+   "en": "License",
+   "es": "Licencia",
+   "de": "Lizenz",
+   "scope": "web"
+  },
+  {
+   "it": "Limite",
+   "en": "Limit",
+   "es": "Límite",
+   "de": "Grenze",
+   "scope": "web"
+  },
+  {
+   "it": "Limite del paese",
+   "en": "Country limit",
+   "es": "Límite del país",
+   "de": "Landeslimit",
+   "scope": "web"
+  },
+  {
+   "it": "Lingua, ora e formati",
+   "en": "Language, time and formats",
+   "es": "Idioma, hora y formatos",
+   "de": "Sprache, Zeit und Formate",
+   "scope": "web"
+  },
+  {
+   "it": "Lista bloccati",
+   "en": "Block list",
+   "es": "Lista bloqueada",
+   "de": "Sperrliste",
+   "scope": "web"
+  },
+  {
+   "it": "Lista consentita",
+   "en": "Allow list",
+   "es": "Lista permitida",
+   "de": "Erlaubt-Liste",
+   "scope": "web"
+  },
+  {
+   "it": "Localizzazione",
+   "en": "Localization",
+   "es": "Localización",
+   "de": "Lokalisierung",
+   "scope": "web"
+  },
+  {
+   "it": "Logout",
+   "en": "Log out",
+   "es": "Cerrar sesión",
+   "de": "Abmelden",
+   "scope": "web"
+  },
+  {
+   "it": "Logout, riavvia o sleep",
+   "en": "Log out, restart or sleep",
+   "es": "Cerrar sesión, reiniciar o dormir",
+   "de": "Abmelden, Neustart oder Schlaf",
+   "scope": "web"
+  },
+  {
+   "it": "Lunedi",
+   "en": "Monday",
+   "es": "Lunes",
+   "de": "Montag",
+   "scope": "web"
+  },
+  {
+   "it": "MQTT, rete tra schede e Bluetooth sono spenti di fabbrica: li accendi tu dalla categoria Servizi quando servono.",
+   "en": "MQTT, board network and Bluetooth are off by default: you turn them on from the Services category when needed.",
+   "es": "MQTT, red entre placas y Bluetooth están apagados de fábrica: los enciendes tú desde la categoría Servicios cuando hagan falta.",
+   "de": "MQTT, Board-Netz und Bluetooth sind ab Werk aus: du schaltest sie bei Bedarf in der Kategorie Dienste ein.",
+   "scope": "web"
+  },
+  {
+   "it": "MQTT, rete tra schede, Bluetooth, server dell'ora e filtro IP restano spenti: li accendi tu quando servono (categoria Servizi e Sicurezza).",
+   "en": "MQTT, board network, Bluetooth, time server and IP filter stay off: you turn them on when needed (Services and Security categories).",
+   "es": "MQTT, red entre placas, Bluetooth, servidor de hora y filtro IP siguen apagados: los enciendes tú cuando hagan falta (categorías Servicios y Seguridad).",
+   "de": "MQTT, Board-Netz, Bluetooth, Zeitserver und IP-Filter bleiben aus: du schaltest sie bei Bedarf ein (Kategorien Dienste und Sicherheit).",
+   "scope": "web"
+  },
+  {
+   "it": "Manca la chiave comune: creala in Impostazioni",
+   "en": "Shared key missing: create it in Settings",
+   "es": "Falta la clave común: créala en Ajustes",
+   "de": "Gemeinsamer Schlüssel fehlt: unter Einstellungen erstellen",
+   "scope": "web"
+  },
+  {
+   "it": "Manuale completo su GitHub",
+   "en": "Full manual on GitHub",
+   "es": "Manual completo en GitHub",
+   "de": "Vollständiges Handbuch auf GitHub",
+   "scope": "web"
+  },
+  {
+   "it": "Mappa del mondo",
+   "en": "World map",
+   "es": "Mapa del mundo",
+   "de": "Weltkarte",
+   "scope": "web"
+  },
+  {
+   "it": "Meno di 2 secondi: esce dal modo aereo. 2-7 secondi (LED azzurro): spegne il filtro IP. 8-19 secondi (LED giallo): azzera le password degli amministratori. 20 secondi o piu (LED rosso): ripristino di fabbrica. L'azione parte quando lasci il tasto.",
+   "en": "Under 2 seconds: leaves airplane mode. 2-7 seconds (light blue LED): turns off the IP filter. 8-19 seconds (yellow LED): clears the administrators' passwords. 20 seconds or more (red LED): factory reset. The action starts when you release the button.",
+   "es": "Menos de 2 segundos: sale del modo avión. 2-7 segundos (LED celeste): apaga el filtro IP. 8-19 segundos (LED amarillo): borra las contraseñas de los administradores. 20 segundos o más (LED rojo): restablecimiento de fábrica. La acción empieza al soltar el botón.",
+   "de": "Unter 2 Sekunden: verlässt den Flugmodus. 2-7 Sekunden (LED hellblau): schaltet den IP-Filter aus. 8-19 Sekunden (LED gelb): löscht die Administrator-Passwörter. 20 Sekunden oder mehr (LED rot): Werkszustand. Die Aktion startet beim Loslassen der Taste.",
+   "scope": "web"
+  },
+  {
+   "it": "Messaggi e comandi",
+   "en": "Messages and commands",
+   "es": "Mensajes y comandos",
+   "de": "Nachrichten und Befehle",
+   "scope": "web"
+  },
+  {
+   "it": "Messaggio di testo",
+   "en": "Text message",
+   "es": "Mensaje de texto",
+   "de": "Textnachricht",
+   "scope": "web"
+  },
+  {
+   "it": "Minuti senza rete",
+   "en": "Minutes without network",
+   "es": "Minutos sin red",
+   "de": "Minuten ohne Netz",
+   "scope": "web"
+  },
+  {
+   "it": "Mostra la chiave",
+   "en": "Show the key",
+   "es": "Mostrar la clave",
+   "de": "Schlüssel anzeigen",
+   "scope": "web"
+  },
+  {
+   "it": "Mostra password e QR",
+   "en": "Show password and QR",
+   "es": "Mostrar contraseña y QR",
+   "de": "Passwort und QR anzeigen",
+   "scope": "web"
+  },
+  {
+   "it": "Nessuna chiave salvata",
+   "en": "No key saved",
+   "es": "Ninguna clave guardada",
+   "de": "Kein Schlüssel gespeichert",
+   "scope": "web"
+  },
+  {
+   "it": "Nessuna modifica registrata",
+   "en": "No changes recorded",
+   "es": "Ningún cambio registrado",
+   "de": "Keine Änderungen erfasst",
+   "scope": "web"
+  },
+  {
+   "it": "Nessuna rete trovata",
+   "en": "No networks found",
+   "es": "Ninguna red encontrada",
+   "de": "Keine Netze gefunden",
+   "scope": "web"
+  },
+  {
+   "it": "Nessuna risposta: aspetta 2 minuti, torna la regola di prima",
+   "en": "No answer: wait 2 minutes, the previous rule comes back",
+   "es": "Sin respuesta: espera 2 minutos, vuelve la regla anterior",
+   "de": "Keine Antwort: 2 Minuten warten, die vorherige Regel kommt zurück",
+   "scope": "web"
+  },
+  {
+   "it": "Nessuna scheda vicina",
+   "en": "No boards nearby",
+   "es": "Ninguna placa cerca",
+   "de": "Keine Boards in der Nähe",
+   "scope": "web"
+  },
+  {
+   "it": "Nessuno",
+   "en": "None",
+   "es": "Ninguno",
+   "de": "Keiner",
+   "scope": "web"
+  },
+  {
+   "it": "Nodo",
+   "en": "Node",
+   "es": "Nodo",
+   "de": "Knoten",
+   "scope": "web"
+  },
+  {
+   "it": "Nodo (ripete i messaggi)",
+   "en": "Node (repeats messages)",
+   "es": "Nodo (repite los mensajes)",
+   "de": "Knoten (wiederholt Nachrichten)",
+   "scope": "web"
+  },
+  {
+   "it": "Nome (3-20: lettere, numeri, punto, trattino)",
+   "en": "Name (3-20: letters, digits, dot, hyphen)",
+   "es": "Nombre (3-20: letras, números, punto, guion)",
+   "de": "Name (3-20: Buchstaben, Ziffern, Punkt, Bindestrich)",
+   "scope": "web"
+  },
+  {
+   "it": "Nome e password dell'hotspot",
+   "en": "Hotspot name and password",
+   "es": "Nombre y contraseña del hotspot",
+   "de": "Hotspot-Name und Passwort",
+   "scope": "web"
+  },
+  {
+   "it": "Note legali",
+   "en": "Legal notes",
+   "es": "Avisos legales",
+   "de": "Rechtliches",
+   "scope": "web"
+  },
+  {
+   "it": "Nuova chiave",
+   "en": "New key",
+   "es": "Clave nueva",
+   "de": "Neuer Schlüssel",
+   "scope": "web"
+  },
+  {
+   "it": "Nuova password casuale",
+   "en": "New random password",
+   "es": "Nueva contraseña aleatoria",
+   "de": "Neues Zufallspasswort",
+   "scope": "web"
+  },
+  {
+   "it": "Nuova password per {0}",
+   "en": "New password for {0}",
+   "es": "Nueva contraseña para {0}",
+   "de": "Neues Passwort für {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Nuovo certificato",
+   "en": "New certificate",
+   "es": "Certificado nuevo",
+   "de": "Neues Zertifikat",
+   "scope": "web"
+  },
+  {
+   "it": "Nuovo utente",
+   "en": "New user",
+   "es": "Usuario nuevo",
+   "de": "Neuer Benutzer",
+   "scope": "web"
+  },
+  {
+   "it": "Ogni scheda inventa una password diversa al primo avvio. Una password uguale per tutti aprirebbe tutte le schede, e la legge lo vieta (UE: direttiva radio, EN 18031, Cyber Resilience Act; Regno Unito: PSTI). Solo chi ha la scheda in mano la legge.",
+   "en": "Every board makes up a different password at first boot. One password for everyone would open every board, and the law forbids it (EU: Radio Equipment Directive, EN 18031, Cyber Resilience Act; UK: PSTI). Only whoever holds the board can read it.",
+   "es": "Cada placa inventa una contraseña distinta en el primer arranque. Una contraseña igual para todos abriría todas las placas, y la ley lo prohíbe (UE: directiva de radio, EN 18031, Cyber Resilience Act; Reino Unido: PSTI). Solo quien tiene la placa en la mano la lee.",
+   "de": "Jedes Board erfindet beim ersten Start ein eigenes Passwort. Ein Passwort für alle würde alle Boards öffnen, und das Gesetz verbietet es (EU: Funkanlagenrichtlinie, EN 18031, Cyber Resilience Act; UK: PSTI). Nur wer das Board in der Hand hat, kann es lesen.",
+   "scope": "web"
+  },
+  {
+   "it": "Paese",
+   "en": "Country",
+   "es": "País",
+   "de": "Land",
+   "scope": "web"
+  },
+  {
+   "it": "Paese non scelto",
+   "en": "No country chosen",
+   "es": "País no elegido",
+   "de": "Kein Land gewählt",
+   "scope": "web"
+  },
+  {
+   "it": "Paese non scelto: la radio usa le regole piu prudenti (canali 1-11)",
+   "en": "No country chosen: the radio uses the safest rules (channels 1-11)",
+   "es": "País no elegido: la radio usa las reglas más prudentes (canales 1-11)",
+   "de": "Kein Land gewählt: der Funk nutzt die vorsichtigsten Regeln (Kanäle 1-11)",
+   "scope": "web"
+  },
+  {
+   "it": "Paese: {0}. Canali 1-{1}, potenza massima {2} dBm EIRP.",
+   "en": "Country: {0}. Channels 1-{1}, maximum power {2} dBm EIRP.",
+   "es": "País: {0}. Canales 1-{1}, potencia máxima {2} dBm EIRP.",
+   "de": "Land: {0}. Kanäle 1-{1}, Höchstleistung {2} dBm EIRP.",
+   "scope": "web"
+  },
+  {
+   "it": "Pagina web, shell web e API sono sempre protette dalla password. Se spegni questo interruttore, chi collega il cavo USB ottiene subito la shell. Il tasto BOOT tenuto da 8 a 19 secondi azzera le password degli amministratori e riaccende la protezione.",
+   "en": "Web page, web shell and API are always password-protected. If you turn this switch off, anyone who plugs in a USB cable gets the shell at once. Holding the BOOT button 8 to 19 seconds clears the administrators' passwords and turns the protection back on.",
+   "es": "Página web, shell web y API siempre están protegidas por contraseña. Si apagas este interruptor, quien conecta el cable USB obtiene la shell enseguida. El botón BOOT pulsado de 8 a 19 segundos borra las contraseñas de los administradores y vuelve a activar la protección.",
+   "de": "Webseite, Web-Shell und API sind immer passwortgeschützt. Schaltest du diesen Schalter aus, bekommt jeder mit USB-Kabel sofort die Shell. BOOT-Taste 8 bis 19 Sekunden halten löscht die Administrator-Passwörter und schaltet den Schutz wieder ein.",
+   "scope": "web"
+  },
+  {
+   "it": "Passo {0} di {1}: {2}",
+   "en": "Step {0} of {1}: {2}",
+   "es": "Paso {0} de {1}: {2}",
+   "de": "Schritt {0} von {1}: {2}",
+   "scope": "web"
+  },
+  {
+   "it": "Password (min 6)",
+   "en": "Password (min 6)",
+   "es": "Contraseña (mín. 6)",
+   "de": "Passwort (min. 6)",
+   "scope": "web"
+  },
+  {
+   "it": "Password dell'hotspot diversa per ogni scheda, accesso senza password in chiaro, HTTPS, utenti con ruoli, blocco dopo troppi errori, filtro IP, controllo della configurazione: misure richieste dalle norme sulla sicurezza dei dispositivi (UE: direttiva radio con EN 18031 e Cyber Resilience Act; Regno Unito: PSTI).",
+   "en": "A different hotspot password for every board, sign-in without clear-text passwords, HTTPS, users with roles, lockout after too many errors, IP filter, configuration checks: measures required by device security rules (EU: Radio Equipment Directive with EN 18031 and Cyber Resilience Act; UK: PSTI).",
+   "es": "Contraseña del hotspot distinta para cada placa, acceso sin contraseñas en claro, HTTPS, usuarios con roles, bloqueo tras demasiados errores, filtro IP, control de la configuración: medidas exigidas por las normas de seguridad de dispositivos (UE: directiva de radio con EN 18031 y Cyber Resilience Act; Reino Unido: PSTI).",
+   "de": "Eigenes Hotspot-Passwort pro Board, Anmeldung ohne Klartext-Passwort, HTTPS, Benutzer mit Rollen, Sperre nach zu vielen Fehlern, IP-Filter, Konfigurationsprüfung: Maßnahmen nach den Regeln zur Gerätesicherheit (EU: Funkanlagenrichtlinie mit EN 18031 und Cyber Resilience Act; UK: PSTI).",
+   "scope": "web"
+  },
+  {
+   "it": "Password nuova (8-63 caratteri, vuoto = non cambiare)",
+   "en": "New password (8-63 characters, empty = keep)",
+   "es": "Contraseña nueva (8-63 caracteres, vacío = no cambiar)",
+   "de": "Neues Passwort (8-63 Zeichen, leer = beibehalten)",
+   "scope": "web"
+  },
+  {
+   "it": "Password persa? Cavo USB e tasto BOOT tenuto da 8 a 19 secondi (LED giallo): la scheda la scrive sulla seriale. Non mettere la password nel nome della rete: il nome lo vedono tutti.",
+   "en": "Lost password? USB cable and BOOT button held 8 to 19 seconds (yellow LED): the board prints it on the serial. Do not put the password in the network name: everyone can see the name.",
+   "es": "¿Contraseña perdida? Cable USB y botón BOOT pulsado de 8 a 19 segundos (LED amarillo): la placa la escribe en la serie. No pongas la contraseña en el nombre de la red: el nombre lo ve todo el mundo.",
+   "de": "Passwort verloren? USB-Kabel und BOOT-Taste 8 bis 19 Sekunden halten (LED gelb): das Board gibt es seriell aus. Das Passwort nicht in den Netznamen schreiben: den Namen sehen alle.",
+   "scope": "web"
+  },
+  {
+   "it": "Per cancellare tutto: Config > Azzera tutto, comando factory-reset oppure tasto BOOT tenuto 20 secondi.",
+   "en": "To erase everything: Config > Reset everything, the factory-reset command or the BOOT button held 20 seconds.",
+   "es": "Para borrarlo todo: Config > Borrar todo, comando factory-reset o botón BOOT pulsado 20 segundos.",
+   "de": "Alles löschen: Config > Alles zurücksetzen, Befehl factory-reset oder BOOT-Taste 20 Sekunden halten.",
+   "scope": "web"
+  },
+  {
+   "it": "Per un broker con certificato fatto in casa incolla qui il certificato dell'autorita (CA) in formato PEM. Vuoto = autorita pubbliche note.",
+   "en": "For a broker with a home-made certificate, paste the authority (CA) certificate here in PEM format. Empty = well-known public authorities.",
+   "es": "Para un broker con certificado casero pega aquí el certificado de la autoridad (CA) en formato PEM. Vacío = autoridades públicas conocidas.",
+   "de": "Für einen Broker mit selbst erstelltem Zertifikat hier das CA-Zertifikat im PEM-Format einfügen. Leer = bekannte öffentliche Stellen.",
+   "scope": "web"
+  },
+  {
+   "it": "Perche la password del Wi-Fi e casuale",
+   "en": "Why the Wi-Fi password is random",
+   "es": "Por qué la contraseña del Wi-Fi es aleatoria",
+   "de": "Warum das WLAN-Passwort zufällig ist",
+   "scope": "web"
+  },
+  {
+   "it": "Piu tardi",
+   "en": "Later",
+   "es": "Más tarde",
+   "de": "Später",
+   "scope": "web"
+  },
+  {
+   "it": "Posizione",
+   "en": "Location",
+   "es": "Ubicación",
+   "de": "Standort",
+   "scope": "web"
+  },
+  {
+   "it": "Potenza di trasmissione (dBm)",
+   "en": "Transmit power (dBm)",
+   "es": "Potencia de transmisión (dBm)",
+   "de": "Sendeleistung (dBm)",
+   "scope": "web"
+  },
+  {
+   "it": "Potenza in uso",
+   "en": "Power in use",
+   "es": "Potencia en uso",
+   "de": "Genutzte Leistung",
+   "scope": "web"
+  },
+  {
+   "it": "Potenza massima con questa antenna",
+   "en": "Maximum power with this antenna",
+   "es": "Potencia máxima con esta antena",
+   "de": "Höchstleistung mit dieser Antenne",
+   "scope": "web"
+  },
+  {
+   "it": "Prima configurazione",
+   "en": "First setup",
+   "es": "Primera configuración",
+   "de": "Ersteinrichtung",
+   "scope": "web"
+  },
+  {
+   "it": "Prima scegli il paese",
+   "en": "Choose the country first",
+   "es": "Primero elige el país",
+   "de": "Zuerst das Land wählen",
+   "scope": "web"
+  },
+  {
+   "it": "Primo accesso",
+   "en": "First access",
+   "es": "Primer acceso",
+   "de": "Erstzugriff",
+   "scope": "web"
+  },
+  {
+   "it": "Primo accesso a una scheda nuova",
+   "en": "First access to a new board",
+   "es": "Primer acceso a una placa nueva",
+   "de": "Erstzugriff auf ein neues Board",
+   "scope": "web"
+  },
+  {
+   "it": "Primo accesso: scegli la password dell'amministratore (almeno 6 caratteri). Non esiste una password di fabbrica: la scegli tu, e solo tu la conosci.",
+   "en": "First access: choose the administrator password (at least 6 characters). There is no factory password: you choose it, and only you know it.",
+   "es": "Primer acceso: elige la contraseña del administrador (al menos 6 caracteres). No existe contraseña de fábrica: la eliges tú, y solo tú la conoces.",
+   "de": "Erstzugriff: wähle das Administrator-Passwort (mindestens 6 Zeichen). Es gibt kein Werkspasswort: du wählst es, und nur du kennst es.",
+   "scope": "web"
+  },
+  {
+   "it": "Primo giorno della settimana",
+   "en": "First day of the week",
+   "es": "Primer día de la semana",
+   "de": "Erster Wochentag",
+   "scope": "web"
+  },
+  {
+   "it": "Prova la regola",
+   "en": "Try the rule",
+   "es": "Probar la regla",
+   "de": "Regel testen",
+   "scope": "web"
+  },
+  {
+   "it": "Punto (3.5)",
+   "en": "Point (3.5)",
+   "es": "Punto (3.5)",
+   "de": "Punkt (3.5)",
+   "scope": "web"
+  },
+  {
+   "it": "RAM libera troppo bassa per un minuto",
+   "en": "Free RAM too low for one minute",
+   "es": "RAM libre demasiado baja durante un minuto",
+   "de": "Freier RAM eine Minute lang zu niedrig",
+   "scope": "web"
+  },
+  {
+   "it": "Radio",
+   "en": "Radio",
+   "es": "Radio",
+   "de": "Funk",
+   "scope": "web"
+  },
+  {
+   "it": "Regola confermata",
+   "en": "Rule confirmed",
+   "es": "Regla confirmada",
+   "de": "Regel bestätigt",
+   "scope": "web"
+  },
+  {
+   "it": "Regola in prova per 2 minuti: se la pagina risponde ancora premi Conferma",
+   "en": "Rule on trial for 2 minutes: if the page still responds, press Confirm",
+   "es": "Regla en prueba durante 2 minutos: si la página sigue respondiendo pulsa Confirmar",
+   "de": "Regel 2 Minuten im Test: antwortet die Seite noch, drücke Bestätigen",
+   "scope": "web"
+  },
+  {
+   "it": "Regola in prova: se non confermi torna quella di prima tra {0} secondi",
+   "en": "Rule on trial: if you do not confirm, the previous one returns in {0} seconds",
+   "es": "Regla en prueba: si no confirmas vuelve la anterior en {0} segundos",
+   "de": "Regel im Test: ohne Bestätigung kommt die vorherige in {0} Sekunden zurück",
+   "scope": "web"
+  },
+  {
+   "it": "Regole",
+   "en": "Rules",
+   "es": "Normas",
+   "de": "Regeln",
+   "scope": "web"
+  },
+  {
+   "it": "Regole: {0}",
+   "en": "Rules: {0}",
+   "es": "Normas: {0}",
+   "de": "Regeln: {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Rete Wi-Fi della scheda",
+   "en": "Board Wi-Fi network",
+   "es": "Red Wi-Fi de la placa",
+   "de": "WLAN des Boards",
+   "scope": "web"
+  },
+  {
+   "it": "Rete Wi-Fi di casa (facoltativa)",
+   "en": "Home Wi-Fi network (optional)",
+   "es": "Red Wi-Fi de casa (opcional)",
+   "de": "Heim-WLAN (optional)",
+   "scope": "web"
+  },
+  {
+   "it": "Rete di casa",
+   "en": "Home network",
+   "es": "Red de casa",
+   "de": "Heimnetz",
+   "scope": "web"
+  },
+  {
+   "it": "Rete di casa assente troppo a lungo",
+   "en": "Home network missing too long",
+   "es": "Red de casa ausente demasiado tiempo",
+   "de": "Heimnetz zu lange weg",
+   "scope": "web"
+  },
+  {
+   "it": "Rete tra schede",
+   "en": "Board network",
+   "es": "Red entre placas",
+   "de": "Board-Netz",
+   "scope": "web"
+  },
+  {
+   "it": "Rete tra schede (ESP-NOW)",
+   "en": "Board network (ESP-NOW)",
+   "es": "Red entre placas (ESP-NOW)",
+   "de": "Board-Netz (ESP-NOW)",
+   "scope": "web"
+  },
+  {
+   "it": "Riavvii",
+   "en": "Restarts",
+   "es": "Reinicios",
+   "de": "Neustarts",
+   "scope": "web"
+  },
+  {
+   "it": "Riavvii automatici sospesi: troppi in un'ora. Controlla il registro.",
+   "en": "Automatic restarts suspended: too many in one hour. Check the log.",
+   "es": "Reinicios automáticos suspendidos: demasiados en una hora. Revisa el registro.",
+   "de": "Automatische Neustarts ausgesetzt: zu viele in einer Stunde. Protokoll prüfen.",
+   "scope": "web"
+  },
+  {
+   "it": "Riavvio dopo N giorni accesa (0 = mai)",
+   "en": "Restart after N days on (0 = never)",
+   "es": "Reinicio tras N días encendida (0 = nunca)",
+   "de": "Neustart nach N Tagen Laufzeit (0 = nie)",
+   "scope": "web"
+  },
+  {
+   "it": "Riavvio programmato (vuoto = spento)",
+   "en": "Scheduled restart (empty = off)",
+   "es": "Reinicio programado (vacío = apagado)",
+   "de": "Geplanter Neustart (leer = aus)",
+   "scope": "web"
+  },
+  {
+   "it": "Riduci",
+   "en": "Zoom out",
+   "es": "Alejar",
+   "de": "Verkleinern",
+   "scope": "web"
+  },
+  {
+   "it": "Ripeti la password",
+   "en": "Repeat the password",
+   "es": "Repite la contraseña",
+   "de": "Passwort wiederholen",
+   "scope": "web"
+  },
+  {
+   "it": "Ripristina valori del paese",
+   "en": "Restore country values",
+   "es": "Restaurar valores del país",
+   "de": "Landeswerte wiederherstellen",
+   "scope": "web"
+  },
+  {
+   "it": "Ruolo",
+   "en": "Role",
+   "es": "Rol",
+   "de": "Rolle",
+   "scope": "web"
+  },
+  {
+   "it": "Ruolo di questa scheda",
+   "en": "Role of this board",
+   "es": "Rol de esta placa",
+   "de": "Rolle dieses Boards",
+   "scope": "web"
+  },
+  {
+   "it": "Salta",
+   "en": "Skip",
+   "es": "Saltar",
+   "de": "Überspringen",
+   "scope": "web"
+  },
+  {
+   "it": "Salti",
+   "en": "Hops",
+   "es": "Saltos",
+   "de": "Sprünge",
+   "scope": "web"
+  },
+  {
+   "it": "Salva certificato",
+   "en": "Save certificate",
+   "es": "Guardar certificado",
+   "de": "Zertifikat speichern",
+   "scope": "web"
+  },
+  {
+   "it": "Salva e finisci",
+   "en": "Save and finish",
+   "es": "Guardar y terminar",
+   "de": "Speichern und fertig",
+   "scope": "web"
+  },
+  {
+   "it": "Salva ed entra",
+   "en": "Save and sign in",
+   "es": "Guardar y entrar",
+   "de": "Speichern und anmelden",
+   "scope": "web"
+  },
+  {
+   "it": "Salva la password dell'hotspot",
+   "en": "Save the hotspot password",
+   "es": "Guarda la contraseña del hotspot",
+   "de": "Hotspot-Passwort sichern",
+   "scope": "web"
+  },
+  {
+   "it": "Salvo...",
+   "en": "Saving...",
+   "es": "Guardando...",
+   "de": "Speichere...",
+   "scope": "web"
+  },
+  {
+   "it": "Scegli il paese",
+   "en": "Choose the country",
+   "es": "Elige el país",
+   "de": "Land wählen",
+   "scope": "web"
+  },
+  {
+   "it": "Scegli il paese dove la scheda si trova davvero: decide canali e potenza della radio. Non e consulenza legale.",
+   "en": "Choose the country where the board really is: it sets the radio channels and power. Not legal advice.",
+   "es": "Elige el país donde está realmente la placa: decide canales y potencia de la radio. No es asesoría legal.",
+   "de": "Wähle das Land, in dem das Board wirklich ist: es bestimmt Funkkanäle und Leistung. Keine Rechtsberatung.",
+   "scope": "web"
+  },
+  {
+   "it": "Scegli il paese...",
+   "en": "Choose the country...",
+   "es": "Elige el país...",
+   "de": "Land wählen...",
+   "scope": "web"
+  },
+  {
+   "it": "Scegli la lingua",
+   "en": "Choose the language",
+   "es": "Elige el idioma",
+   "de": "Sprache wählen",
+   "scope": "web"
+  },
+  {
+   "it": "Schede vicine",
+   "en": "Nearby boards",
+   "es": "Placas cercanas",
+   "de": "Boards in der Nähe",
+   "scope": "web"
+  },
+  {
+   "it": "Scrivi help per l'elenco dei comandi. Sulla seriale premi 1 o 2 per cambiare lingua.",
+   "en": "Type help for the command list. On the serial press 1 or 2 to change language.",
+   "es": "Escribe help para la lista de comandos. En la serie pulsa 1 o 2 para cambiar de idioma.",
+   "de": "Tippe help für die Befehlsliste. Seriell 1 oder 2 drücken, um die Sprache zu wechseln.",
+   "scope": "web"
+  },
+  {
+   "it": "Scrivi il messaggio",
+   "en": "Write the message",
+   "es": "Escribe el mensaje",
+   "de": "Nachricht schreiben",
+   "scope": "web"
+  },
+  {
+   "it": "Scrivi il nome della rete",
+   "en": "Write the network name",
+   "es": "Escribe el nombre de la red",
+   "de": "Netznamen eingeben",
+   "scope": "web"
+  },
+  {
+   "it": "Scrivi il nome utente",
+   "en": "Write the user name",
+   "es": "Escribe el nombre de usuario",
+   "de": "Benutzernamen eingeben",
+   "scope": "web"
+  },
+  {
+   "it": "Scrivi l'azione",
+   "en": "Write the action",
+   "es": "Escribe la acción",
+   "de": "Aktion eingeben",
+   "scope": "web"
+  },
+  {
+   "it": "Scrivi la password",
+   "en": "Write the password",
+   "es": "Escribe la contraseña",
+   "de": "Passwort eingeben",
+   "scope": "web"
+  },
+  {
+   "it": "Se hai un certificato per questo nome (per esempio di una tua autorita), incollalo con la sua chiave (senza password). Vale dal prossimo riavvio.",
+   "en": "If you have a certificate for this name (for example from your own authority), paste it with its key (without password). Active from the next restart.",
+   "es": "Si tienes un certificado para este nombre (por ejemplo de una autoridad tuya), pégalo con su clave (sin contraseña). Vale desde el próximo reinicio.",
+   "de": "Hast du ein Zertifikat für diesen Namen (z. B. von deiner eigenen CA), füge es mit seinem Schlüssel ein (ohne Passwort). Gilt ab dem nächsten Neustart.",
+   "scope": "web"
+  },
+  {
+   "it": "Se la colleghi, la scheda prende l'ora da Internet e la raggiungi dalla tua rete. L'hotspot resta come riserva.",
+   "en": "If you connect it, the board gets the time from the Internet and you can reach it from your network. The hotspot stays as a backup.",
+   "es": "Si la conectas, la placa toma la hora de Internet y la alcanzas desde tu red. El hotspot queda como reserva.",
+   "de": "Verbindest du es, holt das Board die Zeit aus dem Internet und ist aus deinem Netz erreichbar. Der Hotspot bleibt als Reserve.",
+   "scope": "web"
+  },
+  {
+   "it": "Se non sai, lascia Interna. Con un'antenna esterna la potenza scende da sola per restare nel limite del paese.",
+   "en": "If unsure, leave Internal. With an external antenna the power drops by itself to stay within the country limit.",
+   "es": "Si no sabes, deja Interna. Con una antena externa la potencia baja sola para quedar dentro del límite del país.",
+   "de": "Im Zweifel Intern lassen. Mit externer Antenne sinkt die Leistung von selbst, um im Landeslimit zu bleiben.",
+   "scope": "web"
+  },
+  {
+   "it": "Sensore",
+   "en": "Sensor",
+   "es": "Sensor",
+   "de": "Sensor",
+   "scope": "web"
+  },
+  {
+   "it": "Sensore (manda solo il suo stato)",
+   "en": "Sensor (only sends its status)",
+   "es": "Sensor (solo envía su estado)",
+   "de": "Sensor (sendet nur seinen Status)",
+   "scope": "web"
+  },
+  {
+   "it": "Separatore dei decimali",
+   "en": "Decimal separator",
+   "es": "Separador decimal",
+   "de": "Dezimaltrennzeichen",
+   "scope": "web"
+  },
+  {
+   "it": "Server dell'ora (NTP)",
+   "en": "Time server (NTP)",
+   "es": "Servidor de hora (NTP)",
+   "de": "Zeitserver (NTP)",
+   "scope": "web"
+  },
+  {
+   "it": "Servizi",
+   "en": "Services",
+   "es": "Servicios",
+   "de": "Dienste",
+   "scope": "web"
+  },
+  {
+   "it": "Servizi bloccati: prima riavvia il servizio, poi la scheda",
+   "en": "Hung services: first restart the service, then the board",
+   "es": "Servicios bloqueados: primero reinicia el servicio, luego la placa",
+   "de": "Hängende Dienste: erst den Dienst neu starten, dann das Board",
+   "scope": "web"
+  },
+  {
+   "it": "Servizio",
+   "en": "Service",
+   "es": "Servicio",
+   "de": "Dienst",
+   "scope": "web"
+  },
+  {
+   "it": "Servizio spento di fabbrica: la prima volta lo avvii a mano, poi puoi scegliere l'avvio automatico.",
+   "en": "Service off by default: the first time you start it by hand, then you can choose automatic start.",
+   "es": "Servicio apagado de fábrica: la primera vez lo arrancas a mano, luego puedes elegir el arranque automático.",
+   "de": "Dienst ab Werk aus: beim ersten Mal startest du ihn von Hand, danach kannst du den Autostart wählen.",
+   "scope": "web"
+  },
+  {
+   "it": "Si accende solo a mano e per 10 minuti. Il telefono si accoppia con il codice mostrato qui e scrive i comandi: wifi rete|password, country IT, name cucina, mesh 0 chiave, status, done.",
+   "en": "Turns on only by hand and for 10 minutes. The phone pairs with the code shown here and writes the commands: wifi network|password, country IT, name kitchen, mesh 0 key, status, done.",
+   "es": "Se enciende solo a mano y durante 10 minutos. El móvil se empareja con el código mostrado aquí y escribe los comandos: wifi red|contraseña, country ES, name cocina, mesh 0 clave, status, done.",
+   "de": "Schaltet sich nur von Hand und für 10 Minuten ein. Das Handy koppelt mit dem hier gezeigten Code und schreibt die Befehle: wifi netz|passwort, country DE, name kueche, mesh 0 schluessel, status, done.",
+   "scope": "web"
+  },
+  {
+   "it": "Software e dati usati",
+   "en": "Software and data used",
+   "es": "Software y datos usados",
+   "de": "Verwendete Software und Daten",
+   "scope": "web"
+  },
+  {
+   "it": "Soglia RAM (KB)",
+   "en": "RAM threshold (KB)",
+   "es": "Umbral de RAM (KB)",
+   "de": "RAM-Schwelle (KB)",
+   "scope": "web"
+  },
+  {
+   "it": "Solo la mia rete",
+   "en": "My network only",
+   "es": "Solo mi red",
+   "de": "Nur mein Netz",
+   "scope": "web"
+  },
+  {
+   "it": "Spegnere HTTPS? Le password restano protette, ma la pagina viaggia in chiaro sulla rete di casa.",
+   "en": "Turn HTTPS off? Passwords stay protected, but the page travels in clear text on the home network.",
+   "es": "¿Apagar HTTPS? Las contraseñas siguen protegidas, pero la página viaja en claro por la red de casa.",
+   "de": "HTTPS ausschalten? Passwörter bleiben geschützt, aber die Seite geht im Klartext durchs Heimnetz.",
+   "scope": "web"
+  },
+  {
+   "it": "Spegni",
+   "en": "Turn off",
+   "es": "Apagar",
+   "de": "Ausschalten",
+   "scope": "web"
+  },
+  {
+   "it": "Spenta",
+   "en": "Off",
+   "es": "Apagada",
+   "de": "Aus",
+   "scope": "web"
+  },
+  {
+   "it": "Stampa etichetta",
+   "en": "Print label",
+   "es": "Imprimir etiqueta",
+   "de": "Etikett drucken",
+   "scope": "web"
+  },
+  {
+   "it": "Tentativi",
+   "en": "Attempts",
+   "es": "Intentos",
+   "de": "Versuche",
+   "scope": "web"
+  },
+  {
+   "it": "Tocca il tuo paese sulla mappa",
+   "en": "Tap your country on the map",
+   "es": "Toca tu país en el mapa",
+   "de": "Tippe dein Land auf der Karte an",
+   "scope": "web"
+  },
+  {
+   "it": "Tutte",
+   "en": "All",
+   "es": "Todas",
+   "de": "Alle",
+   "scope": "web"
+  },
+  {
+   "it": "Tutto il mondo",
+   "en": "Whole world",
+   "es": "Todo el mundo",
+   "de": "Ganze Welt",
+   "scope": "web"
+  },
+  {
+   "it": "Tutto pronto",
+   "en": "All set",
+   "es": "Todo listo",
+   "de": "Alles bereit",
+   "scope": "web"
+  },
+  {
+   "it": "Ultime modifiche",
+   "en": "Recent changes",
+   "es": "Últimos cambios",
+   "de": "Letzte Änderungen",
+   "scope": "web"
+  },
+  {
+   "it": "Ultimi rifiutati",
+   "en": "Recently rejected",
+   "es": "Últimos rechazados",
+   "de": "Zuletzt abgelehnt",
+   "scope": "web"
+  },
+  {
+   "it": "Ultimo riavvio automatico",
+   "en": "Last automatic restart",
+   "es": "Último reinicio automático",
+   "de": "Letzter automatischer Neustart",
+   "scope": "web"
+  },
+  {
+   "it": "Ultimo segno di vita",
+   "en": "Last sign of life",
+   "es": "Última señal de vida",
+   "de": "Letztes Lebenszeichen",
+   "scope": "web"
+  },
+  {
+   "it": "Uscite di emergenza: comando firewall off dalla seriale oppure tasto BOOT tenuto da 2 a 7 secondi.",
+   "en": "Emergency exits: firewall off command from the serial, or the BOOT button held 2 to 7 seconds.",
+   "es": "Salidas de emergencia: comando firewall off desde la serie o botón BOOT pulsado de 2 a 7 segundos.",
+   "de": "Notausgänge: Befehl firewall off über seriell oder BOOT-Taste 2 bis 7 Sekunden halten.",
+   "scope": "web"
+  },
+  {
+   "it": "Utente",
+   "en": "User",
+   "es": "Usuario",
+   "de": "Benutzer",
+   "scope": "web"
+  },
+  {
+   "it": "Utente aggiunto",
+   "en": "User added",
+   "es": "Usuario añadido",
+   "de": "Benutzer hinzugefügt",
+   "scope": "web"
+  },
+  {
+   "it": "Utente: {0} ({1})",
+   "en": "User: {0} ({1})",
+   "es": "Usuario: {0} ({1})",
+   "de": "Benutzer: {0} ({1})",
+   "scope": "web"
+  },
+  {
+   "it": "Utenti",
+   "en": "Users",
+   "es": "Usuarios",
+   "de": "Benutzer",
+   "scope": "web"
+  },
+  {
+   "it": "Vale dal prossimo riavvio. Il browser avvisera di nuovo: confronta l'impronta nuova.",
+   "en": "Active from the next restart. The browser will warn again: compare the new fingerprint.",
+   "es": "Vale desde el próximo reinicio. El navegador avisará otra vez: compara la huella nueva.",
+   "de": "Gilt ab dem nächsten Neustart. Der Browser warnt erneut: vergleiche den neuen Fingerabdruck.",
+   "scope": "web"
+  },
+  {
+   "it": "Valori del paese caricati: premi Salva per applicarli",
+   "en": "Country values loaded: press Save to apply them",
+   "es": "Valores del país cargados: pulsa Guardar para aplicarlos",
+   "de": "Landeswerte geladen: Speichern drücken, um sie anzuwenden",
+   "scope": "web"
+  },
+  {
+   "it": "Versione",
+   "en": "Version",
+   "es": "Versión",
+   "de": "Version",
+   "scope": "web"
+  },
+  {
+   "it": "VesevOS e software libero con doppia licenza: GPL-3.0-or-later (gratuita) oppure licenza commerciale (a pagamento, su richiesta). Il programma e fornito senza alcuna garanzia, nei limiti consentiti dalla legge. Non e consulenza legale.",
+   "en": "VesevOS is free software with a dual license: GPL-3.0-or-later (free of charge) or a commercial license (paid, on request). The program comes with no warranty, to the extent permitted by law. Not legal advice.",
+   "es": "VesevOS es software libre con doble licencia: GPL-3.0-or-later (gratuita) o licencia comercial (de pago, bajo petición). El programa se ofrece sin ninguna garantía, en la medida permitida por la ley. No es asesoría legal.",
+   "de": "VesevOS ist freie Software mit Doppellizenz: GPL-3.0-or-later (kostenlos) oder kommerzielle Lizenz (kostenpflichtig, auf Anfrage). Das Programm kommt ohne jede Gewährleistung, soweit gesetzlich zulässig. Keine Rechtsberatung.",
+   "scope": "web"
+  },
+  {
+   "it": "Virgola (3,5)",
+   "en": "Comma (3,5)",
+   "es": "Coma (3,5)",
+   "de": "Komma (3,5)",
+   "scope": "web"
+  },
+  {
+   "it": "Visto",
+   "en": "Seen",
+   "es": "Visto",
+   "de": "Gesehen",
+   "scope": "web"
+  },
+  {
+   "it": "Voci: una per riga, indirizzo|1|nome (anche intervallo 192.168.1.10-192.168.1.20 o rete 192.168.1.0/24; 0 = spenta)",
+   "en": "Entries: one per line, address|1|name (also range 192.168.1.10-192.168.1.20 or network 192.168.1.0/24; 0 = off)",
+   "es": "Entradas: una por línea, dirección|1|nombre (también rango 192.168.1.10-192.168.1.20 o red 192.168.1.0/24; 0 = apagada)",
+   "de": "Einträge: einer pro Zeile, Adresse|1|Name (auch Bereich 192.168.1.10-192.168.1.20 oder Netz 192.168.1.0/24; 0 = aus)",
+   "scope": "web"
+  },
+  {
+   "it": "Watchdog",
+   "en": "Watchdog",
+   "es": "Watchdog",
+   "de": "Watchdog",
+   "scope": "web"
+  },
+  {
+   "it": "Wi-Fi di casa",
+   "en": "Home Wi-Fi",
+   "es": "Wi-Fi de casa",
+   "de": "Heim-WLAN",
+   "scope": "web"
+  },
+  {
+   "it": "altro paese",
+   "en": "other country",
+   "es": "otro país",
+   "de": "anderes Land",
+   "scope": "web"
+  },
+  {
+   "it": "con questa regola puoi entrare",
+   "en": "with this rule you can get in",
+   "es": "con esta regla puedes entrar",
+   "de": "mit dieser Regel kommst du rein",
+   "scope": "web"
+  },
+  {
+   "it": "creato dalla scheda",
+   "en": "made by the board",
+   "es": "creado por la placa",
+   "de": "vom Board erstellt",
+   "scope": "web"
+  },
+  {
+   "it": "esterna, {0} dBi",
+   "en": "external, {0} dBi",
+   "es": "externa, {0} dBi",
+   "de": "extern, {0} dBi",
+   "scope": "web"
+  },
+  {
+   "it": "io",
+   "en": "me",
+   "es": "yo",
+   "de": "ich",
+   "scope": "web"
+  },
+  {
+   "it": "nessuna (solo hotspot)",
+   "en": "none (hotspot only)",
+   "es": "ninguna (solo hotspot)",
+   "de": "keins (nur Hotspot)",
+   "scope": "web"
+  },
+  {
+   "it": "senza password",
+   "en": "no password",
+   "es": "sin contraseña",
+   "de": "ohne Passwort",
+   "scope": "web"
+  },
+  {
+   "it": "telefono collegato",
+   "en": "phone connected",
+   "es": "móvil conectado",
+   "de": "Handy verbunden",
+   "scope": "web"
+  },
+  {
+   "it": "tu",
+   "en": "you",
+   "es": "tú",
+   "de": "du",
+   "scope": "web"
+  },
+  {
+   "it": "tuo",
+   "en": "yours",
+   "es": "tuyo",
+   "de": "eigenes",
+   "scope": "web"
+  },
+  {
+   "it": "visto",
+   "en": "seen",
+   "es": "visto",
+   "de": "gesehen",
+   "scope": "web"
+  },
+  {
+   "it": "{0} dBm (massimo {1})",
+   "en": "{0} dBm (max {1})",
+   "es": "{0} dBm (máximo {1})",
+   "de": "{0} dBm (max. {1})",
+   "scope": "web"
+  },
+  {
+   "it": "Il QR per il telefono e nella pagina Home.",
+   "en": "The QR code for the phone is on the Home page.",
+   "es": "El QR para el movil esta en la pagina Inicio.",
+   "de": "Der QR-Code fuers Handy ist auf der Startseite.",
+   "scope": "fw"
+  },
+  {
+   "it": "Periferiche",
+   "en": "Peripherals",
+   "es": "Perifericos",
+   "de": "Peripherie",
+   "scope": "web"
+  },
+  {
+   "it": "Compliant",
+   "en": "Compliant",
+   "es": "Cumplimiento",
+   "de": "Konformitaet",
+   "scope": "web"
+  },
+  {
+   "it": "Altre lingue si aggiungono dopo, con un file (Sistema > Localizzazione).",
+   "en": "More languages can be added later with a file (System > Localization).",
+   "es": "Otros idiomas se anaden despues, con un archivo (Sistema > Localizacion).",
+   "de": "Weitere Sprachen kommen spaeter per Datei dazu (System > Lokalisierung).",
+   "scope": "web"
+  },
+  {
+   "it": "La scheda usa un certificato fatto da lei: il browser avvisa la prima volta. Confronta l'impronta (Servizi > HTTPS) e prosegui.",
+   "en": "The board uses a certificate it made itself: the browser warns the first time. Compare the fingerprint (Services > HTTPS) and continue.",
+   "es": "La placa usa un certificado propio: el navegador avisa la primera vez. Compara la huella (Servicios > HTTPS) y sigue.",
+   "de": "Das Board nutzt ein selbst erzeugtes Zertifikat: der Browser warnt beim ersten Mal. Vergleiche den Fingerabdruck (Dienste > HTTPS) und fahre fort.",
+   "scope": "web"
+  },
+  {
+   "it": "Ora della scheda non impostata. Si imposta dopo l'accesso (Sistema > Ora).",
+   "en": "Board time not set. You set it after login (System > Time).",
+   "es": "Hora de la placa sin ajustar. Se ajusta tras entrar (Sistema > Hora).",
+   "de": "Uhrzeit des Boards nicht gesetzt. Sie wird nach der Anmeldung gesetzt (System > Uhrzeit).",
+   "scope": "web"
+  },
+  {
+   "it": "Ora della scheda: {0} {1} ({2})",
+   "en": "Board time: {0} {1} ({2})",
+   "es": "Hora de la placa: {0} {1} ({2})",
+   "de": "Zeit des Boards: {0} {1} ({2})",
+   "scope": "web"
+  },
+  {
+   "it": "Differisce dall'ora del tuo dispositivo: controlla data e fuso.",
+   "en": "Different from your device's time: check date and time zone.",
+   "es": "Distinta de la hora de tu dispositivo: revisa fecha y zona horaria.",
+   "de": "Weicht von der Zeit deines Geraets ab: Datum und Zeitzone pruefen.",
+   "scope": "web"
+  },
+  {
+   "it": "Collega il telefono alla scheda",
+   "en": "Connect your phone to the board",
+   "es": "Conecta el movil a la placa",
+   "de": "Handy mit dem Board verbinden",
+   "scope": "web"
+  },
+  {
+   "it": "Apri la scheda dal telefono",
+   "en": "Open the board from your phone",
+   "es": "Abre la placa desde el movil",
+   "de": "Board am Handy oeffnen",
+   "scope": "web"
+  },
+  {
+   "it": "L'amministratore ha nascosto il QR Wi-Fi.",
+   "en": "The administrator has hidden the Wi-Fi QR.",
+   "es": "El administrador ha ocultado el QR Wi-Fi.",
+   "de": "Der Administrator hat den WLAN-QR ausgeblendet.",
+   "scope": "web"
+  },
+  {
+   "it": "Indirizzo della scheda",
+   "en": "Board address",
+   "es": "Direccion de la placa",
+   "de": "Adresse des Boards",
+   "scope": "web"
+  },
+  {
+   "it": "Rete Wi-Fi: {0}",
+   "en": "Wi-Fi network: {0}",
+   "es": "Red Wi-Fi: {0}",
+   "de": "WLAN-Netz: {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Mostra il QR Wi-Fi in Home a tutti quelli che entrano",
+   "en": "Show the Wi-Fi QR on Home to everyone who logs in",
+   "es": "Mostrar el QR Wi-Fi en Inicio a todos los que entran",
+   "de": "WLAN-QR auf der Startseite fuer alle zeigen, die sich anmelden",
+   "scope": "web"
+  },
+  {
+   "it": "Il QR e la stampa sono nella pagina Home.",
+   "en": "The QR and printing are on the Home page.",
+   "es": "El QR y la impresion estan en la pagina Inicio.",
+   "de": "QR und Druck sind auf der Startseite.",
+   "scope": "web"
+  },
+  {
+   "it": "Deve restare acceso almeno un protocollo web (HTTP o HTTPS), altrimenti resti chiuso fuori",
+   "en": "At least one web protocol (HTTP or HTTPS) must stay on, otherwise you are locked out",
+   "es": "Debe quedar activo al menos un protocolo web (HTTP o HTTPS), si no te quedas fuera",
+   "de": "Mindestens ein Webprotokoll (HTTP oder HTTPS) muss an bleiben, sonst bist du ausgesperrt",
+   "scope": "fw"
+  },
+  {
+   "it": "HTTP e HTTPS non possono usare la stessa porta",
+   "en": "HTTP and HTTPS cannot use the same port",
+   "es": "HTTP y HTTPS no pueden usar el mismo puerto",
+   "de": "HTTP und HTTPS koennen nicht denselben Port nutzen",
+   "scope": "fw"
+  },
+  {
+   "it": "Per spegnere il Punto di accesso serve prima la Wi-Fi di casa configurata",
+   "en": "To turn the Access Point off, the home Wi-Fi must be configured first",
+   "es": "Para apagar el Punto de acceso hay que configurar antes la Wi-Fi de casa",
+   "de": "Zum Ausschalten des Zugangspunkts muss zuerst das Heim-WLAN eingerichtet sein",
+   "scope": "fw"
+  },
+  {
+   "it": "Porta HTTP non valida: 80 oppure da 1024 a 65535",
+   "en": "Invalid HTTP port: 80 or 1024 to 65535",
+   "es": "Puerto HTTP no valido: 80 o de 1024 a 65535",
+   "de": "Ungueltiger HTTP-Port: 80 oder 1024 bis 65535",
+   "scope": "fw"
+  },
+  {
+   "it": "Porta HTTPS non valida: 443 oppure da 1024 a 65535",
+   "en": "Invalid HTTPS port: 443 or 1024 to 65535",
+   "es": "Puerto HTTPS no valido: 443 o de 1024 a 65535",
+   "de": "Ungueltiger HTTPS-Port: 443 oder 1024 bis 65535",
+   "scope": "fw"
+  },
+  {
+   "it": "Spegni il Punto di accesso solo quando la scheda e collegata alla Wi-Fi di casa",
+   "en": "Turn the Access Point off only when the board is connected to the home Wi-Fi",
+   "es": "Apaga el Punto de acceso solo cuando la placa este conectada a la Wi-Fi de casa",
+   "de": "Zugangspunkt nur ausschalten, wenn das Board mit dem Heim-WLAN verbunden ist",
+   "scope": "fw"
+  },
+  {
+   "it": "Attivo sulla porta {0}",
+   "en": "Active on port {0}",
+   "es": "Activo en el puerto {0}",
+   "de": "Aktiv auf Port {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Cambiare porta non e sicurezza vera: la sicurezza resta password, filtro IP e cifratura. Il portale automatico dell'hotspot funziona solo sulla porta 80.",
+   "en": "Changing the port is not real security: security remains password, IP filter and encryption. The hotspot's automatic portal only works on port 80.",
+   "es": "Cambiar el puerto no es seguridad real: la seguridad sigue siendo contrasena, filtro IP y cifrado. El portal automatico del hotspot solo funciona en el puerto 80.",
+   "de": "Den Port zu aendern ist keine echte Sicherheit: Sicherheit bleiben Passwort, IP-Filter und Verschluesselung. Das automatische Portal des Hotspots funktioniert nur auf Port 80.",
+   "scope": "web"
+  },
+  {
+   "it": "HTTP",
+   "en": "HTTP",
+   "es": "HTTP",
+   "de": "HTTP",
+   "scope": "web"
+  },
+  {
+   "it": "HTTP acceso",
+   "en": "HTTP on",
+   "es": "HTTP activo",
+   "de": "HTTP an",
+   "scope": "web"
+  },
+  {
+   "it": "Il portale automatico serve HTTP acceso sulla porta 80.",
+   "en": "The automatic portal needs HTTP on port 80.",
+   "es": "El portal automatico necesita HTTP en el puerto 80.",
+   "de": "Das automatische Portal braucht HTTP auf Port 80.",
+   "scope": "web"
+  },
+  {
+   "it": "L'hotspot e la Wi-Fi della scheda: serve per entrare quando la scheda non e collegata alla tua rete. Si accende da solo al primo avvio, dopo un ripristino con BOOT e se la tua Wi-Fi non e configurata.",
+   "en": "The hotspot is the board's own Wi-Fi: it lets you in when the board is not connected to your network. It turns on by itself at first start, after a BOOT reset, and if your Wi-Fi is not configured.",
+   "es": "El hotspot es la Wi-Fi de la placa: sirve para entrar cuando la placa no esta conectada a tu red. Se enciende solo en el primer arranque, tras un reinicio con BOOT y si tu Wi-Fi no esta configurada.",
+   "de": "Der Hotspot ist das eigene WLAN des Boards: damit kommst du hinein, wenn das Board nicht mit deinem Netz verbunden ist. Er schaltet sich beim ersten Start, nach einem BOOT-Reset und ohne eingerichtetes WLAN selbst ein.",
+   "scope": "web"
+  },
+  {
+   "it": "La pagina senza cifratura. Serve all'hotspot (portale automatico). Quando la scheda e collegata alla tua Wi-Fi puoi spegnerlo: consigliato, risparmia memoria.",
+   "en": "The page without encryption. It serves the hotspot (automatic portal). When the board is connected to your Wi-Fi you can turn it off: recommended, it saves memory.",
+   "es": "La pagina sin cifrado. Sirve al hotspot (portal automatico). Cuando la placa esta conectada a tu Wi-Fi puedes apagarlo: recomendado, ahorra memoria.",
+   "de": "Die Seite ohne Verschluesselung. Sie dient dem Hotspot (automatisches Portal). Ist das Board mit deinem WLAN verbunden, kannst du sie ausschalten: empfohlen, spart Speicher.",
+   "scope": "web"
+  },
+  {
+   "it": "Le modifiche valgono dal prossimo riavvio.",
+   "en": "Changes apply after the next restart.",
+   "es": "Los cambios valen desde el proximo reinicio.",
+   "de": "Aenderungen gelten ab dem naechsten Neustart.",
+   "scope": "web"
+  },
+  {
+   "it": "Porta HTTP (80 oppure 1024-65535)",
+   "en": "HTTP port (80 or 1024-65535)",
+   "es": "Puerto HTTP (80 o 1024-65535)",
+   "de": "HTTP-Port (80 oder 1024-65535)",
+   "scope": "web"
+  },
+  {
+   "it": "Porta HTTPS (443 oppure 1024-65535)",
+   "en": "HTTPS port (443 or 1024-65535)",
+   "es": "Puerto HTTPS (443 o 1024-65535)",
+   "de": "HTTPS-Port (443 oder 1024-65535)",
+   "scope": "web"
+  },
+  {
+   "it": "Portale automatico (il telefono apre da solo la pagina)",
+   "en": "Automatic portal (the phone opens the page by itself)",
+   "es": "Portal automatico (el movil abre la pagina solo)",
+   "de": "Automatisches Portal (das Handy oeffnet die Seite selbst)",
+   "scope": "web"
+  },
+  {
+   "it": "Punto di accesso acceso",
+   "en": "Access Point on",
+   "es": "Punto de acceso activo",
+   "de": "Zugangspunkt an",
+   "scope": "web"
+  },
+  {
+   "it": "Punto di accesso spento: se la Wi-Fi di casa non e raggiungibile la scheda non si vede. Recupero: tasto BOOT 8 secondi o cavo USB.",
+   "en": "Access Point off: if the home Wi-Fi is unreachable the board cannot be seen. Recovery: BOOT button 8 seconds or USB cable.",
+   "es": "Punto de acceso apagado: si la Wi-Fi de casa no esta disponible la placa no se ve. Recuperacion: boton BOOT 8 segundos o cable USB.",
+   "de": "Zugangspunkt aus: ist das Heim-WLAN nicht erreichbar, ist das Board nicht zu sehen. Wiederherstellung: BOOT-Taste 8 Sekunden oder USB-Kabel.",
+   "scope": "web"
+  },
+  {
+   "it": "Salva porta",
+   "en": "Save port",
+   "es": "Guardar puerto",
+   "de": "Port speichern",
+   "scope": "web"
+  },
+  {
+   "it": "Sei collegato alla tua Wi-Fi: puoi spegnere HTTP e usare solo HTTPS (consigliato).",
+   "en": "You are connected to your Wi-Fi: you can turn HTTP off and use HTTPS only (recommended).",
+   "es": "Estas conectado a tu Wi-Fi: puedes apagar HTTP y usar solo HTTPS (recomendado).",
+   "de": "Du bist mit deinem WLAN verbunden: du kannst HTTP ausschalten und nur HTTPS nutzen (empfohlen).",
+   "scope": "web"
+  },
+  {
+   "it": "Senza HTTPS il traffico non e cifrato: il login non manda la password (HMAC), ma sessione e dati si leggono sulla rete. Scelta tua: usa una rete di cui ti fidi.",
+   "en": "Without HTTPS traffic is not encrypted: login never sends the password (HMAC), but session and data can be read on the network. Your choice: use a network you trust.",
+   "es": "Sin HTTPS el trafico no esta cifrado: el acceso no envia la contrasena (HMAC), pero la sesion y los datos se pueden leer en la red. Tu eliges: usa una red de confianza.",
+   "de": "Ohne HTTPS ist der Verkehr nicht verschluesselt: die Anmeldung sendet das Passwort nie (HMAC), aber Sitzung und Daten sind im Netz lesbar. Deine Wahl: nutze ein vertrauenswuerdiges Netz.",
+   "scope": "web"
+  },
+  {
+   "it": "Servizio Punto di accesso (AP)",
+   "en": "Access Point (AP) service",
+   "es": "Servicio Punto de acceso (AP)",
+   "de": "Dienst Zugangspunkt (AP)",
+   "scope": "web"
+  },
+  {
+   "it": "Con la Wi-Fi di casa l'ora arriva da Internet (NTP): non devi fare altro.",
+   "en": "With the home Wi-Fi the time comes from the Internet (NTP): nothing else to do.",
+   "es": "Con la Wi-Fi de casa la hora llega de Internet (NTP): no tienes que hacer nada mas.",
+   "de": "Mit dem Heim-WLAN kommt die Uhrzeit aus dem Internet (NTP): nichts weiter zu tun.",
+   "scope": "web"
+  },
+  {
+   "it": "Dopo il salvataggio la scheda si collega a {0}. Collega il telefono o il PC a quella rete e apri l'indirizzo che ti mostro. Quando entri da li, si spengono da soli l'hotspot, il portale automatico e HTTP (consigliato). Se il collegamento non riesce, l'hotspot torna da solo.",
+   "en": "After saving, the board connects to {0}. Connect your phone or PC to that network and open the address I show you. When you log in from there, the hotspot, the automatic portal and HTTP turn off by themselves (recommended). If the connection fails, the hotspot comes back by itself.",
+   "es": "Tras guardar, la placa se conecta a {0}. Conecta el movil o el PC a esa red y abre la direccion que te muestro. Cuando entres desde ahi, el hotspot, el portal automatico y HTTP se apagan solos (recomendado). Si la conexion falla, el hotspot vuelve solo.",
+   "de": "Nach dem Speichern verbindet sich das Board mit {0}. Verbinde Handy oder PC mit diesem Netz und oeffne die angezeigte Adresse. Meldest du dich von dort an, schalten sich Hotspot, automatisches Portal und HTTP selbst aus (empfohlen). Schlaegt die Verbindung fehl, kommt der Hotspot von selbst zurueck.",
+   "scope": "web"
+  },
+  {
+   "it": "Hai raggiunto la scheda dalla rete di casa: l'hotspot, il portale automatico e HTTP sono stati spenti. Per riaccenderli: Servizi. Se perdi la Wi-Fi: tasto BOOT 8 secondi.",
+   "en": "You reached the board from the home network: the hotspot, the automatic portal and HTTP were turned off. To turn them back on: Services. If you lose the Wi-Fi: BOOT button 8 seconds.",
+   "es": "Has llegado a la placa desde la red de casa: el hotspot, el portal automatico y HTTP se han apagado. Para encenderlos: Servicios. Si pierdes la Wi-Fi: boton BOOT 8 segundos.",
+   "de": "Du hast das Board vom Heimnetz erreicht: Hotspot, automatisches Portal und HTTP wurden ausgeschaltet. Zum Einschalten: Dienste. Bei Verlust des WLANs: BOOT-Taste 8 Sekunden.",
+   "scope": "web"
+  },
+  {
+   "it": "Hotspot e HTTP spenti",
+   "en": "Hotspot and HTTP off",
+   "es": "Hotspot y HTTP apagados",
+   "de": "Hotspot und HTTP aus",
+   "scope": "web"
+  },
+  {
+   "it": "La scheda non e riuscita a collegarsi alla Wi-Fi di casa: controlla nome e password in Rete > Wi-Fi.",
+   "en": "The board could not connect to the home Wi-Fi: check name and password in Network > Wi-Fi.",
+   "es": "La placa no ha podido conectarse a la Wi-Fi de casa: revisa nombre y contrasena en Red > Wi-Fi.",
+   "de": "Das Board konnte sich nicht mit dem Heim-WLAN verbinden: Name und Passwort unter Netzwerk > WLAN pruefen.",
+   "scope": "web"
+  },
+  {
+   "it": "La scheda non ha una batteria per l'orologio: se la spegni o la riavvii l'ora si perde e dovrai reimpostarla. Con la Wi-Fi di casa l'ora torna da sola. (Opzione futura: modulo orologio DS3231.)",
+   "en": "The board has no clock battery: if you switch it off or restart it the time is lost and you must set it again. With the home Wi-Fi the time comes back by itself. (Future option: DS3231 clock module.)",
+   "es": "La placa no tiene bateria para el reloj: si la apagas o reinicias la hora se pierde y tendras que ajustarla de nuevo. Con la Wi-Fi de casa la hora vuelve sola. (Opcion futura: modulo de reloj DS3231.)",
+   "de": "Das Board hat keine Uhrenbatterie: beim Ausschalten oder Neustart geht die Uhrzeit verloren und muss neu gesetzt werden. Mit dem Heim-WLAN kommt sie von selbst zurueck. (Spaeter moeglich: Uhrenmodul DS3231.)",
+   "scope": "web"
+  },
+  {
+   "it": "La scheda si sta collegando a {0}. Collega il telefono o il PC a quella rete e apri questo indirizzo:",
+   "en": "The board is connecting to {0}. Connect your phone or PC to that network and open this address:",
+   "es": "La placa se esta conectando a {0}. Conecta el movil o el PC a esa red y abre esta direccion:",
+   "de": "Das Board verbindet sich mit {0}. Verbinde Handy oder PC mit diesem Netz und oeffne diese Adresse:",
+   "scope": "web"
+  },
+  {
+   "it": "Ora e fuso orario",
+   "en": "Time and time zone",
+   "es": "Hora y zona horaria",
+   "de": "Uhrzeit und Zeitzone",
+   "scope": "web"
+  },
+  {
+   "it": "Scrivi data e ora",
+   "en": "Enter date and time",
+   "es": "Escribe fecha y hora",
+   "de": "Datum und Uhrzeit eingeben",
+   "scope": "web"
+  },
+  {
+   "it": "Se non riesce a collegarsi, l'hotspot torna da solo: riconnettiti e controlla la password della Wi-Fi in Rete.",
+   "en": "If it cannot connect, the hotspot comes back by itself: reconnect and check the Wi-Fi password in Network.",
+   "es": "Si no logra conectarse, el hotspot vuelve solo: reconecta y revisa la contrasena Wi-Fi en Red.",
+   "de": "Gelingt die Verbindung nicht, kommt der Hotspot von selbst zurueck: neu verbinden und das WLAN-Passwort unter Netzwerk pruefen.",
+   "scope": "web"
+  },
+  {
+   "it": "Senza Wi-Fi di casa il servizio dell'ora da Internet (NTP) e spento: imposta l'ora a mano.",
+   "en": "Without home Wi-Fi the Internet time service (NTP) is off: set the time by hand.",
+   "es": "Sin Wi-Fi de casa el servicio de hora de Internet (NTP) esta apagado: ajusta la hora a mano.",
+   "de": "Ohne Heim-WLAN ist der Internet-Zeitdienst (NTP) aus: Uhrzeit von Hand setzen.",
+   "scope": "web"
+  },
+  {
+   "it": "Senza Wi-Fi di casa l'hotspot e HTTP restano accesi: sono l'unico modo di entrare. Il server dell'ora (NTP) si spegne.",
+   "en": "Without home Wi-Fi the hotspot and HTTP stay on: they are the only way in. The time service (NTP) turns off.",
+   "es": "Sin Wi-Fi de casa el hotspot y HTTP siguen activos: son la unica forma de entrar. El servicio de hora (NTP) se apaga.",
+   "de": "Ohne Heim-WLAN bleiben Hotspot und HTTP an: sie sind der einzige Zugang. Der Zeitdienst (NTP) wird ausgeschaltet.",
+   "scope": "web"
+  },
+  {
+   "it": "Nome troppo lungo (massimo 24 caratteri)",
+   "en": "Name too long (24 characters at most)",
+   "es": "Nombre demasiado largo (maximo 24 caracteres)",
+   "de": "Name zu lang (hoechstens 24 Zeichen)",
+   "scope": "fw"
+  },
+  {
+   "it": "Nome: solo lettere, numeri, spazio e simboli semplici (niente apici)",
+   "en": "Name: only letters, numbers, spaces and simple symbols (no quotes)",
+   "es": "Nombre: solo letras, numeros, espacio y simbolos simples (sin comillas)",
+   "de": "Name: nur Buchstaben, Zahlen, Leerzeichen und einfache Symbole (keine Anfuehrungszeichen)",
+   "scope": "fw"
+  },
+  {
+   "it": "ADC2: con il Wi-Fi acceso la lettura analogica non e affidabile",
+   "en": "ADC2: with Wi-Fi on, analog reading is not reliable",
+   "es": "ADC2: con la Wi-Fi activa la lectura analogica no es fiable",
+   "de": "ADC2: bei eingeschaltetem WLAN ist die analoge Messung unzuverlaessig",
+   "scope": "web"
+  },
+  {
+   "it": "ANTENNA",
+   "en": "ANTENNA",
+   "es": "ANTENA",
+   "de": "ANTENNE",
+   "scope": "web"
+  },
+  {
+   "it": "BOOST: solo con batteria oltre 500 mAh",
+   "en": "BOOST: only with a battery over 500 mAh",
+   "es": "BOOST: solo con bateria de mas de 500 mAh",
+   "de": "BOOST: nur mit Akku ueber 500 mAh",
+   "scope": "web"
+  },
+  {
+   "it": "Collegato a",
+   "en": "Connected to",
+   "es": "Conectado a",
+   "de": "Angeschlossen an",
+   "scope": "web"
+  },
+  {
+   "it": "Console seriale: evitare",
+   "en": "Serial console: avoid",
+   "es": "Consola serie: evitar",
+   "de": "Serielle Konsole: vermeiden",
+   "scope": "web"
+  },
+  {
+   "it": "Disegno della scheda con la presa USB in alto. Fronte: i pin sul bordo. Retro: le piazzole da saldare e i pad della batteria. Confronta i numeri con la scritta stampata sulla tua scheda: alcune serie hanno un ordine diverso.",
+   "en": "Drawing of the board with the USB port at the top. Front: the edge pins. Back: the solder pads and the battery pads. Compare the numbers with the print on your board: some series use a different order.",
+   "es": "Dibujo de la placa con el USB arriba. Frente: los pines del borde. Reverso: las almohadillas para soldar y las de la bateria. Compara los numeros con la serigrafia de tu placa: algunas series usan otro orden.",
+   "de": "Zeichnung des Boards mit dem USB-Anschluss oben. Vorderseite: die Randpins. Rueckseite: die Loetpads und die Akku-Pads. Vergleiche die Nummern mit dem Aufdruck deines Boards: manche Serien haben eine andere Reihenfolge.",
+   "scope": "web"
+  },
+  {
+   "it": "FRONTE",
+   "en": "FRONT",
+   "es": "FRENTE",
+   "de": "VORDERSEITE",
+   "scope": "web"
+  },
+  {
+   "it": "Fronte",
+   "en": "Front",
+   "es": "Frente",
+   "de": "Vorderseite",
+   "scope": "web"
+  },
+  {
+   "it": "Funzioni",
+   "en": "Functions",
+   "es": "Funciones",
+   "de": "Funktionen",
+   "scope": "web"
+  },
+  {
+   "it": "Gli altri pin (piazzole) sono sul retro: premi Retro.",
+   "en": "The other pins (pads) are on the back: press Back.",
+   "es": "Los demas pines (almohadillas) estan en el reverso: pulsa Reverso.",
+   "de": "Die anderen Pins (Pads) sind auf der Rueckseite: Rueckseite waehlen.",
+   "scope": "web"
+  },
+  {
+   "it": "Inventario dei pin",
+   "en": "Pin inventory",
+   "es": "Inventario de pines",
+   "de": "Pin-Inventar",
+   "scope": "web"
+  },
+  {
+   "it": "LED batteria",
+   "en": "Battery LED",
+   "es": "LED bateria",
+   "de": "Akku-LED",
+   "scope": "web"
+  },
+  {
+   "it": "Libero con la PSRAM da 2 MB di questa scheda; occupato sulle schede con PSRAM octal",
+   "en": "Free with this board's 2 MB PSRAM; taken on boards with octal PSRAM",
+   "es": "Libre con la PSRAM de 2 MB de esta placa; ocupado en placas con PSRAM octal",
+   "de": "Frei mit dem 2-MB-PSRAM dieses Boards; belegt bei Boards mit Octal-PSRAM",
+   "scope": "web"
+  },
+  {
+   "it": "Pin di avvio (strapping): meglio non usarlo",
+   "en": "Boot pin (strapping): better not to use it",
+   "es": "Pin de arranque (strapping): mejor no usarlo",
+   "de": "Boot-Pin (Strapping): besser nicht benutzen",
+   "scope": "web"
+  },
+  {
+   "it": "Pin usati dal sistema",
+   "en": "Pins used by the system",
+   "es": "Pines usados por el sistema",
+   "de": "Vom System genutzte Pins",
+   "scope": "web"
+  },
+  {
+   "it": "RETRO (vista da sotto)",
+   "en": "BACK (seen from below)",
+   "es": "REVERSO (visto desde abajo)",
+   "de": "RUECKSEITE (von unten gesehen)",
+   "scope": "web"
+  },
+  {
+   "it": "Retro",
+   "en": "Back",
+   "es": "Reverso",
+   "de": "Rueckseite",
+   "scope": "web"
+  },
+  {
+   "it": "Scrivi a cosa colleghi ogni pin (per esempio \"sensore porta\"): il nome resta salvato nella configurazione e il sistema ti avvisa se una funzione vuole un pin gia segnato.",
+   "en": "Write what you connect to each pin (for example \"door sensor\"): the name is saved in the configuration and the system warns you if a function wants a pin already marked.",
+   "es": "Escribe a que conectas cada pin (por ejemplo \"sensor de puerta\"): el nombre se guarda en la configuracion y el sistema avisa si una funcion quiere un pin ya marcado.",
+   "de": "Schreibe, was du an jeden Pin anschliesst (zum Beispiel \"Tuersensor\"): der Name wird in der Konfiguration gespeichert und das System warnt, wenn eine Funktion einen bereits markierten Pin will.",
+   "scope": "web"
+  },
+  {
+   "it": "Segnato come collegato a: {0}. Una prova puo disturbare il circuito.",
+   "en": "Marked as connected to: {0}. A test may disturb the circuit.",
+   "es": "Marcado como conectado a: {0}. Una prueba puede perturbar el circuito.",
+   "de": "Als angeschlossen markiert an: {0}. Ein Test kann die Schaltung stoeren.",
+   "scope": "web"
+  },
+  {
+   "it": "USB: non usabile",
+   "en": "USB: not usable",
+   "es": "USB: no utilizable",
+   "de": "USB: nicht nutzbar",
+   "scope": "web"
+  },
+  {
+   "it": "Usato dal debug JTAG se lo si usa",
+   "en": "Used by JTAG debugging if you use it",
+   "es": "Usado por la depuracion JTAG si se usa",
+   "de": "Vom JTAG-Debugging genutzt, falls verwendet",
+   "scope": "web"
+  },
+  {
+   "it": "bordo",
+   "en": "edge",
+   "es": "borde",
+   "de": "Rand",
+   "scope": "web"
+  },
+  {
+   "it": "collegato (tuo nome)",
+   "en": "connected (your name)",
+   "es": "conectado (tu nombre)",
+   "de": "angeschlossen (dein Name)",
+   "scope": "web"
+  },
+  {
+   "it": "libero",
+   "en": "free",
+   "es": "libre",
+   "de": "frei",
+   "scope": "web"
+  },
+  {
+   "it": "retro (piazzola)",
+   "en": "back (pad)",
+   "es": "reverso (almohadilla)",
+   "de": "Rueckseite (Pad)",
+   "scope": "web"
+  },
+  {
+   "it": "Il testo completo delle licenze si legge dalla pagina (Sistema > Note legali) e nel file LICENSE del progetto.",
+   "en": "The full license texts can be read in the web page (System > Legal notes) and in the project's LICENSE file.",
+   "es": "El texto completo de las licencias se lee en la pagina (Sistema > Notas legales) y en el archivo LICENSE del proyecto.",
+   "de": "Die vollstaendigen Lizenztexte stehen auf der Webseite (System > Rechtliches) und in der Datei LICENSE des Projekts.",
+   "scope": "fw"
+  },
+  {
+   "it": "  ntp [on|off|sync|every <min>]  stato NTP / accendi, spegni / risincronizza / frequenza",
+   "en": "  ntp [on|off|sync|every <min>]  NTP status / turn on, off / resync / interval",
+   "es": "  ntp [on|off|sync|every <min>]  estado NTP / encender, apagar / resincronizar / frecuencia",
+   "de": "  ntp [on|off|sync|every <min>]  NTP-Status / ein, aus / neu abgleichen / Intervall",
+   "scope": "fw"
+  },
+  {
+   "it": "  setup           configurazione guidata da seriale (lingua, paese, nome, antenna, hotspot, utente, Wi-Fi, ora)",
+   "en": "  setup           guided setup over serial (language, country, name, antenna, hotspot, user, Wi-Fi, time)",
+   "es": "  setup           configuracion guiada por serie (idioma, pais, nombre, antena, hotspot, usuario, Wi-Fi, hora)",
+   "de": "  setup           gefuehrte Einrichtung ueber seriell (Sprache, Land, Name, Antenne, Hotspot, Benutzer, WLAN, Zeit)",
+   "scope": "fw"
+  },
+  {
+   "it": "  svc [ap|captive|http|https on|off] [http-port|https-port <n>]  servizi di rete e porte (vale dal riavvio)",
+   "en": "  svc [ap|captive|http|https on|off] [http-port|https-port <n>]  network services and ports (apply after restart)",
+   "es": "  svc [ap|captive|http|https on|off] [http-port|https-port <n>]  servicios de red y puertos (valen tras reiniciar)",
+   "de": "  svc [ap|captive|http|https on|off] [http-port|https-port <n>]  Netzdienste und Ports (gelten nach Neustart)",
+   "scope": "fw"
+  },
+  {
+   "it": "  wifi set <rete> [password] | wifi off   collega la Wi-Fi di casa (nome senza spazi) o la scollega",
+   "en": "  wifi set <network> [password] | wifi off   connect the home Wi-Fi (name without spaces) or disconnect it",
+   "es": "  wifi set <red> [contrasena] | wifi off   conecta la Wi-Fi de casa (nombre sin espacios) o la desconecta",
+   "de": "  wifi set <Netz> [Passwort] | wifi off   Heim-WLAN verbinden (Name ohne Leerzeichen) oder trennen",
+   "scope": "fw"
+  },
+  {
+   "it": "1/8 Lingua [%s] (it, en, ...):",
+   "en": "1/8 Language [%s] (it, en, ...):",
+   "es": "1/8 Idioma [%s] (it, en, ...):",
+   "de": "1/8 Sprache [%s] (it, en, ...):",
+   "scope": "fw"
+  },
+  {
+   "it": "2/8 Paese, codice di 2 lettere (es. IT) [%s]:",
+   "en": "2/8 Country, 2-letter code (e.g. IT) [%s]:",
+   "es": "2/8 Pais, codigo de 2 letras (p. ej. IT) [%s]:",
+   "de": "2/8 Land, 2-Buchstaben-Code (z. B. IT) [%s]:",
+   "scope": "fw"
+  },
+  {
+   "it": "3/8 Nome della scheda [%s]:",
+   "en": "3/8 Board name [%s]:",
+   "es": "3/8 Nombre de la placa [%s]:",
+   "de": "3/8 Name des Boards [%s]:",
+   "scope": "fw"
+  },
+  {
+   "it": "4/8 Antenna: i = interna, e = esterna [i]:",
+   "en": "4/8 Antenna: i = internal, e = external [i]:",
+   "es": "4/8 Antena: i = interna, e = externa [i]:",
+   "de": "4/8 Antenne: i = intern, e = extern [i]:",
+   "scope": "fw"
+  },
+  {
+   "it": "5/8 Hotspot: %s  password: %s",
+   "en": "5/8 Hotspot: %s  password: %s",
+   "es": "5/8 Hotspot: %s  contrasena: %s",
+   "de": "5/8 Hotspot: %s  Passwort: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "6/8 Amministratore gia impostato. Invio = tieni, oppure scrivi la nuova password:",
+   "en": "6/8 Administrator already set. Enter = keep, or type the new password:",
+   "es": "6/8 Administrador ya configurado. Intro = mantener, o escribe la nueva contrasena:",
+   "de": "6/8 Administrator schon eingerichtet. Enter = behalten, oder neues Passwort eingeben:",
+   "scope": "fw"
+  },
+  {
+   "it": "6/8 Scegli la password dell'amministratore '%s' (almeno 6 caratteri; si vede mentre scrivi: fallo in un luogo sicuro):",
+   "en": "6/8 Choose the password of administrator '%s' (at least 6 characters; it is visible while you type: do it somewhere safe):",
+   "es": "6/8 Elige la contrasena del administrador '%s' (al menos 6 caracteres; se ve mientras escribes: hazlo en un lugar seguro):",
+   "de": "6/8 Passwort des Administrators '%s' waehlen (mindestens 6 Zeichen; es ist beim Tippen sichtbar: an einem sicheren Ort tun):",
+   "scope": "fw"
+  },
+  {
+   "it": "7/8 Collegare la Wi-Fi di casa? s = si, Invio = no (hotspot e HTTP restano accesi):",
+   "en": "7/8 Connect the home Wi-Fi? s = yes, Enter = no (hotspot and HTTP stay on):",
+   "es": "7/8 Conectar la Wi-Fi de casa? s = si, Intro = no (hotspot y HTTP siguen activos):",
+   "de": "7/8 Heim-WLAN verbinden? s = ja, Enter = nein (Hotspot und HTTP bleiben an):",
+   "scope": "fw"
+  },
+  {
+   "it": "8/8 Ora a mano, AAAA-MM-GG HH:MM (Invio = salta):",
+   "en": "8/8 Time by hand, YYYY-MM-DD HH:MM (Enter = skip):",
+   "es": "8/8 Hora a mano, AAAA-MM-DD HH:MM (Intro = saltar):",
+   "de": "8/8 Uhrzeit von Hand, JJJJ-MM-TT HH:MM (Enter = ueberspringen):",
+   "scope": "fw"
+  },
+  {
+   "it": "Configurazione finita.",
+   "en": "Setup finished.",
+   "es": "Configuracion terminada.",
+   "de": "Einrichtung abgeschlossen.",
+   "scope": "fw"
+  },
+  {
+   "it": "Configurazione guidata da seriale. Invio = tieni il valore proposto, skip = salta il passo, quit = esci.",
+   "en": "Guided setup over serial. Enter = keep the proposed value, skip = skip the step, quit = exit.",
+   "es": "Configuracion guiada por serie. Intro = mantener el valor propuesto, skip = saltar el paso, quit = salir.",
+   "de": "Gefuehrte Einrichtung ueber seriell. Enter = Vorschlag behalten, skip = Schritt ueberspringen, quit = beenden.",
+   "scope": "fw"
+  },
+  {
+   "it": "Configurazione interrotta: la guida resta da finire (scrivi setup per riprendere).",
+   "en": "Setup interrupted: it is still to be finished (type setup to resume).",
+   "es": "Configuracion interrumpida: queda por terminar (escribe setup para continuar).",
+   "de": "Einrichtung abgebrochen: sie ist noch nicht fertig (setup eingeben, um fortzufahren).",
+   "scope": "fw"
+  },
+  {
+   "it": "Configurazione non finita: questo messaggio resta finche la guida non e completata (pagina web oppure seriale).",
+   "en": "Setup not finished: this message stays until the guide is completed (web page or serial).",
+   "es": "Configuracion sin terminar: este mensaje sigue hasta completar la guia (pagina web o serie).",
+   "de": "Einrichtung nicht abgeschlossen: diese Meldung bleibt, bis die Anleitung fertig ist (Webseite oder seriell).",
+   "scope": "fw"
+  },
+  {
+   "it": "Guadagno dell'antenna esterna in dBi (0-15) [0]:",
+   "en": "External antenna gain in dBi (0-15) [0]:",
+   "es": "Ganancia de la antena externa en dBi (0-15) [0]:",
+   "de": "Gewinn der externen Antenne in dBi (0-15) [0]:",
+   "scope": "fw"
+  },
+  {
+   "it": "HTTP:          %s, porta %u",
+   "en": "HTTP:          %s, port %u",
+   "es": "HTTP:          %s, puerto %u",
+   "de": "HTTP:          %s, Port %u",
+   "scope": "fw"
+  },
+  {
+   "it": "HTTPS:         %s, porta %u",
+   "en": "HTTPS:         %s, port %u",
+   "es": "HTTPS:         %s, puerto %u",
+   "de": "HTTPS:         %s, Port %u",
+   "scope": "fw"
+  },
+  {
+   "it": "Hotspot (AP):  %s",
+   "en": "Hotspot (AP):  %s",
+   "es": "Hotspot (AP):  %s",
+   "de": "Hotspot (AP):  %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Invio = tieni, n = nuova password casuale:",
+   "en": "Enter = keep, n = new random password:",
+   "es": "Intro = mantener, n = nueva contrasena aleatoria:",
+   "de": "Enter = behalten, n = neues Zufallspasswort:",
+   "scope": "fw"
+  },
+  {
+   "it": "La configurazione guidata si fa solo dalla seriale (USB).",
+   "en": "The guided setup is done only over the serial line (USB).",
+   "es": "La configuracion guiada solo se hace por el puerto serie (USB).",
+   "de": "Die gefuehrte Einrichtung geht nur ueber die serielle Schnittstelle (USB).",
+   "scope": "fw"
+  },
+  {
+   "it": "Mi collego a %s: se non riesce l'hotspot torna da solo",
+   "en": "Connecting to %s: if it fails the hotspot comes back by itself",
+   "es": "Me conecto a %s: si falla el hotspot vuelve solo",
+   "de": "Verbinde mit %s: gelingt es nicht, kommt der Hotspot von selbst zurueck",
+   "scope": "fw"
+  },
+  {
+   "it": "Mi collego a %s: se non riesce l'hotspot torna da solo.",
+   "en": "Connecting to %s: if it fails the hotspot comes back by itself.",
+   "es": "Me conecto a %s: si falla el hotspot vuelve solo.",
+   "de": "Verbinde mit %s: gelingt es nicht, kommt der Hotspot von selbst zurueck.",
+   "scope": "fw"
+  },
+  {
+   "it": "NTP acceso",
+   "en": "NTP on",
+   "es": "NTP activo",
+   "de": "NTP an",
+   "scope": "fw"
+  },
+  {
+   "it": "NTP spento",
+   "en": "NTP off",
+   "es": "NTP apagado",
+   "de": "NTP aus",
+   "scope": "fw"
+  },
+  {
+   "it": "Nessuna rete trovata: scrivi il nome a mano.",
+   "en": "No network found: type the name by hand.",
+   "es": "Ninguna red encontrada: escribe el nombre a mano.",
+   "de": "Kein Netz gefunden: Namen von Hand eingeben.",
+   "scope": "fw"
+  },
+  {
+   "it": "Nome: %s.local   Paese: %s   Lingua: %s",
+   "en": "Name: %s.local   Country: %s   Language: %s",
+   "es": "Nombre: %s.local   Pais: %s   Idioma: %s",
+   "de": "Name: %s.local   Land: %s   Sprache: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Numero della rete, oppure scrivi il nome:",
+   "en": "Network number, or type the name:",
+   "es": "Numero de la red, o escribe el nombre:",
+   "de": "Netznummer oder Namen eingeben:",
+   "scope": "fw"
+  },
+  {
+   "it": "Nuova password hotspot: %s",
+   "en": "New hotspot password: %s",
+   "es": "Nueva contrasena del hotspot: %s",
+   "de": "Neues Hotspot-Passwort: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Password della Wi-Fi (Invio = rete aperta):",
+   "en": "Wi-Fi password (Enter = open network):",
+   "es": "Contrasena de la Wi-Fi (Intro = red abierta):",
+   "de": "WLAN-Passwort (Enter = offenes Netz):",
+   "scope": "fw"
+  },
+  {
+   "it": "Per configurare da questa seriale scrivi: setup",
+   "en": "To configure from this serial line type: setup",
+   "es": "Para configurar desde este puerto serie escribe: setup",
+   "de": "Zum Einrichten ueber diese serielle Schnittstelle eingeben: setup",
+   "scope": "fw"
+  },
+  {
+   "it": "Per i servizi di rete e le porte: svc. Per tutto il resto: help.",
+   "en": "For network services and ports: svc. For everything else: help.",
+   "es": "Para servicios de red y puertos: svc. Para todo lo demas: help.",
+   "de": "Fuer Netzdienste und Ports: svc. Fuer alles andere: help.",
+   "scope": "fw"
+  },
+  {
+   "it": "Portale auto:  %s",
+   "en": "Auto portal:   %s",
+   "es": "Portal auto:    %s",
+   "de": "Auto-Portal:    %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Salvato. HTTP, HTTPS e porte valgono dal prossimo riavvio (reboot).",
+   "en": "Saved. HTTP, HTTPS and ports apply after the next restart (reboot).",
+   "es": "Guardado. HTTP, HTTPS y puertos valen tras el proximo reinicio (reboot).",
+   "de": "Gespeichert. HTTP, HTTPS und Ports gelten nach dem naechsten Neustart (reboot).",
+   "scope": "fw"
+  },
+  {
+   "it": "Scrivi i oppure e",
+   "en": "Type i or e",
+   "es": "Escribe i o e",
+   "de": "i oder e eingeben",
+   "scope": "fw"
+  },
+  {
+   "it": "Senza Wi-Fi di casa: hotspot e HTTP restano accesi, il server dell'ora e spento.",
+   "en": "Without home Wi-Fi: hotspot and HTTP stay on, the time service is off.",
+   "es": "Sin Wi-Fi de casa: hotspot y HTTP siguen activos, el servicio de hora esta apagado.",
+   "de": "Ohne Heim-WLAN: Hotspot und HTTP bleiben an, der Zeitdienst ist aus.",
+   "scope": "fw"
+  },
+  {
+   "it": "Serve una password per l'amministratore.",
+   "en": "The administrator needs a password.",
+   "es": "El administrador necesita una contrasena.",
+   "de": "Der Administrator braucht ein Passwort.",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: svc [ap|captive|http|https on|off] [http-port|https-port <numero>]",
+   "en": "Usage: svc [ap|captive|http|https on|off] [http-port|https-port <number>]",
+   "es": "Uso: svc [ap|captive|http|https on|off] [http-port|https-port <numero>]",
+   "de": "Verwendung: svc [ap|captive|http|https on|off] [http-port|https-port <Nummer>]",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: wifi set <rete> [password]",
+   "en": "Usage: wifi set <network> [password]",
+   "es": "Uso: wifi set <red> [contrasena]",
+   "de": "Verwendung: wifi set <Netz> [Passwort]",
+   "scope": "fw"
+  },
+  {
+   "it": "Wi-Fi di casa scollegata: resta l'hotspot",
+   "en": "Home Wi-Fi disconnected: the hotspot stays",
+   "es": "Wi-Fi de casa desconectada: queda el hotspot",
+   "de": "Heim-WLAN getrennt: der Hotspot bleibt",
+   "scope": "fw"
+  },
+  {
+   "it": "Sicurezza: segnala i problemi a paolellad79@gmail.com (risposta entro 7 giorni). Progetto gratuito: gli aggiornamenti non hanno date garantite.",
+   "en": "Security: report problems to paolellad79@gmail.com (answer within 7 days). Free project: updates have no guaranteed dates.",
+   "es": "Seguridad: comunica los problemas a paolellad79@gmail.com (respuesta en 7 dias). Proyecto gratuito: las actualizaciones no tienen fechas garantizadas.",
+   "de": "Sicherheit: melde Probleme an paolellad79@gmail.com (Antwort innerhalb von 7 Tagen). Kostenloses Projekt: Updates ohne garantierte Termine.",
+   "scope": "fw"
+  },
+  {
+   "it": "Software libero gratuito, fornito fuori da attivita commerciale e senza garanzia (GPL-3.0 sezioni 15-16). Riferimenti normativi: comando license notice.",
+   "en": "Free software, free of charge, supplied outside commercial activity and without warranty (GPL-3.0 sections 15-16). Legal references: command license notice.",
+   "es": "Software libre y gratuito, suministrado fuera de actividad comercial y sin garantia (GPL-3.0 secciones 15-16). Referencias normativas: comando license notice.",
+   "de": "Freie Software, kostenlos, ausserhalb einer gewerblichen Taetigkeit und ohne Gewaehr bereitgestellt (GPL-3.0 Abschnitte 15-16). Rechtliche Verweise: Befehl license notice.",
+   "scope": "fw"
+  },
+  {
+   "it": "Hai trovato un problema di sicurezza? Scrivi a paolellad79@gmail.com: risposta entro 7 giorni. Progetto gratuito: gli aggiornamenti non hanno date garantite.",
+   "en": "Found a security problem? Write to paolellad79@gmail.com: answer within 7 days. Free project: updates have no guaranteed dates.",
+   "es": "Has encontrado un problema de seguridad? Escribe a paolellad79@gmail.com: respuesta en 7 dias. Proyecto gratuito: las actualizaciones no tienen fechas garantizadas.",
+   "de": "Sicherheitsproblem gefunden? Schreibe an paolellad79@gmail.com: Antwort innerhalb von 7 Tagen. Kostenloses Projekt: Updates ohne garantierte Termine.",
+   "scope": "web"
+  },
+  {
+   "it": "Software libero e normative",
+   "en": "Free software and regulations",
+   "es": "Software libre y normativas",
+   "de": "Freie Software und Vorschriften",
+   "scope": "web"
+  },
+  {
+   "it": "VesevOS e software libero, gratuito, fornito fuori da un'attivita commerciale e senza garanzia (GPL-3.0, sezioni 15 e 16): lo usi a tuo rischio. Riferimenti: Regolamento (UE) 2024/2847 (Cyber Resilience Act): non si applica al software libero fornito fuori da attivita commerciale (considerando 18 e 19); Direttiva (UE) 2024/2853 sui prodotti difettosi, art. 2, par. 2: esclusi il software libero sviluppato o fornito fuori da attivita commerciale; Direttiva 2014/53/UE (RED) e Regolamento delegato (UE) 2022/30 (EN 18031) e UK PSTI Act 2022: obblighi di chi mette in commercio un apparecchio; Codice civile art. 1229: restano dolo e colpa grave. Se VesevOS diventa un prodotto a pagamento, questi obblighi valgono per quella versione e si dichiarera il periodo di supporto. Non e consulenza legale.",
+   "en": "VesevOS is free software, free of charge, supplied outside a commercial activity and without warranty (GPL-3.0, sections 15 and 16): you use it at your own risk. References: Regulation (EU) 2024/2847 (Cyber Resilience Act): does not apply to free software supplied outside commercial activity (recitals 18 and 19); Directive (EU) 2024/2853 on defective products, Art. 2(2): excludes free software developed or supplied outside commercial activity; Directive 2014/53/EU (RED) and Delegated Regulation (EU) 2022/30 (EN 18031) and UK PSTI Act 2022: obligations of whoever places a device on the market; Italian Civil Code art. 1229: wilful misconduct and gross negligence remain. If VesevOS becomes a paid product, these obligations apply to that version and a support period will be declared. This is not legal advice.",
+   "es": "VesevOS es software libre y gratuito, suministrado fuera de una actividad comercial y sin garantia (GPL-3.0, secciones 15 y 16): lo usas bajo tu propio riesgo. Referencias: Reglamento (UE) 2024/2847 (Cyber Resilience Act): no se aplica al software libre suministrado fuera de actividad comercial (considerandos 18 y 19); Directiva (UE) 2024/2853 sobre productos defectuosos, art. 2, apdo. 2: excluye el software libre desarrollado o suministrado fuera de actividad comercial; Directiva 2014/53/UE (RED) y Reglamento delegado (UE) 2022/30 (EN 18031) y UK PSTI Act 2022: obligaciones de quien comercializa un aparato; Codigo civil italiano art. 1229: quedan el dolo y la culpa grave. Si VesevOS pasa a ser un producto de pago, estas obligaciones valen para esa version y se declarara el periodo de soporte. No es asesoramiento juridico.",
+   "de": "VesevOS ist freie, kostenlose Software, die ausserhalb einer gewerblichen Taetigkeit und ohne Gewaehr bereitgestellt wird (GPL-3.0, Abschnitte 15 und 16): Nutzung auf eigenes Risiko. Verweise: Verordnung (EU) 2024/2847 (Cyber Resilience Act): gilt nicht fuer freie Software ausserhalb einer gewerblichen Taetigkeit (Erwaegungsgruende 18 und 19); Richtlinie (EU) 2024/2853 ueber fehlerhafte Produkte, Art. 2 Abs. 2: schliesst freie Software aus, die ausserhalb einer gewerblichen Taetigkeit entwickelt oder bereitgestellt wird; Richtlinie 2014/53/EU (RED) und Delegierte Verordnung (EU) 2022/30 (EN 18031) sowie UK PSTI Act 2022: Pflichten dessen, der ein Geraet in Verkehr bringt; Italienisches Zivilgesetzbuch Art. 1229: Vorsatz und grobe Fahrlaessigkeit bleiben. Wird VesevOS ein bezahltes Produkt, gelten diese Pflichten fuer jene Version und ein Supportzeitraum wird angegeben. Keine Rechtsberatung.",
+   "scope": "web"
+  },
+  {
+   "it": "Apri il monitor seriale (115200) e scrivi setup: la guida chiede lingua, paese, nome, antenna, hotspot, password, Wi-Fi di casa e ora.",
+   "en": "Open the serial monitor (115200) and type setup: the guide asks for language, country, name, antenna, hotspot, password, home Wi-Fi and time.",
+   "es": "Abre el monitor serie (115200) y escribe setup: la guia pide idioma, pais, nombre, antena, hotspot, contrasena, Wi-Fi de casa y hora.",
+   "de": "Seriellen Monitor (115200) oeffnen und setup eingeben: die Anleitung fragt Sprache, Land, Name, Antenne, Hotspot, Passwort, Heim-WLAN und Uhrzeit ab.",
+   "scope": "web"
+  },
+  {
+   "it": "Configurare solo dalla seriale",
+   "en": "Set up from the serial line only",
+   "es": "Configurar solo desde el puerto serie",
+   "de": "Nur ueber die serielle Schnittstelle einrichten",
+   "scope": "web"
+  },
+  {
+   "it": "Hotspot, HTTP e porte",
+   "en": "Hotspot, HTTP and ports",
+   "es": "Hotspot, HTTP y puertos",
+   "de": "Hotspot, HTTP und Ports",
+   "scope": "web"
+  },
+  {
+   "it": "Hotspot: Home (QR) oppure Servizi > Punto di accesso > Mostra, oppure cavo USB e tasto BOOT tenuto 8 secondi. Pannello: tasto BOOT 8 secondi azzera le password degli amministratori; al prossimo accesso ne scegli una nuova.",
+   "en": "Hotspot: Home (QR) or Services > Access point > Show, or USB cable and BOOT button held for 8 seconds. Panel: BOOT for 8 seconds resets the administrators' passwords; at the next login you choose a new one.",
+   "es": "Hotspot: Inicio (QR) o Servicios > Punto de acceso > Mostrar, o cable USB y boton BOOT 8 segundos. Panel: BOOT 8 segundos restablece las contrasenas de los administradores; en el proximo acceso eliges una nueva.",
+   "de": "Hotspot: Startseite (QR) oder Dienste > Zugangspunkt > Anzeigen, oder USB-Kabel und BOOT-Taste 8 Sekunden. Panel: BOOT 8 Sekunden setzt die Administrator-Passwoerter zurueck; bei der naechsten Anmeldung waehlst du ein neues.",
+   "scope": "web"
+  },
+  {
+   "it": "Servizi > Punto di accesso, HTTP e HTTPS: ogni servizio si accende e si spegne. Almeno un protocollo web resta acceso. Le porte (HTTP 80, HTTPS 443, oppure da 1024 a 65535) valgono dal riavvio. Tasto BOOT 8 secondi: hotspot, HTTP, HTTPS e porte tornano di fabbrica.",
+   "en": "Services > Access point, HTTP and HTTPS: every service can be turned on and off. At least one web protocol stays on. Ports (HTTP 80, HTTPS 443, or 1024 to 65535) apply after a restart. BOOT 8 seconds: hotspot, HTTP, HTTPS and ports return to factory values.",
+   "es": "Servicios > Punto de acceso, HTTP y HTTPS: cada servicio se enciende y se apaga. Siempre queda activo al menos un protocolo web. Los puertos (HTTP 80, HTTPS 443, o de 1024 a 65535) valen tras reiniciar. BOOT 8 segundos: hotspot, HTTP, HTTPS y puertos vuelven a los valores de fabrica.",
+   "de": "Dienste > Zugangspunkt, HTTP und HTTPS: jeder Dienst kann ein- und ausgeschaltet werden. Mindestens ein Webprotokoll bleibt an. Ports (HTTP 80, HTTPS 443 oder 1024 bis 65535) gelten nach einem Neustart. BOOT 8 Sekunden: Hotspot, HTTP, HTTPS und Ports kehren auf Werkseinstellungen zurueck.",
    "scope": "web"
   }
  ]

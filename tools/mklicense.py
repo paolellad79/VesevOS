@@ -4,7 +4,7 @@
 # Il nome del titolare sta in tools/owner.json. Con --headers aggiorna anche la riga Copyright
 # in testa ai sorgenti (solo se il nome e stato impostato).
 # Uso: python3 tools/mklicense.py [--headers]
-import os, sys, json, glob, re
+import os, sys, json, glob, re, gzip
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 own = json.load(open(os.path.join(ROOT, 'tools', 'owner.json'), encoding='utf-8'))
 placeholder = own['name'].startswith('[')
@@ -24,9 +24,10 @@ open(os.path.join(ROOT, 'NOTICE.txt'), 'w', newline='\n').write(notice)
 DOCS = [  # id, titolo, testo
     ('notice', 'Note legali e licenza di VesevOS', notice),
     ('gpl3',   'GNU General Public License v3.0', rd('licenses/GPL-3.0.txt')),
-    ('lgpl3',  'GNU Lesser General Public License v3.0', rd('licenses/LGPL-3.0.txt')),
     ('lgpl21', 'GNU Lesser General Public License v2.1', rd('licenses/LGPL-2.1.txt')),
     ('apache2', 'Apache License 2.0', rd('licenses/Apache-2.0.txt')),
+    ('mit',    'MIT License (PsychicHttp, ArduinoJson, FreeRTOS, posix_tz_db)', rd('licenses/MIT.txt')),
+    ('bsd3',   'BSD 3-Clause License (lwIP, LittleFS)', rd('licenses/BSD-3-Clause.txt')),
 ]
 def cstr(t, step=7000):
     assert ')VOSLIC"' not in t
@@ -39,13 +40,24 @@ def cstr(t, step=7000):
         out.append('R"VOSLIC(%s)VOSLIC"' % t[i:j]); i = j
     return '\n'.join(out)
 h = ['// VesevOS - vos_license_data.h (GENERATO da tools/mklicense.py, solo ASCII)', '#pragma once', '#include <Arduino.h>', '']
+# note legali: testo semplice (si legge anche dalla seriale). Le licenze lunghe: gzip (la pagina le riceve compresse, circa 50 KB di flash in meno).
+ZS = {}
 for i, (id_, title, text) in enumerate(DOCS):
-    h.append('static const char LIC_TEXT_%d[] PROGMEM =\n%s;' % (i, cstr(text)))
+    if id_ == 'notice':
+        h.append('static const char LIC_TEXT_%d[] PROGMEM =\n%s;' % (i, cstr(text)))
+        ZS[i] = 0
+    else:
+        z = gzip.compress(text.encode('ascii'), 9, mtime=0)
+        ZS[i] = len(z)
+        h.append('static const uint8_t LIC_TEXT_%d[] PROGMEM = {' % i)
+        for k in range(0, len(z), 24):
+            h.append('  ' + ','.join('0x%02x' % c for c in z[k:k+24]) + ',')
+        h.append('};')
 h.append('')
-h.append('struct LicDoc { const char* id; const char* title; const char* text; size_t size; };')
+h.append('struct LicDoc { const char* id; const char* title; const char* text; size_t size; size_t zsize; };')
 h.append('static const LicDoc LIC_DOCS[] = {')
 for i, (id_, title, text) in enumerate(DOCS):
-    h.append('  { "%s", "%s", LIC_TEXT_%d, %d },' % (id_, title, i, len(text.encode('ascii'))))
+    h.append('  { "%s", "%s", (const char*)LIC_TEXT_%d, %d, %d },' % (id_, title, i, len(text.encode('ascii')), ZS[i]))
 h.append('};')
 h.append('#define LIC_COUNT %d' % len(DOCS))
 open(os.path.join(ROOT, 'VesevOS', 'vos_license_data.h'), 'w', newline='\n', encoding='ascii').write('\n'.join(h) + '\n')

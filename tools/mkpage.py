@@ -1,27 +1,14 @@
 #!/usr/bin/env python3
-# Genera VesevOS/vos_page.h dalla pagina web/index.html (solo ASCII).
+# Genera VesevOS/vos_page.h dalla pagina web/index.html: pagina COMPRESSA (gzip) in un array di byte.
+# Il browser la riceve con "Content-Encoding: gzip". Il file .h contiene solo numeri (ASCII):
+# i caratteri speciali della pagina (accenti, simboli) restano UTF-8 veri, senza conversioni in &#...;
 # Uso: python3 tools/mkpage.py
-import os
+import os, gzip
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-src = open(os.path.join(ROOT, 'web', 'index.html'), encoding='utf-8').read()
-out = []
-for ch in src:
-    o = ord(ch)
-    out.append(ch if o < 128 else '&#%d;' % o)
-html = ''.join(out)
-assert ')VOSPAGE"' not in html
-# Il raw string literal ha limiti di lunghezza in alcuni compilatori: spezzo in blocchi concatenati
-chunks = []
-step = 8000
-i = 0
-while i < len(html):
-    j = min(i + step, len(html))
-    # non spezzare dentro una riga lunga: cerca newline
-    k = html.rfind('\n', i, j) if j < len(html) else j
-    if k <= i: k = j
-    else: k = k + 1 if j < len(html) else j
-    chunks.append(html[i:k]); i = k
-body = '\n'.join('R"VOSPAGE(%s)VOSPAGE"' % c for c in chunks)
-open(os.path.join(ROOT, 'VesevOS', 'vos_page.h'), 'w', encoding='ascii').write(
-    '// VesevOS - vos_page.h (GENERATO, solo ASCII)\n#pragma once\n#include <Arduino.h>\nstatic const char INDEX_HTML[] PROGMEM =\n%s;\n' % body)
-print('ok', len(html), 'byte,', len(chunks), 'blocchi')
+raw = open(os.path.join(ROOT, 'web', 'index.html'), encoding='utf-8').read().encode('utf-8')
+gz = gzip.compress(raw, 9, mtime=0)
+lines = [','.join('0x%02x' % b for b in gz[i:i + 24]) for i in range(0, len(gz), 24)]
+h = ('// VesevOS - vos_page.h (GENERATO da tools/mkpage.py, non modificare a mano)\n#pragma once\n#include <Arduino.h>\n'
+     'static const size_t INDEX_GZ_LEN = %d;\nstatic const uint8_t INDEX_GZ[] PROGMEM = {\n%s\n};\n') % (len(gz), ',\n'.join(lines))
+open(os.path.join(ROOT, 'VesevOS', 'vos_page.h'), 'w', encoding='ascii', newline='\n').write(h)
+print('ok pagina: %d byte, compressa %d byte' % (len(raw), len(gz)))

@@ -21,3 +21,5 @@ void     netAirplaneOff(const char* why);
 bool     netAirplane();             // true se attiva
 String   netAirplaneText();         // stato leggibile (shell)
 bool     netCaptive();              // portale automatico attivo (modo AP)
+void     netSetApChannel(int ch);   // canale dell'hotspot (rete schede: ricerca del gateway); solo canali ammessi
+bool     netOnAp(uint32_t ip);      // l'indirizzo e nella rete dell'hotspot (192.168.4.x)?

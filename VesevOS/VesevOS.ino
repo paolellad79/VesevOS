@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
-// VesevOS v1.3.4 - ESP32-S3 SuperMini
-// Fase 1 + 2: base, sicurezza, ora/NTP, file. Progetto diviso in piu file (.h/.cpp nella stessa cartella).
+// VesevOS 1.7.2 - ESP32-S3 SuperMini
+// Piccolo sistema operativo: pagina web (HTTPS), shell, utenti, rete tra schede, automazioni. Progetto in piu file.
 //
 // Impostazioni Arduino IDE consigliate:
 //   Scheda: ESP32S3 Dev Module
 //   PSRAM: QSPI PSRAM
 //   USB CDC On Boot: Enabled
 //   Partition Scheme: Minimal SPIFFS (1.9MB APP with OTA/190KB SPIFFS)
-// Librerie: ESP32Async ESPAsyncWebServer + AsyncTCP
+// Librerie da installare (Gestore librerie): PsychicHttp (hoeken, MIT) e ArduinoJson (bblanchon, MIT).
+// ESPAsyncWebServer e AsyncTCP non servono piu dalla 1.7.1.
 #include <Arduino.h>
 #include <LittleFS.h>
 #include "vos_common.h"
@@ -24,24 +25,44 @@
 #include "vos_shell.h"
 #include "vos_i18n.h"
 #include "vos_boot.h"
+#include "vos_audit.h"
+#include "vos_fw.h"
+#include "vos_ble.h"
 
-static void resetPasswordIfBootHeld() {
-  // Tieni premuto BOOT (GPIO0) per 8 secondi a sistema acceso: azzera la password.
+// Tasto BOOT (GPIO0). L'azione si decide quando lo LASCI; intanto il LED dice cosa succedera:
+//   meno di 2 s           : esce dal modo aereo
+//   2-7 s   (LED azzurro)  : spegne il filtro IP (uscita di emergenza)
+//   8-19 s  (LED giallo)   : azzera le password degli amministratori + mostra sulla seriale la password dell'hotspot
+//   20 s o piu (LED rosso) : ripristino di fabbrica (cancella tutto) e riavvio
+static void bootButton() {
   static uint32_t since = 0;
   if (digitalRead(VOS_PIN_BOOT) == LOW) {
     if (since == 0) since = millis();
-    else if (millis() - since > 8000) {
-      vlog("AUTH: reset password da pulsante BOOT");
-      cfg.authSalt = ""; cfg.authHash = ""; cfg.serialAuth = true;
-      cfgSave();
-      serialAuthSet(false);
-      since = 0;
-      ledSetFault(true); delay(1500); ledSetFault(false);
-    }
-  } else {
-    // pressione breve (da 50 ms a 2 s): spegne la modalita aereo
-    if (since && millis() - since >= 50 && millis() - since < 2000 && netAirplane()) netAirplaneOff("tasto BOOT");
-    since = 0;
+    uint32_t held = millis() - since;
+    ledSetHold(held >= 20000 ? 3 : held >= 8000 ? 2 : held >= 2000 ? 1 : 0);
+    return;
+  }
+  if (!since) return;
+  uint32_t held = millis() - since;
+  since = 0;
+  ledSetHold(0);
+  cfgSetOrigin("tasto BOOT");
+  if (held >= 20000) {
+    vlog("SISTEMA: ripristino di fabbrica con il tasto BOOT");
+    cfgFactoryReset(); delay(300); ESP.restart();
+  } else if (held >= 8000) {
+    authResetAdmin();
+    cfg.serialAuth = true;
+    bool svc = cfgSvcRecover();       // hotspot, HTTP, HTTPS e porte standard: si rientra sempre
+    cfgSave();
+    webAllowFirstPass();
+    shellSerialShowPass();
+    ledSetFault(true); delay(1500); ledSetFault(false);
+    if (svc) { delay(300); ESP.restart(); }   // porte e server si applicano al riavvio
+  } else if (held >= 2000) {
+    fwOff("tasto BOOT");
+  } else if (held >= 50 && netAirplane()) {
+    netAirplaneOff("tasto BOOT");
   }
 }
 
@@ -52,20 +73,24 @@ void setup() {
   vlog("%s %s in avvio", VOS_NAME, VOS_VERSION);
   pinsInit();
   pinMode(VOS_PIN_BOOT, INPUT_PULLUP);
-  pinClaim(VOS_PIN_BOOT, "Sistema", "Pulsante BOOT (breve = esce dal modo aereo, 8 s = reset password)", true);
+  pinClaim(VOS_PIN_BOOT, "Sistema", "Pulsante BOOT (breve = modo aereo, 2 s = filtro IP, 8 s = password, 20 s = fabbrica)", true);
 
   if (!LittleFS.begin(true)) { vlog("FS: LittleFS non parte"); }
   if (!cfgLoad()) { vlog("CFG: nessun file, uso i valori iniziali"); cfgSave(); }
 
   langInit();
-  bootRun();   // sys, led, net, time, web, rules: nell'ordine scelto (con le dipendenze)
-  vlog("Pronto. Primo accesso: rete '%s' -> http://192.168.4.1", cfg.apSsid.c_str());
+  auditInit();                                     // controllo della configurazione (allarmi)
+  bootRun();   // sys, led, net, time, web, rules, mqtt, mesh, wd: nell'ordine scelto (con le dipendenze)
+  ledSetSetup(!cfg.setupDone);                     // arcobaleno lento finche la prima configurazione non e finita
+  vlog("Pronto. Rete '%s' -> http://192.168.4.1 (password sulla seriale)", cfg.apSsid.c_str());
 }
 
 void loop() {
   shellSerialPoll();
-  resetPasswordIfBootHeld();
+  bootButton();
+  bleTick();
   pinTestTick();
   bootStable();
+  feedLoopWDT();
   delay(10);
 }

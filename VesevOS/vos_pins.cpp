@@ -3,6 +3,8 @@
 // VesevOS - vos_pins.cpp
 #include "vos_i18n.h"
 #include "vos_pins.h"
+#include "vos_config.h"
+#include "vos_log.h"
 #include "vos_common.h"
 #include <driver/gpio.h>
 #include "vos_util.h"
@@ -18,6 +20,7 @@ void pinsInit() {
 }
 
 bool pinClaim(uint8_t gpio, const char* owner, const char* note, bool fixed) {
+  if (gpio < 49 && cfg.pinNote[gpio].length()) vlog("PIN: GPIO%u e segnato come collegato a '%s' ma %s lo vuole usare", (unsigned)gpio, cfg.pinNote[gpio].c_str(), owner);
   for (int i = 0; i < g_n; i++) {
     if (g_pins[i].gpio == gpio) {
       if (strcmp(g_pins[i].owner, owner) == 0) { g_pins[i].note = note; return true; }
@@ -72,7 +75,8 @@ static bool g_tBlinkOn = false;
 static volatile bool g_rqHas = false;
 static volatile int g_rqPin = -1, g_rqAct = TA_NONE, g_rqPull = 0;
 
-static bool pinExists(int g) { return (g >= 0 && g <= 21) || (g >= 38 && g <= 48); }
+// ESP32-S3: i GPIO 22-25 non esistono, 26-32 sono flash/PSRAM; 33-37 sono liberi con PSRAM quad (SuperMini 2 MB)
+static bool pinExists(int g) { return (g >= 0 && g <= 21) || (g >= 33 && g <= 48); }
 
 const char* pinTestBlock(int g) {
   if (!pinExists(g)) return tr("Pin inesistente su questa scheda");
@@ -81,6 +85,7 @@ const char* pinTestBlock(int g) {
   if (g == 0) return tr("Tasto BOOT");
   if (g == 3 || g == 45 || g == 46) return tr("Pin di avvio: meglio non toccarlo");
   if (pinIsUsed(g) && g != g_tPin) return tr("Gia usato dal sistema");
+  // (se l'utente lo ha segnato come collegato a qualcosa, la prova e permessa ma la pagina avvisa)
   return nullptr;
 }
 
@@ -151,7 +156,7 @@ String pinMapJson() {
     const char* why = pinTestBlock(g);
     String own = "";
     for (int i = 0; i < g_n; i++) if (g_pins[i].gpio == g) own = tr(g_pins[i].owner);
-    j += "{\"g\":" + String(g) + ",\"ok\":" + (why ? "false" : "true") +
+    j += "{\"g\":" + String(g) + ",\"note\":\"" + jsonEscape(cfg.pinNote[g]) + "\",\"ok\":" + (why ? "false" : "true") +
          ",\"why\":\"" + jsonEscape(why ? why : "") + "\",\"owner\":\"" + jsonEscape(own) + "\"}";
   }
   j += "]";
@@ -162,6 +167,23 @@ String pinMapJson() {
 #ifndef SOC_GPIO_PIN_COUNT
 #define SOC_GPIO_PIN_COUNT 49
 #endif
+String pinNotesJson() {
+  String j = "{";
+  bool first = true;
+  for (int g = 0; g < 49; g++) if (cfg.pinNote[g].length()) { if (!first) j += ","; first = false; j += "\"" + String(g) + "\":\"" + jsonEscape(cfg.pinNote[g]) + "\""; }
+  return j + "}";
+}
+
+bool pinNoteSet(int g, const String& name, String& err) {
+  if (!pinExists(g)) { err = tr("Pin inesistente su questa scheda"); return false; }
+  String n = name; n.trim();
+  if (n.length() > 24) { err = tr("Nome troppo lungo (massimo 24 caratteri)"); return false; }
+  for (size_t i = 0; i < n.length(); i++) { unsigned char ch = n[i]; if (ch < 32 || ch > 126 || ch == '"' || ch == '\'' || ch == '\\') { err = tr("Nome: solo lettere, numeri, spazio e simboli semplici (niente apici)"); return false; } }
+  cfg.pinNote[g] = n;
+  cfgSave();
+  return true;
+}
+
 String pinBoardJson() {
   int valid = 0, out = 0;
   for (int g = 0; g < SOC_GPIO_PIN_COUNT; g++) {

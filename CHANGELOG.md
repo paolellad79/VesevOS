@@ -1,5 +1,54 @@
 # Cronologia delle versioni
 
+## 1.7.2 (ottobre 2026) - "BASE"
+- **Primo avvio**: il banner con la password dell'hotspot resta finche la guida non e finita (ad ogni apertura del monitor seriale e ogni 30 s);
+  il Wi-Fi salvato da solo non fa piu risultare la scheda "configurata". Comando seriale `ap`.
+- **Menu riordinati**: Periferiche (ex Hardware: Pin, LED); Servizi (Punto di accesso, HTTP, HTTPS, MQTT, Rete tra schede, Automazioni, Task,
+  Watchdog, Avvio, Terminale); Sistema (Stato, File, Ora, Localizzazione con la lingua, Log, Config, Accessibilita, Note legali, Aiuto);
+  Sicurezza (Password con seriale, Utenti, Filtro IP, Compliant, ex Controlli).
+- **Pagina di accesso con data, ora e fuso** della scheda e avviso se l'ora e diversa da quella del dispositivo.
+- **QR in Home**: hotspot = QR Wi-Fi con stampa; modo cliente = QR con l'indirizzo. Tolto dalla guida. Interruttore Admin per nasconderlo.
+- **Servizio Punto di accesso, HTTP e porte** (tab nuovi): ogni servizio acceso/spento, porte HTTP/HTTPS configurabili (dal riavvio), almeno un
+  protocollo web sempre acceso, HTTP-solo permesso con avviso, recupero con BOOT 8 s. Portale automatico solo con HTTP sulla porta 80.
+- **Guida**: nuovo ordine (... hotspot, Wi-Fi di casa, ora). Senza Wi-Fi: NTP spento e ora a mano (avviso: niente batteria per l'orologio).
+  Con Wi-Fi: indirizzo nuovo con QR e, al primo accesso dalla rete di casa, si spengono hotspot, portale automatico e HTTP. Avviso in Home
+  se il collegamento fallisce.
+- **Configurazione solo da seriale**: comando `setup` guidato, `wifi set|off`, `ntp on|off`, `svc ...`.
+- **Pin**: schema fronte/retro ridisegnato dalla foto, funzioni e avvisi per pin, **inventario** "collegato a" salvato nella configurazione;
+  GP33-37 ora ammessi.
+- **RAM e spazio**: registro (18 KB) in PSRAM, HTTP con 3 collegamenti, licenze lunghe compresse (gzip) nel firmware.
+- **Legale**: tolto l'impegno di supporto di 2 anni (progetto gratuito, senza date garantite); riferimenti normativi in NOTICE, Note legali,
+  manuale, SECURITY.md; semaforo CRA verde finche gratuito.
+- Manuale it/en: capitoli 12-14.
+
+## 1.7.1 (4 ottobre 2026)
+- **Prima configurazione guidata** (LED arcobaleno lento): lingua, password del pannello, paese sulla mappa, nome, ora, antenna,
+  password dell'hotspot con QR ed etichetta da stampare, Wi-Fi di casa. Alla fine i servizi restano spenti.
+- **Password dell'hotspot casuale** e diversa per ogni scheda (niente piu `vesevos123`), mostrata sulla seriale con la
+  **schermata di benvenuto** (lingua con i tasti 1 e 2) e nella pagina (Rete > Punto di accesso, con QR). Spiegato il motivo legale
+  (UE RED/EN 18031, CRA; UK PSTI). Nessuna password di fabbrica per il pannello: si sceglie al primo accesso.
+- **Accesso senza password in chiaro**: prova HMAC con numero casuale. **Utenti** (fino a 8) con ruoli Amministratore, Operatore, Ospite,
+  controllati dalla scheda (anche nel terminale).
+- **HTTPS** (server PsychicHttp): certificato unico creato dalla scheda (ECDSA), impronta in pagina e seriale, certificato tuo facoltativo.
+  Dalla rete di casa la pagina passa da sola a https; dall'hotspot resta http (rete gia cifrata).
+- **Filtro IP** con regola in prova per 2 minuti e conferma; uscite di emergenza (`firewall off`, BOOT 2-7 s).
+- **Controlli della configurazione** (Sicurezza > Controlli): allarmi rossi (corretti subito) e gialli, registro di chi ha cambiato cosa,
+  anche le modifiche fatte fuori dal pannello.
+- **Localizzazione** (Sistema): paese con mappa del mondo SVG con zoom, canali e potenza della radio secondo il paese, antenna interna/esterna
+  con guadagno, fuso, server dell'ora, formati, separatore decimale, primo giorno della settimana. Dati comuni (249 paesi) dentro il firmware.
+- **Servizi** (nuova categoria): MQTT (spostato qui, ora anche **mqtts** con certificato del broker), **rete tra schede ESP-NOW**
+  (messaggi firmati, fino a 3 salti, ruoli nodo/gateway/sensore), **Bluetooth** per configurare dal telefono (solo a mano, 10 minuti, codice).
+  Tutti spenti di fabbrica: la prima volta si accendono a mano.
+- **Watchdog**: servizi bloccati, rete assente, RAM bassa, riavvio programmato; massimo 3 riavvii automatici in un'ora.
+- **Tasto BOOT** quando lo lasci: <2 s modo aereo, 2-7 s filtro IP spento (azzurro), 8-19 s password azzerate (giallo), 20 s fabbrica (rosso).
+- **Lingue**: inglese dentro il firmware con l'italiano; ogni lingua ha la sua bandiera (SVG) e il codice locale; menu delle lingue con bandiere.
+- **Note legali** (Sistema): licenze, elenco del software usato (SBOM), dati salvati, sicurezza, regole radio. Comando `legal`.
+- Manuale nuovo (`docs/manuale.md`, `docs/manual.en.md`) e pagina Aiuto (`#aiuto`). Nuovi file SECURITY.md (2 anni di aggiornamenti
+  di sicurezza), SBOM.spdx.json; COMMERCIAL.md con il kit LGPL; CONTRIBUTING.md con l'accordo per i contributi (CLA).
+- Il menu in alto a destra dice **Logout**. Corretto il simbolo `&#183;` che compariva come testo: la pagina ora e compressa (gzip).
+- Librerie: **PsychicHttp** e **ArduinoJson** al posto di ESPAsyncWebServer e AsyncTCP.
+- Strumenti: `tools/stub/compila.sh` (controllo di tutti i file senza scheda), `tools/mkcommon.py` (dati dei paesi), prova della pagina `tools/webtest/smoke171.js`.
+
 ## 1.7.0 (3 ottobre 2026)
 - **MQTT** (Rete > MQTT): la scheda invia il suo stato (CPU, temperatura, RAM, segnale, IP...) a un broker e riceve comandi
   sull'argomento `<prefisso>/cmd` (le stesse azioni delle Automazioni: `led-color ff0000`, `gpio 4 1`, `reboot`...), con risposta su `cmd/result`.

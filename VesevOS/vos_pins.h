@@ -28,4 +28,8 @@ bool   pinTestRequest(int gpio, const String& action, const String& pull, String
 void   pinTestTick();          // da chiamare spesso (nel loop)
 String pinTestJson();          // pin in prova, azione, secondi rimasti, livello letto
 String pinMapJson();           // per ogni GPIO: provabile oppure no, e perche
+String pinNotesJson();           // inventario: {"5":"sensore porta",...}
+bool   pinNoteSet(int gpio, const String& name, String& err);   // nome libero ("collegato a"), vuoto = cancella
+String pinNotesJson();           // inventario: {"5":"sensore porta",...}
+bool   pinNoteSet(int gpio, const String& name, String& err);   // nome libero ("collegato a"), vuoto = cancella
 String pinBoardJson();         // chip, numero GPIO del chip, nome scheda (rilevamento automatico)

@@ -1,0 +1,225 @@
+{
+ "spdxVersion": "SPDX-2.3",
+ "dataLicense": "CC0-1.0",
+ "SPDXID": "SPDXRef-DOCUMENT",
+ "name": "VesevOS-1.7.2",
+ "documentNamespace": "https://github.com/paolellad79/VesevOS/spdx/1.7.2",
+ "creationInfo": {
+  "created": "2026-10-04T00:00:00Z",
+  "creators": [
+   "Person: Domenico Paolella",
+   "Tool: tools/mkcommon.py"
+  ]
+ },
+ "hasExtractedLicensingInfos": [
+  {
+   "licenseId": "LicenseRef-VesevOS-Commercial",
+   "extractedText": "Licenza commerciale VesevOS, vedi COMMERCIAL.md",
+   "name": "VesevOS Commercial"
+  },
+  {
+   "licenseId": "LicenseRef-PublicDomain",
+   "extractedText": "Public domain",
+   "name": "Public Domain"
+  }
+ ],
+ "packages": [
+  {
+   "SPDXID": "SPDXRef-Package-0",
+   "name": "VesevOS",
+   "versionInfo": "1.7.2",
+   "downloadLocation": "https://github.com/paolellad79/VesevOS",
+   "licenseConcluded": "GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial",
+   "licenseDeclared": "GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial",
+   "copyrightText": "NOASSERTION",
+   "filesAnalyzed": false
+  },
+  {
+   "SPDXID": "SPDXRef-Package-1",
+   "name": "Arduino-ESP32 core",
+   "versionInfo": "3.3.x",
+   "downloadLocation": "https://github.com/espressif/arduino-esp32",
+   "licenseConcluded": "LGPL-2.1-or-later",
+   "licenseDeclared": "LGPL-2.1-or-later",
+   "copyrightText": "NOASSERTION",
+   "filesAnalyzed": false
+  },
+  {
+   "SPDXID": "SPDXRef-Package-2",
+   "name": "ESP-IDF (esp_wifi, esp_now, esp-mqtt, esp_http_server, esp_https_server, NVS)",
+   "versionInfo": "5.5",
+   "downloadLocation": "https://github.com/espressif/esp-idf",
+   "licenseConcluded": "Apache-2.0",
+   "licenseDeclared": "Apache-2.0",
+   "copyrightText": "NOASSERTION",
+   "filesAnalyzed": false
+  },
+  {
+   "SPDXID": "SPDXRef-Package-3",
+   "name": "Mbed TLS",
+   "versionInfo": "3.6",
+   "downloadLocation": "https://github.com/Mbed-TLS/mbedtls",
+   "licenseConcluded": "Apache-2.0",
+   "licenseDeclared": "Apache-2.0",
+   "copyrightText": "NOASSERTION",
+   "filesAnalyzed": false
+  },
+  {
+   "SPDXID": "SPDXRef-Package-4",
+   "name": "FreeRTOS",
+   "versionInfo": "ESP-IDF 5.5",
+   "downloadLocation": "https://www.freertos.org",
+   "licenseConcluded": "MIT",
+   "licenseDeclared": "MIT",
+   "copyrightText": "NOASSERTION",
+   "filesAnalyzed": false
+  },
+  {
+   "SPDXID": "SPDXRef-Package-5",
+   "name": "lwIP",
+   "versionInfo": "ESP-IDF 5.5",
+   "downloadLocation": "https://savannah.nongnu.org/projects/lwip",
+   "licenseConcluded": "BSD-3-Clause",
+   "licenseDeclared": "BSD-3-Clause",
+   "copyrightText": "NOASSERTION",
+   "filesAnalyzed": false
+  },
+  {
+   "SPDXID": "SPDXRef-Package-6",
+   "name": "LittleFS",
+   "versionInfo": "core 3.3",
+   "downloadLocation": "https://github.com/littlefs-project/littlefs",
+   "licenseConcluded": "BSD-3-Clause",
+   "licenseDeclared": "BSD-3-Clause",
+   "copyrightText": "NOASSERTION",
+   "filesAnalyzed": false
+  },
+  {
+   "SPDXID": "SPDXRef-Package-7",
+   "name": "NimBLE (Apache Mynewt)",
+   "versionInfo": "core 3.3",
+   "downloadLocation": "https://github.com/apache/mynewt-nimble",
+   "licenseConcluded": "Apache-2.0",
+   "licenseDeclared": "Apache-2.0",
+   "copyrightText": "NOASSERTION",
+   "filesAnalyzed": false
+  },
+  {
+   "SPDXID": "SPDXRef-Package-8",
+   "name": "PsychicHttp",
+   "versionInfo": "3.1.2",
+   "downloadLocation": "https://github.com/hoeken/PsychicHttp",
+   "licenseConcluded": "MIT",
+   "licenseDeclared": "MIT",
+   "copyrightText": "NOASSERTION",
+   "filesAnalyzed": false
+  },
+  {
+   "SPDXID": "SPDXRef-Package-9",
+   "name": "ArduinoJson",
+   "versionInfo": "7.x",
+   "downloadLocation": "https://github.com/bblanchon/ArduinoJson",
+   "licenseConcluded": "MIT",
+   "licenseDeclared": "MIT",
+   "copyrightText": "NOASSERTION",
+   "filesAnalyzed": false
+  },
+  {
+   "SPDXID": "SPDXRef-Package-10",
+   "name": "Natural Earth (confini dei paesi)",
+   "versionInfo": "5.1",
+   "downloadLocation": "https://www.naturalearthdata.com",
+   "licenseConcluded": "LicenseRef-PublicDomain",
+   "licenseDeclared": "LicenseRef-PublicDomain",
+   "copyrightText": "NOASSERTION",
+   "filesAnalyzed": false
+  },
+  {
+   "SPDXID": "SPDXRef-Package-11",
+   "name": "IANA tz database (fusi orari)",
+   "versionInfo": "2025+",
+   "downloadLocation": "https://www.iana.org/time-zones",
+   "licenseConcluded": "LicenseRef-PublicDomain",
+   "licenseDeclared": "LicenseRef-PublicDomain",
+   "copyrightText": "NOASSERTION",
+   "filesAnalyzed": false
+  },
+  {
+   "SPDXID": "SPDXRef-Package-12",
+   "name": "posix_tz_db (fusi in formato POSIX)",
+   "versionInfo": "2025",
+   "downloadLocation": "https://github.com/nayarsystems/posix_tz_db",
+   "licenseConcluded": "MIT",
+   "licenseDeclared": "MIT",
+   "copyrightText": "NOASSERTION",
+   "filesAnalyzed": false
+  }
+ ],
+ "relationships": [
+  {
+   "spdxElementId": "SPDXRef-DOCUMENT",
+   "relationshipType": "DESCRIBES",
+   "relatedSpdxElement": "SPDXRef-Package-0"
+  },
+  {
+   "spdxElementId": "SPDXRef-Package-0",
+   "relationshipType": "DEPENDS_ON",
+   "relatedSpdxElement": "SPDXRef-Package-1"
+  },
+  {
+   "spdxElementId": "SPDXRef-Package-0",
+   "relationshipType": "DEPENDS_ON",
+   "relatedSpdxElement": "SPDXRef-Package-2"
+  },
+  {
+   "spdxElementId": "SPDXRef-Package-0",
+   "relationshipType": "DEPENDS_ON",
+   "relatedSpdxElement": "SPDXRef-Package-3"
+  },
+  {
+   "spdxElementId": "SPDXRef-Package-0",
+   "relationshipType": "DEPENDS_ON",
+   "relatedSpdxElement": "SPDXRef-Package-4"
+  },
+  {
+   "spdxElementId": "SPDXRef-Package-0",
+   "relationshipType": "DEPENDS_ON",
+   "relatedSpdxElement": "SPDXRef-Package-5"
+  },
+  {
+   "spdxElementId": "SPDXRef-Package-0",
+   "relationshipType": "DEPENDS_ON",
+   "relatedSpdxElement": "SPDXRef-Package-6"
+  },
+  {
+   "spdxElementId": "SPDXRef-Package-0",
+   "relationshipType": "DEPENDS_ON",
+   "relatedSpdxElement": "SPDXRef-Package-7"
+  },
+  {
+   "spdxElementId": "SPDXRef-Package-0",
+   "relationshipType": "DEPENDS_ON",
+   "relatedSpdxElement": "SPDXRef-Package-8"
+  },
+  {
+   "spdxElementId": "SPDXRef-Package-0",
+   "relationshipType": "DEPENDS_ON",
+   "relatedSpdxElement": "SPDXRef-Package-9"
+  },
+  {
+   "spdxElementId": "SPDXRef-Package-0",
+   "relationshipType": "DEPENDS_ON",
+   "relatedSpdxElement": "SPDXRef-Package-10"
+  },
+  {
+   "spdxElementId": "SPDXRef-Package-0",
+   "relationshipType": "DEPENDS_ON",
+   "relatedSpdxElement": "SPDXRef-Package-11"
+  },
+  {
+   "spdxElementId": "SPDXRef-Package-0",
+   "relationshipType": "DEPENDS_ON",
+   "relatedSpdxElement": "SPDXRef-Package-12"
+  }
+ ]
+}
