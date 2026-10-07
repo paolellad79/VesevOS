@@ -173,7 +173,7 @@ body[data-role="0"] .op,body[data-role="0"] .adm,body[data-role="1"] .adm{displa
 .hlp h4{margin:14px 0 4px}.hlp p{margin:4px 0}
 @media print{body *{visibility:hidden}.prt,.prt *{visibility:visible}.prt{position:absolute;left:0;top:0}}
 .sc{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:8px 0 12px}.svb{display:inline-flex;align-items:center;gap:7px;padding:4px 13px;border-radius:14px;font-weight:600;font-size:13px}.svb::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}.svb.ok{background:var(--okbg);color:var(--ok)}.svb.ko{background:var(--kobg);color:var(--ko)}
-.svi{display:flex;gap:8px}.sib{--c:var(--mut);width:40px;height:40px;border-radius:10px;border:2px solid var(--c);background:transparent;color:var(--c);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;margin:0}.sib svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.sib.act{background:var(--c);color:#fff}.sib:disabled{--c:var(--mut);background:transparent;color:var(--mut);opacity:.4;cursor:default}.sib.go{--c:#16a34a}.sib.st{--c:#dc2626}.sib.rs{--c:#d99a00}.sib.ap{--c:#2563eb}
+.svi{display:flex;gap:8px}.sib{--c:var(--mut);width:40px;height:40px;border-radius:10px;border:2px solid var(--c);background:transparent;color:var(--c);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;margin:0}.sib svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.sib.act{background:var(--c);color:#fff}.sib:disabled{--c:var(--mut);background:transparent;color:var(--mut);opacity:.4;cursor:default}.sib.sm{width:32px;height:32px;border-radius:8px}.sib.sm svg{width:18px;height:18px}.sib.go{--c:#16a34a}.sib.st{--c:#dc2626}.sib.rs{--c:#d99a00}.sib.ap{--c:#2563eb}
 .wid .wt svg{width:16px;height:16px;vertical-align:-3px;margin-right:5px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.lloc{padding:8px 12px;border-top:1px solid var(--bd);font-size:12px;color:var(--mut)}
 </style></head>
 <body>
@@ -915,7 +915,8 @@ function rSer(r){var tg=r.tk=="time"?"time "+r.h+" "+r.d:r.tk=="every"||r.tk=="a
  return(r.on?1:0)+"|"+rClean(r.name)+"|"+tg+"|"+cd+"|"+r.acts.map(aSer).join(";")}
 function dayText(m){if(m=="1111111")return t("ogni giorno");if(m=="1111100")return t("dal lunedi al venerdi");if(m=="0000011")return t("sabato e domenica");
  var o=[];for(var i=0;i<7;i++)if(m[i]=="1")o.push(t(DAYS[i][1]));return o.join(", ")}
-function durText(n){return n%3600==0?tf("{0} h",n/3600):n%60==0?tf("{0} min",n/60):tf("{0} s",n)}
+function durU(k,x){return k==0?tf("{0} g",x):k==1?tf("{0} h",x):k==2?tf("{0} min",x):tf("{0} s",x)}
+function durText(n){n=Math.max(0,Math.round(n));var v=[Math.floor(n/86400),Math.floor(n/3600)%24,Math.floor(n/60)%60,n%60],i=0,r=[];while(i<3&&!v[i])i++;for(var k=i;k<Math.min(i+2,4);k++)if(v[k]||!r.length)r.push(durU(k,v[k]));return r.join(" ")}
 function aText(a){switch(a.k){case"mq":return tf("MQTT: invia \"{1}\" su {0}",a.p,a.v);case"air":return tf("modo aereo: {0}",lk(AIRO,a.v));case"color":return tf("LED colore #{0}",String(a.v).replace("#",""));
  case"ledmode":return tf("LED: {0}",lk(LEDM,a.v));
  case"bright":return tf("luminosita LED {0}",a.v);
@@ -1106,7 +1107,8 @@ setInterval(hdTick,1000);
 function wid(tt,v,sub,go,ic){return'<div class="wid" role="button" tabindex="0" onclick="show(\''+go+'\')" onkeydown="if(event.key==\'Enter\')show(\''+go+'\')"><div class="wt"><svg class="i" aria-hidden="true"><use href="#'+ic+'"/></svg>'+esc(tt)+'</div><div class="wv">'+v+'</div>'+(sub?'<div class="ws">'+sub+'</div>':"")+'</div>'}
 function homeWid(s,n){hwFetch();if(!SV.httpPort)svcLoad();
  var W=HW||{},pill=function(on,a,b){return'<span class="pill'+(on?" a":"")+'">'+esc(on?a:b)+'</span>'},c=[],now=Math.floor(Date.now()/1000);
- if(SV.httpOn||SV.httpsOn)c.push(wid("HTTP / HTTPS",(SV.httpsOn?"HTTPS "+SV.httpsPort:"")+(SV.httpsOn&&SV.httpOn?" · ":"")+(SV.httpOn?"HTTP "+SV.httpPort:""),"","https",SV.httpsOn?"i-lock":"i-globe"));
+ if(SV.httpOn)c.push(wid("HTTP",esc(tf("Porta: {0}",SV.httpPort)),"","http","i-globe"));
+ if(SV.httpsOn)c.push(wid("HTTPS",esc(tf("Porta: {0}",SV.httpsPort)),"","https","i-lock"));
  if(s.mqtt)c.push(wid("MQTT",pill(s.mqtt==2,t("collegato"),t("non collegato")),"","mqtt","i-mqtt"));
  if(W.mesh)c.push(wid("ESP-NOW",esc(t(MROLE[W.role]||"Nodo")),esc(t("Schede vicine"))+": "+W.nodes,"mesh","i-mesh"));
  if(n.mdnsRun)c.push(wid("mDNS",esc(n.fqdn),"","mdns","i-tag"));
@@ -1392,7 +1394,7 @@ function tkDraw(){var c=TK.col,k=TK.asc?1:-1,d=TK.d.slice();
  h+="<th></th></tr>";
  d.forEach(function(x){h+="<tr><td>"+esc(x.n)+"</td><td><span class='pill "+(x.t==2?"a":x.t==1?"v":"")+"'>"+esc(tkType(x))+"</span></td><td>"+esc(tkState(x.s))+"</td><td>"+x.p+"</td><td>"+x.stk+" B</td>"+
   (TK.hasCpu?"<td>"+(x.cpu<0?"-":"<span class='cbar'><i style='width:"+x.cpu+"%'></i></span>"+x.cpu.toFixed(0)+"%")+"</td>":"")+
-  "<td class='tkb'>"+(x.k?(x.s==9?"<button class='btn sm' onclick=\"tkRestart('"+esc(x.n)+"')\"><svg class='i' aria-hidden='true'><use href='#i-play'/></svg>"+esc(t("Avvia"))+"</button>":"<button class='btn gray sm' onclick=\"tkRestart('"+esc(x.n)+"')\"><svg class='i' aria-hidden='true'><use href='#i-reboot'/></svg>"+esc(t("Riavvia"))+"</button><button class='btn red sm' onclick=\"tkKill('"+esc(x.n)+"')\"><svg class='i' aria-hidden='true'><use href='#i-stop'/></svg>"+esc(t("Ferma"))+"</button>"):"<span title='"+esc(t("Protetto"))+"' style='color:var(--mut)'>&#128274;</span>")+"</td></tr>"});
+  "<td class='tkb'>"+(x.k?"<span class='svi'>"+sibB("sm go","i-sgo",t("Avvia"),x.s!=9,0,x.s==9?"tkRestart('"+esc(x.n)+"')":"")+sibB("sm st","i-sst",t("Ferma"),x.s==9,0,x.s==9?"":"tkKill('"+esc(x.n)+"')")+sibB("sm rs","i-srs",t("Riavvia"),0,x.s==9,"tkRestart('"+esc(x.n)+"')")+"</span>":"<span title='"+esc(t("Protetto"))+"' style='color:var(--mut)'>&#128274;</span>")+"</td></tr>"});
  $("tktab").innerHTML=h;$("tkinfo").textContent=tf("{0} task. Clicca un titolo per ordinare.",d.length)}
 function tkKill(n){dlg({title:tf("Fermare il task {0}?",n),body:'<p style="margin:0">'+esc(t("Alcune funzioni smettono di funzionare finche non lo riavvii (pulsante Avvia o comando start)."))+'</p>',ok:t("Ferma"),danger:true,
  onOk:function(){return post("/api/taskkill",{name:n}).then(function(r){return r.json()}).then(function(j){if(j.ok){msg("tkm",tf("Task '{0}' fermato",n),true);tkPoll()}return j.ok?"":j.err})}})}
@@ -1846,8 +1848,9 @@ var SVT={ap:{set:svcSet("apOn","svm_ap")},dhcp:{set:svcSet("dhcpOn","svm_dhcp")}
  power:{set:function(v){return pwSave(v)}},
  mfa:{set:function(v){return v?mfBegin():mfOff(-1)},cls:""}},SVS={};
 function svcSt(id,on,pend,run){SVS[id]={on:!!on,pend:!!pend,run:run===undefined?!!on:!!run,busy:""};svcCtl(id)}
+function sibB(cls,ic,lab,act,dis,oc){return'<button type="button" class="sib '+cls+(act?" act":"")+'"'+(oc?' onclick="'+oc+'"':"")+(dis?" disabled":"")+' aria-label="'+esc(lab)+'" title="'+esc(lab)+'" aria-pressed="'+(act?"true":"false")+'"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#'+ic+'"/></svg></button>'}
 function svcCtl(id){var e=$("sc_"+id),d=SVT[id],s=SVS[id];if(!e||!d||!s)return;var b=s.busy,
- B=function(k,cls,ic,lab,act,dis){return'<button type="button" class="sib '+cls+(act?" act":"")+'" onclick="svcAct(\''+id+'\',\''+k+'\')"'+(dis?" disabled":"")+' aria-label="'+esc(lab)+'" title="'+esc(lab)+'" aria-pressed="'+(act?"true":"false")+'"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#'+ic+'"/></svg></button>'};
+ B=function(k,cls,ic,lab,act,dis){return sibB(cls,ic,lab,act,dis,"svcAct('"+id+"','"+k+"')")};
  e.innerHTML='<div class="svb '+(s.run?"ok":"ko")+'" role="status">'+esc(s.run?t("Avviato"):t("Fermo"))+'</div><div class="svi '+(d.cls||"adm")+'" role="group" aria-label="'+esc(t("Controlli del servizio"))+'">'+
   B("go","go","i-sgo",t("Avvia"),b?b=="go":s.on)+B("st","st","i-sst",t("Ferma"),b?b=="st":!s.on)+B("rs","rs","i-srs",t("Riavvia"),b=="rs",!d.rs||!s.on)+(d.ap?B("ap","ap","i-sap",t("Applica"),b=="ap",!s.pend):"")+'</div>'}
 function svcAct(id,k){var d=SVT[id],s=SVS[id];if(!d||!s||s.busy)return;if(k=="go"&&s.on||k=="st"&&!s.on)return;s.busy=k;svcCtl(id);var p=k=="rs"?d.rs():k=="ap"?uReboot():d.set(k=="go");

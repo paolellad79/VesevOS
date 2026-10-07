@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
-// VesevOS 1.7.5 - ESP32-S3 SuperMini
+// VesevOS 1.7.6 - ESP32-S3 SuperMini
 // Piccolo sistema operativo: pagina web (HTTPS), shell, utenti, rete tra schede, automazioni. Progetto in piu file.
 //
 // Impostazioni Arduino IDE consigliate:

@@ -1,4 +1,4 @@
-# VesevOS 1.7.5 - Manual
+# VesevOS 1.7.6 - Manual
 
 Manual for people who use the board. Plain words, no programming.
 Versione italiana: [manuale.md](manuale.md). The same help is in the board's page (System > Help, or `http://192.168.4.1/#aiuto`).
@@ -110,7 +110,7 @@ apply to that version and a support period will be declared.
 Type `help`. New commands: `welcome`, `ap`, `user`, `passwd`, `locale`, `firewall`, `audit`, `watchdog`, `mesh`, `ble`, `cert`, `legal`.
 On the serial, at an empty line, keys `1` and `2` change language.
 
-## 12. Menus, hotspot, HTTP/HTTPS, ports and end of the guide (new in 1.7.3, 1.7.4 and 1.7.5)
+## 12. Menus, hotspot, HTTP/HTTPS, ports and end of the guide (new in 1.7.3, 1.7.4, 1.7.5 and 1.7.6)
 **Where things are**
 - **Home**: rings (CPU with speed and temperature, RAM, PSRAM, files, Wi-Fi), a second row with one icon widget for each running service (the IP address is under the Wi-Fi widget; time and date are in the header; the Location shows when you click the flag) (HTTP/S, MQTT, ESP-NOW, mDNS, Bluetooth, NTP, DHCP, hotspot, power saving, statistics); click opens the service page. **Network**: Wi-Fi, IP address, name, airplane mode.
 - **Services**: Access point (AP), HTTP, HTTPS, MQTT, Board network, Automations, Tasks, Watchdog, Boot, Terminal.
@@ -122,6 +122,7 @@ On the serial, at an empty line, keys `1` and `2` change language.
 - At the top there is the **status banner**: **Started** (green) or **Stopped** (red). Below, four icons with a coloured background for the state: **Start** (green), **Stop** (red), **Restart** (yellow, grey when the service is stopped or cannot restart), **Apply** (blue, HTTP and HTTPS only).
 - HTTP and HTTPS: changes (on, off, ports) take effect after **Apply**, which restarts the board (with confirmation).
 - Applies to: Access point, DHCP, DNS (captive portal), mDNS, HTTP, HTTPS, MQTT, Board network, Statistics, NTP, Bluetooth, Power saving, MFA.
+- **Tasks** (System > Diagnostics): each task has the same Start / Stop / Restart icons; Restart is grey when the task is stopped; protected tasks show a lock.
 
 **The user always chooses.** Every service can be turned on and off. Three guard rails remain: (1) you cannot lock yourself out: at least one
 web protocol (HTTP or HTTPS) stays on, and BOOT 8 seconds restores hotspot, HTTP, HTTPS and ports to factory values; (2) the country's radio

@@ -1,4 +1,4 @@
-# VesevOS 1.7.5 - Manuale
+# VesevOS 1.7.6 - Manuale
 
 Manuale per chi usa la scheda. Parole semplici, niente programmazione.
 English version: [manual.en.md](manual.en.md). Lo stesso aiuto e nella pagina della scheda (Sistema > Aiuto, oppure `http://192.168.4.1/#aiuto`).
@@ -110,7 +110,7 @@ Se VesevOS diventa un prodotto a pagamento, questi obblighi valgono per quella v
 Scrivi `help`. Comandi nuovi: `welcome`, `ap`, `user`, `passwd`, `locale`, `firewall`, `audit`, `watchdog`, `mesh`, `ble`, `cert`, `legal`.
 Sulla seriale, a riga vuota, i tasti `1` e `2` cambiano lingua.
 
-## 12. Menu, hotspot, HTTP/HTTPS, porte e fine della guida (novita 1.7.3, 1.7.4 e 1.7.5)
+## 12. Menu, hotspot, HTTP/HTTPS, porte e fine della guida (novita 1.7.3, 1.7.4, 1.7.5 e 1.7.6)
 **Dove si trova cosa**
 - **Home**: anelli (CPU con velocita e temperatura, RAM, PSRAM, file, Wi-Fi), in seconda fila un widget con icona per ogni servizio acceso (l'indirizzo IP sta sotto il widget Wi-Fi; ora e data sono nella testata; la Posizione si vede cliccando la bandiera) (HTTP/S, MQTT, ESP-NOW, mDNS, Bluetooth, NTP, DHCP, hotspot, risparmio energia, statistiche); il clic apre la scheda del servizio. **Rete**: Wi-Fi, indirizzo IP, nome, modo aereo.
 - **Servizi**: Punto di accesso (AP), HTTP, HTTPS, MQTT, Rete tra schede, Automazioni, Task, Watchdog, Avvio, Terminale.
@@ -122,6 +122,7 @@ Sulla seriale, a riga vuota, i tasti `1` e `2` cambiano lingua.
 - In alto c'e il **banner di stato**: **Avviato** (verde) o **Fermo** (rosso). Sotto, quattro icone con il fondo colorato per lo stato: **Avvia** (verde), **Ferma** (rosso), **Riavvia** (giallo, grigio se il servizio e fermo o non si puo riavviare), **Applica** (blu, solo HTTP e HTTPS).
 - HTTP e HTTPS: le modifiche (accendere, spegnere, porte) valgono dopo **Applica**, che riavvia la scheda (con conferma).
 - Vale per: Punto di accesso, DHCP, DNS (portale automatico), mDNS, HTTP, HTTPS, MQTT, Rete tra schede, Statistiche, NTP, Bluetooth, Risparmio energia, MFA.
+- **Task** (Sistema > Diagnostica): ogni task ha le stesse icone Avvia / Ferma / Riavvia; Riavvia e grigio se il task e fermo; i task protetti mostrano il lucchetto.
 
 **L'utente sceglie sempre.** Ogni servizio si accende e si spegne. Restano tre paletti: (1) non puoi restare chiuso fuori: almeno un
 protocollo web (HTTP o HTTPS) resta acceso, e BOOT 8 secondi rimette hotspot, HTTP, HTTPS e porte di fabbrica; (2) le regole radio

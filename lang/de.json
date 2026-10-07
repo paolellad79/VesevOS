@@ -1517,4 +1517,6 @@
 "Controlli del servizio":"Dienststeuerung",
 "Salvato: vale dopo Applica":"Gespeichert: gilt nach Anwenden",
 "Le modifiche valgono dopo Applica (riavvia la scheda).":"Aenderungen gelten nach Anwenden (Board startet neu).",
-"Modo (si applica con Avvia)":"Modus (gilt mit Start)"}
+"Modo (si applica con Avvia)":"Modus (gilt mit Start)",
+"Porta: {0}":"Port: {0}",
+"{0} g":"{0} T"}

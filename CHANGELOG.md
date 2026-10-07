@@ -1,5 +1,11 @@
 # Cronologia delle versioni
 
+## 1.7.6 (ottobre 2026) - "TASK E HOME RIFINITI"
+- **Task manager**: stesse icone Avvia / Ferma / Riavvia dei servizi, con il fondo colorato per lo stato (Riavvia grigio se il task e fermo). Un solo componente per tutti (nessun codice doppio).
+- **Home**: HTTP e HTTPS sono due widget separati, ognuno con la sua porta.
+- **Tempi leggibili** in tutta la pagina (statistiche, widget, Bluetooth, nodi vicini...): i secondi diventano minuti, ore e giorni (es. 3725 s = 1 h 2 min, 93784 s = 1 g 2 h).
+- Solo pagina e documenti: il firmware non cambia (versione 1.7.6).
+
 ## 1.7.5 (ottobre 2026) - "HOME E SERVIZI COERENTI"
 - **Testata**: ora e data al posto dell'indirizzo IP. L'IP sta sotto il widget Wi-Fi. Il riquadro Orologio e le schede "Azioni rapide" e "Posizione" sono tolti dalla Home (la Posizione si vede cliccando la bandiera; Modo aereo e Terminale restano in Rete e nella testata).
 - **Widget dei servizi** in una sola fila sotto gli anelli, con icone nostre generiche (niente loghi di marchi). Titolo "Sistema" al posto di "Stai usando". Icona Periferiche tipo USB.

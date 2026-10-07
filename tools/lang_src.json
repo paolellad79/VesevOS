@@ -11014,6 +11014,20 @@
    "es": "Modo (se aplica con Iniciar)",
    "de": "Modus (gilt mit Start)",
    "scope": "web"
+  },
+  {
+   "it": "Porta: {0}",
+   "en": "Port: {0}",
+   "es": "Puerto: {0}",
+   "de": "Port: {0}",
+   "scope": "web"
+  },
+  {
+   "it": "{0} g",
+   "en": "{0} d",
+   "es": "{0} d",
+   "de": "{0} T",
+   "scope": "web"
   }
  ]
 }
