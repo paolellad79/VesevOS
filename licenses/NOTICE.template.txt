@@ -21,16 +21,22 @@ Progetto: {REPO}
 2. COMPONENTI DI TERZI
    Indicati secondo i rispettivi progetti. Verifica sempre la licenza
    della versione che usi. Le librerie restano sotto la loro licenza.
-   - Arduino-ESP32 (Espressif): LGPL-2.1 o successiva.
+   - Arduino-ESP32 core (Espressif): LGPL-2.1 o successiva.
      Testo: "license lgpl21"
-   - ESP-IDF e mbedTLS (Espressif): Apache-2.0.
+   - ESP-IDF (esp_wifi, esp_now, esp-mqtt, esp_http_server,
+     esp_https_server, NVS), Mbed TLS, NimBLE (Bluetooth): Apache-2.0.
      Testo: "license apache2"
-   - ESPAsyncWebServer e AsyncTCP (ESP32Async): LGPL-3.0.
-     Testo: "license lgpl3" (la LGPL v3 rimanda alla GPL v3: "license gpl3")
-   - LittleFS (Arm): BSD-3-Clause.
+   - PsychicHttp (server web e HTTPS), ArduinoJson, FreeRTOS,
+     posix_tz_db (fusi orari POSIX): MIT. Testo: "license mit"
+   - lwIP, LittleFS: BSD-3-Clause. Testo: "license bsd3"
+   - Natural Earth (nomi dei paesi): pubblico dominio.
+   - IANA tz database (fusi orari, nomi dei paesi): pubblico dominio.
    Chi distribuisce un firmware compilato deve rispettare anche queste
-   licenze (per esempio fornire i testi e, per le LGPL, la possibilita di
-   ricompilare con una versione modificata della libreria).
+   licenze (per esempio fornire i testi e, per la LGPL del core Arduino,
+   la possibilita di ricollegare il programma con una versione modificata
+   della libreria: vedi COMMERCIAL.md, "kit LGPL").
+   Elenco completo con versioni: pagina Sistema > Note legali (SBOM) e
+   file SBOM.spdx.json nel repository.
 
 3. RIFERIMENTI NORMATIVI (informativi, non sono consulenza legale)
    - Diritto d'autore: Legge 22 aprile 1941 n. 633 e successive modifiche;
@@ -39,13 +45,25 @@ Progetto: {REPO}
      Convenzione di Berna.
    - Protezione dei dati: Regolamento (UE) 2016/679 (GDPR); D.Lgs. 30 giugno
      2003 n. 196 e successive modifiche. VesevOS non invia dati personali a
-     terzi. Eventuali funzioni statistiche future saranno facoltative
-     (opt-in) e descritte con precisione.
+     terzi. MQTT e la rete tra schede inviano dati solo se li accendi tu.
+     Eventuali funzioni statistiche future saranno facoltative (opt-in).
    - Prodotti: chi costruisce o vende apparecchi con VesevOS e responsabile
      della loro conformita (marcatura CE), tra cui: Direttiva 2014/53/UE
      (apparecchiature radio), Direttiva 2014/30/UE (compatibilita
      elettromagnetica), Direttiva 2011/65/UE (RoHS) e, se applicabile,
-     Regolamento (UE) 2024/2847 (Cyber Resilience Act).
+     Regolamento (UE) 2024/2847 (Cyber Resilience Act), Regolamento
+     delegato (UE) 2022/30 con la norma EN 18031; Regno Unito: PSTI Act
+     2022. La radio segue i canali e la potenza del paese scelto.
+   - Software libero fuori da attivita commerciale: VesevOS e gratuito e senza
+     garanzia (GPL-3.0, sezioni 15-16). Il Regolamento (UE) 2024/2847 (Cyber
+     Resilience Act, considerando 18-19) non si applica al software libero
+     sviluppato o fornito fuori da attivita commerciale; la Direttiva (UE)
+     2024/2853 sui prodotti difettosi (art. 2, par. 2) esclude lo stesso
+     software; Codice civile art. 1229: restano dolo e colpa grave. Se
+     VesevOS diventa un prodotto a pagamento, questi obblighi valgono per
+     quella versione e si dichiarera il periodo di supporto.
+   - Sicurezza: segnalazioni a {EMAIL} (vedi SECURITY.md). Nessuna data
+     garantita per gli aggiornamenti.
    - Marchi: "VesevOS" e il nome del progetto. Espressif, Arduino e gli
      altri nomi citati sono marchi dei rispettivi titolari; il loro uso qui
      non implica approvazione o collaborazione.
@@ -53,4 +71,4 @@ Progetto: {REPO}
 4. CONTRIBUTI
    Chi contribuisce con codice accetta le condizioni di CONTRIBUTING.md.
 
-Elenco dei testi: notice, gpl3, lgpl3, lgpl21, apache2
+Elenco dei testi: notice, gpl3, lgpl21, apache2, mit, bsd3

@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_sys.cpp
 #include "vos_sys.h"
+#include "vos_diario.h"
 #include "vos_led.h"
 #include <WiFi.h>
 #include <esp_sleep.h>
@@ -17,12 +18,15 @@
 #include "esp_freertos_hooks.h"
 #include <LittleFS.h>
 #include <Preferences.h>
+#include "vos_wd.h"
+#include "vos_audit.h"
+#include "vos_fw.h"
 
 #define HIST 60
 
 static volatile uint32_t g_idle[2] = {0, 0};
 static uint32_t g_maxIdle[2] = {1, 1};
-static volatile int g_cpu = 0;
+static volatile int g_cpu = 0, g_cpu0 = 0, g_cpu1 = 0;
 static float g_temp = 0;
 static uint8_t g_cpuH[HIST], g_cpuHn = 0;
 static int16_t g_tempH[HIST];            // decimi di grado
@@ -31,6 +35,8 @@ static uint32_t g_boot = 0;
 static uint32_t g_lifeBase = 0;       // secondi di vita accumulati fino all'ultimo salvataggio (contaore, come un contachilometri)
 static uint32_t g_lifeSaved = 0;      // uptime (s) al momento dell'ultimo salvataggio
 static String g_reset;
+static char g_topName[16] = "";      // task piu attivo (non IDLE), aggiornato ogni secondo
+static int  g_topPct = 0;
 static bool g_hot = false;      // allarme temperatura
 
 static bool idle0() { g_idle[0]++; return false; }
@@ -64,14 +70,57 @@ static void lifeSave() {
 }
 
 static void monitorTask(void*);
-static void monitorStart() { xTaskCreatePinnedToCore(monitorTask, "monitor", 3072, NULL, 1, NULL, 0); }
+static void monitorStart() { xTaskCreatePinnedToCore(monitorTask, "monitor", 4608, NULL, 1, NULL, 0); }
 
+// Carico vero per core dal tempo che i task IDLE0/IDLE1 NON hanno girato (stessa fonte del Task manager).
+// La taratura a conteggio sbagliava dopo i cambi di frequenza (mostrava 100% con la scheda quasi ferma).
+static bool idleRunTimeLoad(int& l0, int& l1) {
+#if (configUSE_TRACE_FACILITY == 1) && (configGENERATE_RUN_TIME_STATS == 1)
+  static uint32_t pTot = 0, pI0 = 0, pI1 = 0; static bool have = false;
+  UBaseType_t n = uxTaskGetNumberOfTasks();
+  TaskStatus_t* a = (TaskStatus_t*)malloc((n + 2) * sizeof(TaskStatus_t));
+  if (!a) return false;
+  uint32_t tot = 0;
+  n = uxTaskGetSystemState(a, n + 2, &tot);
+  uint32_t i0 = 0, i1 = 0; bool f0 = false, f1 = false;
+  static uint32_t pnum[40], prt[40]; static int pcnt = 0;           // tempo di esecuzione precedente per numero di task
+  static uint32_t nnum[40], nrt[40]; int ncnt = 0, bestPct = 0; const char* best = nullptr;
+  uint32_t dtAll = tot > pTot ? tot - pTot : 0;
+  for (UBaseType_t i = 0; i < n; i++) {
+    if (strcmp(a[i].pcTaskName, "IDLE0") == 0) { i0 = a[i].ulRunTimeCounter; f0 = true; }
+    else if (strcmp(a[i].pcTaskName, "IDLE1") == 0) { i1 = a[i].ulRunTimeCounter; f1 = true; }
+    else if (ncnt < 40) {
+      uint32_t id = a[i].xTaskNumber, rt = a[i].ulRunTimeCounter, old = rt;
+      for (int k = 0; k < pcnt; k++) if (pnum[k] == id) { old = prt[k]; break; }
+      nnum[ncnt] = id; nrt[ncnt] = rt; ncnt++;
+      if (dtAll) { int pc = (int)(100ULL * (rt - old) / dtAll); if (pc > bestPct) { bestPct = pc; best = a[i].pcTaskName; } }
+    }
+  }
+  if (best) { strncpy(g_topName, best, sizeof(g_topName) - 1); g_topName[sizeof(g_topName) - 1] = 0; g_topPct = bestPct; }
+  else { g_topName[0] = 0; g_topPct = 0; }
+  memcpy(pnum, nnum, ncnt * sizeof(uint32_t)); memcpy(prt, nrt, ncnt * sizeof(uint32_t)); pcnt = ncnt;
+  free(a);
+  bool ok = false;
+  if (have && f0 && f1 && tot > pTot) {
+    uint32_t dt = tot - pTot;
+    int a0 = (int)(100ULL * (i0 - pI0) / dt), a1 = (int)(100ULL * (i1 - pI1) / dt);
+    l0 = constrain(100 - a0, 0, 100); l1 = constrain(100 - a1, 0, 100); ok = true;
+  }
+  pTot = tot; pI0 = i0; pI1 = i1; have = f0 && f1;
+  return ok;
+#else
+  (void)l0; (void)l1; return false;
+#endif
+}
 static void monitorTask(void*) {
   uint32_t last[2] = {0, 0};
   int lowCount = 0;
   bool skip = false;                 // salta la misura subito dopo un cambio di frequenza
+  wdWatch("monitor", 20);
   for (;;) {
     vTaskDelay(pdMS_TO_TICKS(1000));
+    wdBeat("monitor");
+    auditTick();
     uint32_t mhz = getCpuFrequencyMhz();
     uint32_t d0 = g_idle[0] - last[0], d1 = g_idle[1] - last[1];
     last[0] = g_idle[0]; last[1] = g_idle[1];
@@ -85,10 +134,16 @@ static void monitorTask(void*) {
       if (e1 == 0) e1 = 1;
       int l0 = 100 - (int)(100ULL * d0 / e0);
       int l1 = 100 - (int)(100ULL * d1 / e1);
+      { int m0, m1; if (idleRunTimeLoad(m0, m1)) { l0 = m0; l1 = m1; } }   // se ci sono le statistiche di FreeRTOS, valgono piu della taratura a conteggio
+      g_cpu0 = constrain(l0, 0, 100); g_cpu1 = constrain(l1, 0, 100);
       g_cpu = constrain((l0 + l1) / 2, 0, 100);
     }
     skip = false;
     g_temp = temperatureRead();
+    { static uint32_t dtick = 0; dtick++;
+      diaryTick(dtick, ESP.getMinFreeHeap(), g_topName, g_topPct, mhz);                       // istantanea per il diario dei riavvii (in RTC ogni 10 s)
+      if (dtick % 60 == 0) vlogl(LG_DBG, "TOP: task piu attivo %s %d%%, CPU %d%% (core %d%% e %d%%), %u MHz, %d C, RAM libera %u KB, minima %u KB",
+                                 g_topName[0] ? g_topName : "-", g_topPct, g_cpu, g_cpu0, g_cpu1, (unsigned)mhz, (int)g_temp, (unsigned)(ESP.getFreeHeap() / 1024), (unsigned)(ESP.getMinFreeHeap() / 1024)); }
     { static uint32_t lifeTick = 0; if (++lifeTick >= 600) { lifeTick = 0; lifeSave(); } }   // ogni 10 minuti
     // allarme: sopra 80 C LED rosso lampeggiante, torna normale sotto 75 C
     if (!g_hot && g_temp > 80.0f) { g_hot = true; ledSetFault(true); vlog("ATTENZIONE: temperatura CPU alta (%.1f C)", g_temp); }
@@ -96,7 +151,9 @@ static void monitorTask(void*) {
     // scalatura automatica: sale subito se serve, scende piano se la CPU e libera
     {
       uint32_t target = mhz;
-      if (cfg.cpuMhz != 0) { target = (g_temp > 80.0f) ? 80 : cfg.cpuMhz; lowCount = 0; }   // velocita fissa
+      bool settle = millis() < 60000;      // primo minuto: niente cambi di frequenza (Wi-Fi, NTP e HTTPS si assestano; un cambio dopo un reset da USB ha dato un Task watchdog)
+      if (settle && g_temp <= 80.0f) { lowCount = 0; }
+      else if (cfg.cpuMhz != 0) { target = (g_temp > 80.0f) ? 80 : cfg.cpuMhz; lowCount = 0; }   // velocita fissa
       else if (g_temp > 80.0f) { target = 80; lowCount = 0; }
       else if (g_cpu >= 60) { target = (mhz <= 80) ? 160 : 240; lowCount = 0; }
       else if (g_cpu < 20) { if (++lowCount >= 5) { lowCount = 0; target = (mhz > 160) ? 160 : 80; } }
@@ -138,6 +195,8 @@ float sysCpuTemp() { return g_temp; }
 uint64_t sysUptimeSec() { return (uint64_t)(esp_timer_get_time() / 1000000ULL); }
 uint32_t sysBootCount() { return g_boot; }
 String sysResetReason() { return g_reset; }
+String sysResetName(int reason) { return resetName(reason); }
+void sysTopTask(char* name, size_t n, int* pct) { strncpy(name, g_topName, n - 1); name[n - 1] = 0; if (pct) *pct = g_topPct; }
 
 static String histJson(const uint8_t* a, int n) {
   String j = "[";
@@ -165,7 +224,7 @@ String sysStatusJson() {
        ",\"cores\":" + String((int)ESP.getChipCores()) + ",\"flashChip\":" + String((unsigned long)ESP.getFlashChipSize()) +
        ",\"idf\":\"" + jsonEscape(String(ESP.getSdkVersion())) + "\",";
   j += "\"reset\":\"" + jsonEscape(g_reset) + "\",";
-  j += "\"cpu\":" + String(g_cpu) + ",";
+  j += "\"cpu\":" + String(g_cpu) + ",\"cpu0\":" + String(g_cpu0) + ",\"cpu1\":" + String(g_cpu1) + ",";
   j += "\"temp\":" + String(g_temp, 1) + ",";
   j += "\"tempUnit\":" + String(cfg.tempUnit) + ",";
   j += "\"hot\":" + String(g_hot ? "true" : "false") + ",";
@@ -204,12 +263,12 @@ String sysTasksText() {
 // Si possono fermare solo i task della lista qui sotto (lista consentita, non lista dei vietati).
 // Lista consentita: i moduli registrano i loro task con sysTaskRegister (nome + funzione che lo avvia).
 struct TaskDef { const char* n; SysTaskStart f; SysTaskStart stop; };
-static TaskDef g_defs[8]; static int g_ndefs = 0;
-static const char* const OURS[] = {"led", "time", "monitor", "net", "rules", "mqtt"};
+static TaskDef g_defs[12]; static int g_ndefs = 0;
+static const char* const OURS[] = {"led", "time", "monitor", "net", "rules", "mqtt", "mesh", "wd"};
 
 void sysTaskRegister(const char* name, SysTaskStart start, SysTaskStart stop) {
   for (int i = 0; i < g_ndefs; i++) if (strcmp(g_defs[i].n, name) == 0) { g_defs[i].f = start; g_defs[i].stop = stop; return; }
-  if (g_ndefs < 8) { g_defs[g_ndefs].n = name; g_defs[g_ndefs].f = start; g_defs[g_ndefs].stop = stop; g_ndefs++; }
+  if (g_ndefs < 12) { g_defs[g_ndefs].n = name; g_defs[g_ndefs].f = start; g_defs[g_ndefs].stop = stop; g_ndefs++; }
 }
 static int defOf(const char* name) {
   for (int i = 0; i < g_ndefs; i++) if (strcmp(g_defs[i].n, name) == 0) return i;
@@ -232,7 +291,7 @@ String sysTasksJson() {
   String j = "{\"ok\":true,\"total\":" + String((unsigned long)total) + ",\"tasks\":[";
   for (UBaseType_t i = 0; i < n; i++) {
     const char* nm = a[i].pcTaskName;
-    int type = inList(nm, OURS, 6) ? 1 : 0;
+    int type = inList(nm, OURS, 8) ? 1 : 0;
     bool kill = defOf(nm) >= 0;
     if (i) j += ",";
     j += "{\"n\":\"" + jsonEscape(String(nm)) + "\",\"id\":" + String((unsigned)a[i].xTaskNumber) +

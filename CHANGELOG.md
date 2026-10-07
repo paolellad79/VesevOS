@@ -1,5 +1,144 @@
 # Cronologia delle versioni
 
+## 1.7.9 (ottobre 2026) - Seriale configurabile
+- **Nuova scheda "Seriale (cavo USB)"** in Sistema > Sicurezza e nuovo comando `serial`: velocita (baud, con prova di 20 secondi e conferma), a capo (CR+LF / LF / CR), eco dei tasti, accetta comandi, scrive il registro, benvenuto all'apertura, attesa massima di scrittura.
+- Tutta l'uscita della seriale (comandi, registro, guida) passa da un solo punto che rispetta queste impostazioni.
+- Seriale senza comandi: si riaccende dalla pagina o con il tasto BOOT (8-19 s). Per spegnerla da shell serve `serial input off yes`.
+- Il diario dei riavvii registra anche il passo `L:serial` di `loop`.
+
+## 1.7.8f (ottobre 2026) - Bluetooth: accendi e spegni ripetuti
+- Prova: con la pagina HTTPS aperta, tre accensioni/spegnimenti del Bluetooth di fila hanno dato "esp-aes: Failed to allocate memory" (RAM frammentata).
+- **Pausa di 5 secondi** tra lo spegnimento e una nuova accensione (messaggio chiaro, vale per pagina, shell e telefono).
+- **Controllo prima di accendere**: se il blocco di RAM piu grande e sotto 45 KB il Bluetooth non parte e dice di riavviare la scheda.
+- Le righe del log "BLE: prima di accendere..." e "BLE: spento..." scrivono RAM libera e blocco piu grande, per vedere quanto cala a ogni giro.
+- Gli oggetti di risposta del Bluetooth sono fissi (prima ne restavano due in RAM a ogni accensione).
+
+## 1.7.8e (ottobre 2026) - a-capo giusti per PuTTY
+- La seriale manda sempre CR+LF: programmi come PuTTY non mostrano piu le righe "a scalinata" (prima serviva spuntare "Implicit CR in every LF"). Vale per i comandi, `log`, `reboots` e la guida.
+
+## 1.7.8d (ottobre 2026) - seriale: niente testo perso
+- Prova 1.7.8c: nessun watchdog nei reset da USB, ma con attesa 0 la seriale perdeva pezzi di testo (riquadro iniziale, `log`, `reboots`). Ora attesa massima 10 ms per scrittura. Le righe "AVVIO ... USB" nel diario sono i reset fatti aprendo il monitor, non blocchi.
+
+## 1.7.8c (ottobre 2026) - seriale che non blocca e diario piu chiaro
+- **Seriale USB con attesa breve**: ogni scrittura aspetta al massimo 10 ms il PC (prima 100 ms; con 0 si perdevano pezzi di testo lunghi, visto nella prova). Sospetto per il "Task watchdog" 7 secondi dopo un reset da USB: durante la riconnessione del PC la scrittura sulla seriale poteva fermare `loop` per piu di 5 secondi.
+- Il diario dice anche **quale passo di `loop`** era in corso (L:shell, L:ble, L:power, L:stats, L:pin, L:stable...).
+- Il file del diario ha un'**intestazione con versione**: un file di formato diverso viene scartato (niente piu righe senza senso). Nuovo file /boots3.bin; i vecchi si cancellano da soli.
+
+## 1.7.8b (ottobre 2026) - watchdog all'avvio e RAM
+- **Task watchdog dopo un reset da USB** (provato: 7 secondi dopo l'avvio con la CPU in automatico, mai con la CPU fissa a 240 MHz): nel primo minuto dopo l'avvio la scheda non cambia piu la frequenza della CPU da sola. Poi la scalatura automatica riparte come prima.
+- Il diario dei riavvii salva anche i MHz al momento del blocco.
+- "Ultima riga grave": non conta piu l'allarme della seriale (che c'e a ogni avvio) ne le righe sul riavvio anomalo, che coprivano la riga vera.
+- RAM: il report dell'Autotest e il diario usano la PSRAM; stack del task di prova 5120 B (era 6144). Minima vista in prova: 22 KB.
+
+## 1.7.8a (ottobre 2026) - diario dei riavvii piu preciso
+- Dopo un caricamento da Arduino IDE la scheda si e riavviata una volta per "Task watchdog" entro 10 secondi (visto due volte, 7/10 20:04 e 20:59). Il diario non aveva i dettagli perche la prima istantanea arrivava dopo 10 s.
+- Istantanea ogni secondo nei primi 15 secondi (poi ogni 10).
+- Nuova **fase di avvio** nell'istantanea (pins, fs, cfg, lang, i servizi uno per uno, avviato, loop): se la scheda si blocca all'avvio il diario dice dove.
+- Il diario usa un nuovo file (/boots2.bin); il vecchio si cancella da solo.
+
+## 1.7.8 (ottobre 2026) - "LOG COMPLETO E DIARIO DEI RIAVVII"
+- **Diario dei riavvii**: gli ultimi 20 avvii restano salvati anche dopo lo spegnimento (file piccolo in memoria file). Per ognuno: numero, data e ora, motivo (accensione, watchdog, crash, brownout...), da quanto tempo era accesa la scheda, RAM minima, task piu attivo e l'ultima riga grave. Si vede in Sistema > Log (scheda "Diario dei riavvii"), nel report dell'Autotest e dalla seriale con `reboots`.
+- **Istantanea prima del riavvio**: ogni 10 secondi la scheda salva in una memoria che sopravvive a watchdog e crash (non allo spegnimento) il tempo acceso, la RAM minima, il task piu attivo e l'ultima riga grave. Serve a capire chi ha causato un watchdog.
+- **Riga di avvio completa** nel registro: "AVVIO n.N: motivo..., RAM, MHz". Se il riavvio e anomalo compaiono righe ATTENZIONE con i dettagli.
+- **Livelli di log**: ogni riga porta [E] errore, [W] attenzione, [I] info, [D] dettaglio. In Sistema > Log si sceglie cosa mostrare e (Admin) fino a che livello registrare; di fabbrica Info. Dettaglio (spento di fabbrica) aggiunge ogni minuto il task piu attivo, la CPU e la RAM. Seriale: `log level [0-3]`.
+- Correzioni dell'Autotest (ex 1.7.7a): righe lunghe non piu tagliate; secondi della prova CPU realmente misurati; la pagina riprova da sola se una richiesta si perde (non resta piu ferma su "prova 3 di 16").
+- Solo dati tecnici nel diario (niente IP, MAC, nomi Wi-Fi o utenti); azzerabile da pagina e seriale.
+
+## 1.7.7 (ottobre 2026) - "AUTOTEST"
+- **Autotest** (Sistema > Autotest, Admin): 16 prove non distruttive (anche CPU e temperatura: media su 2 secondi, avviso oltre 60%, errore oltre 85%; temperatura avviso oltre 70 C, errore oltre 85 C), una per volta, ognuna con esito chiaro (OK / Avviso / Errore / Saltata) e tempo. Alla fine il **report di testo** si scarica o si copia, per mandarlo a mano a Claude.
+- Il report non contiene mai password, chiavi o token. MAC, nome Wi-Fi, IP e registro sono oscurati, salvo la casella "nomi reali". Le prove attive (LED, messaggio MQTT) partono solo se spunti la casella.
+- Comando seriale `selftest [active] [names]`. Nulla esce dalla scheda; il report sta in RAM (circa 2,7 KB) finche non lo chiudi.
+- **Pagina piu leggera**: aggiornamento ogni 3 s (era 2 s), nessuna richiesta nuova finche la precedente non e finita, e nessuna richiesta quando la scheda del browser e nascosta o in secondo piano (prima la CPU della scheda poteva restare al 100% con la pagina lasciata aperta).
+- **CPU misurata meglio**: il carico di ogni core ora si calcola dal tempo dei task IDLE (stessa fonte del Task manager). Prima la taratura a conteggio, dopo i cambi di frequenza, poteva mostrare 100% con la scheda quasi ferma (Task: IDLE0 97%, IDLE1 83%).
+- **Task manager**: icone Avvia / Ferma / Riavvia alte quanto il lucchetto (26 px), righe tutte della stessa altezza.
+
+## 1.7.6 (ottobre 2026) - "TASK E HOME RIFINITI"
+- **Task manager**: stesse icone Avvia / Ferma / Riavvia dei servizi, con il fondo colorato per lo stato (Riavvia grigio se il task e fermo). Un solo componente per tutti (nessun codice doppio).
+- **Home**: HTTP e HTTPS sono due widget separati, ognuno con la sua porta.
+- **Tempi leggibili** in tutta la pagina (statistiche, widget, Bluetooth, nodi vicini...): i secondi diventano minuti, ore e giorni (es. 3725 s = 1 h 2 min, 93784 s = 1 g 2 h).
+- Solo pagina e documenti: il firmware non cambia (versione 1.7.6).
+
+## 1.7.5 (ottobre 2026) - "HOME E SERVIZI COERENTI"
+- **Testata**: ora e data al posto dell'indirizzo IP. L'IP sta sotto il widget Wi-Fi. Il riquadro Orologio e le schede "Azioni rapide" e "Posizione" sono tolti dalla Home (la Posizione si vede cliccando la bandiera; Modo aereo e Terminale restano in Rete e nella testata).
+- **Widget dei servizi** in una sola fila sotto gli anelli, con icone nostre generiche (niente loghi di marchi). Titolo "Sistema" al posto di "Stai usando". Icona Periferiche tipo USB.
+- **Controlli dei servizi, un solo componente**: banner Avviato (verde) / Fermo (rosso) e icone Avvia / Ferma / Riavvia / Applica con fondo colorato per lo stato. Tolte le scritte "MQTT acceso" ecc. Riavvia grigio quando il servizio e fermo o non si puo riavviare. HTTP e HTTPS: **Applica** (riavvia la scheda con conferma) al posto di "Riavvia ora".
+- Vale per: Punto di accesso, DHCP, DNS, mDNS, HTTP, HTTPS, MQTT, Rete tra schede, Statistiche, NTP, Bluetooth, Risparmio energia e MFA (Avvia = accende, Ferma = spegne; Riavvia solo dove ha senso).
+- Solo pagina e documenti: il firmware non cambia (versione 1.7.5).
+
+## 1.7.4 (ottobre 2026) - "GUIDA E HOME PIU CHIARE"
+- **Mappa del mondo tolta**: la scelta del paese e un elenco con ricerca (meno RAM e meno flash; restano solo i nomi dei paesi).
+- **Guida a 6 passi**: Lingua, Paese, Nome, Antenna, Wi-Fi di casa o hotspot, Fine. Il passo Wi-Fi **prova subito a collegarsi** (fino a 20 s) e dice se ha funzionato; se fallisce non si perde nulla. In modalita hotspot (senza Wi-Fi di casa) compare il passo **Ora** con fuso orario, data e ora (preimpostati dal dispositivo); con la Wi-Fi di casa l'ora arriva da NTP. A fine installazione, al primo accesso dalla Wi-Fi di casa, hotspot, portale automatico e HTTP si spengono e restano spenti (li riaccende l'utente quando vuole); la guida lo dice chiaramente.
+- **Password dell'hotspot piu semplice**: 12 caratteri, solo minuscole e cifre (senza simboli e senza caratteri ambigui), sempre casuale per scheda.
+- **Home**: anelli CPU (con velocita e temperatura), RAM, PSRAM, file, Wi-Fi (modo, segnale o client); orologio con data; un **widget per ogni servizio acceso** (HTTP/S, MQTT, ESP-NOW, mDNS, Bluetooth, NTP, DHCP, hotspot, risparmio energia, statistiche), con stato a parole; riga Core 0 / Core 1. Tolti il grafico della temperatura, l'indirizzo IP e il QR (resta solo quello dell'MFA). Nuova richiesta `/api/home`.
+- **Password e QR dell'hotspot** solo in Rete > Punto di accesso (si vedono subito aprendo la scheda, Admin). L'avviso "la Wi-Fi di casa non si e collegata" e ora nelle notifiche.
+- **MQTT e Rete tra schede**: interruttore Acceso/Spento (come HTTP) e, di fianco, pulsante **Riavvia**, spento quando il servizio e fermo.
+- **Sistema > Ora**: scelta del fuso orario.
+- Novita tecniche: `meshNodeCount`, `timeLastSync`, `bleLeftSec`, `cpu0`/`cpu1` nello stato.
+
+## 1.7.3 (ottobre 2026) - "SICUREZZA ED ENERGIA"
+- **Accesso in due passi (MFA, TOTP RFC 6238)**: per utente, con QR (solo da HTTPS o dall'hotspot), 8 codici di recupero, codice 6 cifre a 30 s (finestra +-1, ogni codice una sola volta). Senza ora valida: si chiede l'ora al browser (solo dopo password e codice giusti, con audit giallo) oppure solo recupero/blocco, a scelta. BOOT 8 s spegne l'MFA degli Admin (allarme giallo).
+- **Anti-bot senza servizi esterni**: prova di lavoro (SHA-256, 0/12/14/16/18 bit, 14 di fabbrica), campo-trappola nascosto, blocco IP dopo i fallimenti.
+- **Scheda Certificato** (Sistema): scadenza (da/a), impronta SHA-256, scarica, rigenera, importa.
+- **Risparmio energia** (Servizi): modi Normale / Risparmio Wi-Fi / Sonno programmato (sveglia a tempo, da 1 min a 7 giorni), comando "Dormi adesso". La scheda CPU e passata qui dentro. Il tasto BOOT non e fonte di risveglio (solo timer o RESET).
+- **Statistiche d'uso** (Sistema > Diagnostica): spente di fabbrica, anonime (niente MAC/IP), contatori Wi-Fi/Bluetooth/avvii/LED, CSV scaricabile, azzera.
+- Comandi seriali: `power`, `sleep [min]`, `stats`.
+- Bluetooth: scheda in Servizi, messaggio chiaro se manca RAM.
+
+## 1.7.2 (ottobre 2026) - "BASE + SERVIZI"
+- **Primo avvio**: il banner con la password dell'hotspot resta finche la guida non e finita (ad ogni apertura del monitor seriale e ogni 30 s);
+  il Wi-Fi salvato da solo non fa piu risultare la scheda "configurata". Comando seriale `ap`.
+- **Menu riordinati**: Periferiche (ex Hardware: Pin, LED); Servizi (Punto di accesso, HTTP, HTTPS, MQTT, Rete tra schede, Automazioni, Task,
+  Watchdog, Avvio, Terminale); Sistema (Stato, File, Ora, Localizzazione con la lingua, Log, Config, Accessibilita, Note legali, Aiuto);
+  Sicurezza (Password con seriale, Utenti, Filtro IP, Compliant, ex Controlli).
+- **Pagina di accesso con data, ora e fuso** della scheda e avviso se l'ora e diversa da quella del dispositivo.
+- **QR in Home**: hotspot = QR Wi-Fi con stampa; modo cliente = QR con l'indirizzo. Tolto dalla guida. Interruttore Admin per nasconderlo.
+- **Servizio Punto di accesso, HTTP e porte** (tab nuovi): ogni servizio acceso/spento, porte HTTP/HTTPS configurabili (dal riavvio), almeno un
+  protocollo web sempre acceso, HTTP-solo permesso con avviso, recupero con BOOT 8 s. Portale automatico solo con HTTP sulla porta 80.
+- **Guida**: nuovo ordine (... hotspot, Wi-Fi di casa, ora). Senza Wi-Fi: NTP spento e ora a mano (avviso: niente batteria per l'orologio).
+  Con Wi-Fi: indirizzo nuovo con QR e, al primo accesso dalla rete di casa, si spengono hotspot, portale automatico e HTTP. Avviso in Home
+  se il collegamento fallisce.
+- **Configurazione solo da seriale**: comando `setup` guidato, `wifi set|off`, `ntp on|off`, `svc ...`.
+- **Pin**: schema fronte/retro ridisegnato dalla foto, funzioni e avvisi per pin, **inventario** "collegato a" salvato nella configurazione;
+  GP33-37 ora ammessi.
+- **RAM e spazio**: registro (18 KB) in PSRAM, HTTP con 3 collegamenti, licenze lunghe e dizionario inglese compressi (gzip) nel firmware (decompressore nostro, vos_inflate.cpp; circa 65 KB in meno).
+- **Legale**: tolto l'impegno di supporto di 2 anni (progetto gratuito, senza date garantite); riferimenti normativi in NOTICE, Note legali,
+  manuale, SECURITY.md; semaforo CRA verde finche gratuito.
+- Manuale it/en: capitoli 12-15.
+- **Menu v2**: Rete = Wi-Fi, Punto di accesso, Radio (con il Modo aereo dentro Wi-Fi); Servizi = HTTP, HTTPS, MQTT, Rete tra schede, **NTP, DHCP, DNS, mDNS**, Bluetooth (non supportato), Automazioni, Avvio; Sistema = Stato, gruppo **Diagnostica** (Task, Watchdog, Log, Terminale), File, Ora, Localizzazione, Config, Accessibilita, Note legali, Aiuto.
+- **Servizi configurabili e spegnibili**: NTP, DHCP dell'hotspot (durata 10-1440 min; si spegne solo con la Wi-Fi di casa collegata), DNS del portale automatico, mDNS. DHCP, mDNS e portale valgono subito. Comando seriale `svc dhcp|mdns on|off`.
+- **Home**: azioni rapide (Modo aereo con conferma, Terminale, Stampa).
+- **Bluetooth**: scheda propria in Servizi (stato, codice, accendi 10 minuti); se manca RAM il messaggio dice di chiudere la pagina web.
+- **Guida**: pulsante "La scheda e gia configurata" e comando seriale `setup done` (prima "Piu tardi" la lasciava riapparire a ogni avvio). Avvisi in Home e nei controlli se la guida non e finita o se il salvataggio fallisce; messaggio di avvio veritiero; comando `diag`.
+- **RAM**: buffer grandi (TLS) in PSRAM, richieste della pagina in coda (2 alla volta), HTTPS con 2 collegamenti e scarto del piu vecchio, log HTTPS piu quieti; NTP nel log una volta ogni 24 h; fuso orario applicato prima della prima riga di log.
+
+## 1.7.1 (4 ottobre 2026)
+- **Prima configurazione guidata** (LED arcobaleno lento): lingua, password del pannello, paese sulla mappa, nome, ora, antenna,
+  password dell'hotspot con QR ed etichetta da stampare, Wi-Fi di casa. Alla fine i servizi restano spenti.
+- **Password dell'hotspot casuale** e diversa per ogni scheda (niente piu `vesevos123`), mostrata sulla seriale con la
+  **schermata di benvenuto** (lingua con i tasti 1 e 2) e nella pagina (Rete > Punto di accesso, con QR). Spiegato il motivo legale
+  (UE RED/EN 18031, CRA; UK PSTI). Nessuna password di fabbrica per il pannello: si sceglie al primo accesso.
+- **Accesso senza password in chiaro**: prova HMAC con numero casuale. **Utenti** (fino a 8) con ruoli Amministratore, Operatore, Ospite,
+  controllati dalla scheda (anche nel terminale).
+- **HTTPS** (server PsychicHttp): certificato unico creato dalla scheda (ECDSA), impronta in pagina e seriale, certificato tuo facoltativo.
+  Dalla rete di casa la pagina passa da sola a https; dall'hotspot resta http (rete gia cifrata).
+- **Filtro IP** con regola in prova per 2 minuti e conferma; uscite di emergenza (`firewall off`, BOOT 2-7 s).
+- **Controlli della configurazione** (Sicurezza > Controlli): allarmi rossi (corretti subito) e gialli, registro di chi ha cambiato cosa,
+  anche le modifiche fatte fuori dal pannello.
+- **Localizzazione** (Sistema): paese con mappa del mondo SVG con zoom, canali e potenza della radio secondo il paese, antenna interna/esterna
+  con guadagno, fuso, server dell'ora, formati, separatore decimale, primo giorno della settimana. Dati comuni (249 paesi) dentro il firmware.
+- **Servizi** (nuova categoria): MQTT (spostato qui, ora anche **mqtts** con certificato del broker), **rete tra schede ESP-NOW**
+  (messaggi firmati, fino a 3 salti, ruoli nodo/gateway/sensore), **Bluetooth** per configurare dal telefono (solo a mano, 10 minuti, codice).
+  Tutti spenti di fabbrica: la prima volta si accendono a mano.
+- **Watchdog**: servizi bloccati, rete assente, RAM bassa, riavvio programmato; massimo 3 riavvii automatici in un'ora.
+- **Tasto BOOT** quando lo lasci: <2 s modo aereo, 2-7 s filtro IP spento (azzurro), 8-19 s password azzerate (giallo), 20 s fabbrica (rosso).
+- **Lingue**: inglese dentro il firmware con l'italiano; ogni lingua ha la sua bandiera (SVG) e il codice locale; menu delle lingue con bandiere.
+- **Note legali** (Sistema): licenze, elenco del software usato (SBOM), dati salvati, sicurezza, regole radio. Comando `legal`.
+- Manuale nuovo (`docs/manuale.md`, `docs/manual.en.md`) e pagina Aiuto (`#aiuto`). Nuovi file SECURITY.md (2 anni di aggiornamenti
+  di sicurezza), SBOM.spdx.json; COMMERCIAL.md con il kit LGPL; CONTRIBUTING.md con l'accordo per i contributi (CLA).
+- Il menu in alto a destra dice **Logout**. Corretto il simbolo `&#183;` che compariva come testo: la pagina ora e compressa (gzip).
+- Librerie: **PsychicHttp** e **ArduinoJson** al posto di ESPAsyncWebServer e AsyncTCP.
+- Strumenti: `tools/stub/compila.sh` (controllo di tutti i file senza scheda), `tools/mkcommon.py` (dati dei paesi), prova della pagina `tools/webtest/smoke171.js`.
+
 ## 1.7.0 (3 ottobre 2026)
 - **MQTT** (Rete > MQTT): la scheda invia il suo stato (CPU, temperatura, RAM, segnale, IP...) a un broker e riceve comandi
   sull'argomento `<prefisso>/cmd` (le stesse azioni delle Automazioni: `led-color ff0000`, `gpio 4 1`, `reboot`...), con risposta su `cmd/result`.

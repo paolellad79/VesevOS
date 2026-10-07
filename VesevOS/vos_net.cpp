@@ -8,14 +8,21 @@
 #include "vos_log.h"
 #include "vos_led.h"
 #include "vos_web.h"
+#include "vos_region.h"
+#include "vos_fw.h"
+#include "vos_wd.h"
+#include "vos_mesh.h"
+#include "vos_ble.h"
 #include <WiFi.h>
 #include <ESPmDNS.h>
 #include <esp_mac.h>
+#include <esp_netif.h>
 #include <DNSServer.h>
 #include <time.h>
 
 static volatile NetState g_state = NET_BOOT;
 static volatile bool g_reconf = true;
+static volatile bool g_staFail = false;   // l'ultimo tentativo verso la Wi-Fi di casa e fallito
 static volatile bool g_scanReq = false;
 static volatile bool g_scanRun = false;
 static String g_scanJson = "[]";
@@ -25,6 +32,10 @@ void netReconfigure() { g_reconf = true; }
 void netScanStart() { g_scanReq = true; }
 
 static void setState(NetState s) { g_state = s; ledSetNetState(s); }
+static volatile int g_apCh = 0;            // 0 = canale di partenza della rete schede
+static volatile bool g_apChReq = false;
+void netSetApChannel(int ch) { if (regionChannelOk(ch)) { g_apCh = ch; g_apChReq = true; } }
+bool netOnAp(uint32_t ip) { return (ip & 0xFFFFFF00UL) == 0xC0A80400UL; }
 
 // ---- portale automatico (captive portal): in modo AP ogni nome DNS punta alla scheda ----
 static DNSServer* g_dns = nullptr;
@@ -40,6 +51,36 @@ static void dnsStop() {
   g_dns->stop(); delete g_dns; g_dns = nullptr;
 }
 bool netCaptive() { return g_dns != nullptr; }
+
+// ---- servizi dell'hotspot e nome in rete: acceso/spento da Servizi ----
+static volatile bool g_svcReq = false;
+static bool g_mdnsRun = false;
+void netApplyServices() { g_svcReq = true; }
+
+static esp_netif_t* apNetif() { return esp_netif_get_handle_from_ifkey("WIFI_AP_DEF"); }
+static bool dhcpRunning() {                          // il server DHCP dell'hotspot sta rispondendo?
+  esp_netif_t* ap = apNetif();
+  esp_netif_dhcp_status_t st = ESP_NETIF_DHCP_INIT;
+  return ap && esp_netif_dhcps_get_status(ap, &st) == ESP_OK && st == ESP_NETIF_DHCP_STARTED;
+}
+static void dhcpApply() {                            // solo con l'hotspot acceso
+  esp_netif_t* ap = apNetif();
+  if (!ap) return;
+  esp_netif_dhcps_stop(ap);
+  if (!cfg.dhcpOn) { vlog("NET: server DHCP dell'hotspot spento"); return; }
+  uint32_t lease = cfg.dhcpLease;                    // minuti
+  esp_netif_dhcps_option(ap, ESP_NETIF_OP_SET, ESP_NETIF_IP_ADDRESS_LEASE_TIME, &lease, sizeof(lease));
+  esp_netif_dhcps_start(ap);
+}
+static void mdnsApply() {
+  MDNS.end(); g_mdnsRun = false;
+  if (!cfg.mdnsOn) { vlog("NET: mDNS spento"); return; }
+  if (MDNS.begin(cfg.hostname.c_str())) {
+    g_mdnsRun = true;
+    if (cfg.httpOn) MDNS.addService("http", "tcp", cfg.httpPort);
+    if (cfg.https) MDNS.addService("https", "tcp", cfg.httpsPort);
+  }
+}
 
 // ---- modalita aereo ----
 static volatile bool g_airReq = false, g_airOffReq = false;
@@ -94,8 +135,10 @@ static void airCheck() {
 }
 
 static void airEnter() {
+  meshStop();
+  bleStop();
   dnsStop();
-  MDNS.end();
+  MDNS.end(); g_mdnsRun = false;
   WiFi.disconnect(true);
   WiFi.mode(WIFI_OFF);
   setState(NET_AIR);
@@ -128,6 +171,9 @@ String netStatusJson() {
   j += ",\"gw\":\"" + gw + "\",\"mask\":\"" + mk + "\",\"dns\":\"" + d1 + "\",\"dns2\":\"" + d2 + "\"";
   j += ",\"ch\":" + String((int)WiFi.channel());
   if (g_state == NET_AP) j += ",\"clients\":" + String((int)WiFi.softAPgetStationNum());
+  j += ",\"staFail\":" + String(g_staFail && cfg.staEnabled ? "true" : "false");
+  j += ",\"apOn\":" + String(cfg.apOn ? "true" : "false");
+  j += ",\"dhcpRun\":" + String(g_state == NET_AP && dhcpRunning() ? "true" : "false") + ",\"mdnsRun\":" + String(g_mdnsRun ? "true" : "false");
   j += ",\"captive\":" + String(g_dns ? "true" : "false") + ",\"air\":" + String(cfg.airOn ? "true" : "false") +
        ",\"airExit\":" + String(cfg.airExit) + ",\"airAt\":" + String(cfg.airAt);
   j += ",\"mac\":\"" + netMac(false) + "\",\"apMac\":\"" + netMac(true) + "\"";
@@ -163,15 +209,22 @@ String netScanJson() {
   return "{\"running\":" + String(g_scanRun ? "true" : "false") + ",\"list\":" + g_scanJson + "}";
 }
 
+// L'hotspot parte se il servizio e acceso, oppure se non c'e nessuna Wi-Fi di casa (altrimenti la scheda sarebbe irraggiungibile).
+static bool apAllowed() { return cfg.apOn || !cfg.staEnabled || !cfg.staSsid.length(); }
+
 static void startAp() {
   WiFi.disconnect(true);
   WiFi.mode(WIFI_AP);
+  regionApplyRadio();                                 // paese e potenza PRIMA di trasmettere
+  int ch = g_apCh ? g_apCh : cfg.meshCh;
+  if (!regionChannelOk(ch)) ch = 1;
   IPAddress ip(192, 168, 4, 1), gw(192, 168, 4, 1), nm(255, 255, 255, 0);
   WiFi.softAPConfig(ip, gw, nm);
-  WiFi.softAP(cfg.apSsid.c_str(), cfg.apPass.c_str());
+  WiFi.softAP(cfg.apSsid.c_str(), cfg.apPass.c_str(), ch);   // sempre con password (WPA2), unica per ogni scheda
   setState(NET_AP);
-  vlog("NET: AP '%s' su 192.168.4.1", cfg.apSsid.c_str());
-  dnsStart();
+  vlog("NET: AP '%s' su 192.168.4.1 (canale %d)", cfg.apSsid.c_str(), ch);
+  if (!cfg.dhcpOn) dhcpApply(); else if (cfg.dhcpLease != 120) dhcpApply();   // di fabbrica: DHCP gia acceso, 120 minuti
+  if (cfg.apCaptive && cfg.httpOn && cfg.httpPort == 80) dnsStart();   // il portale automatico serve solo con HTTP sulla porta 80
 }
 
 static bool applyStaticIp() {
@@ -193,17 +246,19 @@ static bool tryClient() {
   WiFi.disconnect(true);
   delay(200);
   WiFi.mode(WIFI_STA);
+  regionApplyRadio();                                 // paese e potenza PRIMA di trasmettere
   WiFi.setHostname(cfg.hostname.c_str());
   if (!applyStaticIp()) WiFi.config(IPAddress(), IPAddress(), IPAddress());  // torna a DHCP
   WiFi.begin(cfg.staSsid.c_str(), cfg.staPass.c_str());
   for (int i = 0; i < 40; i++) {            // max 20 s
     if (WiFi.status() == WL_CONNECTED) {
-      setState(NET_CLIENT_OK);
+      setState(NET_CLIENT_OK); g_staFail = false;
       vlog("NET: client connesso, IP %s", WiFi.localIP().toString().c_str());
       return true;
     }
     vTaskDelay(pdMS_TO_TICKS(500));
   }
+  g_staFail = true;
   return false;
 }
 
@@ -211,7 +266,7 @@ static void doScan() {
   g_scanRun = true;
   wifi_mode_t m = WiFi.getMode();
   if (m == WIFI_AP) WiFi.mode(WIFI_AP_STA);
-  int n = WiFi.scanNetworks(false, true);
+  int n = WiFi.scanNetworks(false, true);       // il paese impostato limita i canali cercati
   String j = "[";
   for (int i = 0; i < n; i++) {
     if (i) j += ",";
@@ -226,10 +281,52 @@ static void doScan() {
   g_scanRun = false;
 }
 
+// ---- prova del Wi-Fi di casa dalla guida: l'hotspot resta acceso, niente viene salvato ----
+static volatile bool g_tReq = false;
+static volatile int g_tState = 0;          // 0 niente, 1 in corso, 2 collegata, 3 non riuscita
+static String g_tSsid, g_tPass, g_tIp, g_tErr;
+void netTestStart(const String& ssid, const String& pass) {
+  if (g_tState == 1) return;
+  g_tSsid = ssid; g_tPass = pass; g_tIp = ""; g_tErr = ""; g_tState = 1; g_tReq = true;
+}
+String netTestJson() {
+  String j = "{\"state\":" + String((int)g_tState);
+  if (g_tState == 2) j += ",\"ip\":\"" + jsonEscape(g_tIp) + "\"";
+  if (g_tState == 3) j += ",\"err\":\"" + jsonEscape(g_tErr) + "\"";
+  return j + "}";
+}
+static void doTest() {
+  if (g_state != NET_AP) { g_tErr = tr("Prova possibile solo con l'hotspot acceso"); g_tState = 3; return; }
+  WiFi.mode(WIFI_AP_STA);
+  WiFi.setHostname(cfg.hostname.c_str());
+  WiFi.begin(g_tSsid.c_str(), g_tPass.c_str());
+  wl_status_t st = WL_IDLE_STATUS;
+  for (int i = 0; i < 40; i++) {                       // max 20 s
+    st = WiFi.status();
+    if (st == WL_CONNECTED) break;
+    vTaskDelay(pdMS_TO_TICKS(500));
+    wdBeat("net");
+  }
+  if (st == WL_CONNECTED) { g_tIp = WiFi.localIP().toString(); g_tState = 2; vlog("NET: prova Wi-Fi di casa riuscita"); }
+  else {
+    g_tErr = (st == WL_NO_SSID_AVAIL) ? tr("Rete non trovata (la scheda usa solo 2,4 GHz)") : tr("Non collegata: controlla la password della rete");
+    g_tState = 3; vlog("NET: prova Wi-Fi di casa fallita");
+  }
+  WiFi.disconnect(false, false);
+  WiFi.mode(WIFI_AP);
+}
+
 static void netTask(void*) {
   int fails = 0;
   if (cfg.airOn && cfg.airExit == 0) netAirplaneOff("nuovo avvio");   // "al prossimo avvio"
+  wdWatch("net", 90);                                // tryClient puo durare 20 s, la scansione qualche secondo
   for (;;) {
+    wdBeat("net");
+    fwTick();
+    if (g_apChReq) {                                 // cambio canale dell'hotspot senza spegnere il Wi-Fi (la rete schede resta accesa)
+      g_apChReq = false;
+      if (g_state == NET_AP) { WiFi.softAP(cfg.apSsid.c_str(), cfg.apPass.c_str(), g_apCh); vlog("NET: hotspot sul canale %d", (int)g_apCh); }
+    }
     if (g_airOffReq) { g_airOffReq = false; g_reconf = true; }
     if (g_airReq || (cfg.airOn && g_state != NET_AIR)) {
       g_airReq = false;
@@ -239,20 +336,32 @@ static void netTask(void*) {
     if (g_reconf) {
       g_reconf = false; fails = 0;
       if (cfg.staEnabled && cfg.staSsid.length()) {
-        if (!tryClient()) startAp();     // se fallisce torna AP
+        if (!tryClient() && apAllowed()) startAp();     // se fallisce torna AP (se il servizio AP e acceso)
       } else startAp();
-      MDNS.end();
-      if (MDNS.begin(cfg.hostname.c_str())) MDNS.addService("http", "tcp", 80);
+      mdnsApply();
       webStart();                       // il server parte solo ora che la rete e pronta
     }
+    if (g_svcReq) {                                  // DHCP, portale automatico e mDNS: si applicano subito, senza riavvio
+      g_svcReq = false;
+      if (g_state == NET_AP) {
+        dhcpApply();
+        if (cfg.apCaptive && cfg.httpOn && cfg.httpPort == 80) dnsStart(); else dnsStop();
+      }
+      mdnsApply();
+    }
     if (g_scanReq) { g_scanReq = false; doScan(); }
+    if (g_tReq) { g_tReq = false; doTest(); }
     if (cfg.staEnabled && g_state == NET_CLIENT_OK && WiFi.status() != WL_CONNECTED) {
       vlog("NET: connessione persa");
       setState(NET_CLIENT_TRY);
     }
     if (g_state == NET_CLIENT_TRY) {
       if (WiFi.status() == WL_CONNECTED) setState(NET_CLIENT_OK);
-      else if (++fails >= 60) { fails = 0; vlog("NET: troppi tentativi, torno in AP"); startAp(); }
+      else if (++fails >= 60) {
+        fails = 0;
+        if (apAllowed()) { vlog("NET: troppi tentativi, torno in AP"); startAp(); }
+        else { vlog("NET: Wi-Fi assente, il servizio AP e spento: riprovo"); tryClient(); }   // scelta dell'utente: recupero con BOOT 8 s
+      }
     } else fails = 0;
     if (g_dns) g_dns->processNextRequest();
     vTaskDelay(pdMS_TO_TICKS(1000));

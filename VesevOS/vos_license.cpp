@@ -10,6 +10,8 @@ const char* licTitle(int i) { return (i >= 0 && i < LIC_COUNT) ? LIC_DOCS[i].tit
 const char* licText(int i)  { return (i >= 0 && i < LIC_COUNT) ? LIC_DOCS[i].text : ""; }
 size_t      licSize(int i)  { return (i >= 0 && i < LIC_COUNT) ? LIC_DOCS[i].size : 0; }
 
+size_t      licZ(int i)     { return (i >= 0 && i < LIC_COUNT) ? LIC_DOCS[i].zsize : 0; }
+
 int licFind(const String& id) {
   for (int i = 0; i < LIC_COUNT; i++) if (id.equalsIgnoreCase(LIC_DOCS[i].id)) return i;
   return -1;

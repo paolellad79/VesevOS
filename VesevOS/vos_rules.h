@@ -18,4 +18,4 @@ bool   rulesSave(const String& text, String& err);   // controlla, salva e ricar
 String rulesStatusJson();                            // stato di ogni regola (ultima esecuzione, conteggio, antiloop)
 bool   rulesRunNow(int index, String& err);          // "prova ora"
 int    rulesCount();
-bool   rulesAction(const String& action, String& err);   // esegue subito UNA azione (controllata; "wait" non ammessa) - usata da MQTT
+bool   rulesAction(const String& action, String& err, const char* who = "MQTT");   // esegue subito UNA azione (controllata; "wait" non ammessa) - MQTT, rete schede

@@ -14,12 +14,15 @@
 #include "vos_rules.h"
 #include <WiFi.h>
 #include "mqtt_client.h"
+#include "esp_crt_bundle.h"
+#include "vos_wd.h"
+#include <LittleFS.h>
 
 static esp_mqtt_client_handle_t g_cli = nullptr;
 static volatile bool g_conn = false, g_onConnect = false, g_stopReq = false;
 static volatile uint32_t g_sent = 0, g_recv = 0;
 static String g_lastErr = "";
-static String g_uri, g_user, g_pass, g_id, g_will;      // restano vivi finche il client esiste
+static String g_uri, g_user, g_pass, g_id, g_will, g_ca;   // restano vivi finche il client esiste
 static SemaphoreHandle_t g_mx = NULL;
 #define QN 4
 static String g_q[QN]; static int g_qn = 0;
@@ -124,8 +127,10 @@ static void cleanup() {
 
 static void mqttTask(void*) {
   uint32_t lastState = 0;
+  wdWatch("mqtt", 30);
   for (;;) {
-    if (g_stopReq) { cleanup(); vlog("MQTT: fermato"); g_stopReq = false; vTaskDelete(NULL); }
+    wdBeat("mqtt");
+    if (g_stopReq) { cleanup(); vlog("MQTT: fermato"); g_stopReq = false; wdUnwatch("mqtt"); vTaskDelete(NULL); }
     if (g_onConnect) {
       g_onConnect = false;
       vlog("MQTT: collegato a %s", cfg.mqttHost.c_str());
@@ -157,11 +162,19 @@ void mqttStart() {
   if (mqttRunning()) mqttStop();
   if (!g_mx) g_mx = xSemaphoreCreateMutex();
   if (!cfg.mqttHost.length()) { g_lastErr = tr("Manca l'indirizzo del broker"); vlog("MQTT: manca l'indirizzo del broker"); return; }
-  g_uri = "mqtt://" + cfg.mqttHost + ":" + String(cfg.mqttPort);
+  g_uri = String(cfg.mqttTls ? "mqtts://" : "mqtt://") + cfg.mqttHost + ":" + String(cfg.mqttPort);
   g_user = cfg.mqttUser; g_pass = cfg.mqttPass; g_id = devId();
   g_will = mqttPrefix() + "/status";
   esp_mqtt_client_config_t c = {};
   c.broker.address.uri = g_uri.c_str();
+  if (cfg.mqttTls) {
+    // verifica del server: certificato caricato dall'utente (/mqtt-ca.pem) oppure le autorita pubbliche note
+    g_ca = "";
+    File f = LittleFS.open("/mqtt-ca.pem", "r");
+    if (f) { g_ca = f.readString(); f.close(); }
+    if (g_ca.indexOf("-----BEGIN CERTIFICATE-----") >= 0) c.broker.verification.certificate = g_ca.c_str();
+    else c.broker.verification.crt_bundle_attach = esp_crt_bundle_attach;
+  }
   c.credentials.client_id = g_id.c_str();
   if (g_user.length()) c.credentials.username = g_user.c_str();
   if (g_pass.length()) c.credentials.authentication.password = g_pass.c_str();
@@ -198,7 +211,8 @@ String mqttStatusJson() {
   j += ",\"auto\":" + String(cfg.mqttAuto ? "true" : "false") + ",\"host\":\"" + jsonEscape(cfg.mqttHost) + "\",\"port\":" + String(cfg.mqttPort);
   j += ",\"user\":\"" + jsonEscape(cfg.mqttUser) + "\",\"hasPass\":" + String(cfg.mqttPass.length() ? "true" : "false");
   j += ",\"prefix\":\"" + jsonEscape(cfg.mqttPrefix) + "\",\"prefixUsed\":\"" + jsonEscape(mqttPrefix()) + "\"";
-  j += ",\"every\":" + String(cfg.mqttEvery) + ",\"ha\":" + String(cfg.mqttHa ? "true" : "false");
+  j += ",\"every\":" + String(cfg.mqttEvery) + ",\"ha\":" + String(cfg.mqttHa ? "true" : "false") +
+       ",\"tls\":" + String(cfg.mqttTls ? "true" : "false") + ",\"hasCa\":" + String(LittleFS.exists("/mqtt-ca.pem") ? "true" : "false");
   j += ",\"sent\":" + String((unsigned long)g_sent) + ",\"recv\":" + String((unsigned long)g_recv) + ",\"err\":\"" + jsonEscape(g_lastErr) + "\"}";
   return j;
 }

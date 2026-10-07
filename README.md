@@ -30,7 +30,7 @@ rete Wi-Fi, ora, file, LED, pin, shell e tante altre cose, tutto protetto da una
 </p>
 <p align="center"><sub>Schermate della pagina di controllo (con dati di esempio): Home in tema scuro, Automazioni, ordine di avvio con il terminale a pannello, e la versione per telefono.</sub></p>
 
-> **Stato:** in sviluppo (versione 1.7.0). Il progetto cresce a fasi: guarda "Dove stiamo andando".
+> **Stato:** in sviluppo (versione 1.7.9). Il progetto cresce a fasi: guarda "Dove stiamo andando".
 
 ## Perché si chiama VesevOS
 
@@ -71,19 +71,21 @@ una situazione di emergenza, in silenzio radio quando serve, o comunicando in mo
 ## Cosa fa oggi
 
 - **Rete**: modo AP (la scheda crea la sua rete Wi-Fi) e modo client, IP automatico o fisso, scansione reti, nome host e dominio configurabili (`nome.local` con mDNS).
-- **Pagina web** con schede: Riepilogo, Stato, Wi-Fi, Shell, Task, Ora, File, LED, Pin, Config.
+- **Pagina web** con categorie Home, Rete, Servizi, Periferiche, Sistema, Sicurezza; **prima configurazione guidata** (6 passi, con verifica del Wi-Fi di casa).
 - **Prova dei pin**: tocca un pin per mettere un'uscita alta o bassa, farla lampeggiare o leggerla, con avvisi sui rischi. La prova si spegne da sola.
 - **Shell** web e seriale con molti comandi (digita `help`).
-- **Sicurezza**: password con SHA-256 salato e ripetuto, sessioni a tempo, blocco per indirizzo IP dopo troppe password sbagliate (tempo che raddoppia) e limite alle richieste. La password protegge pagina, API e shell.
-- **MQTT**: invia lo stato della scheda a un broker e riceve comandi; Home Assistant la riconosce da solo. Servizio con avvio automatico o manuale.
+- **Sicurezza**: password dell'hotspot casuale per ogni scheda, nessuna password di fabbrica, accesso con prova HMAC (la password non viaggia), **HTTPS** con certificato unico, fino a 8 **utenti con ruoli**, blocco per indirizzo IP, **filtro IP**, **controlli della configurazione** con allarmi e registro delle modifiche.
+- **Servizi** (spenti di fabbrica): **MQTT** (anche cifrato, mqtts), **rete tra schede** ESP-NOW con messaggi firmati e fino a 3 salti, **Bluetooth** per configurare dal telefono (10 minuti).
+- **Watchdog**: riavvia servizi o scheda bloccati, con limite anti-giro.
+- **Localizzazione**: paese, canali e potenza della radio secondo le regole del paese, antenna, fuso, formati.
 - **Modo aereo** con scelta di come riaccendere la rete, **portale automatico** in modalità hotspot, **sleep** profondo e **registro** con filtro.
-- **Ora**: NTP, fusi orari, formati data/ora, temperatura in C o F, server NTP locale.
+- **Ora**: NTP, data e ora a mano, server NTP locale.
 - **File**: memoria interna (LittleFS) con cartelle, carica/scarica/modifica.
 - **CPU**: velocità automatica o fissa (80/160/240 MHz), temperatura interna, allarme se troppo calda.
 - **LED**: LED RGB WS2812 (stato del sistema, battito legato al carico CPU, colore fisso).
 - **Configurazione** in stile OpenWrt (`/vesevos.conf`), scaricabile e ripristinabile.
-- **Lingue**: italiano nel firmware; inglese, spagnolo e tedesco come file separati (`lang/`), caricabili dalla pagina senza ricompilare.
-- **Licenze e note legali** consultabili dalla pagina e dalla shell (`license`).
+- **Lingue**: italiano e inglese nel firmware (con bandiera, cambio anche dalla seriale con i tasti 1 e 2); spagnolo e tedesco come file separati (`lang/`).
+- **Note legali**, elenco del software usato (SBOM) e manuale nella pagina e nella shell (`legal`, `license`). Manuale: [docs/manuale.md](docs/manuale.md).
 
 ## Dove stiamo andando
 
@@ -97,18 +99,18 @@ Queste sono idee e progetti, non promesse: l'ordine può cambiare.
 - [ ] **Aggiornamento del firmware dalla pagina** (OTA).
 
 **Più avanti**
-- [ ] **Prima configurazione guidata** (lingua, password, paese, Wi-Fi, ora).
 - [ ] **Scheda SD** e **app Lua** protette in una "gabbia" sulla SD.
 - [ ] **Catalogo di accessori plug and play**: scegli il sensore dall'elenco e VesevOS ti mostra come collegarlo e installa il necessario.
-- [ ] **Comunicazione tra schede** (ESP-NOW, reti mesh) e modi alternativi per le emergenze.
+- [ ] **Scheda SD** (1.8.0) e **aggiornamento OTA dalla pagina** (1.8.1).
 - [ ] **Modalità silenzio radio** e **risparmio energetico** per l'uso con pannello solare.
-- [ ] Server **SSH**, MQTT, HTTPS.
+- [ ] Server **SSH**.
 
 ## Requisiti
 
 - Scheda **ESP32-S3 SuperMini** (ESP32-S3FH4R2: 4 MB flash, 2 MB PSRAM).
 - Arduino IDE con core **esp32 3.3.x** o piu recente.
-- Librerie: **ESP32Async ESPAsyncWebServer** e **AsyncTCP** (ESP32Async).
+- Librerie (Gestore librerie di Arduino IDE): **PsychicHttp** (3.1.x, MIT) e **ArduinoJson** (7.x, MIT). Non servono piu ESPAsyncWebServer e AsyncTCP.
+- Il Bluetooth si puo togliere per risparmiare memoria: `#define VOS_WITH_BLE 0` in `vos_common.h`.
 
 ## Impostazioni Arduino IDE
 
@@ -128,12 +130,14 @@ Queste sono idee e progetti, non promesse: l'ordine può cambiare.
 
 ## Primo accesso
 
-1. Collegati alla rete Wi-Fi **VesevOS** (password iniziale `vesevos123`).
-2. Apri `http://192.168.4.1`.
-3. Scegli la password della scheda (minimo 6 caratteri). Vale anche per la shell seriale.
+1. Apri il monitor seriale (115200) e premi RESET: la scheda scrive il nome della rete (**VesevOS**) e la **sua password**,
+   diversa per ogni scheda (lo chiedono le leggi sulla sicurezza dei dispositivi: UE RED/EN 18031, Cyber Resilience Act; UK PSTI).
+2. Collegati a quella rete e apri `http://192.168.4.1` (di solito si apre da sola).
+3. Scegli la password del pannello (minimo 6 caratteri) e segui la configurazione guidata (LED arcobaleno).
 
-**Password dimenticata:** tieni premuto il pulsante **BOOT** per 8 secondi a scheda gia accesa.
-Non tenerlo premuto all'accensione: la scheda entrerebbe in modo download.
+**Tasto BOOT** (tieni premuto a scheda accesa, poi lascia): meno di 2 s esce dal modo aereo; 2-7 s (LED azzurro) spegne il filtro IP;
+8-19 s (LED giallo) azzera le password degli amministratori e riscrive la password Wi-Fi sulla seriale; 20 s o piu (LED rosso) fabbrica.
+Non tenerlo premuto all'accensione: la scheda entrerebbe in modo download. Tutto spiegato nel [manuale](docs/manuale.md).
 
 ## Colori del LED RGB (modo "Stato")
 
@@ -149,12 +153,16 @@ Non tenerlo premuto all'accensione: la scheda entrerebbe in modo download.
 
 ```
 VesevOS/      sketch Arduino (VesevOS.ino + file .h/.cpp)
-web/          pagina web in HTML (sorgente di vos_page.h)
+web/          pagina web in HTML (sorgente di vos_page.h, compressa gzip)
+docs/         manuale (italiano e inglese)
 assets/       banner e schermate del README
-lang/         file di lingua pronti da caricare (en, es, de) - GENERATI da tools/lang_src.json
-licenses/     testi delle licenze (GPL, LGPL, Apache) e modello della nota legale
-tools/        mkpage.py (pagina), mklang.py (lingue), mklicense.py (testi legali)
+lang/         lingue in file (es, de) - GENERATE da tools/lang_src.json; l'inglese e dentro il firmware
+licenses/     testi delle licenze (GPL, LGPL, Apache, MIT, BSD) e modello della nota legale
+tools/        mkpage.py (pagina), mklang.py (lingue), mklicense.py (testi legali), mkcommon.py (elenco dei paesi),
+              stub/ (controllo di tutti i file senza scheda: compila.sh), data/ (sorgente dei dati dei paesi)
 NOTICE.txt    note legali: titolarita, licenze, riferimenti normativi
+SBOM.spdx.json elenco del software usato (formato SPDX)
+SECURITY.md   come segnalare problemi di sicurezza, anni di supporto
 CHANGELOG.md  cronologia delle versioni
 ```
 
@@ -164,13 +172,13 @@ Se modifichi `web/index.html`, rigenera la pagina con:
 python3 tools/mkpage.py
 ```
 
-I sorgenti usano solo caratteri ASCII (le lettere accentate nella pagina sono entita HTML).
+I sorgenti del firmware usano solo caratteri ASCII.
 
 ## Lingue
 
 L'italiano e dentro il firmware. Per le altre lingue:
 
-1. Apri la pagina, scheda **Config > Lingue**.
+1. Apri la pagina, scheda **Sistema > Localizzazione** (carta Lingue).
 2. Scegli il file (`en.json`, `es.json` o `de.json` dalla cartella `lang/`) e premi **Carica lingua**.
 3. Scegli la lingua dal menu in alto a destra. La scheda la ricorda; da shell: `lang en`.
 
@@ -192,6 +200,6 @@ Doppia licenza:
 - **Licenza commerciale**: per usare VesevOS in prodotti chiusi. Vedi `COMMERCIAL.md`.
 
 Titolarità, licenze delle librerie di terzi e riferimenti normativi: vedi `NOTICE.txt` (anche nella
-pagina, scheda Config > Licenze, e nella shell con `license`).
+pagina, scheda Sistema > Note legali, e nella shell con `license`).
 
 Copyright (C) 2026 Domenico Paolella.

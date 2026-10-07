@@ -14,6 +14,8 @@ uint64_t sysUptimeSec();            // dall'avvio del sistema
 uint32_t sysBootCount();
 uint32_t sysLifeSec();              // contaore totale di vita della scheda (secondi, salvato ogni 10 min)
 String   sysResetReason();
+String   sysResetName(int reason);      // nome (tradotto) di un motivo di reset di esp_reset_reason()
+void     sysTopTask(char* name, size_t n, int* pct);   // task (non IDLE) piu attivo nell'ultimo secondo
 String   sysTempHistoryJson();      // ultimi 60 secondi
 String   sysCpuHistoryJson();
 String   sysStatusJson();           // tutto lo stato per la pagina

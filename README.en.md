@@ -30,7 +30,7 @@ Wi-Fi, clock, files, LEDs, pins, a shell and much more, all protected by a passw
 </p>
 <p align="center"><sub>Screenshots of the control page (with sample data): Home in dark theme, Automations, startup order with the bottom terminal panel, and the phone layout.</sub></p>
 
-> **Status:** in development (version 1.7.0). The project grows in stages: see "Where we are going".
+> **Status:** in development (version 1.7.9). The project grows in stages: see "Where we are going".
 
 ## Why "VesevOS"?
 
@@ -71,17 +71,20 @@ in radio silence when needed, or communicating in alternative ways.
 ## What it does today
 
 - **Network**: AP mode (the board creates its own Wi-Fi network) and client mode, automatic or fixed IP, network scan, configurable host name and domain (`name.local` with mDNS).
-- **Web page** with tabs: Summary, Status, Wi-Fi, Shell, Tasks, Time, Files, LED, Pins, Config.
+- **Web page** with categories Home, Network, Services, Peripherals, System, Security; **guided first setup** (6 steps, with home Wi-Fi check).
 - **Pin tests**: tap a pin to set an output high or low, make it blink or read it, with warnings about the risks. The test switches off by itself.
 - **Shell**, on the web and on the serial port, with many commands (type `help`).
-- **Security**: salted, iterated SHA-256 password, lock-out after 5 mistakes, timed sessions. The password protects the page, the API and the shell.
-- **Time**: NTP, time zones, date/time formats, temperature in C or F, local NTP server.
+- **Security**: random hotspot password for every board, no factory panel password, HMAC sign-in (the password never travels), **HTTPS** with a unique certificate, up to 8 **users with roles**, per-IP lock-out, **IP filter**, **configuration checks** with alarms and change log.
+- **Services** (off by default): **MQTT** (also encrypted, mqtts), **board network** over ESP-NOW with signed messages and up to 3 hops, **Bluetooth** to configure from a phone (10 minutes).
+- **Watchdog**: restarts hung services or the board, with an anti-loop limit.
+- **Localization**: country, radio channels and power following the country's rules, antenna, time zone, formats.
+- **Time**: NTP, manual date and time, local NTP server.
 - **Files**: internal memory (LittleFS) with folders, upload/download/edit.
 - **CPU**: automatic or fixed speed (80/160/240 MHz), internal temperature, alarm when too hot.
-- **LED**: WS2812 RGB LED (system status, heartbeat tied to CPU load, fixed color) and an extra LED.
+- **LED**: WS2812 RGB LED (system status, heartbeat tied to CPU load, fixed color).
 - **Configuration** in OpenWrt style (`/vesevos.conf`), downloadable and restorable.
-- **Languages**: Italian inside the firmware; English, Spanish and German as separate files (`lang/`) that can be loaded from the page without recompiling.
-- **Licenses and legal notes** available from the page and from the shell (`license`).
+- **Languages**: Italian and English inside the firmware (with flags; keys 1 and 2 switch language on the serial); Spanish and German as separate files (`lang/`).
+- **Legal notes**, software list (SBOM) and manual in the page and in the shell (`legal`, `license`). Manual: [docs/manual.en.md](docs/manual.en.md).
 
 ## Where we are going
 
@@ -99,15 +102,16 @@ These are ideas and plans, not promises: the order may change.
 - [ ] **Guided first-time setup** (language, password, country, Wi-Fi, time).
 - [ ] **SD card** and **Lua apps** confined to a "cage" on the SD card.
 - [ ] **Plug-and-play accessory catalog**: pick the sensor from a list and VesevOS shows how to wire it and installs what is needed.
-- [ ] **Board-to-board communication** (ESP-NOW, mesh networks) and alternative channels for emergencies.
+- [ ] **SD card** (1.8.0) and **OTA update from the page** (1.8.1).
 - [ ] **Radio silence mode** and **power saving** for solar-powered use.
-- [ ] **SSH** server, MQTT, HTTPS.
+- [ ] **SSH** server.
 
 ## Requirements
 
 - An **ESP32-S3 SuperMini** board (ESP32-S3FH4R2: 4 MB flash, 2 MB PSRAM).
 - Arduino IDE with **esp32 core 3.3.x** or newer.
-- Libraries: **ESP32Async ESPAsyncWebServer** and **AsyncTCP** (ESP32Async).
+- Libraries (Arduino IDE Library Manager): **PsychicHttp** (3.1.x, MIT) and **ArduinoJson** (7.x, MIT). ESPAsyncWebServer and AsyncTCP are no longer needed.
+- Bluetooth can be left out to save memory: `#define VOS_WITH_BLE 0` in `vos_common.h`.
 
 ## Arduino IDE settings
 
@@ -127,12 +131,14 @@ These are ideas and plans, not promises: the order may change.
 
 ## First access
 
-1. Connect to the Wi-Fi network **VesevOS** (initial password `vesevos123`).
-2. Open `http://192.168.4.1`.
-3. Choose the board's password (at least 6 characters). It also applies to the serial shell.
+1. Open the serial monitor (115200) and press RESET: the board prints the network name (**VesevOS**) and **its own password**,
+   different for every board (required by device security laws: EU RED/EN 18031, Cyber Resilience Act; UK PSTI).
+2. Join that network and open `http://192.168.4.1` (it usually opens by itself).
+3. Choose the panel password (at least 6 characters) and follow the guided setup (rainbow LED).
 
-**Forgot the password:** hold the **BOOT** button for 8 seconds while the board is already running.
-Do not hold it at power-up: the board would enter download mode.
+**BOOT button** (hold while running, then release): under 2 s leaves airplane mode; 2-7 s (light blue LED) turns off the IP filter;
+8-19 s (yellow LED) clears the administrators' passwords and prints the Wi-Fi password on the serial; 20 s or more (red LED) factory reset.
+Do not hold it at power-up: the board would enter download mode. Everything is explained in the [manual](docs/manual.en.md).
 
 ## RGB LED colors ("Status" mode)
 
@@ -148,12 +154,16 @@ Do not hold it at power-up: the board would enter download mode.
 
 ```
 VesevOS/      Arduino sketch (VesevOS.ino + .h/.cpp files)
-web/          web page in HTML (source of vos_page.h)
+web/          web page in HTML (source of vos_page.h, gzip-compressed)
+docs/         manual (Italian and English)
 assets/       README banner and screenshots
-lang/         ready-to-load language files (en, es, de) - GENERATED from tools/lang_src.json
-licenses/     license texts (GPL, LGPL, Apache) and legal notice template
-tools/        mkpage.py (page), mklang.py (languages), mklicense.py (legal texts)
+lang/         language files (es, de) - GENERATED from tools/lang_src.json; English is inside the firmware
+licenses/     license texts (GPL, LGPL, Apache, MIT, BSD) and legal notice template
+tools/        mkpage.py (page), mklang.py (languages), mklicense.py (legal texts), mkcommon.py (country list),
+              stub/ (check every file without a board: compila.sh), data/ (country data source)
 NOTICE.txt    legal notes: ownership, licenses, regulatory references
+SBOM.spdx.json list of the software used (SPDX format)
+SECURITY.md   how to report security problems, years of support
 CHANGELOG.md  version history (in Italian)
 ```
 
@@ -163,13 +173,13 @@ If you edit `web/index.html`, regenerate the page with:
 python3 tools/mkpage.py
 ```
 
-The sources use only ASCII characters (accented letters in the page are HTML entities).
+The firmware sources use only ASCII characters.
 
 ## Languages
 
 Italian is inside the firmware. For the other languages:
 
-1. Open the page, tab **Config > Languages**.
+1. Open the page, tab **System > Localization** (Languages card).
 2. Choose the file (`en.json`, `es.json` or `de.json` from the `lang/` folder) and press **Upload language**.
 3. Pick the language from the menu at the top right. The board remembers it; from the shell: `lang en`.
 
@@ -191,6 +201,6 @@ Dual license:
 - **Commercial license**: for using VesevOS in closed products. See `COMMERCIAL.md`.
 
 Ownership, third-party library licenses and regulatory references: see `NOTICE.txt` (also on the
-page, Config > Licenses tab, and in the shell with `license`).
+page, System > Legal notes tab, and in the shell with `license`).
 
 Copyright (C) 2026 Domenico Paolella.

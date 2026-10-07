@@ -465,11 +465,11 @@ String rulesStatusJson() {
   return j + "]";
 }
 
-bool rulesAction(const String& action, String& err) {
+bool rulesAction(const String& action, String& err, const char* who) {
   String a = action; a.trim();
   if (word(a, 0) == "wait") { err = tr("Azione non ammessa"); return false; }
   if (!actionCheck(a, err)) return false;
-  doAction(a, "MQTT");
+  doAction(a, who);
   return true;
 }
 
