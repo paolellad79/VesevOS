@@ -29,7 +29,7 @@ Progetto: https://github.com/paolellad79/VesevOS
    - PsychicHttp (server web e HTTPS), ArduinoJson, FreeRTOS,
      posix_tz_db (fusi orari POSIX): MIT. Testo: "license mit"
    - lwIP, LittleFS: BSD-3-Clause. Testo: "license bsd3"
-   - Natural Earth (mappa del mondo): pubblico dominio.
+   - Natural Earth (nomi dei paesi): pubblico dominio.
    - IANA tz database (fusi orari, nomi dei paesi): pubblico dominio.
    Chi distribuisce un firmware compilato deve rispettare anche queste
    licenze (per esempio fornire i testi e, per la LGPL del core Arduino,

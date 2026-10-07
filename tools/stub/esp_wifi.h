@@ -19,3 +19,5 @@ esp_err_t esp_wifi_get_max_tx_power(int8_t* power);
 esp_err_t esp_wifi_set_channel(uint8_t primary, wifi_second_chan_t second);
 esp_err_t esp_wifi_get_channel(uint8_t* primary, wifi_second_chan_t* second);
 esp_err_t esp_wifi_set_promiscuous(bool en);
+typedef enum { WIFI_PS_NONE, WIFI_PS_MIN_MODEM, WIFI_PS_MAX_MODEM } wifi_ps_type_t;
+esp_err_t esp_wifi_set_ps(wifi_ps_type_t type);

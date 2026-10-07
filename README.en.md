@@ -30,7 +30,7 @@ Wi-Fi, clock, files, LEDs, pins, a shell and much more, all protected by a passw
 </p>
 <p align="center"><sub>Screenshots of the control page (with sample data): Home in dark theme, Automations, startup order with the bottom terminal panel, and the phone layout.</sub></p>
 
-> **Status:** in development (version 1.7.2). The project grows in stages: see "Where we are going".
+> **Status:** in development (version 1.7.5). The project grows in stages: see "Where we are going".
 
 ## Why "VesevOS"?
 
@@ -71,7 +71,7 @@ in radio silence when needed, or communicating in alternative ways.
 ## What it does today
 
 - **Network**: AP mode (the board creates its own Wi-Fi network) and client mode, automatic or fixed IP, network scan, configurable host name and domain (`name.local` with mDNS).
-- **Web page** with categories Home, Network, Services, Peripherals, System, Security; **guided first setup** with a world map.
+- **Web page** with categories Home, Network, Services, Peripherals, System, Security; **guided first setup** (6 steps, with home Wi-Fi check).
 - **Pin tests**: tap a pin to set an output high or low, make it blink or read it, with warnings about the risks. The test switches off by itself.
 - **Shell**, on the web and on the serial port, with many commands (type `help`).
 - **Security**: random hotspot password for every board, no factory panel password, HMAC sign-in (the password never travels), **HTTPS** with a unique certificate, up to 8 **users with roles**, per-IP lock-out, **IP filter**, **configuration checks** with alarms and change log.
@@ -159,7 +159,7 @@ docs/         manual (Italian and English)
 assets/       README banner and screenshots
 lang/         language files (es, de) - GENERATED from tools/lang_src.json; English is inside the firmware
 licenses/     license texts (GPL, LGPL, Apache, MIT, BSD) and legal notice template
-tools/        mkpage.py (page), mklang.py (languages), mklicense.py (legal texts), mkcommon.py (countries and map),
+tools/        mkpage.py (page), mklang.py (languages), mklicense.py (legal texts), mkcommon.py (country list),
               stub/ (check every file without a board: compila.sh), data/ (country data source)
 NOTICE.txt    legal notes: ownership, licenses, regulatory references
 SBOM.spdx.json list of the software used (SPDX format)

@@ -9,6 +9,7 @@
 #include "vos_log.h"
 #include "vos_i18n.h"
 #include "vos_util.h"
+#include "vos_stats.h"
 
 #if VOS_WITH_BLE
 #include <BLEDevice.h>
@@ -36,16 +37,17 @@ class CmdCb : public BLECharacteristicCallbacks {
   }
 };
 class SrvCb : public BLEServerCallbacks {
-  void onConnect(BLEServer*) override { g_conn = true; vlog("BLE: telefono collegato"); }
+  void onConnect(BLEServer*) override { g_conn = true; statNote(ST_BLE_CONN); vlog("BLE: telefono collegato"); }
   void onDisconnect(BLEServer*) override { g_conn = false; vlog("BLE: telefono scollegato"); if (g_on) BLEDevice::startAdvertising(); }
 };
 
 bool bleRunning() { return g_on; }
+uint32_t bleLeftSec() { return g_on ? (uint32_t)((g_until - millis()) / 1000) : 0; }
 
 bool bleStart(String& err) {
   if (g_on) { g_until = millis() + BLE_MS; return true; }
   if (cfg.airOn) { err = tr("Modalita aereo attiva: radio spenta"); return false; }
-  if (ESP.getFreeHeap() < 60000) { err = tr("Memoria insufficiente per il Bluetooth"); return false; }
+  if (ESP.getFreeHeap() < 60000) { err = tr("Memoria insufficiente per il Bluetooth: chiudi la pagina web e riprova"); return false; }
   BLEDevice::init("VesevOS-setup");
   g_pin = 100000 + esp_random() % 900000;
   BLESecurity::setPassKey(true, g_pin);
@@ -133,6 +135,7 @@ String bleText() {
 bool   bleStart(String& err) { err = tr("Bluetooth non incluso in questo firmware"); return false; }
 void   bleStop() {}
 bool   bleRunning() { return false; }
+uint32_t bleLeftSec() { return 0; }
 void   bleTick() {}
 String bleJson() { return "{\"have\":false,\"on\":false}"; }
 String bleText() { return String(tr("Bluetooth non incluso in questo firmware")) + "\n"; }

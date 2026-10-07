@@ -60,7 +60,7 @@ LANG = {'IT': 'it', 'SM': 'it', 'VA': 'it', 'CH': 'it', 'ES': 'es', 'MX': 'es', 
 
 # ---------- elenco del software usato (SBOM semplice) ----------
 SBOM = [
-    ['VesevOS', '1.7.2', 'GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial', 'https://github.com/paolellad79/VesevOS'],
+    ['VesevOS', '1.7.5', 'GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial', 'https://github.com/paolellad79/VesevOS'],
     ['Arduino-ESP32 core', '3.3.x', 'LGPL-2.1-or-later', 'https://github.com/espressif/arduino-esp32'],
     ['ESP-IDF (esp_wifi, esp_now, esp-mqtt, esp_http_server, esp_https_server, NVS)', '5.5', 'Apache-2.0', 'https://github.com/espressif/esp-idf'],
     ['Mbed TLS', '3.6', 'Apache-2.0', 'https://github.com/Mbed-TLS/mbedtls'],
@@ -70,7 +70,7 @@ SBOM = [
     ['NimBLE (Apache Mynewt)', 'core 3.3', 'Apache-2.0', 'https://github.com/apache/mynewt-nimble'],
     ['PsychicHttp', '3.1.2', 'MIT', 'https://github.com/hoeken/PsychicHttp'],
     ['ArduinoJson', '7.x', 'MIT', 'https://github.com/bblanchon/ArduinoJson'],
-    ['Natural Earth (confini dei paesi)', '5.1', 'Public Domain', 'https://www.naturalearthdata.com'],
+    ['Natural Earth (nomi dei paesi)', '5.1', 'Public Domain', 'https://www.naturalearthdata.com'],
     ['IANA tz database (fusi orari)', '2025+', 'Public Domain', 'https://www.iana.org/time-zones'],
     ['posix_tz_db (fusi in formato POSIX)', '2025', 'MIT', 'https://github.com/nayarsystems/posix_tz_db'],
 ]
@@ -147,15 +147,13 @@ def build():
     table = []
     for c in src['countries']:
         cc = c['cc']
-        e = dict(c)
+        e = {k: v for k, v in c.items() if k not in ('d', 'lx', 'ly')}   # dalla 1.7.4 senza mappa: solo elenco dei paesi
         e['ch'] = 11 if cc in CH11 else 13
         e['dbm'] = 30 if cc in DBM30 else 20
         e['rg'] = region_of(cc)
         e['f'] = {'t': 1 if cc in FAHRENHEIT else 0, 'd': 2 if cc in MDY else (1 if cc in YMD else 0), 'h': 1 if cc in H12 else 0,
                   'w': 1 if cc in SUNDAY else 0, 's': 1 if cc in DOT else 0, 'l': LANG.get(cc, 'en')}
         e['ntp'] = cc.lower() + '.pool.ntp.org'
-        if 'lx' not in e and cc in SPOT:          # territori piccoli senza punto in Natural Earth: posizione approssimata
-            e['lx'], e['ly'] = (round(v) for v in project(*SPOT[cc]))
         cl.append(e)
         table.append((cc, e['ch'], e['dbm']))
     common = {'v': 1, 'countries': cl, 'regions': REGIONS,

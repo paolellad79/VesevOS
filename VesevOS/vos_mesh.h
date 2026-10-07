@@ -13,6 +13,7 @@ void   meshInit();                                  // registra il servizio; par
 bool   meshStart(String& err);                      // accende (serve il Wi-Fi acceso e la chiave)
 void   meshStop();
 bool   meshRunning();
+int    meshNodeCount();                             // schede vicine conosciute
 bool   meshSendCmd(const String& to, const String& cmd, String& err);    // to = nome o MAC; esegue un'azione sull'altra scheda
 bool   meshSendText(const String& to, const String& text, String& err);  // to = nome, MAC o "*" (tutti)
 String meshNewKey();                                // 64 cifre esadecimali casuali

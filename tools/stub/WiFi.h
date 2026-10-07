@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include "esp_wifi.h"
 #define WIFI_AUTH_OPEN 0
-enum wl_status_t{WL_IDLE_STATUS,WL_CONNECTED=3,WL_DISCONNECTED=6};
+enum wl_status_t{WL_IDLE_STATUS,WL_NO_SSID_AVAIL=1,WL_CONNECTED=3,WL_CONNECT_FAILED=4,WL_DISCONNECTED=6};
 #define WIFI_SCAN_RUNNING (-1)
 #define WIFI_SCAN_FAILED (-2)
 typedef enum { WIFI_POWER_19_5dBm=78, WIFI_POWER_2dBm=8 } wifi_power_t;

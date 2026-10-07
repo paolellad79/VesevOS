@@ -1,4 +1,4 @@
-# VesevOS 1.7.2 - Manuale
+# VesevOS 1.7.5 - Manuale
 
 Manuale per chi usa la scheda. Parole semplici, niente programmazione.
 English version: [manual.en.md](manual.en.md). Lo stesso aiuto e nella pagina della scheda (Sistema > Aiuto, oppure `http://192.168.4.1/#aiuto`).
@@ -22,18 +22,17 @@ Ogni scheda VesevOS, la prima volta che si accende, inventa da sola una password
 ### Metodo 1 (consigliato): cavo USB e monitor seriale
 1. Carica VesevOS sulla scheda (Arduino IDE > Carica).
 2. Apri Strumenti > Monitor seriale, velocita 115200, e premi RESET sulla scheda.
-3. Leggi la schermata di benvenuto: nome della rete (`VesevOS`), password (es. `k7Hm-pQ4x-Tr9a`) e indirizzo `http://192.168.4.1`.
+3. Leggi la schermata di benvenuto: nome della rete (`VesevOS`), password (es. `k7mpq4xtr9ab`: 12 caratteri, tutti minuscoli e numeri, senza simboli) e indirizzo `http://192.168.4.1`.
    Vuoi l'inglese? Premi `2` (senza Invio). Per tornare all'italiano premi `1`.
 4. Collegati con telefono o PC alla rete `VesevOS` con quella password. La pagina si apre da sola; altrimenti apri `http://192.168.4.1`.
 5. **Scegli la password del pannello** (almeno 6 caratteri). Non esiste una password di fabbrica: la scegli tu e la conosci solo tu.
-6. Parte la **configurazione guidata** (il LED fa l'arcobaleno finche non hai finito). I passi: lingua, paese sulla mappa, nome della
-   scheda, antenna, password dell'hotspot, **Wi-Fi di casa** (facoltativo), **ora**, fine. Vedi il capitolo 12.
-7. Il **QR** per collegare il telefono (e per stamparlo) e nella pagina **Home**: in modo hotspot e il QR della Wi-Fi della scheda,
-   quando la scheda e collegata alla tua Wi-Fi e il QR con l'indirizzo della scheda. Stampa l'etichetta e attaccala sotto la scheda.
+6. Parte la **configurazione guidata** (il LED fa l'arcobaleno finche non hai finito). I passi: lingua, paese (elenco con ricerca), nome della
+   scheda, antenna, **Wi-Fi di casa o hotspot** (la scheda prova subito a collegarsi e te lo dice), **ora** (solo se non c'e Wi-Fi di casa), fine. Vedi il capitolo 12.
+7. Il **QR** della Wi-Fi della scheda (e la stampa dell'etichetta) e in **Rete > Punto di accesso**, con nome e password. Stampa l'etichetta e attaccala sotto la scheda.
    Il banner con la password dell'hotspot sulla seriale resta finche la guida non e finita (anche se riapri il monitor).
 
 Senza Arduino IDE va bene qualsiasi programma per porta seriale (PuTTY, screen, app "Serial USB Terminal" con cavo OTG).
-Il QR non viene disegnato sulla seriale (nei monitor seriali spesso non si legge): e solo nella pagina Home. La configurazione si puo fare anche solo da seriale (capitolo 13).
+Il QR non viene disegnato sulla seriale (nei monitor seriali spesso non si legge): e solo nella pagina Punto di accesso. La configurazione si puo fare anche solo da seriale (capitolo 13).
 
 ### Metodo 2: scheda preparata da un altro
 Chi la prepara legge la password come nel Metodo 1 e consegna la scheda con l'etichetta (nome rete + password + QR).
@@ -49,7 +48,7 @@ Chi la riceve, al primo accesso, sceglie la password del pannello e, se vuole, c
 | 20 secondi o piu | rosso | ripristino di fabbrica: cancella tutto, nuova password Wi-Fi |
 
 - L'azione parte quando **lasci** il tasto: guarda il colore e lascia al momento giusto.
-- Password del Wi-Fi: pannello > Home (QR, solo in modo hotspot) oppure Servizi > Punto di accesso > Mostra. Oppure cavo USB + BOOT 8 secondi.
+- Password del Wi-Fi: pannello > Rete > Punto di accesso (nome, password e QR). Oppure cavo USB + BOOT 8 secondi.
 - Password del pannello: la scheda conserva solo un'impronta, non si puo rileggere. BOOT 8 secondi la azzera; entro 10 minuti
   ne scegli una nuova (dall'hotspot della scheda in qualsiasi momento).
 
@@ -67,7 +66,7 @@ della pagina (Servizi > HTTPS) o della seriale, poi prosegui. Dall'hotspot della
 perche la rete e gia cifrata dalla password Wi-Fi. Puoi caricare un certificato tuo (vale dal riavvio successivo).
 
 ## 5. Paese, radio e localizzazione
-Sistema > Localizzazione: paese (mappa del mondo con zoom), lingua, fuso orario, server dell'ora, formati di data e ora,
+Sistema > Localizzazione: paese (elenco con ricerca), lingua, fuso orario, server dell'ora, formati di data e ora,
 separatore dei decimali, primo giorno della settimana, gradi C/F, antenna e potenza.
 - **Il paese decide i canali Wi-Fi e la potenza massima** secondo le sue regole: la scheda non li supera.
   Senza paese valgono le regole piu prudenti (canali 1-11).
@@ -111,13 +110,18 @@ Se VesevOS diventa un prodotto a pagamento, questi obblighi valgono per quella v
 Scrivi `help`. Comandi nuovi: `welcome`, `ap`, `user`, `passwd`, `locale`, `firewall`, `audit`, `watchdog`, `mesh`, `ble`, `cert`, `legal`.
 Sulla seriale, a riga vuota, i tasti `1` e `2` cambiano lingua.
 
-## 12. Menu, hotspot, HTTP/HTTPS, porte e fine della guida (novita 1.7.2)
+## 12. Menu, hotspot, HTTP/HTTPS, porte e fine della guida (novita 1.7.3, 1.7.4 e 1.7.5)
 **Dove si trova cosa**
-- **Home**: situazione e QR. **Rete**: Wi-Fi, indirizzo IP, nome, modo aereo.
+- **Home**: anelli (CPU con velocita e temperatura, RAM, PSRAM, file, Wi-Fi), in seconda fila un widget con icona per ogni servizio acceso (l'indirizzo IP sta sotto il widget Wi-Fi; ora e data sono nella testata; la Posizione si vede cliccando la bandiera) (HTTP/S, MQTT, ESP-NOW, mDNS, Bluetooth, NTP, DHCP, hotspot, risparmio energia, statistiche); il clic apre la scheda del servizio. **Rete**: Wi-Fi, indirizzo IP, nome, modo aereo.
 - **Servizi**: Punto di accesso (AP), HTTP, HTTPS, MQTT, Rete tra schede, Automazioni, Task, Watchdog, Avvio, Terminale.
 - **Periferiche** (ex Hardware): Pin (schema fronte/retro e inventario), LED.
 - **Sistema**: Stato, File, Ora, Localizzazione (qui anche la lingua), Log, Config, Accessibilita, Note legali, Aiuto.
 - **Sicurezza**: Password (qui anche la password della seriale), Utenti, Filtro IP, Compliant.
+
+**Controlli dei servizi (uguali per tutti)**
+- In alto c'e il **banner di stato**: **Avviato** (verde) o **Fermo** (rosso). Sotto, quattro icone con il fondo colorato per lo stato: **Avvia** (verde), **Ferma** (rosso), **Riavvia** (giallo, grigio se il servizio e fermo o non si puo riavviare), **Applica** (blu, solo HTTP e HTTPS).
+- HTTP e HTTPS: le modifiche (accendere, spegnere, porte) valgono dopo **Applica**, che riavvia la scheda (con conferma).
+- Vale per: Punto di accesso, DHCP, DNS (portale automatico), mDNS, HTTP, HTTPS, MQTT, Rete tra schede, Statistiche, NTP, Bluetooth, Risparmio energia, MFA.
 
 **L'utente sceglie sempre.** Ogni servizio si accende e si spegne. Restano tre paletti: (1) non puoi restare chiuso fuori: almeno un
 protocollo web (HTTP o HTTPS) resta acceso, e BOOT 8 secondi rimette hotspot, HTTP, HTTPS e porte di fabbrica; (2) le regole radio
@@ -132,9 +136,8 @@ del paese non si superano; (3) niente password uguali per tutti.
   porta non e sicurezza vera: la sicurezza resta password, filtro IP e cifratura. Link e QR mostrano la porta.
 
 **Fine della configurazione guidata**
-- Passo **Wi-Fi di casa**: cerca la rete, scrivi la password, oppure **Salta**.
-- Passo **Ora**: con la Wi-Fi di casa l'ora arriva da Internet (NTP). Se salti la Wi-Fi il servizio NTP si spegne e ti chiede ora e data
-  (preimpostate da questo dispositivo). Attenzione: **la scheda non ha una batteria per l'orologio**, se la spegni l'ora si perde.
+- Passo **Wi-Fi di casa o hotspot**: scegli la rete e la password, premi Avanti: la scheda prova subito a collegarsi (fino a 20 secondi) e ti dice se ha funzionato.
+- Passo **Ora** (solo se salti la Wi-Fi): il servizio NTP si spegne e ti chiede fuso orario, data e ora (preimpostati da questo dispositivo). Con la Wi-Fi di casa l'ora arriva da Internet (NTP) e il passo non compare. Attenzione: **la scheda non ha una batteria per l'orologio**, se la spegni l'ora si perde.
 - A fine guida, con la Wi-Fi di casa, la pagina mostra il nuovo indirizzo (con QR). Collega il telefono a quella rete e aprilo: **al primo
   accesso da li** si spengono da soli hotspot, portale automatico e HTTP. Se la scheda non riesce a collegarsi, l'hotspot torna da solo
   e in Home compare l'avviso. Senza Wi-Fi di casa niente si spegne (tranne NTP).
@@ -147,9 +150,31 @@ Invio = tieni il valore, `skip` = salta, `quit` = esci. Comandi singoli: `lang`,
 `wifi off`, `ntp on|off`, `date set AAAA-MM-GG HH:MM`, `svc ap|captive|http|https on|off`, `svc http-port N`, `svc https-port N`, `ap new`.
 Dopo la guida valgono le regole di sicurezza (seriale con password, se acceso).
 
-## 14. Pin: schema e inventario
+## 14. Servizi di rete: NTP, DHCP, DNS, mDNS (novita 1.7.3)
+
+Ognuno ha la sua scheda in **Servizi** e si puo spegnere.
+- **NTP**: ora da Internet (serve la Wi-Fi di casa). Spento = ora a mano.
+- **DHCP**: da gli indirizzi a chi si collega all'hotspot. Durata da 10 a 1440 minuti. Si spegne solo con la Wi-Fi di casa collegata.
+- **DNS**: il portale automatico dell'hotspot (serve HTTP sulla porta 80).
+- **mDNS**: il nome NOME.local. Spento = solo indirizzo IP.
+DHCP, mDNS e portale cambiano subito; web e porte dal riavvio. Dalla seriale: `svc dhcp off`, `svc mdns on`, `diag`.
+
+Se la guida compare a ogni avvio: premi **La scheda e gia configurata** (oppure `setup done` dalla seriale). "Piu tardi" non la segna come finita.
+
+## 15. Pin: schema e inventario
 Periferiche > Pin: schema **Fronte** (pin sul bordo, USB-C in alto, BOOT/RESET, LED RGB, antenna) e **Retro** (piazzole da saldare
 GP14-18, 21, 33-42, 45-48 e pad B+, B-, BOOST: BOOST solo con batteria oltre 500 mAh). Tocca un pin per vedere funzioni e avvisi
 (pin di avvio 0/3/45/46, ADC2 con il Wi-Fi acceso, USB 19/20, JTAG 39-42). **Inventario**: scrivi a cosa colleghi ogni pin
 (es. "sensore porta"): il nome resta nella configurazione e un avviso compare se provi un pin gia segnato. GP33-37 sono liberi con la
 PSRAM da 2 MB di questa scheda (occupati sulle schede con PSRAM octal).
+
+
+## 16. Sicurezza e energia (novita 1.7.3)
+- **MFA**: Sicurezza > Accesso in due passi. Scansiona il QR con un'app (Google Authenticator, Aegis...), inserisci il codice, salva gli 8 codici di recupero (ognuno vale una volta). Il QR si vede solo da HTTPS o dall'hotspot.
+- **Ora**: il codice dipende dall'ora. Se la scheda non ha ora valida puoi scegliere: chiedere l'ora al browser (dopo password e codice giusti) oppure solo codici di recupero / blocco.
+- **Recupero**: tasto BOOT 8 s spegne l'MFA degli Admin.
+- **Anti-bot**: all'accesso il browser risolve una piccola prova di lavoro (difficolta in Sicurezza). Niente captcha esterni.
+- **Certificato**: Sistema > Certificato: scadenza, impronta, scarica, rigenera, importa.
+- **Risparmio energia**: Servizi > Risparmio energia. Sonno programmato = la scheda dorme e si sveglia dopo il tempo scelto (1 min - 7 giorni). Non si sveglia con BOOT: usa RESET. Nel sonno Wi-Fi e pagina sono spenti.
+- **Statistiche**: spente di fabbrica; solo contatori anonimi; scarica CSV; azzera.
+- **Seriale**: `power`, `sleep [min]`, `stats`.

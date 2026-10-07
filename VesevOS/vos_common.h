@@ -6,7 +6,11 @@
 #include <Arduino.h>
 
 #define VOS_NAME     "VesevOS"
-#define VOS_VERSION  "1.7.2"
+// 1 = i blocchi grandi (buffer TLS) vanno in PSRAM; se la pagina diventa instabile mettere 0
+#ifndef VOS_PSRAM_MALLOC
+#define VOS_PSRAM_MALLOC 1
+#endif
+#define VOS_VERSION  "1.7.5"
 #define VOS_GITHUB   "https://github.com/paolellad79/VesevOS"
 #define VOS_BOARD    "ESP32-S3 SuperMini"   // scheda (tabella dei piedini nella pagina)
 

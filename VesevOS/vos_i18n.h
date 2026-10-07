@@ -15,6 +15,6 @@ bool        langCodeValid(const String& c);      // 2-8 lettere minuscole o nume
 String      langListJson();                      // [{"code":"it","name":"Italiano","loc":"it-IT","flag":"<svg..>"},...]
 int         langList(String* codes, String* names, int max);   // lingue disponibili (per il menu della seriale)
 bool        langBuiltin(const String& code);     // "it" o "en"
-const char* langBuiltinJson(const String& code, size_t& len);   // file della lingua interna (per la pagina)
+const uint8_t* langBuiltinJson(const String& code, size_t& len);   // file della lingua interna, compresso gzip (per la pagina)
 const char* tr(const char* it);                  // testo nella lingua corrente
 String      trf(const char* it, ...) __attribute__((format(printf, 1, 2)));   // come printf, con testo tradotto

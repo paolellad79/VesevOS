@@ -30,7 +30,7 @@ rete Wi-Fi, ora, file, LED, pin, shell e tante altre cose, tutto protetto da una
 </p>
 <p align="center"><sub>Schermate della pagina di controllo (con dati di esempio): Home in tema scuro, Automazioni, ordine di avvio con il terminale a pannello, e la versione per telefono.</sub></p>
 
-> **Stato:** in sviluppo (versione 1.7.2). Il progetto cresce a fasi: guarda "Dove stiamo andando".
+> **Stato:** in sviluppo (versione 1.7.5). Il progetto cresce a fasi: guarda "Dove stiamo andando".
 
 ## Perché si chiama VesevOS
 
@@ -71,7 +71,7 @@ una situazione di emergenza, in silenzio radio quando serve, o comunicando in mo
 ## Cosa fa oggi
 
 - **Rete**: modo AP (la scheda crea la sua rete Wi-Fi) e modo client, IP automatico o fisso, scansione reti, nome host e dominio configurabili (`nome.local` con mDNS).
-- **Pagina web** con categorie Home, Rete, Servizi, Periferiche, Sistema, Sicurezza; **prima configurazione guidata** con mappa del mondo.
+- **Pagina web** con categorie Home, Rete, Servizi, Periferiche, Sistema, Sicurezza; **prima configurazione guidata** (6 passi, con verifica del Wi-Fi di casa).
 - **Prova dei pin**: tocca un pin per mettere un'uscita alta o bassa, farla lampeggiare o leggerla, con avvisi sui rischi. La prova si spegne da sola.
 - **Shell** web e seriale con molti comandi (digita `help`).
 - **Sicurezza**: password dell'hotspot casuale per ogni scheda, nessuna password di fabbrica, accesso con prova HMAC (la password non viaggia), **HTTPS** con certificato unico, fino a 8 **utenti con ruoli**, blocco per indirizzo IP, **filtro IP**, **controlli della configurazione** con allarmi e registro delle modifiche.
@@ -158,7 +158,7 @@ docs/         manuale (italiano e inglese)
 assets/       banner e schermate del README
 lang/         lingue in file (es, de) - GENERATE da tools/lang_src.json; l'inglese e dentro il firmware
 licenses/     testi delle licenze (GPL, LGPL, Apache, MIT, BSD) e modello della nota legale
-tools/        mkpage.py (pagina), mklang.py (lingue), mklicense.py (testi legali), mkcommon.py (paesi e mappa),
+tools/        mkpage.py (pagina), mklang.py (lingue), mklicense.py (testi legali), mkcommon.py (elenco dei paesi),
               stub/ (controllo di tutti i file senza scheda: compila.sh), data/ (sorgente dei dati dei paesi)
 NOTICE.txt    note legali: titolarita, licenze, riferimenti normativi
 SBOM.spdx.json elenco del software usato (formato SPDX)

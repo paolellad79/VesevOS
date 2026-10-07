@@ -82,6 +82,8 @@ void auditFix() {
 }
 
 void auditRefresh() {
+  cond(!cfgLastSaveOk(), AUD_RED, "saveerr", tr("Salvataggio della configurazione fallito: le modifiche si perdono al riavvio (memoria piena?)"));
+  cond(!cfg.setupDone, AUD_YELLOW, "setupnd", tr("Guida di configurazione non finita: hotspot e HTTP restano forzati accesi a ogni avvio"));
   cond(cfg.setupDone && !hasAdmin(), AUD_RED, "noadmin", tr("Nessun amministratore attivo: tieni premuto BOOT 8 s per crearlo di nuovo"));
   cond(!cfg.country.length(), AUD_YELLOW, "nocountry", tr("Paese non scelto: radio con regole prudenti (canali 1-11). Sceglilo in Sistema > Localizzazione"));
   cond(!cfg.serialAuth, AUD_YELLOW, "serial", tr("Seriale senza password: chi collega il cavo USB entra senza password"));

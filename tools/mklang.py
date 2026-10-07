@@ -119,15 +119,17 @@ for code, name in langs.items():
         old = os.path.join(OUT, code + '.json')
         if os.path.exists(old): os.remove(old)       # e dentro il firmware: niente file
         txt = json.dumps(d, ensure_ascii=True, separators=(',', ':'))
-        body = '\n'.join('R"VOSLANG(%s)VOSLANG"' % txt[i:i + 8000] for i in range(0, len(txt), 8000))
+        import gzip
+        z = gzip.compress(txt.encode('ascii'), 9, mtime=0)      # compresso nel firmware (circa 28 KB invece di 100); si decomprime in PSRAM
+        body = '\n'.join('  ' + ','.join('0x%02x' % c for c in z[k:k + 24]) + ',' for k in range(0, len(z), 24))
         def cstr(x): return json.dumps(x, ensure_ascii=True)
         h = ('// VesevOS - vos_lang_%s.h (GENERATO da tools/mklang.py, non modificare a mano)\n#pragma once\n#include <Arduino.h>\n'
              'static const char LANG_EN_NAME[] = %s;\nstatic const char LANG_EN_LOCALE[] = %s;\nstatic const char LANG_EN_FLAG[] = %s;\n'
-             'static const char LANG_FLAG_IT[] = %s;\nstatic const char LANG_EN_JSON[] PROGMEM =\n%s;\n') % (
-            code, cstr(name), cstr(locales[code]), cstr(flags[code]), cstr(flags['it']), body)
+             'static const char LANG_FLAG_IT[] = %s;\nstatic const size_t LANG_EN_GZ_LEN = %d;\nstatic const uint8_t LANG_EN_GZ[] PROGMEM = {\n%s\n};\n') % (
+            code, cstr(name), cstr(locales[code]), cstr(flags[code]), cstr(flags['it']), len(z), body)
         assert all(ord(c) < 128 for c in h)
         open(os.path.join(FWD, 'vos_lang_%s.h' % code), 'w', encoding='ascii', newline='\n').write(h)
-        print('VesevOS/vos_lang_%s.h: %d voci, %d byte (dentro il firmware)' % (code, len(d) - 3, len(txt)))
+        print('VesevOS/vos_lang_%s.h: %d voci, %d byte (compressi: %d, dentro il firmware)' % (code, len(d) - 3, len(txt), len(z)))
         continue
     txt = json.dumps(d, ensure_ascii=False, separators=(',', ':'), indent=None)
     txt = txt.replace('","', '",\n"')  # una voce per riga: file leggibile e confrontabile

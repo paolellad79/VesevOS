@@ -17,12 +17,15 @@
 #include "esp_freertos_hooks.h"
 #include <LittleFS.h>
 #include <Preferences.h>
+#include "vos_wd.h"
+#include "vos_audit.h"
+#include "vos_fw.h"
 
 #define HIST 60
 
 static volatile uint32_t g_idle[2] = {0, 0};
 static uint32_t g_maxIdle[2] = {1, 1};
-static volatile int g_cpu = 0;
+static volatile int g_cpu = 0, g_cpu0 = 0, g_cpu1 = 0;
 static float g_temp = 0;
 static uint8_t g_cpuH[HIST], g_cpuHn = 0;
 static int16_t g_tempH[HIST];            // decimi di grado
@@ -70,8 +73,11 @@ static void monitorTask(void*) {
   uint32_t last[2] = {0, 0};
   int lowCount = 0;
   bool skip = false;                 // salta la misura subito dopo un cambio di frequenza
+  wdWatch("monitor", 20);
   for (;;) {
     vTaskDelay(pdMS_TO_TICKS(1000));
+    wdBeat("monitor");
+    auditTick();
     uint32_t mhz = getCpuFrequencyMhz();
     uint32_t d0 = g_idle[0] - last[0], d1 = g_idle[1] - last[1];
     last[0] = g_idle[0]; last[1] = g_idle[1];
@@ -85,6 +91,7 @@ static void monitorTask(void*) {
       if (e1 == 0) e1 = 1;
       int l0 = 100 - (int)(100ULL * d0 / e0);
       int l1 = 100 - (int)(100ULL * d1 / e1);
+      g_cpu0 = constrain(l0, 0, 100); g_cpu1 = constrain(l1, 0, 100);
       g_cpu = constrain((l0 + l1) / 2, 0, 100);
     }
     skip = false;
@@ -165,7 +172,7 @@ String sysStatusJson() {
        ",\"cores\":" + String((int)ESP.getChipCores()) + ",\"flashChip\":" + String((unsigned long)ESP.getFlashChipSize()) +
        ",\"idf\":\"" + jsonEscape(String(ESP.getSdkVersion())) + "\",";
   j += "\"reset\":\"" + jsonEscape(g_reset) + "\",";
-  j += "\"cpu\":" + String(g_cpu) + ",";
+  j += "\"cpu\":" + String(g_cpu) + ",\"cpu0\":" + String(g_cpu0) + ",\"cpu1\":" + String(g_cpu1) + ",";
   j += "\"temp\":" + String(g_temp, 1) + ",";
   j += "\"tempUnit\":" + String(cfg.tempUnit) + ",";
   j += "\"hot\":" + String(g_hot ? "true" : "false") + ",";
@@ -204,12 +211,12 @@ String sysTasksText() {
 // Si possono fermare solo i task della lista qui sotto (lista consentita, non lista dei vietati).
 // Lista consentita: i moduli registrano i loro task con sysTaskRegister (nome + funzione che lo avvia).
 struct TaskDef { const char* n; SysTaskStart f; SysTaskStart stop; };
-static TaskDef g_defs[8]; static int g_ndefs = 0;
-static const char* const OURS[] = {"led", "time", "monitor", "net", "rules", "mqtt"};
+static TaskDef g_defs[12]; static int g_ndefs = 0;
+static const char* const OURS[] = {"led", "time", "monitor", "net", "rules", "mqtt", "mesh", "wd"};
 
 void sysTaskRegister(const char* name, SysTaskStart start, SysTaskStart stop) {
   for (int i = 0; i < g_ndefs; i++) if (strcmp(g_defs[i].n, name) == 0) { g_defs[i].f = start; g_defs[i].stop = stop; return; }
-  if (g_ndefs < 8) { g_defs[g_ndefs].n = name; g_defs[g_ndefs].f = start; g_defs[g_ndefs].stop = stop; g_ndefs++; }
+  if (g_ndefs < 12) { g_defs[g_ndefs].n = name; g_defs[g_ndefs].f = start; g_defs[g_ndefs].stop = stop; g_ndefs++; }
 }
 static int defOf(const char* name) {
   for (int i = 0; i < g_ndefs; i++) if (strcmp(g_defs[i].n, name) == 0) return i;
@@ -232,7 +239,7 @@ String sysTasksJson() {
   String j = "{\"ok\":true,\"total\":" + String((unsigned long)total) + ",\"tasks\":[";
   for (UBaseType_t i = 0; i < n; i++) {
     const char* nm = a[i].pcTaskName;
-    int type = inList(nm, OURS, 6) ? 1 : 0;
+    int type = inList(nm, OURS, 8) ? 1 : 0;
     bool kill = defOf(nm) >= 0;
     if (i) j += ",";
     j += "{\"n\":\"" + jsonEscape(String(nm)) + "\",\"id\":" + String((unsigned)a[i].xTaskNumber) +

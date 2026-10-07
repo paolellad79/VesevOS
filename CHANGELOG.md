@@ -1,6 +1,32 @@
 # Cronologia delle versioni
 
-## 1.7.2 (ottobre 2026) - "BASE"
+## 1.7.5 (ottobre 2026) - "HOME E SERVIZI COERENTI"
+- **Testata**: ora e data al posto dell'indirizzo IP. L'IP sta sotto il widget Wi-Fi. Il riquadro Orologio e le schede "Azioni rapide" e "Posizione" sono tolti dalla Home (la Posizione si vede cliccando la bandiera; Modo aereo e Terminale restano in Rete e nella testata).
+- **Widget dei servizi** in una sola fila sotto gli anelli, con icone nostre generiche (niente loghi di marchi). Titolo "Sistema" al posto di "Stai usando". Icona Periferiche tipo USB.
+- **Controlli dei servizi, un solo componente**: banner Avviato (verde) / Fermo (rosso) e icone Avvia / Ferma / Riavvia / Applica con fondo colorato per lo stato. Tolte le scritte "MQTT acceso" ecc. Riavvia grigio quando il servizio e fermo o non si puo riavviare. HTTP e HTTPS: **Applica** (riavvia la scheda con conferma) al posto di "Riavvia ora".
+- Vale per: Punto di accesso, DHCP, DNS, mDNS, HTTP, HTTPS, MQTT, Rete tra schede, Statistiche, NTP, Bluetooth, Risparmio energia e MFA (Avvia = accende, Ferma = spegne; Riavvia solo dove ha senso).
+- Solo pagina e documenti: il firmware non cambia (versione 1.7.5).
+
+## 1.7.4 (ottobre 2026) - "GUIDA E HOME PIU CHIARE"
+- **Mappa del mondo tolta**: la scelta del paese e un elenco con ricerca (meno RAM e meno flash; restano solo i nomi dei paesi).
+- **Guida a 6 passi**: Lingua, Paese, Nome, Antenna, Wi-Fi di casa o hotspot, Fine. Il passo Wi-Fi **prova subito a collegarsi** (fino a 20 s) e dice se ha funzionato; se fallisce non si perde nulla. In modalita hotspot (senza Wi-Fi di casa) compare il passo **Ora** con fuso orario, data e ora (preimpostati dal dispositivo); con la Wi-Fi di casa l'ora arriva da NTP. A fine installazione, al primo accesso dalla Wi-Fi di casa, hotspot, portale automatico e HTTP si spengono e restano spenti (li riaccende l'utente quando vuole); la guida lo dice chiaramente.
+- **Password dell'hotspot piu semplice**: 12 caratteri, solo minuscole e cifre (senza simboli e senza caratteri ambigui), sempre casuale per scheda.
+- **Home**: anelli CPU (con velocita e temperatura), RAM, PSRAM, file, Wi-Fi (modo, segnale o client); orologio con data; un **widget per ogni servizio acceso** (HTTP/S, MQTT, ESP-NOW, mDNS, Bluetooth, NTP, DHCP, hotspot, risparmio energia, statistiche), con stato a parole; riga Core 0 / Core 1. Tolti il grafico della temperatura, l'indirizzo IP e il QR (resta solo quello dell'MFA). Nuova richiesta `/api/home`.
+- **Password e QR dell'hotspot** solo in Rete > Punto di accesso (si vedono subito aprendo la scheda, Admin). L'avviso "la Wi-Fi di casa non si e collegata" e ora nelle notifiche.
+- **MQTT e Rete tra schede**: interruttore Acceso/Spento (come HTTP) e, di fianco, pulsante **Riavvia**, spento quando il servizio e fermo.
+- **Sistema > Ora**: scelta del fuso orario.
+- Novita tecniche: `meshNodeCount`, `timeLastSync`, `bleLeftSec`, `cpu0`/`cpu1` nello stato.
+
+## 1.7.3 (ottobre 2026) - "SICUREZZA ED ENERGIA"
+- **Accesso in due passi (MFA, TOTP RFC 6238)**: per utente, con QR (solo da HTTPS o dall'hotspot), 8 codici di recupero, codice 6 cifre a 30 s (finestra +-1, ogni codice una sola volta). Senza ora valida: si chiede l'ora al browser (solo dopo password e codice giusti, con audit giallo) oppure solo recupero/blocco, a scelta. BOOT 8 s spegne l'MFA degli Admin (allarme giallo).
+- **Anti-bot senza servizi esterni**: prova di lavoro (SHA-256, 0/12/14/16/18 bit, 14 di fabbrica), campo-trappola nascosto, blocco IP dopo i fallimenti.
+- **Scheda Certificato** (Sistema): scadenza (da/a), impronta SHA-256, scarica, rigenera, importa.
+- **Risparmio energia** (Servizi): modi Normale / Risparmio Wi-Fi / Sonno programmato (sveglia a tempo, da 1 min a 7 giorni), comando "Dormi adesso". La scheda CPU e passata qui dentro. Il tasto BOOT non e fonte di risveglio (solo timer o RESET).
+- **Statistiche d'uso** (Sistema > Diagnostica): spente di fabbrica, anonime (niente MAC/IP), contatori Wi-Fi/Bluetooth/avvii/LED, CSV scaricabile, azzera.
+- Comandi seriali: `power`, `sleep [min]`, `stats`.
+- Bluetooth: scheda in Servizi, messaggio chiaro se manca RAM.
+
+## 1.7.2 (ottobre 2026) - "BASE + SERVIZI"
 - **Primo avvio**: il banner con la password dell'hotspot resta finche la guida non e finita (ad ogni apertura del monitor seriale e ogni 30 s);
   il Wi-Fi salvato da solo non fa piu risultare la scheda "configurata". Comando seriale `ap`.
 - **Menu riordinati**: Periferiche (ex Hardware: Pin, LED); Servizi (Punto di accesso, HTTP, HTTPS, MQTT, Rete tra schede, Automazioni, Task,
@@ -16,10 +42,16 @@
 - **Configurazione solo da seriale**: comando `setup` guidato, `wifi set|off`, `ntp on|off`, `svc ...`.
 - **Pin**: schema fronte/retro ridisegnato dalla foto, funzioni e avvisi per pin, **inventario** "collegato a" salvato nella configurazione;
   GP33-37 ora ammessi.
-- **RAM e spazio**: registro (18 KB) in PSRAM, HTTP con 3 collegamenti, licenze lunghe compresse (gzip) nel firmware.
+- **RAM e spazio**: registro (18 KB) in PSRAM, HTTP con 3 collegamenti, licenze lunghe e dizionario inglese compressi (gzip) nel firmware (decompressore nostro, vos_inflate.cpp; circa 65 KB in meno).
 - **Legale**: tolto l'impegno di supporto di 2 anni (progetto gratuito, senza date garantite); riferimenti normativi in NOTICE, Note legali,
   manuale, SECURITY.md; semaforo CRA verde finche gratuito.
-- Manuale it/en: capitoli 12-14.
+- Manuale it/en: capitoli 12-15.
+- **Menu v2**: Rete = Wi-Fi, Punto di accesso, Radio (con il Modo aereo dentro Wi-Fi); Servizi = HTTP, HTTPS, MQTT, Rete tra schede, **NTP, DHCP, DNS, mDNS**, Bluetooth (non supportato), Automazioni, Avvio; Sistema = Stato, gruppo **Diagnostica** (Task, Watchdog, Log, Terminale), File, Ora, Localizzazione, Config, Accessibilita, Note legali, Aiuto.
+- **Servizi configurabili e spegnibili**: NTP, DHCP dell'hotspot (durata 10-1440 min; si spegne solo con la Wi-Fi di casa collegata), DNS del portale automatico, mDNS. DHCP, mDNS e portale valgono subito. Comando seriale `svc dhcp|mdns on|off`.
+- **Home**: azioni rapide (Modo aereo con conferma, Terminale, Stampa).
+- **Bluetooth**: scheda propria in Servizi (stato, codice, accendi 10 minuti); se manca RAM il messaggio dice di chiudere la pagina web.
+- **Guida**: pulsante "La scheda e gia configurata" e comando seriale `setup done` (prima "Piu tardi" la lasciava riapparire a ogni avvio). Avvisi in Home e nei controlli se la guida non e finita o se il salvataggio fallisce; messaggio di avvio veritiero; comando `diag`.
+- **RAM**: buffer grandi (TLS) in PSRAM, richieste della pagina in coda (2 alla volta), HTTPS con 2 collegamenti e scarto del piu vecchio, log HTTPS piu quieti; NTP nel log una volta ogni 24 h; fuso orario applicato prima della prima riga di log.
 
 ## 1.7.1 (4 ottobre 2026)
 - **Prima configurazione guidata** (LED arcobaleno lento): lingua, password del pannello, paese sulla mappa, nome, ora, antenna,

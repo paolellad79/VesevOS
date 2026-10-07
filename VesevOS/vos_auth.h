@@ -27,6 +27,7 @@ String authLoginStart(const String& name);        // {"salt":"..","nonce":"..","
 //    ritorna 0 ok (idx = utente), 1 errato, 2 IP bloccato (waitSec)
 int    authLoginFinish(uint32_t ip, const String& name, const String& nonce, const String& mac, int& idx, uint32_t& waitSec);
 bool   authIpBlocked(uint32_t ip, uint32_t& waitSec);
+bool   authFailIp(uint32_t ip, const char* why);   // conta un errore (password, MFA, trappola); true = ora bloccato
 void   authNoteDenied(uint32_t ip);               // richiesta senza sessione valida (limite richieste)
 String authBanJson();
 String authBanText();

@@ -1,4 +1,4 @@
-# VesevOS 1.7.2 - Manual
+# VesevOS 1.7.5 - Manual
 
 Manual for people who use the board. Plain words, no programming.
 Versione italiana: [manuale.md](manuale.md). The same help is in the board's page (System > Help, or `http://192.168.4.1/#aiuto`).
@@ -22,18 +22,17 @@ The first time it starts, every VesevOS board makes up its own Wi-Fi password, d
 ### Method 1 (recommended): USB cable and serial monitor
 1. Upload VesevOS to the board (Arduino IDE > Upload).
 2. Open Tools > Serial Monitor at 115200 and press RESET on the board.
-3. Read the welcome screen: network name (`VesevOS`), password (e.g. `k7Hm-pQ4x-Tr9a`) and address `http://192.168.4.1`.
+3. Read the welcome screen: network name (`VesevOS`), password (e.g. `k7mpq4xtr9ab`: 12 characters, lowercase letters and digits only, no symbols) and address `http://192.168.4.1`.
    Press `2` (no Enter) for English, `1` for Italian.
 4. Join the `VesevOS` network with that password from a phone or PC. The page opens by itself; otherwise open `http://192.168.4.1`.
 5. **Choose the panel password** (at least 6 characters). There is no factory password: you choose it and only you know it.
-6. The **guided setup** starts (the LED shows a rainbow until you finish). Steps: language, country on the map, board name, antenna,
-   hotspot password, **home Wi-Fi** (optional), **time**, finish. See chapter 12.
-7. The **QR code** to connect your phone (and to print) is on the **Home** page: in hotspot mode it is the board's Wi-Fi QR, when the board
-   is on your Wi-Fi it is the QR with the board's address. Print the label and stick it under the board. The hotspot-password banner on the
+6. The **guided setup** starts (the LED shows a rainbow until you finish). Steps: language, country (list with search), board name, antenna,
+   **home Wi-Fi or hotspot** (the board tries to connect at once and tells you), **time** (only without home Wi-Fi), finish. See chapter 12.
+7. The **QR code** to connect your phone (and to print) is in **Network > Access point**, with name and password. Print the label and stick it under the board. The hotspot-password banner on the
    serial stays until the guide is finished (even if you reopen the monitor).
 
 Any serial program works without Arduino IDE (PuTTY, screen, the "Serial USB Terminal" app with an OTG cable).
-The QR code is not drawn on the serial (serial monitors often cannot show it): it is only in the Home page. Setup can also be done from the serial line alone (chapter 13).
+The QR code is not drawn on the serial (serial monitors often cannot show it): it is only in the Access point page. Setup can also be done from the serial line alone (chapter 13).
 
 ### Method 2: board prepared by someone else
 Whoever prepares it reads the password as in Method 1 and hands over the board with the label (network name + password + QR).
@@ -49,7 +48,7 @@ The receiver chooses the panel password at first access and may change the Wi-Fi
 | 20 seconds or more | red | factory reset: erases everything, new Wi-Fi password |
 
 - The action starts when you **release** the button: watch the colour and let go at the right moment.
-- Wi-Fi password: panel > Home (QR, hotspot mode only) or Services > Access point > Show. Or USB cable + BOOT 8 seconds.
+- Wi-Fi password: panel > Network > Access point (name, password and QR). Or USB cable + BOOT 8 seconds.
 - Panel password: the board keeps only a fingerprint, it cannot be read back. BOOT 8 seconds clears it; within 10 minutes
   you choose a new one (from the board's hotspot at any time).
 
@@ -67,7 +66,7 @@ the one in the page (Services > HTTPS) or on the serial, then continue. From the
 because the network is already encrypted by the Wi-Fi password. You can upload your own certificate (active after restart).
 
 ## 5. Country, radio and localization
-System > Localization: country (zoomable world map), language, time zone, time server, date and time formats,
+System > Localization: country (list with search), language, time zone, time server, date and time formats,
 decimal separator, first day of the week, C/F degrees, antenna and power.
 - **The country sets the Wi-Fi channels and the maximum power** according to its rules: the board never exceeds them.
   Without a country the safest rules apply (channels 1-11).
@@ -111,13 +110,18 @@ apply to that version and a support period will be declared.
 Type `help`. New commands: `welcome`, `ap`, `user`, `passwd`, `locale`, `firewall`, `audit`, `watchdog`, `mesh`, `ble`, `cert`, `legal`.
 On the serial, at an empty line, keys `1` and `2` change language.
 
-## 12. Menus, hotspot, HTTP/HTTPS, ports and end of the guide (new in 1.7.2)
+## 12. Menus, hotspot, HTTP/HTTPS, ports and end of the guide (new in 1.7.3, 1.7.4 and 1.7.5)
 **Where things are**
-- **Home**: overview and QR. **Network**: Wi-Fi, IP address, name, airplane mode.
+- **Home**: rings (CPU with speed and temperature, RAM, PSRAM, files, Wi-Fi), a second row with one icon widget for each running service (the IP address is under the Wi-Fi widget; time and date are in the header; the Location shows when you click the flag) (HTTP/S, MQTT, ESP-NOW, mDNS, Bluetooth, NTP, DHCP, hotspot, power saving, statistics); click opens the service page. **Network**: Wi-Fi, IP address, name, airplane mode.
 - **Services**: Access point (AP), HTTP, HTTPS, MQTT, Board network, Automations, Tasks, Watchdog, Boot, Terminal.
 - **Peripherals** (was Hardware): Pins (front/back drawing and inventory), LED.
 - **System**: Status, Files, Time, Localization (language too), Log, Config, Accessibility, Legal notes, Help.
 - **Security**: Password (serial password too), Users, IP filter, Compliant.
+
+**Service controls (the same everywhere)**
+- At the top there is the **status banner**: **Started** (green) or **Stopped** (red). Below, four icons with a coloured background for the state: **Start** (green), **Stop** (red), **Restart** (yellow, grey when the service is stopped or cannot restart), **Apply** (blue, HTTP and HTTPS only).
+- HTTP and HTTPS: changes (on, off, ports) take effect after **Apply**, which restarts the board (with confirmation).
+- Applies to: Access point, DHCP, DNS (captive portal), mDNS, HTTP, HTTPS, MQTT, Board network, Statistics, NTP, Bluetooth, Power saving, MFA.
 
 **The user always chooses.** Every service can be turned on and off. Three guard rails remain: (1) you cannot lock yourself out: at least one
 web protocol (HTTP or HTTPS) stays on, and BOOT 8 seconds restores hotspot, HTTP, HTTPS and ports to factory values; (2) the country's radio
@@ -132,9 +136,8 @@ rules cannot be exceeded; (3) no identical passwords.
   is not real security: security stays password, IP filter and encryption. Links and QR codes show the port.
 
 **End of the guided setup**
-- **Home Wi-Fi** step: search the network, type the password, or **Skip**.
-- **Time** step: with the home Wi-Fi the time comes from the Internet (NTP). If you skip the Wi-Fi the NTP service turns off and asks for time
-  and date (preset from this device). Note: **the board has no clock battery**, if you switch it off the time is lost.
+- **Home Wi-Fi or hotspot** step: pick the network and password, press Next: the board tries to connect at once (up to 20 seconds) and tells you if it worked.
+- **Time** step (only if you skip the Wi-Fi): the NTP service turns off and you are asked for time zone, date and time (preset from this device). With home Wi-Fi the time comes from the Internet (NTP) and this step does not appear. Note: **the board has no clock battery**, if you power it off the time is lost.
 - At the end, with the home Wi-Fi, the page shows the new address (with QR). Connect your phone to that network and open it: **at the first
   login from there** hotspot, automatic portal and HTTP turn off by themselves. If the board cannot connect, the hotspot comes back by itself
   and a warning appears on Home. Without home Wi-Fi nothing turns off (except NTP).
@@ -147,8 +150,30 @@ Enter = keep the value, `skip` = skip, `quit` = exit. Single commands: `lang`, `
 `wifi off`, `ntp on|off`, `date set YYYY-MM-DD HH:MM`, `svc ap|captive|http|https on|off`, `svc http-port N`, `svc https-port N`, `ap new`.
 After the guide the security rules apply (serial password, if on).
 
-## 14. Pins: drawing and inventory
+## 14. Network services: NTP, DHCP, DNS, mDNS (new in 1.7.3)
+
+Each one has its own tab under **Services** and can be turned off.
+- **NTP**: time from the Internet (needs the home Wi-Fi). Off = set time by hand.
+- **DHCP**: gives addresses to whoever joins the hotspot. Lease 10 to 1440 minutes. It can be turned off only while the home Wi-Fi is connected.
+- **DNS**: the hotspot's automatic portal (needs HTTP on port 80).
+- **mDNS**: the NAME.local name. Off = IP address only.
+DHCP, mDNS and portal change at once; web and ports after reboot. Over serial: `svc dhcp off`, `svc mdns on`, `diag`.
+
+If the guide appears at every start: press **The board is already configured** (or `setup done` over serial). "Later" does not mark it as finished.
+
+## 15. Pins: drawing and inventory
 Peripherals > Pins: **Front** drawing (edge pins, USB-C at the top, BOOT/RESET, RGB LED, antenna) and **Back** (solder pads GP14-18, 21, 33-42,
 45-48 and pads B+, B-, BOOST: BOOST only with a battery over 500 mAh). Tap a pin to see functions and warnings (boot pins 0/3/45/46, ADC2 with
 Wi-Fi on, USB 19/20, JTAG 39-42). **Inventory**: write what you connect to each pin (e.g. "door sensor"): the name stays in the configuration and
 a warning appears if you test a pin already marked. GP33-37 are free with this board's 2 MB PSRAM (taken on boards with octal PSRAM).
+
+
+## 16. Security and energy (new in 1.7.3)
+- **MFA**: Security > Two-step login. Scan the QR with an app (Google Authenticator, Aegis...), type the code, keep the 8 recovery codes (each works once). The QR shows only over HTTPS or from the hotspot.
+- **Time**: the code depends on time. Without valid time you can choose: ask the browser time (after correct password and code) or recovery codes only / block.
+- **Recovery**: BOOT 8 s turns off MFA for Admins.
+- **Anti-bot**: at login the browser solves a small proof of work (level in Security). No external captcha.
+- **Certificate**: System > Certificate: expiry, fingerprint, download, regenerate, import.
+- **Power saving**: Services > Power saving. Scheduled sleep = the board sleeps and wakes after the chosen time (1 min - 7 days). BOOT does not wake it: use RESET. While asleep Wi-Fi and page are off.
+- **Statistics**: off by default; anonymous counters only; CSV download; reset.
+- **Serial**: `power`, `sleep [min]`, `stats`.

@@ -7,6 +7,7 @@
 #include "vos_log.h"
 #include <LittleFS.h>
 #include "vos_lang_en.h"
+#include "vos_inflate.h"
 #include <stdarg.h>
 #include <stdio.h>
 
@@ -89,10 +90,12 @@ static char* readStr(char*& p) {
 static bool loadFile(const String& code, String& err) {
   char* buf = nullptr; size_t got = 0;
   if (code == "en") {                                // inglese: dentro il firmware
-    got = sizeof(LANG_EN_JSON) - 1;
-    buf = (char*)bigAlloc(got + 1);
+    size_t raw = gzipRawSize(LANG_EN_GZ, LANG_EN_GZ_LEN);
+    buf = raw ? (char*)bigAlloc(raw + 1) : nullptr;
     if (!buf) { err = tr("Memoria esaurita"); return false; }
-    memcpy(buf, LANG_EN_JSON, got); buf[got] = 0;
+    got = gzipUnpack(LANG_EN_GZ, LANG_EN_GZ_LEN, (uint8_t*)buf, raw);
+    if (got != raw) { free(buf); err = tr("Lingua non installata"); return false; }
+    buf[got] = 0;
   } else {
     String path = String(LANG_DIR) + "/" + code + ".json";
     File f = LittleFS.open(path, "r");
@@ -181,8 +184,8 @@ String trf(const char* it, ...) {
 
 bool langBuiltin(const String& c) { return c == "it" || c == "en"; }
 
-const char* langBuiltinJson(const String& code, size_t& len) {
-  if (code == "en") { len = sizeof(LANG_EN_JSON) - 1; return LANG_EN_JSON; }
+const uint8_t* langBuiltinJson(const String& code, size_t& len) {      // compresso (gzip): la pagina lo riceve cosi
+  if (code == "en") { len = LANG_EN_GZ_LEN; return LANG_EN_GZ; }
   len = 0; return nullptr;
 }
 

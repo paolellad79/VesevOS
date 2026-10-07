@@ -29,24 +29,25 @@ void cfgDefaults() {
   cfg.ip = "192.168.1.50"; cfg.mask = "255.255.255.0";
   cfg.gw = "192.168.1.1"; cfg.dns1 = "192.168.1.1"; cfg.dns2 = "8.8.8.8";
   cfg.authSalt = ""; cfg.authHash = "";     // solo per i file vecchi
-  for (int i = 0; i < VOS_MAX_USERS; i++) { cfg.users[i].name = ""; cfg.users[i].salt = ""; cfg.users[i].hash = ""; cfg.users[i].role = ROLE_GUEST; cfg.users[i].on = false; }
+  for (int i = 0; i < VOS_MAX_USERS; i++) { cfg.users[i].name = ""; cfg.users[i].salt = ""; cfg.users[i].hash = ""; cfg.users[i].role = ROLE_GUEST; cfg.users[i].on = false; cfg.users[i].mfa = ""; cfg.users[i].mfaOn = false; cfg.users[i].mfaLast = 0; cfg.users[i].rec = ""; }
   cfg.ledMode = LED_STATE;
   cfg.ledColor = 0x0000FF;
   cfg.ledBrightness = 40;
   cfg.ledPin = VOS_PIN_LED_RGB;
-  cfg.banFails = 5; cfg.banSecs = 60;
+  cfg.banFails = 5; cfg.banSecs = 60; cfg.powBits = 14; cfg.mfaNoTime = 0;
   cfg.mqttAuto = false; cfg.mqttHost = ""; cfg.mqttUser = ""; cfg.mqttPass = ""; cfg.mqttPrefix = ""; cfg.mqttPort = 1883; cfg.mqttEvery = 30; cfg.mqttHa = true; cfg.mqttTls = false;
   cfg.airOn = 0; cfg.airExit = 0; cfg.airUntil = 0; cfg.airAt = 0;
   cfg.ntpOn = true; cfg.ntpServe = false; cfg.ntpEvery = 60;
   cfg.ntpServer = "pool.ntp.org";
   cfg.tz = "CET-1CEST,M3.5.0,M10.5.0/3"; cfg.tzName = "Europe/Rome";
-  cfg.cpuMhz = 0;
+  cfg.cpuMhz = 0; cfg.statOn = false; cfg.pwMode = 0; cfg.pwAwake = 15; cfg.pwSleep = 10;
   cfg.dateFmt = 0; cfg.timeFmt = 0; cfg.tempUnit = 0; cfg.weekStart = 0; cfg.decSep = 0;
   cfg.country = ""; cfg.antExt = 0; cfg.antGain = 0; cfg.txDbm = 0;
   cfg.fwMode = 0; cfg.fwNtp = false; cfg.fwN = 0;
   cfg.meshAuto = false; cfg.meshRole = 0; cfg.meshKey = ""; cfg.meshCh = 1;
   cfg.https = true;
   cfg.apOn = true; cfg.apCaptive = true; cfg.httpOn = true; cfg.httpPort = 80; cfg.httpsPort = 443;
+  cfg.dhcpOn = true; cfg.dhcpLease = 120; cfg.mdnsOn = true;
   cfg.wdTask = true; cfg.wdNet = true; cfg.wdRam = true; cfg.wdNetMin = 10; cfg.wdRamKb = 20; cfg.wdUpDays = 0; cfg.wdAt = -1; cfg.wdDays = 0x7F;
   cfg.sdEnabled = false;
   cfg.sdCs = 10; cfg.sdSck = 12; cfg.sdMiso = 13; cfg.sdMosi = 11;
@@ -74,12 +75,19 @@ String cfgExport(bool withSecrets) {
   opt(s, "hostname", cfg.hostname);
   opt(s, "domain", cfg.domain);
   opt(s, "cpu", String(cfg.cpuMhz));
+  opt(s, "stat", cfg.statOn ? "1" : "0");
+  opt(s, "pwmode", String(cfg.pwMode));
+  opt(s, "pwawake", String(cfg.pwAwake));
+  opt(s, "pwsleep", String(cfg.pwSleep));
   opt(s, "lang", cfg.lang);
   opt(s, "setup", cfg.setupDone ? "1" : "0");
   opt(s, "https", cfg.https ? "1" : "0");
   s += "\nconfig svc 'svc'\n";
   opt(s, "apon", cfg.apOn ? "1" : "0");
   opt(s, "captive", cfg.apCaptive ? "1" : "0");
+  opt(s, "dhcp", cfg.dhcpOn ? "1" : "0");
+  opt(s, "lease", String(cfg.dhcpLease));
+  opt(s, "mdns", cfg.mdnsOn ? "1" : "0");
   opt(s, "httpon", cfg.httpOn ? "1" : "0");
   opt(s, "httpport", String(cfg.httpPort));
   opt(s, "httpsport", String(cfg.httpsPort));
@@ -105,6 +113,8 @@ String cfgExport(bool withSecrets) {
   opt(s, "apqr", cfg.apQr ? "1" : "0");
   opt(s, "banfails", String(cfg.banFails));
   opt(s, "bansecs", String((unsigned long)cfg.banSecs));
+  opt(s, "powbits", String(cfg.powBits));
+  opt(s, "mfanotime", String(cfg.mfaNoTime));
   for (int i = 0; i < VOS_MAX_USERS; i++) {
     const VosUser& u = cfg.users[i];
     if (!u.name.length()) continue;
@@ -114,6 +124,10 @@ String cfgExport(bool withSecrets) {
     opt(s, "on", u.on ? "1" : "0");
     opt(s, "salt", withSecrets ? u.salt : String(""));
     opt(s, "hash", withSecrets ? u.hash : String(""));
+    opt(s, "mfaon", u.mfaOn ? "1" : "0");
+    opt(s, "mfa", withSecrets ? u.mfa : String(""));
+    opt(s, "mfalast", String((unsigned long)u.mfaLast));
+    opt(s, "rec", withSecrets ? u.rec : String(""));
   }
   s += "\nconfig firewall 'firewall'\n";
   opt(s, "mode", String(cfg.fwMode));
@@ -202,6 +216,10 @@ static void applyKey(const String& sec, const String& k, const String& v) {
   if (sec == "system") {
     if (k == "hostname" && hostnameValid(v)) cfg.hostname = v;
     else if (k == "domain" && domainValid(v)) cfg.domain = v;
+    else if (k == "stat") cfg.statOn = (v == "1");
+    else if (k == "pwmode") cfg.pwMode = constrain(v.toInt(), 0, 2);
+    else if (k == "pwawake") cfg.pwAwake = constrain(v.toInt(), 10, 1440);
+    else if (k == "pwsleep") cfg.pwSleep = constrain(v.toInt(), 1, 10080);
     else if (k == "cpu") { int m = v.toInt(); if (m == 0 || m == 80 || m == 160 || m == 240) cfg.cpuMhz = m; }
     else if (k == "lang") { if (langCodeValid(v)) cfg.lang = v; }
     else if (k == "setup") { cfg.setupDone = (v == "1"); g_hadSetupKey = true; }
@@ -213,6 +231,9 @@ static void applyKey(const String& sec, const String& k, const String& v) {
   else if (sec == "svc") {
     if (k == "apon") cfg.apOn = (v != "0");
     else if (k == "captive") cfg.apCaptive = (v != "0");
+    else if (k == "dhcp") cfg.dhcpOn = (v != "0");
+    else if (k == "lease") { int m = v.toInt(); if (m >= 10 && m <= 1440) cfg.dhcpLease = m; }
+    else if (k == "mdns") cfg.mdnsOn = (v != "0");
     else if (k == "httpon") cfg.httpOn = (v != "0");
     else if (k == "httpport") { int n = v.toInt(); if (n == 80 || (n >= 1024 && n <= 65535)) cfg.httpPort = n; }
     else if (k == "httpsport") { int n = v.toInt(); if (n == 443 || (n >= 1024 && n <= 65535)) cfg.httpsPort = n; }
@@ -243,6 +264,8 @@ static void applyKey(const String& sec, const String& k, const String& v) {
     else if (k == "apqr") cfg.apQr = (v != "0");
     else if (k == "banfails") cfg.banFails = constrain(v.toInt(), 3, 20);
     else if (k == "bansecs") cfg.banSecs = constrain(v.toInt(), 10, 3600);
+    else if (k == "powbits") cfg.powBits = (v.toInt() == 0 || (v.toInt() >= 8 && v.toInt() <= 20)) ? v.toInt() : 14;
+    else if (k == "mfanotime") cfg.mfaNoTime = constrain(v.toInt(), 0, 2);
   } else if (sec.startsWith("user")) {
     int i = sec.substring(4).toInt();
     if (i < 0 || i >= VOS_MAX_USERS || sec.length() > 5) return;
@@ -252,6 +275,10 @@ static void applyKey(const String& sec, const String& k, const String& v) {
     else if (k == "on") u.on = (v == "1");
     else if (k == "salt" && v.length()) u.salt = v;
     else if (k == "hash" && hexOnly(v, 64)) u.hash = v;
+    else if (k == "mfaon") u.mfaOn = (v == "1");
+    else if (k == "mfa" && (v.length() == 0 || hexOnly(v, 40))) u.mfa = v;
+    else if (k == "mfalast") u.mfaLast = (uint32_t)strtoul(v.c_str(), nullptr, 10);
+    else if (k == "rec" && v.length() <= 8 * 17) u.rec = v;
   } else if (sec == "firewall") {
     if (k == "mode") cfg.fwMode = constrain(v.toInt(), 0, 3);
     else if (k == "ntp") cfg.fwNtp = (v == "1");
@@ -398,19 +425,24 @@ bool cfgFileChanged() {
 
 static String g_lastPub;     // ultimo testo salvato SENZA password (per il registro delle modifiche)
 
+static bool g_saveOk = true;
+bool cfgLastSaveOk() { return g_saveOk; }
+static bool saveFail(const char* why) { vlog("CFG: %s", why); g_saveOk = false; auditRefresh(); return false; }
+
 bool cfgSave() {
   auditFix();                                        // valori fuori regola: corretti prima di salvare
   String s = cfgExport(true);
   File f = LittleFS.open(CFG_TMP, "w");
-  if (!f) { vlog("CFG: errore apertura tmp"); return false; }
+  if (!f) return saveFail("errore apertura tmp");
   size_t w = f.print(s);
   f.close();
-  if (w != s.length()) { vlog("CFG: scrittura incompleta"); LittleFS.remove(CFG_TMP); return false; }
+  if (w != s.length()) { LittleFS.remove(CFG_TMP); return saveFail("scrittura incompleta (memoria piena?)"); }
   if (LittleFS.exists(CFG_FILE)) {
     LittleFS.remove(CFG_BAK);
     LittleFS.rename(CFG_FILE, CFG_BAK);
   }
-  if (!LittleFS.rename(CFG_TMP, CFG_FILE)) { vlog("CFG: rename fallito"); return false; }
+  if (!LittleFS.rename(CFG_TMP, CFG_FILE)) return saveFail("rename fallito");
+  g_saveOk = true;
   hashSave(sha256Hex(s));
   String pub = cfgExport(false);
   if (g_lastPub.length()) auditDiff(g_lastPub, pub, g_origin);
@@ -431,11 +463,10 @@ static bool loadFile(const char* path) {
 
 // Password casuale per l'hotspot: 12 caratteri senza simboli che si confondono, a gruppi di 4 ("k7Hm-pQ4x-Tr9a")
 String cfgNewApPass() {
-  static const char* A = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  static const char* A = "abcdefghjkmnpqrstuvwxyz23456789";   // solo minuscole e cifre, senza lettere simili (facile da scrivere sul telefono)
   size_t n = strlen(A);
   String p;
   for (int i = 0; i < 12; i++) {
-    if (i && i % 4 == 0) p += '-';
     uint32_t r;
     do { r = esp_random() & 0xFF; } while (r >= (256 / n) * n);   // nessuna preferenza per alcune lettere
     p += A[r % n];
@@ -482,8 +513,8 @@ bool cfgLoad() {
 }
 
 bool cfgSvcRecover() {
-  bool ch = !cfg.apOn || !cfg.apCaptive || !cfg.httpOn || !cfg.https || cfg.httpPort != 80 || cfg.httpsPort != 443;
-  cfg.apOn = true; cfg.apCaptive = true; cfg.httpOn = true; cfg.https = true; cfg.httpPort = 80; cfg.httpsPort = 443;
+  bool ch = !cfg.apOn || !cfg.apCaptive || !cfg.dhcpOn || !cfg.httpOn || !cfg.https || cfg.httpPort != 80 || cfg.httpsPort != 443;
+  cfg.apOn = true; cfg.apCaptive = true; cfg.dhcpOn = true; cfg.httpOn = true; cfg.https = true; cfg.httpPort = 80; cfg.httpsPort = 443;
   return ch;
 }
 

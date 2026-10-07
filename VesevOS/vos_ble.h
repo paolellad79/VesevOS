@@ -12,6 +12,7 @@
 bool   bleStart(String& err);     // acceso per 10 minuti
 void   bleStop();
 bool   bleRunning();
+uint32_t bleLeftSec();                       // secondi rimasti (0 = spento)
 void   bleTick();                 // dal ciclo principale: esegue i comandi arrivati, spegne allo scadere
 String bleJson();
 String bleText();

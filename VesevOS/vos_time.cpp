@@ -26,7 +26,11 @@ bool timeValid() { return time(nullptr) > 1700000000; }   // dopo novembre 2023
 void timeApply() { g_apply = true; }
 
 static volatile uint32_t g_lastSync = 0;        // epoch dell'ultima sincronizzazione riuscita
-static void onSync(struct timeval* tv) { g_lastSync = (uint32_t)tv->tv_sec; vlog("TIME: ora sincronizzata con NTP"); }
+static void onSync(struct timeval* tv) {
+  static uint32_t lastLog = 0;                         // una riga ogni 24 ore: niente righe ogni ora nel registro
+  uint32_t prev = g_lastSync; g_lastSync = (uint32_t)tv->tv_sec;
+  if (!prev || g_lastSync - lastLog >= 86400UL || !lastLog) { vlog("TIME: ora sincronizzata con NTP"); lastLog = g_lastSync; }
+}
 
 bool timeEveryValid(long m) {
   static const long ok[] = {0, 15, 60, 360, 720, 1440, 10080};
@@ -65,6 +69,21 @@ void timeSetEpoch(uint32_t t) {
   struct timeval tv; tv.tv_sec = t; tv.tv_usec = 0;
   settimeofday(&tv, NULL);
   vlog("TIME: ora impostata a mano");
+}
+
+uint32_t timeLastSync() { return g_lastSync; }
+
+// pezzo pubblico (pagina di accesso): solo ora, scarto dal UTC, fuso e formati
+String timePubJson() {
+  bool v = timeValid();
+  time_t t = time(nullptr);
+  struct tm tmv; localtime_r(&t, &tmv);
+  struct tm gm; gmtime_r(&t, &gm); gm.tm_isdst = tmv.tm_isdst;
+  long off = (long)((long long)t - (long long)mktime(&gm));   // scarto dal UTC in secondi (senza tm_gmtoff)
+  String j = String(",\"tv\":") + (v ? "true" : "false");
+  j += ",\"te\":" + String((unsigned long)t) + ",\"to\":" + String(off);
+  j += ",\"tn\":\"" + jsonEscape(cfg.tzName) + "\",\"df\":" + String(cfg.dateFmt) + ",\"tf\":" + String(cfg.timeFmt);
+  return j;
 }
 
 String timeJson() {

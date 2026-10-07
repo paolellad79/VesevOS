@@ -323,6 +323,8 @@ bool meshSendText(const String& to, const String& text, String& err) {
   return send(T_TEXT, mac, t);
 }
 
+int meshNodeCount() { int n = 0; for (int i = 0; i < NODES_MAX; i++) if (g_nodes[i].used) n++; return n; }
+
 String meshJson() {
   String j = "{\"run\":" + String(meshReady() ? "true" : "false") + ",\"auto\":" + String(cfg.meshAuto ? "true" : "false") +
              ",\"role\":" + String(cfg.meshRole) + ",\"hasKey\":" + String(cfg.meshKey.length() == 64 ? "true" : "false") +

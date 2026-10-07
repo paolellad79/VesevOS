@@ -1314,24 +1314,10 @@
    "scope": "web"
   },
   {
-   "it": "Sincronizzazione automatica (NTP)",
-   "en": "Automatic synchronisation (NTP)",
-   "es": "Sincronización automática (NTP)",
-   "de": "Automatische Synchronisierung (NTP)",
-   "scope": "web"
-  },
-  {
    "it": "Attiva",
    "en": "On",
    "es": "Activa",
    "de": "Aktiv",
-   "scope": "web"
-  },
-  {
-   "it": "Spenta (ora a mano)",
-   "en": "Off (set time by hand)",
-   "es": "Apagada (hora manual)",
-   "de": "Aus (Zeit von Hand)",
    "scope": "web"
   },
   {
@@ -2858,20 +2844,6 @@
    "en": "Turn off the serial port password? Anyone who plugs in the USB cable will be able to use the shell without a password.",
    "es": "¿Apagar la contrasena del puerto serie? Quien conecte el cable USB podra usar la shell sin contrasena.",
    "de": "Passwort der seriellen Schnittstelle ausschalten? Jeder mit USB-Kabel kann die Shell ohne Passwort benutzen.",
-   "scope": "web"
-  },
-  {
-   "it": "Stai usando",
-   "en": "You are using",
-   "es": "Estas usando",
-   "de": "Du benutzt",
-   "scope": "web"
-  },
-  {
-   "it": "Temperatura",
-   "en": "Temperature",
-   "es": "Temperatura",
-   "de": "Temperatur",
    "scope": "web"
   },
   {
@@ -4800,13 +4772,6 @@
    "scope": "fw"
   },
   {
-   "it": "  sleep           sonno profondo (si riaccende con RESET)",
-   "en": "  sleep           deep sleep (wakes up with RESET)",
-   "es": "  sleep           sueno profundo (se enciende con RESET)",
-   "de": "  sleep           Tiefschlaf (Aufwachen mit RESET)",
-   "scope": "fw"
-  },
-  {
    "it": "  start <nome>    avvia o riavvia un task fermato (restart = uguale)",
    "en": "  start <name>    start or restart a stopped task (restart = same)",
    "es": "  start <nombre>  inicia o reinicia una tarea parada (restart = igual)",
@@ -5276,13 +5241,6 @@
    "scope": "web"
   },
   {
-   "it": "Avviato, non collegato",
-   "en": "Started, not connected",
-   "es": "Iniciado, no conectado",
-   "de": "Gestartet, nicht verbunden",
-   "scope": "web"
-  },
-  {
    "it": "Avvio automatico (parte all'accensione della scheda)",
    "en": "Autostart (starts when the board powers on)",
    "es": "Inicio automático (arranca al encender la placa)",
@@ -5658,13 +5616,6 @@
    "en": "Port",
    "es": "Puerto",
    "de": "Port",
-   "scope": "web"
-  },
-  {
-   "it": "Portale automatico",
-   "en": "Captive portal",
-   "es": "Portal automático",
-   "de": "Captive Portal",
    "scope": "web"
   },
   {
@@ -6578,10 +6529,10 @@
    "scope": "fw"
   },
   {
-   "it": "Memoria insufficiente per il Bluetooth",
-   "en": "Not enough memory for Bluetooth",
-   "es": "Memoria insuficiente para el Bluetooth",
-   "de": "Nicht genug Speicher fuer Bluetooth",
+   "it": "Memoria insufficiente per il Bluetooth: chiudi la pagina web e riprova",
+   "en": "Not enough memory for Bluetooth: close the web page and try again",
+   "es": "Memoria insuficiente para el Bluetooth: cierra la pagina web y vuelve a intentarlo",
+   "de": "Nicht genug Speicher fuer Bluetooth: Webseite schliessen und erneut versuchen",
    "scope": "fw"
   },
   {
@@ -7250,27 +7201,6 @@
    "scope": "web"
   },
   {
-   "it": "Accendi",
-   "en": "Turn on",
-   "es": "Encender",
-   "de": "Einschalten",
-   "scope": "web"
-  },
-  {
-   "it": "Accendi per 10 minuti",
-   "en": "Turn on for 10 minutes",
-   "es": "Encender 10 minutos",
-   "de": "10 Minuten einschalten",
-   "scope": "web"
-  },
-  {
-   "it": "Accesa",
-   "en": "On",
-   "es": "Encendida",
-   "de": "An",
-   "scope": "web"
-  },
-  {
    "it": "Acceso per altri {0}. Nome: VesevOS-setup. Codice di accoppiamento: {1}",
    "en": "On for another {0}. Name: VesevOS-setup. Pairing code: {1}",
    "es": "Encendido otros {0}. Nombre: VesevOS-setup. Código de emparejamiento: {1}",
@@ -7677,13 +7607,6 @@
    "scope": "web"
   },
   {
-   "it": "Formati del paese: data {0}, ora {1}, temperatura {2}. Si cambiano poi in Sistema > Localizzazione.",
-   "en": "Country formats: date {0}, time {1}, temperature {2}. Change them later in System > Localization.",
-   "es": "Formatos del país: fecha {0}, hora {1}, temperatura {2}. Se cambian luego en Sistema > Localización.",
-   "de": "Landesformate: Datum {0}, Uhrzeit {1}, Temperatur {2}. Später änderbar unter System > Lokalisierung.",
-   "scope": "web"
-  },
-  {
    "it": "Fuso orario, formati e unita: Sistema > Localizzazione.",
    "en": "Time zone, formats and units: System > Localization.",
    "es": "Huso horario, formatos y unidades: Sistema > Localización.",
@@ -7712,13 +7635,6 @@
    "scope": "web"
   },
   {
-   "it": "HTTPS attivo (consigliato)",
-   "en": "HTTPS on (recommended)",
-   "es": "HTTPS activo (recomendado)",
-   "de": "HTTPS an (empfohlen)",
-   "scope": "web"
-  },
-  {
    "it": "Ho perso una password",
    "en": "I lost a password",
    "es": "He perdido una contraseña",
@@ -7730,13 +7646,6 @@
    "en": "I've seen them all",
    "es": "Lo he visto todo",
    "de": "Alles gesehen",
-   "scope": "web"
-  },
-  {
-   "it": "Hotspot",
-   "en": "Hotspot",
-   "es": "Hotspot",
-   "de": "Hotspot",
    "scope": "web"
   },
   {
@@ -7779,13 +7688,6 @@
    "en": "Back",
    "es": "Atrás",
    "de": "Zurück",
-   "scope": "web"
-  },
-  {
-   "it": "Ingrandisci",
-   "en": "Zoom in",
-   "es": "Acercar",
-   "de": "Vergrößern",
    "scope": "web"
   },
   {
@@ -7968,13 +7870,6 @@
    "en": "Full manual on GitHub",
    "es": "Manual completo en GitHub",
    "de": "Vollständiges Handbuch auf GitHub",
-   "scope": "web"
-  },
-  {
-   "it": "Mappa del mondo",
-   "en": "World map",
-   "es": "Mapa del mundo",
-   "de": "Weltkarte",
    "scope": "web"
   },
   {
@@ -8377,13 +8272,6 @@
    "scope": "web"
   },
   {
-   "it": "Rete Wi-Fi di casa (facoltativa)",
-   "en": "Home Wi-Fi network (optional)",
-   "es": "Red Wi-Fi de casa (opcional)",
-   "de": "Heim-WLAN (optional)",
-   "scope": "web"
-  },
-  {
    "it": "Rete di casa",
    "en": "Home network",
    "es": "Red de casa",
@@ -8437,13 +8325,6 @@
    "en": "Scheduled restart (empty = off)",
    "es": "Reinicio programado (vacío = apagado)",
    "de": "Geplanter Neustart (leer = aus)",
-   "scope": "web"
-  },
-  {
-   "it": "Riduci",
-   "en": "Zoom out",
-   "es": "Alejar",
-   "de": "Verkleinern",
    "scope": "web"
   },
   {
@@ -8608,13 +8489,6 @@
    "scope": "web"
   },
   {
-   "it": "Se la colleghi, la scheda prende l'ora da Internet e la raggiungi dalla tua rete. L'hotspot resta come riserva.",
-   "en": "If you connect it, the board gets the time from the Internet and you can reach it from your network. The hotspot stays as a backup.",
-   "es": "Si la conectas, la placa toma la hora de Internet y la alcanzas desde tu red. El hotspot queda como reserva.",
-   "de": "Verbindest du es, holt das Board die Zeit aus dem Internet und ist aus deinem Netz erreichbar. Der Hotspot bleibt als Reserve.",
-   "scope": "web"
-  },
-  {
    "it": "Se non sai, lascia Interna. Con un'antenna esterna la potenza scende da sola per restare nel limite del paese.",
    "en": "If unsure, leave Internal. With an external antenna the power drops by itself to stay within the country limit.",
    "es": "Si no sabes, deja Interna. Con una antena externa la potencia baja sola para quedar dentro del límite del país.",
@@ -8678,13 +8552,6 @@
    "scope": "web"
   },
   {
-   "it": "Si accende solo a mano e per 10 minuti. Il telefono si accoppia con il codice mostrato qui e scrive i comandi: wifi rete|password, country IT, name cucina, mesh 0 chiave, status, done.",
-   "en": "Turns on only by hand and for 10 minutes. The phone pairs with the code shown here and writes the commands: wifi network|password, country IT, name kitchen, mesh 0 key, status, done.",
-   "es": "Se enciende solo a mano y durante 10 minutos. El móvil se empareja con el código mostrado aquí y escribe los comandos: wifi red|contraseña, country ES, name cocina, mesh 0 clave, status, done.",
-   "de": "Schaltet sich nur von Hand und für 10 Minuten ein. Das Handy koppelt mit dem hier gezeigten Code und schreibt die Befehle: wifi netz|passwort, country DE, name kueche, mesh 0 schluessel, status, done.",
-   "scope": "web"
-  },
-  {
    "it": "Software e dati usati",
    "en": "Software and data used",
    "es": "Software y datos usados",
@@ -8741,24 +8608,10 @@
    "scope": "web"
   },
   {
-   "it": "Tocca il tuo paese sulla mappa",
-   "en": "Tap your country on the map",
-   "es": "Toca tu país en el mapa",
-   "de": "Tippe dein Land auf der Karte an",
-   "scope": "web"
-  },
-  {
    "it": "Tutte",
    "en": "All",
    "es": "Todas",
    "de": "Alle",
-   "scope": "web"
-  },
-  {
-   "it": "Tutto il mondo",
-   "en": "Whole world",
-   "es": "Todo el mundo",
-   "de": "Ganze Welt",
    "scope": "web"
   },
   {
@@ -8885,13 +8738,6 @@
    "en": "Watchdog",
    "es": "Watchdog",
    "de": "Watchdog",
-   "scope": "web"
-  },
-  {
-   "it": "Wi-Fi di casa",
-   "en": "Home Wi-Fi",
-   "es": "Wi-Fi de casa",
-   "de": "Heim-WLAN",
    "scope": "web"
   },
   {
@@ -9035,55 +8881,6 @@
    "scope": "web"
   },
   {
-   "it": "Collega il telefono alla scheda",
-   "en": "Connect your phone to the board",
-   "es": "Conecta el movil a la placa",
-   "de": "Handy mit dem Board verbinden",
-   "scope": "web"
-  },
-  {
-   "it": "Apri la scheda dal telefono",
-   "en": "Open the board from your phone",
-   "es": "Abre la placa desde el movil",
-   "de": "Board am Handy oeffnen",
-   "scope": "web"
-  },
-  {
-   "it": "L'amministratore ha nascosto il QR Wi-Fi.",
-   "en": "The administrator has hidden the Wi-Fi QR.",
-   "es": "El administrador ha ocultado el QR Wi-Fi.",
-   "de": "Der Administrator hat den WLAN-QR ausgeblendet.",
-   "scope": "web"
-  },
-  {
-   "it": "Indirizzo della scheda",
-   "en": "Board address",
-   "es": "Direccion de la placa",
-   "de": "Adresse des Boards",
-   "scope": "web"
-  },
-  {
-   "it": "Rete Wi-Fi: {0}",
-   "en": "Wi-Fi network: {0}",
-   "es": "Red Wi-Fi: {0}",
-   "de": "WLAN-Netz: {0}",
-   "scope": "web"
-  },
-  {
-   "it": "Mostra il QR Wi-Fi in Home a tutti quelli che entrano",
-   "en": "Show the Wi-Fi QR on Home to everyone who logs in",
-   "es": "Mostrar el QR Wi-Fi en Inicio a todos los que entran",
-   "de": "WLAN-QR auf der Startseite fuer alle zeigen, die sich anmelden",
-   "scope": "web"
-  },
-  {
-   "it": "Il QR e la stampa sono nella pagina Home.",
-   "en": "The QR and printing are on the Home page.",
-   "es": "El QR y la impresion estan en la pagina Inicio.",
-   "de": "QR und Druck sind auf der Startseite.",
-   "scope": "web"
-  },
-  {
    "it": "Deve restare acceso almeno un protocollo web (HTTP o HTTPS), altrimenti resti chiuso fuori",
    "en": "At least one web protocol (HTTP or HTTPS) must stay on, otherwise you are locked out",
    "es": "Debe quedar activo al menos un protocolo web (HTTP o HTTPS), si no te quedas fuera",
@@ -9126,13 +8923,6 @@
    "scope": "fw"
   },
   {
-   "it": "Attivo sulla porta {0}",
-   "en": "Active on port {0}",
-   "es": "Activo en el puerto {0}",
-   "de": "Aktiv auf Port {0}",
-   "scope": "web"
-  },
-  {
    "it": "Cambiare porta non e sicurezza vera: la sicurezza resta password, filtro IP e cifratura. Il portale automatico dell'hotspot funziona solo sulla porta 80.",
    "en": "Changing the port is not real security: security remains password, IP filter and encryption. The hotspot's automatic portal only works on port 80.",
    "es": "Cambiar el puerto no es seguridad real: la seguridad sigue siendo contrasena, filtro IP y cifrado. El portal automatico del hotspot solo funciona en el puerto 80.",
@@ -9144,13 +8934,6 @@
    "en": "HTTP",
    "es": "HTTP",
    "de": "HTTP",
-   "scope": "web"
-  },
-  {
-   "it": "HTTP acceso",
-   "en": "HTTP on",
-   "es": "HTTP activo",
-   "de": "HTTP an",
    "scope": "web"
   },
   {
@@ -9175,13 +8958,6 @@
    "scope": "web"
   },
   {
-   "it": "Le modifiche valgono dal prossimo riavvio.",
-   "en": "Changes apply after the next restart.",
-   "es": "Los cambios valen desde el proximo reinicio.",
-   "de": "Aenderungen gelten ab dem naechsten Neustart.",
-   "scope": "web"
-  },
-  {
    "it": "Porta HTTP (80 oppure 1024-65535)",
    "en": "HTTP port (80 or 1024-65535)",
    "es": "Puerto HTTP (80 o 1024-65535)",
@@ -9200,13 +8976,6 @@
    "en": "Automatic portal (the phone opens the page by itself)",
    "es": "Portal automatico (el movil abre la pagina solo)",
    "de": "Automatisches Portal (das Handy oeffnet die Seite selbst)",
-   "scope": "web"
-  },
-  {
-   "it": "Punto di accesso acceso",
-   "en": "Access Point on",
-   "es": "Punto de acceso activo",
-   "de": "Zugangspunkt an",
    "scope": "web"
   },
   {
@@ -9245,20 +9014,6 @@
    "scope": "web"
   },
   {
-   "it": "Con la Wi-Fi di casa l'ora arriva da Internet (NTP): non devi fare altro.",
-   "en": "With the home Wi-Fi the time comes from the Internet (NTP): nothing else to do.",
-   "es": "Con la Wi-Fi de casa la hora llega de Internet (NTP): no tienes que hacer nada mas.",
-   "de": "Mit dem Heim-WLAN kommt die Uhrzeit aus dem Internet (NTP): nichts weiter zu tun.",
-   "scope": "web"
-  },
-  {
-   "it": "Dopo il salvataggio la scheda si collega a {0}. Collega il telefono o il PC a quella rete e apri l'indirizzo che ti mostro. Quando entri da li, si spengono da soli l'hotspot, il portale automatico e HTTP (consigliato). Se il collegamento non riesce, l'hotspot torna da solo.",
-   "en": "After saving, the board connects to {0}. Connect your phone or PC to that network and open the address I show you. When you log in from there, the hotspot, the automatic portal and HTTP turn off by themselves (recommended). If the connection fails, the hotspot comes back by itself.",
-   "es": "Tras guardar, la placa se conecta a {0}. Conecta el movil o el PC a esa red y abre la direccion que te muestro. Cuando entres desde ahi, el hotspot, el portal automatico y HTTP se apagan solos (recomendado). Si la conexion falla, el hotspot vuelve solo.",
-   "de": "Nach dem Speichern verbindet sich das Board mit {0}. Verbinde Handy oder PC mit diesem Netz und oeffne die angezeigte Adresse. Meldest du dich von dort an, schalten sich Hotspot, automatisches Portal und HTTP selbst aus (empfohlen). Schlaegt die Verbindung fehl, kommt der Hotspot von selbst zurueck.",
-   "scope": "web"
-  },
-  {
    "it": "Hai raggiunto la scheda dalla rete di casa: l'hotspot, il portale automatico e HTTP sono stati spenti. Per riaccenderli: Servizi. Se perdi la Wi-Fi: tasto BOOT 8 secondi.",
    "en": "You reached the board from the home network: the hotspot, the automatic portal and HTTP were turned off. To turn them back on: Services. If you lose the Wi-Fi: BOOT button 8 seconds.",
    "es": "Has llegado a la placa desde la red de casa: el hotspot, el portal automatico y HTTP se han apagado. Para encenderlos: Servicios. Si pierdes la Wi-Fi: boton BOOT 8 segundos.",
@@ -9280,31 +9035,10 @@
    "scope": "web"
   },
   {
-   "it": "La scheda non ha una batteria per l'orologio: se la spegni o la riavvii l'ora si perde e dovrai reimpostarla. Con la Wi-Fi di casa l'ora torna da sola. (Opzione futura: modulo orologio DS3231.)",
-   "en": "The board has no clock battery: if you switch it off or restart it the time is lost and you must set it again. With the home Wi-Fi the time comes back by itself. (Future option: DS3231 clock module.)",
-   "es": "La placa no tiene bateria para el reloj: si la apagas o reinicias la hora se pierde y tendras que ajustarla de nuevo. Con la Wi-Fi de casa la hora vuelve sola. (Opcion futura: modulo de reloj DS3231.)",
-   "de": "Das Board hat keine Uhrenbatterie: beim Ausschalten oder Neustart geht die Uhrzeit verloren und muss neu gesetzt werden. Mit dem Heim-WLAN kommt sie von selbst zurueck. (Spaeter moeglich: Uhrenmodul DS3231.)",
-   "scope": "web"
-  },
-  {
    "it": "La scheda si sta collegando a {0}. Collega il telefono o il PC a quella rete e apri questo indirizzo:",
    "en": "The board is connecting to {0}. Connect your phone or PC to that network and open this address:",
    "es": "La placa se esta conectando a {0}. Conecta el movil o el PC a esa red y abre esta direccion:",
    "de": "Das Board verbindet sich mit {0}. Verbinde Handy oder PC mit diesem Netz und oeffne diese Adresse:",
-   "scope": "web"
-  },
-  {
-   "it": "Ora e fuso orario",
-   "en": "Time and time zone",
-   "es": "Hora y zona horaria",
-   "de": "Uhrzeit und Zeitzone",
-   "scope": "web"
-  },
-  {
-   "it": "Scrivi data e ora",
-   "en": "Enter date and time",
-   "es": "Escribe fecha y hora",
-   "de": "Datum und Uhrzeit eingeben",
    "scope": "web"
   },
   {
@@ -9315,17 +9049,10 @@
    "scope": "web"
   },
   {
-   "it": "Senza Wi-Fi di casa il servizio dell'ora da Internet (NTP) e spento: imposta l'ora a mano.",
-   "en": "Without home Wi-Fi the Internet time service (NTP) is off: set the time by hand.",
-   "es": "Sin Wi-Fi de casa el servicio de hora de Internet (NTP) esta apagado: ajusta la hora a mano.",
-   "de": "Ohne Heim-WLAN ist der Internet-Zeitdienst (NTP) aus: Uhrzeit von Hand setzen.",
-   "scope": "web"
-  },
-  {
-   "it": "Senza Wi-Fi di casa l'hotspot e HTTP restano accesi: sono l'unico modo di entrare. Il server dell'ora (NTP) si spegne.",
-   "en": "Without home Wi-Fi the hotspot and HTTP stay on: they are the only way in. The time service (NTP) turns off.",
-   "es": "Sin Wi-Fi de casa el hotspot y HTTP siguen activos: son la unica forma de entrar. El servicio de hora (NTP) se apaga.",
-   "de": "Ohne Heim-WLAN bleiben Hotspot und HTTP an: sie sind der einzige Zugang. Der Zeitdienst (NTP) wird ausgeschaltet.",
+   "it": "Senza Wi-Fi di casa l'hotspot e HTTP restano accesi: sono l'unico modo di entrare. La scheda non ha batteria per l'orologio: se la spegni l'ora va rimessa (Sistema > Ora).",
+   "en": "Without home Wi-Fi the hotspot and HTTP stay on: they are the only way in. The board has no clock battery: if you power it off the time must be set again (System > Time).",
+   "es": "Sin Wi-Fi de casa el punto de acceso y HTTP siguen encendidos: son la unica forma de entrar. La placa no tiene bateria para el reloj: si la apagas hay que poner la hora de nuevo (Sistema > Hora).",
+   "de": "Ohne Heim-WLAN bleiben Hotspot und HTTP an: Sie sind der einzige Zugang. Die Platine hat keine Uhrenbatterie: nach dem Ausschalten muss die Uhrzeit neu gesetzt werden (System > Zeit).",
    "scope": "web"
   },
   {
@@ -9536,13 +9263,6 @@
    "en": "  setup           guided setup over serial (language, country, name, antenna, hotspot, user, Wi-Fi, time)",
    "es": "  setup           configuracion guiada por serie (idioma, pais, nombre, antena, hotspot, usuario, Wi-Fi, hora)",
    "de": "  setup           gefuehrte Einrichtung ueber seriell (Sprache, Land, Name, Antenne, Hotspot, Benutzer, WLAN, Zeit)",
-   "scope": "fw"
-  },
-  {
-   "it": "  svc [ap|captive|http|https on|off] [http-port|https-port <n>]  servizi di rete e porte (vale dal riavvio)",
-   "en": "  svc [ap|captive|http|https on|off] [http-port|https-port <n>]  network services and ports (apply after restart)",
-   "es": "  svc [ap|captive|http|https on|off] [http-port|https-port <n>]  servicios de red y puertos (valen tras reiniciar)",
-   "de": "  svc [ap|captive|http|https on|off] [http-port|https-port <n>]  Netzdienste und Ports (gelten nach Neustart)",
    "scope": "fw"
   },
   {
@@ -9798,13 +9518,6 @@
    "scope": "fw"
   },
   {
-   "it": "Uso: svc [ap|captive|http|https on|off] [http-port|https-port <numero>]",
-   "en": "Usage: svc [ap|captive|http|https on|off] [http-port|https-port <number>]",
-   "es": "Uso: svc [ap|captive|http|https on|off] [http-port|https-port <numero>]",
-   "de": "Verwendung: svc [ap|captive|http|https on|off] [http-port|https-port <Nummer>]",
-   "scope": "fw"
-  },
-  {
    "it": "Uso: wifi set <rete> [password]",
    "en": "Usage: wifi set <network> [password]",
    "es": "Uso: wifi set <red> [contrasena]",
@@ -9886,6 +9599,1420 @@
    "en": "Services > Access point, HTTP and HTTPS: every service can be turned on and off. At least one web protocol stays on. Ports (HTTP 80, HTTPS 443, or 1024 to 65535) apply after a restart. BOOT 8 seconds: hotspot, HTTP, HTTPS and ports return to factory values.",
    "es": "Servicios > Punto de acceso, HTTP y HTTPS: cada servicio se enciende y se apaga. Siempre queda activo al menos un protocolo web. Los puertos (HTTP 80, HTTPS 443, o de 1024 a 65535) valen tras reiniciar. BOOT 8 segundos: hotspot, HTTP, HTTPS y puertos vuelven a los valores de fabrica.",
    "de": "Dienste > Zugangspunkt, HTTP und HTTPS: jeder Dienst kann ein- und ausgeschaltet werden. Mindestens ein Webprotokoll bleibt an. Ports (HTTP 80, HTTPS 443 oder 1024 bis 65535) gelten nach einem Neustart. BOOT 8 Sekunden: Hotspot, HTTP, HTTPS und Ports kehren auf Werkseinstellungen zurueck.",
+   "scope": "web"
+  },
+  {
+   "it": "RAM minima dall'avvio %u KB, blocco piu grande %u KB",
+   "en": "Lowest free RAM since boot %u KB, largest block %u KB",
+   "es": "RAM minima desde el arranque %u KB, bloque mas grande %u KB",
+   "de": "Kleinster freier RAM seit dem Start %u KB, groesster Block %u KB",
+   "scope": "fw"
+  },
+  {
+   "it": "  diag            diagnosi: guida, salvataggio, rete, servizi, RAM, flash",
+   "en": "  diag            diagnosis: guide, saving, network, services, RAM, flash",
+   "es": "  diag            diagnostico: guia, guardado, red, servicios, RAM, flash",
+   "de": "  diag            Diagnose: Assistent, Speichern, Netz, Dienste, RAM, Flash",
+   "scope": "fw"
+  },
+  {
+   "it": "  setup done      segna la guida come finita (scheda gia in uso)",
+   "en": "  setup done      mark the guide as finished (board already in use)",
+   "es": "  setup done      marca la guia como terminada (placa ya en uso)",
+   "de": "  setup done      Assistent als beendet markieren (Board schon in Gebrauch)",
+   "scope": "fw"
+  },
+  {
+   "it": "  svc [ap|captive|http|https|dhcp|mdns on|off] [http-port|https-port <n>]  servizi di rete e porte (web e porte dal riavvio, DHCP e mDNS subito)",
+   "en": "  svc [ap|captive|http|https|dhcp|mdns on|off] [http-port|https-port <n>]  network services and ports (web and ports after reboot, DHCP and mDNS at once)",
+   "es": "  svc [ap|captive|http|https|dhcp|mdns on|off] [http-port|https-port <n>]  servicios de red y puertos (web y puertos tras reiniciar, DHCP y mDNS al instante)",
+   "de": "  svc [ap|captive|http|https|dhcp|mdns on|off] [http-port|https-port <n>]  Netzdienste und Ports (Web und Ports nach Neustart, DHCP und mDNS sofort)",
+   "scope": "fw"
+  },
+  {
+   "it": "/flash usati %u KB su %u KB",
+   "en": "/flash used %u KB of %u KB",
+   "es": "/flash usados %u KB de %u KB",
+   "de": "/flash belegt %u KB von %u KB",
+   "scope": "fw"
+  },
+  {
+   "it": "Blocchi grandi (TLS) in PSRAM: %s",
+   "en": "Big blocks (TLS) in PSRAM: %s",
+   "es": "Bloques grandes (TLS) en PSRAM: %s",
+   "de": "Grosse Bloecke (TLS) im PSRAM: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "DHCP hotspot:  %s, durata %u minuti",
+   "en": "Hotspot DHCP:  %s, lease %u minutes",
+   "es": "DHCP hotspot:  %s, duracion %u minutos",
+   "de": "Hotspot-DHCP:   %s, Dauer %u Minuten",
+   "scope": "fw"
+  },
+  {
+   "it": "Durata dell'indirizzo: da 10 a 1440 minuti",
+   "en": "Address lease: from 10 to 1440 minutes",
+   "es": "Duracion de la direccion: de 10 a 1440 minutos",
+   "de": "Adressdauer: von 10 bis 1440 Minuten",
+   "scope": "fw"
+  },
+  {
+   "it": "FALLITO",
+   "en": "FAILED",
+   "es": "FALLIDO",
+   "de": "FEHLGESCHLAGEN",
+   "scope": "fw"
+  },
+  {
+   "it": "Guida di configurazione non finita: hotspot e HTTP restano forzati accesi a ogni avvio",
+   "en": "Setup guide not finished: hotspot and HTTP are forced on at every start",
+   "es": "Guia de configuracion sin terminar: hotspot y HTTP se fuerzan encendidos en cada arranque",
+   "de": "Einrichtungsassistent nicht beendet: Hotspot und HTTP werden bei jedem Start erzwungen",
+   "scope": "fw"
+  },
+  {
+   "it": "Guida finita:    %s",
+   "en": "Guide finished: %s",
+   "es": "Guia terminada:  %s",
+   "de": "Assistent fertig: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Guida segnata come finita.",
+   "en": "Guide marked as finished.",
+   "es": "Guia marcada como terminada.",
+   "de": "Assistent als beendet markiert.",
+   "scope": "fw"
+  },
+  {
+   "it": "NO (hotspot e HTTP forzati accesi a ogni avvio)",
+   "en": "NO (hotspot and HTTP forced on at every start)",
+   "es": "NO (hotspot y HTTP forzados en cada arranque)",
+   "de": "NEIN (Hotspot und HTTP bei jedem Start erzwungen)",
+   "scope": "fw"
+  },
+  {
+   "it": "RAM libera %u KB, minima %u KB, blocco piu grande %u KB, PSRAM libera %u KB",
+   "en": "Free RAM %u KB, lowest %u KB, largest block %u KB, free PSRAM %u KB",
+   "es": "RAM libre %u KB, minima %u KB, bloque mas grande %u KB, PSRAM libre %u KB",
+   "de": "Freier RAM %u KB, minimal %u KB, groesster Block %u KB, freier PSRAM %u KB",
+   "scope": "fw"
+  },
+  {
+   "it": "Rete: stato %d, modo Wi-Fi %d (1 client, 2 hotspot, 3 entrambi, 0 spento)",
+   "en": "Network: state %d, Wi-Fi mode %d (1 client, 2 hotspot, 3 both, 0 off)",
+   "es": "Red: estado %d, modo Wi-Fi %d (1 cliente, 2 hotspot, 3 ambos, 0 apagado)",
+   "de": "Netz: Zustand %d, WLAN-Modus %d (1 Client, 2 Hotspot, 3 beides, 0 aus)",
+   "scope": "fw"
+  },
+  {
+   "it": "Salvataggio della configurazione fallito: le modifiche si perdono al riavvio (memoria piena?)",
+   "en": "Saving the configuration failed: changes are lost at reboot (memory full?)",
+   "es": "Fallo al guardar la configuracion: los cambios se pierden al reiniciar (memoria llena?)",
+   "de": "Speichern der Konfiguration fehlgeschlagen: Aenderungen gehen beim Neustart verloren (Speicher voll?)",
+   "scope": "fw"
+  },
+  {
+   "it": "Salvataggio fallito: la guida risultera ancora non finita.",
+   "en": "Saving failed: the guide will still count as not finished.",
+   "es": "Fallo al guardar: la guia seguira sin terminar.",
+   "de": "Speichern fehlgeschlagen: der Assistent gilt weiter als nicht beendet.",
+   "scope": "fw"
+  },
+  {
+   "it": "Salvato e applicato.",
+   "en": "Saved and applied.",
+   "es": "Guardado y aplicado.",
+   "de": "Gespeichert und angewendet.",
+   "scope": "fw"
+  },
+  {
+   "it": "Servizi: hotspot %s, DHCP %s, portale %s, mDNS %s",
+   "en": "Services: hotspot %s, DHCP %s, portal %s, mDNS %s",
+   "es": "Servicios: hotspot %s, DHCP %s, portal %s, mDNS %s",
+   "de": "Dienste: Hotspot %s, DHCP %s, Portal %s, mDNS %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Spegni il DHCP dell'hotspot solo quando la scheda e collegata alla Wi-Fi di casa: senza DHCP il telefono dovrebbe avere un indirizzo fisso",
+   "en": "Turn off the hotspot DHCP only when the board is connected to the home Wi-Fi: without DHCP the phone would need a fixed address",
+   "es": "Apaga el DHCP del hotspot solo cuando la placa esta conectada a la Wi-Fi de casa: sin DHCP el telefono necesitaria una direccion fija",
+   "de": "Hotspot-DHCP nur ausschalten, wenn das Board mit dem Heim-WLAN verbunden ist: ohne DHCP braucht das Handy eine feste Adresse",
+   "scope": "fw"
+  },
+  {
+   "it": "Ultimo salvataggio configurazione: %s",
+   "en": "Last configuration save: %s",
+   "es": "Ultimo guardado de la configuracion: %s",
+   "de": "Letztes Speichern der Konfiguration: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: svc [ap|captive|http|https|dhcp|mdns on|off] [http-port|https-port <numero>]",
+   "en": "Use: svc [ap|captive|http|https|dhcp|mdns on|off] [http-port|https-port <number>]",
+   "es": "Uso: svc [ap|captive|http|https|dhcp|mdns on|off] [http-port|https-port <numero>]",
+   "de": "Aufruf: svc [ap|captive|http|https|dhcp|mdns on|off] [http-port|https-port <Zahl>]",
+   "scope": "fw"
+  },
+  {
+   "it": "Utente password impostata: %s   Ora valida: %s",
+   "en": "Password set: %s   Valid time: %s",
+   "es": "Contrasena definida: %s   Hora valida: %s",
+   "de": "Passwort gesetzt: %s   Uhrzeit gueltig: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Web: HTTP %s porta %u, HTTPS %s porta %u (in funzione: %s)",
+   "en": "Web: HTTP %s port %u, HTTPS %s port %u (running: %s)",
+   "es": "Web: HTTP %s puerto %u, HTTPS %s puerto %u (en marcha: %s)",
+   "de": "Web: HTTP %s Port %u, HTTPS %s Port %u (laeuft: %s)",
+   "scope": "fw"
+  },
+  {
+   "it": "mDNS:          %s",
+   "en": "mDNS:          %s",
+   "es": "mDNS:          %s",
+   "de": "mDNS:          %s",
+   "scope": "fw"
+  },
+  {
+   "it": "no",
+   "en": "no",
+   "es": "no",
+   "de": "nein",
+   "scope": "fw"
+  },
+  {
+   "it": "non attivo",
+   "en": "not active",
+   "es": "no activo",
+   "de": "nicht aktiv",
+   "scope": "fw"
+  },
+  {
+   "it": "riuscito",
+   "en": "succeeded",
+   "es": "correcto",
+   "de": "erfolgreich",
+   "scope": "fw"
+  },
+  {
+   "it": "si",
+   "en": "yes",
+   "es": "si",
+   "de": "ja",
+   "scope": "fw"
+  },
+  {
+   "it": "DHCP",
+   "en": "DHCP",
+   "es": "DHCP",
+   "de": "DHCP",
+   "scope": "web"
+  },
+  {
+   "it": "DHCP (hotspot)",
+   "en": "DHCP (hotspot)",
+   "es": "DHCP (hotspot)",
+   "de": "DHCP (Hotspot)",
+   "scope": "web"
+  },
+  {
+   "it": "DNS",
+   "en": "DNS",
+   "es": "DNS",
+   "de": "DNS",
+   "scope": "web"
+  },
+  {
+   "it": "DNS (portale automatico)",
+   "en": "DNS (automatic portal)",
+   "es": "DNS (portal automatico)",
+   "de": "DNS (automatisches Portal)",
+   "scope": "web"
+  },
+  {
+   "it": "Da gli indirizzi ai telefoni e ai PC che si collegano all'hotspot della scheda. Con la Wi-Fi di casa il DHCP lo fa il tuo router, non la scheda.",
+   "en": "Gives addresses to the phones and PCs that connect to the board's hotspot. On your home Wi-Fi the DHCP is done by your router, not by the board.",
+   "es": "Da direcciones a los telefonos y PC que se conectan al hotspot de la placa. En la Wi-Fi de casa el DHCP lo hace tu router, no la placa.",
+   "de": "Vergibt Adressen an Handys und PCs, die sich mit dem Hotspot des Boards verbinden. Im Heim-WLAN macht das DHCP dein Router, nicht das Board.",
+   "scope": "web"
+  },
+  {
+   "it": "Diagnostica",
+   "en": "Diagnostics",
+   "es": "Diagnostico",
+   "de": "Diagnose",
+   "scope": "web"
+  },
+  {
+   "it": "Durata dell'indirizzo (minuti, da 10 a 1440)",
+   "en": "Address lease (minutes, 10 to 1440)",
+   "es": "Duracion de la direccion (minutos, de 10 a 1440)",
+   "de": "Adressdauer (Minuten, 10 bis 1440)",
+   "scope": "web"
+  },
+  {
+   "it": "I DNS usati dalla scheda verso Internet si scelgono in Rete > Wi-Fi > Indirizzo IP.",
+   "en": "The DNS servers the board uses for the Internet are chosen in Network > Wi-Fi > IP address.",
+   "es": "Los DNS que usa la placa hacia Internet se eligen en Red > Wi-Fi > Direccion IP.",
+   "de": "Die DNS-Server fuer das Internet waehlst du unter Netz > WLAN > IP-Adresse.",
+   "scope": "web"
+  },
+  {
+   "it": "Impostazioni NTP",
+   "en": "NTP settings",
+   "es": "Ajustes de NTP",
+   "de": "NTP-Einstellungen",
+   "scope": "web"
+  },
+  {
+   "it": "La guida non comparira piu a ogni avvio. Le impostazioni restano come sono.",
+   "en": "The guide will no longer appear at every start. Settings stay as they are.",
+   "es": "La guia ya no aparecera en cada arranque. Los ajustes se quedan como estan.",
+   "de": "Der Assistent erscheint nicht mehr bei jedem Start. Die Einstellungen bleiben unveraendert.",
+   "scope": "web"
+  },
+  {
+   "it": "La scheda e gia configurata",
+   "en": "The board is already configured",
+   "es": "La placa ya esta configurada",
+   "de": "Das Board ist schon eingerichtet",
+   "scope": "web"
+  },
+  {
+   "it": "La scheda e gia configurata?",
+   "en": "Is the board already configured?",
+   "es": "La placa ya esta configurada?",
+   "de": "Ist das Board schon eingerichtet?",
+   "scope": "web"
+  },
+  {
+   "it": "NTP",
+   "en": "NTP",
+   "es": "NTP",
+   "de": "NTP",
+   "scope": "web"
+  },
+  {
+   "it": "Nell'hotspot la scheda risponde ai nomi con il proprio indirizzo: cosi il telefono apre da solo la pagina. Serve HTTP acceso sulla porta 80.",
+   "en": "On the hotspot the board answers every name with its own address: so the phone opens the page by itself. It needs HTTP on port 80.",
+   "es": "En el hotspot la placa responde a los nombres con su propia direccion: asi el telefono abre solo la pagina. Necesita HTTP en el puerto 80.",
+   "de": "Im Hotspot antwortet das Board auf jeden Namen mit der eigenen Adresse: so oeffnet das Handy die Seite von selbst. Braucht HTTP auf Port 80.",
+   "scope": "web"
+  },
+  {
+   "it": "Permette di trovare la scheda con il suo nome (per esempio vesevos.local) senza sapere l'indirizzo. Se lo spegni, la scheda si raggiunge solo con l'indirizzo IP.",
+   "en": "Lets you find the board by its name (for example vesevos.local) without knowing the address. If you turn it off, the board is reached only by its IP address.",
+   "es": "Permite encontrar la placa por su nombre (por ejemplo vesevos.local) sin saber la direccion. Si lo apagas, la placa se alcanza solo por su direccion IP.",
+   "de": "Damit findest du das Board ueber seinen Namen (z. B. vesevos.local), ohne die Adresse zu kennen. Ausgeschaltet ist das Board nur ueber die IP-Adresse erreichbar.",
+   "scope": "web"
+  },
+  {
+   "it": "Salva durata",
+   "en": "Save lease",
+   "es": "Guardar duracion",
+   "de": "Dauer speichern",
+   "scope": "web"
+  },
+  {
+   "it": "Servizio dell'ora (NTP)",
+   "en": "Time service (NTP)",
+   "es": "Servicio de hora (NTP)",
+   "de": "Zeitdienst (NTP)",
+   "scope": "web"
+  },
+  {
+   "it": "Si puo spegnere solo quando la scheda e collegata alla tua Wi-Fi. Se lo spegni mentre l'hotspot e l'unico accesso, nessuno riesce piu a collegarsi.",
+   "en": "It can be turned off only when the board is connected to your Wi-Fi. If you turn it off while the hotspot is the only way in, nobody can connect any more.",
+   "es": "Solo se puede apagar cuando la placa esta conectada a tu Wi-Fi. Si lo apagas cuando el hotspot es la unica entrada, nadie podra conectarse.",
+   "de": "Es laesst sich nur ausschalten, wenn das Board mit deinem WLAN verbunden ist. Ausgeschaltet, solange der Hotspot der einzige Zugang ist, kann sich niemand mehr verbinden.",
+   "scope": "web"
+  },
+  {
+   "it": "Si, e configurata",
+   "en": "Yes, it is configured",
+   "es": "Si, esta configurada",
+   "de": "Ja, ist eingerichtet",
+   "scope": "web"
+  },
+  {
+   "it": "Stampa",
+   "en": "Print",
+   "es": "Imprimir",
+   "de": "Drucken",
+   "scope": "web"
+  },
+  {
+   "it": "Tiene l'ora della scheda uguale a quella di Internet. Serve la Wi-Fi di casa. Puoi spegnerlo e mettere l'ora a mano (Sistema > Ora).",
+   "en": "Keeps the board's time equal to Internet time. Needs the home Wi-Fi. You can turn it off and set the time by hand (System > Time).",
+   "es": "Mantiene la hora de la placa igual a la de Internet. Necesita la Wi-Fi de casa. Puedes apagarlo y poner la hora a mano (Sistema > Hora).",
+   "de": "Haelt die Zeit des Boards gleich der Internetzeit. Braucht das Heim-WLAN. Du kannst es ausschalten und die Zeit von Hand setzen (System > Zeit).",
+   "scope": "web"
+  },
+  {
+   "it": "mDNS",
+   "en": "mDNS",
+   "es": "mDNS",
+   "de": "mDNS",
+   "scope": "web"
+  },
+  {
+   "it": "mDNS (NOME.local)",
+   "en": "mDNS (NAME.local)",
+   "es": "mDNS (NOMBRE.local)",
+   "de": "mDNS (NAME.local)",
+   "scope": "web"
+  },
+  {
+   "it": "Si accende solo a mano e per 10 minuti, poi si spegne da solo. Serve circa 70 KB di memoria: se la scheda rifiuta, chiudi le altre pagine web e riprova. Il telefono si accoppia con il codice mostrato qui e scrive i comandi: wifi rete|password, country IT, name cucina, mesh 0 chiave, status, done.",
+   "en": "It turns on only by hand and for 10 minutes, then turns itself off. It needs about 70 KB of memory: if the board refuses, close the other web pages and try again. The phone pairs with the code shown here and writes the commands: wifi network|password, country IT, name kitchen, mesh 0 key, status, done.",
+   "es": "Se enciende solo a mano y durante 10 minutos, luego se apaga solo. Necesita unos 70 KB de memoria: si la placa lo rechaza, cierra las otras paginas web y vuelve a intentarlo. El telefono se empareja con el codigo mostrado aqui y escribe los comandos: wifi red|contrasena, country IT, name cocina, mesh 0 clave, status, done.",
+   "de": "Schaltet sich nur von Hand fuer 10 Minuten ein und dann von selbst wieder aus. Braucht etwa 70 KB Speicher: lehnt das Board ab, schliesse die anderen Webseiten und versuche es erneut. Das Handy koppelt mit dem hier gezeigten Code und schreibt die Befehle: wifi Netz|Passwort, country IT, name kueche, mesh 0 Schluessel, status, done.",
+   "scope": "web"
+  },
+  {
+   "it": "  power [off|wifi|cycle <sveglia> <sonno>]  risparmio energia (minuti)",
+   "en": "  power [off|wifi|cycle <awake> <sleep>]  power saving (minutes)",
+   "es": "  power [off|wifi|cycle <despierta> <sueno>]  ahorro de energia (minutos)",
+   "de": "  power [off|wifi|cycle <wach> <Schlaf>]  Energiesparen (Minuten)",
+   "scope": "fw"
+  },
+  {
+   "it": "  sleep [minuti]  sonno profondo (con i minuti la scheda riparte da sola; senza, solo con RESET)",
+   "en": "  sleep [minutes]  deep sleep (with minutes the board restarts by itself; without, only with RESET)",
+   "es": "  sleep [minutos]  sueno profundo (con minutos la placa arranca sola; sin ellos, solo con RESET)",
+   "de": "  sleep [Minuten]  Tiefschlaf (mit Minuten startet das Board von selbst; ohne nur mit RESET)",
+   "scope": "fw"
+  },
+  {
+   "it": "  stats [on|off|reset]  statistiche d'uso anonime (spente di fabbrica)",
+   "en": "  stats [on|off|reset]  anonymous usage statistics (off by default)",
+   "es": "  stats [on|off|reset]  estadisticas de uso anonimas (apagadas de fabrica)",
+   "de": "  stats [on|off|reset]  anonyme Nutzungsstatistik (werkseitig aus)",
+   "scope": "fw"
+  },
+  {
+   "it": "Bluetooth: accensioni %lu, collegamenti %lu",
+   "en": "Bluetooth: starts %lu, connections %lu",
+   "es": "Bluetooth: encendidos %lu, conexiones %lu",
+   "de": "Bluetooth: Einschaltungen %lu, Verbindungen %lu",
+   "scope": "fw"
+  },
+  {
+   "it": "Certificato non pronto",
+   "en": "Certificate not ready",
+   "es": "Certificado no listo",
+   "de": "Zertifikat nicht bereit",
+   "scope": "fw"
+  },
+  {
+   "it": "Codice errato",
+   "en": "Wrong code",
+   "es": "Codigo incorrecto",
+   "de": "Falscher Code",
+   "scope": "fw"
+  },
+  {
+   "it": "Codice errato: controlla l'ora del telefono e riprova",
+   "en": "Wrong code: check the phone time and try again",
+   "es": "Codigo incorrecto: revisa la hora del telefono y vuelve a intentarlo",
+   "de": "Falscher Code: Uhrzeit des Handys pruefen und erneut versuchen",
+   "scope": "fw"
+  },
+  {
+   "it": "Conteggio da %lu s",
+   "en": "Counting for %lu s",
+   "es": "Contando desde hace %lu s",
+   "de": "Zaehlung seit %lu s",
+   "scope": "fw"
+  },
+  {
+   "it": "Difficolta non valida",
+   "en": "Invalid difficulty",
+   "es": "Dificultad no valida",
+   "de": "Ungueltige Schwierigkeit",
+   "scope": "fw"
+  },
+  {
+   "it": "Hotspot: al massimo %d telefoni insieme",
+   "en": "Hotspot: at most %d phones at once",
+   "es": "Hotspot: como maximo %d telefonos a la vez",
+   "de": "Hotspot: hoechstens %d Handys gleichzeitig",
+   "scope": "fw"
+  },
+  {
+   "it": "LED (secondi): stato %lu, battito %lu, fisso %lu, spento %lu",
+   "en": "LED (seconds): state %lu, heartbeat %lu, fixed %lu, off %lu",
+   "es": "LED (segundos): estado %lu, latido %lu, fijo %lu, apagado %lu",
+   "de": "LED (Sekunden): Zustand %lu, Herzschlag %lu, fest %lu, aus %lu",
+   "scope": "fw"
+  },
+  {
+   "it": "MFA degli amministratori disattivato con il tasto BOOT",
+   "en": "MFA of the administrators turned off with the BOOT button",
+   "es": "MFA de los administradores desactivada con el boton BOOT",
+   "de": "MFA der Administratoren mit der BOOT-Taste ausgeschaltet",
+   "scope": "fw"
+  },
+  {
+   "it": "MFA non attivo",
+   "en": "MFA not active",
+   "es": "MFA no activa",
+   "de": "MFA nicht aktiv",
+   "scope": "fw"
+  },
+  {
+   "it": "Ora della scheda impostata dal browser durante l'accesso con MFA",
+   "en": "Board time set by the browser during the MFA login",
+   "es": "Hora de la placa puesta por el navegador durante el acceso con MFA",
+   "de": "Boardzeit vom Browser beim MFA-Login gesetzt",
+   "scope": "fw"
+  },
+  {
+   "it": "Ora della scheda non impostata: imposta l'ora (Sistema > Ora) e riprova",
+   "en": "Board time not set: set the time (System > Time) and try again",
+   "es": "Hora de la placa sin configurar: ajusta la hora (Sistema > Hora) y vuelve a intentarlo",
+   "de": "Boardzeit nicht gesetzt: Zeit einstellen (System > Zeit) und erneut versuchen",
+   "scope": "fw"
+  },
+  {
+   "it": "Ora della scheda non valida: accesso con MFA bloccato. Usa il tasto BOOT 8 secondi o imposta l'ora dalla seriale",
+   "en": "Board time not valid: MFA login blocked. Use the BOOT button for 8 seconds or set the time over serial",
+   "es": "Hora de la placa no valida: acceso con MFA bloqueado. Usa el boton BOOT 8 segundos o ajusta la hora por el puerto serie",
+   "de": "Boardzeit ungueltig: MFA-Login gesperrt. BOOT-Taste 8 Sekunden oder Zeit ueber seriell setzen",
+   "scope": "fw"
+  },
+  {
+   "it": "Ora della scheda non valida: il browser non ha mandato la sua ora",
+   "en": "Board time not valid: the browser did not send its time",
+   "es": "Hora de la placa no valida: el navegador no envio su hora",
+   "de": "Boardzeit ungueltig: der Browser hat seine Zeit nicht gesendet",
+   "scope": "fw"
+  },
+  {
+   "it": "Per sicurezza i codici si mostrano solo con HTTPS o dall'hotspot",
+   "en": "For safety the codes are shown only with HTTPS or from the hotspot",
+   "es": "Por seguridad los codigos solo se muestran con HTTPS o desde el hotspot",
+   "de": "Aus Sicherheitsgruenden werden die Codes nur mit HTTPS oder ueber den Hotspot gezeigt",
+   "scope": "fw"
+  },
+  {
+   "it": "Per sicurezza il QR si mostra solo con HTTPS o dall'hotspot",
+   "en": "For safety the QR is shown only with HTTPS or from the hotspot",
+   "es": "Por seguridad el QR solo se muestra con HTTPS o desde el hotspot",
+   "de": "Aus Sicherheitsgruenden wird der QR nur mit HTTPS oder ueber den Hotspot gezeigt",
+   "scope": "fw"
+  },
+  {
+   "it": "Prima premi Attiva MFA",
+   "en": "First press Turn on MFA",
+   "es": "Primero pulsa Activar MFA",
+   "de": "Zuerst MFA aktivieren druecken",
+   "scope": "fw"
+  },
+  {
+   "it": "Prova di lavoro non valida: ricarica la pagina e riprova",
+   "en": "Proof of work not valid: reload the page and try again",
+   "es": "Prueba de trabajo no valida: recarga la pagina y vuelve a intentarlo",
+   "de": "Arbeitsnachweis ungueltig: Seite neu laden und erneut versuchen",
+   "scope": "fw"
+  },
+  {
+   "it": "Risparmio energia: Wi-Fi a risparmio massimo (raggiungibile, piu lenta)",
+   "en": "Power saving: Wi-Fi at maximum saving (reachable, slower)",
+   "es": "Ahorro de energia: Wi-Fi al maximo ahorro (accesible, mas lenta)",
+   "de": "Energiesparen: WLAN im Maximalsparmodus (erreichbar, langsamer)",
+   "scope": "fw"
+  },
+  {
+   "it": "Risparmio energia: sonno a cicli, sveglia %u min, dorme %u min",
+   "en": "Power saving: cycled sleep, awake %u min, asleep %u min",
+   "es": "Ahorro de energia: sueno por ciclos, despierta %u min, duerme %u min",
+   "de": "Energiesparen: Schlafzyklen, wach %u Min, schlaeft %u Min",
+   "scope": "fw"
+  },
+  {
+   "it": "Risparmio energia: spento",
+   "en": "Power saving: off",
+   "es": "Ahorro de energia: apagado",
+   "de": "Energiesparen: aus",
+   "scope": "fw"
+  },
+  {
+   "it": "Risvegli dal sonno: %lu, tempo dormito circa %lu s",
+   "en": "Wake-ups from sleep: %lu, time asleep about %lu s",
+   "es": "Despertares del sueno: %lu, tiempo dormido unos %lu s",
+   "de": "Aufwachen aus dem Schlaf: %lu, Schlafzeit etwa %lu s",
+   "scope": "fw"
+  },
+  {
+   "it": "Solo l'amministratore puo spegnere l'MFA di un altro utente",
+   "en": "Only the administrator can turn off the MFA of another user",
+   "es": "Solo el administrador puede apagar la MFA de otro usuario",
+   "de": "Nur der Administrator kann die MFA eines anderen Benutzers ausschalten",
+   "scope": "fw"
+  },
+  {
+   "it": "Sonno profondo per %d minuti: poi la scheda riparte da sola (o con RESET)",
+   "en": "Deep sleep for %d minutes: then the board restarts by itself (or with RESET)",
+   "es": "Sueno profundo durante %d minutos: luego la placa arranca sola (o con RESET)",
+   "de": "Tiefschlaf fuer %d Minuten: danach startet das Board von selbst (oder mit RESET)",
+   "scope": "fw"
+  },
+  {
+   "it": "Statistiche spente (stats on per accenderle)",
+   "en": "Statistics off (stats on to turn them on)",
+   "es": "Estadisticas apagadas (stats on para encenderlas)",
+   "de": "Statistik aus (stats on zum Einschalten)",
+   "scope": "fw"
+  },
+  {
+   "it": "Tasto BOOT: brevi %lu, 2 s %lu, 8 s %lu, 20 s %lu",
+   "en": "BOOT button: short %lu, 2 s %lu, 8 s %lu, 20 s %lu",
+   "es": "Boton BOOT: cortas %lu, 2 s %lu, 8 s %lu, 20 s %lu",
+   "de": "BOOT-Taste: kurz %lu, 2 s %lu, 8 s %lu, 20 s %lu",
+   "scope": "fw"
+  },
+  {
+   "it": "Tempo da sveglia: da 10 minuti a 24 ore",
+   "en": "Awake time: from 10 minutes to 24 hours",
+   "es": "Tiempo despierta: de 10 minutos a 24 horas",
+   "de": "Wachzeit: von 10 Minuten bis 24 Stunden",
+   "scope": "fw"
+  },
+  {
+   "it": "Tempo di sonno: da 1 minuto a 7 giorni",
+   "en": "Sleep time: from 1 minute to 7 days",
+   "es": "Tiempo de sueno: de 1 minuto a 7 dias",
+   "de": "Schlafzeit: von 1 Minute bis 7 Tage",
+   "scope": "web"
+  },
+  {
+   "it": "Tempo scaduto o troppi errori: rifai l'accesso dall'inizio",
+   "en": "Time expired or too many errors: log in again from the start",
+   "es": "Tiempo agotado o demasiados errores: vuelve a acceder desde el principio",
+   "de": "Zeit abgelaufen oder zu viele Fehler: Anmeldung von vorn wiederholen",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: power [off|wifi|cycle <minuti sveglia> <minuti sonno>]",
+   "en": "Use: power [off|wifi|cycle <awake minutes> <sleep minutes>]",
+   "es": "Uso: power [off|wifi|cycle <minutos despierta> <minutos sueno>]",
+   "de": "Aufruf: power [off|wifi|cycle <Minuten wach> <Minuten Schlaf>]",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: stats [on|off|reset]",
+   "en": "Use: stats [on|off|reset]",
+   "es": "Uso: stats [on|off|reset]",
+   "de": "Aufruf: stats [on|off|reset]",
+   "scope": "fw"
+  },
+  {
+   "it": "Wi-Fi: collegamenti %lu, cadute %lu, collegato %lu s, segnale medio %d dBm, minimo %d dBm",
+   "en": "Wi-Fi: connections %lu, drops %lu, connected %lu s, average signal %d dBm, minimum %d dBm",
+   "es": "Wi-Fi: conexiones %lu, caidas %lu, conectada %lu s, senal media %d dBm, minima %d dBm",
+   "de": "WLAN: Verbindungen %lu, Abbrueche %lu, verbunden %lu s, mittleres Signal %d dBm, Minimum %d dBm",
+   "scope": "fw"
+  },
+  {
+   "it": "(si vedono una sola volta, ognuno vale una volta). Scrivili o stampali e tienili al sicuro.",
+   "en": "(shown only once, each is valid once). Write them down or print them and keep them safe.",
+   "es": "(se ven una sola vez, cada uno vale una vez). Escribelos o imprimelos y guardalos bien.",
+   "de": "(werden nur einmal gezeigt, jeder gilt einmal). Aufschreiben oder ausdrucken und sicher aufbewahren.",
+   "scope": "web"
+  },
+  {
+   "it": "1.",
+   "en": "1.",
+   "es": "1.",
+   "de": "1.",
+   "scope": "web"
+  },
+  {
+   "it": "2.",
+   "en": "2.",
+   "es": "2.",
+   "de": "2.",
+   "scope": "web"
+  },
+  {
+   "it": "Accetta solo codici di recupero",
+   "en": "Accept only recovery codes",
+   "es": "Aceptar solo codigos de recuperacion",
+   "de": "Nur Wiederherstellungscodes akzeptieren",
+   "scope": "web"
+  },
+  {
+   "it": "Apri l'app e inquadra il QR (oppure scrivi la chiave a mano).",
+   "en": "Open the app and scan the QR (or type the key by hand).",
+   "es": "Abre la app y escanea el QR (o escribe la clave a mano).",
+   "de": "App oeffnen und QR scannen (oder den Schluessel von Hand eingeben).",
+   "scope": "web"
+  },
+  {
+   "it": "Azzera",
+   "en": "Reset",
+   "es": "Poner a cero",
+   "de": "Zuruecksetzen",
+   "scope": "web"
+  },
+  {
+   "it": "Azzerate",
+   "en": "Reset done",
+   "es": "Puesto a cero",
+   "de": "Zurueckgesetzt",
+   "scope": "web"
+  },
+  {
+   "it": "Blocca l'accesso",
+   "en": "Block the login",
+   "es": "Bloquear el acceso",
+   "de": "Anmeldung sperren",
+   "scope": "web"
+  },
+  {
+   "it": "Bluetooth: accensioni / collegamenti",
+   "en": "Bluetooth: starts / connections",
+   "es": "Bluetooth: encendidos / conexiones",
+   "de": "Bluetooth: Einschaltungen / Verbindungen",
+   "scope": "web"
+  },
+  {
+   "it": "Certificato della scheda",
+   "en": "Board certificate",
+   "es": "Certificado de la placa",
+   "de": "Zertifikat des Boards",
+   "scope": "web"
+  },
+  {
+   "it": "Chiave (se non puoi inquadrare il QR)",
+   "en": "Key (if you cannot scan the QR)",
+   "es": "Clave (si no puedes escanear el QR)",
+   "de": "Schluessel (wenn du den QR nicht scannen kannst)",
+   "scope": "web"
+  },
+  {
+   "it": "Chiedi di impostare l'ora (consigliato)",
+   "en": "Ask to set the time (recommended)",
+   "es": "Pedir que se ajuste la hora (recomendado)",
+   "de": "Zeit einstellen lassen (empfohlen)",
+   "scope": "web"
+  },
+  {
+   "it": "Codice a 6 cifre dell'app (oppure un codice di recupero)",
+   "en": "6-digit code from the app (or a recovery code)",
+   "es": "Codigo de 6 cifras de la app (o un codigo de recuperacion)",
+   "de": "6-stelliger Code aus der App (oder ein Wiederherstellungscode)",
+   "scope": "web"
+  },
+  {
+   "it": "Codici di recupero",
+   "en": "Recovery codes",
+   "es": "Codigos de recuperacion",
+   "de": "Wiederherstellungscodes",
+   "scope": "web"
+  },
+  {
+   "it": "Conferma e accendi",
+   "en": "Confirm and turn on",
+   "es": "Confirmar y encender",
+   "de": "Bestaetigen und einschalten",
+   "scope": "web"
+  },
+  {
+   "it": "Contano quanto si usano Wi-Fi, Bluetooth, tasto BOOT e LED. Sono numeri anonimi: niente indirizzi MAC, niente indirizzi IP, niente nomi. Restano nella memoria della scheda (si azzerano al riavvio) e non escono mai. Spente di fabbrica.",
+   "en": "They count how much Wi-Fi, Bluetooth, the BOOT button and the LED are used. They are anonymous numbers: no MAC addresses, no IP addresses, no names. They stay in the board's memory (reset at reboot) and never leave it. Off by default.",
+   "es": "Cuentan cuanto se usan Wi-Fi, Bluetooth, el boton BOOT y el LED. Son numeros anonimos: sin direcciones MAC, sin direcciones IP, sin nombres. Quedan en la memoria de la placa (se ponen a cero al reiniciar) y nunca salen. Apagadas de fabrica.",
+   "de": "Sie zaehlen, wie viel WLAN, Bluetooth, BOOT-Taste und LED benutzt werden. Es sind anonyme Zahlen: keine MAC-Adressen, keine IP-Adressen, keine Namen. Sie bleiben im Speicher des Boards (beim Neustart zurueckgesetzt) und verlassen es nie. Werkseitig aus.",
+   "scope": "web"
+  },
+  {
+   "it": "Conteggio da",
+   "en": "Counting for",
+   "es": "Contando desde hace",
+   "de": "Zaehlung seit",
+   "scope": "web"
+  },
+  {
+   "it": "Copia",
+   "en": "Copy",
+   "es": "Copiar",
+   "de": "Kopieren",
+   "scope": "web"
+  },
+  {
+   "it": "Dormi",
+   "en": "Sleep",
+   "es": "Dormir",
+   "de": "Schlafen",
+   "scope": "web"
+  },
+  {
+   "it": "Dormi adesso",
+   "en": "Sleep now",
+   "es": "Dormir ahora",
+   "de": "Jetzt schlafen",
+   "scope": "web"
+  },
+  {
+   "it": "Dormi per questo tempo",
+   "en": "Sleep for this time",
+   "es": "Dormir este tiempo",
+   "de": "Fuer diese Zeit schlafen",
+   "scope": "web"
+  },
+  {
+   "it": "Dormire adesso?",
+   "en": "Sleep now?",
+   "es": "Dormir ahora?",
+   "de": "Jetzt schlafen?",
+   "scope": "web"
+  },
+  {
+   "it": "Forte",
+   "en": "Strong",
+   "es": "Fuerte",
+   "de": "Stark",
+   "scope": "web"
+  },
+  {
+   "it": "Hotspot: telefoni insieme (massimo)",
+   "en": "Hotspot: phones at once (maximum)",
+   "es": "Hotspot: telefonos a la vez (maximo)",
+   "de": "Hotspot: Handys gleichzeitig (Maximum)",
+   "scope": "web"
+  },
+  {
+   "it": "I codici dipendono dall'ora esatta (UTC). La scheda non ha batteria per l'orologio: dopo un riavvio l'ora si perde finche non torna da Internet (NTP) o la imposti tu. L'ora del telefono deve essere automatica. Fuso orario e ora legale non contano.",
+   "en": "The codes depend on the exact time (UTC). The board has no battery for its clock: after a reboot the time is lost until it comes back from the Internet (NTP) or you set it. The phone time must be automatic. Time zone and daylight saving do not matter.",
+   "es": "Los codigos dependen de la hora exacta (UTC). La placa no tiene bateria para el reloj: tras un reinicio la hora se pierde hasta que vuelve de Internet (NTP) o la ajustas tu. La hora del telefono debe ser automatica. La zona horaria y el horario de verano no importan.",
+   "de": "Die Codes haengen von der genauen Zeit (UTC) ab. Das Board hat keine Batterie fuer die Uhr: nach einem Neustart geht die Zeit verloren, bis sie aus dem Internet (NTP) zurueckkommt oder du sie einstellst. Die Handyzeit muss automatisch sein. Zeitzone und Sommerzeit spielen keine Rolle.",
+   "scope": "web"
+  },
+  {
+   "it": "I codici vecchi smettono di valere.",
+   "en": "The old codes stop working.",
+   "es": "Los codigos antiguos dejan de valer.",
+   "de": "Die alten Codes gelten nicht mehr.",
+   "scope": "web"
+  },
+  {
+   "it": "I pin e il consumo di corrente non sono ancora contati.",
+   "en": "Pins and power consumption are not counted yet.",
+   "es": "Los pines y el consumo de corriente aun no se cuentan.",
+   "de": "Pins und Stromverbrauch werden noch nicht gezaehlt.",
+   "scope": "web"
+  },
+  {
+   "it": "Il certificato e unico per questa scheda: lo crea lei, la chiave resta dentro e non esce mai. Serve a cifrare HTTPS (e in futuro gli altri servizi cifrati). Il browser avvisa \"connessione non privata\" perche non lo ha emesso un'autorita: e normale. Confronta l'impronta con quella del browser (lucchetto > certificato) e con quella della seriale (comando cert).",
+   "en": "The certificate is unique to this board: it creates it itself and the key stays inside and never leaves. It encrypts HTTPS (and in future the other encrypted services). The browser warns \"connection not private\" because no authority issued it: this is normal. Compare the fingerprint with the browser's (padlock > certificate) and with the serial one (command cert).",
+   "es": "El certificado es unico de esta placa: lo crea ella misma y la clave se queda dentro sin salir nunca. Sirve para cifrar HTTPS (y en el futuro los demas servicios cifrados). El navegador avisa \"conexion no privada\" porque no lo emitio una autoridad: es normal. Compara la huella con la del navegador (candado > certificado) y con la del puerto serie (comando cert).",
+   "de": "Das Zertifikat ist fuer dieses Board einmalig: es erzeugt es selbst, der Schluessel bleibt drin und verlaesst es nie. Es verschluesselt HTTPS (und kuenftig die anderen verschluesselten Dienste). Der Browser warnt \"Verbindung nicht privat\", weil keine Stelle es ausgestellt hat: das ist normal. Vergleiche den Fingerabdruck mit dem des Browsers (Schloss > Zertifikat) und dem der seriellen Schnittstelle (Befehl cert).",
+   "scope": "web"
+  },
+  {
+   "it": "Il certificato nuovo vale dal prossimo riavvio: il browser avvisera di nuovo. Quello creato dalla scheda dura 10 anni.",
+   "en": "A new certificate is valid from the next reboot: the browser will warn again. The one created by the board lasts 10 years.",
+   "es": "El certificado nuevo vale desde el proximo reinicio: el navegador avisara de nuevo. El creado por la placa dura 10 anos.",
+   "de": "Ein neues Zertifikat gilt ab dem naechsten Neustart: der Browser warnt erneut. Das vom Board erzeugte haelt 10 Jahre.",
+   "scope": "web"
+  },
+  {
+   "it": "L'accesso torna a chiedere solo la password.",
+   "en": "The login goes back to asking only for the password.",
+   "es": "El acceso vuelve a pedir solo la contrasena.",
+   "de": "Die Anmeldung fragt wieder nur nach dem Passwort.",
+   "scope": "web"
+  },
+  {
+   "it": "L'ora della scheda non e valida: con il codice giusto la scheda prende l'ora di questo dispositivo. Controlla che l'ora del dispositivo sia esatta.",
+   "en": "The board time is not valid: with the right code the board takes the time of this device. Check that the device time is correct.",
+   "es": "La hora de la placa no es valida: con el codigo correcto la placa toma la hora de este dispositivo. Comprueba que la hora del dispositivo sea correcta.",
+   "de": "Die Boardzeit ist ungueltig: mit dem richtigen Code uebernimmt das Board die Zeit dieses Geraets. Pruefe, ob die Geraetezeit stimmt.",
+   "scope": "web"
+  },
+  {
+   "it": "L'ora della scheda non e valida: serve un codice di recupero.",
+   "en": "The board time is not valid: a recovery code is needed.",
+   "es": "La hora de la placa no es valida: hace falta un codigo de recuperacion.",
+   "de": "Die Boardzeit ist ungueltig: ein Wiederherstellungscode ist noetig.",
+   "scope": "web"
+  },
+  {
+   "it": "L'ora e l'MFA",
+   "en": "Time and MFA",
+   "es": "La hora y la MFA",
+   "de": "Zeit und MFA",
+   "scope": "web"
+  },
+  {
+   "it": "LED: stato / battito / fisso / spento",
+   "en": "LED: state / heartbeat / fixed / off",
+   "es": "LED: estado / latido / fijo / apagado",
+   "de": "LED: Zustand / Herzschlag / fest / aus",
+   "scope": "web"
+  },
+  {
+   "it": "La pagina non si raggiunge piu fino al risveglio.",
+   "en": "The page cannot be reached until wake-up.",
+   "es": "La pagina no se alcanza hasta el despertar.",
+   "de": "Die Seite ist bis zum Aufwachen nicht erreichbar.",
+   "scope": "web"
+  },
+  {
+   "it": "La scheda riparte da sola tra {0} (o subito con il tasto RESET).",
+   "en": "The board restarts by itself in {0} (or at once with the RESET button).",
+   "es": "La placa arranca sola en {0} (o al instante con el boton RESET).",
+   "de": "Das Board startet in {0} von selbst (oder sofort mit der RESET-Taste).",
+   "scope": "web"
+  },
+  {
+   "it": "Leggera",
+   "en": "Light",
+   "es": "Ligera",
+   "de": "Leicht",
+   "scope": "web"
+  },
+  {
+   "it": "MFA",
+   "en": "MFA",
+   "es": "MFA",
+   "de": "MFA",
+   "scope": "web"
+  },
+  {
+   "it": "MFA acceso",
+   "en": "MFA on",
+   "es": "MFA activa",
+   "de": "MFA an",
+   "scope": "web"
+  },
+  {
+   "it": "MFA acceso. Codici di recupero rimasti: {0}",
+   "en": "MFA on. Recovery codes left: {0}",
+   "es": "MFA activa. Codigos de recuperacion restantes: {0}",
+   "de": "MFA an. Verbleibende Wiederherstellungscodes: {0}",
+   "scope": "web"
+  },
+  {
+   "it": "MFA spento",
+   "en": "MFA off",
+   "es": "MFA apagada",
+   "de": "MFA aus",
+   "scope": "web"
+  },
+  {
+   "it": "Minuti di sonno (da 1 a 10080)",
+   "en": "Minutes of sleep (1 to 10080)",
+   "es": "Minutos de sueno (de 1 a 10080)",
+   "de": "Schlafminuten (1 bis 10080)",
+   "scope": "web"
+  },
+  {
+   "it": "Molto forte (lenta su telefoni vecchi)",
+   "en": "Very strong (slow on old phones)",
+   "es": "Muy fuerte (lenta en telefonos viejos)",
+   "de": "Sehr stark (langsam auf alten Handys)",
+   "scope": "web"
+  },
+  {
+   "it": "Non riesco a copiare: scrivili a mano",
+   "en": "I cannot copy: write them by hand",
+   "es": "No puedo copiar: escribelos a mano",
+   "de": "Kopieren nicht moeglich: von Hand aufschreiben",
+   "scope": "web"
+  },
+  {
+   "it": "Non usa servizi esterni e non salva nulla del visitatore. Dopo errori ripetuti l'indirizzo viene bloccato (Sicurezza > Filtro IP).",
+   "en": "It uses no external services and stores nothing about the visitor. After repeated errors the address is blocked (Security > IP filter).",
+   "es": "No usa servicios externos y no guarda nada del visitante. Tras errores repetidos la direccion se bloquea (Seguridad > Filtro IP).",
+   "de": "Es nutzt keine externen Dienste und speichert nichts ueber den Besucher. Nach wiederholten Fehlern wird die Adresse gesperrt (Sicherheit > IP-Filter).",
+   "scope": "web"
+  },
+  {
+   "it": "Normale (consigliata)",
+   "en": "Normal (recommended)",
+   "es": "Normal (recomendada)",
+   "de": "Normal (empfohlen)",
+   "scope": "web"
+  },
+  {
+   "it": "Nuovi codici di recupero",
+   "en": "New recovery codes",
+   "es": "Nuevos codigos de recuperacion",
+   "de": "Neue Wiederherstellungscodes",
+   "scope": "web"
+  },
+  {
+   "it": "Nuovi codici di recupero?",
+   "en": "New recovery codes?",
+   "es": "Nuevos codigos de recuperacion?",
+   "de": "Neue Wiederherstellungscodes?",
+   "scope": "web"
+  },
+  {
+   "it": "Oltre alla password, all'accesso serve un codice a 6 cifre che cambia ogni 30 secondi e che crei con un'app sul telefono (Google Authenticator, Microsoft Authenticator, Aegis, FreeOTP). Facoltativa, consigliata per gli amministratori.",
+   "en": "Besides the password, the login needs a 6-digit code that changes every 30 seconds and that you create with an app on your phone (Google Authenticator, Microsoft Authenticator, Aegis, FreeOTP). Optional, recommended for administrators.",
+   "es": "Ademas de la contrasena, el acceso necesita un codigo de 6 cifras que cambia cada 30 segundos y que creas con una app en el telefono (Google Authenticator, Microsoft Authenticator, Aegis, FreeOTP). Opcional, recomendada para administradores.",
+   "de": "Neben dem Passwort braucht die Anmeldung einen 6-stelligen Code, der sich alle 30 Sekunden aendert und den du mit einer App auf dem Handy erzeugst (Google Authenticator, Microsoft Authenticator, Aegis, FreeOTP). Optional, fuer Administratoren empfohlen.",
+   "scope": "web"
+  },
+  {
+   "it": "Ora della scheda NON valida: impostala in Sistema > Ora prima di attivare l'MFA.",
+   "en": "Board time NOT valid: set it in System > Time before turning on MFA.",
+   "es": "Hora de la placa NO valida: ajustala en Sistema > Hora antes de activar la MFA.",
+   "de": "Boardzeit NICHT gueltig: vor dem Aktivieren der MFA unter System > Zeit einstellen.",
+   "scope": "web"
+  },
+  {
+   "it": "Ora della scheda valida.",
+   "en": "Board time valid.",
+   "es": "Hora de la placa valida.",
+   "de": "Boardzeit gueltig.",
+   "scope": "web"
+  },
+  {
+   "it": "Poi dorme (minuti, da 1 a 10080)",
+   "en": "Then it sleeps (minutes, 1 to 10080)",
+   "es": "Luego duerme (minutos, de 1 a 10080)",
+   "de": "Dann schlaeft es (Minuten, 1 bis 10080)",
+   "scope": "web"
+  },
+  {
+   "it": "Prova anti-bot all'accesso (il browser fa un piccolo calcolo prima del login)",
+   "en": "Anti-bot check at login (the browser does a small calculation before the login)",
+   "es": "Prueba anti-bot al acceder (el navegador hace un pequeno calculo antes del acceso)",
+   "de": "Anti-Bot-Pruefung bei der Anmeldung (der Browser rechnet vor der Anmeldung kurz)",
+   "scope": "web"
+  },
+  {
+   "it": "Resta sveglia (minuti, da 10 a 1440)",
+   "en": "Stays awake (minutes, 10 to 1440)",
+   "es": "Permanece despierta (minutos, de 10 a 1440)",
+   "de": "Bleibt wach (Minuten, 10 bis 1440)",
+   "scope": "web"
+  },
+  {
+   "it": "Risparmio energia",
+   "en": "Power saving",
+   "es": "Ahorro de energia",
+   "de": "Energiesparen",
+   "scope": "web"
+  },
+  {
+   "it": "Risparmio energia spento",
+   "en": "Power saving off",
+   "es": "Ahorro de energia apagado",
+   "de": "Energiesparen aus",
+   "scope": "web"
+  },
+  {
+   "it": "Scade il",
+   "en": "Expires on",
+   "es": "Caduca el",
+   "de": "Laeuft ab am",
+   "scope": "web"
+  },
+  {
+   "it": "Scarica CSV",
+   "en": "Download CSV",
+   "es": "Descargar CSV",
+   "de": "CSV herunterladen",
+   "scope": "web"
+  },
+  {
+   "it": "Scarica il certificato (per fidarti nel browser)",
+   "en": "Download the certificate (to trust it in the browser)",
+   "es": "Descargar el certificado (para confiar en el navegador)",
+   "de": "Zertifikat herunterladen (um ihm im Browser zu vertrauen)",
+   "scope": "web"
+  },
+  {
+   "it": "Scrivi il codice",
+   "en": "Type the code",
+   "es": "Escribe el codigo",
+   "de": "Code eingeben",
+   "scope": "web"
+  },
+  {
+   "it": "Scrivi qui il primo codice di 6 cifre che vedi nell'app. Finche non lo confermi, l'MFA resta spento.",
+   "en": "Type here the first 6-digit code you see in the app. Until you confirm it, MFA stays off.",
+   "es": "Escribe aqui el primer codigo de 6 cifras que ves en la app. Hasta que lo confirmes, la MFA sigue apagada.",
+   "de": "Gib hier den ersten 6-stelligen Code aus der App ein. Bis du ihn bestaetigst, bleibt die MFA aus.",
+   "scope": "web"
+  },
+  {
+   "it": "Se l'ora della scheda non e valida",
+   "en": "If the board time is not valid",
+   "es": "Si la hora de la placa no es valida",
+   "de": "Wenn die Boardzeit ungueltig ist",
+   "scope": "web"
+  },
+  {
+   "it": "Se perdi il telefono e i codici: tieni premuto il tasto BOOT della scheda per 8 secondi (con il cavo USB). Si spegne l'MFA degli amministratori e si sceglie una password nuova. Chi ha la scheda in mano ha il controllo fisico.",
+   "en": "If you lose the phone and the codes: hold the board's BOOT button for 8 seconds (with the USB cable). The administrators' MFA is turned off and you choose a new password. Whoever holds the board has physical control.",
+   "es": "Si pierdes el telefono y los codigos: manten pulsado el boton BOOT de la placa 8 segundos (con el cable USB). Se apaga la MFA de los administradores y eliges una contrasena nueva. Quien tiene la placa en la mano tiene el control fisico.",
+   "de": "Wenn du Handy und Codes verlierst: BOOT-Taste des Boards 8 Sekunden halten (mit USB-Kabel). Die MFA der Administratoren wird ausgeschaltet und du waehlst ein neues Passwort. Wer das Board in der Hand hat, hat die physische Kontrolle.",
+   "scope": "web"
+  },
+  {
+   "it": "Segnale medio / minimo",
+   "en": "Average / minimum signal",
+   "es": "Senal media / minima",
+   "de": "Mittleres / minimales Signal",
+   "scope": "web"
+  },
+  {
+   "it": "Sito web",
+   "en": "Website",
+   "es": "Sitio web",
+   "de": "Webseite",
+   "scope": "web"
+  },
+  {
+   "it": "Solo con il tasto RESET (senza tempo): menu in alto a destra > Sleep.",
+   "en": "Only with the RESET button (without time): top right menu > Sleep.",
+   "es": "Solo con el boton RESET (sin tiempo): menu arriba a la derecha > Sleep.",
+   "de": "Nur mit der RESET-Taste (ohne Zeit): Menue oben rechts > Sleep.",
+   "scope": "web"
+  },
+  {
+   "it": "Sonno a cicli: dormira tra {0}",
+   "en": "Cycled sleep: it will sleep in {0}",
+   "es": "Sueno por ciclos: dormira dentro de {0}",
+   "de": "Schlafzyklen: schlaeft in {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Sonno a cicli: non dorme finche la guida di configurazione non e finita",
+   "en": "Cycled sleep: it does not sleep until the setup guide is finished",
+   "es": "Sueno por ciclos: no duerme hasta que termine la guia de configuracion",
+   "de": "Schlafzyklen: es schlaeft nicht, bis der Einrichtungsassistent fertig ist",
+   "scope": "web"
+  },
+  {
+   "it": "Sonno profondo a cicli",
+   "en": "Deep sleep in cycles",
+   "es": "Sueno profundo por ciclos",
+   "de": "Tiefschlaf in Zyklen",
+   "scope": "web"
+  },
+  {
+   "it": "Sonno profondo: Wi-Fi, pagina, MQTT, rete tra schede e automazioni sono FERMI mentre dorme. Il cavo USB si scollega. La scheda riparte da sola dopo il tempo scelto (il timer e impreciso di qualche percento) oppure subito con il tasto RESET. L'ora si perde: torna con NTP o a mano. Non dorme nei primi 10 minuti dall'accensione, ne mentre usi la pagina, ne se la guida di configurazione non e finita.",
+   "en": "Deep sleep: Wi-Fi, page, MQTT, board-to-board network and automations are STOPPED while it sleeps. The USB cable disconnects. The board restarts by itself after the chosen time (the timer is inaccurate by a few percent) or at once with the RESET button. The time is lost: it comes back with NTP or by hand. It does not sleep in the first 10 minutes after power-on, nor while you use the page, nor if the setup guide is not finished.",
+   "es": "Sueno profundo: Wi-Fi, pagina, MQTT, red entre placas y automatizaciones estan PARADOS mientras duerme. El cable USB se desconecta. La placa arranca sola tras el tiempo elegido (el temporizador es impreciso unos pocos por ciento) o al instante con el boton RESET. La hora se pierde: vuelve con NTP o a mano. No duerme en los primeros 10 minutos desde el encendido, ni mientras usas la pagina, ni si la guia de configuracion no ha terminado.",
+   "de": "Tiefschlaf: WLAN, Seite, MQTT, Board-Netz und Automationen STEHEN, solange es schlaeft. Das USB-Kabel trennt sich. Das Board startet nach der gewaehlten Zeit von selbst (der Timer ist um einige Prozent ungenau) oder sofort mit der RESET-Taste. Die Zeit geht verloren: sie kommt mit NTP oder von Hand zurueck. Es schlaeft nicht in den ersten 10 Minuten nach dem Einschalten, nicht waehrend du die Seite benutzt und nicht, wenn der Einrichtungsassistent nicht fertig ist.",
+   "scope": "web"
+  },
+  {
+   "it": "Spegnere l'MFA?",
+   "en": "Turn off MFA?",
+   "es": "Apagar la MFA?",
+   "de": "MFA ausschalten?",
+   "scope": "web"
+  },
+  {
+   "it": "Statistiche",
+   "en": "Statistics",
+   "es": "Estadisticas",
+   "de": "Statistik",
+   "scope": "web"
+  },
+  {
+   "it": "Statistiche d'uso",
+   "en": "Usage statistics",
+   "es": "Estadisticas de uso",
+   "de": "Nutzungsstatistik",
+   "scope": "web"
+  },
+  {
+   "it": "Statistiche spente",
+   "en": "Statistics off",
+   "es": "Estadisticas apagadas",
+   "de": "Statistik aus",
+   "scope": "web"
+  },
+  {
+   "it": "Tasto BOOT: brevi / 2 s / 8 s / 20 s",
+   "en": "BOOT button: short / 2 s / 8 s / 20 s",
+   "es": "Boton BOOT: cortas / 2 s / 8 s / 20 s",
+   "de": "BOOT-Taste: kurz / 2 s / 8 s / 20 s",
+   "scope": "web"
+  },
+  {
+   "it": "Tre livelli, da usare insieme: processore piu lento (sotto), Wi-Fi a risparmio massimo, sonno profondo. Il consumo vero dipende dalla scheda: misuralo con un tester prima di fidarti dei numeri.",
+   "en": "Three levels, to be used together: slower processor (below), Wi-Fi at maximum saving, deep sleep. Real consumption depends on the board: measure it with a tester before trusting the numbers.",
+   "es": "Tres niveles, para usar juntos: procesador mas lento (abajo), Wi-Fi al maximo ahorro, sueno profundo. El consumo real depende de la placa: mide con un tester antes de fiarte de los numeros.",
+   "de": "Drei Stufen, zusammen nutzbar: langsamerer Prozessor (unten), WLAN im Maximalsparmodus, Tiefschlaf. Der echte Verbrauch haengt vom Board ab: mit einem Messgeraet pruefen, bevor man den Zahlen traut.",
+   "scope": "web"
+  },
+  {
+   "it": "Ultima pressione di BOOT",
+   "en": "Last BOOT press",
+   "es": "Ultima pulsacion de BOOT",
+   "de": "Letzter BOOT-Druck",
+   "scope": "web"
+  },
+  {
+   "it": "Utenti e impostazioni (amministratore)",
+   "en": "Users and settings (administrator)",
+   "es": "Usuarios y ajustes (administrador)",
+   "de": "Benutzer und Einstellungen (Administrator)",
+   "scope": "web"
+  },
+  {
+   "it": "Valido dal",
+   "en": "Valid from",
+   "es": "Valido desde",
+   "de": "Gueltig ab",
+   "scope": "web"
+  },
+  {
+   "it": "Verifica in due passi (MFA)",
+   "en": "Two-step verification (MFA)",
+   "es": "Verificacion en dos pasos (MFA)",
+   "de": "Zwei-Schritt-Bestaetigung (MFA)",
+   "scope": "web"
+  },
+  {
+   "it": "Verifico che sei una persona...",
+   "en": "Checking that you are a person...",
+   "es": "Compruebo que eres una persona...",
+   "de": "Pruefe, ob du eine Person bist...",
+   "scope": "web"
+  },
+  {
+   "it": "Wi-Fi a risparmio massimo",
+   "en": "Wi-Fi at maximum saving",
+   "es": "Wi-Fi al maximo ahorro",
+   "de": "WLAN im Maximalsparmodus",
+   "scope": "web"
+  },
+  {
+   "it": "Wi-Fi a risparmio massimo (la scheda resta raggiungibile)",
+   "en": "Wi-Fi at maximum saving (the board stays reachable)",
+   "es": "Wi-Fi al maximo ahorro (la placa sigue accesible)",
+   "de": "WLAN im Maximalsparmodus (das Board bleibt erreichbar)",
+   "scope": "web"
+  },
+  {
+   "it": "Wi-Fi a risparmio massimo: la scheda si sveglia solo a intervalli per ascoltare la rete. Risposte e pagina piu lente; consuma meno di prima ma molto piu del sonno profondo.",
+   "en": "Wi-Fi at maximum saving: the board wakes only at intervals to listen to the network. Answers and page are slower; it uses less than before but far more than deep sleep.",
+   "es": "Wi-Fi al maximo ahorro: la placa se despierta solo a intervalos para escuchar la red. Respuestas y pagina mas lentas; consume menos que antes pero mucho mas que el sueno profundo.",
+   "de": "WLAN im Maximalsparmodus: das Board wacht nur in Abstaenden auf, um das Netz zu hoeren. Antworten und Seite sind langsamer; es verbraucht weniger als vorher, aber viel mehr als der Tiefschlaf.",
+   "scope": "web"
+  },
+  {
+   "it": "Wi-Fi: collegamenti / cadute",
+   "en": "Wi-Fi: connections / drops",
+   "es": "Wi-Fi: conexiones / caidas",
+   "de": "WLAN: Verbindungen / Abbrueche",
+   "scope": "web"
+  },
+  {
+   "it": "Wi-Fi: tempo collegato",
+   "en": "Wi-Fi: connected time",
+   "es": "Wi-Fi: tiempo conectado",
+   "de": "WLAN: verbundene Zeit",
+   "scope": "web"
+  },
+  {
+   "it": "risvegli: {0}, dormito circa {1}",
+   "en": "wake-ups: {0}, asleep about {1}",
+   "es": "despertares: {0}, dormido unos {1}",
+   "de": "Aufwachen: {0}, geschlafen etwa {1}",
+   "scope": "web"
+  },
+  {
+   "it": "{0} fa",
+   "en": "{0} ago",
+   "es": "hace {0}",
+   "de": "vor {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Sonno: da 1 minuto a 7 giorni",
+   "en": "Sleep: from 1 minute to 7 days",
+   "es": "Sueno: de 1 minuto a 7 dias",
+   "de": "Schlaf: von 1 Minute bis 7 Tage",
+   "scope": "fw"
+  },
+  {
+   "it": "Non collegata: controlla la password della rete",
+   "en": "Not connected: check the network password",
+   "es": "No conectada: revisa la contrasena de la red",
+   "de": "Nicht verbunden: Netzwerkpasswort pruefen",
+   "scope": "fw"
+  },
+  {
+   "it": "Prova possibile solo con l'hotspot acceso",
+   "en": "Test possible only with the hotspot on",
+   "es": "Prueba posible solo con el punto de acceso encendido",
+   "de": "Test nur bei eingeschaltetem Hotspot moeglich",
+   "scope": "fw"
+  },
+  {
+   "it": "Rete non trovata (la scheda usa solo 2,4 GHz)",
+   "en": "Network not found (the board uses 2.4 GHz only)",
+   "es": "Red no encontrada (la placa usa solo 2,4 GHz)",
+   "de": "Netzwerk nicht gefunden (die Platine nutzt nur 2,4 GHz)",
+   "scope": "fw"
+  },
+  {
+   "it": "Collegamento non riuscito: controlla la password",
+   "en": "Connection failed: check the password",
+   "es": "Conexion fallida: revisa la contrasena",
+   "de": "Verbindung fehlgeschlagen: Passwort pruefen",
+   "scope": "web"
+  },
+  {
+   "it": "Collegata a {0}. Indirizzo della scheda su quella rete: {1}",
+   "en": "Connected to {0}. Board address on that network: {1}",
+   "es": "Conectada a {0}. Direccion de la placa en esa red: {1}",
+   "de": "Mit {0} verbunden. Adresse der Platine in diesem Netz: {1}",
+   "scope": "web"
+  },
+  {
+   "it": "Dopo il salvataggio la scheda si collega a {0}: collega il telefono o il PC a quella rete e apri l'indirizzo che ti mostro. Al primo accesso da quella rete hotspot, portale automatico e HTTP si spengono e restano spenti: li riaccendi tu quando vuoi (Servizi). Se il collegamento non riesce, l'hotspot torna da solo.",
+   "en": "After saving, the board connects to {0}: connect your phone or PC to that network and open the address shown. At the first login from that network the hotspot, the captive portal and HTTP turn off and stay off: you turn them back on whenever you want (Services). If the connection fails, the hotspot comes back by itself.",
+   "es": "Tras guardar, la placa se conecta a {0}: conecta el teléfono o el PC a esa red y abre la dirección que se muestra. En el primer acceso desde esa red el punto de acceso, el portal automático y HTTP se apagan y siguen apagados: los enciendes tú cuando quieras (Servicios). Si la conexión falla, el punto de acceso vuelve solo.",
+   "de": "Nach dem Speichern verbindet sich die Platine mit {0}: Verbinden Sie Handy oder PC mit diesem Netz und öffnen Sie die angezeigte Adresse. Beim ersten Zugriff aus diesem Netz werden Hotspot, automatisches Portal und HTTP ausgeschaltet und bleiben aus: Sie schalten sie selbst wieder ein (Dienste). Schlägt die Verbindung fehl, kommt der Hotspot von selbst zurück.",
+   "scope": "web"
+  },
+  {
+   "it": "La scheda non risponde: riprova tra poco",
+   "en": "The board does not answer: try again shortly",
+   "es": "La placa no responde: reintenta en un momento",
+   "de": "Die Platine antwortet nicht: bitte gleich nochmal versuchen",
+   "scope": "web"
+  },
+  {
+   "it": "Mi collego a {0} (fino a 20 secondi)...",
+   "en": "Connecting to {0} (up to 20 seconds)...",
+   "es": "Conectando a {0} (hasta 20 segundos)...",
+   "de": "Verbinde mit {0} (bis zu 20 Sekunden)...",
+   "scope": "web"
+  },
+  {
+   "it": "Scegli la rete e scrivi la password, poi premi Avanti: la scheda prova subito a collegarsi e ti dice se ha funzionato. Se la colleghi, prende l'ora da Internet e la raggiungi dalla tua rete. L'hotspot resta acceso.",
+   "en": "Pick the network and type the password, then press Next: the board tries to connect right away and tells you if it worked. If you connect it, it takes the time from the Internet and you reach it from your network. The hotspot stays on.",
+   "es": "Elige la red y escribe la contrasena, luego pulsa Siguiente: la placa intenta conectarse enseguida y te dice si funciono. Si la conectas, toma la hora de Internet y la alcanzas desde tu red. El punto de acceso sigue encendido.",
+   "de": "Netzwerk waehlen und Passwort eingeben, dann Weiter druecken: Die Platine versucht sofort die Verbindung und sagt dir, ob es geklappt hat. Bei Verbindung holt sie die Uhrzeit aus dem Internet und du erreichst sie im Heimnetz. Der Hotspot bleibt an.",
+   "scope": "web"
+  },
+  {
+   "it": "si cambia in Sistema > Localizzazione",
+   "en": "change it in System > Localization",
+   "es": "se cambia en Sistema > Localizacion",
+   "de": "aenderbar unter System > Lokalisierung",
+   "scope": "web"
+  },
+  {
+   "it": "Wi-Fi di casa (facoltativa)",
+   "en": "Home Wi-Fi (optional)",
+   "es": "Wi-Fi de casa (opcional)",
+   "de": "Heim-WLAN (optional)",
+   "scope": "web"
+  },
+  {
+   "it": "Wi-Fi di casa o hotspot",
+   "en": "Home Wi-Fi or hotspot",
+   "es": "Wi-Fi de casa o punto de acceso",
+   "de": "Heim-WLAN oder Hotspot",
+   "scope": "web"
+  },
+  {
+   "it": "Imposta l'ora",
+   "en": "Set the time",
+   "es": "Pon la hora",
+   "de": "Uhrzeit einstellen",
+   "scope": "web"
+  },
+  {
+   "it": "Senza Internet la scheda non sa che ora e. Controlla data, ora e fuso orario: sono quelli di questo dispositivo.",
+   "en": "Without Internet the board does not know the time. Check date, time and time zone: they are taken from this device.",
+   "es": "Sin Internet la placa no sabe la hora. Revisa fecha, hora y huso horario: son los de este dispositivo.",
+   "de": "Ohne Internet kennt die Platine die Uhrzeit nicht. Prüfen Sie Datum, Uhrzeit und Zeitzone: Sie stammen von diesem Gerät.",
+   "scope": "web"
+  },
+  {
+   "it": "Core 0 / Core 1",
+   "en": "Core 0 / Core 1",
+   "es": "Núcleo 0 / Núcleo 1",
+   "de": "Kern 0 / Kern 1",
+   "scope": "web"
+  },
+  {
+   "it": "Il QR e la stampa sono in Rete > Punto di accesso.",
+   "en": "The QR code and printing are in Network > Access point.",
+   "es": "El QR y la impresion estan en Red > Punto de acceso.",
+   "de": "QR-Code und Druck finden Sie unter Netzwerk > Zugangspunkt.",
+   "scope": "web"
+  },
+  {
+   "it": "Risparmio Wi-Fi",
+   "en": "Wi-Fi saving",
+   "es": "Ahorro Wi-Fi",
+   "de": "WLAN-Sparmodus",
+   "scope": "web"
+  },
+  {
+   "it": "Sonno a cicli",
+   "en": "Cycle sleep",
+   "es": "Sueño por ciclos",
+   "de": "Zyklischer Schlaf",
+   "scope": "web"
+  },
+  {
+   "it": "{0} client",
+   "en": "{0} clients",
+   "es": "{0} clientes",
+   "de": "{0} Clients",
+   "scope": "web"
+  },
+  {
+   "it": "Avviato",
+   "en": "Started",
+   "es": "Iniciado",
+   "de": "Gestartet",
+   "scope": "web"
+  },
+  {
+   "it": "Applica",
+   "en": "Apply",
+   "es": "Aplicar",
+   "de": "Anwenden",
+   "scope": "web"
+  },
+  {
+   "it": "Controlli del servizio",
+   "en": "Service controls",
+   "es": "Controles del servicio",
+   "de": "Dienststeuerung",
+   "scope": "web"
+  },
+  {
+   "it": "Salvato: vale dopo Applica",
+   "en": "Saved: valid after Apply",
+   "es": "Guardado: vale tras Aplicar",
+   "de": "Gespeichert: gilt nach Anwenden",
+   "scope": "web"
+  },
+  {
+   "it": "Le modifiche valgono dopo Applica (riavvia la scheda).",
+   "en": "Changes take effect after Apply (restarts the board).",
+   "es": "Los cambios valen tras Aplicar (reinicia la placa).",
+   "de": "Aenderungen gelten nach Anwenden (Board startet neu).",
+   "scope": "web"
+  },
+  {
+   "it": "Modo (si applica con Avvia)",
+   "en": "Mode (applied with Start)",
+   "es": "Modo (se aplica con Iniciar)",
+   "de": "Modus (gilt mit Start)",
    "scope": "web"
   }
  ]

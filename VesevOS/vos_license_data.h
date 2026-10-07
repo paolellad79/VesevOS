@@ -34,7 +34,7 @@ Progetto: https://github.com/paolellad79/VesevOS
    - PsychicHttp (server web e HTTPS), ArduinoJson, FreeRTOS,
      posix_tz_db (fusi orari POSIX): MIT. Testo: "license mit"
    - lwIP, LittleFS: BSD-3-Clause. Testo: "license bsd3"
-   - Natural Earth (mappa del mondo): pubblico dominio.
+   - Natural Earth (nomi dei paesi): pubblico dominio.
    - IANA tz database (fusi orari, nomi dei paesi): pubblico dominio.
    Chi distribuisce un firmware compilato deve rispettare anche queste
    licenze (per esempio fornire i testi e, per la LGPL del core Arduino,
@@ -1231,7 +1231,7 @@ static const uint8_t LIC_TEXT_5[] PROGMEM = {
 
 struct LicDoc { const char* id; const char* title; const char* text; size_t size; size_t zsize; };
 static const LicDoc LIC_DOCS[] = {
-  { "notice", "Note legali e licenza di VesevOS", (const char*)LIC_TEXT_0, 4259, 0 },
+  { "notice", "Note legali e licenza di VesevOS", (const char*)LIC_TEXT_0, 4258, 0 },
   { "gpl3", "GNU General Public License v3.0", (const char*)LIC_TEXT_1, 35149, 12124 },
   { "lgpl21", "GNU Lesser General Public License v2.1", (const char*)LIC_TEXT_2, 26530, 9357 },
   { "apache2", "Apache License 2.0", (const char*)LIC_TEXT_3, 11358, 3968 },

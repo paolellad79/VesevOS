@@ -104,6 +104,7 @@ bool userDel(int idx, String& err) {
   if (cfg.users[idx].role == ROLE_ADMIN && cfg.users[idx].on && admins(idx) == 0) { err = tr("Serve almeno un amministratore attivo"); return false; }
   authLogoutUser(idx);
   cfg.users[idx].name = ""; cfg.users[idx].salt = ""; cfg.users[idx].hash = ""; cfg.users[idx].on = false; cfg.users[idx].role = ROLE_GUEST;
+  cfg.users[idx].mfa = ""; cfg.users[idx].mfaOn = false; cfg.users[idx].mfaLast = 0; cfg.users[idx].rec = "";
   return true;
 }
 
@@ -126,7 +127,7 @@ String usersJson() {
     if (!u.name.length()) continue;
     if (!first) j += ","; first = false;
     j += "{\"i\":" + String(i) + ",\"name\":\"" + jsonEscape(u.name) + "\",\"role\":" + String(u.role) + ",\"on\":" + String(u.on ? "true" : "false") +
-         ",\"pass\":" + String(u.hash.length() == 64 ? "true" : "false") + "}";
+         ",\"pass\":" + String(u.hash.length() == 64 ? "true" : "false") + ",\"mfa\":" + String(u.mfaOn ? "true" : "false") + "}";
   }
   return j + "]";
 }
@@ -166,7 +167,7 @@ String authLoginStart(const String& name) {
     if (g_nonce[k].t < oldest) { oldest = g_nonce[k].t; slot = k; }
   }
   g_nonce[slot].used = true; g_nonce[slot].name = name; g_nonce[slot].nonce = randomHex(16); g_nonce[slot].t = millis();
-  return "{\"salt\":\"" + jsonEscape(salt) + "\",\"nonce\":\"" + g_nonce[slot].nonce + "\",\"iter\":" + String(HASH_ITER) + "}";
+  return "{\"salt\":\"" + jsonEscape(salt) + "\",\"nonce\":\"" + g_nonce[slot].nonce + "\",\"iter\":" + String(HASH_ITER) + ",\"pow\":" + String(cfg.powBits) + "}";
 }
 
 // ---------- blocco per indirizzo IP ----------
@@ -210,6 +211,7 @@ static void banFail(Ban* b, const char* why) {
 }
 
 bool authIpBlocked(uint32_t ip, uint32_t& wait) { return banActive(banSlot(ip, false), wait); }
+bool authFailIp(uint32_t ip, const char* why) { Ban* b = banSlot(ip, true); uint32_t w = 0; banFail(b, why); return banActive(b, w); }
 
 int authLoginFinish(uint32_t ip, const String& name, const String& nonce, const String& mac, int& idx, uint32_t& wait) {
   idx = -1;
