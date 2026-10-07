@@ -60,7 +60,7 @@ LANG = {'IT': 'it', 'SM': 'it', 'VA': 'it', 'CH': 'it', 'ES': 'es', 'MX': 'es', 
 
 # ---------- elenco del software usato (SBOM semplice) ----------
 SBOM = [
-    ['VesevOS', '1.7.6', 'GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial', 'https://github.com/paolellad79/VesevOS'],
+    ['VesevOS', '1.7.7', 'GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial', 'https://github.com/paolellad79/VesevOS'],
     ['Arduino-ESP32 core', '3.3.x', 'LGPL-2.1-or-later', 'https://github.com/espressif/arduino-esp32'],
     ['ESP-IDF (esp_wifi, esp_now, esp-mqtt, esp_http_server, esp_https_server, NVS)', '5.5', 'Apache-2.0', 'https://github.com/espressif/esp-idf'],
     ['Mbed TLS', '3.6', 'Apache-2.0', 'https://github.com/Mbed-TLS/mbedtls'],

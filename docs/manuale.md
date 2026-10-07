@@ -1,4 +1,4 @@
-# VesevOS 1.7.6 - Manuale
+# VesevOS 1.7.7 - Manuale
 
 Manuale per chi usa la scheda. Parole semplici, niente programmazione.
 English version: [manual.en.md](manual.en.md). Lo stesso aiuto e nella pagina della scheda (Sistema > Aiuto, oppure `http://192.168.4.1/#aiuto`).
@@ -110,7 +110,7 @@ Se VesevOS diventa un prodotto a pagamento, questi obblighi valgono per quella v
 Scrivi `help`. Comandi nuovi: `welcome`, `ap`, `user`, `passwd`, `locale`, `firewall`, `audit`, `watchdog`, `mesh`, `ble`, `cert`, `legal`.
 Sulla seriale, a riga vuota, i tasti `1` e `2` cambiano lingua.
 
-## 12. Menu, hotspot, HTTP/HTTPS, porte e fine della guida (novita 1.7.3, 1.7.4, 1.7.5 e 1.7.6)
+## 12. Menu, hotspot, HTTP/HTTPS, porte e fine della guida (novita 1.7.3, 1.7.4, 1.7.5, 1.7.6 e 1.7.7)
 **Dove si trova cosa**
 - **Home**: anelli (CPU con velocita e temperatura, RAM, PSRAM, file, Wi-Fi), in seconda fila un widget con icona per ogni servizio acceso (l'indirizzo IP sta sotto il widget Wi-Fi; ora e data sono nella testata; la Posizione si vede cliccando la bandiera) (HTTP/S, MQTT, ESP-NOW, mDNS, Bluetooth, NTP, DHCP, hotspot, risparmio energia, statistiche); il clic apre la scheda del servizio. **Rete**: Wi-Fi, indirizzo IP, nome, modo aereo.
 - **Servizi**: Punto di accesso (AP), HTTP, HTTPS, MQTT, Rete tra schede, Automazioni, Task, Watchdog, Avvio, Terminale.
@@ -179,3 +179,7 @@ PSRAM da 2 MB di questa scheda (occupati sulle schede con PSRAM octal).
 - **Risparmio energia**: Servizi > Risparmio energia. Sonno programmato = la scheda dorme e si sveglia dopo il tempo scelto (1 min - 7 giorni). Non si sveglia con BOOT: usa RESET. Nel sonno Wi-Fi e pagina sono spenti.
 - **Statistiche**: spente di fabbrica; solo contatori anonimi; scarica CSV; azzera.
 - **Seriale**: `power`, `sleep [min]`, `stats`.
+
+
+## 17. Autotest (novita 1.7.7)
+Sistema > Autotest (solo Admin). Premi **Avvia la diagnosi**: 16 prove una per volta, ognuna con esito OK / Avviso / Errore / Saltata. Alla fine **Scarica il report** (o **Copia**). Senza password, chiavi o token; MAC, nome Wi-Fi, IP e registro sono oscurati salvo "nomi reali". "Prove attive" accende il LED e invia un messaggio MQTT di prova. Seriale: `selftest [active] [names]`. **Chiudi e libera la memoria** cancella il report.

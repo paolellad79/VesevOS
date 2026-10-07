@@ -35,6 +35,7 @@
 #include "vos_power.h"
 #include "vos_stats.h"
 #include "vos_log.h"
+#include "vos_selftest.h"
 #include <LittleFS.h>
 #include <WiFi.h>
 #include <PsychicHttp.h>
@@ -547,6 +548,20 @@ static void routes(PsychicHttpServer* S, bool sec) {
     esp_err_t e = ok(s);
     xTaskCreate(delayedSleep, "slp", 3072, NULL, 1, NULL);
     return e;
+  });
+  // ---- autodiagnosi: prove una per volta + report di testo (solo Admin) ----
+  add(S, sec, "/api/selftest", HTTP_GET, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, selftestJson()); });
+  add(S, sec, "/api/selftest", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    String e;
+    if (P(r, "clear") == "1") { selftestClear(); return ok(s); }
+    if (!selftestStart(P(r, "active") == "1", P(r, "names") == "1", e)) return ko(s, e);
+    return ok(s);
+  });
+  add(S, sec, "/api/selftest/report", HTTP_GET, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    String rp = selftestReport();
+    if (!rp.length()) return ko(s, tr("Nessun report: lancia prima la prova"));
+    s->addHeader("Content-Disposition", "attachment; filename=\"vesevos-report.txt\"");
+    return sendText(s, 200, "text/plain; charset=utf-8", rp);
   });
   add(S, sec, "/api/stats", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, statsJson()); });
   add(S, sec, "/api/stats.csv", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {

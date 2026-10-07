@@ -11028,6 +11028,580 @@
    "es": "{0} d",
    "de": "{0} T",
    "scope": "web"
+  },
+  {
+   "it": "  selftest [active] [names]  autodiagnosi con report (prove attive: LED e MQTT; names: nomi reali)",
+   "en": "  selftest [active] [names]  self-test with report (active tests: LED and MQTT; names: real names)",
+   "es": "  selftest [active] [names]  autodiagnostico con informe (pruebas activas: LED y MQTT; names: nombres reales)",
+   "de": "  selftest [active] [names]  Selbsttest mit Bericht (aktive Tests: LED und MQTT; names: echte Namen)",
+   "scope": "fw"
+  },
+  {
+   "it": "(nuovo in attesa del riavvio)",
+   "en": "(new one waiting for restart)",
+   "es": "(nuevo, espera el reinicio)",
+   "de": "(neues wartet auf den Neustart)",
+   "scope": "fw"
+  },
+  {
+   "it": "; DHCP %s, DNS %s, mDNS %s",
+   "en": "; DHCP %s, DNS %s, mDNS %s",
+   "es": "; DHCP %s, DNS %s, mDNS %s",
+   "de": "; DHCP %s, DNS %s, mDNS %s",
+   "scope": "fw"
+  },
+  {
+   "it": "; MAC %s",
+   "en": "; MAC %s",
+   "es": "; MAC %s",
+   "de": "; MAC %s",
+   "scope": "fw"
+  },
+  {
+   "it": "; PSRAM usata %d%%",
+   "en": "; PSRAM used %d%%",
+   "es": "; PSRAM usada %d%%",
+   "de": "; PSRAM belegt %d%%",
+   "scope": "fw"
+  },
+  {
+   "it": "; Wi-Fi di casa %s, segnale %d dBm, IP %s",
+   "en": "; home Wi-Fi %s, signal %d dBm, IP %s",
+   "es": "; Wi-Fi de casa %s, senal %d dBm, IP %s",
+   "de": "; Heim-WLAN %s, Signal %d dBm, IP %s",
+   "scope": "fw"
+  },
+  {
+   "it": "; hotspot con %d client",
+   "en": "; hotspot with %d clients",
+   "es": "; hotspot con %d clientes",
+   "de": "; Hotspot mit %d Clients",
+   "scope": "fw"
+  },
+  {
+   "it": "Configurazione della scheda",
+   "en": "Configuration",
+   "es": "Configuracion",
+   "de": "Konfiguration",
+   "scope": "fw"
+  },
+  {
+   "it": "FALLITA",
+   "en": "FAILED",
+   "es": "FALLIDA",
+   "de": "FEHLGESCHLAGEN",
+   "scope": "fw"
+  },
+  {
+   "it": "File: %u KB usati su %u KB; scrittura e lettura di prova: %s",
+   "en": "Files: %u KB used of %u KB; test write and read: %s",
+   "es": "Archivos: %u KB usados de %u KB; escritura y lectura de prueba: %s",
+   "de": "Dateien: %u KB belegt von %u KB; Schreib- und Lesetest: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Flash e file",
+   "en": "Flash and files",
+   "es": "Flash y archivos",
+   "de": "Flash und Dateien",
+   "scope": "fw"
+  },
+  {
+   "it": "HTTP %s porta %u; HTTPS %s porta %u (in funzione: %s); certificato %s, impronta %s...%s",
+   "en": "HTTP %s port %u; HTTPS %s port %u (running: %s); certificate %s, fingerprint %s...%s",
+   "es": "HTTP %s puerto %u; HTTPS %s puerto %u (en marcha: %s); certificado %s, huella %s...%s",
+   "de": "HTTP %s Port %u; HTTPS %s Port %u (laeuft: %s); Zertifikat %s, Fingerabdruck %s...%s",
+   "scope": "fw"
+  },
+  {
+   "it": "Hotspot %s, DHCP %s, HTTP %s, HTTPS %s, MQTT %s (collegato: %s), ESP-NOW %s, Bluetooth %s, NTP %s, energia modo %d, statistiche %s",
+   "en": "Hotspot %s, DHCP %s, HTTP %s, HTTPS %s, MQTT %s (connected: %s), ESP-NOW %s, Bluetooth %s, NTP %s, power mode %d, statistics %s",
+   "es": "Hotspot %s, DHCP %s, HTTP %s, HTTPS %s, MQTT %s (conectado: %s), ESP-NOW %s, Bluetooth %s, NTP %s, energia modo %d, estadisticas %s",
+   "de": "Hotspot %s, DHCP %s, HTTP %s, HTTPS %s, MQTT %s (verbunden: %s), ESP-NOW %s, Bluetooth %s, NTP %s, Energiemodus %d, Statistik %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Il LED fa l'arcobaleno per 2 secondi: guardalo",
+   "en": "The LED shows a rainbow for 2 seconds: watch it",
+   "es": "El LED hace el arcoiris durante 2 segundos: mirala",
+   "de": "Die LED zeigt 2 Sekunden lang einen Regenbogen: schau hin",
+   "scope": "fw"
+  },
+  {
+   "it": "Impossibile avviare la prova",
+   "en": "Cannot start the test",
+   "es": "No se puede iniciar la prueba",
+   "de": "Test kann nicht gestartet werden",
+   "scope": "fw"
+  },
+  {
+   "it": "Invio del messaggio di prova fallito",
+   "en": "Sending the test message failed",
+   "es": "Fallo el envio del mensaje de prueba",
+   "de": "Senden der Testnachricht fehlgeschlagen",
+   "scope": "fw"
+  },
+  {
+   "it": "LED (prova attiva)",
+   "en": "LED (active test)",
+   "es": "LED (prueba activa)",
+   "de": "LED (aktiver Test)",
+   "scope": "fw"
+  },
+  {
+   "it": "LED sul pin %u, modo %u; pin registrati %d; tasto BOOT %s",
+   "en": "LED on pin %u, mode %u; registered pins %d; BOOT button %s",
+   "es": "LED en el pin %u, modo %u; pines registrados %d; boton BOOT %s",
+   "de": "LED an Pin %u, Modus %u; registrierte Pins %d; BOOT-Taste %s",
+   "scope": "fw"
+  },
+  {
+   "it": "MQTT (prova attiva)",
+   "en": "MQTT (active test)",
+   "es": "MQTT (prueba activa)",
+   "de": "MQTT (aktiver Test)",
+   "scope": "fw"
+  },
+  {
+   "it": "MQTT avviato ma non collegato al broker",
+   "en": "MQTT started but not connected to the broker",
+   "es": "MQTT iniciado pero no conectado al broker",
+   "de": "MQTT gestartet, aber nicht mit dem Broker verbunden",
+   "scope": "fw"
+  },
+  {
+   "it": "MQTT fermo",
+   "en": "MQTT stopped",
+   "es": "MQTT detenido",
+   "de": "MQTT gestoppt",
+   "scope": "fw"
+  },
+  {
+   "it": "Memoria RAM",
+   "en": "RAM memory",
+   "es": "Memoria RAM",
+   "de": "RAM-Speicher",
+   "scope": "fw"
+  },
+  {
+   "it": "Messaggio di prova inviato al broker",
+   "en": "Test message sent to the broker",
+   "es": "Mensaje de prueba enviado al broker",
+   "de": "Testnachricht an den Broker gesendet",
+   "scope": "fw"
+  },
+  {
+   "it": "Modo aereo: radio spenta",
+   "en": "Airplane mode: radio off",
+   "es": "Modo avion: radio apagada",
+   "de": "Flugmodus: Funk aus",
+   "scope": "fw"
+  },
+  {
+   "it": "NON scelto",
+   "en": "NOT chosen",
+   "es": "NO elegido",
+   "de": "NICHT gewaehlt",
+   "scope": "fw"
+  },
+  {
+   "it": "Nessun report: lancia prima la prova",
+   "en": "No report: run the test first",
+   "es": "Sin informe: lanza primero la prueba",
+   "de": "Kein Bericht: starte zuerst den Test",
+   "scope": "fw"
+  },
+  {
+   "it": "Nomi e dati: %s   Prove attive: %s   Durata: %u ms",
+   "en": "Names and data: %s   Active tests: %s   Duration: %u ms",
+   "es": "Nombres y datos: %s   Pruebas activas: %s   Duracion: %u ms",
+   "de": "Namen und Daten: %s   Aktive Tests: %s   Dauer: %u ms",
+   "scope": "fw"
+  },
+  {
+   "it": "Ora e data",
+   "en": "Time",
+   "es": "Hora",
+   "de": "Uhrzeit",
+   "scope": "fw"
+  },
+  {
+   "it": "Ora valida: %s; NTP %s; ultima sincronizzazione: %s; fuso %s",
+   "en": "Time valid: %s; NTP %s; last sync: %s; time zone %s",
+   "es": "Hora valida: %s; NTP %s; ultima sincronizacion: %s; zona horaria %s",
+   "de": "Zeit gueltig: %s; NTP %s; letzte Synchronisierung: %s; Zeitzone %s",
+   "scope": "fw"
+  },
+  {
+   "it": "PREMUTO",
+   "en": "PRESSED",
+   "es": "PULSADO",
+   "de": "GEDRUECKT",
+   "scope": "fw"
+  },
+  {
+   "it": "Paese %s; canali 1-%d (in uso %d); potenza %d dBm (massimo %d, limite del paese %d); antenna %s",
+   "en": "Country %s; channels 1-%d (in use %d); power %d dBm (maximum %d, country limit %d); antenna %s",
+   "es": "Pais %s; canales 1-%d (en uso %d); potencia %d dBm (maximo %d, limite del pais %d); antena %s",
+   "de": "Land %s; Kanaele 1-%d (in Benutzung %d); Leistung %d dBm (Maximum %d, Landesgrenze %d); Antenne %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Pagina web",
+   "en": "Web page",
+   "es": "Pagina web",
+   "de": "Webseite",
+   "scope": "fw"
+  },
+  {
+   "it": "Password impostata: %s; HTTPS %s; seriale protetta: %s; prova di lavoro al login %u bit; blocco IP dopo %u errori; amministratori %d (con MFA %d)",
+   "en": "Password set: %s; HTTPS %s; serial protected: %s; login proof of work %u bits; IP block after %u errors; administrators %d (with MFA %d)",
+   "es": "Contrasena puesta: %s; HTTPS %s; serie protegido: %s; prueba de trabajo al acceso %u bits; bloqueo de IP tras %u errores; administradores %d (con MFA %d)",
+   "de": "Passwort gesetzt: %s; HTTPS %s; seriell geschuetzt: %s; Proof-of-Work beim Login %u Bit; IP-Sperre nach %u Fehlern; Administratoren %d (mit MFA %d)",
+   "scope": "fw"
+  },
+  {
+   "it": "Periferiche e tasto BOOT",
+   "en": "Peripherals",
+   "es": "Perifericos",
+   "de": "Peripherie",
+   "scope": "fw"
+  },
+  {
+   "it": "Questo report non contiene password, chiavi o token.",
+   "en": "This report contains no passwords, keys or tokens.",
+   "es": "Este informe no contiene contrasenas, claves ni tokens.",
+   "de": "Dieser Bericht enthaelt keine Passwoerter, Schluessel oder Token.",
+   "scope": "fw"
+  },
+  {
+   "it": "RAM troppo bassa per la diagnosi: chiudi le altre pagine e riprova",
+   "en": "RAM too low for the diagnosis: close other pages and retry",
+   "es": "RAM demasiado baja para el diagnostico: cierra otras paginas y reintenta",
+   "de": "Zu wenig RAM fuer die Diagnose: andere Seiten schliessen und erneut versuchen",
+   "scope": "fw"
+  },
+  {
+   "it": "RAM usata %d%%, libera %u KB, minima %u KB, blocco grande %u KB",
+   "en": "RAM used %d%%, free %u KB, minimum %u KB, largest block %u KB",
+   "es": "RAM usada %d%%, libre %u KB, minima %u KB, bloque grande %u KB",
+   "de": "RAM belegt %d%%, frei %u KB, Minimum %u KB, groesster Block %u KB",
+   "scope": "fw"
+  },
+  {
+   "it": "REALI",
+   "en": "REAL",
+   "es": "REALES",
+   "de": "ECHT",
+   "scope": "fw"
+  },
+  {
+   "it": "Radio e antenna",
+   "en": "Radio",
+   "es": "Radio",
+   "de": "Funk",
+   "scope": "fw"
+  },
+  {
+   "it": "Registro della scheda",
+   "en": "Log",
+   "es": "Registro (log)",
+   "de": "Protokoll (Log)",
+   "scope": "fw"
+  },
+  {
+   "it": "Registro omesso (puo contenere indirizzi e nomi). Per includerlo rifai la prova con i nomi reali.",
+   "en": "Log omitted (it may contain addresses and names). To include it, repeat the test with real names.",
+   "es": "Registro omitido (puede contener direcciones y nombres). Para incluirlo repite la prueba con nombres reales.",
+   "de": "Protokoll weggelassen (kann Adressen und Namen enthalten). Zum Einschliessen den Test mit echten Namen wiederholen.",
+   "scope": "fw"
+  },
+  {
+   "it": "Rete Wi-Fi",
+   "en": "Network",
+   "es": "Red",
+   "de": "Netzwerk",
+   "scope": "fw"
+  },
+  {
+   "it": "Riepilogo: %d OK, %d avvisi, %d errori, %d saltate",
+   "en": "Summary: %d OK, %d warnings, %d errors, %d skipped",
+   "es": "Resumen: %d OK, %d avisos, %d errores, %d omitidas",
+   "de": "Zusammenfassung: %d OK, %d Warnungen, %d Fehler, %d uebersprungen",
+   "scope": "fw"
+  },
+  {
+   "it": "Righe nel registro: %d; righe con errore o watchdog: %d",
+   "en": "Lines in the log: %d; lines with error or watchdog: %d",
+   "es": "Lineas en el registro: %d; lineas con error o watchdog: %d",
+   "de": "Zeilen im Protokoll: %d; Zeilen mit Fehler oder Watchdog: %d",
+   "scope": "fw"
+  },
+  {
+   "it": "Servizi attivi",
+   "en": "Services",
+   "es": "Servicios",
+   "de": "Dienste",
+   "scope": "fw"
+  },
+  {
+   "it": "Sicurezza e accessi",
+   "en": "Security",
+   "es": "Seguridad",
+   "de": "Sicherheit",
+   "scope": "fw"
+  },
+  {
+   "it": "Solo con le prove attive",
+   "en": "Only with active tests",
+   "es": "Solo con las pruebas activas",
+   "de": "Nur mit aktiven Tests",
+   "scope": "fw"
+  },
+  {
+   "it": "Stato %d, modo Wi-Fi %d",
+   "en": "State %d, Wi-Fi mode %d",
+   "es": "Estado %d, modo Wi-Fi %d",
+   "de": "Status %d, WLAN-Modus %d",
+   "scope": "fw"
+  },
+  {
+   "it": "Task %u; stack libero minimo: prova %u B, loop %u B; watchdog task %s, rete %s, RAM %s; task led %s",
+   "en": "Tasks %u; minimum free stack: test %u B, loop %u B; watchdog task %s, network %s, RAM %s; led task %s",
+   "es": "Tareas %u; pila libre minima: prueba %u B, loop %u B; watchdog tarea %s, red %s, RAM %s; tarea led %s",
+   "de": "Tasks %u; minimaler freier Stack: Test %u B, Loop %u B; Watchdog Task %s, Netz %s, RAM %s; LED-Task %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Task e watchdog",
+   "en": "Tasks and watchdog",
+   "es": "Tareas y watchdog",
+   "de": "Tasks und Watchdog",
+   "scope": "fw"
+  },
+  {
+   "it": "Ultime righe del registro:",
+   "en": "Last log lines:",
+   "es": "Ultimas lineas del registro:",
+   "de": "Letzte Protokollzeilen:",
+   "scope": "fw"
+  },
+  {
+   "it": "Ultimo salvataggio: %s; guida finita: %s; avvisi rossi %d, gialli %d (scheda Compliant)",
+   "en": "Last save: %s; guide finished: %s; red alerts %d, yellow %d (Compliant tab)",
+   "es": "Ultimo guardado: %s; guia terminada: %s; avisos rojos %d, amarillos %d (pestana Compliant)",
+   "de": "Letztes Speichern: %s; Assistent fertig: %s; rote Warnungen %d, gelbe %d (Tab Compliant)",
+   "scope": "fw"
+  },
+  {
+   "it": "Una prova e gia in corso",
+   "en": "A test is already running",
+   "es": "Ya hay una prueba en curso",
+   "de": "Ein Test laeuft bereits",
+   "scope": "fw"
+  },
+  {
+   "it": "Versione %s, %s rev %u, %u core, flash %u MB, sketch %u KB (liberi %u KB), ultimo reset: %s, avvii %u, acceso da %s",
+   "en": "Version %s, %s rev %u, %u cores, flash %u MB, sketch %u KB (free %u KB), last reset: %s, boots %u, up for %s",
+   "es": "Version %s, %s rev %u, %u nucleos, flash %u MB, sketch %u KB (libres %u KB), ultimo reinicio: %s, arranques %u, encendido desde hace %s",
+   "de": "Version %s, %s Rev %u, %u Kerne, Flash %u MB, Sketch %u KB (frei %u KB), letzter Reset: %s, Starts %u, in Betrieb seit %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Versione: %s   Scheda: %s (ID %s)   Data: %s",
+   "en": "Version: %s   Board: %s (ID %s)   Date: %s",
+   "es": "Version: %s   Placa: %s (ID %s)   Fecha: %s",
+   "de": "Version: %s   Board: %s (ID %s)   Datum: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Wi-Fi di casa configurata ma NON collegata",
+   "en": "Home Wi-Fi configured but NOT connected",
+   "es": "Wi-Fi de casa configurada pero NO conectada",
+   "de": "Heim-WLAN konfiguriert, aber NICHT verbunden",
+   "scope": "fw"
+  },
+  {
+   "it": "autofirmato dalla scheda",
+   "en": "created by the board",
+   "es": "creado por la placa",
+   "de": "vom Board erstellt",
+   "scope": "fw"
+  },
+  {
+   "it": "esterna",
+   "en": "external",
+   "es": "externa",
+   "de": "extern",
+   "scope": "fw"
+  },
+  {
+   "it": "mai",
+   "en": "never",
+   "es": "nunca",
+   "de": "nie",
+   "scope": "fw"
+  },
+  {
+   "it": "ora non valida",
+   "en": "time not valid",
+   "es": "hora no valida",
+   "de": "Zeit ungueltig",
+   "scope": "fw"
+  },
+  {
+   "it": "oscurati",
+   "en": "masked",
+   "es": "ocultos",
+   "de": "maskiert",
+   "scope": "fw"
+  },
+  {
+   "it": "rilasciato",
+   "en": "released",
+   "es": "suelto",
+   "de": "losgelassen",
+   "scope": "fw"
+  },
+  {
+   "it": "riuscita",
+   "en": "succeeded",
+   "es": "correcta",
+   "de": "erfolgreich",
+   "scope": "fw"
+  },
+  {
+   "it": "caricato da te",
+   "en": "yours",
+   "es": "tuyo",
+   "de": "eigenes",
+   "scope": "fw"
+  },
+  {
+   "it": "Autotest",
+   "en": "Self-test",
+   "es": "Autotest",
+   "de": "Selbsttest",
+   "scope": "web"
+  },
+  {
+   "it": "Avvia la diagnosi",
+   "en": "Start the diagnosis",
+   "es": "Iniciar el diagnostico",
+   "de": "Diagnose starten",
+   "scope": "web"
+  },
+  {
+   "it": "Chiudi e libera la memoria",
+   "en": "Close and free the memory",
+   "es": "Cerrar y liberar la memoria",
+   "de": "Schliessen und Speicher freigeben",
+   "scope": "web"
+  },
+  {
+   "it": "Copia il report",
+   "en": "Copy the report",
+   "es": "Copiar el informe",
+   "de": "Bericht kopieren",
+   "scope": "web"
+  },
+  {
+   "it": "Finita: {0} OK, {1} avvisi, {2} errori, {3} saltate",
+   "en": "Finished: {0} OK, {1} warnings, {2} errors, {3} skipped",
+   "es": "Terminado: {0} OK, {1} avisos, {2} errores, {3} omitidas",
+   "de": "Fertig: {0} OK, {1} Warnungen, {2} Fehler, {3} uebersprungen",
+   "scope": "web"
+  },
+  {
+   "it": "In corso: prova {0} di {1}",
+   "en": "Running: test {0} of {1}",
+   "es": "En curso: prueba {0} de {1}",
+   "de": "Laeuft: Test {0} von {1}",
+   "scope": "web"
+  },
+  {
+   "it": "Includi i nomi reali (indirizzi, nome Wi-Fi e registro) nel report",
+   "en": "Include real names (addresses, Wi-Fi name and log) in the report",
+   "es": "Incluir los nombres reales (direcciones, nombre Wi-Fi y registro) en el informe",
+   "de": "Echte Namen (Adressen, WLAN-Name und Protokoll) in den Bericht aufnehmen",
+   "scope": "web"
+  },
+  {
+   "it": "La scheda esegue le prove una per volta e mostra l'esito di ognuna. Sono prove di sola lettura (solo un file di prova, subito cancellato). Alla fine puoi scaricare un report di testo: nulla viene inviato fuori, lo mandi tu a chi vuoi.",
+   "en": "The board runs the tests one at a time and shows the result of each. They are read-only tests (only a test file, deleted at once). At the end you can download a text report: nothing is sent out, you send it to whoever you want.",
+   "es": "La placa ejecuta las pruebas una por una y muestra el resultado de cada una. Son pruebas de solo lectura (solo un archivo de prueba, borrado enseguida). Al final puedes descargar un informe de texto: no se envia nada fuera, lo mandas tu a quien quieras.",
+   "de": "Das Board fuehrt die Tests nacheinander aus und zeigt jedes Ergebnis. Es sind reine Lesetests (nur eine Testdatei, sofort geloescht). Am Ende kannst du einen Textbericht herunterladen: nichts wird nach aussen gesendet, du schickst ihn selbst.",
+   "scope": "web"
+  },
+  {
+   "it": "Prove attive (il LED fa l'arcobaleno e parte un messaggio MQTT di prova)",
+   "en": "Active tests (the LED shows a rainbow and a test MQTT message is sent)",
+   "es": "Pruebas activas (el LED hace el arcoiris y se envia un mensaje MQTT de prueba)",
+   "de": "Aktive Tests (die LED zeigt einen Regenbogen und eine MQTT-Testnachricht wird gesendet)",
+   "scope": "web"
+  },
+  {
+   "it": "Report copiato",
+   "en": "Report copied",
+   "es": "Informe copiado",
+   "de": "Bericht kopiert",
+   "scope": "web"
+  },
+  {
+   "it": "Scarica il report",
+   "en": "Download the report",
+   "es": "Descargar el informe",
+   "de": "Bericht herunterladen",
+   "scope": "web"
+  },
+  {
+   "it": "Saltata",
+   "en": "Skipped",
+   "es": "Omitida",
+   "de": "Uebersprungen",
+   "scope": "web"
+  },
+  {
+   "it": "Avviso",
+   "en": "Warning",
+   "es": "Aviso",
+   "de": "Warnung",
+   "scope": "web"
+  },
+  {
+   "it": "CPU e temperatura",
+   "en": "CPU and temperature",
+   "es": "CPU y temperatura",
+   "de": "CPU und Temperatur",
+   "scope": "fw"
+  },
+  {
+   "it": "CPU media %d%% (massimo %d%%) in 2 secondi, %u MHz",
+   "en": "CPU average %d%% (maximum %d%%) in 2 seconds, %u MHz",
+   "es": "CPU media %d%% (maximo %d%%) en 2 segundos, %u MHz",
+   "de": "CPU Durchschnitt %d%% (Maximum %d%%) in 2 Sekunden, %u MHz",
+   "scope": "fw"
+  },
+  {
+   "it": "; temperatura non disponibile",
+   "en": "; temperature not available",
+   "es": "; temperatura no disponible",
+   "de": "; Temperatur nicht verfuegbar",
+   "scope": "fw"
+  },
+  {
+   "it": "; temperatura %d C",
+   "en": "; temperature %d C",
+   "es": "; temperatura %d C",
+   "de": "; Temperatur %d C",
+   "scope": "fw"
+  },
+  {
+   "it": "; vedi Sistema > Task per il task che consuma di piu",
+   "en": "; see System > Task for the task using the most",
+   "es": "; mira Sistema > Tareas para la tarea que mas consume",
+   "de": "; siehe System > Tasks fuer den Task mit dem hoechsten Verbrauch",
+   "scope": "fw"
   }
  ]
 }

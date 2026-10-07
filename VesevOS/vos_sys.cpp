@@ -69,6 +69,34 @@ static void lifeSave() {
 static void monitorTask(void*);
 static void monitorStart() { xTaskCreatePinnedToCore(monitorTask, "monitor", 3072, NULL, 1, NULL, 0); }
 
+// Carico vero per core dal tempo che i task IDLE0/IDLE1 NON hanno girato (stessa fonte del Task manager).
+// La taratura a conteggio sbagliava dopo i cambi di frequenza (mostrava 100% con la scheda quasi ferma).
+static bool idleRunTimeLoad(int& l0, int& l1) {
+#if (configUSE_TRACE_FACILITY == 1) && (configGENERATE_RUN_TIME_STATS == 1)
+  static uint32_t pTot = 0, pI0 = 0, pI1 = 0; static bool have = false;
+  UBaseType_t n = uxTaskGetNumberOfTasks();
+  TaskStatus_t* a = (TaskStatus_t*)malloc((n + 2) * sizeof(TaskStatus_t));
+  if (!a) return false;
+  uint32_t tot = 0;
+  n = uxTaskGetSystemState(a, n + 2, &tot);
+  uint32_t i0 = 0, i1 = 0; bool f0 = false, f1 = false;
+  for (UBaseType_t i = 0; i < n; i++) {
+    if (strcmp(a[i].pcTaskName, "IDLE0") == 0) { i0 = a[i].ulRunTimeCounter; f0 = true; }
+    else if (strcmp(a[i].pcTaskName, "IDLE1") == 0) { i1 = a[i].ulRunTimeCounter; f1 = true; }
+  }
+  free(a);
+  bool ok = false;
+  if (have && f0 && f1 && tot > pTot) {
+    uint32_t dt = tot - pTot;
+    int a0 = (int)(100ULL * (i0 - pI0) / dt), a1 = (int)(100ULL * (i1 - pI1) / dt);
+    l0 = constrain(100 - a0, 0, 100); l1 = constrain(100 - a1, 0, 100); ok = true;
+  }
+  pTot = tot; pI0 = i0; pI1 = i1; have = f0 && f1;
+  return ok;
+#else
+  (void)l0; (void)l1; return false;
+#endif
+}
 static void monitorTask(void*) {
   uint32_t last[2] = {0, 0};
   int lowCount = 0;
@@ -91,6 +119,7 @@ static void monitorTask(void*) {
       if (e1 == 0) e1 = 1;
       int l0 = 100 - (int)(100ULL * d0 / e0);
       int l1 = 100 - (int)(100ULL * d1 / e1);
+      { int m0, m1; if (idleRunTimeLoad(m0, m1)) { l0 = m0; l1 = m1; } }   // se ci sono le statistiche di FreeRTOS, valgono piu della taratura a conteggio
       g_cpu0 = constrain(l0, 0, 100); g_cpu1 = constrain(l1, 0, 100);
       g_cpu = constrain((l0 + l1) / 2, 0, 100);
     }

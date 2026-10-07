@@ -56,7 +56,7 @@ for m in re.finditer(r'\b(?:window\.)?tf?\(\s*"((?:[^"\\]|\\.)*)"', js):
 for arr in ('TABS', 'RSUB', 'TKCOLS', 'GRP', 'DAYS', 'LEDM', 'AIRO', 'UNITS', 'ONOFF', 'TKS', 'CKS', 'AKS', 'BN', 'BFIX'):
     for m in re.finditer(r'\["([^"]+)","([^"]+)"\]', re.search(r'var %s=.*?;' % arr, js, re.S).group(0)):
         addw(m.group(2))
-for arr in ('SUSTEPS', 'MROLE', 'RNAME', 'WDD'):          # elenchi semplici di testi passati a t()
+for arr in ('SUSTEPS', 'MROLE', 'RNAME', 'WDD', 'STLW'):          # elenchi semplici di testi passati a t()
     for m in re.finditer(r'"([^"]+)"', re.search(r'var %s=\[.*?\];' % arr, js, re.S).group(0)):
         addw(m.group(1))
 for m in re.finditer(r'var APLAW="((?:[^"\\]|\\.)*)"', js): addw(json.loads('"' + m.group(1) + '"'))

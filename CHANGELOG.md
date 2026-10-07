@@ -1,5 +1,13 @@
 # Cronologia delle versioni
 
+## 1.7.7 (ottobre 2026) - "AUTOTEST"
+- **Autotest** (Sistema > Autotest, Admin): 16 prove non distruttive (anche CPU e temperatura: media su 2 secondi, avviso oltre 60%, errore oltre 85%; temperatura avviso oltre 70 C, errore oltre 85 C), una per volta, ognuna con esito chiaro (OK / Avviso / Errore / Saltata) e tempo. Alla fine il **report di testo** si scarica o si copia, per mandarlo a mano a Claude.
+- Il report non contiene mai password, chiavi o token. MAC, nome Wi-Fi, IP e registro sono oscurati, salvo la casella "nomi reali". Le prove attive (LED, messaggio MQTT) partono solo se spunti la casella.
+- Comando seriale `selftest [active] [names]`. Nulla esce dalla scheda; il report sta in RAM (circa 2,7 KB) finche non lo chiudi.
+- **Pagina piu leggera**: aggiornamento ogni 3 s (era 2 s), nessuna richiesta nuova finche la precedente non e finita, e nessuna richiesta quando la scheda del browser e nascosta o in secondo piano (prima la CPU della scheda poteva restare al 100% con la pagina lasciata aperta).
+- **CPU misurata meglio**: il carico di ogni core ora si calcola dal tempo dei task IDLE (stessa fonte del Task manager). Prima la taratura a conteggio, dopo i cambi di frequenza, poteva mostrare 100% con la scheda quasi ferma (Task: IDLE0 97%, IDLE1 83%).
+- **Task manager**: icone Avvia / Ferma / Riavvia alte quanto il lucchetto (26 px), righe tutte della stessa altezza.
+
 ## 1.7.6 (ottobre 2026) - "TASK E HOME RIFINITI"
 - **Task manager**: stesse icone Avvia / Ferma / Riavvia dei servizi, con il fondo colorato per lo stato (Riavvia grigio se il task e fermo). Un solo componente per tutti (nessun codice doppio).
 - **Home**: HTTP e HTTPS sono due widget separati, ognuno con la sua porta.

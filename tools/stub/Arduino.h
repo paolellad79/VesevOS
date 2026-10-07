@@ -36,7 +36,7 @@ struct HWCDC: public Stream{int peek(){return 0;} int available(){return 0;} int
 using std::min; using std::max;
 #include "freertos/FreeRTOS.h"
 void rgbLedWrite(uint8_t,uint8_t,uint8_t,uint8_t); float temperatureRead(); inline bool isHexadecimalDigit(char){return true;} inline bool isAlphaNumeric(char){return true;} inline bool isAlpha(char){return true;} inline bool isPrintable(char){return true;}
-TaskHandle_t xTaskGetHandle(const char*); void vTaskDelete(TaskHandle_t);
+TaskHandle_t xTaskGetHandle(const char*); void vTaskDelete(TaskHandle_t); UBaseType_t uxTaskGetStackHighWaterMark(TaskHandle_t);
 inline bool isDigit(char c){return c>=48&&c<=57;}
 #include <math.h>
 inline bool psramFound(){return true;} inline void* ps_malloc(size_t n){return malloc(n);}

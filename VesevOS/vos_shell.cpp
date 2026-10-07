@@ -28,6 +28,7 @@
 #include "vos_web.h"
 #include "vos_power.h"
 #include "vos_stats.h"
+#include "vos_selftest.h"
 extern bool g_extmem;                 // definita in VesevOS.ino: i blocchi grandi vanno in PSRAM?
 #include <LittleFS.h>
 #include <WiFi.h>
@@ -123,6 +124,7 @@ static void cmdHelp(Print& o) {
   o.println(tr("  reboot          riavvia"));
   o.println(tr("  sleep [minuti]  sonno profondo (con i minuti la scheda riparte da sola; senza, solo con RESET)"));
   o.println(tr("  stats [on|off|reset]  statistiche d'uso anonime (spente di fabbrica)"));
+  o.println(tr("  selftest [active] [names]  autodiagnosi con report (prove attive: LED e MQTT; names: nomi reali)"));
   o.println(tr("  power [off|wifi|cycle <sveglia> <sonno>]  risparmio energia (minuti)"));
 }
 
@@ -562,6 +564,17 @@ void shellExec(const String& lineIn, Print& o, int role) {
     if (a1.length() && (m < 1 || m > 10080)) { o.println(tr("Sonno: da 1 minuto a 7 giorni")); return; }
     if (m) { o.println(trf("Sonno profondo per %d minuti: poi la scheda riparte da sola (o con RESET)", m)); delay(300); powerSleepNow((uint32_t)m * 60UL); }
     else { o.println(tr("Sonno profondo: si riaccende con il tasto RESET")); delay(300); sysSleep(); }
+  }
+  else if (c == "selftest") {
+    String e;
+    bool act = line.indexOf("active") >= 0, nm = line.indexOf("names") >= 0;
+    if (!selftestStart(act, nm, e)) { o.println(e); return; }
+    int shown = 0;
+    while (selftestRunning() || shown < selftestTotal()) {
+      String l = selftestLine(shown);
+      if (l.length()) { o.println(l); shown++; } else if (!selftestRunning()) break; else delay(100);
+    }
+    o.print(selftestReport());
   }
   else if (c == "stats") {
     if (a1 == "on") { cfg.statOn = true; statsReset(); cfgSave(); }

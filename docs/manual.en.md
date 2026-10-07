@@ -1,4 +1,4 @@
-# VesevOS 1.7.6 - Manual
+# VesevOS 1.7.7 - Manual
 
 Manual for people who use the board. Plain words, no programming.
 Versione italiana: [manuale.md](manuale.md). The same help is in the board's page (System > Help, or `http://192.168.4.1/#aiuto`).
@@ -110,7 +110,7 @@ apply to that version and a support period will be declared.
 Type `help`. New commands: `welcome`, `ap`, `user`, `passwd`, `locale`, `firewall`, `audit`, `watchdog`, `mesh`, `ble`, `cert`, `legal`.
 On the serial, at an empty line, keys `1` and `2` change language.
 
-## 12. Menus, hotspot, HTTP/HTTPS, ports and end of the guide (new in 1.7.3, 1.7.4, 1.7.5 and 1.7.6)
+## 12. Menus, hotspot, HTTP/HTTPS, ports and end of the guide (new in 1.7.3, 1.7.4, 1.7.5, 1.7.6 and 1.7.7)
 **Where things are**
 - **Home**: rings (CPU with speed and temperature, RAM, PSRAM, files, Wi-Fi), a second row with one icon widget for each running service (the IP address is under the Wi-Fi widget; time and date are in the header; the Location shows when you click the flag) (HTTP/S, MQTT, ESP-NOW, mDNS, Bluetooth, NTP, DHCP, hotspot, power saving, statistics); click opens the service page. **Network**: Wi-Fi, IP address, name, airplane mode.
 - **Services**: Access point (AP), HTTP, HTTPS, MQTT, Board network, Automations, Tasks, Watchdog, Boot, Terminal.
@@ -178,3 +178,7 @@ a warning appears if you test a pin already marked. GP33-37 are free with this b
 - **Power saving**: Services > Power saving. Scheduled sleep = the board sleeps and wakes after the chosen time (1 min - 7 days). BOOT does not wake it: use RESET. While asleep Wi-Fi and page are off.
 - **Statistics**: off by default; anonymous counters only; CSV download; reset.
 - **Serial**: `power`, `sleep [min]`, `stats`.
+
+
+## 17. Self-test (new in 1.7.7)
+System > Self-test (Admin only). Press **Start diagnosis**: 16 tests one at a time, each with result OK / Warning / Error / Skipped. At the end **Download report** (or **Copy**). No passwords, keys or tokens; MAC, Wi-Fi name, IP and log are hidden unless "real names" is ticked. "Active tests" blinks the LED and sends a test MQTT message. Serial: `selftest [active] [names]`. **Close and free memory** deletes the report.
