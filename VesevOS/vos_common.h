@@ -10,7 +10,7 @@
 #ifndef VOS_PSRAM_MALLOC
 #define VOS_PSRAM_MALLOC 1
 #endif
-#define VOS_VERSION  "1.7.7"
+#define VOS_VERSION  "1.7.8"
 #define VOS_GITHUB   "https://github.com/paolellad79/VesevOS"
 #define VOS_BOARD    "ESP32-S3 SuperMini"   // scheda (tabella dei piedini nella pagina)
 

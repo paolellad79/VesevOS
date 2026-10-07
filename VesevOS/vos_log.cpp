@@ -3,6 +3,7 @@
 // VesevOS - vos_log.cpp
 #include "vos_log.h"
 #include "vos_util.h"
+#include "vos_diario.h"
 #include <stdarg.h>
 #include <time.h>
 
@@ -13,6 +14,7 @@
 static char     (*g_lines)[LOG_LEN] = nullptr;
 static uint16_t g_head = 0;
 static uint16_t g_count = 0;
+static volatile int g_level = LG_INFO;
 static SemaphoreHandle_t g_mx = NULL;
 
 void logInit() {
@@ -25,17 +27,19 @@ void logInit() {
   if (!g_mx) g_mx = xSemaphoreCreateMutex();
 }
 
-void vlog(const char* fmt, ...) {
-  char buf[LOG_LEN];
-  va_list ap; va_start(ap, fmt);
-  vsnprintf(buf, sizeof(buf), fmt, ap);
-  va_end(ap);
-  // pulizia: solo ASCII stampabile
-  for (size_t i = 0; buf[i]; i++) {
-    unsigned char c = (unsigned char)buf[i];
-    if (c < 32 || c >= 127) buf[i] = '?';
-  }
+void logSetLevel(int lv) { g_level = constrain(lv, 0, 3); }
+int  logLevel() { return g_level; }
+
+static int autoLevel(const char* b) {
+  if (strstr(b, "ERRORE") || strstr(b, "AUDIT: ROSSO")) return LG_ERR;
+  if (strstr(b, "ATTENZIONE") || strstr(b, "AUDIT: GIALLO")) return LG_WARN;
+  return LG_INFO;
+}
+
+static void put(int lv, const char* buf) {
+  if (lv > g_level) return;
   Serial.println(buf);
+  if (lv <= LG_WARN) diaryNote(buf);
   if (!g_mx || !g_lines) return;
   if (xSemaphoreTake(g_mx, pdMS_TO_TICKS(50)) == pdTRUE) {
     char stamp[24];
@@ -44,11 +48,32 @@ void vlog(const char* fmt, ...) {
       struct tm tmv; localtime_r(&now, &tmv);
       strftime(stamp, sizeof(stamp), "%d/%m %H:%M:%S ", &tmv);
     } else snprintf(stamp, sizeof(stamp), "[%lus] ", (unsigned long)(millis() / 1000));
-    snprintf(g_lines[g_head], LOG_LEN, "%s%s", stamp, buf);
+    static const char TAG[4] = {'E', 'W', 'I', 'D'};
+    snprintf(g_lines[g_head], LOG_LEN, "%s[%c] %s", stamp, TAG[lv & 3], buf);
     g_head = (g_head + 1) % LOG_LINES;
     if (g_count < LOG_LINES) g_count++;
     xSemaphoreGive(g_mx);
   }
+}
+
+static void fmtClean(char* buf, size_t n, const char* fmt, va_list ap) {
+  vsnprintf(buf, n, fmt, ap);
+  for (size_t i = 0; buf[i]; i++) {                 // pulizia: solo ASCII stampabile
+    unsigned char c = (unsigned char)buf[i];
+    if (c < 32 || c >= 127) buf[i] = '?';
+  }
+}
+
+void vlog(const char* fmt, ...) {
+  char buf[LOG_LEN - 4];
+  va_list ap; va_start(ap, fmt); fmtClean(buf, sizeof(buf), fmt, ap); va_end(ap);
+  put(autoLevel(buf), buf);
+}
+
+void vlogl(int lv, const char* fmt, ...) {
+  char buf[LOG_LEN - 4];
+  va_list ap; va_start(ap, fmt); fmtClean(buf, sizeof(buf), fmt, ap); va_end(ap);
+  put(constrain(lv, 0, 3), buf);
 }
 
 String logGet(int maxLines) {

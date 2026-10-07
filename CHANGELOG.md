@@ -1,5 +1,13 @@
 # Cronologia delle versioni
 
+## 1.7.8 (ottobre 2026) - "LOG COMPLETO E DIARIO DEI RIAVVII"
+- **Diario dei riavvii**: gli ultimi 20 avvii restano salvati anche dopo lo spegnimento (file piccolo in memoria file). Per ognuno: numero, data e ora, motivo (accensione, watchdog, crash, brownout...), da quanto tempo era accesa la scheda, RAM minima, task piu attivo e l'ultima riga grave. Si vede in Sistema > Log (scheda "Diario dei riavvii"), nel report dell'Autotest e dalla seriale con `reboots`.
+- **Istantanea prima del riavvio**: ogni 10 secondi la scheda salva in una memoria che sopravvive a watchdog e crash (non allo spegnimento) il tempo acceso, la RAM minima, il task piu attivo e l'ultima riga grave. Serve a capire chi ha causato un watchdog.
+- **Riga di avvio completa** nel registro: "AVVIO n.N: motivo..., RAM, MHz". Se il riavvio e anomalo compaiono righe ATTENZIONE con i dettagli.
+- **Livelli di log**: ogni riga porta [E] errore, [W] attenzione, [I] info, [D] dettaglio. In Sistema > Log si sceglie cosa mostrare e (Admin) fino a che livello registrare; di fabbrica Info. Dettaglio (spento di fabbrica) aggiunge ogni minuto il task piu attivo, la CPU e la RAM. Seriale: `log level [0-3]`.
+- Correzioni dell'Autotest (ex 1.7.7a): righe lunghe non piu tagliate; secondi della prova CPU realmente misurati; la pagina riprova da sola se una richiesta si perde (non resta piu ferma su "prova 3 di 16").
+- Solo dati tecnici nel diario (niente IP, MAC, nomi Wi-Fi o utenti); azzerabile da pagina e seriale.
+
 ## 1.7.7 (ottobre 2026) - "AUTOTEST"
 - **Autotest** (Sistema > Autotest, Admin): 16 prove non distruttive (anche CPU e temperatura: media su 2 secondi, avviso oltre 60%, errore oltre 85%; temperatura avviso oltre 70 C, errore oltre 85 C), una per volta, ognuna con esito chiaro (OK / Avviso / Errore / Saltata) e tempo. Alla fine il **report di testo** si scarica o si copia, per mandarlo a mano a Claude.
 - Il report non contiene mai password, chiavi o token. MAC, nome Wi-Fi, IP e registro sono oscurati, salvo la casella "nomi reali". Le prove attive (LED, messaggio MQTT) partono solo se spunti la casella.

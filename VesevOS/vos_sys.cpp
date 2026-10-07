@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_sys.cpp
 #include "vos_sys.h"
+#include "vos_diario.h"
 #include "vos_led.h"
 #include <WiFi.h>
 #include <esp_sleep.h>
@@ -34,6 +35,8 @@ static uint32_t g_boot = 0;
 static uint32_t g_lifeBase = 0;       // secondi di vita accumulati fino all'ultimo salvataggio (contaore, come un contachilometri)
 static uint32_t g_lifeSaved = 0;      // uptime (s) al momento dell'ultimo salvataggio
 static String g_reset;
+static char g_topName[16] = "";      // task piu attivo (non IDLE), aggiornato ogni secondo
+static int  g_topPct = 0;
 static bool g_hot = false;      // allarme temperatura
 
 static bool idle0() { g_idle[0]++; return false; }
@@ -67,7 +70,7 @@ static void lifeSave() {
 }
 
 static void monitorTask(void*);
-static void monitorStart() { xTaskCreatePinnedToCore(monitorTask, "monitor", 3072, NULL, 1, NULL, 0); }
+static void monitorStart() { xTaskCreatePinnedToCore(monitorTask, "monitor", 4608, NULL, 1, NULL, 0); }
 
 // Carico vero per core dal tempo che i task IDLE0/IDLE1 NON hanno girato (stessa fonte del Task manager).
 // La taratura a conteggio sbagliava dopo i cambi di frequenza (mostrava 100% con la scheda quasi ferma).
@@ -80,10 +83,22 @@ static bool idleRunTimeLoad(int& l0, int& l1) {
   uint32_t tot = 0;
   n = uxTaskGetSystemState(a, n + 2, &tot);
   uint32_t i0 = 0, i1 = 0; bool f0 = false, f1 = false;
+  static uint32_t pnum[40], prt[40]; static int pcnt = 0;           // tempo di esecuzione precedente per numero di task
+  static uint32_t nnum[40], nrt[40]; int ncnt = 0, bestPct = 0; const char* best = nullptr;
+  uint32_t dtAll = tot > pTot ? tot - pTot : 0;
   for (UBaseType_t i = 0; i < n; i++) {
     if (strcmp(a[i].pcTaskName, "IDLE0") == 0) { i0 = a[i].ulRunTimeCounter; f0 = true; }
     else if (strcmp(a[i].pcTaskName, "IDLE1") == 0) { i1 = a[i].ulRunTimeCounter; f1 = true; }
+    else if (ncnt < 40) {
+      uint32_t id = a[i].xTaskNumber, rt = a[i].ulRunTimeCounter, old = rt;
+      for (int k = 0; k < pcnt; k++) if (pnum[k] == id) { old = prt[k]; break; }
+      nnum[ncnt] = id; nrt[ncnt] = rt; ncnt++;
+      if (dtAll) { int pc = (int)(100ULL * (rt - old) / dtAll); if (pc > bestPct) { bestPct = pc; best = a[i].pcTaskName; } }
+    }
   }
+  if (best) { strncpy(g_topName, best, sizeof(g_topName) - 1); g_topName[sizeof(g_topName) - 1] = 0; g_topPct = bestPct; }
+  else { g_topName[0] = 0; g_topPct = 0; }
+  memcpy(pnum, nnum, ncnt * sizeof(uint32_t)); memcpy(prt, nrt, ncnt * sizeof(uint32_t)); pcnt = ncnt;
   free(a);
   bool ok = false;
   if (have && f0 && f1 && tot > pTot) {
@@ -125,6 +140,10 @@ static void monitorTask(void*) {
     }
     skip = false;
     g_temp = temperatureRead();
+    { static uint32_t dtick = 0; dtick++;
+      diaryTick(dtick, ESP.getMinFreeHeap(), g_topName, g_topPct);                       // istantanea per il diario dei riavvii (in RTC ogni 10 s)
+      if (dtick % 60 == 0) vlogl(LG_DBG, "TOP: task piu attivo %s %d%%, CPU %d%% (core %d%% e %d%%), %u MHz, %d C, RAM libera %u KB, minima %u KB",
+                                 g_topName[0] ? g_topName : "-", g_topPct, g_cpu, g_cpu0, g_cpu1, (unsigned)mhz, (int)g_temp, (unsigned)(ESP.getFreeHeap() / 1024), (unsigned)(ESP.getMinFreeHeap() / 1024)); }
     { static uint32_t lifeTick = 0; if (++lifeTick >= 600) { lifeTick = 0; lifeSave(); } }   // ogni 10 minuti
     // allarme: sopra 80 C LED rosso lampeggiante, torna normale sotto 75 C
     if (!g_hot && g_temp > 80.0f) { g_hot = true; ledSetFault(true); vlog("ATTENZIONE: temperatura CPU alta (%.1f C)", g_temp); }
@@ -174,6 +193,8 @@ float sysCpuTemp() { return g_temp; }
 uint64_t sysUptimeSec() { return (uint64_t)(esp_timer_get_time() / 1000000ULL); }
 uint32_t sysBootCount() { return g_boot; }
 String sysResetReason() { return g_reset; }
+String sysResetName(int reason) { return resetName(reason); }
+void sysTopTask(char* name, size_t n, int* pct) { strncpy(name, g_topName, n - 1); name[n - 1] = 0; if (pct) *pct = g_topPct; }
 
 static String histJson(const uint8_t* a, int n) {
   String j = "[";

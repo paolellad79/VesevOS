@@ -4758,13 +4758,6 @@
    "scope": "fw"
   },
   {
-   "it": "  log [n|clear]   ultime righe del registro (n righe) o svuota",
-   "en": "  log [n|clear]   last log lines (n lines) or clear",
-   "es": "  log [n|clear]   ultimas lineas del registro (n lineas) o vaciar",
-   "de": "  log [n|clear]   letzte Logzeilen (n Zeilen) oder leeren",
-   "scope": "fw"
-  },
-  {
    "it": "  mqtt [start|stop|restart|pub]  servizio MQTT",
    "en": "  mqtt [start|stop|restart|pub]  MQTT service",
    "es": "  mqtt [start|stop|restart|pub]  servicio MQTT",
@@ -11576,10 +11569,10 @@
    "scope": "fw"
   },
   {
-   "it": "CPU media %d%% (massimo %d%%) in 2 secondi, %u MHz",
-   "en": "CPU average %d%% (maximum %d%%) in 2 seconds, %u MHz",
-   "es": "CPU media %d%% (maximo %d%%) en 2 segundos, %u MHz",
-   "de": "CPU Durchschnitt %d%% (Maximum %d%%) in 2 Sekunden, %u MHz",
+   "it": "CPU media %d%% (massimo %d%%) in %u secondi, %u MHz",
+   "en": "CPU average %d%% (maximum %d%%) in %u seconds, %u MHz",
+   "es": "CPU media %d%% (maximo %d%%) en %u segundos, %u MHz",
+   "de": "CPU Durchschnitt %d%% (Maximum %d%%) in %u Sekunden, %u MHz",
    "scope": "fw"
   },
   {
@@ -11602,6 +11595,181 @@
    "es": "; mira Sistema > Tareas para la tarea que mas consume",
    "de": "; siehe System > Tasks fuer den Task mit dem hoechsten Verbrauch",
    "scope": "fw"
+  },
+  {
+   "it": "La scheda non risponde, riprovo...",
+   "en": "The board is not answering, retrying...",
+   "es": "La placa no responde, reintentando...",
+   "de": "Die Platine antwortet nicht, neuer Versuch...",
+   "scope": "web"
+  },
+  {
+   "it": "  log [n|clear|level [0-3]]   ultime righe del registro, svuota, o livello (0 errori ... 3 dettagli)",
+   "en": "  log [n|clear|level [0-3]]   last log lines, clear, or level (0 errors ... 3 details)",
+   "es": "  log [n|clear|level [0-3]]   ultimas lineas del registro, borrar, o nivel (0 errores ... 3 detalles)",
+   "de": "  log [n|clear|level [0-3]]   letzte Logzeilen, loeschen oder Stufe (0 Fehler ... 3 Details)",
+   "scope": "fw"
+  },
+  {
+   "it": "  reboots [clear]   diario degli ultimi 20 riavvii (motivo, durata, RAM minima) o azzera",
+   "en": "  reboots [clear]   journal of the last 20 reboots (reason, uptime, minimum RAM) or clear",
+   "es": "  reboots [clear]   diario de los ultimos 20 reinicios (motivo, duracion, RAM minima) o borrar",
+   "de": "  reboots [clear]   Tagebuch der letzten 20 Neustarts (Grund, Laufzeit, minimaler RAM) oder loeschen",
+   "scope": "fw"
+  },
+  {
+   "it": "Avvio n.%u - %s - %s",
+   "en": "Boot no.%u - %s - %s",
+   "es": "Arranque n.%u - %s - %s",
+   "de": "Start Nr.%u - %s - %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Diario dei riavvii azzerato",
+   "en": "Reboot journal cleared",
+   "es": "Diario de reinicios borrado",
+   "de": "Neustart-Tagebuch geloescht",
+   "scope": "fw"
+  },
+  {
+   "it": "Diario dei riavvii:",
+   "en": "Reboot journal:",
+   "es": "Diario de reinicios:",
+   "de": "Neustart-Tagebuch:",
+   "scope": "fw"
+  },
+  {
+   "it": "Livello del registro: %d (0 errori, 1 + attenzioni, 2 + info, 3 + dettagli)",
+   "en": "Log level: %d (0 errors, 1 + warnings, 2 + info, 3 + details)",
+   "es": "Nivel del registro: %d (0 errores, 1 + avisos, 2 + info, 3 + detalles)",
+   "de": "Log-Stufe: %d (0 Fehler, 1 + Warnungen, 2 + Info, 3 + Details)",
+   "scope": "fw"
+  },
+  {
+   "it": "Nessun avvio registrato",
+   "en": "No boot recorded",
+   "es": "Ningun arranque registrado",
+   "de": "Kein Start aufgezeichnet",
+   "scope": "fw"
+  },
+  {
+   "it": "diario dei riavvii azzerato (%s)",
+   "en": "reboot journal cleared (%s)",
+   "es": "diario de reinicios borrado (%s)",
+   "de": "Neustart-Tagebuch geloescht (%s)",
+   "scope": "fw"
+  },
+  {
+   "it": "era acceso da %s, RAM minima %u KB",
+   "en": "was on for %s, minimum RAM %u KB",
+   "es": "estuvo encendida %s, RAM minima %u KB",
+   "de": "war an seit %s, minimaler RAM %u KB",
+   "scope": "fw"
+  },
+  {
+   "it": "livello del registro %d (%s)",
+   "en": "log level %d (%s)",
+   "es": "nivel del registro %d (%s)",
+   "de": "Log-Stufe %d (%s)",
+   "scope": "fw"
+  },
+  {
+   "it": "nessun dettaglio prima del riavvio (accensione o prima registrazione)",
+   "en": "no detail before the reboot (power on or first record)",
+   "es": "sin detalles antes del reinicio (encendido o primer registro)",
+   "de": "keine Details vor dem Neustart (Einschalten oder erster Eintrag)",
+   "scope": "fw"
+  },
+  {
+   "it": "ora non nota",
+   "en": "time unknown",
+   "es": "hora desconocida",
+   "de": "Zeit unbekannt",
+   "scope": "fw"
+  },
+  {
+   "it": "task piu attivo: %s",
+   "en": "busiest task: %s",
+   "es": "tarea mas activa: %s",
+   "de": "aktivster Task: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "ultima riga grave: %s",
+   "en": "last serious line: %s",
+   "es": "ultima linea grave: %s",
+   "de": "letzte schwere Zeile: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Mostra fino a",
+   "en": "Show up to",
+   "es": "Mostrar hasta",
+   "de": "Anzeigen bis",
+   "scope": "web"
+  },
+  {
+   "it": "Registra fino a",
+   "en": "Record up to",
+   "es": "Registrar hasta",
+   "de": "Aufzeichnen bis",
+   "scope": "web"
+  },
+  {
+   "it": "Informazione",
+   "en": "Information",
+   "es": "Informacion",
+   "de": "Information",
+   "scope": "web"
+  },
+  {
+   "it": "Dettaglio",
+   "en": "Detail",
+   "es": "Detalle",
+   "de": "Detail",
+   "scope": "web"
+  },
+  {
+   "it": "Il livello Dettaglio riempie il registro: usalo solo per cercare un problema.",
+   "en": "The Detail level fills the log: use it only to look for a problem.",
+   "es": "El nivel Detalle llena el registro: usalo solo para buscar un problema.",
+   "de": "Die Stufe Detail fuellt das Log: nur zur Fehlersuche verwenden.",
+   "scope": "web"
+  },
+  {
+   "it": "Diario dei riavvii",
+   "en": "Reboot journal",
+   "es": "Diario de reinicios",
+   "de": "Neustart-Tagebuch",
+   "scope": "web"
+  },
+  {
+   "it": "Gli ultimi 20 avvii restano salvati anche se la scheda si spegne: motivo, da quanto era accesa, RAM minima e task piu attivo.",
+   "en": "The last 20 boots stay saved even if the board is powered off: reason, how long it was on, minimum RAM and busiest task.",
+   "es": "Los ultimos 20 arranques quedan guardados aunque la placa se apague: motivo, tiempo encendida, RAM minima y tarea mas activa.",
+   "de": "Die letzten 20 Starts bleiben auch ohne Strom gespeichert: Grund, Laufzeit, minimaler RAM und aktivster Task.",
+   "scope": "web"
+  },
+  {
+   "it": "Azzera il diario",
+   "en": "Clear the journal",
+   "es": "Borrar el diario",
+   "de": "Tagebuch loeschen",
+   "scope": "web"
+  },
+  {
+   "it": "Azzerare il diario dei riavvii?",
+   "en": "Clear the reboot journal?",
+   "es": "Borrar el diario de reinicios?",
+   "de": "Neustart-Tagebuch loeschen?",
+   "scope": "web"
+  },
+  {
+   "it": "Nessun riavvio registrato",
+   "en": "No reboot recorded",
+   "es": "Ningun reinicio registrado",
+   "de": "Kein Neustart aufgezeichnet",
+   "scope": "web"
   }
  ]
 }

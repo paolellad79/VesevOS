@@ -30,7 +30,7 @@ Wi-Fi, clock, files, LEDs, pins, a shell and much more, all protected by a passw
 </p>
 <p align="center"><sub>Screenshots of the control page (with sample data): Home in dark theme, Automations, startup order with the bottom terminal panel, and the phone layout.</sub></p>
 
-> **Status:** in development (version 1.7.7). The project grows in stages: see "Where we are going".
+> **Status:** in development (version 1.7.8). The project grows in stages: see "Where we are going".
 
 ## Why "VesevOS"?
 

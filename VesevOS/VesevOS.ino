@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
-// VesevOS 1.7.7 - ESP32-S3 SuperMini
+// VesevOS 1.7.8 - ESP32-S3 SuperMini
 // Piccolo sistema operativo: pagina web (HTTPS), shell, utenti, rete tra schede, automazioni. Progetto in piu file.
 //
 // Impostazioni Arduino IDE consigliate:
@@ -15,6 +15,7 @@
 #include <esp_log.h>
 #include "vos_common.h"
 #include "vos_log.h"
+#include "vos_diario.h"
 #include "vos_pins.h"
 #include "vos_config.h"
 #include "vos_auth.h"
@@ -79,6 +80,7 @@ extern "C" void heap_caps_malloc_extmem_enable(size_t limit) __attribute__((weak
 bool g_extmem = false;                                // letto da shell (comando diag)
 
 void setup() {
+  diaryEarly();                                     // prima di tutto: salva l'istantanea lasciata dall'avvio precedente
   Serial.begin(115200);
   delay(300);
   logInit();
@@ -93,12 +95,14 @@ void setup() {
   if (!LittleFS.begin(true)) { vlog("FS: LittleFS non parte"); }
   powerBegin();
   if (!cfgLoad()) { vlog("CFG: nessun file, uso i valori iniziali"); cfgSave(); }
+  logSetLevel(cfg.logLevel);
   setenv("TZ", cfg.tz.c_str(), 1); tzset();         // il fuso subito: cosi le righe del registro hanno l'ora locale fin dall'inizio
   vlog("%s %s in avvio", VOS_NAME, VOS_VERSION);
 
   langInit();
   auditInit();                                     // controllo della configurazione (allarmi)
   bootRun();   // sys, led, net, time, web, rules, mqtt, mesh, wd: nell'ordine scelto (con le dipendenze)
+  diaryInit();                                     // dopo sysInit: contatore avvii pronto; scrive la riga AVVIO e, se anomalo, i dettagli
   ledSetSetup(!cfg.setupDone);                     // arcobaleno lento finche la prima configurazione non e finita
   vlog("Pronto. Guida di configurazione: %s", cfg.setupDone ? "finita" : "NON finita (hotspot e HTTP forzati accesi)");   // la rete la dicono le righe NET: seguenti
 }

@@ -1,4 +1,4 @@
-# VesevOS 1.7.7 - Manuale
+# VesevOS 1.7.8 - Manuale
 
 Manuale per chi usa la scheda. Parole semplici, niente programmazione.
 English version: [manual.en.md](manual.en.md). Lo stesso aiuto e nella pagina della scheda (Sistema > Aiuto, oppure `http://192.168.4.1/#aiuto`).
@@ -183,3 +183,7 @@ PSRAM da 2 MB di questa scheda (occupati sulle schede con PSRAM octal).
 
 ## 17. Autotest (novita 1.7.7)
 Sistema > Autotest (solo Admin). Premi **Avvia la diagnosi**: 16 prove una per volta, ognuna con esito OK / Avviso / Errore / Saltata. Alla fine **Scarica il report** (o **Copia**). Senza password, chiavi o token; MAC, nome Wi-Fi, IP e registro sono oscurati salvo "nomi reali". "Prove attive" accende il LED e invia un messaggio MQTT di prova. Seriale: `selftest [active] [names]`. **Chiudi e libera la memoria** cancella il report.
+
+
+## 18. Log e diario dei riavvii (novita 1.7.8)
+Sistema > Log: ogni riga ha il livello [E] errore, [W] attenzione, [I] info, [D] dettaglio. **Mostra fino a** filtra solo la vista; **Registra fino a** (Admin) decide cosa viene scritto (di fabbrica Info; Dettaglio solo per cercare un problema). Sotto, il **Diario dei riavvii**: ultimi 20 avvii con motivo, da quanto era accesa la scheda, RAM minima e task piu attivo; resta anche dopo lo spegnimento. Seriale: `log level [0-3]`, `reboots [clear]`. Il diario e nel report dell'Autotest (l'ultima riga grave solo con "nomi reali").

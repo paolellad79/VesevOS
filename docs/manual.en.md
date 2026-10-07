@@ -1,4 +1,4 @@
-# VesevOS 1.7.7 - Manual
+# VesevOS 1.7.8 - Manual
 
 Manual for people who use the board. Plain words, no programming.
 Versione italiana: [manuale.md](manuale.md). The same help is in the board's page (System > Help, or `http://192.168.4.1/#aiuto`).
@@ -182,3 +182,7 @@ a warning appears if you test a pin already marked. GP33-37 are free with this b
 
 ## 17. Self-test (new in 1.7.7)
 System > Self-test (Admin only). Press **Start diagnosis**: 16 tests one at a time, each with result OK / Warning / Error / Skipped. At the end **Download report** (or **Copy**). No passwords, keys or tokens; MAC, Wi-Fi name, IP and log are hidden unless "real names" is ticked. "Active tests" blinks the LED and sends a test MQTT message. Serial: `selftest [active] [names]`. **Close and free memory** deletes the report.
+
+
+## 18. Log and reboot journal (new in 1.7.8)
+System > Log: each line has the level [E] error, [W] warning, [I] info, [D] detail. **Show up to** only filters the view; **Record up to** (Admin) decides what is written (factory: Info; Detail only to hunt a problem). Below, the **Reboot journal**: last 20 boots with reason, how long the board was on, minimum RAM and busiest task; it survives power-off. Serial: `log level [0-3]`, `reboots [clear]`. The journal is in the Self-test report (the last serious line only with "real names").

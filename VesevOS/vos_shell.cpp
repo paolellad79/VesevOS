@@ -29,6 +29,7 @@
 #include "vos_power.h"
 #include "vos_stats.h"
 #include "vos_selftest.h"
+#include "vos_diario.h"
 extern bool g_extmem;                 // definita in VesevOS.ino: i blocchi grandi vanno in PSRAM?
 #include <LittleFS.h>
 #include <WiFi.h>
@@ -119,7 +120,8 @@ static void cmdHelp(Print& o) {
   o.println(tr("  ban             indirizzi bloccati o sospetti"));
   o.println(tr("  unban <ip|all>  sblocca un indirizzo (o tutti)"));
   o.println(tr("  logout          esce (solo seriale)"));
-  o.println(tr("  log [n|clear]   ultime righe del registro (n righe) o svuota"));
+  o.println(tr("  log [n|clear|level [0-3]]   ultime righe del registro, svuota, o livello (0 errori ... 3 dettagli)"));
+  o.println(tr("  reboots [clear]   diario degli ultimi 20 riavvii (motivo, durata, RAM minima) o azzera"));
   o.println(tr("  factory-reset   azzera tutto (poi riavvia)"));
   o.println(tr("  reboot          riavvia"));
   o.println(tr("  sleep [minuti]  sonno profondo (con i minuti la scheda riparte da sola; senza, solo con RESET)"));
@@ -138,7 +140,8 @@ static bool operOk(const String& c, const String& a1) {
                                    "date", "led", "led-color", "led-bright", "pin", "pins", "rules", "audit", "watchdog", "legal", "license", "licenza", "locale"};
   for (size_t i = 0; i < sizeof(OK) / sizeof(OK[0]); i++) if (c == OK[i]) return true;
   if (c == "ntp") return a1 == "" || a1 == "sync";
-  if (c == "log") return a1 != "clear";
+  if (c == "log") return a1 != "clear" && a1 != "level";
+  if (c == "reboots") return a1 != "clear";
   if (c == "mqtt") return a1 == "" || a1 == "status" || a1 == "pub";
   if (c == "mesh") return a1 == "" || a1 == "status" || a1 == "send" || a1 == "cmd";
   if (c == "airplane" || c == "aereo" || c == "reboot" || c == "sleep") return true;
@@ -522,7 +525,19 @@ void shellExec(const String& lineIn, Print& o, int role) {
     o.println(tr("Software libero gratuito, fornito fuori da attivita commerciale e senza garanzia (GPL-3.0 sezioni 15-16). Riferimenti normativi: comando license notice."));
   }
   else if (c == "welcome") shellWelcome(o, !cfg.setupDone && &o == &Serial);
-  else if (c == "log") { if (a1 == "clear") { logClear(); o.println(tr("Registro svuotato")); } else o.print(logGet(a1.length() ? constrain((int)a1.toInt(), 1, 150) : 30)); }
+  else if (c == "log") {
+    if (a1 == "clear") { logClear(); o.println(tr("Registro svuotato")); }
+    else if (a1 == "level") {
+      String a2 = argAt(line, 2);
+      if (a2.length()) { int lv = constrain((int)a2.toInt(), 0, 3); cfg.logLevel = (uint8_t)lv; logSetLevel(lv); cfgSave(); }
+      o.println(trf("Livello del registro: %d (0 errori, 1 + attenzioni, 2 + info, 3 + dettagli)", (int)logLevel()));
+    }
+    else o.print(logGet(a1.length() ? constrain((int)a1.toInt(), 1, 150) : 30));
+  }
+  else if (c == "reboots") {
+    if (a1 == "clear") { diaryClear(); o.println(tr("Diario dei riavvii azzerato")); }
+    else { String d = diaryText(20, true); o.print(d.length() ? d : String(tr("Nessun avvio registrato")) + "\n"); }
+  }
   else if (c == "factory-reset") {
     o.println(tr("Azzero tutto e riavvio..."));
     vlog("SISTEMA: ripristino di fabbrica dalla shell");

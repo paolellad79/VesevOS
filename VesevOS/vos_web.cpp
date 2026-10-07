@@ -36,6 +36,7 @@
 #include "vos_stats.h"
 #include "vos_log.h"
 #include "vos_selftest.h"
+#include "vos_diario.h"
 #include <LittleFS.h>
 #include <WiFi.h>
 #include <PsychicHttp.h>
@@ -371,6 +372,17 @@ static void routes(PsychicHttpServer* S, bool sec) {
   add(S, sec, "/api/log", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendText(s, 200, "text/plain; charset=utf-8", logGet(150)); });
   add(S, sec, "/api/log/clear", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
     logClear(); auditEvent(AUD_INFO, "", trf("registro svuotato (%s)", who(c).c_str())); return ok(s);
+  });
+  add(S, sec, "/api/log/level", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, "{\"lv\":" + String((int)logLevel()) + "}"); });
+  add(S, sec, "/api/log/level", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    int lv = constrain((int)P(r, "lv").toInt(), 0, 3);
+    cfg.logLevel = (uint8_t)lv; logSetLevel(lv); cfgSave();
+    auditEvent(AUD_INFO, "", trf("livello del registro %d (%s)", lv, who(c).c_str()));
+    return ok(s);
+  });
+  add(S, sec, "/api/boots", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendText(s, 200, "text/plain; charset=utf-8", diaryText(20, true)); });
+  add(S, sec, "/api/boots/clear", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    diaryClear(); auditEvent(AUD_INFO, "", trf("diario dei riavvii azzerato (%s)", who(c).c_str())); return ok(s);
   });
   add(S, sec, "/api/tasks", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendText(s, 200, "text/plain; charset=utf-8", sysTasksText()); });
 

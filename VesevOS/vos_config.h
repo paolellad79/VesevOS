@@ -63,6 +63,7 @@ struct VosConfig {
   uint8_t antExt;                // 0 = antenna interna, 1 = antenna esterna
   int8_t  antGain;               // guadagno antenna esterna in dBi (0-15)
   int8_t  txDbm;                 // potenza scelta (dBm); 0 = la massima consentita
+  uint8_t  logLevel;             // 0 errori, 1 + attenzioni, 2 + info (di fabbrica), 3 + dettagli
   bool     statOn;               // statistiche d'uso (spente di fabbrica)
   uint8_t  pwMode;               // risparmio energia: 0 spento, 1 Wi-Fi a risparmio massimo, 2 sonno profondo a cicli
   uint16_t pwAwake, pwSleep;     // minuti sveglia / minuti di sonno (modo 2)

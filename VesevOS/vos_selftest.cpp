@@ -23,12 +23,13 @@
 #include "vos_mqtt.h"
 #include "vos_mesh.h"
 #include "vos_ble.h"
+#include "vos_diario.h"
 #include <WiFi.h>
 #include <LittleFS.h>
 #include <esp_system.h>
 
 static const int NT = 16;                 // numero di prove
-struct SelfEntry { uint8_t st; uint16_t ms; char name[28]; char det[160]; };
+struct SelfEntry { uint8_t st; uint16_t ms; char name[28]; char det[224]; };
 static SelfEntry* g_res = nullptr;        // allocato a ogni avvio (circa 2,7 KB), libero con selftestClear()
 static volatile uint8_t g_state = 0;      // 0 mai lanciata, 1 in corso, 2 finita
 static volatile int g_n = 0;              // prova in corso
@@ -80,11 +81,13 @@ static void tRam() {
 static void tCpu() {
   title(tr("CPU e temperatura"));
   int sum = 0, mx = 0, n = 0;
+  uint32_t t0 = millis();
   for (int i = 0; i < 5; i++) { int c = sysCpuPercent(); sum += c; if (c > mx) mx = c; n++; vTaskDelay(400 / portTICK_PERIOD_MS); }
+  unsigned secs = (unsigned)((millis() - t0 + 500) / 1000);
   int avg = n ? sum / n : 0;
   float tc = sysCpuTemp();
   uint8_t st = avg > 85 ? SELF_ERR : avg > 60 ? SELF_WARN : SELF_OK;
-  String d = trf("CPU media %d%% (massimo %d%%) in 2 secondi, %u MHz", avg, mx, (unsigned)ESP.getCpuFreqMHz());
+  String d = trf("CPU media %d%% (massimo %d%%) in %u secondi, %u MHz", avg, mx, secs, (unsigned)ESP.getCpuFreqMHz());
   if (isnan(tc)) { d += tr("; temperatura non disponibile"); if (st < SELF_WARN) st = SELF_WARN; }
   else {
     d += trf("; temperatura %d C", (int)(tc + 0.5f));
@@ -274,6 +277,7 @@ String selftestReport() {
     r += hd; r += g_res[i].name; r += " ("; r += String((int)g_res[i].ms); r += " ms)\n    "; r += g_res[i].det; r += "\n";
   }
   r += "------------------------------------------------------------\n";
+  r += tr("Diario dei riavvii:"); r += "\n"; r += diaryText(8, g_names); r += "\n";
   if (g_names) {
     r += tr("Ultime righe del registro:"); r += "\n"; r += logGet(20); r += "\n";
   } else {

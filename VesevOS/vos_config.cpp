@@ -40,7 +40,7 @@ void cfgDefaults() {
   cfg.ntpOn = true; cfg.ntpServe = false; cfg.ntpEvery = 60;
   cfg.ntpServer = "pool.ntp.org";
   cfg.tz = "CET-1CEST,M3.5.0,M10.5.0/3"; cfg.tzName = "Europe/Rome";
-  cfg.cpuMhz = 0; cfg.statOn = false; cfg.pwMode = 0; cfg.pwAwake = 15; cfg.pwSleep = 10;
+  cfg.cpuMhz = 0; cfg.logLevel = 2; cfg.statOn = false; cfg.pwMode = 0; cfg.pwAwake = 15; cfg.pwSleep = 10;
   cfg.dateFmt = 0; cfg.timeFmt = 0; cfg.tempUnit = 0; cfg.weekStart = 0; cfg.decSep = 0;
   cfg.country = ""; cfg.antExt = 0; cfg.antGain = 0; cfg.txDbm = 0;
   cfg.fwMode = 0; cfg.fwNtp = false; cfg.fwN = 0;
@@ -76,6 +76,7 @@ String cfgExport(bool withSecrets) {
   opt(s, "domain", cfg.domain);
   opt(s, "cpu", String(cfg.cpuMhz));
   opt(s, "stat", cfg.statOn ? "1" : "0");
+  opt(s, "loglv", String((int)cfg.logLevel));
   opt(s, "pwmode", String(cfg.pwMode));
   opt(s, "pwawake", String(cfg.pwAwake));
   opt(s, "pwsleep", String(cfg.pwSleep));
@@ -217,6 +218,7 @@ static void applyKey(const String& sec, const String& k, const String& v) {
     if (k == "hostname" && hostnameValid(v)) cfg.hostname = v;
     else if (k == "domain" && domainValid(v)) cfg.domain = v;
     else if (k == "stat") cfg.statOn = (v == "1");
+    else if (k == "loglv") cfg.logLevel = (uint8_t)constrain((int)v.toInt(), 0, 3);
     else if (k == "pwmode") cfg.pwMode = constrain(v.toInt(), 0, 2);
     else if (k == "pwawake") cfg.pwAwake = constrain(v.toInt(), 10, 1440);
     else if (k == "pwsleep") cfg.pwSleep = constrain(v.toInt(), 1, 10080);

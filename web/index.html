@@ -509,8 +509,18 @@ body[data-role="0"] .op,body[data-role="0"] .adm,body[data-role="1"] .adm{displa
    <button class="btn gray" onclick="lgDl()"><svg class="i" aria-hidden="true"><use href="#i-dl"/></svg><span>Scarica</span></button>
    <button class="btn red" onclick="lgClear()"><svg class="i" aria-hidden="true"><use href="#i-del"/></svg><span>Svuota</span></button>
   </div>
+  <div class="lgb">
+   <label class="lgck">Mostra fino a <select id="lgsh" onchange="lgDraw()"><option value="3">Dettaglio</option><option value="2" selected>Informazione</option><option value="1">Attenzione</option><option value="0">Errore</option></select></label>
+   <label class="lgck">Registra fino a <select id="lglv" onchange="lgSetLv()"><option value="3">Dettaglio</option><option value="2" selected>Informazione</option><option value="1">Attenzione</option><option value="0">Errore</option></select></label>
+  </div>
   <div id="lginfo" class="fhint"></div>
+  <div id="lgdw" class="fhint hide">Il livello Dettaglio riempie il registro: usalo solo per cercare un problema.</div>
   <pre id="lg" class="lgv" tabindex="0" aria-label="Righe del registro"></pre></div>
+ <div class="card"><h3>Diario dei riavvii</h3>
+  <p class="fhint">Gli ultimi 20 avvii restano salvati anche se la scheda si spegne: motivo, da quanto era accesa, RAM minima e task piu attivo.</p>
+  <div class="lgb"><button class="btn gray" onclick="loadBoots()"><svg class="i" aria-hidden="true"><use href="#i-reboot"/></svg><span>Aggiorna</span></button>
+   <button class="btn red" id="btclr" onclick="btClear()"><svg class="i" aria-hidden="true"><use href="#i-del"/></svg><span>Azzera il diario</span></button></div>
+  <pre id="bt" class="lgv" tabindex="0" aria-label="Diario dei riavvii"></pre></div>
 </section>
 <section id="t_sec" class="hide">
  <div class="card"><h3>La tua password</h3><div id="pwho" class="fhint"></div>
@@ -1528,9 +1538,14 @@ function loadLic(){fetch("/api/license").then(function(r){return r.json()}).then
 function showLic(id){fetch("/api/license?id="+encodeURIComponent(id)).then(function(r){return r.text()}).then(function(x){var e=$("licx");e.textContent=x;e.className="";e.scrollTop=0})}
 var LG={txt:"",tm:null};
 function loadLog(){api("/api/log").then(function(r){return r.text()}).then(function(x){LG.txt=x;lgDraw()}).catch(function(){})}
-function lgDraw(){var e=$("lg");if(!e)return;var q=($("lgq").value||"").toLowerCase(),L=LG.txt.split("\n").filter(function(l){return l&&(!q||l.toLowerCase().indexOf(q)>=0)}),all=LG.txt.split("\n").filter(Boolean).length;
- var stick=e.scrollTop+e.clientHeight>=e.scrollHeight-20;e.innerHTML=L.map(function(l){var c=/errore|error|fall|ko\b|non riuscit|bloccat/i.test(l)?"lk":/avviso|attenzione|warn|persa|ban|errat|sbagliat|scollegat/i.test(l)?"lw":"";return c?'<span class="'+c+'">'+esc(l)+'</span>':esc(l)}).join("\n");
- if(stick)e.scrollTop=e.scrollHeight;$("lginfo").textContent=q?tf("{0} righe su {1}",L.length,all):tf("{0} righe",all)}
+var LGL={E:0,W:1,I:2,D:3},LGC=["lk","lw","",""];
+function lgDraw(){var e=$("lg");if(!e)return;var q=($("lgq").value||"").toLowerCase(),mx=+$("lgsh").value,all=LG.txt.split("\n").filter(Boolean),L=all.filter(function(l){var m=l.match(/\[([EWID])\] /),lv=m?LGL[m[1]]:2;return lv<=mx&&(!q||l.toLowerCase().indexOf(q)>=0)});
+ var stick=e.scrollTop+e.clientHeight>=e.scrollHeight-20;e.innerHTML=L.map(function(l){var m=l.match(/\[([EWID])\] /),c=m?LGC[LGL[m[1]]]:"";return c?'<span class="'+c+'">'+esc(l)+'</span>':esc(l)}).join("\n");
+ if(stick)e.scrollTop=e.scrollHeight;$("lginfo").textContent=L.length!=all.length?tf("{0} righe su {1}",L.length,all.length):tf("{0} righe",all.length)}
+function lgInit(){api("/api/log/level").then(function(r){return r.json()}).then(function(j){$("lglv").value=j.lv;$("lgdw").className=j.lv>=3?"fhint":"fhint hide"}).catch(function(){});$("lglv").disabled=ROLE<2;$("btclr").disabled=ROLE<2;loadBoots()}
+function lgSetLv(){var v=+$("lglv").value;post("/api/log/level",{lv:v}).then(function(r){return r.json()}).then(function(j){if(j.ok){$("lgdw").className=v>=3?"fhint":"fhint hide";loadLog()}})}
+function loadBoots(){api("/api/boots").then(function(r){return r.text()}).then(function(x){$("bt").textContent=x||t("Nessun riavvio registrato")}).catch(function(){})}
+function btClear(){dlg({title:t("Azzerare il diario dei riavvii?"),body:"",ok:t("Azzera il diario"),danger:true,onOk:function(){return post("/api/boots/clear",{}).then(function(r){return r.json()}).then(function(j){if(j.ok)loadBoots();return j.ok?"":j.err})}})}
 function lgAuto(){clearInterval(LG.tm);if($("lgauto").checked&&cur=="log")LG.tm=setInterval(loadLog,3000)}
 function lgDl(){var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([LG.txt],{type:"text/plain"}));a.download="vesevos-log.txt";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)}
 function lgClear(){dlg({title:t("Svuotare il registro?"),body:'<p style="margin:0">'+esc(t("Le righe vengono cancellate dalla memoria della scheda. Se ti servono, prima premi Scarica."))+'</p>',ok:t("Svuota"),danger:true,onOk:function(){return post("/api/log/clear",{}).then(function(r){return r.json()}).then(function(j){if(j.ok)loadLog();return j.ok?"":j.err})}})}
@@ -1636,7 +1651,7 @@ function show(id){if(!canSee(id))id="sum";cur=id;var g=gOf(id);LASTG[g]=id;
   if(g=="sys"&&DIAG.indexOf(k)<0&&ix>0&&DIAG.indexOf(L[ix-1])>=0)h+='<span class="gsep"></span>';
   h+='<button class="'+(k==id?"on":"")+'" onclick="show(\''+k+'\')">'+esc(t(x[1]))+'</button>'})}
  $("gsub").innerHTML=h;$("gsub").className="sub gsub"+(h?"":" hide");$("alerts").className="alerts hide";
- if(id=="shell")cpToggle(true);if(id!="auto"){clearInterval(RU.tm)}if(id=="auto")rLoad();if(id=="boot")bLoad();if(id!="task")clearInterval(TK.tm);if(id=="task")loadTasks();if(id=="pin")loadPins();if(id=="loc")loadLangs();if(id=="log"){loadLog();lgAuto()}else clearInterval(LG.tm);if(id=="wifi")fillNet();if(id=="led")fillLed();if(id=="ora")loadTime();if(id=="file")fList(fp);
+ if(id=="shell")cpToggle(true);if(id!="auto"){clearInterval(RU.tm)}if(id=="auto")rLoad();if(id=="boot")bLoad();if(id!="task")clearInterval(TK.tm);if(id=="task")loadTasks();if(id=="pin")loadPins();if(id=="loc")loadLangs();if(id=="log"){lgInit();loadLog();lgAuto()}else clearInterval(LG.tm);if(id=="wifi")fillNet();if(id=="led")fillLed();if(id=="ora")loadTime();if(id=="file")fList(fp);
  if(id=="sec")fillSec();if(id=="sum"){homeDraw()}if(id=="mqtt")mqLoad();if(id=="mesh")msLoad();if(id=="loc")lcLoad();if(id=="wd")wdLoad();if(id=="users")usLoad();if(id=="fw")fwLoad();if(id=="https"){tlsLoad();svcLoad()}if(id=="ap"){fillNet();svcLoad()}if(id=="http"||id=="dhcp"||id=="dns"||id=="mdns")svcLoad();if(id=="ntp")loadTime();if(id=="mfa")mfLoad();if(id!="stat")clearInterval(STT);if(id=="stat"){stLoad();clearInterval(STT);STT=setInterval(stLoad,5000)}if(id=="power")pwLoad();if(id=="selftest")stlPoll();if(id=="cert")tlsLoad();if(id=="ble"&&ROLE==2){bleLoad();clearInterval(BLT);BLT=setInterval(function(){if(cur!="ble")clearInterval(BLT);else bleLoad()},3000)}if(id=="radio")lcLoad();if(id=="audit")auLoad();if(id=="legal")lgLoad();
  if(id=="help"&&location.hash!="#aiuto")try{history.replaceState(null,"","#aiuto")}catch(e){}if(id!="help"&&location.hash=="#aiuto")try{history.replaceState(null,"",location.pathname)}catch(e){}}
 window.addEventListener("hashchange",function(){if(location.hash=="#aiuto"&&loggedIn())show("help")});
@@ -1884,11 +1899,11 @@ function pwNow(){var m=+$("pw_now").value;if(!(m>=1&&m<=10080)){msg("pwm2",t("Te
   onOk:function(){return post("/api/sleep",{min:m}).then(function(r){return r.json()}).then(function(j){return j.ok===false?j.err:""})}})}
 
 /* ===== Autotest ===== */
-var SL={tm:null};
-function stlGo(){$("stl_go").disabled=true;post("/api/selftest",{active:$("stl_act").classList.contains("on")?1:0,names:$("stl_nm").classList.contains("on")?1:0}).then(function(r){return r.json()}).then(function(j){if(j.ok===false){msg("stlm",j.err,false);$("stl_go").disabled=false;return}$("stlm").className="msg";stlPoll()}).catch(function(){$("stl_go").disabled=false})}
-function stlPoll(){clearTimeout(SL.tm);api("/api/selftest").then(function(r){return r.json()}).then(stlDraw).catch(function(){})}
+var SL={tm:null,seq:0,run:false};
+function stlGo(){$("stl_go").disabled=true;post("/api/selftest",{active:$("stl_act").classList.contains("on")?1:0,names:$("stl_nm").classList.contains("on")?1:0}).then(function(r){return r.json()}).then(function(j){if(j.ok===false){msg("stlm",j.err,false);$("stl_go").disabled=false;return}$("stlm").className="msg";SL.run=true;stlPoll()}).catch(function(){$("stl_go").disabled=false})}
+function stlPoll(){clearTimeout(SL.tm);var id=++SL.seq;api("/api/selftest").then(function(r){return r.json()}).then(function(j){if(id!=SL.seq)return;stlDraw(j)}).catch(function(){if(id!=SL.seq||cur!="selftest")return;if(SL.run){$("stl_sum").textContent=t("La scheda non risponde, riprovo...");SL.tm=setTimeout(stlPoll,1500)}})}
 var STLW=["Saltata","OK","Avviso","Errore","Saltata"];var STLC=["","a","w","k",""];
-function stlDraw(j){if(cur!="selftest")return;var run=j.state==1,fin=j.state==2,c=[0,0,0,0,0];
+function stlDraw(j){if(cur!="selftest")return;var run=j.state==1,fin=j.state==2,c=[0,0,0,0,0];SL.run=run;
  $("stl_go").disabled=run;$("stl_dl").className=fin?"btn gray":"btn gray hide";$("stl_cp").className=fin?"btn gray":"btn gray hide";$("stl_cl").className=j.state?"btn gray":"btn gray hide";
  $("stl_bar").className=run?"":"hide";if(run)$("stl_bar").innerHTML=bar(Math.round(100*j.list.length/j.total));
  var h="";j.list.forEach(function(x){c[x.s]++;h+='<div class="row" style="align-items:flex-start;gap:10px"><span class="pill '+STLC[x.s]+'" style="min-width:64px;text-align:center">'+esc(t(STLW[x.s]))+'</span><span style="flex:1"><b>'+esc(x.n)+'</b> <span class="fhint">('+x.ms+' ms)</span><br><span>'+esc(x.d)+'</span></span></div>'});
