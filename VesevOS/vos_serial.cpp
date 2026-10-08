@@ -13,23 +13,35 @@ static const bool kUsb = false;
 #endif
 
 // Uscita con a-capo scelto: "\r\n", "\n" e "\r" nel testo diventano tutti l'a-capo configurato
+// Se il PC non legge (monitor aperto ma fermo) una scrittura finisce in ritardo: da quel momento per 2 secondi
+// l'uscita si butta via senza aspettare, cosi il ciclo principale non resta bloccato (e il watchdog non scatta).
+static uint32_t g_stallUntil = 0, g_stalls = 0;
+uint32_t serStallCount() { return g_stalls; }
+static bool stalled() { return g_stallUntil && (int32_t)(millis() - g_stallUntil) < 0; }
+static void markStall() { g_stalls++; g_stallUntil = millis() + 2000UL; if (!g_stallUntil) g_stallUntil = 1; }
+
 class SerOut : public Print {
   uint8_t last = 0;
-public:
-  size_t write(uint8_t c) override {
-    if (c == '\n' && last == '\r') { last = c; return 1; }          // seconda meta di CR+LF: gia scritto
-    last = c;
-    if (c == '\r' || c == '\n') {
-      switch (cfg.serEol) {
-        case 1:  Serial.write((uint8_t)'\n'); break;
-        case 2:  Serial.write((uint8_t)'\r'); break;
-        default: Serial.write((uint8_t)'\r'); Serial.write((uint8_t)'\n'); break;
-      }
-      return 1;
+  // una scrittura sola per pezzo (non una per carattere): con il PC che non legge, ogni scrittura puo aspettare fino al tempo massimo
+  size_t put(const uint8_t* b, size_t n) {
+    if (stalled()) return n;                                            // il PC non sta leggendo: non si aspetta
+    uint8_t buf[96]; size_t k = 0;
+    for (size_t i = 0; i < n; i++) {
+      uint8_t c = b[i];
+      if (c == '\n' && last == '\r') { last = c; continue; }            // seconda meta di CR+LF: gia scritto
+      last = c;
+      if (k + 2 > sizeof(buf)) { if (Serial.write(buf, k) < k) { markStall(); return n; } k = 0; }
+      if (c == '\r' || c == '\n') {
+        if (cfg.serEol == 0 || cfg.serEol == 2) buf[k++] = '\r';        // CR+LF o solo CR
+        if (cfg.serEol == 0 || cfg.serEol == 1) buf[k++] = '\n';        // CR+LF o solo LF
+      } else buf[k++] = c;
     }
-    return Serial.write(c);
+    if (k && Serial.write(buf, k) < k) { markStall(); return n; }
+    return n;
   }
-  size_t write(const uint8_t* b, size_t n) override { for (size_t i = 0; i < n; i++) write(b[i]); return n; }
+public:
+  size_t write(uint8_t c) override { return put(&c, 1); }
+  size_t write(const uint8_t* b, size_t n) override { return put(b, n); }
 };
 static SerOut g_out;
 Print& serOut() { return g_out; }
@@ -40,14 +52,15 @@ void serLogLine(const char* line) {
   g_out.print(line); g_out.print("\n");
 }
 
-static uint32_t g_prevBaud = 0, g_trialUntil = 0;       // prova della velocita nuova
+static uint32_t g_trialBaud = 0, g_trialUntil = 0;      // velocita nuova in prova (non finisce nella configurazione finche non si conferma)
 
 void serialApply() {
 #if ARDUINO_USB_CDC_ON_BOOT
   Serial.setTxTimeoutMs(cfg.serTx);
 #else
   static uint32_t cur = 115200;
-  if (cur != cfg.serBaud) { Serial.updateBaudRate(cfg.serBaud); cur = cfg.serBaud; }
+  uint32_t want = g_trialUntil ? g_trialBaud : cfg.serBaud;
+  if (cur != want) { Serial.updateBaudRate(want); cur = want; }
 #endif
 }
 
@@ -58,17 +71,19 @@ static bool baudOk(uint32_t b) {
 }
 
 bool serialSet(const String& key, const String& val, String& err) {
+  bool isBool = (key == "echo" || key == "input" || key == "log" || key == "banner");
   bool on = (val == "on" || val == "1");
+  if (isBool && !on && val != "off" && val != "0") { err = tr("Valore non valido (on oppure off)"); return false; }
   if (key == "baud") {
     uint32_t b = (uint32_t)val.toInt();
     if (!baudOk(b)) { err = tr("Velocita non valida (9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600)"); return false; }
     if (kUsb) { cfg.serBaud = b; }
     else {
-      if (b == cfg.serBaud) return true;
-      g_prevBaud = cfg.serBaud; g_trialUntil = millis() + 20000UL; if (!g_trialUntil) g_trialUntil = 1;
-      cfg.serBaud = b; serialApply();
+      if (b == cfg.serBaud && !g_trialUntil) return true;
+      g_trialBaud = b; g_trialUntil = millis() + 20000UL; if (!g_trialUntil) g_trialUntil = 1;
+      serialApply();
       vlog("SERIALE: velocita %lu in prova per 20 secondi", (unsigned long)b);
-      return true;                                     // salvato solo con "serial keep"
+      return true;                                     // salvata solo con "serial keep"
     }
   }
   else if (key == "eol") {
@@ -93,14 +108,14 @@ bool serialSet(const String& key, const String& val, String& err) {
 
 bool serialKeep() {
   if (!g_trialUntil) return false;
-  g_trialUntil = 0; cfgSave();
+  g_trialUntil = 0; cfg.serBaud = g_trialBaud; cfgSave();
   vlog("SERIALE: velocita %lu confermata", (unsigned long)cfg.serBaud);
   return true;
 }
 
 void serialTick() {
   if (g_trialUntil && (int32_t)(millis() - g_trialUntil) >= 0) {
-    g_trialUntil = 0; cfg.serBaud = g_prevBaud; serialApply();
+    g_trialUntil = 0; serialApply();
     vlog("SERIALE: velocita non confermata, torna %lu", (unsigned long)cfg.serBaud);
   }
 }

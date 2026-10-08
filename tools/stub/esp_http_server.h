@@ -19,6 +19,8 @@ typedef struct httpd_ws_frame { bool final; bool fragmented; httpd_ws_type_t typ
 typedef void (*transfer_complete_cb)(esp_err_t err, int socket, void* arg);
 esp_err_t httpd_ws_send_data_async(httpd_handle_t, int, httpd_ws_frame_t*, transfer_complete_cb, void*);
 bool httpd_uri_match_wildcard(const char*, const char*, size_t);
+esp_err_t httpd_get_client_list(httpd_handle_t, size_t*, int*);
+esp_err_t httpd_sess_trigger_close(httpd_handle_t, int);
 #define HTTPD_DEFAULT_CONFIG() {}
 #ifdef __cplusplus
 }

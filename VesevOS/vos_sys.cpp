@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_sys.cpp
+#include "vos_ble.h"
+#include "vos_traffic.h"
 #include "vos_sys.h"
 #include "vos_diario.h"
 #include "vos_led.h"
@@ -14,11 +16,14 @@
 #include "vos_led.h"
 #include "vos_config.h"
 #include "esp_timer.h"
+#include "esp_heap_caps.h"
 #include "esp_system.h"
 #include "esp_freertos_hooks.h"
 #include <LittleFS.h>
 #include <Preferences.h>
 #include "vos_wd.h"
+#include "vos_serial.h"
+#include "vos_web.h"
 #include "vos_audit.h"
 #include "vos_fw.h"
 
@@ -29,6 +34,8 @@ static uint32_t g_maxIdle[2] = {1, 1};
 static volatile int g_cpu = 0, g_cpu0 = 0, g_cpu1 = 0;
 static float g_temp = 0;
 static uint8_t g_cpuH[HIST], g_cpuHn = 0;
+static uint8_t g_c0H[HIST], g_c1H[HIST], g_ramH[HIST], g_psH[HIST], g_flH[HIST];   // storie per i grafici della Home (percentuali)
+static uint8_t g_flPct = 0;                // percentuale file in flash, riletta ogni 30 s (la lettura costa)
 static int16_t g_tempH[HIST];            // decimi di grado
 static uint8_t g_tempHn = 0;
 static uint32_t g_boot = 0;
@@ -140,8 +147,16 @@ static void monitorTask(void*) {
     }
     skip = false;
     g_temp = temperatureRead();
+    { static uint32_t ftick = 0; ftick++;                      // ogni 10 s: la RAM e a pezzi troppo piccoli? (avviso in pagina, spento con un po' di margine)
+      if (ftick % 10 == 0 && ftick > 30) {
+        uint32_t big = ESP.getMaxAllocHeap();
+        if (bleRunning() || big > 40000) auditClear("frag");        // con il Bluetooth acceso il pezzo piccolo e normale (se ne va quando si spegne)
+        else if (big < 30000) auditEvent(AUD_YELLOW, "frag", tr("Memoria frammentata: il pezzo di RAM libero piu grande e piccolo. Chiudi la pagina web o spegni i servizi che non servono: si libera da sola"));
+        webTrimIdle();                                      // RAM a pezzi e nessuno usa la pagina: chiude i collegamenti HTTPS fermi
+      } }
     { static uint32_t dtick = 0; dtick++;
-      diaryTick(dtick, ESP.getMinFreeHeap(), g_topName, g_topPct, mhz);                       // istantanea per il diario dei riavvii (in RTC ogni 10 s)
+      diaryTick(dtick, ESP.getMinFreeHeap(), g_topName, g_topPct, mhz);
+      if (dtick <= 15 || dtick % 10 == 0) { char st[20]; wdStalest(st, sizeof(st)); diaryExtra(ESP.getMaxAllocHeap(), serStallCount(), st); }                       // istantanea per il diario dei riavvii (in RTC ogni 10 s)
       if (dtick % 60 == 0) vlogl(LG_DBG, "TOP: task piu attivo %s %d%%, CPU %d%% (core %d%% e %d%%), %u MHz, %d C, RAM libera %u KB, minima %u KB",
                                  g_topName[0] ? g_topName : "-", g_topPct, g_cpu, g_cpu0, g_cpu1, (unsigned)mhz, (int)g_temp, (unsigned)(ESP.getFreeHeap() / 1024), (unsigned)(ESP.getMinFreeHeap() / 1024)); }
     { static uint32_t lifeTick = 0; if (++lifeTick >= 600) { lifeTick = 0; lifeSave(); } }   // ogni 10 minuti
@@ -160,12 +175,23 @@ static void monitorTask(void*) {
       else lowCount = 0;
       if (target != mhz) { setCpuFrequencyMhz(target); skip = true; }
     }
-    if (g_cpuHn < HIST) { g_cpuH[g_cpuHn] = g_cpu; g_tempH[g_cpuHn] = (int16_t)(g_temp * 10); g_cpuHn++; g_tempHn = g_cpuHn; }
-    else {
-      memmove(g_cpuH, g_cpuH + 1, HIST - 1);
-      memmove(g_tempH, g_tempH + 1, (HIST - 1) * sizeof(int16_t));
-      g_cpuH[HIST - 1] = g_cpu; g_tempH[HIST - 1] = (int16_t)(g_temp * 10);
+    { static uint32_t ftk = 0;
+      if (ftk++ % 30 == 0) { size_t ft = LittleFS.totalBytes(); g_flPct = ft ? (uint8_t)constrain((int)(100ULL * LittleFS.usedBytes() / ft), 0, 100) : 0; }
     }
+    trafficTick();
+    uint32_t ht = ESP.getHeapSize(), pt = ESP.getPsramSize();
+    uint8_t rp = ht ? (uint8_t)constrain((int)(100 - 100ULL * ESP.getFreeHeap() / ht), 0, 100) : 0;
+    uint8_t pp = pt ? (uint8_t)constrain((int)(100 - 100ULL * ESP.getFreePsram() / pt), 0, 100) : 0;
+    if (g_cpuHn >= HIST) {
+      memmove(g_cpuH, g_cpuH + 1, HIST - 1); memmove(g_c0H, g_c0H + 1, HIST - 1); memmove(g_c1H, g_c1H + 1, HIST - 1);
+      memmove(g_ramH, g_ramH + 1, HIST - 1); memmove(g_psH, g_psH + 1, HIST - 1); memmove(g_flH, g_flH + 1, HIST - 1);
+      memmove(g_tempH, g_tempH + 1, (HIST - 1) * sizeof(int16_t));
+      g_cpuHn = HIST - 1;
+    }
+    g_cpuH[g_cpuHn] = g_cpu; g_c0H[g_cpuHn] = g_cpu0; g_c1H[g_cpuHn] = g_cpu1;
+    g_ramH[g_cpuHn] = rp; g_psH[g_cpuHn] = pp; g_flH[g_cpuHn] = g_flPct;
+    g_tempH[g_cpuHn] = (int16_t)(g_temp * 10);
+    g_cpuHn++; g_tempHn = g_cpuHn;
   }
 }
 
@@ -239,6 +265,9 @@ String sysStatusJson() {
   j += "\"net\":" + netStatusJson() + ",";
   j += "\"mqtt\":" + String(mqttConnected() ? 2 : mqttRunning() ? 1 : 0) + ",";
   j += "\"cpuHist\":" + sysCpuHistoryJson() + ",";
+  j += "\"cpu0Hist\":" + histJson(g_c0H, g_cpuHn) + ",\"cpu1Hist\":" + histJson(g_c1H, g_cpuHn) + ",";
+  j += "\"ramHist\":" + histJson(g_ramH, g_cpuHn) + ",\"psHist\":" + histJson(g_psH, g_cpuHn) + ",\"flHist\":" + histJson(g_flH, g_cpuHn) + ",";
+  j += trafficJson() + ",";
   j += "\"tempHist\":" + sysTempHistoryJson();
   j += "}";
   return j;
@@ -264,7 +293,6 @@ String sysTasksText() {
 // Lista consentita: i moduli registrano i loro task con sysTaskRegister (nome + funzione che lo avvia).
 struct TaskDef { const char* n; SysTaskStart f; SysTaskStart stop; };
 static TaskDef g_defs[12]; static int g_ndefs = 0;
-static const char* const OURS[] = {"led", "time", "monitor", "net", "rules", "mqtt", "mesh", "wd"};
 
 void sysTaskRegister(const char* name, SysTaskStart start, SysTaskStart stop) {
   for (int i = 0; i < g_ndefs; i++) if (strcmp(g_defs[i].n, name) == 0) { g_defs[i].f = start; g_defs[i].stop = stop; return; }
@@ -276,10 +304,13 @@ static int defOf(const char* name) {
 }
 bool sysTaskRunning(const char* name) { return xTaskGetHandle(name) != NULL; }
 
+#if (configUSE_TRACE_FACILITY == 1)          // usati solo qui sotto: fuori da questo blocco darebbero l'avviso "non usata"
+static const char* const OURS[] = {"led", "time", "monitor", "net", "rules", "mqtt", "mesh", "wd"};
 static bool inList(const char* name, const char* const* list, int n) {
   for (int i = 0; i < n; i++) if (strcmp(name, list[i]) == 0) return true;
   return false;
 }
+#endif
 
 String sysTasksJson() {
 #if (configUSE_TRACE_FACILITY == 1)

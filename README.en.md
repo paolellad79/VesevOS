@@ -30,7 +30,7 @@ Wi-Fi, clock, files, LEDs, pins, a shell and much more, all protected by a passw
 </p>
 <p align="center"><sub>Screenshots of the control page (with sample data): Home in dark theme, Automations, startup order with the bottom terminal panel, and the phone layout.</sub></p>
 
-> **Status:** in development (version 1.7.9). The project grows in stages: see "Where we are going".
+> **Status:** in development (version 1.7.11). The project grows in stages: see "Where we are going".
 
 ## Why "VesevOS"?
 
@@ -155,7 +155,7 @@ Do not hold it at power-up: the board would enter download mode. Everything is e
 ```
 VesevOS/      Arduino sketch (VesevOS.ino + .h/.cpp files)
 web/          web page in HTML (source of vos_page.h, gzip-compressed)
-docs/         manual (Italian and English)
+docs/         manual, known issues (KNOWN_ISSUES) and release guide (RELEASE_DEVELOPER), in Italian and English
 assets/       README banner and screenshots
 lang/         language files (es, de) - GENERATED from tools/lang_src.json; English is inside the firmware
 licenses/     license texts (GPL, LGPL, Apache, MIT, BSD) and legal notice template

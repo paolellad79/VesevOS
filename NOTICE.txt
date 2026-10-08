@@ -25,6 +25,7 @@ Progetto: https://github.com/paolellad79/VesevOS
      Testo: "license lgpl21"
    - ESP-IDF (esp_wifi, esp_now, esp-mqtt, esp_http_server,
      esp_https_server, NVS), Mbed TLS, NimBLE (Bluetooth): Apache-2.0.
+   Bluetooth: libreria NimBLE-Arduino 2.x (Ryan Powell / h2zero e collaboratori, basata su Apache Mynewt NimBLE): Apache-2.0; installata a parte dall'utente, testo: "license apache2".
      Testo: "license apache2"
    - PsychicHttp (server web e HTTPS), ArduinoJson, FreeRTOS,
      posix_tz_db (fusi orari POSIX): MIT. Testo: "license mit"

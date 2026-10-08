@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
-// VesevOS 1.7.9 - ESP32-S3 SuperMini
+// VesevOS 1.7.11 - ESP32-S3 SuperMini
 // Piccolo sistema operativo: pagina web (HTTPS), shell, utenti, rete tra schede, automazioni. Progetto in piu file.
 //
 // Impostazioni Arduino IDE consigliate:
@@ -13,6 +13,7 @@
 #include <Arduino.h>
 #include <LittleFS.h>
 #include <esp_log.h>
+#include "vos_ram.h"
 #include "vos_common.h"
 #include "vos_log.h"
 #include "vos_diario.h"
@@ -88,7 +89,7 @@ void setup() {
 #endif
   delay(300);
   logInit();
-  if (VOS_PSRAM_MALLOC && psramFound() && heap_caps_malloc_extmem_enable) { heap_caps_malloc_extmem_enable(4096); g_extmem = true; }
+  if (VOS_PSRAM_MALLOC && psramFound() && heap_caps_malloc_extmem_enable) { heap_caps_malloc_extmem_enable(256); g_extmem = true; ramTlsToPsram(); }
   esp_log_level_set("esp-tls-mbedtls", ESP_LOG_NONE);   // un browser che non si fida del certificato non riempie la seriale di errori ogni 30 s
   esp_log_level_set("esp_https_server", ESP_LOG_NONE);
   esp_log_level_set("httpd", ESP_LOG_NONE);

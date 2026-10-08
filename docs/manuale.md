@@ -1,4 +1,4 @@
-# VesevOS 1.7.9 - Manuale
+# VesevOS 1.7.11 - Manuale
 
 Manuale per chi usa la scheda. Parole semplici, niente programmazione.
 English version: [manual.en.md](manual.en.md). Lo stesso aiuto e nella pagina della scheda (Sistema > Aiuto, oppure `http://192.168.4.1/#aiuto`).
@@ -68,9 +68,11 @@ perche la rete e gia cifrata dalla password Wi-Fi. Puoi caricare un certificato 
 ## 5. Paese, radio e localizzazione
 Sistema > Localizzazione: paese (elenco con ricerca), lingua, fuso orario, server dell'ora, formati di data e ora,
 separatore dei decimali, primo giorno della settimana, gradi C/F, antenna e potenza.
-- **Il paese decide i canali Wi-Fi e la potenza massima** secondo le sue regole: la scheda non li supera.
+- **Il paese decide i canali Wi-Fi e la potenza massima** secondo le regole che la scheda conosce: non li supera.
   Senza paese valgono le regole piu prudenti (canali 1-11).
-- Antenna esterna: indica il guadagno (dBi) e la potenza scende da sola per restare nel limite. Montarla e responsabilita di chi la monta.
+- La pagina **Radio** ha due blocchi: **Impostazioni** (antenna, guadagno, potenza: le scegli tu) e **Informazioni** (canali, limite del paese, potenza massima, regole: calcolate dalla scheda, non si modificano).
+- Antenna esterna: indica il guadagno (dBi) e la potenza scende da sola per restare nel limite.
+- **Scegliere il paese non garantisce da solo la conformita del prodotto finito**: dipende anche dall'hardware, dall'antenna, dal montaggio e dalle regole del luogo. Chi installa la scheda ne e responsabile.
 
 ## 6. Servizi (spenti di fabbrica)
 MQTT, rete tra schede, Bluetooth, server dell'ora per altri dispositivi e filtro IP **sono spenti**: la prima volta li accendi tu.
@@ -86,8 +88,8 @@ Una regola nuova vale 2 minuti: se la pagina risponde ancora premi **Conferma**,
 L'hotspot della scheda e la seriale sono sempre ammessi. Uscite di emergenza: `firewall off` dalla seriale o BOOT 2-7 secondi.
 
 ## 8. Watchdog e controlli
-- **Watchdog** (Servizi > Watchdog): se un servizio si blocca lo riavvia, poi riavvia la scheda; massimo 3 riavvii automatici
-  in un'ora, poi si ferma e avvisa. Facoltativi: rete assente, RAM bassa, riavvio programmato.
+- **Watchdog** (Servizi > Watchdog): se un servizio si blocca lo riavvia, poi riavvia la scheda. Facoltativi: rete assente, RAM bassa, riavvio programmato.
+- **Modalita ridotta** (1.7.11): dopo 3 riavvii automatici in un'ora la scheda **non si riavvia piu** e non resta ferma: se sa quale servizio si e bloccato (MQTT, rete tra schede, LED) spegne solo quello; se non lo sa (rete, RAM, servizio di base) spegne MQTT, rete tra schede e Bluetooth. Pagina web, registro, aggiornamento e recupero restano attivi. La pagina Watchdog dice cosa e stato spento e perche. Vale fino al prossimo riavvio; la configurazione salvata non cambia.
 - **Compliant** (Sicurezza > Compliant): la scheda controlla la configurazione. Rosso = valore vietato (legge o sicurezza),
   corretto subito. Giallo = permesso ma rischioso. Il registro dice chi ha cambiato cosa (pagina, seriale, file).
 
@@ -147,14 +149,14 @@ del paese non si superano; (3) niente password uguali per tutti.
 ## 13. Configurazione solo da seriale
 Senza pagina web: apri il monitor seriale (115200) e scrivi `setup`. Chiede: lingua, paese, nome, antenna, hotspot (mostra la password,
 `n` = nuova), password dell'amministratore (si vede mentre scrivi: fallo in un luogo sicuro), Wi-Fi di casa (elenco numerato), ora.
-Invio = tieni il valore, `skip` = salta, `quit` = esci. Comandi singoli: `lang`, `locale country XX`, `hostname`, `wifi set <rete> [password]`,
-`wifi off`, `ntp on|off`, `date set AAAA-MM-GG HH:MM`, `svc ap|captive|http|https on|off`, `svc http-port N`, `svc https-port N`, `ap new`.
+Invio = tieni il valore, `skip` = salta, `quit` = esci. Comandi singoli: `lang`, `locale country XX`, `hostname`, `wifi set <rete> [password]` (con spazi: `wifi set "Casa mia" password`),
+`wifi off`, `ntp on|off`, `ntp server <nome>`, `ntp server2 <nome|off>`, `date set AAAA-MM-GG HH:MM`, `svc ap|captive|http|https on|off`, `svc http-port N`, `svc https-port N`, `ap new`.
 Dopo la guida valgono le regole di sicurezza (seriale con password, se acceso).
 
 ## 14. Servizi di rete: NTP, DHCP, DNS, mDNS (novita 1.7.3)
 
 Ognuno ha la sua scheda in **Servizi** e si puo spegnere.
-- **NTP**: ora da Internet (serve la Wi-Fi di casa). Spento = ora a mano.
+- **NTP**: ora da Internet (serve la Wi-Fi di casa). Spento = ora a mano. Di fabbrica contatta solo `pool.ntp.org`; un secondo server si aggiunge a scelta (`ntp server2 <nome>`). Ogni richiesta mostra ai server il tuo IP pubblico. Se l'ora ricevuta non e credibile (prima del 2026 o un salto di oltre un giorno) viene scartata e compare un avviso.
 - **DHCP**: da gli indirizzi a chi si collega all'hotspot. Durata da 10 a 1440 minuti. Si spegne solo con la Wi-Fi di casa collegata.
 - **DNS**: il portale automatico dell'hotspot (serve HTTP sulla porta 80).
 - **mDNS**: il nome NOME.local. Spento = solo indirizzo IP.
@@ -177,7 +179,7 @@ PSRAM da 2 MB di questa scheda (occupati sulle schede con PSRAM octal).
 - **Anti-bot**: all'accesso il browser risolve una piccola prova di lavoro (difficolta in Sicurezza). Niente captcha esterni.
 - **Certificato**: Sistema > Certificato: scadenza, impronta, scarica, rigenera, importa.
 - **Risparmio energia**: Servizi > Risparmio energia. Sonno programmato = la scheda dorme e si sveglia dopo il tempo scelto (1 min - 7 giorni). Non si sveglia con BOOT: usa RESET. Nel sonno Wi-Fi e pagina sono spenti.
-- **Statistiche**: spente di fabbrica; solo contatori anonimi; scarica CSV; azzera.
+- **Statistiche locali**: spente di fabbrica; contatori che restano nella scheda e non vengono mai inviati fuori; scarica CSV; azzera.
 - **Seriale**: `power`, `sleep [min]`, `stats`.
 
 
@@ -196,3 +198,18 @@ Sistema > Sicurezza > **Seriale (cavo USB)** (solo Admin) oppure, dalla seriale 
 - **Attesa massima di scrittura** (0-200 ms, di fabbrica 10): quanto la scheda aspetta il PC prima di lasciar perdere il testo. Con 0 puo perdere pezzi di testo.
 - Comandi: `serial` (mostra), `serial baud 115200`, `serial eol crlf|lf|cr`, `serial echo|input|log|banner on|off`, `serial tx 10`, `serial keep`. Per spegnere i comandi serve `serial input off yes`.
 - Se spegni "accetta comandi" e ti serve la seriale: riaccendila da questa pagina oppure tieni premuto BOOT da 8 a 19 secondi (azzera anche le password degli amministratori).
+- Seriale (1.7.9a): Backspace cancella l'ultimo carattere (anche sullo schermo), Ctrl+U o Ctrl+C svuotano la riga; frecce e Canc vengono ignorati.
+- `ram` (1.7.9a, misura per ridurre la RAM): per ogni task stack libero minimo, stack totale e quanto si potrebbe togliere. `ram mark` segna la RAM di adesso; accendi o spegni un servizio e scrivi `ram diff` per vedere quanto costa (RAM interna, pezzo piu grande, PSRAM). Solo Admin.
+- `free detail` (1.7.9a): RAM interna, pezzo piu grande, frammentazione, PSRAM. Se il pezzo piu grande scende sotto 45 KB compare un avviso giallo "Memoria frammentata": riavvia la scheda.
+
+## 20. Device Manager (novita 1.7.11)
+Un solo gruppo di menu, **Device Manager**, con tutte le periferiche: virtuali (MQTT, rete tra schede, Bluetooth, MFA, statistiche) e hardware (pin, LED, tasto BOOT, USB, temperatura, memoria, processore, radio). Ognuna risponde alle stesse regole: elenco, stato (spenta / accesa / con problema), accendi e spegni (solo Admin), dettagli e azioni.
+- Dalla seriale o dal terminale: `dev list`, `dev status <nome>`, `dev on <nome>`, `dev off <nome>`, `dev act <nome> <azione> [valore]` (es. `dev act pin test 5,high`).
+- **Package a compilazione** (per chi compila): in `vos_common.h` `VOS_WITH_BLE`, `VOS_WITH_MQTT`, `VOS_WITH_MESH`, `VOS_WITH_MFA`, `VOS_WITH_STATS` (1 = dentro il firmware, 0 = fuori). Le schede delle parti tolte spariscono dalla pagina. Il comando `diag` dice quali package ci sono.
+
+## 21. Backup e ripristino (novita 1.7.11)
+Sistema > **Backup e ripristino** (solo Admin).
+- **Scarica senza segreti**: configurazione senza password e chiavi (di fabbrica).
+- **Includi anche i segreti**: spunta, scegli una **frase di almeno 10 caratteri**, scrivila due volte e accetta l'avviso. Il file e **cifrato** (PBKDF2-HMAC-SHA256 + AES-256-GCM): senza la frase non si legge. Chi ha il file e la frase puo entrare nella scheda e nella tua rete; **se perdi la frase i segreti non si recuperano**. Ogni esportazione con segreti resta scritta nel registro.
+- **Ripristina da file**: scegli il file (e, se e cifrato, scrivi la frase). La pagina dice quante righe sono cambiate. Una frase sbagliata conta come errore di accesso.
+- **Ripristino di fabbrica**: cancella impostazioni, utenti e password; per confermare devi scrivere la parola AZZERA.

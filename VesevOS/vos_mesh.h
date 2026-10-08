@@ -8,7 +8,9 @@
 // - Solo sui canali ammessi dal paese scelto. Il contenuto non e cifrato: niente dati personali o segreti.
 #pragma once
 #include <Arduino.h>
+#include "vos_common.h"
 
+#if VOS_WITH_MESH
 void   meshInit();                                  // registra il servizio; parte solo se gia attivato a mano (auto)
 bool   meshStart(String& err);                      // accende (serve il Wi-Fi acceso e la chiave)
 void   meshStop();
@@ -20,3 +22,17 @@ String meshNewKey();                                // 64 cifre esadecimali casu
 String meshJson();                                  // stato, nodi, ultimi messaggi
 String meshText();
 int    meshChannel();                               // canale in uso
+#else
+// Package spento (VOS_WITH_MESH = 0): funzioni vuote, il resto del codice non cambia.
+inline void   meshInit() {}
+inline bool   meshStart(String& err) { err = "ESP-NOW non presente in questo firmware"; return false; }
+inline void   meshStop() {}
+inline bool   meshRunning() { return false; }
+inline int    meshNodeCount() { return 0; }
+inline bool   meshSendCmd(const String&, const String&, String& err) { err = "ESP-NOW non presente in questo firmware"; return false; }
+inline bool   meshSendText(const String&, const String&, String& err) { err = "ESP-NOW non presente in questo firmware"; return false; }
+inline String meshNewKey() { return ""; }
+inline String meshJson() { return "{\"present\":false}"; }
+inline String meshText() { return "ESP-NOW: non presente in questo firmware"; }
+inline int    meshChannel() { return 0; }
+#endif

@@ -38,8 +38,8 @@ void cfgDefaults() {
   cfg.banFails = 5; cfg.banSecs = 60; cfg.powBits = 14; cfg.mfaNoTime = 0;
   cfg.mqttAuto = false; cfg.mqttHost = ""; cfg.mqttUser = ""; cfg.mqttPass = ""; cfg.mqttPrefix = ""; cfg.mqttPort = 1883; cfg.mqttEvery = 30; cfg.mqttHa = true; cfg.mqttTls = false;
   cfg.airOn = 0; cfg.airExit = 0; cfg.airUntil = 0; cfg.airAt = 0;
-  cfg.ntpOn = true; cfg.ntpServe = false; cfg.ntpEvery = 60;
-  cfg.ntpServer = "pool.ntp.org";
+  cfg.ntpOn = true; cfg.ntpServe = false; cfg.ntpAutoOff = false; cfg.ntpEvery = 60;
+  cfg.ntpServer = "pool.ntp.org"; cfg.ntpServer2 = "";   // nessun secondo server di fabbrica (niente Google)
   cfg.tz = "CET-1CEST,M3.5.0,M10.5.0/3"; cfg.tzName = "Europe/Rome";
   cfg.cpuMhz = 0; cfg.logLevel = 2; cfg.statOn = false; cfg.pwMode = 0; cfg.pwAwake = 15; cfg.pwSleep = 10;
   cfg.dateFmt = 0; cfg.timeFmt = 0; cfg.tempUnit = 0; cfg.weekStart = 0; cfg.decSep = 0;
@@ -170,7 +170,9 @@ String cfgExport(bool withSecrets) {
   opt(s, "at", String(cfg.airAt));
   s += "\nconfig time 'time'\n";
   opt(s, "ntp", cfg.ntpOn ? "1" : "0");
+  opt(s, "ntpauto", cfg.ntpAutoOff ? "1" : "0");
   opt(s, "server", cfg.ntpServer);
+  opt(s, "server2", cfg.ntpServer2);
   opt(s, "serve", cfg.ntpServe ? "1" : "0");
   opt(s, "every", String((unsigned long)cfg.ntpEvery));
   opt(s, "tz", cfg.tz);
@@ -337,9 +339,11 @@ static void applyKey(const String& sec, const String& k, const String& v) {
     else if (k == "at") cfg.airAt = constrain(v.toInt(), 0, 1439);
   } else if (sec == "time") {
     if (k == "ntp") cfg.ntpOn = (v == "1");
+    else if (k == "ntpauto") cfg.ntpAutoOff = (v == "1");
     else if (k == "serve") cfg.ntpServe = (v == "1");
     else if (k == "every") { long m = v.toInt(); if (m >= 0 && m <= 10080) cfg.ntpEvery = m; }
     else if (k == "server" && v.length()) cfg.ntpServer = v;
+    else if (k == "server2") cfg.ntpServer2 = v;
     else if (k == "tz" && v.length()) cfg.tz = v;
     else if (k == "tzname" && v.length()) cfg.tzName = v;
     else if (k == "datefmt") cfg.dateFmt = constrain(v.toInt(), 0, 2);
@@ -445,6 +449,16 @@ static String g_lastPub;     // ultimo testo salvato SENZA password (per il regi
 static bool g_saveOk = true;
 bool cfgLastSaveOk() { return g_saveOk; }
 static bool saveFail(const char* why) { vlog("CFG: %s", why); g_saveOk = false; auditRefresh(); return false; }
+
+// F2 (1.7.9a): la guida senza Wi-Fi spegne NTP e lo segna come "spento dalla guida".
+// Quando poi arriva il Wi-Fi di casa (shell, pagina, Bluetooth) NTP si riaccende da solo.
+// Se invece l'utente lo ha spento lui, resta spento.
+bool cfgNtpAfterWifi() {
+  if (!cfg.ntpAutoOff) return false;
+  cfg.ntpAutoOff = false; cfg.ntpOn = true;
+  vlog("TIME: NTP acceso (Wi-Fi di casa impostata): contatta %s%s%s; ogni richiesta mostra il tuo IP pubblico, per spegnere: ntp off", cfg.ntpServer.c_str(), cfg.ntpServer2.length() ? " e " : "", cfg.ntpServer2.c_str());
+  return true;
+}
 
 bool cfgSave() {
   auditFix();                                        // valori fuori regola: corretti prima di salvare

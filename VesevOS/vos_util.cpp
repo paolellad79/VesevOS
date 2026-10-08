@@ -131,3 +131,59 @@ bool domainValid(const String& s) {
   }
   return true;
 }
+
+// F1 (1.7.9a): un argomento e una parola, oppure un testo tra virgolette doppie ("Casa mia").
+// Dentro le virgolette \" vale una virgoletta. Se manca la virgoletta finale si prende tutto fino alla fine.
+bool utilTakeArg(const String& s, int& pos, String& out) {
+  out = "";
+  int n = (int)s.length();
+  while (pos < n && s[pos] == ' ') pos++;
+  if (pos >= n) return false;
+  if (s[pos] == '"') {
+    pos++;
+    while (pos < n && s[pos] != '"') {
+      if (s[pos] == '\\' && pos + 1 < n && s[pos + 1] == '"') { out += '"'; pos += 2; continue; }
+      out += s[pos++];
+    }
+    if (pos < n) pos++;                       // salta la virgoletta finale
+    return true;
+  }
+  while (pos < n && s[pos] != ' ') out += s[pos++];
+  return true;
+}
+
+bool utilHostOk(const String& s) {
+  if (s.length() < 1 || s.length() > 60) return false;
+  for (size_t i = 0; i < s.length(); i++) { char ch = s[i]; if (!((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '.' || ch == '-')) return false; }
+  return true;
+}
+
+// Mai prima del 1 gennaio 2026; dopo una sincronizzazione buona, un salto di piu di un giorno e sospetto
+// (si accetta comunque alla quarta volta di fila: vuol dire che l'ora vera e cambiata davvero)
+bool utilTimeSyncOk(uint32_t got, uint32_t expected, uint8_t refused) {
+  if (got < 1767225600UL) return false;
+  if (expected && refused < 3) { uint32_t d = got > expected ? got - expected : expected - got; if (d > 86400UL) return false; }
+  return true;
+}
+
+// Quanto stack si puo togliere a un task: il libero minimo visto, meno il 25% dello stack totale tenuto di scorta
+uint32_t utilStackSpare(uint32_t total, uint32_t freeMin) {
+  if (!total) return 0;
+  uint32_t keep = total / 4;
+  if (freeMin <= keep) return 0;
+  return ((freeMin - keep) / 256U) * 256U;
+}
+
+// Riga in digitazione sulla seriale. Il terminale non cancella da solo: serve rimandargli "\b \b" per ogni carattere tolto.
+// Le sequenze ESC (frecce, Canc, Home...) non devono finire nella riga come lettere: ESC [ ... lettera -> scartata.
+bool utilEditKey(String& buf, uint8_t& esc, char ch, String& echo, size_t maxLen) {
+  echo = "";
+  if (esc == 1) { esc = (ch == '[') ? 2 : (ch == 'O') ? 3 : 0; return true; }
+  if (esc == 2) { if ((uint8_t)ch >= 0x40 && (uint8_t)ch <= 0x7E) esc = 0; return true; }
+  if (esc == 3) { esc = 0; return true; }
+  if (ch == 27) { esc = 1; return true; }
+  if (ch == 8 || ch == 127) { if (buf.length()) { buf.remove(buf.length() - 1); echo = "\b \b"; } return true; }
+  if (ch == 21 || ch == 3) { for (size_t i = 0; i < buf.length(); i++) echo += "\b \b"; buf = ""; return true; }
+  if (ch >= 32 && ch < 127) { if (buf.length() < maxLen) { buf += ch; echo = String(ch); } return true; }
+  return false;
+}

@@ -14,3 +14,4 @@ String  serialText();                                    // riassunto per la she
 String  serialJson();                                    // per la pagina
 bool    serialKeep();                                    // conferma la nuova velocita
 void    serialTick();                                    // ogni giro di loop: se la velocita nuova non e confermata torna la vecchia
+uint32_t serStallCount();                                // quante volte il PC non ha letto in tempo (scritture buttate via)

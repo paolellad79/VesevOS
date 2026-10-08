@@ -13,6 +13,9 @@
 #include "mbedtls/md.h"
 #include <time.h>
 
+static int hexNib(char c) { return c >= '0' && c <= '9' ? c - '0' : c >= 'a' && c <= 'f' ? c - 'a' + 10 : c >= 'A' && c <= 'F' ? c - 'A' + 10 : -1; }
+
+#if VOS_WITH_MFA
 #define MFA_TOK_MS   120000UL
 #define MFA_TRIES    5
 
@@ -21,7 +24,6 @@ struct Tok { String tok; int idx; uint32_t t; uint8_t tries; bool noTime; bool r
 static Tok g_tok[2];
 
 static String hexOfBytes(const uint8_t* b, int n) { static const char* hx = "0123456789abcdef"; String r; for (int i = 0; i < n; i++) { r += hx[b[i] >> 4]; r += hx[b[i] & 15]; } return r; }
-static int hexNib(char c) { return c >= '0' && c <= '9' ? c - '0' : c >= 'a' && c <= 'f' ? c - 'a' + 10 : c >= 'A' && c <= 'F' ? c - 'A' + 10 : -1; }
 static bool hexToBytes(const String& h, uint8_t* out, int n) {
   if ((int)h.length() != n * 2) return false;
   for (int i = 0; i < n; i++) { int a = hexNib(h[2 * i]), b = hexNib(h[2 * i + 1]); if (a < 0 || b < 0) return false; out[i] = a * 16 + b; }
@@ -187,6 +189,8 @@ int mfaLoginCheck(const String& tok, const String& code, uint32_t browserNow, in
   err = "";
   return 1;
 }
+
+#endif  // VOS_WITH_MFA
 
 bool powCheck(const String& nonce, const String& answer) {
   if (!cfg.powBits) return true;

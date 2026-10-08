@@ -9,6 +9,8 @@ const SALT='0123456789abcdef0123456789abcdef',ITER=3000;
 const sha=s=>crypto.createHash('sha256').update(s,'utf8').digest('hex');
 let HASH=(()=>{let h=sha(SALT+'prova123');for(let i=0;i<ITER;i++)h=sha(h+SALT+'prova123');return h})();
 const NONCES={};
+const DEVS=[{id:'mqtt',label:'MQTT',cap:'Messaggi',kind:0,tab:'mqtt',state:0,sw:1,act:1},{id:'mesh',label:'ESP-NOW',cap:'Radio',kind:0,tab:'mesh',state:0,sw:1,act:0},{id:'ble',label:'Bluetooth',cap:'Radio',kind:0,tab:'ble',state:0,sw:1,act:0},{id:'mfa',label:'MFA (due passaggi)',cap:'Sicurezza',kind:0,tab:'mfa',state:0,sw:0,act:0},{id:'stat',label:'Statistiche',cap:'Misure',kind:0,tab:'stat',state:0,sw:1,act:0},
+{id:'pin',label:'Pin (GPIO)',cap:'Ingressi e uscite',kind:1,tab:'pin',state:1,sw:0,act:1},{id:'led',label:'LED di stato',cap:'Luce',kind:1,tab:'led',state:1,sw:1,act:1},{id:'boot',label:'Tasto BOOT',cap:'Pulsante',kind:1,tab:'btn',state:1,sw:0,act:0},{id:'usb',label:'USB',cap:'Collegamenti',kind:1,tab:'usb',state:1,sw:0,act:0},{id:'temp',label:'Temperatura del chip',cap:'Sensori',kind:1,tab:'temp',state:1,sw:0,act:0},{id:'mem',label:'Memoria',cap:'Risorse',kind:1,tab:'mem',state:1,sw:0,act:0},{id:'cpu',label:'Processore',cap:'Risorse',kind:1,tab:'cpu',state:1,sw:0,act:0},{id:'rad',label:'Radio 2,4 GHz',cap:'Radio',kind:1,tab:'rad',state:1,sw:0,act:0}];
 let ST={on:false,sec:600,wifiUp:2,wifiDown:1,wifiSec:500,rssiAvg:-61,rssiMin:-80,apMax:2,bleStart:1,bleConn:1,boot:[1,0,0,0],bootLast:30,bootEver:true,led:[600,0,0,0]};
 let PWR={mode:0,awake:15,sleep:10,in:0,wakes:2,slept:1200,guide:true};
 let POW=12,MFA={on:false,pend:false,rec:0,nt:0},MTOK='';
@@ -24,7 +26,7 @@ const NET={mode:"AP",st:1,host:"vesevos",mac:"AA:BB:CC:DD:A4:F2",apMac:"AA:BB:CC
 let NTPON=true,TASKLED=2;
 let STST=0,LOGLV=2,BOOTS=true;
 var SRD={baud:115200,usb:false,eol:'crlf',echo:true,input:true,log:true,banner:true,tx:10,trial:false};
-const status={name:"VesevOS",version:"1.7.9",uptime:"1h 2min 3s",lifeSec:93784,chip:"ESP32-S3",rev:2,cores:2,flashChip:4194304,idf:"v5.5",serialAuth:true,reset:"Accensione",boots:5,net:NET,mqtt:0,cpu:12,cpu0:15,cpu1:9,cpuMhz:160,cpuMode:0,temp:41.2,tempUnit:0,hot:false,heapTotal:300000,heapFree:150000,psramTotal:2000000,psramFree:1900000,flashTotal:190000,flashUsed:20000,cpuHist:[1,2,3,4,5,6,7,8,9,10],tempHist:[40,41,42]};
+const status={name:"VesevOS",version:"1.7.11",uptime:"1h 2min 3s",lifeSec:93784,chip:"ESP32-S3",rev:2,cores:2,flashChip:4194304,idf:"v5.5",serialAuth:true,reset:"Accensione",boots:5,net:NET,mqtt:0,cpu:12,cpu0:15,cpu1:9,cpuMhz:160,cpuMode:0,temp:41.2,tempUnit:0,hot:false,heapTotal:300000,heapFree:150000,psramTotal:2000000,psramFree:1900000,flashTotal:190000,flashUsed:20000,trafHook:true,inHist:[100,2000,5000,800,300,9000,12000,500],outHist:[50,100,3000,200,100,400,6000,100],cpuHist:[1,2,3,4,5,6,7,8,9,10],cpu0Hist:[5,20,40,30,60,50,20,10,15,15],cpu1Hist:[2,5,10,8,30,70,60,20,9,9],ramHist:[50,50,51,51,52,52,50,50,50,50],psHist:[5,5,5,6,6,5,5,5,5,5],flHist:[10,10,10,10,10,10,10,10,10,10],tempHist:[40,41,42]};
 let REGION={country:process.env.FIRST?'':'IT',ch:13,limit:20,max:20,tx:20,txSet:0,antExt:0,gain:0,weekStart:0,decSep:0,dateFmt:0,timeFmt:0,tempUnit:0,tz:'CET-1CEST,M3.5.0,M10.5.0/3',tzName:'Europe/Rome',ntp:'it.pool.ntp.org',lang:'it'};
 let USERS=[{i:0,name:'admin',role:2,on:true,pass:true},{i:1,name:'ospite',role:0,on:true,pass:true}];
 const AP={ssid:'VesevOS',pass:'kd7mq4xnb3ph',qr:true};
@@ -33,7 +35,7 @@ const PNOTE={};
 const WT={state:0};
 const AUDIT={alarms:process.env.FIRST?[{n:1,lv:1,ack:false,key:'nocountry',text:'Paese non scelto: la radio usa le regole piu prudenti'}]:[{n:1,lv:1,ack:false,key:'serial',text:'La seriale non e protetta da password'}],history:['03/10 19:40 region.country = IT (web admin 192.168.4.2)']};
 const FW={mode:0,ntp:false,try:0,you:'192.168.4.2',youOk:true,rules:[],rejected:[{ip:'10.0.0.9',n:3}]};
-const WD={task:true,net:false,ram:true,netMin:10,ramKb:30,upDays:0,at:-1,days:127,stopped:false,last:'',watch:[{n:'net',to:90,ago:1,r:0},{n:'monitor',to:20,ago:0,r:0}]};
+const WD={task:true,net:false,ram:true,netMin:10,ramKb:30,upDays:0,at:-1,days:127,stopped:false,degraded:false,off:'',last:'',watch:[{n:'net',to:90,ago:1,r:0},{n:'monitor',to:20,ago:0,r:0}]};
 const TLS={on:true,custom:false,pending:false,fp:'AB:CD:EF:01:23:45:67:89:AB:CD:EF:01:23:45:67:89:AB:CD:EF:01:23:45:67:89:AB:CD:EF:01:23:45:67:89',name:'vesevos.local',from:'2026-10-04',to:'2036-10-01'};
 const MESH={run:false,auto:false,role:0,hasKey:false,ch:1,chMax:13,me:'AA:BB:CC:DD:A4:F3',sent:0,recv:0,bad:0,nodes:[{mac:'AA:BB:CC:00:00:01',name:'cucina',role:2,hops:1,rssi:-60,ago:3,ccx:false,state:'24.1C'}],msgs:[{from:'cucina',text:'ciao',when:'19:40'}]};
 const MQS={run:false,conn:false};
@@ -67,6 +69,15 @@ http.createServer((q,res)=>{
   if(P=='/api/login'){return body(q,p=>{const n=p.get('nonce');if(p.get('hp'))return j(res,{ok:false,err:'Nome o password errati'});if(!powOk(n,p.get('pw')))return j(res,{ok:false,err:'Prova di lavoro non valida'});const ok=NONCES[n]==p.get('u')&&p.get('u')=='admin'&&crypto.createHmac('sha256',HASH).update(n).digest('hex')==p.get('mac');delete NONCES[n];
     if(!ok)return j(res,{ok:false,err:'Nome o password errati'});if(MFA.on){MTOK=crypto.randomBytes(8).toString('hex');return j(res,{ok:false,mfa:true,tok:MTOK,notime:false,recOnly:false})}login(res,{ok:true,user:'admin',role})})}
   if(P=='/api/login/mfa'){return body(q,p=>{if(p.get('tok')!=MTOK||!/^(123456|ABCD-EFGH)$/.test(p.get('code')))return j(res,{ok:false,err:'Codice errato'});login(res,{ok:true,user:'admin',role})})}
+  if(P=='/api/dev'){
+    const id=u.searchParams.get('id');
+    if(id){const d=DEVS.find(x=>x.id==id);if(!d)return j(res,{ok:false},404);
+      const rows={boot:[['Premuto adesso','no'],['Pressione breve','modo aereo']],usb:[['Collegamento','USB nativo']],temp:[['Temperatura del chip','41.0 C']],mem:[['RAM interna libera','151 KB / 300 KB']],cpu:[['Velocita','160 MHz']],rad:[['Paese','IT']]}[id];
+      return j(res,{id:d.id,label:d.label,kind:d.kind,state:d.state,sw:d.sw,data:rows?{rows}:{}})}
+    return j(res,{dev:DEVS})}
+  if(P=='/api/dev/set'){return body(q,p=>{const d=DEVS.find(x=>x.id==p.get('id'));if(!d||!d.sw)return j(res,{ok:false,err:'Questa periferica non si accende o si spegne da qui'});d.state=p.get('on')=='1'?1:0;j(res,{ok:true})})}
+  if(P=='/api/config/export'&&q.method=='POST')return body(q,p=>{if(p.get('acc')!='1')return j(res,{ok:false,err:'Devi accettare l\'avviso per esportare i segreti'});res.writeHead(200,{'Content-Type':'text/plain'});res.end('VOSENC1 20000 00 00 00 00\n')});
+  if(P=='/api/config/restore'&&q.method=='POST')return body(q,p=>j(res,{ok:true,changed:3}));
   if(P=='/api/stats'){if(q.method=='POST')return body(q,p=>{if(p.get('on')!==null)ST.on=p.get('on')=='1';j(res,ST)});return j(res,ST)}
   if(P=='/api/power'){if(q.method=='POST')return body(q,p=>{const m=+p.get('mode'),a=+p.get('awake'),sl=+p.get('sleep');if(m==2&&(a<10||a>1440))return j(res,{ok:false,err:'Tempo da sveglia: da 10 minuti a 24 ore'});PWR.mode=m;if(m==2){PWR.awake=a;PWR.sleep=sl;PWR.in=600}j(res,PWR)});return j(res,PWR)}
   if(P=='/api/mfa/begin'&&q.method=='POST'){MFA.pend=true;return j(res,{uri:'otpauth://totp/VesevOS:admin@vesevos?secret=JBSWY3DPEHPK3PXP&issuer=VesevOS',key:'JBSW Y3DP EHPK 3PXP'})}

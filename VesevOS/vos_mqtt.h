@@ -10,7 +10,9 @@
 // Home Assistant: se attivo, la scheda si presenta da sola (homeassistant/sensor/...).
 #pragma once
 #include <Arduino.h>
+#include "vos_common.h"
 
+#if VOS_WITH_MQTT
 void   mqttInit();                          // registra il servizio; parte se "avvio automatico" e acceso
 void   mqttStart();                         // avvia (o riavvia) il client
 void   mqttStop();                          // ferma il client e il task
@@ -20,3 +22,15 @@ bool   mqttPublishRel(const String& sub, const String& payload, bool retain = fa
 String mqttStatusJson();
 String mqttStatusText();
 String mqttPrefix();
+#else
+// Package spento (VOS_WITH_MQTT = 0): funzioni vuote, il resto del codice non cambia.
+inline void   mqttInit() {}
+inline void   mqttStart() {}
+inline void   mqttStop() {}
+inline bool   mqttRunning() { return false; }
+inline bool   mqttConnected() { return false; }
+inline bool   mqttPublishRel(const String&, const String&, bool = false) { return false; }
+inline String mqttStatusJson() { return "{\"present\":false}"; }
+inline String mqttStatusText() { return "MQTT: non presente in questo firmware"; }
+inline String mqttPrefix() { return ""; }
+#endif

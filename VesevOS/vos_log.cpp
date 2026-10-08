@@ -31,9 +31,10 @@ void logInit() {
 void logSetLevel(int lv) { g_level = constrain(lv, 0, 3); }
 int  logLevel() { return g_level; }
 
+// il livello si decide dall'INIZIO della riga (e un testo scelto dall'utente, come il nome della scheda, non puo alzarlo)
 static int autoLevel(const char* b) {
-  if (strstr(b, "ERRORE") || strstr(b, "AUDIT: ROSSO")) return LG_ERR;
-  if (strstr(b, "ATTENZIONE") || strstr(b, "AUDIT: GIALLO")) return LG_WARN;
+  if (!strncmp(b, "ERRORE", 6) || !strncmp(b, "AUDIT: ROSSO", 12)) return LG_ERR;
+  if (!strncmp(b, "ATTENZIONE", 10) || !strncmp(b, "AUDIT: GIALLO", 13)) return LG_WARN;
   return LG_INFO;
 }
 

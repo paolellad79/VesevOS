@@ -9,6 +9,7 @@
 #include "vos_i18n.h"
 #include <WiFi.h>
 
+#if VOS_WITH_STATS
 struct Stats {
   uint32_t t0;                                    // secondi dall'avvio quando e iniziato il conteggio
   uint32_t wifiUp, wifiDown, wifiSec;             // collegamenti, cadute, secondi collegato
@@ -99,3 +100,4 @@ String statsText() {
   t += trf("LED (secondi): stato %lu, battito %lu, fisso %lu, spento %lu", (unsigned long)g.ledSec[0], (unsigned long)g.ledSec[1], (unsigned long)g.ledSec[2], (unsigned long)g.ledSec[3]) + "\n";
   return t;
 }
+#endif  // VOS_WITH_STATS

@@ -58,8 +58,9 @@ struct VosConfig {
   uint8_t  ledBrightness;        // 0..255
   uint8_t  ledPin;
   bool   ntpOn, ntpServe;        // client NTP, server NTP per altri dispositivi
+  bool   ntpAutoOff;             // NTP spento DALLA GUIDA (nessun Wi-Fi): si riaccende da solo quando arriva il Wi-Fi
   uint32_t ntpEvery;             // minuti tra due sincronizzazioni NTP (0 = solo all'avvio)
-  String ntpServer, tz, tzName;  // server, fuso (formato POSIX), nome
+  String ntpServer, ntpServer2, tz, tzName;  // server, secondo server (vuoto = nessuno), fuso (formato POSIX), nome
   uint8_t dateFmt, timeFmt, tempUnit;   // data: 0 GG/MM/AAAA 1 AAAA-MM-GG 2 MM/GG/AAAA; ora: 0=24h 1=12h; temp: 0=C 1=F
   uint8_t weekStart, decSep;     // 0 = lunedi / 1 = domenica; 0 = virgola / 1 = punto
   String  country;               // paese (ISO 3166, es. "IT"); vuoto = non scelto (regole prudenti)
@@ -106,6 +107,7 @@ extern VosConfig cfg;
 
 void   cfgDefaults();
 bool   cfgLoad();                       // da file (true se trovato)
+bool   cfgNtpAfterWifi();             // chiamare quando si imposta il Wi-Fi di casa: riaccende NTP se lo aveva spento la guida; true se e cambiato
 bool   cfgSave();                       // salvataggio sicuro (.tmp/.bak) + controllo (allarmi) + registro delle modifiche
 String cfgExport(bool withSecrets);     // testo OpenWrt
 bool   cfgImport(const String& text, String& err);   // ripristino: chiavi assenti restano

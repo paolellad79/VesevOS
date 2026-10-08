@@ -18,6 +18,7 @@
 #include "vos_wd.h"
 #include <LittleFS.h>
 
+#if VOS_WITH_MQTT
 static esp_mqtt_client_handle_t g_cli = nullptr;
 static volatile bool g_conn = false, g_onConnect = false, g_stopReq = false;
 static volatile uint32_t g_sent = 0, g_recv = 0;
@@ -226,3 +227,4 @@ String mqttStatusText() {
   if (g_lastErr.length()) t += trf("Ultimo errore: %s", g_lastErr.c_str()) + "\n";
   return t;
 }
+#endif  // VOS_WITH_MQTT

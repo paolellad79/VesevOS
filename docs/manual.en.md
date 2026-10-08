@@ -1,4 +1,4 @@
-# VesevOS 1.7.9 - Manual
+# VesevOS 1.7.11 - Manual
 
 Manual for people who use the board. Plain words, no programming.
 Versione italiana: [manuale.md](manuale.md). The same help is in the board's page (System > Help, or `http://192.168.4.1/#aiuto`).
@@ -68,9 +68,11 @@ because the network is already encrypted by the Wi-Fi password. You can upload y
 ## 5. Country, radio and localization
 System > Localization: country (list with search), language, time zone, time server, date and time formats,
 decimal separator, first day of the week, C/F degrees, antenna and power.
-- **The country sets the Wi-Fi channels and the maximum power** according to its rules: the board never exceeds them.
+- **The country sets the Wi-Fi channels and the maximum power** according to the rules the board knows: it never exceeds them.
   Without a country the safest rules apply (channels 1-11).
-- External antenna: enter its gain (dBi) and the power drops by itself to stay within the limit. Fitting it is the installer's responsibility.
+- The **Radio** page has two blocks: **Settings** (antenna, gain, power: you choose them) and **Information** (channels, country limit, maximum power, rules: calculated by the board, read-only).
+- External antenna: enter its gain (dBi) and the power drops by itself to stay within the limit.
+- **Choosing the country does not by itself guarantee that the finished product is compliant**: that also depends on the hardware, the antenna, the installation and the local rules. Whoever installs the board is responsible.
 
 ## 6. Services (off by default)
 MQTT, board network, Bluetooth, time server for other devices and IP filter **are off**: you turn them on the first time.
@@ -86,8 +88,8 @@ A new rule lasts 2 minutes: if the page still answers press **Confirm**, otherwi
 The board's hotspot and the serial are always allowed. Emergency exits: `firewall off` on the serial or BOOT 2-7 seconds.
 
 ## 8. Watchdog and checks
-- **Watchdog** (Services > Watchdog): if a service hangs it restarts it, then the board; at most 3 automatic restarts per hour,
-  then it stops and warns. Optional: missing network, low RAM, scheduled restart.
+- **Watchdog** (Services > Watchdog): if a service hangs it restarts it, then the board. Optional: missing network, low RAM, scheduled restart.
+- **Reduced mode** (1.7.11): after 3 automatic restarts in one hour the board **stops restarting and does not stay stuck**: if it knows which service hung (MQTT, board network, LED) it switches off only that one; if it does not (network, RAM, a basic service) it switches off MQTT, the board network and Bluetooth. The web page, log, update and recovery stay active. The Watchdog page says what was switched off and why. It lasts until the next restart; the saved configuration does not change.
 - **Compliant** (Security > Compliant): the board checks its configuration. Red = forbidden value (law or security), fixed at once.
   Yellow = allowed but risky. The log says who changed what (page, serial, file).
 
@@ -147,14 +149,14 @@ rules cannot be exceeded; (3) no identical passwords.
 ## 13. Setup from the serial line only
 Without the web page: open the serial monitor (115200) and type `setup`. It asks: language, country, name, antenna, hotspot (shows the
 password, `n` = new), administrator password (visible while typing: do it somewhere safe), home Wi-Fi (numbered list), time.
-Enter = keep the value, `skip` = skip, `quit` = exit. Single commands: `lang`, `locale country XX`, `hostname`, `wifi set <network> [password]`,
-`wifi off`, `ntp on|off`, `date set YYYY-MM-DD HH:MM`, `svc ap|captive|http|https on|off`, `svc http-port N`, `svc https-port N`, `ap new`.
+Enter = keep the value, `skip` = skip, `quit` = exit. Single commands: `lang`, `locale country XX`, `hostname`, `wifi set <network> [password]` (with spaces: `wifi set "My home" password`),
+`wifi off`, `ntp on|off`, `ntp server <name>`, `ntp server2 <name|off>`, `date set YYYY-MM-DD HH:MM`, `svc ap|captive|http|https on|off`, `svc http-port N`, `svc https-port N`, `ap new`.
 After the guide the security rules apply (serial password, if on).
 
 ## 14. Network services: NTP, DHCP, DNS, mDNS (new in 1.7.3)
 
 Each one has its own tab under **Services** and can be turned off.
-- **NTP**: time from the Internet (needs the home Wi-Fi). Off = set time by hand.
+- **NTP**: time from the Internet (needs the home Wi-Fi). Off = set time by hand. By default it contacts only `pool.ntp.org`; you may add a second server (`ntp server2 <name>`). Every request shows your public IP to the servers. If the received time is not credible (before 2026 or a jump of more than a day) it is discarded and a warning appears.
 - **DHCP**: gives addresses to whoever joins the hotspot. Lease 10 to 1440 minutes. It can be turned off only while the home Wi-Fi is connected.
 - **DNS**: the hotspot's automatic portal (needs HTTP on port 80).
 - **mDNS**: the NAME.local name. Off = IP address only.
@@ -176,7 +178,7 @@ a warning appears if you test a pin already marked. GP33-37 are free with this b
 - **Anti-bot**: at login the browser solves a small proof of work (level in Security). No external captcha.
 - **Certificate**: System > Certificate: expiry, fingerprint, download, regenerate, import.
 - **Power saving**: Services > Power saving. Scheduled sleep = the board sleeps and wakes after the chosen time (1 min - 7 days). BOOT does not wake it: use RESET. While asleep Wi-Fi and page are off.
-- **Statistics**: off by default; anonymous counters only; CSV download; reset.
+- **Local statistics**: off by default; counters that stay in the board and are never sent out; CSV download; reset.
 - **Serial**: `power`, `sleep [min]`, `stats`.
 
 
@@ -195,3 +197,18 @@ System > Security > **Serial port (USB cable)** (Admin only) or, from the serial
 - **Maximum write wait** (0-200 ms, factory 10): how long the board waits for the PC before dropping text. With 0 it may lose pieces of text.
 - Commands: `serial` (show), `serial baud 115200`, `serial eol crlf|lf|cr`, `serial echo|input|log|banner on|off`, `serial tx 10`, `serial keep`. Turning commands off needs `serial input off yes`.
 - If you turned "accepts commands" off and need the serial port: turn it back on from this page, or hold BOOT for 8 to 19 seconds (this also resets the administrator passwords).
+- Serial (1.7.9a): Backspace deletes the last character (on screen too), Ctrl+U or Ctrl+C clear the line; arrow keys and Delete are ignored.
+- `ram` (1.7.9a, measuring to reduce RAM): for each task the minimum free stack, the total stack and how much could be removed. `ram mark` marks the RAM now; turn a service on or off and type `ram diff` to see what it costs (internal RAM, largest piece, PSRAM). Admin only.
+- `free detail` (1.7.9a): internal RAM, largest piece, fragmentation, PSRAM. If the largest piece drops below 45 KB a yellow "Memory is fragmented" warning appears: restart the board.
+
+## 20. Device Manager (new in 1.7.11)
+One menu group, **Device Manager**, with all peripherals: virtual (MQTT, board network, Bluetooth, MFA, statistics) and hardware (pins, LED, BOOT button, USB, temperature, memory, processor, radio). Each follows the same rules: list, state (off / on / with a problem), switch on and off (Admin only), details and actions.
+- From the serial port or the terminal: `dev list`, `dev status <name>`, `dev on <name>`, `dev off <name>`, `dev act <name> <action> [value]` (e.g. `dev act pin test 5,high`).
+- **Build-time packages** (for people who compile): in `vos_common.h` `VOS_WITH_BLE`, `VOS_WITH_MQTT`, `VOS_WITH_MESH`, `VOS_WITH_MFA`, `VOS_WITH_STATS` (1 = in the firmware, 0 = out). The pages of removed parts disappear. The `diag` command lists the packages present.
+
+## 21. Backup and restore (new in 1.7.11)
+System > **Backup and restore** (Admin only).
+- **Download without secrets**: configuration without passwords and keys (default).
+- **Include the secrets too**: tick it, choose a **phrase of at least 10 characters**, type it twice and accept the warning. The file is **encrypted** (PBKDF2-HMAC-SHA256 + AES-256-GCM): it cannot be read without the phrase. Whoever has the file and the phrase can get into the board and your network; **if you lose the phrase the secrets cannot be recovered**. Every export with secrets is written in the log.
+- **Restore from file**: choose the file (and, if it is encrypted, type the phrase). The page tells how many lines changed. A wrong phrase counts as a login failure.
+- **Factory reset**: erases settings, users and passwords; to confirm you must type the word ERASE.

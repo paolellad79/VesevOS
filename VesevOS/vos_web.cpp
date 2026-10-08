@@ -18,6 +18,8 @@
 #include "vos_mqtt.h"
 #include "vos_led.h"
 #include "vos_pins.h"
+#include "vos_dev.h"
+#include "vos_crypt.h"
 #include "vos_shell.h"
 #include "vos_util.h"
 #include "vos_files.h"
@@ -114,6 +116,17 @@ static String who(const Ctx& c) {
 static volatile uint32_t g_lastReq = 0;                // ultima richiesta dalla pagina (per non dormire mentre la usi)
 uint32_t webIdleSec() { return (millis() - g_lastReq) / 1000; }
 
+// RAM a pezzi e nessuno usa la pagina da 20 s: si chiudono i collegamenti HTTPS rimasti aperti (ognuno tiene circa 40 KB).
+// Il browser li riapre da solo quando serve. Chiamata dal monitor ogni 10 s.
+void webTrimIdle() {
+  if (!g_https || !g_tlsUp || !g_https->server) return;
+  if (webIdleSec() < 20 || ESP.getMaxAllocHeap() >= 60000) return;
+  int fds[8]; size_t n = 8;
+  if (httpd_get_client_list(g_https->server, &n, fds) != ESP_OK) return;
+  for (size_t i = 0; i < n; i++) httpd_sess_trigger_close(g_https->server, fds[i]);
+  if (n) vlogl(LG_DBG, "WEB: RAM a pezzi, chiusi %u collegamenti HTTPS fermi", (unsigned)n);
+}
+
 static void add(PsychicHttpServer* srv, bool secure, const char* path, int method, uint8_t lvl, Handler h) {
   srv->on(path, method, [h, lvl, secure, method](Req* r, Res* s) -> esp_err_t {
     Ctx c; c.ip = ipOf(r); c.user = -1; c.role = 0; c.secure = secure;
@@ -208,7 +221,7 @@ static void routes(PsychicHttpServer* S, bool sec) {
     String j = String("{\"set\":") + (authIsSet() ? "true" : "false") + ",\"setup\":" + (cfg.setupDone ? "true" : "false") +
                ",\"lang\":\"" + jsonEscape(cfg.lang) + "\",\"secure\":" + (c.secure ? "true" : "false") +
                ",\"https\":" + (g_tlsUp && cfg.https ? "true" : "false") + ",\"fp\":\"" + (g_tlsUp ? tlsFingerprint() : String("")) + "\"" +
-               ",\"ble\":" + (VOS_WITH_BLE ? "true" : "false") + ",\"hp\":" + String(g_runHttpPort) + ",\"sp\":" + String(g_runHttpsPort) + timePubJson();
+               ",\"ble\":" + (VOS_WITH_BLE ? "true" : "false") + ",\"pk\":{\"ble\":" + String(VOS_WITH_BLE) + ",\"mqtt\":" + String(VOS_WITH_MQTT) + ",\"mesh\":" + String(VOS_WITH_MESH) + ",\"mfa\":" + String(VOS_WITH_MFA) + ",\"stat\":" + String(VOS_WITH_STATS) + "}" + ",\"hp\":" + String(g_runHttpPort) + ",\"sp\":" + String(g_runHttpsPort) + timePubJson();
     if (!authIsSet()) { int a = authFirstAdmin(); j += ",\"first\":\"" + jsonEscape(a >= 0 ? cfg.users[a].name : String("admin")) + "\""; }
     if (u >= 0) j += ",\"user\":\"" + jsonEscape(cfg.users[u].name) + "\",\"role\":" + String(cfg.users[u].role);
     return sendJson(s, j + "}");
@@ -360,6 +373,19 @@ static void routes(PsychicHttpServer* S, bool sec) {
 
   add(S, sec, "/api/status", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, sysStatusJson()); });
   add(S, sec, "/api/settings", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, settingsJson()); });
+  // ---- periferiche (virtuali e hardware): stesso modo di rispondere per tutte ----
+  add(S, sec, "/api/dev", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    if (has(r, "id")) { String j = devStatusJson(P(r, "id"), c.role); return j.length() ? sendJson(s, j) : notFound(s); }
+    return sendJson(s, devListJson());
+  });
+  add(S, sec, "/api/dev/set", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    String e; return devSet(P(r, "id"), P(r, "on") == "1", e) ? ok(s) : ko(s, e);
+  });
+  add(S, sec, "/api/dev/act", HTTP_POST, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    String out, e;
+    if (!devAct(P(r, "id"), P(r, "a"), P(r, "arg"), c.role, out, e)) return ko(s, e);
+    return out.length() ? sendJson(s, out) : ok(s);
+  });
   add(S, sec, "/api/pins", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, pinsJson()); });
   add(S, sec, "/api/pins/info", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, pinBoardJson()); });
   add(S, sec, "/api/pinmap", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, pinMapJson()); });
@@ -449,7 +475,8 @@ static void routes(PsychicHttpServer* S, bool sec) {
     cfg.staSsid = ssid;
     if (pass.length()) cfg.staPass = pass;
     cfg.staDhcp = dhcp; cfg.staEnabled = true;
-    cfgSave(); netReconfigure(); return ok(s);
+    bool ntpBack = cfgNtpAfterWifi();
+    cfgSave(); netReconfigure(); if (ntpBack) timeApply(); return ok(s);
   });
   add(S, sec, "/api/wifi/ap", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t { cfg.staEnabled = false; cfgSave(); netReconfigure(); return ok(s); });
 
@@ -505,11 +532,36 @@ static void routes(PsychicHttpServer* S, bool sec) {
     s->addHeader("Content-Disposition", "attachment; filename=\"vesevos.conf\"");
     return sendText(s, 200, "text/plain; charset=utf-8", cfgExport(false));
   });
+  // esportazione con i segreti: solo Admin, solo dopo aver accettato (acc=1), sempre cifrata con una frase (mai in chiaro)
+  add(S, sec, "/api/config/export", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    if (P(r, "acc") != "1") return ko(s, tr("Devi accettare l'avviso per esportare i segreti"));
+    String pw = P(r, "pw"), out, err;
+    if (!cryptSeal(cfgExport(true), pw, out, err)) return ko(s, err);
+    vlog("CFG: esportazione con segreti (cifrata) da %s", who(c).c_str());
+    auditEvent(AUD_YELLOW, "cfgexp", trf("Backup con segreti scaricato da %s", who(c).c_str()));
+    s->addHeader("Content-Disposition", "attachment; filename=\"vesevos-segreti.conf\"");
+    return sendText(s, 200, "text/plain; charset=utf-8", out);
+  });
   add(S, sec, "/api/config/restore", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
     String t = P(r, "t"), err;
-    if (t.length() == 0 || t.length() > 12000) return ko(s, tr("File vuoto o troppo grande"));
+    if (t.length() == 0 || t.length() > 46000) return ko(s, tr("File vuoto o troppo grande"));
+    if (cryptIsSealed(t)) {
+      String plain;
+      if (!P(r, "pw").length()) return ko(s, tr("Il file e cifrato: scrivi la frase"));
+      if (!cryptOpen(t, P(r, "pw"), plain, err)) { authFailIp(c.ip, "frase del backup sbagliata"); return ko(s, err); }
+      t = plain;
+    }
+    String before = cfgExport(true);
     if (!cfgImport(t, err)) return ko(s, err);
-    cfgSave(); ledApplyConfig(); netReconfigure(); return ok(s);
+    cfgSave(); ledApplyConfig(); netReconfigure();
+    String after = cfgExport(true); int ch = 0, i = 0;                   // righe cambiate rispetto a prima
+    while (i < (int)after.length()) {
+      int e = after.indexOf('\n', i); if (e < 0) e = after.length();
+      String ln = after.substring(i, e); i = e + 1;
+      if (ln.length() && before.indexOf(ln + "\n") < 0) ch++;
+    }
+    vlog("CFG: ripristino da file (%d righe cambiate) da %s", ch, who(c).c_str());
+    return sendJson(s, "{\"ok\":true,\"changed\":" + String(ch) + "}");
   });
 
   add(S, sec, "/api/airplane", HTTP_POST, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
@@ -613,14 +665,15 @@ static void routes(PsychicHttpServer* S, bool sec) {
   // ---- ora / NTP ----
   add(S, sec, "/api/time", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, timeJson()); });
   add(S, sec, "/api/time", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
-    String srv = P(r, "server");
+    String srv = P(r, "server"), srv2 = P(r, "server2"); srv.trim(); srv2.trim();
     if (srv.length() < 1 || srv.length() > 60) return ko(s, tr("Server NTP non valido"));
     for (size_t i = 0; i < srv.length(); i++) { char ch = srv[i]; if (!(isAlphaNumeric(ch) || ch == '.' || ch == '-')) return ko(s, tr("Server NTP: solo lettere, numeri, punto e trattino")); }
+    if (has(r, "server2") && srv2.length() && !utilHostOk(srv2)) return ko(s, tr("Server NTP: solo lettere, numeri, punto e trattino"));
     long ev = has(r, "every") ? P(r, "every").toInt() : (long)cfg.ntpEvery;
     if (!timeEveryValid(ev)) return ko(s, tr("Frequenza non valida"));
     cfg.ntpEvery = ev;
-    cfg.ntpOn = P(r, "ntp") == "1"; cfg.ntpServe = P(r, "serve") == "1";
-    cfg.ntpServer = srv;
+    cfg.ntpOn = P(r, "ntp") == "1"; cfg.ntpAutoOff = false; cfg.ntpServe = P(r, "serve") == "1";
+    cfg.ntpServer = srv; if (has(r, "server2")) cfg.ntpServer2 = srv2;
     cfgSave(); timeApply(); return ok(s);
   });
   add(S, sec, "/api/time/sync", HTTP_POST, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
@@ -672,7 +725,7 @@ static void routes(PsychicHttpServer* S, bool sec) {
 
   // ---- prima configurazione ----
   add(S, sec, "/api/setup/done", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
-    if (has(r, "ntp")) { cfg.ntpOn = P(r, "ntp") == "1"; timeApply(); }     // senza Wi-Fi di casa: server dell'ora spento
+    if (has(r, "ntp")) { cfg.ntpOn = P(r, "ntp") == "1"; cfg.ntpAutoOff = !cfg.ntpOn; timeApply(); }     // senza Wi-Fi di casa: server dell'ora spento
     cfg.setupDone = true; cfgSave(); ledSetSetup(false);
     vlog("SETUP: prima configurazione completata");
     return ok(s);

@@ -30,12 +30,12 @@ void enableLoopWDT(); void disableLoopWDT(); void feedLoopWDT();
 #define OUTPUT 3
 #define INPUT_PULLUP 5
 #define INPUT_PULLDOWN 9
-struct HWCDC: public Stream{int peek(){return 0;} int available(){return 0;} int read(){return 0;} void flush(){} size_t write(uint8_t){return 1;} size_t write(const uint8_t*b,size_t n){return n;} void begin(unsigned long=0){} void updateBaudRate(unsigned long){} void setTxTimeoutMs(uint32_t){} operator bool(){return true;} int availableForWrite(){return 64;}}; extern HWCDC Serial;
+struct HWCDC: public Stream{int peek(){return 0;} int available(){return 0;} int read(){return 0;} void flush(){} bool failWrite=false; unsigned calls=0; size_t write(uint8_t){calls++;return failWrite?0:1;} size_t write(const uint8_t*b,size_t n){calls++;return failWrite?0:n;} void begin(unsigned long=0){} void updateBaudRate(unsigned long){} void setTxTimeoutMs(uint32_t){} operator bool(){return true;} int availableForWrite(){return 64;}}; extern HWCDC Serial;
 #define constrain(a,b,c) ((a)<(b)?(b):(a)>(c)?(c):(a))
 #include <algorithm>
 using std::min; using std::max;
 #include "freertos/FreeRTOS.h"
-void rgbLedWrite(uint8_t,uint8_t,uint8_t,uint8_t); float temperatureRead(); inline bool isHexadecimalDigit(char){return true;} inline bool isAlphaNumeric(char){return true;} inline bool isAlpha(char){return true;} inline bool isPrintable(char){return true;}
+void rgbLedWrite(uint8_t,uint8_t,uint8_t,uint8_t); float temperatureRead(); inline bool isHexadecimalDigit(char c){return (c>=48&&c<=57)||(c>=65&&c<=70)||(c>=97&&c<=102);} inline bool isAlphaNumeric(char c){return (c>=48&&c<=57)||(c>=65&&c<=90)||(c>=97&&c<=122);} inline bool isAlpha(char c){return (c>=65&&c<=90)||(c>=97&&c<=122);} inline bool isPrintable(char c){return c>=32&&c<127;}
 TaskHandle_t xTaskGetHandle(const char*); void vTaskDelete(TaskHandle_t); UBaseType_t uxTaskGetStackHighWaterMark(TaskHandle_t);
 inline bool isDigit(char c){return c>=48&&c<=57;}
 #include <math.h>

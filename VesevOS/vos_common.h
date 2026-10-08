@@ -10,14 +10,27 @@
 #ifndef VOS_PSRAM_MALLOC
 #define VOS_PSRAM_MALLOC 1
 #endif
-#define VOS_VERSION  "1.7.9"
+#define VOS_VERSION  "1.7.11"
 #define VOS_GITHUB   "https://github.com/paolellad79/VesevOS"
 #define VOS_BOARD    "ESP32-S3 SuperMini"   // scheda (tabella dei piedini nella pagina)
 
-// Moduli opzionali (1 = dentro il firmware, 0 = tolti). Il Bluetooth (BLE) occupa circa 300 KB di programma:
-// se lo spazio non basta, metti 0 e ricompila (la pagina nasconde la sezione BLE).
+// PACKAGE (moduli opzionali): 1 = dentro il firmware, 0 = tolti (meno flash e meno RAM).
+// Per toglierne uno basta mettere 0 e ricompilare: i servizi e le voci in pagina/shell spariscono da soli.
+// Si possono anche cambiare dal menu Arduino con "build_opt.h" oppure qui sotto.
 #ifndef VOS_WITH_BLE
-#define VOS_WITH_BLE 1
+#define VOS_WITH_BLE 1      // Bluetooth per la prima configurazione (NimBLE)
+#endif
+#ifndef VOS_WITH_MQTT
+#define VOS_WITH_MQTT 1     // client MQTT (broker, Home Assistant)
+#endif
+#ifndef VOS_WITH_MESH
+#define VOS_WITH_MESH 1     // ESP-NOW tra schede
+#endif
+#ifndef VOS_WITH_MFA
+#define VOS_WITH_MFA 1      // codice a due passaggi (TOTP) al login
+#endif
+#ifndef VOS_WITH_STATS
+#define VOS_WITH_STATS 1    // statistiche d'uso (contatori locali)
 #endif
 
 // Ruoli degli utenti (multiutenza)

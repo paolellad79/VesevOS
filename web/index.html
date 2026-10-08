@@ -44,10 +44,12 @@ body.cpo .cp{display:flex}body.cpo main{padding-bottom:calc(var(--ph,280px) + 24
 @media(max-width:820px){.cp{left:0;bottom:62px}body.cpo main{padding-bottom:calc(var(--ph,280px) + 90px)!important}.ru{flex-wrap:wrap}.ru .rbt{justify-content:flex-start}.ib.wide span{display:none}.pop{right:8px;top:56px}.arow select.ak{flex:1 1 100%}}
 #rsub{position:sticky;top:60px;z-index:4;background:var(--bg);padding:8px 0}
 .hl{display:grid;gap:14px;grid-template-columns:repeat(12,1fr)}
+.rfbar{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin:0 0 10px}.rfbar label{color:var(--mut);font-size:13px}.rfbar select{width:auto;min-width:0}
 .rings{grid-column:1/-1;display:grid;grid-template-columns:repeat(5,1fr);gap:14px}.wg{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}.wgh{grid-column:1/-1;margin:6px 0 0}.wid{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;cursor:pointer;min-height:84px}.wid:hover{border-color:var(--ac)}.wid .wt{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}.wid .wv{font-size:18px;font-weight:700;margin:4px 0 2px;overflow-wrap:anywhere}.wid .ws{font-size:12px;color:var(--mut)}.hclk{font-size:30px;font-weight:700;margin:2px 0}
 .ring{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px 8px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:transform .15s}.ring:hover{transform:translateY(-2px);border-color:var(--ac)}
 .ring>svg{width:84px;height:84px}.ring .v{font-size:19px;font-weight:700}.ring .l{font-size:12px;color:var(--mut)}
-.hid{grid-column:span 5}.hres{grid-column:span 7}.hnet{grid-column:span 5}.htmp{grid-column:span 7}
+.rx{width:100%;padding:0 8px;box-sizing:border-box}.leg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--mut);margin-top:6px}.leg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+.hid{grid-column:1/-1}.hres{grid-column:span 7}.hnet{grid-column:span 5}.htmp{grid-column:span 7}
 .hl .card{margin:0}.hl h3{text-transform:uppercase;letter-spacing:.04em;font-size:12.5px;color:var(--mut)}
 .big{font-size:20px;font-weight:700}.subt{color:var(--mut);font-size:13px}
 .pb{margin:10px 0}.pb .t{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px}.pb .t span:first-child{color:var(--mut)}.pb .tr{height:9px;border-radius:5px;background:var(--trk);overflow:hidden}.pb i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--ac),var(--ac2))}
@@ -266,12 +268,8 @@ body[data-role="0"] .op,body[data-role="0"] .adm,body[data-role="1"] .adm{displa
 <div class="sub gsub hide" id="gsub"></div>
 <main>
 <section id="t_sum">
+ <div class="rfbar"><label for="rf">Aggiornamento</label><select id="rf" onchange="rfSet(this.value)"><option value="1">Ogni secondo</option><option value="3">Ogni 3 secondi</option><option value="5">Ogni 5 secondi</option><option value="10">Ogni 10 secondi</option><option value="30">Ogni 30 secondi</option><option value="0">Fermo (solo manuale)</option></select><button class="btn gray sm" onclick="poll()">Aggiorna ora</button></div>
  <div class="hl" id="home"></div>
-</section>
-<section id="t_stato" class="hide">
- <div class="card"><h3>Uso risorse</h3><div id="res"></div></div>
- <div class="card"><h3>CPU (ultimi 60 s)</h3><canvas id="cc" width="600" height="110" style="width:100%"></canvas></div>
- <div class="card"><h3>Temperatura CPU (ultimi 60 s)</h3><canvas id="tc" width="600" height="110" style="width:100%"></canvas></div>
 </section>
 <section id="t_wifi" class="hide">
  <div class="sub" id="rsub"></div>
@@ -345,7 +343,9 @@ body[data-role="0"] .op,body[data-role="0"] .adm,body[data-role="1"] .adm{displa
  <div class="card adm"><h3>Impostazioni NTP</h3>
   <label for="o_ev">Quanto spesso sincronizzare</label>
   <select id="o_ev"><option value="15">Ogni 15 minuti</option><option value="60">Ogni ora</option><option value="360">Ogni 6 ore</option><option value="720">Ogni 12 ore</option><option value="1440">Ogni giorno</option><option value="10080">Ogni settimana</option><option value="0">Solo all'avvio</option></select>
-  <label>Server NTP</label><input id="o_srv">
+  <label for="o_srv">Server NTP</label><input id="o_srv">
+  <label for="o_srv2">Secondo server NTP (vuoto = nessuno)</label><input id="o_srv2">
+  <p class="fhint" id="ontpwho"></p>
   <p class="fhint">Fuso orario, formati e unita: Sistema &gt; Localizzazione. <a href="#" onclick="show('loc');return false">Apri</a></p>
   <label>Questa scheda come server NTP per altri dispositivi</label>
   <select id="o_serve"><option value="0">No</option><option value="1">Si (UDP 123)</option></select>
@@ -381,13 +381,15 @@ body[data-role="0"] .op,body[data-role="0"] .adm,body[data-role="1"] .adm{displa
 </section>
 <section id="t_radio" class="hide">
  <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-wifi"/></svg>Radio</h3>
-  <div id="lcradio"></div>
+  <div class="fhint" style="font-weight:600">Impostazioni (le scegli tu)</div>
   <div class="agrid adm">
    <div><label for="lc_ant">Antenna</label><select id="lc_ant" onchange="lcAnt()"><option value="0">Interna (sul circuito)</option><option value="1">Esterna</option></select></div>
    <div id="lc_gw" class="hide"><label for="lc_gain">Guadagno dell'antenna esterna (dBi)</label><input type="number" id="lc_gain" min="0" max="15" value="0"></div>
    <div><label for="lc_tx">Potenza di trasmissione (dBm)</label><input type="range" id="lc_tx" min="2" max="20" oninput="lcTx()"><div id="lc_txv" class="fhint"></div></div>
   </div>
-  <div class="law">Canali e potenza massima vengono dal paese: non si possono superare. Con un'antenna esterna la potenza scende da sola per restare nel limite (potenza + guadagno dell'antenna). Montare un'antenna esterna e responsabilita di chi la monta.</div></div>
+  <div class="fhint" style="font-weight:600;margin-top:12px">Informazioni (calcolate dalla scheda, non si modificano)</div>
+  <div id="lcradio"></div>
+  <div class="law">La scheda applica i limiti noti del paese scelto (canali e potenza massima) e abbassa la potenza se usi un'antenna esterna. Questo non garantisce la conformita del prodotto finito: dipende anche dall'hardware, dall'antenna, dal montaggio e dalle regole del luogo. Chi installa la scheda ne e responsabile.</div></div>
  <div class="card adm"><button class="btn" onclick="lcSave('lcm3')">Salva</button><div id="lcm3" class="msg"></div></div>
 </section>
 <section id="t_http" class="hide">
@@ -465,6 +467,48 @@ body[data-role="0"] .op,body[data-role="0"] .adm,body[data-role="1"] .adm{displa
   <button class="btn" onclick="saveLed()">Salva</button><div id="lm2" class="msg"></div>
   <p style="color:var(--mut)">Colori di stato: arancio = avvio, blu = AP, giallo = connessione, verde = client collegato, rosso lampeggiante = errore.</p></div>
 </section>
+<section id="t_dmgr" class="hide">
+ <div class="card"><h3>Device Manager</h3>
+  <p class="fhint">Tutte le periferiche della scheda: servizi (MQTT, ESP-NOW, Bluetooth, statistiche) e hardware (pin, LED, tasto, USB, sensori, memoria, processore, radio). Rispondono tutte allo stesso modo all'API /api/dev e al comando shell dev. I servizi si accendono e si spengono da qui o con dev on|off nome: di fabbrica sono spenti e, spenti, non occupano memoria.</p>
+  <div id="dm_list"></div><div id="dm_m" class="msg"></div>
+ </div>
+</section>
+<section id="t_btn" class="hide">
+ <div class="card"><h3>Tasto BOOT</h3>
+  <p class="fhint">Il pulsante BOOT della scheda (GPIO0): le pressioni lunghe servono al recupero.</p>
+  <div id="dv_btn"></div>
+ </div>
+</section>
+<section id="t_usb" class="hide">
+ <div class="card"><h3>USB</h3>
+  <p class="fhint">Collegamento USB nativo del chip (seriale e JTAG).</p>
+  <div id="dv_usb"></div>
+ </div>
+</section>
+<section id="t_temp" class="hide">
+ <div class="card"><h3>Temperatura del chip</h3>
+  <p class="fhint">Sensore interno del chip. Sopra 80 C la velocita scende da sola.</p>
+  <div id="dv_temp"></div>
+ </div>
+</section>
+<section id="t_mem" class="hide">
+ <div class="card"><h3>Memoria</h3>
+  <p class="fhint">RAM interna, PSRAM, flash e file system.</p>
+  <div id="dv_mem"></div>
+ </div>
+</section>
+<section id="t_cpu" class="hide">
+ <div class="card"><h3>Processore</h3>
+  <p class="fhint">Core, velocita e carico.</p>
+  <div id="dv_cpu"></div>
+ </div>
+</section>
+<section id="t_rad" class="hide">
+ <div class="card"><h3>Radio 2,4 GHz</h3>
+  <p class="fhint">Informazioni dell'hardware radio. Paese, canali e potenza si cambiano in Rete > Radio.</p>
+  <div id="dv_rad"></div>
+ </div>
+</section>
 <section id="t_pin" class="hide">
  <div class="card"><h3>Pin e prove</h3>
   <p style="color:var(--mut);margin-top:0">Tocca un pin verde per provarlo. Blu = pin in uso (la linea porta a chi lo usa), grigio = vietato.</p>
@@ -493,12 +537,25 @@ body[data-role="0"] .op,body[data-role="0"] .adm,body[data-role="1"] .adm{displa
   <p class="fhint">Tastiera: Tab per spostarti, Invio per premere, Esc per chiudere finestre e menu, Ctrl + ` per il terminale. Nell'editor dei file: Ctrl+S salva, Ctrl+M cambia il comportamento del tasto Tab.</p></div>
 </section>
 <section id="t_conf" class="hide">
- <div class="card adm"><h3>Configurazione</h3>
-  <button class="btn" onclick="location.href='/api/config/download'">Scarica file</button>
-  <label style="display:block;margin-top:12px">Ripristina da file</label><input type="file" id="cf">
+ <div class="card adm"><h3>Backup e ripristino</h3>
+  <p class="fhint">Il file di backup contiene la configurazione della scheda. Di fabbrica non contiene password e chiavi.</p>
+  <button class="btn" onclick="location.href='/api/config/download'">Scarica senza segreti</button>
+  <label class="lgck" style="display:block;margin-top:12px"><input type="checkbox" id="bk_sec" onchange="bkSec()"> Includi anche i segreti (password Wi-Fi e MQTT, utenti)</label>
+  <div id="bk_box" class="hide">
+   <div class="law">I segreti vengono cifrati con una frase che scegli tu. Chi ha il file e la frase puo entrare nella scheda e nella tua rete. Se perdi la frase i segreti non si recuperano. Custodisci il file come una password.</div>
+   <label for="bk_pw">Frase (almeno 10 caratteri)</label><input type="password" id="bk_pw" autocomplete="new-password">
+   <label for="bk_pw2">Ripeti la frase</label><input type="password" id="bk_pw2" autocomplete="new-password">
+   <label class="lgck"><input type="checkbox" id="bk_acc"> Ho letto l'avviso e lo accetto</label>
+   <button class="btn" onclick="bkExport()">Scarica con segreti (cifrato)</button>
+  </div>
+  <label style="display:block;margin-top:16px" for="cf">Ripristina da file</label><input type="file" id="cf">
+  <label for="bk_rp">Frase (solo se il file e cifrato)</label><input type="password" id="bk_rp" autocomplete="off">
   <button class="btn gray" onclick="restoreCfg()">Ripristina</button>
-  <button class="btn red" onclick="factory()">Azzera tutto</button>
   <div id="cm" class="msg"></div></div>
+ <div class="card adm"><h3>Ripristino di fabbrica</h3>
+  <p class="fhint">Cancella impostazioni, utenti e password. La scheda riparte come nuova.</p>
+  <button class="btn red" onclick="factory()">Azzera tutto</button>
+  <div id="fm" class="msg"></div></div>
 </section>
 <section id="t_log" class="hide">
  <div class="card"><h3>Registro (log)</h3>
@@ -682,8 +739,8 @@ body[data-role="0"] .op,body[data-role="0"] .adm,body[data-role="1"] .adm{displa
  </div>
 </section>
 <section id="t_stat" class="hide">
- <div class="card"><h3>Statistiche d'uso</h3>
-  <p class="fhint">Contano quanto si usano Wi-Fi, Bluetooth, tasto BOOT e LED. Sono numeri anonimi: niente indirizzi MAC, niente indirizzi IP, niente nomi. Restano nella memoria della scheda (si azzerano al riavvio) e non escono mai. Spente di fabbrica.</p>
+ <div class="card"><h3>Statistiche locali</h3>
+  <p class="fhint">Contano quanto si usano Wi-Fi, Bluetooth, tasto BOOT e LED. Sono statistiche locali: niente indirizzi MAC, niente indirizzi IP, niente nomi. Restano nella memoria della scheda (si azzerano al riavvio) e non vengono mai inviate fuori. Spente di fabbrica.</p>
   <div class="sc" id="sc_stat"></div>
   <div id="stbody"></div>
   <a class="btn gray hide" id="st_csv" href="/api/stats.csv" download="vesevos-statistiche.csv">Scarica CSV</a><button class="btn gray adm hide" id="st_rst" onclick="stReset()">Azzera</button><div id="stm" class="msg"></div>
@@ -845,11 +902,11 @@ body[data-role="0"] .op,body[data-role="0"] .adm,body[data-role="1"] .adm{displa
   of(j.u,j.o).then(function(r){clearTimeout(tm);rel();j.res(r)},function(e){clearTimeout(tm);rel();j.rej(e)})}
  function nx(){while(act<2&&q.length)run(q.shift())}
  window.fetch=function(u,o){return new Promise(function(res,rej){q.push({u:u,o:o,res:res,rej:rej});nx()})}})();
-var GRP=[["home","Home"],["rete","Rete"],["svc","Servizi"],["hw","Periferiche"],["sys","Sistema"],["sec","Sicurezza"]];
-var GMAP={home:["sum"],rete:["wifi","ap","radio"],svc:["http","https","mqtt","mesh","ntp","dhcp","dns","mdns","ble","power","auto","boot"],hw:["pin","led"],sys:["stato","task","wd","log","shell","stat","selftest","file","ora","loc","cert","conf","acc","legal","help"],sec:["sec","mfa","users","fw","audit"]};
-var GICO={home:"i-home",rete:"i-wifi",svc:"i-rack",hw:"i-usb",sys:"i-gear",sec:"i-shield"};
-var TABS=[["sum","Home"],["wifi","Wi-Fi"],["mqtt","MQTT"],["mesh","Rete tra schede"],["pin","Pin"],["led","LED"],["task","Task"],["stato","Stato"],["file","File"],["ora","Ora"],["loc","Localizzazione"],["auto","Automazioni"],["boot","Avvio"],["wd","Watchdog"],["log","Log"],["shell","Terminale"],["conf","Config"],["legal","Note legali"],["help","Aiuto"],["sec","Password"],["users","Utenti"],["fw","Filtro IP"],["https","HTTPS"],["audit","Compliant"],["mfa","MFA"],["cert","Certificato"],["stat","Statistiche"],["selftest","Autotest"],["power","Risparmio energia"],["acc","Accessibilita"],["ap","Punto di accesso"],["http","HTTP"],["radio","Radio"],["ntp","NTP"],["dhcp","DHCP"],["dns","DNS"],["mdns","mDNS"],["ble","Bluetooth"]];
-var DIAG=["task","wd","log","shell","stat","selftest"];
+var GRP=[["home","Home"],["rete","Rete"],["dm","Device Manager"],["sys","Sistema"],["sec","Sicurezza"]];
+var GMAP={home:["sum"],rete:["wifi","ap","radio","http","https","dhcp","dns","mdns"],dm:["dmgr","mqtt","mesh","ble","stat","pin","led","btn","usb","temp","mem","cpu","rad"],sys:["task","wd","log","shell","selftest","file","ora","ntp","loc","cert","conf","acc","legal","help","power","auto","boot"],sec:["sec","mfa","users","fw","audit"]};
+var GICO={home:"i-home",rete:"i-wifi",dm:"i-usb",sys:"i-gear",sec:"i-shield"};
+var TABS=[["sum","Home"],["wifi","Wi-Fi"],["mqtt","MQTT"],["mesh","Rete tra schede"],["pin","Pin"],["led","LED"],["task","Task"],["file","File"],["ora","Ora"],["loc","Localizzazione"],["auto","Automazioni"],["boot","Avvio"],["wd","Watchdog"],["log","Log"],["shell","Terminale"],["conf","Config"],["legal","Note legali"],["help","Aiuto"],["sec","Password"],["users","Utenti"],["fw","Filtro IP"],["https","HTTPS"],["audit","Compliant"],["mfa","MFA"],["cert","Certificato"],["stat","Statistiche"],["selftest","Autotest"],["power","Risparmio energia"],["acc","Accessibilita"],["ap","Punto di accesso"],["http","HTTP"],["radio","Radio"],["ntp","NTP"],["dhcp","DHCP"],["dns","DNS"],["mdns","mDNS"],["ble","Bluetooth"],["dmgr","Device Manager"],["btn","Tasto BOOT"],["usb","USB"],["temp","Temperatura del chip"],["mem","Memoria"],["cpu","Processore"],["rad","Radio 2,4 GHz"]];
+var DIAG=["task","wd","log","shell","selftest"];
 var LASTG={};
 function gOf(id){for(var g in GMAP)if(GMAP[g].indexOf(id)>=0)return g;return"home"}
 var A11Y={fs:0,hc:"auto",cb:0,rm:"auto"};try{var _a=JSON.parse(localStorage.getItem("va11y")||"{}");for(var _k in A11Y)if(_a[_k]!==undefined)A11Y[_k]=_a[_k]}catch(e){}
@@ -1090,16 +1147,17 @@ function bar(p){return '<div class="bar"><i style="width:'+p+'%"></i></div>'}
 function tmp(c,u){return u?(c*9/5+32).toFixed(1)+" &deg;F":c.toFixed(1)+" &deg;C"}
 function kb(n){return Math.round(n/1024)+" KB"}
 var PBUSY=0;document.addEventListener("visibilitychange",function(){if(!document.hidden&&typeof loggedIn=="function"&&loggedIn())poll()});
+var RF=3;try{var q=parseInt(localStorage.getItem("vosRf"));if([0,1,3,5,10,30].indexOf(q)>=0)RF=q}catch(e){}
+function rfApply(){clearInterval(timer);timer=null;if($("rf"))$("rf").value=String(RF);if(RF>0)timer=setInterval(poll,RF*1000)}
+function rfSet(v){RF=parseInt(v);try{localStorage.setItem("vosRf",String(RF))}catch(e){}rfApply();if(RF>0)poll()}
 function poll(){if(PBUSY&&Date.now()-PBUSY<8000)return;if(document.hidden)return;PBUSY=Date.now();api("/api/status").then(function(r){return r.json()}).then(function(s){S=s;if($("fver"))$("fver").textContent="VesevOS "+s.version+" \u00b7 (C) 2026 Domenico Paolella";
  hdTick();hwFetch();$("bchip").textContent=s.net.host+" · "+boardId(s);
  var hp=Math.round(100-100*s.heapFree/s.heapTotal),pp=s.psramTotal?Math.round(100-100*s.psramFree/s.psramTotal):0,fp=s.flashTotal?Math.round(100*s.flashUsed/s.flashTotal):0;
- $("res").innerHTML=row(t("CPU"),s.cpu+"%")+bar(s.cpu)+row("RAM",kb(s.heapTotal-s.heapFree)+" / "+kb(s.heapTotal))+bar(hp)+
-  row("PSRAM",kb(s.psramTotal-s.psramFree)+" / "+kb(s.psramTotal))+bar(pp)+row(t("Flash (file)"),kb(s.flashUsed)+" / "+kb(s.flashTotal))+bar(fp);
- if(document.activeElement!=$("cpumode"))$("cpumode").value=s.cpuMode;draw("cc",s.cpuHist,0,100);draw("tc",s.tempUnit?s.tempHist.map(function(c){return c*9/5+32}):s.tempHist,null,null);
+ if($("cpumode")&&document.activeElement!=$("cpumode"))$("cpumode").value=s.cpuMode;
  alertsCalc(s,hp,pp,fp);if(cur=="sum"){homeDraw()}PBUSY=0}).catch(function(){PBUSY=0})}
 function boardId(s){var m=(s.net.mac||"").split(":");return m.length==6?(m[4]+m[5]).toUpperCase():"----"}
 function hcol(p,w,k){return p>=k?"var(--ko)":p>=w?"var(--wa)":"var(--ok)"}
-function hring(l,txt,p,c,icon,go,sub){var R=38,C=2*Math.PI*R;return'<div class="ring" onclick="show(\''+go+'\')"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="'+R+'" fill="none" stroke="var(--trk)" stroke-width="9"/><circle cx="50" cy="50" r="'+R+'" fill="none" stroke="'+c+'" stroke-width="9" stroke-linecap="round" stroke-dasharray="'+(C*Math.max(0,Math.min(100,p))/100)+' '+C+'" transform="rotate(-90 50 50)"/><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--mut)"><use href="#'+icon+'" x="35" y="35" width="30" height="30"/></g></svg><div class="v">'+txt+'</div><div class="l">'+esc(l)+'</div>'+(sub?'<div class="l">'+sub+'</div>':'')+'</div>'}
+function hring(l,txt,p,c,icon,go,sub,ex){var R=38,C=2*Math.PI*R;return'<div class="ring" onclick="'+"show('"+go+"')"+'"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="'+R+'" fill="none" stroke="var(--trk)" stroke-width="9"/><circle cx="50" cy="50" r="'+R+'" fill="none" stroke="'+c+'" stroke-width="9" stroke-linecap="round" stroke-dasharray="'+(C*Math.max(0,Math.min(100,p))/100)+' '+C+'" transform="rotate(-90 50 50)"/><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--mut)"><use href="#'+icon+'" x="35" y="35" width="30" height="30"/></g></svg><div class="v">'+txt+'</div><div class="l">'+esc(l)+'</div>'+(sub?'<div class="l">'+sub+'</div>':'')+(ex?'<div class="rx">'+ex+'</div>':'')+'</div>'}
 function hbar(l,v,p,w,k){var c=p>=k?" k":p>=w?" w":"";return'<div class="pb'+c+'"><div class="t"><span>'+esc(l)+'</span><span>'+v+'</span></div><div class="tr"><i style="width:'+Math.min(100,p)+'%"></i></div></div>'}
 function harea(a,mn,mx,color,id){var w=600,h=120,n=a.length;if(n<2)return"";if(mn===null){mn=Math.min.apply(null,a)-2;mx=Math.max.apply(null,a)+2}
  var pts=a.map(function(v,i){return[i*w/59,h-6-((v-mn)/(mx-mn))*(h-14)]}),l=pts.map(function(q,i){return(i?"L":"M")+q[0].toFixed(1)+" "+q[1].toFixed(1)}).join(" "),g="";
@@ -1119,18 +1177,25 @@ function alertsCalc(s,hp,pp,fp){AL=[];var n=s.net;if(hp===undefined){hp=Math.rou
  if(!$("alerts").classList.contains("hide"))bellDraw()}
 function bellDraw(){var h="";if(!AL.length)h="<div style='color:var(--mut)'>"+esc(t("Nessun allarme"))+"</div>";AL.forEach(function(a){h+="<div"+(a[2]?" style='cursor:pointer' onclick=\"show('audit')\"":"")+"><span class='dot' style='background:"+(a[0]=="k"?"var(--ko)":a[0]=="w"?"var(--wa)":"var(--ac)")+"'></span>"+esc(a[1])+"</div>"});$("alerts").innerHTML=h}
 function bellTog(){var e=$("alerts");if(e.classList.contains("hide")){bellDraw();e.className="alerts"}else e.className="alerts hide"}
+function hlines(L,mn,mx,px){var w=600,h=100,g="";for(var i=1;i<4;i++)g+='<line x1="0" x2="'+w+'" y1="'+i*h/4+'" y2="'+i*h/4+'" stroke="var(--bd)"/>';
+ var p=L.map(function(q){var a=q[0]||[];if(a.length<2)return"";var d=a.map(function(v,i){return(i?"L":"M")+(i*w/59).toFixed(1)+" "+(h-4-((v-mn)/(mx-mn))*(h-8)).toFixed(1)}).join(" ");return'<path d="'+d+'" fill="none" stroke="'+q[1]+'" stroke-width="2" vector-effect="non-scaling-stroke"/>'}).join("");
+ return'<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" style="width:100%;height:'+(px||90)+'px;display:block">'+g+p+'</svg>'}
+function hleg(L){return'<div class="leg">'+L.map(function(q){return'<span><i style="background:'+q[1]+'"></i>'+esc(q[0])+' '+q[2]+'</span>'}).join("")+'</div>'}
+function bps(v){return v>=1024?(v/1024).toFixed(1)+' KB/s':v+' B/s'}
+function memTx(u,t0){return kb(u)+' / '+kb(t0)+'<br>'+kb(t0-u)+' '+esc(t("liberi"))}
 function homeDraw(){var s=S;if(!s||!$("home"))return;var n=s.net,hp=Math.round(100-100*s.heapFree/s.heapTotal),pp=s.psramTotal?Math.round(100-100*s.psramFree/s.psramTotal):0,fp=s.flashTotal?Math.round(100*s.flashUsed/s.flashTotal):0;
  var wp=n.st==3?2*(n.rssi+100):100,wt=n.st==3?n.rssi+" dBm":(n.st==1?""+(n.clients||0):n.st==4?t("Aereo"):"..."),wc=n.st==3?(n.rssi>-67?"var(--ok)":n.rssi>-75?"var(--wa)":"var(--ko)"):"var(--ac)",
  ws=esc(n.mode)+(n.st==1?" · "+esc(tf("{0} client",n.clients||0)):"")+(n.ip?"<br>"+esc(n.ip):"");
  var rv=s.rev,revs=Math.floor(rv/100)+"."+rv%100,mhz=s.cpuMhz;
- var h='<section class="rings">'+hring("CPU",s.cpu+"%",s.cpu,hcol(s.cpu,60,85),"i-chipn","stato",mhz+" MHz · "+tmp(s.temp,s.tempUnit))+hring("RAM",hp+"%",hp,hcol(hp,80,92),"i-mem","stato")+hring("PSRAM",pp+"%",pp,hcol(pp,80,92),"i-mem","stato")+hring(t("File"),fp+"%",fp,hcol(fp,75,90),"i-disk","file")+hring(t("Wi-Fi"),wt,wp,wc,"i-wifi","wifi",ws)+'</section>';
+ var th=(s.tempHist||[]).map(function(v){return s.tempUnit?v*9/5+32:v});
+ var cx=hlines([[s.cpu0Hist,"#3fa7ff"],[s.cpu1Hist,"#b07cff"]],0,100,34)+hleg([["C0","#3fa7ff",s.cpu0+"%"],["C1","#b07cff",s.cpu1+"%"]])+hlines([[th,"#ff9f43"]],th.length?Math.min.apply(null,th)-2:0,th.length?Math.max.apply(null,th)+2:1,26);
+ var ih=s.inHist||[],oh=s.outHist||[],mx=Math.max(1024,Math.max.apply(null,ih.concat(oh,[0]))),wx=hlines([[ih,"#3fa7ff"],[oh,"#ff9f43"]],0,mx,34)+hleg([["In","#3fa7ff",bps(ih.length?ih[ih.length-1]:0)],["Out","#ff9f43",bps(oh.length?oh[oh.length-1]:0)]]);
+ var h='<section class="rings">'+hring("CPU",s.cpu+"%",s.cpu,hcol(s.cpu,60,85),"i-chipn","task",mhz+" MHz · "+tmp(s.temp,s.tempUnit),cx)+hring("RAM",hp+"%",hp,hcol(hp,80,92),"i-mem","task",memTx(s.heapTotal-s.heapFree,s.heapTotal),hlines([[s.ramHist,"#3fa7ff"]],0,100,34))+hring("PSRAM",pp+"%",pp,hcol(pp,80,92),"i-mem","task",memTx(s.psramTotal-s.psramFree,s.psramTotal),hlines([[s.psHist,"#2ecc71"]],0,100,34))+hring(t("File"),fp+"%",fp,hcol(fp,75,90),"i-disk","file",memTx(s.flashUsed,s.flashTotal),hlines([[s.flHist,"#ffb020"]],0,100,34))+hring(t("Wi-Fi"),wt,wp,wc,"i-wifi","wifi",ws,wx)+'</section>';
  h+=homeWid(s,n);
  h+='<section class="card hid"><h3>'+esc(t("Sistema"))+'</h3><div class="big">'+esc(n.host)+'</div><div class="subt">'+esc(s.chip)+" · ID "+boardId(s)+'</div><div style="height:8px"></div>'+
   row(t("Chip"),esc(s.chip)+" rev "+revs)+row(t("Processore"),tf("{0} core a {1} MHz",s.cores,mhz))+row(t("Memoria"),tf("{0} MB flash · {1} MB PSRAM",Math.round(s.flashChip/1048576),Math.round(s.psramTotal/1048576)))+
   row(t("Acceso da"),esc(s.uptime))+row(t("Ore di vita"),tf("{0} h {1} min",Math.floor(s.lifeSec/3600),Math.floor(s.lifeSec/60)%60))+row(t("Avvii totali"),s.boots)+row(t("Ultimo reset"),esc(s.reset))+row(t("Versione"),esc(s.name+" "+s.version))+
   '<button class="btn" style="margin-top:10px" onclick="identify()">'+esc(t("Trova questa scheda"))+'</button><div id="idm" class="msg"></div></section>';
- h+='<section class="card hres"><h3>'+esc(t("Risorse"))+'</h3>'+hbar("RAM",kb(s.heapFree)+" "+t("liberi"),hp,80,92)+hbar("PSRAM",kb(s.psramFree)+" "+t("liberi"),pp,80,92)+hbar(t("File in flash"),kb(s.flashUsed)+" / "+kb(s.flashTotal),fp,75,90)+
-  '<h3 style="margin-top:14px">'+esc(t("CPU (ultimi 60 s)"))+'</h3>'+harea(s.cpuHist,0,100,"#3fa7ff","hc1")+row(t("Core 0 / Core 1"),s.cpu0+"% / "+s.cpu1+"%")+'</section>';
 $("home").innerHTML=h}
 var HW=null,HWT=0;
 function hdTick(){var e=$("hd");if(!e)return;if(HW&&HW.tv){var c=hClock();e.textContent=c[0]+" · "+c[1]}else e.textContent=""}
@@ -1144,8 +1209,8 @@ function homeWid(s,n){hwFetch();if(!SV.httpPort)svcLoad();
  var W=HW||{},pill=function(on,a,b){return'<span class="pill'+(on?" a":"")+'">'+esc(on?a:b)+'</span>'},c=[],now=Math.floor(Date.now()/1000);
  if(SV.httpOn)c.push(wid("HTTP",esc(tf("Porta: {0}",SV.httpPort)),"","http","i-globe"));
  if(SV.httpsOn)c.push(wid("HTTPS",esc(tf("Porta: {0}",SV.httpsPort)),"","https","i-lock"));
- if(s.mqtt)c.push(wid("MQTT",pill(s.mqtt==2,t("collegato"),t("non collegato")),"","mqtt","i-mqtt"));
- if(W.mesh)c.push(wid("ESP-NOW",esc(t(MROLE[W.role]||"Nodo")),esc(t("Schede vicine"))+": "+W.nodes,"mesh","i-mesh"));
+ if(s.mqtt&&canSee("mqtt"))c.push(wid("MQTT",pill(s.mqtt==2,t("collegato"),t("non collegato")),"","mqtt","i-mqtt"));
+ if(W.mesh&&canSee("mesh"))c.push(wid("ESP-NOW",esc(t(MROLE[W.role]||"Nodo")),esc(t("Schede vicine"))+": "+W.nodes,"mesh","i-mesh"));
  if(n.mdnsRun)c.push(wid("mDNS",esc(n.fqdn),"","mdns","i-tag"));
  if(W.ble)c.push(wid("Bluetooth",esc(durText(W.bleLeft)),bar(Math.min(100,Math.round(100*W.bleLeft/600))),"ble","i-link"));
  if(W.ntp)c.push(wid("NTP",W.last?esc(tf("{0} fa",durText(Math.max(1,now-W.last)))):esc(t("Nessuna sincronizzazione ancora")),"","ntp","i-clock"));
@@ -1167,7 +1232,7 @@ var SRD={};
 function srOpts(){if($("sr_baud").options.length)return;[9600,19200,38400,57600,115200,230400,460800,921600].forEach(function(b){var o=document.createElement("option");o.value=b;o.textContent=b;$("sr_baud").appendChild(o)});[["crlf","CR+LF"],["lf","LF"],["cr","CR"]].forEach(function(e){var o=document.createElement("option");o.value=e[0];o.textContent=e[1];$("sr_eol").appendChild(o)})}
 function srLoad(){srOpts();api("/api/serial").then(function(r){return r.json()}).then(function(j){SRD=j;srDraw()}).catch(function(){})}
 function srDraw(){$("sr_baud").value=SRD.baud;$("sr_eol").value=SRD.eol;$("sr_tx").value=SRD.tx;["echo","input","log","banner"].forEach(function(k){$("sw_sr_"+k).className="sw1"+(SRD[k]?" on":"")});
- $("sr_usb").textContent=SRD.usb?t("USB nativa: la velocita non conta."):"";$("sr_trial").className=SRD.trial?"msg ko":"msg ko hide"}
+ $("sr_usb").textContent=SRD.usb?t("USB nativa: la velocita non conta."):"";$("sr_trial").className=SRD.trial?"msg ko":"msg ko hide";clearTimeout(srDraw._t);if(SRD.trial)srDraw._t=setTimeout(srLoad,21000)}
 function srSet(k,v){post("/api/serial",{k:k,v:v}).then(function(r){return r.json()}).then(function(j){if(j.err){msg("srm",j.err,false);srLoad()}else{SRD=j;srDraw();msg("srm",t("Salvato"),true)}}).catch(function(){})}
 function srTog(k){if(k==="input"&&SRD.input&&!confirm(t("La seriale non accettera piu comandi. Si riattiva da questa pagina o con il tasto BOOT. Continuare?")))return;srSet(k,SRD[k]?"off":"on")}
 var SER=true;
@@ -1194,11 +1259,11 @@ function oraTz(){Promise.all([commonLoad(),api("/api/region").then(function(r){r
  L.forEach(function(z,i){h+='<option value="'+i+'">'+esc(z[0])+'</option>'});OTZ=L;$("o_tz").innerHTML=h;$("o_tz").value=f}).catch(function(){})}
 function oraTzSave(){var z=OTZ[+$("o_tz").value];if(!z)return;post("/api/region",{tz:z[1],tzname:z[0]}).then(function(r){return r.json()}).then(function(j){msg("om4",j.ok===false?j.err:t("Salvato"),j.ok!==false);loadTime();oraTz()}).catch(function(){})}
 function loadTime(){if(!$("o_tz").options.length)oraTz();api("/api/time").then(function(r){return r.json()}).then(function(t){
- $("oranow").textContent=t.valid?t.now:window.t("Ora non impostata");svcSt("ntp",t.ntp);$("o_ev").value=t.every;var ld=new Date((t.last||0)*1000);$("olast").textContent=t.last?tf("Ultima sincronizzazione: {0}",ld.toLocaleString()):(t.ntp?window.t("Nessuna sincronizzazione ancora"):window.t("Sincronizzazione spenta: ora a mano"));if(t.valid&&!$("o_md").value){var e=new Date(t.epoch*1000);$("o_md").value=e.getFullYear()+"-"+("0"+(e.getMonth()+1)).slice(-2)+"-"+("0"+e.getDate()).slice(-2);$("o_mt").value=("0"+e.getHours()).slice(-2)+":"+("0"+e.getMinutes()).slice(-2)+":00"}$("o_srv").value=t.server;if($("ontpst"))$("ontpst").textContent=t.ntp?(t.last?tf("Ultima sincronizzazione: {0}",ld.toLocaleString()):window.t("Nessuna sincronizzazione ancora")):window.t("Sincronizzazione spenta: ora a mano");$("o_serve").value=t.serve?"1":"0";
+ $("oranow").textContent=t.valid?t.now:window.t("Ora non impostata");svcSt("ntp",t.ntp);$("o_ev").value=t.every;var ld=new Date((t.last||0)*1000);$("olast").textContent=t.last?tf("Ultima sincronizzazione: {0}",ld.toLocaleString()):(t.ntp?window.t("Nessuna sincronizzazione ancora"):window.t("Sincronizzazione spenta: ora a mano"));if(t.valid&&!$("o_md").value){var e=new Date(t.epoch*1000);$("o_md").value=e.getFullYear()+"-"+("0"+(e.getMonth()+1)).slice(-2)+"-"+("0"+e.getDate()).slice(-2);$("o_mt").value=("0"+e.getHours()).slice(-2)+":"+("0"+e.getMinutes()).slice(-2)+":00"}$("o_srv").value=t.server;$("o_srv2").value=t.server2||"";$("ontpwho").textContent=tf("Ogni richiesta NTP mostra ai server l'indirizzo IP pubblico della tua rete. Server usati: {0}",t.server+(t.server2?", "+t.server2:""));if($("ontpst"))$("ontpst").textContent=t.ntp?(t.last?tf("Ultima sincronizzazione: {0}",ld.toLocaleString()):window.t("Nessuna sincronizzazione ancora")):window.t("Sincronizzazione spenta: ora a mano");$("o_serve").value=t.serve?"1":"0";
  })}
 function setManual(){var d=$("o_md").value,h=$("o_mt").value;if(!d||!h){msg("om3",t("Scegli data e ora"),false);return}if(h.length==5)h+=":00";
  post("/api/time/set",{local:d+" "+h}).then(function(r){return r.json()}).then(function(j){msg("om3",j.ok?t("Ora impostata"):j.err,j.ok);if(j.ok)loadTime()})}
-function saveTime(on){if(on===undefined)on=!!(SVS.ntp&&SVS.ntp.on);return post("/api/time",{ntp:on?"1":"0",every:$("o_ev").value,server:$("o_srv").value,serve:$("o_serve").value})
+function saveTime(on){if(on===undefined)on=!!(SVS.ntp&&SVS.ntp.on);return post("/api/time",{ntp:on?"1":"0",every:$("o_ev").value,server:$("o_srv").value,server2:$("o_srv2").value,serve:$("o_serve").value})
  .then(function(r){return r.json()}).then(function(j){msg("om",j.ok?t("Salvato"):j.err,j.ok);if(j.ok)setTimeout(loadTime,1500)})}
 function syncNow(){post("/api/time/sync",{}).then(function(r){return r.json()}).then(function(j){msg("om2",j.ok?t("Sincronizzazione richiesta: controllo l'ora tra pochi secondi"):j.err,j.ok);if(j.ok){setTimeout(loadTime,3000);setTimeout(loadTime,8000)}})}
 function setFromBrowser(){post("/api/time/set",{epoch:Math.floor(Date.now()/1000)}).then(function(r){return r.json()}).then(function(j){msg("om2",j.ok?t("Ora impostata"):j.err,j.ok);if(j.ok)loadTime()})}
@@ -1569,8 +1634,18 @@ function lgAuto(){clearInterval(LG.tm);if($("lgauto").checked&&cur=="log")LG.tm=
 function lgDl(){var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([LG.txt],{type:"text/plain"}));a.download="vesevos-log.txt";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)}
 function lgClear(){dlg({title:t("Svuotare il registro?"),body:'<p style="margin:0">'+esc(t("Le righe vengono cancellate dalla memoria della scheda. Se ti servono, prima premi Scarica."))+'</p>',ok:t("Svuota"),danger:true,onOk:function(){return post("/api/log/clear",{}).then(function(r){return r.json()}).then(function(j){if(j.ok)loadLog();return j.ok?"":j.err})}})}
 function restoreCfg(){var f=$("cf").files[0];if(!f){msg("cm",t("Scegli un file"),false);return}
- f.text().then(function(t){return post("/api/config/restore",{t:t})}).then(function(r){return r.json()}).then(function(j){msg("cm",j.ok?t("Ripristinato"):j.err,j.ok)})}
-function factory(){if(!confirm(t("Azzerare TUTTO (anche la password)?")))return;post("/api/factory",{}).then(function(){msg("cm",t("Riavvio in corso..."),true)})}
+ f.text().then(function(x){return post("/api/config/restore",{t:x,pw:$("bk_rp").value})}).then(function(r){return r.json()}).then(function(j){msg("cm",j.ok?tf("Ripristinato: {0} righe cambiate",j.changed):j.err,j.ok);if(j.ok)$("bk_rp").value=""})}
+function bkSec(){$("bk_box").className=$("bk_sec").checked?"":"hide"}
+function bkExport(){var p=$("bk_pw").value;
+ if(p.length<10){msg("cm",t("La frase deve avere almeno 10 caratteri"),false);return}
+ if(p!==$("bk_pw2").value){msg("cm",t("Le due frasi non sono uguali"),false);return}
+ if(!$("bk_acc").checked){msg("cm",t("Devi accettare l'avviso per esportare i segreti"),false);return}
+ post("/api/config/export",{acc:"1",pw:p}).then(function(r){return r.text()}).then(function(x){
+  if(x.charAt(0)=="{"){var j={};try{j=JSON.parse(x)}catch(e){}msg("cm",j.err||t("Errore"),false);return}
+  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([x],{type:"text/plain"}));a.download="vesevos-segreti.conf";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);
+  $("bk_pw").value="";$("bk_pw2").value="";$("bk_acc").checked=false;msg("cm",t("Backup cifrato scaricato. Custodisci il file e la frase."),true)}).catch(function(){})}
+function factory(){dlg({title:t("Azzerare TUTTO (anche la password)?"),body:'<p style="margin:0 0 8px">'+esc(t("Tutte le impostazioni, gli utenti e le password vengono cancellati. Per confermare scrivi la parola AZZERA."))+'</p><input id="fz_t" autocomplete="off" aria-label="'+esc(t("Parola di conferma"))+'">',ok:t("Azzera tutto"),danger:true,
+ onOk:function(){if(dlgV("fz_t").toUpperCase()!==t("AZZERA"))return t("La parola non coincide");return post("/api/factory",{}).then(function(){msg("fm",t("Riavvio in corso..."),true);return ""})}})}
 function chPass(){post("/api/passwd",{o:$("p_old").value,n:$("p_new").value}).then(function(r){return r.json()}).then(function(j){msg("pm",j.ok?t("Password cambiata"):j.err,j.ok)})}
 /* ===== 1.7.1: impronta della password (SHA-256 / HMAC), uguale alla scheda ===== */
 var SHK=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
@@ -1640,7 +1715,7 @@ function doMfa(){var c=$("lcode").value.trim();if(!c){msg("lm",t("Scrivi il codi
  post("/api/login/mfa",{tok:MFAT,code:c,now:Math.floor(Date.now()/1000)}).then(function(r){return r.json()}).then(function(j){if(j.ok){$("lu").disabled=false;$("lp").disabled=false;$("lmfa").className="hide";$("lbt").className="btn";loginOk(j)}else{msg("lm",j.err||t("Errore"),false);if(/Tempo scaduto/.test(j.err||"")){setTimeout(showLogin,1500)}}}).catch(function(){})}
 function logout(){post("/api/logout",{}).then(showLogin).catch(showLogin)}
 function start(){$("login").className="hide";$("app").className="";setRole(AUTH.role===undefined?ROLE:AUTH.role);USER=AUTH.user||USER;
- $("who").textContent=USER?USER+" · "+t(RNAME[ROLE]):"";buildNav();cpApply();poll();clearInterval(timer);timer=setInterval(poll,3000);auPoll();
+ $("who").textContent=USER?USER+" · "+t(RNAME[ROLE]):"";buildNav();cpApply();poll();rfApply();auPoll();
  if(!AUTH.setup&&ROLE==2)setupOpen();else if(location.hash=="#aiuto")show("help")}
 
 /* ===== lingua: bandiere ===== */
@@ -1655,8 +1730,8 @@ function langPop(e){e.stopPropagation();var m=$("lpop");if(!m.classList.contains
 document.addEventListener("click",function(e){var m=$("lpop");if(m&&!m.classList.contains("hide")&&!e.target.closest("#lpop"))m.className="pop hide"});
 
 /* ===== navigazione con ruoli ===== */
-var TMIN={selftest:2,stat:1,power:1,cert:1,radio:1,ntp:1,dhcp:1,dns:1,mdns:1,ble:1,ap:1,http:1,wifi:1,mqtt:1,mesh:1,pin:1,led:1,task:1,file:1,ora:1,loc:1,auto:1,boot:1,wd:1,shell:1,audit:1,https:1,users:2,fw:2};
-function canSee(id){return ROLE>=(TMIN[id]||0)}
+var TMIN={dmgr:1,btn:1,usb:1,temp:1,mem:1,cpu:1,rad:1,selftest:2,stat:1,power:1,cert:1,radio:1,ntp:1,dhcp:1,dns:1,mdns:1,ble:1,ap:1,http:1,wifi:1,mqtt:1,mesh:1,pin:1,led:1,task:1,file:1,ora:1,loc:1,auto:1,boot:1,wd:1,shell:1,audit:1,https:1,users:2,fw:2};
+function canSee(id){if(AUTH&&AUTH.pk&&AUTH.pk[id]===0)return false;return ROLE>=(TMIN[id]||0)}
 function gTabs(g){return GMAP[g].filter(canSee)}
 function buildNav(){var h='<svg class="i slogo" style="stroke:url(#vg)"><use href="#i-chipn"/></svg>';
  GRP.forEach(function(g){if(gTabs(g[0]).length)h+='<button class="nb" id="n_'+g[0]+'" onclick="gGo(\''+g[0]+'\')"><svg class="i"><use href="#'+GICO[g[0]]+'"/></svg>'+esc(t(g[1]))+'</button>'});$("nav").innerHTML=h;
@@ -1670,10 +1745,31 @@ function show(id){if(!canSee(id))id="sum";cur=id;var g=gOf(id);LASTG[g]=id;
   if(g=="sys"&&DIAG.indexOf(k)<0&&ix>0&&DIAG.indexOf(L[ix-1])>=0)h+='<span class="gsep"></span>';
   h+='<button class="'+(k==id?"on":"")+'" onclick="show(\''+k+'\')">'+esc(t(x[1]))+'</button>'})}
  $("gsub").innerHTML=h;$("gsub").className="sub gsub"+(h?"":" hide");$("alerts").className="alerts hide";
- if(id=="shell")cpToggle(true);if(id!="auto"){clearInterval(RU.tm)}if(id=="auto")rLoad();if(id=="boot")bLoad();if(id!="task")clearInterval(TK.tm);if(id=="task")loadTasks();if(id=="pin")loadPins();if(id=="loc")loadLangs();if(id=="log"){lgInit();loadLog();lgAuto()}else clearInterval(LG.tm);if(id=="wifi")fillNet();if(id=="led")fillLed();if(id=="ora")loadTime();if(id=="file")fList(fp);
+ if(id=="dmgr")dmLoad();if(["btn","usb","temp","mem","cpu","rad"].indexOf(id)>=0)dvRows(id);if(id=="shell")cpToggle(true);if(id!="auto"){clearInterval(RU.tm)}if(id=="auto")rLoad();if(id=="boot")bLoad();if(id!="task")clearInterval(TK.tm);if(id=="task")loadTasks();if(id=="pin")loadPins();if(id=="loc")loadLangs();if(id=="log"){lgInit();loadLog();lgAuto()}else clearInterval(LG.tm);if(id=="wifi")fillNet();if(id=="led")fillLed();if(id=="ora")loadTime();if(id=="file")fList(fp);
  if(id=="sec")fillSec();if(id=="sum"){homeDraw()}if(id=="mqtt")mqLoad();if(id=="mesh")msLoad();if(id=="loc")lcLoad();if(id=="wd")wdLoad();if(id=="users")usLoad();if(id=="fw")fwLoad();if(id=="https"){tlsLoad();svcLoad()}if(id=="ap"){fillNet();svcLoad()}if(id=="http"||id=="dhcp"||id=="dns"||id=="mdns")svcLoad();if(id=="ntp")loadTime();if(id=="mfa")mfLoad();if(id!="stat")clearInterval(STT);if(id=="stat"){stLoad();clearInterval(STT);STT=setInterval(stLoad,5000)}if(id=="power")pwLoad();if(id=="selftest")stlPoll();if(id=="cert")tlsLoad();if(id=="ble"&&ROLE==2){bleLoad();clearInterval(BLT);BLT=setInterval(function(){if(cur!="ble")clearInterval(BLT);else bleLoad()},3000)}if(id=="radio")lcLoad();if(id=="audit")auLoad();if(id=="legal")lgLoad();
  if(id=="help"&&location.hash!="#aiuto")try{history.replaceState(null,"","#aiuto")}catch(e){}if(id!="help"&&location.hash=="#aiuto")try{history.replaceState(null,"",location.pathname)}catch(e){}}
 window.addEventListener("hashchange",function(){if(location.hash=="#aiuto"&&loggedIn())show("help")});
+
+
+/* ===== periferiche e Device Manager (API /api/dev) ===== */
+var DV=[],DVT={btn:"boot"};
+function dvList(){return api("/api/dev").then(function(r){return r.json()}).then(function(j){DV=j.dev||[]})}
+function dmLoad(){dvList().then(function(){dvDraw("dm_list","dm_m")}).catch(function(){})}
+function dvDraw(box,mm){var L=DV.filter(function(d){return canSee(d.tab)}),caps=[],h="";
+ L.forEach(function(d){if(caps.indexOf(d.cap)<0)caps.push(d.cap)});
+ caps.forEach(function(c){h+='<h4 class="gsep" style="margin:12px 0 4px">'+esc(c)+'</h4><table>';
+  L.filter(function(d){return d.cap==c}).forEach(function(d){
+   var st=d.state==1?(d.sw||d.kind==0?t("acceso"):t("presente")):d.state==2?t("con problema"):t("spento");
+   var cl=d.state==1?"v":d.state==2?"k":"";
+   h+='<tr><td>'+esc(d.label)+'</td><td><span class="pill '+cl+'">'+esc(st)+'</span></td><td style="text-align:right">';
+   if(d.sw&&ROLE==2)h+='<button class="sw1'+(d.state?" on":"")+'" role="switch" aria-checked="'+(d.state?"true":"false")+'" aria-label="'+esc(d.label)+'" onclick="dvSet(\''+d.id+'\','+(d.state?0:1)+',\''+box+'\',\''+mm+'\')"></button> ';
+   h+='<button class="btn gray" onclick="show(\''+d.tab+'\')">'+esc(t("Apri"))+'</button></td></tr>'});
+  h+='</table>'});
+ $(box).innerHTML=h||'<p class="fhint">'+esc(t("Nessuna voce"))+'</p>'}
+function dvSet(id,on,box,mm){post("/api/dev/set",{id:id,on:on}).then(function(r){return r.json()}).then(function(j){msg(mm,j.ok?t("Fatto"):j.err,j.ok);setTimeout(dmLoad,600)}).catch(function(){})}
+function dvRows(tab){var id=DVT[tab]||tab;api("/api/dev?id="+id).then(function(r){return r.json()}).then(function(j){var R=(j.data&&j.data.rows)||[],h='<table>';
+ R.forEach(function(x){h+='<tr><td>'+esc(x[0])+'</td><td style="text-align:right"><b>'+esc(x[1])+'</b></td></tr>'});
+ $("dv_"+tab).innerHTML=h+'</table>'}).catch(function(){})}
 
 /* ===== dati comuni (paesi, mappa) ===== */
 var COMMON=null;
@@ -1820,7 +1916,7 @@ function lcSave(mid){mid=typeof mid=="string"?mid:"lcm";var d={country:LOC.cc,tz
 /* ===== Watchdog ===== */
 var WDD=["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
 function wdLoad(){api("/api/wd").then(function(r){return r.json()}).then(function(w){
- var h=(w.stopped?'<div class="msg ko" style="display:block">'+esc(t("Riavvii automatici sospesi: troppi in un'ora. Controlla il registro."))+'</div>':"")+(w.last?row(esc(t("Ultimo riavvio automatico")),esc(w.last)):"");
+ var h=(w.degraded?'<div class="msg ko" style="display:block">'+esc(tf("Modalita ridotta: servizi spenti: {0}. Pagina web, log e recupero restano attivi.",w.off||"-"))+'</div>':"")+(w.stopped?'<div class="msg ko" style="display:block">'+esc(t("Riavvii automatici sospesi: troppi in un'ora. Controlla il registro."))+'</div>':"")+(w.last?row(esc(t("Ultimo riavvio automatico")),esc(w.last)):"");
  h+='<table class="ftab"><thead><tr><th>'+esc(t("Servizio"))+'</th><th>'+esc(t("Ultimo segno di vita"))+'</th><th>'+esc(t("Limite"))+'</th><th>'+esc(t("Riavvii"))+'</th></tr></thead><tbody>';
  w.watch.forEach(function(x){h+='<tr><td>'+esc(x.n)+'</td><td>'+esc(durText(x.ago))+'</td><td>'+esc(durText(x.to))+'</td><td>'+x.r+'</td></tr>'});$("wdst").innerHTML=h+'</tbody></table>';
  $("wd_task").classList.toggle("on",w.task);$("wd_net").classList.toggle("on",w.net);$("wd_ram").classList.toggle("on",w.ram);$("wd_nm").value=w.netMin;$("wd_rk").value=w.ramKb;$("wd_ud").value=w.upDays;

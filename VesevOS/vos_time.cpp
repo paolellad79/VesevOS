@@ -8,6 +8,7 @@
 #include "vos_net.h"
 #include "vos_util.h"
 #include "vos_log.h"
+#include "vos_audit.h"
 #include <WiFi.h>
 #include <AsyncUDP.h>
 #include <sys/time.h>
@@ -26,8 +27,19 @@ bool timeValid() { return time(nullptr) > 1700000000; }   // dopo novembre 2023
 void timeApply() { g_apply = true; }
 
 static volatile uint32_t g_lastSync = 0;        // epoch dell'ultima sincronizzazione riuscita
+static uint32_t g_refEpoch = 0, g_refMs = 0;    // ora dell'ultima sincronizzazione accettata (0 = nessuna) e quando
+static uint8_t  g_refused = 0;                  // quante volte di fila e stata scartata
 static void onSync(struct timeval* tv) {
   static uint32_t lastLog = 0;                         // una riga ogni 24 ore: niente righe ogni ora nel registro
+  uint32_t expected = g_refEpoch ? g_refEpoch + (millis() - g_refMs) / 1000UL : 0;
+  if (!utilTimeSyncOk((uint32_t)tv->tv_sec, expected, g_refused)) {         // l'NTP semplice non e autenticato: ora assurda = scartata
+    g_refused++;
+    if (expected) { struct timeval t2; t2.tv_sec = expected; t2.tv_usec = 0; settimeofday(&t2, NULL); }
+    vlog("ATTENZIONE: ora ricevuta da NTP non credibile (%lu), scartata", (unsigned long)tv->tv_sec);
+    auditEvent(AUD_YELLOW, "ntpbad", tr("Ora ricevuta da NTP non credibile: scartata. Controlla il server NTP e la rete"));
+    return;
+  }
+  g_refused = 0; g_refEpoch = (uint32_t)tv->tv_sec; g_refMs = millis(); auditClear("ntpbad");
   uint32_t prev = g_lastSync; g_lastSync = (uint32_t)tv->tv_sec;
   if (!prev || g_lastSync - lastLog >= 86400UL || !lastLog) { vlog("TIME: ora sincronizzata con NTP"); lastLog = g_lastSync; }
 }
@@ -68,6 +80,7 @@ String timeNowStr() {
 void timeSetEpoch(uint32_t t) {
   struct timeval tv; tv.tv_sec = t; tv.tv_usec = 0;
   settimeofday(&tv, NULL);
+  g_refEpoch = 0; g_refused = 0;                        // ora a mano: niente piu "ora attesa" da confrontare
   vlog("TIME: ora impostata a mano");
 }
 
@@ -92,7 +105,7 @@ String timeJson() {
   j += "\"now\":\"" + timeNowStr() + "\",";
   j += "\"epoch\":" + String((unsigned long)time(nullptr)) + ",";
   j += "\"ntp\":" + String(cfg.ntpOn ? "true" : "false") + ",";
-  j += "\"server\":\"" + jsonEscape(cfg.ntpServer) + "\",";
+  j += "\"server\":\"" + jsonEscape(cfg.ntpServer) + "\",\"server2\":\"" + jsonEscape(cfg.ntpServer2) + "\",";
   j += "\"serve\":" + String(cfg.ntpServe ? "true" : "false") + ",";
   j += "\"every\":" + String((unsigned long)cfg.ntpEvery) + ",\"last\":" + String((unsigned long)g_lastSync) + ",";
   j += "\"tz\":\"" + jsonEscape(cfg.tz) + "\",";
@@ -149,9 +162,9 @@ static void timeTask(void*) {
       // frequenza: 0 = solo all'avvio (intervallo massimo, circa 49 giorni)
       sntp_set_sync_interval(cfg.ntpEvery ? cfg.ntpEvery * 60000UL : 0xFFFFFFF0UL);
       sntp_set_time_sync_notification_cb(onSync);
-      configTzTime(cfg.tz.c_str(), cfg.ntpServer.c_str(), "time.google.com");
+      configTzTime(cfg.tz.c_str(), cfg.ntpServer.c_str(), cfg.ntpServer2.length() ? cfg.ntpServer2.c_str() : nullptr);
       g_ntpStarted = true;
-      vlog("TIME: NTP avviato (%s, %s)", cfg.ntpServer.c_str(), cfg.tzName.c_str());
+      vlog("TIME: NTP avviato (%s%s%s, %s)", cfg.ntpServer.c_str(), cfg.ntpServer2.length() ? ", " : "", cfg.ntpServer2.c_str(), cfg.tzName.c_str());
     } else if (!cfg.ntpOn && !g_ntpStarted) {
       setenv("TZ", cfg.tz.c_str(), 1); tzset();           // solo il fuso, ora a mano
       g_ntpStarted = true;

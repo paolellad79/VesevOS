@@ -236,10 +236,10 @@
    "scope": "fw"
   },
   {
-   "it": "  free            memoria RAM/PSRAM",
-   "en": "  free            RAM/PSRAM memory",
-   "es": "  free            memoria RAM/PSRAM",
-   "de": "  free            RAM/PSRAM-Speicher",
+   "it": "  free [detail]   memoria RAM/PSRAM (detail: blocchi e frammentazione)",
+   "en": "  free [detail]   RAM/PSRAM memory (detail: blocks and fragmentation)",
+   "es": "  free [detail]   memoria RAM/PSRAM (detail: bloques y fragmentacion)",
+   "de": "  free [detail]   RAM/PSRAM-Speicher (detail: Bloecke und Fragmentierung)",
    "scope": "fw"
   },
   {
@@ -1111,13 +1111,6 @@
    "scope": "web"
   },
   {
-   "it": "Uso risorse",
-   "en": "Resource usage",
-   "es": "Uso de recursos",
-   "de": "Ressourcennutzung",
-   "scope": "web"
-  },
-  {
    "it": "Velocita CPU",
    "en": "CPU speed",
    "es": "Velocidad de la CPU",
@@ -1150,20 +1143,6 @@
    "en": "Fixed 240 MHz",
    "es": "Fija 240 MHz",
    "de": "Fest 240 MHz",
-   "scope": "web"
-  },
-  {
-   "it": "CPU (ultimi 60 s)",
-   "en": "CPU (last 60 s)",
-   "es": "CPU (últimos 60 s)",
-   "de": "CPU (letzte 60 s)",
-   "scope": "web"
-  },
-  {
-   "it": "Temperatura CPU (ultimi 60 s)",
-   "en": "CPU temperature (last 60 s)",
-   "es": "Temperatura de la CPU (últimos 60 s)",
-   "de": "CPU-Temperatur (letzte 60 s)",
    "scope": "web"
   },
   {
@@ -1319,6 +1298,97 @@
    "es": "Activa",
    "de": "Aktiv",
    "scope": "web"
+  },
+  {
+   "it": "Secondo server NTP (vuoto = nessuno)",
+   "en": "Second NTP server (empty = none)",
+   "es": "Segundo servidor NTP (vacio = ninguno)",
+   "de": "Zweiter NTP-Server (leer = keiner)",
+   "scope": "web"
+  },
+  {
+   "it": "Ogni richiesta NTP mostra ai server l'indirizzo IP pubblico della tua rete. Server usati: {0}",
+   "en": "Every NTP request shows the public IP address of your network to the servers. Servers used: {0}",
+   "es": "Cada peticion NTP muestra a los servidores la direccion IP publica de tu red. Servidores usados: {0}",
+   "de": "Jede NTP-Anfrage zeigt den Servern die oeffentliche IP-Adresse deines Netzes. Verwendete Server: {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Uso: ntp server <nome>  |  ntp server2 <nome|off>  (solo lettere, numeri, punto e trattino)",
+   "en": "Usage: ntp server <name>  |  ntp server2 <name|off>  (letters, numbers, dot and hyphen only)",
+   "es": "Uso: ntp server <nombre>  |  ntp server2 <nombre|off>  (solo letras, numeros, punto y guion)",
+   "de": "Nutzung: ntp server <Name>  |  ntp server2 <Name|off>  (nur Buchstaben, Zahlen, Punkt und Bindestrich)",
+   "scope": "fw"
+  },
+  {
+   "it": "  ram [mark|diff] stack dei task e costo dei servizi (mark, cambia qualcosa, diff)",
+   "en": "  ram [mark|diff] task stacks and service cost (mark, change something, diff)",
+   "es": "  ram [mark|diff] pilas de las tareas y coste de los servicios (mark, cambia algo, diff)",
+   "de": "  ram [mark|diff] Task-Stacks und Dienstkosten (mark, etwas aendern, diff)",
+   "scope": "fw"
+  },
+  {
+   "it": "Memoria segnata: accendi o spegni un servizio e scrivi: ram diff",
+   "en": "Memory marked: turn a service on or off and type: ram diff",
+   "es": "Memoria marcada: enciende o apaga un servicio y escribe: ram diff",
+   "de": "Speicher markiert: Dienst ein- oder ausschalten und eingeben: ram diff",
+   "scope": "fw"
+  },
+  {
+   "it": "Prima scrivi: ram mark",
+   "en": "First type: ram mark",
+   "es": "Primero escribe: ram mark",
+   "de": "Zuerst eingeben: ram mark",
+   "scope": "fw"
+  },
+  {
+   "it": "Task          Stack libero minimo / totale (byte)  Si puo togliere",
+   "en": "Task          Minimum free stack / total (bytes)  Can be removed",
+   "es": "Tarea         Pila libre minima / total (bytes)  Se puede quitar",
+   "de": "Task          Minimal freier Stack / gesamt (Byte)  Entfernbar",
+   "scope": "fw"
+  },
+  {
+   "it": "Stack dei task VesevOS: %u byte in tutto, margine recuperabile (tenendo 25%% libero): %u byte",
+   "en": "VesevOS task stacks: %u bytes in total, recoverable margin (keeping 25%% free): %u bytes",
+   "es": "Pilas de las tareas VesevOS: %u bytes en total, margen recuperable (dejando 25%% libre): %u bytes",
+   "de": "VesevOS-Task-Stacks: %u Byte insgesamt, zurueckgewinnbarer Spielraum (25%% bleiben frei): %u Byte",
+   "scope": "fw"
+  },
+  {
+   "it": "Dopo %lu s: RAM interna %+.1f KB, pezzo piu grande %+.1f KB, PSRAM %+.1f KB",
+   "en": "After %lu s: internal RAM %+.1f KB, largest piece %+.1f KB, PSRAM %+.1f KB",
+   "es": "Tras %lu s: RAM interna %+.1f KB, pieza mas grande %+.1f KB, PSRAM %+.1f KB",
+   "de": "Nach %lu s: interner RAM %+.1f KB, groesstes Stueck %+.1f KB, PSRAM %+.1f KB",
+   "scope": "fw"
+  },
+  {
+   "it": "nessuno",
+   "en": "none",
+   "es": "ninguno",
+   "de": "keiner",
+   "scope": "fw"
+  },
+  {
+   "it": "Server NTP: %s",
+   "en": "NTP server: %s",
+   "es": "Servidor NTP: %s",
+   "de": "NTP-Server: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Secondo server NTP: %s",
+   "en": "Second NTP server: %s",
+   "es": "Segundo servidor NTP: %s",
+   "de": "Zweiter NTP-Server: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Ora ricevuta da NTP non credibile: scartata. Controlla il server NTP e la rete",
+   "en": "Time received from NTP is not credible: discarded. Check the NTP server and the network",
+   "es": "La hora recibida por NTP no es creible: descartada. Revisa el servidor NTP y la red",
+   "de": "Die per NTP empfangene Zeit ist nicht glaubwuerdig: verworfen. Pruefe NTP-Server und Netz",
+   "scope": "fw"
   },
   {
    "it": "Server NTP",
@@ -1566,20 +1636,6 @@
    "scope": "web"
   },
   {
-   "it": "Configurazione",
-   "en": "Configuration",
-   "es": "Configuración",
-   "de": "Konfiguration",
-   "scope": "web"
-  },
-  {
-   "it": "Scarica file",
-   "en": "Download file",
-   "es": "Descargar archivo",
-   "de": "Datei herunterladen",
-   "scope": "web"
-  },
-  {
    "it": "Ripristina da file",
    "en": "Restore from file",
    "es": "Restaurar desde archivo",
@@ -1696,13 +1752,6 @@
    "en": "CPU",
    "es": "CPU",
    "de": "CPU",
-   "scope": "web"
-  },
-  {
-   "it": "Flash (file)",
-   "en": "Flash (files)",
-   "es": "Flash (archivos)",
-   "de": "Flash (Dateien)",
    "scope": "web"
   },
   {
@@ -2714,13 +2763,6 @@
    "scope": "web"
   },
   {
-   "it": "Chip",
-   "en": "Chip",
-   "es": "Chip",
-   "de": "Chip",
-   "scope": "web"
-  },
-  {
    "it": "Collegamento Wi-Fi in corso",
    "en": "Wi-Fi connection in progress",
    "es": "Conexion Wi-Fi en curso",
@@ -2735,13 +2777,6 @@
    "scope": "web"
   },
   {
-   "it": "File in flash",
-   "en": "Files in flash",
-   "es": "Archivos en flash",
-   "de": "Dateien im Flash",
-   "scope": "web"
-  },
-  {
    "it": "Guarda il LED: lampeggia a colori per 10 secondi",
    "en": "Look at the LED: it flashes in colors for 10 seconds",
    "es": "Mira el LED: parpadea en colores durante 10 segundos",
@@ -2753,13 +2788,6 @@
    "en": "Home",
    "es": "Inicio",
    "de": "Start",
-   "scope": "web"
-  },
-  {
-   "it": "Memoria",
-   "en": "Memory",
-   "es": "Memoria",
-   "de": "Speicher",
    "scope": "web"
   },
   {
@@ -2784,13 +2812,6 @@
    "scope": "web"
   },
   {
-   "it": "Processore",
-   "en": "Processor",
-   "es": "Procesador",
-   "de": "Prozessor",
-   "scope": "web"
-  },
-  {
    "it": "Proteggi la seriale (cavo USB) con la password",
    "en": "Protect the serial port (USB cable) with the password",
    "es": "Proteger el puerto serie (cable USB) con la contrasena",
@@ -2812,24 +2833,10 @@
    "scope": "web"
   },
   {
-   "it": "Risorse",
-   "en": "Resources",
-   "es": "Recursos",
-   "de": "Ressourcen",
-   "scope": "web"
-  },
-  {
    "it": "Segnale Wi-Fi debole",
    "en": "Weak Wi-Fi signal",
    "es": "Senal Wi-Fi debil",
    "de": "Schwaches WLAN-Signal",
-   "scope": "web"
-  },
-  {
-   "it": "Sicurezza",
-   "en": "Security",
-   "es": "Seguridad",
-   "de": "Sicherheit",
    "scope": "web"
   },
   {
@@ -6242,13 +6249,6 @@
    "scope": "fw"
   },
   {
-   "it": "Bluetooth non incluso in questo firmware",
-   "en": "Bluetooth not included in this firmware",
-   "es": "Bluetooth no incluido en este firmware",
-   "de": "Bluetooth ist in dieser Firmware nicht enthalten",
-   "scope": "fw"
-  },
-  {
    "it": "Bluetooth spento (ble on per accenderlo 10 minuti)",
    "en": "Bluetooth off (ble on turns it on for 10 minutes)",
    "es": "Bluetooth apagado (ble on lo enciende 10 minutos)",
@@ -6970,13 +6970,6 @@
    "scope": "fw"
   },
   {
-   "it": "Watchdog: troppi riavvii automatici in un'ora, riavvio sospeso. Controlla il registro",
-   "en": "Watchdog: too many automatic restarts in one hour, restart suspended. Check the log",
-   "es": "Watchdog: demasiados reinicios automaticos en una hora, reinicio suspendido. Revisa el registro",
-   "de": "Watchdog: zu viele automatische Neustarts in einer Stunde, Neustart ausgesetzt. Protokoll pruefen",
-   "scope": "fw"
-  },
-  {
    "it": "Wi-Fi casa: %s  %s  %d dBm",
    "en": "Home Wi-Fi: %s  %s  %d dBm",
    "es": "Wi-Fi casa: %s  %s  %d dBm",
@@ -7222,13 +7215,6 @@
    "scope": "web"
   },
   {
-   "it": "Antenna",
-   "en": "Antenna",
-   "es": "Antena",
-   "de": "Antenne",
-   "scope": "web"
-  },
-  {
    "it": "Apri",
    "en": "Open",
    "es": "Abrir",
@@ -7261,13 +7247,6 @@
    "en": "Action on the other board (e.g. led-color 00ff00, gpio 4 1, note hello, reboot)",
    "es": "Acción en la otra placa (ej. led-color 00ff00, gpio 4 1, note hola, reboot)",
    "de": "Aktion auf dem anderen Board (z. B. led-color 00ff00, gpio 4 1, note hallo, reboot)",
-   "scope": "web"
-  },
-  {
-   "it": "Bluetooth",
-   "en": "Bluetooth",
-   "es": "Bluetooth",
-   "de": "Bluetooth",
    "scope": "web"
   },
   {
@@ -7313,10 +7292,10 @@
    "scope": "web"
   },
   {
-   "it": "Canali e potenza massima vengono dal paese: non si possono superare. Con un'antenna esterna la potenza scende da sola per restare nel limite (potenza + guadagno dell'antenna). Montare un'antenna esterna e responsabilita di chi la monta.",
-   "en": "Channels and maximum power come from the country and cannot be exceeded. With an external antenna the power drops by itself to stay within the limit (power + antenna gain). Fitting an external antenna is the installer's responsibility.",
-   "es": "Canales y potencia máxima vienen del país: no se pueden superar. Con una antena externa la potencia baja sola para quedar dentro del límite (potencia + ganancia de la antena). Montar una antena externa es responsabilidad de quien la monta.",
-   "de": "Kanäle und Höchstleistung kommen vom Land und dürfen nicht überschritten werden. Mit externer Antenne sinkt die Leistung von selbst, um im Limit zu bleiben (Leistung + Antennengewinn). Das Anbringen einer externen Antenne liegt in der Verantwortung des Monteurs.",
+   "it": "La scheda applica i limiti noti del paese scelto (canali e potenza massima) e abbassa la potenza se usi un'antenna esterna. Questo non garantisce la conformita del prodotto finito: dipende anche dall'hardware, dall'antenna, dal montaggio e dalle regole del luogo. Chi installa la scheda ne e responsabile.",
+   "en": "The board applies the known limits of the chosen country (channels and maximum power) and lowers the power if you use an external antenna. This does not guarantee that the finished product is compliant: that also depends on the hardware, the antenna, the installation and the local rules. Whoever installs the board is responsible.",
+   "es": "La placa aplica los límites conocidos del país elegido (canales y potencia máxima) y baja la potencia si usas una antena externa. Esto no garantiza la conformidad del producto final: depende también del hardware, de la antena, del montaje y de las normas del lugar. Quien instala la placa es responsable.",
+   "de": "Das Board wendet die bekannten Grenzen des gewählten Landes an (Kanäle und Höchstleistung) und senkt die Leistung bei externer Antenne. Das garantiert nicht die Konformität des fertigen Produkts: sie hängt auch von Hardware, Antenne, Montage und den örtlichen Regeln ab. Verantwortlich ist, wer das Board installiert.",
    "scope": "web"
   },
   {
@@ -7782,13 +7761,6 @@
    "scope": "web"
   },
   {
-   "it": "Limite del paese",
-   "en": "Country limit",
-   "es": "Límite del país",
-   "de": "Landeslimit",
-   "scope": "web"
-  },
-  {
    "it": "Lingua, ora e formati",
    "en": "Language, time and formats",
    "es": "Idioma, hora y formatos",
@@ -8027,13 +7999,6 @@
    "scope": "web"
   },
   {
-   "it": "Paese",
-   "en": "Country",
-   "es": "País",
-   "de": "Land",
-   "scope": "web"
-  },
-  {
    "it": "Paese non scelto",
    "en": "No country chosen",
    "es": "País no elegido",
@@ -8139,13 +8104,6 @@
    "scope": "web"
   },
   {
-   "it": "Potenza in uso",
-   "en": "Power in use",
-   "es": "Potencia en uso",
-   "de": "Genutzte Leistung",
-   "scope": "web"
-  },
-  {
    "it": "Potenza massima con questa antenna",
    "en": "Maximum power with this antenna",
    "es": "Potencia máxima con esta antena",
@@ -8213,13 +8171,6 @@
    "en": "Free RAM too low for one minute",
    "es": "RAM libre demasiado baja durante un minuto",
    "de": "Freier RAM eine Minute lang zu niedrig",
-   "scope": "web"
-  },
-  {
-   "it": "Radio",
-   "en": "Radio",
-   "es": "Radio",
-   "de": "Funk",
    "scope": "web"
   },
   {
@@ -8825,13 +8776,6 @@
    "scope": "fw"
   },
   {
-   "it": "Periferiche",
-   "en": "Peripherals",
-   "es": "Perifericos",
-   "de": "Peripherie",
-   "scope": "web"
-  },
-  {
    "it": "Compliant",
    "en": "Compliant",
    "es": "Cumplimiento",
@@ -9259,10 +9203,10 @@
    "scope": "fw"
   },
   {
-   "it": "  wifi set <rete> [password] | wifi off   collega la Wi-Fi di casa (nome senza spazi) o la scollega",
-   "en": "  wifi set <network> [password] | wifi off   connect the home Wi-Fi (name without spaces) or disconnect it",
-   "es": "  wifi set <red> [contrasena] | wifi off   conecta la Wi-Fi de casa (nombre sin espacios) o la desconecta",
-   "de": "  wifi set <Netz> [Passwort] | wifi off   Heim-WLAN verbinden (Name ohne Leerzeichen) oder trennen",
+   "it": "  wifi set <rete> [password] | wifi off   collega la Wi-Fi di casa (nome con spazi tra virgolette) o la scollega",
+   "en": "  wifi set <network> [password] | wifi off   connect the home Wi-Fi (name with spaces in quotes) or disconnect it",
+   "es": "  wifi set <red> [contrasena] | wifi off   conecta la Wi-Fi de casa (nombre con espacios entre comillas) o la desconecta",
+   "de": "  wifi set <Netz> [Passwort] | wifi off   Heim-WLAN verbinden (Name mit Leerzeichen in Anfuehrungszeichen) oder trennen",
    "scope": "fw"
   },
   {
@@ -9511,10 +9455,10 @@
    "scope": "fw"
   },
   {
-   "it": "Uso: wifi set <rete> [password]",
-   "en": "Usage: wifi set <network> [password]",
-   "es": "Uso: wifi set <red> [contrasena]",
-   "de": "Verwendung: wifi set <Netz> [Passwort]",
+   "it": "Uso: wifi set <rete> [password]   (con spazi: wifi set \"mia rete\" password)",
+   "en": "Usage: wifi set <network> [password]   (with spaces: wifi set \"my network\" password)",
+   "es": "Uso: wifi set <red> [contrasena]   (con espacios: wifi set \"mi red\" contrasena)",
+   "de": "Verwendung: wifi set <Netz> [Passwort]   (mit Leerzeichen: wifi set \"mein Netz\" Passwort)",
    "scope": "fw"
   },
   {
@@ -9980,10 +9924,10 @@
    "scope": "fw"
   },
   {
-   "it": "  stats [on|off|reset]  statistiche d'uso anonime (spente di fabbrica)",
-   "en": "  stats [on|off|reset]  anonymous usage statistics (off by default)",
-   "es": "  stats [on|off|reset]  estadisticas de uso anonimas (apagadas de fabrica)",
-   "de": "  stats [on|off|reset]  anonyme Nutzungsstatistik (werkseitig aus)",
+   "it": "  stats [on|off|reset]  statistiche locali (spente di fabbrica)",
+   "en": "  stats [on|off|reset]  local statistics (off by default)",
+   "es": "  stats [on|off|reset]  estadisticas locales (apagadas de fabrica)",
+   "de": "  stats [on|off|reset]  lokale Statistik (werkseitig aus)",
    "scope": "fw"
   },
   {
@@ -10316,10 +10260,10 @@
    "scope": "web"
   },
   {
-   "it": "Contano quanto si usano Wi-Fi, Bluetooth, tasto BOOT e LED. Sono numeri anonimi: niente indirizzi MAC, niente indirizzi IP, niente nomi. Restano nella memoria della scheda (si azzerano al riavvio) e non escono mai. Spente di fabbrica.",
-   "en": "They count how much Wi-Fi, Bluetooth, the BOOT button and the LED are used. They are anonymous numbers: no MAC addresses, no IP addresses, no names. They stay in the board's memory (reset at reboot) and never leave it. Off by default.",
-   "es": "Cuentan cuanto se usan Wi-Fi, Bluetooth, el boton BOOT y el LED. Son numeros anonimos: sin direcciones MAC, sin direcciones IP, sin nombres. Quedan en la memoria de la placa (se ponen a cero al reiniciar) y nunca salen. Apagadas de fabrica.",
-   "de": "Sie zaehlen, wie viel WLAN, Bluetooth, BOOT-Taste und LED benutzt werden. Es sind anonyme Zahlen: keine MAC-Adressen, keine IP-Adressen, keine Namen. Sie bleiben im Speicher des Boards (beim Neustart zurueckgesetzt) und verlassen es nie. Werkseitig aus.",
+   "it": "Contano quanto si usano Wi-Fi, Bluetooth, tasto BOOT e LED. Sono statistiche locali: niente indirizzi MAC, niente indirizzi IP, niente nomi. Restano nella memoria della scheda (si azzerano al riavvio) e non vengono mai inviate fuori. Spente di fabbrica.",
+   "en": "They count how much Wi-Fi, Bluetooth, the BOOT button and the LED are used. These are local statistics: no MAC addresses, no IP addresses, no names. They stay in the board's memory (reset on reboot) and are never sent out. Off by default.",
+   "es": "Cuentan cuánto se usan Wi-Fi, Bluetooth, el botón BOOT y el LED. Son estadísticas locales: sin direcciones MAC, sin direcciones IP, sin nombres. Quedan en la memoria de la placa (se ponen a cero al reiniciar) y nunca se envían fuera. Apagadas de fábrica.",
+   "de": "Sie zählen, wie oft WLAN, Bluetooth, die BOOT-Taste und die LED benutzt werden. Es sind lokale Statistiken: keine MAC-Adressen, keine IP-Adressen, keine Namen. Sie bleiben im Speicher des Boards (beim Neustart gelöscht) und werden nie nach außen gesendet. Werkseitig aus.",
    "scope": "web"
   },
   {
@@ -10708,17 +10652,10 @@
    "scope": "web"
   },
   {
-   "it": "Statistiche",
-   "en": "Statistics",
-   "es": "Estadisticas",
-   "de": "Statistik",
-   "scope": "web"
-  },
-  {
-   "it": "Statistiche d'uso",
-   "en": "Usage statistics",
-   "es": "Estadisticas de uso",
-   "de": "Nutzungsstatistik",
+   "it": "Statistiche locali",
+   "en": "Local statistics",
+   "es": "Estadisticas locales",
+   "de": "Lokale Statistik",
    "scope": "web"
   },
   {
@@ -10929,13 +10866,6 @@
    "en": "Without Internet the board does not know the time. Check date, time and time zone: they are taken from this device.",
    "es": "Sin Internet la placa no sabe la hora. Revisa fecha, hora y huso horario: son los de este dispositivo.",
    "de": "Ohne Internet kennt die Platine die Uhrzeit nicht. Prüfen Sie Datum, Uhrzeit und Zeitzone: Sie stammen von diesem Gerät.",
-   "scope": "web"
-  },
-  {
-   "it": "Core 0 / Core 1",
-   "en": "Core 0 / Core 1",
-   "es": "Núcleo 0 / Núcleo 1",
-   "de": "Kern 0 / Kern 1",
    "scope": "web"
   },
   {
@@ -11695,6 +11625,27 @@
    "scope": "fw"
   },
   {
+   "it": "blocco RAM piu grande %u KB",
+   "en": "largest free RAM block %u KB",
+   "es": "bloque de RAM libre mas grande %u KB",
+   "de": "groesster freier RAM-Block %u KB",
+   "scope": "fw"
+  },
+  {
+   "it": "seriale non letta %u volte",
+   "en": "serial not read %u times",
+   "es": "serie sin leer %u veces",
+   "de": "Seriell %u Mal nicht gelesen",
+   "scope": "fw"
+  },
+  {
+   "it": "servizio in ritardo: %s",
+   "en": "service late: %s",
+   "es": "servicio con retraso: %s",
+   "de": "Dienst im Verzug: %s",
+   "scope": "fw"
+  },
+  {
    "it": "ultima riga grave: %s",
    "en": "last serious line: %s",
    "es": "ultima linea grave: %s",
@@ -11793,10 +11744,10 @@
    "scope": "fw"
   },
   {
-   "it": "Memoria frammentata: riavvia la scheda per usare il Bluetooth",
-   "en": "Memory is fragmented: restart the board to use Bluetooth",
-   "es": "Memoria fragmentada: reinicia la placa para usar el Bluetooth",
-   "de": "Speicher fragmentiert: Board neu starten, um Bluetooth zu nutzen",
+   "it": "Memoria troppo frammentata per il Bluetooth: chiudi la pagina web, attendi qualche secondo e riprova",
+   "en": "Memory too fragmented for Bluetooth: close the web page, wait a few seconds and try again",
+   "es": "Memoria demasiado fragmentada para Bluetooth: cierra la pagina web, espera unos segundos e intentalo de nuevo",
+   "de": "Speicher zu fragmentiert fuer Bluetooth: Webseite schliessen, einige Sekunden warten und erneut versuchen",
    "scope": "fw"
   },
   {
@@ -12008,6 +11959,895 @@
    "es": "Velocidad nueva en prueba: si no la confirmas en 20 segundos vuelve la anterior.",
    "de": "Neue Geschwindigkeit in Erprobung: ohne Bestaetigung in 20 Sekunden gilt wieder die alte.",
    "scope": "web"
+  },
+  {
+   "it": "RAM interna: libera %u KB, pezzo piu grande %u KB, minima %u KB",
+   "en": "Internal RAM: free %u KB, largest piece %u KB, minimum %u KB",
+   "es": "RAM interna: libre %u KB, pieza mas grande %u KB, minima %u KB",
+   "de": "Interner RAM: frei %u KB, groesstes Stueck %u KB, Minimum %u KB",
+   "scope": "fw"
+  },
+  {
+   "it": "  blocchi: %u occupati (%u KB), %u liberi",
+   "en": "  blocks: %u used (%u KB), %u free",
+   "es": "  bloques: %u ocupados (%u KB), %u libres",
+   "de": "  Bloecke: %u belegt (%u KB), %u frei",
+   "scope": "fw"
+  },
+  {
+   "it": "  frammentazione: %u%% (0 = tutto in un pezzo; sopra 60 la RAM e a pezzi piccoli)",
+   "en": "  fragmentation: %u%% (0 = all in one piece; above 60 the RAM is in small pieces)",
+   "es": "  fragmentacion: %u%% (0 = todo en una pieza; sobre 60 la RAM esta en piezas pequenas)",
+   "de": "  Fragmentierung: %u%% (0 = alles in einem Stueck; ueber 60 ist der RAM in kleinen Stuecken)",
+   "scope": "fw"
+  },
+  {
+   "it": "PSRAM: libera %u KB, pezzo piu grande %u KB",
+   "en": "PSRAM: free %u KB, largest piece %u KB",
+   "es": "PSRAM: libre %u KB, pieza mas grande %u KB",
+   "de": "PSRAM: frei %u KB, groesstes Stueck %u KB",
+   "scope": "fw"
+  },
+  {
+   "it": "Memoria frammentata: il pezzo di RAM libero piu grande e piccolo. Chiudi la pagina web o spegni i servizi che non servono: si libera da sola",
+   "en": "Memory is fragmented: the largest free piece of RAM is small. Close the web page or stop services you do not need: it frees itself",
+   "es": "Memoria fragmentada: la pieza libre de RAM mas grande es pequena. Cierra la pagina web o detiene servicios que no necesitas: se libera sola",
+   "de": "Speicher fragmentiert: das groesste freie RAM-Stueck ist klein. Webseite schliessen oder nicht benoetigte Dienste stoppen: er gibt sich von selbst frei",
+   "scope": "fw"
+  },
+  {
+   "it": "Valore non valido (on oppure off)",
+   "en": "Invalid value (on or off)",
+   "es": "Valor no valido (on u off)",
+   "de": "Ungueltiger Wert (on oder off)",
+   "scope": "fw"
+  },
+  {
+   "it": "Aggiornamento",
+   "en": "Refresh",
+   "es": "Actualización",
+   "de": "Aktualisierung",
+   "scope": "web"
+  },
+  {
+   "it": "Ogni secondo",
+   "en": "Every second",
+   "es": "Cada segundo",
+   "de": "Jede Sekunde",
+   "scope": "web"
+  },
+  {
+   "it": "Ogni 3 secondi",
+   "en": "Every 3 seconds",
+   "es": "Cada 3 segundos",
+   "de": "Alle 3 Sekunden",
+   "scope": "web"
+  },
+  {
+   "it": "Ogni 5 secondi",
+   "en": "Every 5 seconds",
+   "es": "Cada 5 segundos",
+   "de": "Alle 5 Sekunden",
+   "scope": "web"
+  },
+  {
+   "it": "Ogni 10 secondi",
+   "en": "Every 10 seconds",
+   "es": "Cada 10 segundos",
+   "de": "Alle 10 Sekunden",
+   "scope": "web"
+  },
+  {
+   "it": "Ogni 30 secondi",
+   "en": "Every 30 seconds",
+   "es": "Cada 30 segundos",
+   "de": "Alle 30 Sekunden",
+   "scope": "web"
+  },
+  {
+   "it": "Fermo (solo manuale)",
+   "en": "Stopped (manual only)",
+   "es": "Detenido (solo manual)",
+   "de": "Angehalten (nur manuell)",
+   "scope": "web"
+  },
+  {
+   "it": "Aggiorna ora",
+   "en": "Refresh now",
+   "es": "Actualizar ahora",
+   "de": "Jetzt aktualisieren",
+   "scope": "web"
+  },
+  {
+   "it": "Buffer HTTPS (TLS) in PSRAM: %s",
+   "en": "HTTPS (TLS) buffers in PSRAM: %s",
+   "es": "Buffers HTTPS (TLS) en PSRAM: %s",
+   "de": "HTTPS-(TLS-)Puffer im PSRAM: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "non disponibile in questo core",
+   "en": "not available in this core",
+   "es": "no disponible en este core",
+   "de": "in diesem Core nicht verfuegbar",
+   "scope": "fw"
+  },
+  {
+   "it": "Package nel firmware: %s",
+   "en": "Packages in this firmware: %s",
+   "es": "Paquetes en este firmware: %s",
+   "de": "Pakete in dieser Firmware: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Bluetooth non incluso in questo firmware",
+   "en": "Bluetooth is not included in this firmware",
+   "es": "Bluetooth no incluido en este firmware",
+   "de": "Bluetooth ist in dieser Firmware nicht enthalten",
+   "scope": "web"
+  },
+  {
+   "it": "  dev [status <nome>|on <nome>|off <nome>|act <nome> <azione> [arg]]  periferiche (MQTT, Bluetooth, pin, LED, memoria...)",
+   "en": "  dev [status <name>|on <name>|off <name>|act <name> <action> [arg]]  peripherals (MQTT, Bluetooth, pins, LED, memory...)",
+   "es": "  dev [status <nombre>|on <nombre>|off <nombre>|act <nombre> <accion> [arg]]  perifericos (MQTT, Bluetooth, pines, LED, memoria...)",
+   "de": "  dev [status <Name>|on <Name>|off <Name>|act <Name> <Aktion> [Arg]]  Peripherie (MQTT, Bluetooth, Pins, LED, Speicher...)",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: dev [status <nome>|on <nome>|off <nome>|act <nome> <azione> [arg]]",
+   "en": "Usage: dev [status <name>|on <name>|off <name>|act <name> <action> [arg]]",
+   "es": "Uso: dev [status <nombre>|on <nombre>|off <nombre>|act <nombre> <accion> [arg]]",
+   "de": "Verwendung: dev [status <Name>|on <Name>|off <Name>|act <Name> <Aktion> [Arg]]",
+   "scope": "fw"
+  },
+  {
+   "it": "Antenna",
+   "en": "Antenna",
+   "es": "Antena",
+   "de": "Antenne",
+   "scope": "fw"
+  },
+  {
+   "it": "Bluetooth",
+   "en": "Bluetooth",
+   "es": "Bluetooth",
+   "de": "Bluetooth",
+   "scope": "fw"
+  },
+  {
+   "it": "Canali ammessi",
+   "en": "Allowed channels",
+   "es": "Canales permitidos",
+   "de": "Erlaubte Kanaele",
+   "scope": "fw"
+  },
+  {
+   "it": "Carico",
+   "en": "Load",
+   "es": "Carga",
+   "de": "Auslastung",
+   "scope": "fw"
+  },
+  {
+   "it": "Chip",
+   "en": "Chip",
+   "es": "Chip",
+   "de": "Chip",
+   "scope": "fw"
+  },
+  {
+   "it": "Collegamenti",
+   "en": "Connections",
+   "es": "Conexiones",
+   "de": "Verbindungen",
+   "scope": "fw"
+  },
+  {
+   "it": "Collegamento",
+   "en": "Connection",
+   "es": "Conexion",
+   "de": "Verbindung",
+   "scope": "fw"
+  },
+  {
+   "it": "Core",
+   "en": "Cores",
+   "es": "Nucleos",
+   "de": "Kerne",
+   "scope": "fw"
+  },
+  {
+   "it": "ESP-NOW",
+   "en": "ESP-NOW",
+   "es": "ESP-NOW",
+   "de": "ESP-NOW",
+   "scope": "fw"
+  },
+  {
+   "it": "File (LittleFS)",
+   "en": "Files (LittleFS)",
+   "es": "Archivos (LittleFS)",
+   "de": "Dateien (LittleFS)",
+   "scope": "fw"
+  },
+  {
+   "it": "Flash del chip",
+   "en": "Chip flash",
+   "es": "Flash del chip",
+   "de": "Chip-Flash",
+   "scope": "fw"
+  },
+  {
+   "it": "Ingressi e uscite",
+   "en": "Inputs and outputs",
+   "es": "Entradas y salidas",
+   "de": "Ein- und Ausgaenge",
+   "scope": "fw"
+  },
+  {
+   "it": "LED di stato",
+   "en": "Status LED",
+   "es": "LED de estado",
+   "de": "Status-LED",
+   "scope": "fw"
+  },
+  {
+   "it": "Limite del paese",
+   "en": "Country limit",
+   "es": "Limite del pais",
+   "de": "Landesgrenze",
+   "scope": "fw"
+  },
+  {
+   "it": "Luce",
+   "en": "Light",
+   "es": "Luz",
+   "de": "Licht",
+   "scope": "fw"
+  },
+  {
+   "it": "MFA (due passaggi)",
+   "en": "MFA (two steps)",
+   "es": "MFA (dos pasos)",
+   "de": "MFA (zwei Schritte)",
+   "scope": "fw"
+  },
+  {
+   "it": "Memoria",
+   "en": "Memory",
+   "es": "Memoria",
+   "de": "Speicher",
+   "scope": "fw"
+  },
+  {
+   "it": "Messaggi",
+   "en": "Messages",
+   "es": "Mensajes",
+   "de": "Nachrichten",
+   "scope": "fw"
+  },
+  {
+   "it": "Minimo raggiunto",
+   "en": "Lowest reached",
+   "es": "Minimo alcanzado",
+   "de": "Tiefstwert",
+   "scope": "fw"
+  },
+  {
+   "it": "Misure",
+   "en": "Measurements",
+   "es": "Mediciones",
+   "de": "Messwerte",
+   "scope": "fw"
+  },
+  {
+   "it": "Modo velocita",
+   "en": "Speed mode",
+   "es": "Modo de velocidad",
+   "de": "Geschwindigkeitsmodus",
+   "scope": "fw"
+  },
+  {
+   "it": "Monitor seriale aperto",
+   "en": "Serial monitor open",
+   "es": "Monitor serie abierto",
+   "de": "Serieller Monitor offen",
+   "scope": "fw"
+  },
+  {
+   "it": "PSRAM libera",
+   "en": "PSRAM free",
+   "es": "PSRAM libre",
+   "de": "PSRAM frei",
+   "scope": "fw"
+  },
+  {
+   "it": "Paese",
+   "en": "Country",
+   "es": "Pais",
+   "de": "Land",
+   "scope": "fw"
+  },
+  {
+   "it": "Periferica sconosciuta",
+   "en": "Unknown peripheral",
+   "es": "Periferico desconocido",
+   "de": "Unbekannte Peripherie",
+   "scope": "fw"
+  },
+  {
+   "it": "Periferica sconosciuta o ruolo insufficiente",
+   "en": "Unknown peripheral or role not allowed",
+   "es": "Periferico desconocido o rol insuficiente",
+   "de": "Unbekannte Peripherie oder Rolle nicht ausreichend",
+   "scope": "fw"
+  },
+  {
+   "it": "Pezzo piu grande",
+   "en": "Largest block",
+   "es": "Bloque mas grande",
+   "de": "Groesster Block",
+   "scope": "fw"
+  },
+  {
+   "it": "Piedini",
+   "en": "Pins",
+   "es": "Pines",
+   "de": "Pins",
+   "scope": "fw"
+  },
+  {
+   "it": "Pin (GPIO)",
+   "en": "Pins (GPIO)",
+   "es": "Pines (GPIO)",
+   "de": "Pins (GPIO)",
+   "scope": "fw"
+  },
+  {
+   "it": "Potenza in uso",
+   "en": "Power in use",
+   "es": "Potencia en uso",
+   "de": "Verwendete Leistung",
+   "scope": "fw"
+  },
+  {
+   "it": "Premuto adesso",
+   "en": "Pressed now",
+   "es": "Pulsado ahora",
+   "de": "Jetzt gedrueckt",
+   "scope": "fw"
+  },
+  {
+   "it": "Pressione breve",
+   "en": "Short press",
+   "es": "Pulsacion corta",
+   "de": "Kurzer Druck",
+   "scope": "fw"
+  },
+  {
+   "it": "Processore",
+   "en": "Processor",
+   "es": "Procesador",
+   "de": "Prozessor",
+   "scope": "fw"
+  },
+  {
+   "it": "Programma",
+   "en": "Program",
+   "es": "Programa",
+   "de": "Programm",
+   "scope": "fw"
+  },
+  {
+   "it": "Pulsante",
+   "en": "Button",
+   "es": "Pulsador",
+   "de": "Taste",
+   "scope": "fw"
+  },
+  {
+   "it": "Questa periferica non ha azioni",
+   "en": "This peripheral has no actions",
+   "es": "Este periferico no tiene acciones",
+   "de": "Diese Peripherie hat keine Aktionen",
+   "scope": "fw"
+  },
+  {
+   "it": "Questa periferica non si accende o si spegne da qui",
+   "en": "This peripheral cannot be switched on or off from here",
+   "es": "Este periferico no se enciende ni se apaga desde aqui",
+   "de": "Diese Peripherie kann hier nicht ein- oder ausgeschaltet werden",
+   "scope": "fw"
+  },
+  {
+   "it": "RAM interna libera",
+   "en": "Internal RAM free",
+   "es": "RAM interna libre",
+   "de": "Interner RAM frei",
+   "scope": "fw"
+  },
+  {
+   "it": "Radio",
+   "en": "Radio",
+   "es": "Radio",
+   "de": "Funk",
+   "scope": "fw"
+  },
+  {
+   "it": "Radio 2,4 GHz",
+   "en": "2.4 GHz radio",
+   "es": "Radio de 2,4 GHz",
+   "de": "2,4-GHz-Funk",
+   "scope": "fw"
+  },
+  {
+   "it": "Risorse",
+   "en": "Resources",
+   "es": "Recursos",
+   "de": "Ressourcen",
+   "scope": "fw"
+  },
+  {
+   "it": "Sensori",
+   "en": "Sensors",
+   "es": "Sensores",
+   "de": "Sensoren",
+   "scope": "fw"
+  },
+  {
+   "it": "Sicurezza",
+   "en": "Security",
+   "es": "Seguridad",
+   "de": "Sicherheit",
+   "scope": "fw"
+  },
+  {
+   "it": "Sotto 80 C la velocita non cala",
+   "en": "Below 80 C the speed does not drop",
+   "es": "Por debajo de 80 C la velocidad no baja",
+   "de": "Unter 80 C sinkt die Geschwindigkeit nicht",
+   "scope": "fw"
+  },
+  {
+   "it": "Statistiche",
+   "en": "Statistics",
+   "es": "Estadisticas",
+   "de": "Statistiken",
+   "scope": "fw"
+  },
+  {
+   "it": "Temperatura del chip",
+   "en": "Chip temperature",
+   "es": "Temperatura del chip",
+   "de": "Chip-Temperatur",
+   "scope": "fw"
+  },
+  {
+   "it": "Tenuto 2 secondi",
+   "en": "Held 2 seconds",
+   "es": "Mantenido 2 segundos",
+   "de": "2 Sekunden gehalten",
+   "scope": "fw"
+  },
+  {
+   "it": "Tenuto 20 secondi",
+   "en": "Held 20 seconds",
+   "es": "Mantenido 20 segundos",
+   "de": "20 Sekunden gehalten",
+   "scope": "fw"
+  },
+  {
+   "it": "Tenuto 8 secondi",
+   "en": "Held 8 seconds",
+   "es": "Mantenido 8 segundos",
+   "de": "8 Sekunden gehalten",
+   "scope": "fw"
+  },
+  {
+   "it": "USB",
+   "en": "USB",
+   "es": "USB",
+   "de": "USB",
+   "scope": "fw"
+  },
+  {
+   "it": "USB nativo (seriale e JTAG)",
+   "en": "Native USB (serial and JTAG)",
+   "es": "USB nativo (serie y JTAG)",
+   "de": "Natives USB (seriell und JTAG)",
+   "scope": "fw"
+  },
+  {
+   "it": "Velocita",
+   "en": "Speed",
+   "es": "Velocidad",
+   "de": "Geschwindigkeit",
+   "scope": "fw"
+  },
+  {
+   "it": "assente",
+   "en": "absent",
+   "es": "ausente",
+   "de": "nicht vorhanden",
+   "scope": "fw"
+  },
+  {
+   "it": "automatico",
+   "en": "automatic",
+   "es": "automatico",
+   "de": "automatisch",
+   "scope": "fw"
+  },
+  {
+   "it": "con problema",
+   "en": "with a problem",
+   "es": "con problema",
+   "de": "mit Problem",
+   "scope": "fw"
+  },
+  {
+   "it": "filtro IP",
+   "en": "IP filter",
+   "es": "filtro IP",
+   "de": "IP-Filter",
+   "scope": "fw"
+  },
+  {
+   "it": "hardware ",
+   "en": "hardware ",
+   "es": "hardware ",
+   "de": "Hardware ",
+   "scope": "fw"
+  },
+  {
+   "it": "modo aereo",
+   "en": "airplane mode",
+   "es": "modo avion",
+   "de": "Flugmodus",
+   "scope": "fw"
+  },
+  {
+   "it": "non scelto",
+   "en": "not chosen",
+   "es": "no elegido",
+   "de": "nicht gewaehlt",
+   "scope": "fw"
+  },
+  {
+   "it": "password",
+   "en": "password",
+   "es": "contrasena",
+   "de": "Passwort",
+   "scope": "fw"
+  },
+  {
+   "it": "ripristino di fabbrica",
+   "en": "factory reset",
+   "es": "restablecimiento de fabrica",
+   "de": "Werkseinstellungen",
+   "scope": "fw"
+  },
+  {
+   "it": "solo stato",
+   "en": "status only",
+   "es": "solo estado",
+   "de": "nur Status",
+   "scope": "fw"
+  },
+  {
+   "it": "sopra 80 C scende a 80 MHz",
+   "en": "above 80 C it drops to 80 MHz",
+   "es": "por encima de 80 C baja a 80 MHz",
+   "de": "ueber 80 C sinkt sie auf 80 MHz",
+   "scope": "fw"
+  },
+  {
+   "it": "virtuale ",
+   "en": "virtual ",
+   "es": "virtual ",
+   "de": "virtuell ",
+   "scope": "fw"
+  },
+  {
+   "it": "Collegamento USB nativo del chip (seriale e JTAG).",
+   "en": "The chip's native USB connection (serial and JTAG).",
+   "es": "Conexion USB nativa del chip (serie y JTAG).",
+   "de": "Natives USB des Chips (seriell und JTAG).",
+   "scope": "web"
+  },
+  {
+   "it": "Core, velocita e carico.",
+   "en": "Cores, speed and load.",
+   "es": "Nucleos, velocidad y carga.",
+   "de": "Kerne, Geschwindigkeit und Auslastung.",
+   "scope": "web"
+  },
+  {
+   "it": "Device Manager",
+   "en": "Device Manager",
+   "es": "Gestor de dispositivos",
+   "de": "Geraetemanager",
+   "scope": "web"
+  },
+  {
+   "it": "Il pulsante BOOT della scheda (GPIO0): le pressioni lunghe servono al recupero.",
+   "en": "The board's BOOT button (GPIO0): long presses are used for recovery.",
+   "es": "El boton BOOT de la placa (GPIO0): las pulsaciones largas sirven para la recuperacion.",
+   "de": "Die BOOT-Taste der Platine (GPIO0): lange Druecke dienen der Wiederherstellung.",
+   "scope": "web"
+  },
+  {
+   "it": "Informazioni dell'hardware radio. Paese, canali e potenza si cambiano in Rete > Radio.",
+   "en": "Radio hardware information. Country, channels and power are changed in Network > Radio.",
+   "es": "Informacion del hardware de radio. Pais, canales y potencia se cambian en Red > Radio.",
+   "de": "Informationen zur Funk-Hardware. Land, Kanaele und Leistung aendert man unter Netzwerk > Funk.",
+   "scope": "web"
+  },
+  {
+   "it": "Nessuna voce",
+   "en": "No items",
+   "es": "Ningun elemento",
+   "de": "Keine Eintraege",
+   "scope": "web"
+  },
+  {
+   "it": "RAM interna, PSRAM, flash e file system.",
+   "en": "Internal RAM, PSRAM, flash and file system.",
+   "es": "RAM interna, PSRAM, flash y sistema de archivos.",
+   "de": "Interner RAM, PSRAM, Flash und Dateisystem.",
+   "scope": "web"
+  },
+  {
+   "it": "Sensore interno del chip. Sopra 80 C la velocita scende da sola.",
+   "en": "The chip's internal sensor. Above 80 C the speed drops on its own.",
+   "es": "Sensor interno del chip. Por encima de 80 C la velocidad baja sola.",
+   "de": "Interner Sensor des Chips. Ueber 80 C sinkt die Geschwindigkeit von selbst.",
+   "scope": "web"
+  },
+  {
+   "it": "presente",
+   "en": "present",
+   "es": "presente",
+   "de": "vorhanden",
+   "scope": "web"
+  },
+  {
+   "it": "Tutte le periferiche della scheda: servizi (MQTT, ESP-NOW, Bluetooth, statistiche) e hardware (pin, LED, tasto, USB, sensori, memoria, processore, radio). Rispondono tutte allo stesso modo all'API /api/dev e al comando shell dev. I servizi si accendono e si spengono da qui o con dev on|off nome: di fabbrica sono spenti e, spenti, non occupano memoria.",
+   "en": "All the board's peripherals: services (MQTT, ESP-NOW, Bluetooth, statistics) and hardware (pins, LED, button, USB, sensors, memory, processor, radio). They all answer the same way to the /api/dev API and the dev shell command. Services are switched on and off here or with dev on|off name: they are off by default and, when off, use no memory.",
+   "es": "Todos los perifericos de la placa: servicios (MQTT, ESP-NOW, Bluetooth, estadisticas) y hardware (pines, LED, boton, USB, sensores, memoria, procesador, radio). Todos responden igual a la API /api/dev y al comando de shell dev. Los servicios se encienden y apagan aqui o con dev on|off nombre: de fabrica estan apagados y, apagados, no usan memoria.",
+   "de": "Alle Peripherie der Platine: Dienste (MQTT, ESP-NOW, Bluetooth, Statistiken) und Hardware (Pins, LED, Taste, USB, Sensoren, Speicher, Prozessor, Funk). Alle antworten gleich auf die API /api/dev und den Shell-Befehl dev. Dienste werden hier oder mit dev on|off Name ein- und ausgeschaltet: werkseitig aus und im ausgeschalteten Zustand ohne Speicherbedarf.",
+   "scope": "web"
+  },
+  {
+   "it": "Impostazioni (le scegli tu)",
+   "en": "Settings (you choose them)",
+   "es": "Ajustes (los eliges tú)",
+   "de": "Einstellungen (von dir gewählt)",
+   "scope": "web"
+  },
+  {
+   "it": "Informazioni (calcolate dalla scheda, non si modificano)",
+   "en": "Information (calculated by the board, read-only)",
+   "es": "Información (calculada por la placa, no se modifica)",
+   "de": "Informationen (vom Board berechnet, nicht änderbar)",
+   "scope": "web"
+  },
+  {
+   "it": "Backup e ripristino",
+   "en": "Backup and restore",
+   "es": "Copia de seguridad y restauración",
+   "de": "Sicherung und Wiederherstellung",
+   "scope": "web"
+  },
+  {
+   "it": "Il file di backup contiene la configurazione della scheda. Di fabbrica non contiene password e chiavi.",
+   "en": "The backup file contains the board configuration. By default it contains no passwords or keys.",
+   "es": "El archivo de copia contiene la configuración de la placa. De fábrica no contiene contraseñas ni claves.",
+   "de": "Die Sicherungsdatei enthält die Konfiguration des Boards. Standardmäßig enthält sie keine Passwörter oder Schlüssel.",
+   "scope": "web"
+  },
+  {
+   "it": "Scarica senza segreti",
+   "en": "Download without secrets",
+   "es": "Descargar sin secretos",
+   "de": "Ohne Geheimnisse herunterladen",
+   "scope": "web"
+  },
+  {
+   "it": "Includi anche i segreti (password Wi-Fi e MQTT, utenti)",
+   "en": "Include the secrets too (Wi-Fi and MQTT passwords, users)",
+   "es": "Incluir también los secretos (contraseñas Wi-Fi y MQTT, usuarios)",
+   "de": "Auch die Geheimnisse einschließen (WLAN- und MQTT-Passwörter, Benutzer)",
+   "scope": "web"
+  },
+  {
+   "it": "I segreti vengono cifrati con una frase che scegli tu. Chi ha il file e la frase puo entrare nella scheda e nella tua rete. Se perdi la frase i segreti non si recuperano. Custodisci il file come una password.",
+   "en": "The secrets are encrypted with a phrase you choose. Whoever has the file and the phrase can get into the board and your network. If you lose the phrase the secrets cannot be recovered. Keep the file like a password.",
+   "es": "Los secretos se cifran con una frase que eliges tú. Quien tenga el archivo y la frase puede entrar en la placa y en tu red. Si pierdes la frase los secretos no se recuperan. Guarda el archivo como una contraseña.",
+   "de": "Die Geheimnisse werden mit einer von dir gewählten Phrase verschlüsselt. Wer die Datei und die Phrase hat, kommt in das Board und in dein Netz. Geht die Phrase verloren, sind die Geheimnisse nicht wiederherstellbar. Bewahre die Datei wie ein Passwort auf.",
+   "scope": "web"
+  },
+  {
+   "it": "Frase (almeno 10 caratteri)",
+   "en": "Phrase (at least 10 characters)",
+   "es": "Frase (al menos 10 caracteres)",
+   "de": "Phrase (mindestens 10 Zeichen)",
+   "scope": "web"
+  },
+  {
+   "it": "Ripeti la frase",
+   "en": "Repeat the phrase",
+   "es": "Repite la frase",
+   "de": "Phrase wiederholen",
+   "scope": "web"
+  },
+  {
+   "it": "Ho letto l'avviso e lo accetto",
+   "en": "I have read the warning and accept it",
+   "es": "He leído el aviso y lo acepto",
+   "de": "Ich habe die Warnung gelesen und akzeptiere sie",
+   "scope": "web"
+  },
+  {
+   "it": "Scarica con segreti (cifrato)",
+   "en": "Download with secrets (encrypted)",
+   "es": "Descargar con secretos (cifrado)",
+   "de": "Mit Geheimnissen herunterladen (verschlüsselt)",
+   "scope": "web"
+  },
+  {
+   "it": "Frase (solo se il file e cifrato)",
+   "en": "Phrase (only if the file is encrypted)",
+   "es": "Frase (solo si el archivo está cifrado)",
+   "de": "Phrase (nur wenn die Datei verschlüsselt ist)",
+   "scope": "web"
+  },
+  {
+   "it": "Ripristino di fabbrica",
+   "en": "Factory reset",
+   "es": "Restablecimiento de fábrica",
+   "de": "Werkseinstellungen",
+   "scope": "web"
+  },
+  {
+   "it": "Cancella impostazioni, utenti e password. La scheda riparte come nuova.",
+   "en": "Erases settings, users and passwords. The board restarts as new.",
+   "es": "Borra ajustes, usuarios y contraseñas. La placa arranca como nueva.",
+   "de": "Löscht Einstellungen, Benutzer und Passwörter. Das Board startet wie neu.",
+   "scope": "web"
+  },
+  {
+   "it": "Ripristinato: {0} righe cambiate",
+   "en": "Restored: {0} lines changed",
+   "es": "Restaurado: {0} líneas cambiadas",
+   "de": "Wiederhergestellt: {0} Zeilen geändert",
+   "scope": "web"
+  },
+  {
+   "it": "La frase deve avere almeno 10 caratteri",
+   "en": "The phrase must have at least 10 characters",
+   "es": "La frase debe tener al menos 10 caracteres",
+   "de": "Die Phrase muss mindestens 10 Zeichen haben",
+   "scope": "web"
+  },
+  {
+   "it": "Le due frasi non sono uguali",
+   "en": "The two phrases are not the same",
+   "es": "Las dos frases no son iguales",
+   "de": "Die beiden Phrasen sind nicht gleich",
+   "scope": "web"
+  },
+  {
+   "it": "Backup cifrato scaricato. Custodisci il file e la frase.",
+   "en": "Encrypted backup downloaded. Keep the file and the phrase safe.",
+   "es": "Copia cifrada descargada. Guarda el archivo y la frase.",
+   "de": "Verschlüsselte Sicherung heruntergeladen. Bewahre Datei und Phrase sicher auf.",
+   "scope": "web"
+  },
+  {
+   "it": "Tutte le impostazioni, gli utenti e le password vengono cancellati. Per confermare scrivi la parola AZZERA.",
+   "en": "All settings, users and passwords are erased. To confirm, type the word ERASE.",
+   "es": "Se borran todos los ajustes, usuarios y contraseñas. Para confirmar escribe la palabra BORRAR.",
+   "de": "Alle Einstellungen, Benutzer und Passwörter werden gelöscht. Zur Bestätigung gib das Wort LÖSCHEN ein.",
+   "scope": "web"
+  },
+  {
+   "it": "Parola di conferma",
+   "en": "Confirmation word",
+   "es": "Palabra de confirmación",
+   "de": "Bestätigungswort",
+   "scope": "web"
+  },
+  {
+   "it": "AZZERA",
+   "en": "ERASE",
+   "es": "BORRAR",
+   "de": "LÖSCHEN",
+   "scope": "web"
+  },
+  {
+   "it": "La parola non coincide",
+   "en": "The word does not match",
+   "es": "La palabra no coincide",
+   "de": "Das Wort stimmt nicht überein",
+   "scope": "web"
+  },
+  {
+   "it": "Modalita ridotta: servizi spenti: {0}. Pagina web, log e recupero restano attivi.",
+   "en": "Reduced mode: services switched off: {0}. Web page, log and recovery stay active.",
+   "es": "Modo reducido: servicios apagados: {0}. Página web, registro y recuperación siguen activos.",
+   "de": "Reduzierter Modus: abgeschaltete Dienste: {0}. Webseite, Protokoll und Wiederherstellung bleiben aktiv.",
+   "scope": "web"
+  },
+  {
+   "it": "Devi accettare l'avviso per esportare i segreti",
+   "en": "You must accept the warning to export the secrets",
+   "es": "Debes aceptar el aviso para exportar los secretos",
+   "de": "Du musst die Warnung akzeptieren, um die Geheimnisse zu exportieren",
+   "scope": "fw"
+  },
+  {
+   "it": "Il file e cifrato: scrivi la frase",
+   "en": "The file is encrypted: enter the phrase",
+   "es": "El archivo esta cifrado: escribe la frase",
+   "de": "Die Datei ist verschluesselt: gib die Phrase ein",
+   "scope": "fw"
+  },
+  {
+   "it": "La frase deve avere almeno %d caratteri",
+   "en": "The phrase must have at least %d characters",
+   "es": "La frase debe tener al menos %d caracteres",
+   "de": "Die Phrase muss mindestens %d Zeichen haben",
+   "scope": "fw"
+  },
+  {
+   "it": "Cifratura non riuscita",
+   "en": "Encryption failed",
+   "es": "Cifrado no logrado",
+   "de": "Verschluesselung fehlgeschlagen",
+   "scope": "fw"
+  },
+  {
+   "it": "Il file non e un backup cifrato",
+   "en": "The file is not an encrypted backup",
+   "es": "El archivo no es una copia cifrada",
+   "de": "Die Datei ist keine verschluesselte Sicherung",
+   "scope": "fw"
+  },
+  {
+   "it": "File cifrato danneggiato",
+   "en": "Encrypted file damaged",
+   "es": "Archivo cifrado danado",
+   "de": "Verschluesselte Datei beschaedigt",
+   "scope": "fw"
+  },
+  {
+   "it": "Frase sbagliata o file danneggiato",
+   "en": "Wrong phrase or damaged file",
+   "es": "Frase incorrecta o archivo danado",
+   "de": "Falsche Phrase oder beschaedigte Datei",
+   "scope": "fw"
+  },
+  {
+   "it": "Watchdog: troppi riavvii automatici in un'ora (%s). Modalita ridotta: servizi spenti: %s. Pagina web, log e recupero restano attivi",
+   "en": "Watchdog: too many automatic restarts in one hour (%s). Reduced mode: services switched off: %s. Web page, log and recovery stay active",
+   "es": "Watchdog: demasiados reinicios automaticos en una hora (%s). Modo reducido: servicios apagados: %s. Pagina web, registro y recuperacion siguen activos",
+   "de": "Watchdog: zu viele automatische Neustarts in einer Stunde (%s). Reduzierter Modus: abgeschaltete Dienste: %s. Webseite, Protokoll und Wiederherstellung bleiben aktiv",
+   "scope": "fw"
+  },
+  {
+   "it": "Modalita ridotta: servizi spenti: %s",
+   "en": "Reduced mode: services switched off: %s",
+   "es": "Modo reducido: servicios apagados: %s",
+   "de": "Reduzierter Modus: abgeschaltete Dienste: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Backup con segreti scaricato da %s",
+   "en": "Backup with secrets downloaded by %s",
+   "es": "Copia con secretos descargada por %s",
+   "de": "Sicherung mit Geheimnissen heruntergeladen von %s",
+   "scope": "fw"
   }
  ]
 }

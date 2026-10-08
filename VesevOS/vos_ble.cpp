@@ -10,12 +10,12 @@
 #include "vos_i18n.h"
 #include "vos_util.h"
 #include "vos_stats.h"
+#include "vos_time.h"
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 
 #if VOS_WITH_BLE
-#include <BLEDevice.h>
-#include <BLEServer.h>
-#include <BLEUtils.h>
-#include <BLESecurity.h>
+#include <NimBLEDevice.h>                 // libreria NimBLE-Arduino 2.x: usa molta meno RAM del Bluetooth di Arduino (misurato: quello costava 74 KB)
 
 #define BLE_SVC  "5b0a0001-7665-7365-766f-730000000001"
 #define BLE_CMD  "5b0a0002-7665-7365-766f-730000000001"
@@ -24,70 +24,78 @@
 
 static bool g_on = false, g_inited = false;
 static uint32_t g_until = 0, g_pin = 0;
-static BLECharacteristic* g_resp = nullptr;
+static NimBLECharacteristic* g_resp = nullptr;
 static volatile bool g_hasCmd = false;
 static String g_cmd, g_last;
 static bool g_conn = false;
-static uint32_t g_stopAt = 0;                         // quando e stato spento l'ultima volta (pausa tra due accensioni)
+static uint32_t g_stopAt = 0;
+// pagina web, rete (modo aereo) e ciclo principale chiamano queste funzioni da task diversi: un solo alla volta
+static SemaphoreHandle_t bleMx() { static SemaphoreHandle_t m = xSemaphoreCreateRecursiveMutex(); return m; }
+struct BleLock { BleLock() { xSemaphoreTakeRecursive(bleMx(), portMAX_DELAY); } ~BleLock() { xSemaphoreGiveRecursive(bleMx()); } };                         // quando e stato spento l'ultima volta (pausa tra due accensioni)
 #define BLE_PAUSE_MS  5000UL
-#define BLE_MIN_BLOCK 45000u                         // blocco libero piu grande minimo per accendere
+#define BLE_MIN_BLOCK 35000u                         // blocco libero piu grande minimo per accendere (misurato: acceso senza problemi anche con 47 e 59 KB)
 
-class CmdCb : public BLECharacteristicCallbacks {
-  void onWrite(BLECharacteristic* c) override {
-    String v = c->getValue();
+class CmdCb : public NimBLECharacteristicCallbacks {
+  void onWrite(NimBLECharacteristic* c, NimBLEConnInfo&) override {
+    NimBLEAttValue v = c->getValue();
     if (v.length() > 200 || g_hasCmd) return;
-    g_cmd = v; g_hasCmd = true;                       // si esegue nel ciclo principale, non qui
+    String t; t.reserve(v.length());
+    const uint8_t* d = v.data();
+    for (size_t i = 0; i < v.length(); i++) t += (char)d[i];
+    g_cmd = t; g_hasCmd = true;                       // si esegue nel ciclo principale, non qui
   }
 };
-class SrvCb : public BLEServerCallbacks {
-  void onConnect(BLEServer*) override { g_conn = true; statNote(ST_BLE_CONN); vlog("BLE: telefono collegato"); }
-  void onDisconnect(BLEServer*) override { g_conn = false; vlog("BLE: telefono scollegato"); if (g_on) BLEDevice::startAdvertising(); }
+class SrvCb : public NimBLEServerCallbacks {
+  void onConnect(NimBLEServer*, NimBLEConnInfo&) override { g_conn = true; statNote(ST_BLE_CONN); vlog("BLE: telefono collegato"); }
+  void onDisconnect(NimBLEServer*, NimBLEConnInfo&, int) override { g_conn = false; vlog("BLE: telefono scollegato"); if (g_on) NimBLEDevice::startAdvertising(); }
 };
 
 bool bleRunning() { return g_on; }
 uint32_t bleLeftSec() { return g_on ? (uint32_t)((g_until - millis()) / 1000) : 0; }
 
 bool bleStart(String& err) {
+  BleLock lk;
   if (g_on) { g_until = millis() + BLE_MS; return true; }
   if (cfg.airOn) { err = tr("Modalita aereo attiva: radio spenta"); return false; }
-  if (ESP.getFreeHeap() < 60000) { err = tr("Memoria insufficiente per il Bluetooth: chiudi la pagina web e riprova"); return false; }
+  if (ESP.getFreeHeap() < 85000) { err = tr("Memoria insufficiente per il Bluetooth: chiudi la pagina web e riprova"); return false; }
   if (g_stopAt && millis() - g_stopAt < BLE_PAUSE_MS) { err = trf("Bluetooth appena spento: attendi %d secondi e riprova", (int)((BLE_PAUSE_MS - (millis() - g_stopAt)) / 1000 + 1)); return false; }
   uint32_t big = ESP.getMaxAllocHeap();
   vlog("BLE: prima di accendere, RAM libera %u KB, blocco piu grande %u KB", (unsigned)(ESP.getFreeHeap() / 1024), (unsigned)(big / 1024));
-  if (big < BLE_MIN_BLOCK) { err = tr("Memoria frammentata: riavvia la scheda per usare il Bluetooth"); vlog("ATTENZIONE: BLE non acceso, memoria frammentata (blocco piu grande %u KB)", (unsigned)(big / 1024)); return false; }
-  BLEDevice::init("VesevOS-setup");
+  if (big < BLE_MIN_BLOCK) { err = tr("Memoria troppo frammentata per il Bluetooth: chiudi la pagina web, attendi qualche secondo e riprova"); vlog("ATTENZIONE: BLE non acceso, memoria frammentata (blocco piu grande %u KB)", (unsigned)(big / 1024)); return false; }
+  NimBLEDevice::init("VesevOS-setup");
   g_pin = 100000 + esp_random() % 900000;
-  BLESecurity::setPassKey(true, g_pin);
-  BLESecurity::setCapability(ESP_IO_CAP_OUT);                 // la scheda MOSTRA il codice, il telefono lo scrive
-  BLESecurity::setAuthenticationMode(false, true, true);      // niente memoria del telefono, protezione MITM, connessione sicura
-  BLEServer* s = BLEDevice::createServer();
+  NimBLEDevice::setSecurityPasskey(g_pin);
+  NimBLEDevice::setSecurityIOCap(BLE_HS_IO_DISPLAY_ONLY);     // la scheda MOSTRA il codice, il telefono lo scrive
+  NimBLEDevice::setSecurityAuth(false, true, true);           // niente memoria del telefono, protezione MITM, connessione sicura
+  NimBLEServer* s = NimBLEDevice::createServer();
   static SrvCb srvCb;                                          // oggetti fissi: con "new" ogni accensione ne lasciava due in RAM
-  s->setCallbacks(&srvCb);
-  BLEService* svc = s->createService(BLE_SVC);
-  BLECharacteristic* cmd = svc->createCharacteristic(BLE_CMD, BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_WRITE_ENC | BLECharacteristic::PROPERTY_WRITE_AUTHEN);
+  s->setCallbacks(&srvCb, false);                              // false = la libreria non li cancella (sono statici)
+  NimBLEService* svc = s->createService(BLE_SVC);
+  NimBLECharacteristic* cmd = svc->createCharacteristic(BLE_CMD, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::WRITE_ENC | NIMBLE_PROPERTY::WRITE_AUTHEN);
   static CmdCb cmdCb;
   cmd->setCallbacks(&cmdCb);
-  g_resp = svc->createCharacteristic(BLE_RESP, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_READ_ENC | BLECharacteristic::PROPERTY_READ_AUTHEN | BLECharacteristic::PROPERTY_NOTIFY);
-  g_resp->setValue(String("VesevOS ") + VOS_VERSION + " - " + cfg.hostname);
-  svc->start();
-  BLEDevice::getAdvertising()->addServiceUUID(BLE_SVC);
-  BLEDevice::startAdvertising();
+  g_resp = svc->createCharacteristic(BLE_RESP, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::READ_ENC | NIMBLE_PROPERTY::READ_AUTHEN | NIMBLE_PROPERTY::NOTIFY);
+  { String hi = String("VesevOS ") + VOS_VERSION + " - " + cfg.hostname; g_resp->setValue((const uint8_t*)hi.c_str(), (uint16_t)hi.length()); }
+  s->start();
+  NimBLEDevice::getAdvertising()->addServiceUUID(BLE_SVC);
+  NimBLEDevice::startAdvertising();
   g_inited = true; g_on = true; g_until = millis() + BLE_MS;
-  vlog("BLE: acceso per 10 minuti, codice di accoppiamento %06lu", (unsigned long)g_pin);
+  vlog("BLE: acceso per 10 minuti (il codice di accoppiamento si vede solo in pagina o nella shell)");   // il registro lo legge anche un ospite: niente codice qui
   return true;
 }
 
 void bleStop() {
+  BleLock lk;
   if (!g_on) return;
-  g_on = false; g_resp = nullptr;
-  BLEDevice::deinit(false);
+  g_on = false; g_resp = nullptr; g_conn = false;
+  NimBLEDevice::deinit(true);                                  // true = libera anche server e servizi (riparte da zero alla prossima accensione)
   g_stopAt = millis(); if (!g_stopAt) g_stopAt = 1;
   vlog("BLE: spento, RAM libera %u KB, blocco piu grande %u KB", (unsigned)(ESP.getFreeHeap() / 1024), (unsigned)(ESP.getMaxAllocHeap() / 1024));
 }
 
 static void reply(const String& r) {
   g_last = r;
-  if (g_resp) { g_resp->setValue(r); g_resp->notify(); }
+  if (g_resp) { g_resp->setValue((const uint8_t*)r.c_str(), (uint16_t)r.length()); g_resp->notify(); }
 }
 
 static void run(String c) {
@@ -102,7 +110,8 @@ static void run(String c) {
     String ssid = p >= 0 ? rest.substring(0, p) : rest, pass = p >= 0 ? rest.substring(p + 1) : String("");
     if (!ssid.length() || ssid.length() > 32 || (pass.length() && (pass.length() < 8 || pass.length() > 63))) { reply(tr("rete o password non valide")); return; }
     cfg.staSsid = ssid; cfg.staPass = pass; cfg.staEnabled = true; cfg.staDhcp = true;
-    cfgSave(); netReconfigure(); reply("ok"); return;
+    bool ntpBack = cfgNtpAfterWifi();
+    cfgSave(); netReconfigure(); if (ntpBack) timeApply(); reply("ok"); return;
   }
   if (w == "country") {
     rest.toUpperCase();
@@ -126,6 +135,7 @@ static void run(String c) {
 }
 
 void bleTick() {
+  BleLock lk;
   if (!g_on) return;
   if (g_hasCmd) { String c = g_cmd; g_hasCmd = false; vlog("BLE: comando ricevuto"); run(c); }
   if ((int32_t)(g_until - millis()) <= 0) { vlog("BLE: tempo scaduto"); bleStop(); }
@@ -137,16 +147,8 @@ String bleJson() {
 }
 String bleText() {
   if (!g_on) return String(tr("Bluetooth spento (ble on per accenderlo 10 minuti)")) + "\n";
-  char p[8]; snprintf(p, sizeof(p), "%06lu", (unsigned long)g_pin);
+  char p[16]; snprintf(p, sizeof(p), "%06lu", (unsigned long)(g_pin % 1000000UL));
   return trf("Bluetooth acceso: nome VesevOS-setup, codice %s, ancora %lu s", p, (unsigned long)((g_until - millis()) / 1000)) + "\n";
 }
 
-#else   // senza Bluetooth
-bool   bleStart(String& err) { err = tr("Bluetooth non incluso in questo firmware"); return false; }
-void   bleStop() {}
-bool   bleRunning() { return false; }
-uint32_t bleLeftSec() { return 0; }
-void   bleTick() {}
-String bleJson() { return "{\"have\":false,\"on\":false}"; }
-String bleText() { return String(tr("Bluetooth non incluso in questo firmware")) + "\n"; }
 #endif

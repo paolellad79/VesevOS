@@ -9,4 +9,5 @@ void webInit();     // registra i percorsi (non avvia il server)
 void webStart();    // avvia i server (80 e 443): chiamare dopo l'avvio del Wi-Fi
 void webAllowFirstPass();   // dopo il reset con BOOT: 10 minuti per scegliere la password anche dalla rete di casa
 bool webHttpsUp();
+void     webTrimIdle();               // RAM a pezzi e pagina ferma: chiude i collegamenti HTTPS aperti
 uint32_t webIdleSec();                 // secondi dall'ultima richiesta della pagina

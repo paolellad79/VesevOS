@@ -1,5 +1,53 @@
 # Cronologia delle versioni
 
+## 1.7.11 (ottobre 2026) - Device Manager, package, backup cifrato
+- **Bluetooth con NimBLE** (libreria NimBLE-Arduino 2.5.1, Apache-2.0, da installare dal gestore librerie): circa 11 KB di RAM interna in meno rispetto a prima. Si accende e si spegne anche ripetutamente.
+- **Device Manager** (un solo gruppo di menu) con tutte le periferiche: virtuali (MQTT, rete tra schede, Bluetooth, MFA, statistiche) e hardware (pin, LED, tasto BOOT, USB, temperatura, memoria, processore, radio). Tutte rispondono alle stesse regole: elenco, stato, accendi/spegni (Admin), dettagli, azioni. Nuove API `GET /api/dev`, `POST /api/dev/set` (Admin), `POST /api/dev/act` e comando `dev list|status|on|off|act`. Il menu "Stato" non c'e piu: i dati sono nei widget della Home e nelle schede Memoria, Processore e Radio.
+- **Package a compilazione** (`vos_common.h`): `VOS_WITH_BLE`, `VOS_WITH_MQTT`, `VOS_WITH_MESH`, `VOS_WITH_MFA`, `VOS_WITH_STATS` (1 = dentro, 0 = fuori). Con 0 il codice sparisce, le schede spariscono dalla pagina e `diag` elenca i package presenti. Misura con tutti a 0: sketch 1.653.667 byte (52%), RAM libera 151 KB invece di 127 KB.
+- **Home**: grafici nei widget (CPU, RAM, PSRAM, file), grafici In/Out del Wi-Fi, selettore di aggiornamento (1/3/5/10/30 s, fermo) e "Aggiorna ora".
+- **Memoria**: i buffer di HTTPS (TLS) vanno in PSRAM (soglia 256 byte); la RAM interna libera resta stabile con pagina HTTPS e Bluetooth insieme. Comandi `ram`, `ram mark`, `ram diff`, `free detail`. L'allarme "Memoria frammentata" non chiede piu il riavvio.
+- **Backup e ripristino** (Sistema, Admin): scarica senza segreti (di fabbrica) oppure **con i segreti cifrati con una frase tua** (almeno 10 caratteri; PBKDF2-HMAC-SHA256 20000 giri + AES-256-GCM), con avviso da accettare e voce nel registro. Il ripristino dice quante righe sono cambiate; una frase sbagliata conta come errore di accesso. Reset di fabbrica: si conferma scrivendo AZZERA.
+- **Watchdog: modalita ridotta**. Dopo 3 riavvii automatici in un'ora la scheda non si riavvia piu e non resta ferma: spegne il servizio che si e bloccato (MQTT, rete tra schede, LED) oppure, se non lo sa, MQTT, rete tra schede e Bluetooth. Pagina web, log e recupero restano. La pagina Watchdog mostra cosa e stato spento.
+- **Pagina Radio** divisa in **Impostazioni** (le scegli tu) e **Informazioni** (calcolate dalla scheda); il testo non dice piu che il paese basta per la conformita: dipende anche da hardware, antenna e montaggio.
+- **Statistiche locali** (nome chiaro: i dati restano nella scheda, non vengono mai inviati fuori).
+- **Seriale**: il benvenuto non scorre piu all'infinito quando il segnale USB cade e risale (monitor che si riapre, velocita diversa): conta come nuova apertura solo dopo 2 secondi di chiusura, e mai prima di 5 secondi dall'ultimo benvenuto. Backspace/Ctrl+U/Ctrl+C e tasti freccia gestiti.
+- **Diario dei riavvii piu ricco** e chiusura dei collegamenti HTTPS fermi quando la RAM e poca; uscita seriale che non blocca il ciclo principale.
+- **NTP piu rispettoso**: tolto Google dai server di fabbrica, avviso su cosa vede il server, ora non credibile scartata.
+- Correzioni: `wifi set "Casa mia" password`, NTP che si riaccende se la guida e finita senza Wi-Fi, codice di accoppiamento Bluetooth fuori dal registro, livello del registro deciso dall'inizio della riga.
+- **Prove**: 144 prove sul computer (`tools/hosttest/run.sh`, comprese quelle del backup cifrato, verificato anche con Python) e pagina provata con finto server e Playwright.
+- Documenti: manuali it/en (capitoli 20 e 21), `docs/KNOWN_ISSUES` e `docs/RELEASE_DEVELOPER` in italiano e inglese.
+
+## 1.7.9a (ottobre 2026) - RAM frammentata: si vede e si misura
+- Comando **`free detail`**: RAM interna (libera, pezzo piu grande, minima), blocchi occupati e liberi, percentuale di frammentazione e PSRAM.
+- **Avviso giallo** in pagina (campanella/Home) quando il pezzo di RAM libero piu grande scende sotto 45 KB; sparisce quando risale sopra 55 KB.
+- Il log del Bluetooth scrive gia (1.7.8f) il pezzo piu grande a ogni accensione e spegnimento.
+- **Tre correzioni dalla lista dei problemi noti**:
+  - `wifi set` accetta il nome della rete con spazi tra virgolette: `wifi set "Casa mia" password` (anche la password puo stare tra virgolette). Senza virgolette funziona come prima. Vale per seriale, shell della pagina e Bluetooth resta `rete|password`.
+  - **NTP si riaccende da solo** se la guida e finita senza Wi-Fi (la guida lo spegne) e il Wi-Fi di casa viene impostato dopo (shell, pagina o telefono). Se lo hai spento tu, resta spento. Nuova voce di configurazione `ntpauto` (segna "spento dalla guida").
+  - Tolto l'avviso del compilatore "`inList` non usata" in vos_sys.cpp.
+- **Contro i riavvii "Task watchdog"** (dal diario della scheda, 7-8 ottobre):
+  - **Seriale che non blocca**: se il PC non legge in tempo (monitor aperto ma fermo), l'uscita seriale si butta via per 2 secondi senza altre attese, poi riprova. Prima ogni riga aspettava il tempo massimo e il ciclo principale poteva fermarsi fino allo scatto del watchdog.
+  - **Diario piu utile**: per ogni riavvio salva il pezzo di RAM libero piu grande, quante volte la seriale non e stata letta e il servizio con il battito piu vecchio (es. "web 12s"). Il vecchio diario resta e si completa (nessuna perdita).
+  - **Meno RAM per HTTPS**: se il pezzo di RAM libero piu grande scende sotto 60 KB e la pagina e ferma da 20 secondi, la scheda chiude i collegamenti HTTPS rimasti aperti (circa 40 KB l'uno); il browser li riapre da solo.
+- **Seriale: si puo correggere cio che scrivi** (segnalato dalla prova): il tasto Backspace toglieva il carattere dalla riga ma sullo schermo la lettera restava; ora lo schermo la cancella davvero. In piu **Ctrl+U** e **Ctrl+C** svuotano la riga, e i tasti freccia / Canc / Home non mettono piu lettere strane (`[D`, `[3~`) nella riga.
+- **Misura della RAM** (passo R0 del piano RAM, claude/VesevOS-piano-ram.md): nuovo modulo `vos_ram` e comando **`ram`** (stack libero minimo e totale di ogni task e quanto si puo togliere tenendo il 25% libero) piu **`ram mark`** / **`ram diff`** (quanto costa in RAM interna, pezzo piu grande e PSRAM accendere o spegnere un servizio). Nessun cambiamento al comportamento della scheda.
+- **NTP piu rispettoso (privacy e sicurezza)**:
+  - **Tolto Google**: il secondo server NTP non e piu `time.google.com` fisso. Di fabbrica c'e solo `pool.ntp.org`; un secondo server e a scelta (pagina Servizi > NTP, oppure `ntp server2 <nome|off>`; `ntp server <nome>` cambia il primo). Chiave di configurazione `server2`.
+  - **Avviso chiaro**: la scheda NTP dice a quali server parla e che ogni richiesta mostra il tuo IP pubblico; anche la riga di log quando NTP si accende da solo nomina i server.
+  - **Ora non credibile = scartata**: l'NTP semplice non e autenticato. Un'ora prima del 2026, o un salto di oltre un giorno dopo una sincronizzazione buona, viene scartata (torna l'ora attesa) con avviso giallo; alla quarta volta di fila si accetta (l'ora vera e cambiata). Mettere l'ora a mano azzera il confronto.
+  - Non fatti (da provare sulla scheda o decisioni commerciali): NTP dal router (DHCP opzione 42) e vendor zone di ntppool.org (serve prima della vendita).
+- **Documenti per GitHub** (cartella `docs/`, italiano e inglese): `KNOWN_ISSUES` (problemi noti) e `RELEASE_DEVELOPER` (guida per chi sviluppa e rilascia).
+- **Correzioni dalla verifica approfondita** (revisione indipendente del codice):
+  - **Sicurezza**: il codice di accoppiamento del Bluetooth non va piu nel registro (lo leggeva anche un ospite). Resta solo in pagina (Admin) e nella shell.
+  - Seriale: scrittura a pezzi (non un carattere alla volta) per non bloccare `loop` quando il PC non legge.
+  - Seriale: i valori degli interruttori devono essere on/off/1/0 (prima "niente" o "no" spegnevano la voce); la velocita in prova non finisce nella configurazione e una seconda prova non cancella la velocita di partenza; la pagina si aggiorna quando la prova scade.
+  - Bluetooth: accensione, spegnimento e ciclo principale non si calpestano piu (blocco comune); `conn` torna a zero allo spegnimento.
+  - Diario: `diaryCount` non sbaglia con file vuoti o di altro formato.
+  - Guida da seriale: usa lo stesso a-capo scelto.
+  - Diario: l'istantanea e protetta da un blocco brevissimo (piu task la scrivono), niente piu checksum che non torna per una sovrapposizione.
+  - Registro: il livello della riga si decide dall'inizio del testo (ERRORE / ATTENZIONE / AUDIT:), non da una parola a meta riga: un nome scheda o una rete Wi-Fi con "ERRORE" dentro non alza piu il livello.
+- **Prove sul computer** (passo 1 del rifacimento, nessun cambio al comportamento della scheda): cartella `tools/hosttest` con 132 prove su utilita, configurazione, registro e seriale; si lanciano con `tools/hosttest/run.sh`. Correzione del finto `Arduino.h` (le funzioni `isAlphaNumeric` ecc. rispondevano sempre si).
+
 ## 1.7.9 (ottobre 2026) - Seriale configurabile
 - **Nuova scheda "Seriale (cavo USB)"** in Sistema > Sicurezza e nuovo comando `serial`: velocita (baud, con prova di 20 secondi e conferma), a capo (CR+LF / LF / CR), eco dei tasti, accetta comandi, scrive il registro, benvenuto all'apertura, attesa massima di scrittura.
 - Tutta l'uscita della seriale (comandi, registro, guida) passa da un solo punto che rispetta queste impostazioni.

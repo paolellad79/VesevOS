@@ -20,6 +20,7 @@
 #include <esp_mac.h>
 #include "mbedtls/md.h"
 
+#if VOS_WITH_MESH
 #define M_VER     1
 #define M_TTL     3
 #define M_MAXPAY  180
@@ -357,3 +358,4 @@ String meshText() {
   }
   return t;
 }
+#endif  // VOS_WITH_MESH
