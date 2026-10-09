@@ -1,4 +1,4 @@
-# VesevOS 1.7.11 - Manuale
+# VesevOS 1.7.39 - Manuale
 
 Manuale per chi usa la scheda. Parole semplici, niente programmazione.
 English version: [manual.en.md](manual.en.md). Lo stesso aiuto e nella pagina della scheda (Sistema > Aiuto, oppure `http://192.168.4.1/#aiuto`).
@@ -80,7 +80,7 @@ MQTT, rete tra schede, Bluetooth, server dell'ora per altri dispositivi e filtro
 - **Rete tra schede** (Servizi > Rete tra schede, ESP-NOW): le schede parlano senza router, fino a 3 salti. Serve la stessa
   chiave comune (64 cifre) su tutte; i messaggi senza chiave giusta vengono scartati. Ruoli: nodo, gateway (manda tutto a MQTT), sensore.
   Il contenuto non e cifrato: non mandare dati personali.
-- **Bluetooth** (nella stessa pagina): solo per configurare dal telefono, si accende a mano per 10 minuti con un codice di accoppiamento.
+- **Bluetooth** (nella stessa pagina): per telefoni e applicazioni. Spento di fabbrica; lo accende la pagina, la shell (`ble on [minuti]`) o un'app (API `POST /api/ble`, con `min` facoltativo). Di fabbrica resta acceso finche non lo si spegne; il telefono si accoppia con un codice casuale a 6 cifre, diverso a ogni accensione e visibile solo all'amministratore.
 
 ## 7. Filtro IP
 Sicurezza > Filtro IP decide chi puo parlare con la scheda (solo la mia rete, lista consentita, lista bloccati).

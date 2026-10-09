@@ -1,0 +1,66 @@
+<section id="t_help" class="hide">
+ <div class="card hlp"><h3>Aiuto</h3>
+  <h4>Primo accesso a una scheda nuova</h4>
+  <p>Collega la scheda al computer con il cavo USB e apri il monitor seriale (115200): la scheda scrive il nome della rete Wi-Fi e la sua password. Collegati a quella rete e apri http://192.168.4.1: parte la configurazione guidata.</p>
+  <h4>Perche la password del Wi-Fi e casuale</h4>
+  <p>Ogni scheda inventa una password diversa al primo avvio. Una password uguale per tutti aprirebbe tutte le schede, e la legge lo vieta (UE: direttiva radio, EN 18031, Cyber Resilience Act; Regno Unito: PSTI). Solo chi ha la scheda in mano la legge.</p>
+  <h4>Ho perso una password</h4>
+  <p>Hotspot: Home (QR) oppure Servizi > Punto di accesso > Mostra, oppure cavo USB e tasto BOOT tenuto 8 secondi. Pannello: tasto BOOT 8 secondi azzera le password degli amministratori; al prossimo accesso ne scegli una nuova.</p>
+  <h4>Tasto BOOT</h4>
+  <p>Meno di 2 secondi: esce dal modo aereo. 2-7 secondi (LED azzurro): spegne il filtro IP. 8-19 secondi (LED giallo): azzera le password degli amministratori. 20 secondi o piu (LED rosso): ripristino di fabbrica. L'azione parte quando lasci il tasto.</p>
+  <h4>Avviso del browser su HTTPS</h4>
+  <p>La scheda usa un certificato fatto da lei: il browser avvisa la prima volta. Confronta l'impronta (Servizi > HTTPS) e prosegui.</p>
+  <h4>Servizi</h4>
+  <p>MQTT, rete tra schede e Bluetooth sono spenti di fabbrica: li accendi tu dalla categoria Servizi quando servono.</p>
+  <h4>Hotspot, HTTP e porte</h4>
+  <p>Servizi > Punto di accesso, HTTP e HTTPS: ogni servizio si accende e si spegne. Almeno un protocollo web resta acceso. Le porte (HTTP 80, HTTPS 443, oppure da 1024 a 65535) valgono dal riavvio. Tasto BOOT 8 secondi: hotspot, HTTP, HTTPS e porte tornano di fabbrica.</p>
+  <h4>Configurare solo dalla seriale</h4>
+  <p>Apri il monitor seriale (115200) e scrivi setup: la guida chiede lingua, paese, nome, antenna, hotspot, password, Wi-Fi di casa e ora.</p>
+  <h4>Terminale</h4>
+  <p>Scrivi help per l'elenco dei comandi. Sulla seriale premi 1 o 2 per cambiare lingua.</p>
+  <p><a href="https://github.com/paolellad79/VesevOS" target="_blank" rel="noopener">Manuale completo su GitHub</a></p></div>
+</section>
+<div class="foot"><a href="#" onclick="show('legal');return false">Note legali e licenze</a> &middot; <a href="#aiuto">Aiuto</a> &middot; <a href="https://github.com/paolellad79/VesevOS" target="_blank" rel="noopener">GitHub</a><div id="fver" style="margin-top:4px"></div></div>
+</main></div>
+<div class="pop hide" id="um" role="menu">
+ <button role="menuitem" onclick="umClose();logout()"><svg class="i"><use href="#i-out"/></svg><span><b>Logout</b><small>Chiudi la sessione su questo browser</small></span></button>
+ <button role="menuitem" class="op" onclick="umClose();uReboot()"><svg class="i"><use href="#i-reboot"/></svg><span><b>Riavvia</b><small>La scheda riparte in pochi secondi</small></span></button>
+ <button role="menuitem" class="op" onclick="umClose();uSleep()"><svg class="i"><use href="#i-sleep"/></svg><span><b>Sleep</b><small>Sonno profondo: si riaccende con RESET</small></span></button>
+</div>
+<div class="pop hide" id="lpop" role="menu"></div>
+<div id="mapw" class="dlgw hide"></div>
+<div id="setup" class="setup hide" role="dialog" aria-modal="true" aria-label="Prima configurazione"></div>
+<div class="pop hide" id="thm" role="menu">
+ <button onclick="themeSet('auto')" id="tm_auto"><svg class="i"><use href="#i-auto"/></svg><span><b>Automatico</b><small>Segue il tema del dispositivo</small></span><i class="ck">&#10003;</i></button>
+ <button onclick="themeSet('light')" id="tm_light"><svg class="i"><use href="#i-sun"/></svg><span><b>Chiaro</b><small>Sfondo chiaro</small></span><i class="ck">&#10003;</i></button>
+ <button onclick="themeSet('dark')" id="tm_dark"><svg class="i"><use href="#i-moon"/></svg><span><b>Scuro</b><small>Sfondo scuro</small></span><i class="ck">&#10003;</i></button>
+ <button onclick="a11yOpen()" style="border-top:1px solid var(--bd);border-radius:0 0 10px 10px"><svg class="i"><use href="#i-a11y"/></svg><span><b>Accessibilita</b><small>Testo grande, contrasto, colori</small></span></button>
+</div>
+<div class="cp" id="cp">
+ <div class="cph" id="cph"><svg class="i" style="width:18px;height:18px"><use href="#i-term"/></svg><b>Terminale</b>
+  <button id="cps0" onclick="cpSize(0)">&#9601;</button><button id="cps1" onclick="cpSize(1)">&#9635;</button><button id="cps2" onclick="cpSize(2)">&#10530;</button><button id="cpx" onclick="cpToggle(false)">&#10005;</button></div>
+ <div class="cpb"><pre id="so" class="term" role="log" aria-label="Terminale" tabindex="0" onclick="$('si').focus()"></pre>
+  <div class="trow"><b>vesevos&gt;</b><input id="si" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="help" onkeydown="shKey(event)" onpaste="shPaste(event)"></div>
+  <div class="keys"><button class="btn gray" onclick="shTab()">Tab</button><button class="btn gray" onclick="shHist(-1)">&uarr;</button><button class="btn gray" onclick="shHist(1)">&darr;</button><button class="btn gray" onclick="shCancel()">Ctrl+C</button><button class="btn gray" onclick="shClear()">Pulisci</button><button class="btn gray" onclick="shCopy()">Copia tutto</button></div>
+  <div id="shm" class="msg"></div></div>
+</div>
+<div id="fed" class="fed hide" role="dialog" aria-modal="true" aria-labelledby="fedt" aria-describedby="fedtab">
+ <div class="fedh">
+  <button class="ib" data-tt onclick="fEdClose()" title="Chiudi" aria-label="Chiudi l'editor"><svg class="i"><use href="#i-x"/></svg></button>
+  <div class="fedn"><b id="fedt"></b><small><span id="fedp"></span> · <span id="feds" class="feds"></span></small></div>
+  <div class="fedbt">
+   <button class="btn" onclick="fEdSave()" title="Ctrl+S"><svg class="i" aria-hidden="true"><use href="#i-save"/></svg><span>Salva</span></button>
+   <button class="btn gray" onclick="fEdSaveAs()"><span>Salva come</span></button>
+   <button class="btn gray" id="fedpaste" onclick="fEdPaste()"><span>Incolla</span></button>
+   <button class="btn gray" onclick="fEdClear()"><span>Svuota</span></button>
+   <button class="btn gray" onclick="fEdDl()"><svg class="i" aria-hidden="true"><use href="#i-dl"/></svg><span>Scarica</span></button>
+  </div>
+ </div>
+ <div id="fedw" class="fedw hide" role="note">File di sistema: un errore puo cambiare il comportamento della scheda.</div>
+ <div id="fedm" class="msg" role="status"></div>
+ <div class="fedb"><pre id="fedn" aria-hidden="true"></pre><textarea id="fedx" spellcheck="false" autocapitalize="off" autocomplete="off" wrap="off" data-tt aria-label="Contenuto del file"></textarea></div>
+ <div class="fedf"><span id="fedpos"></span><span id="fedsz"></span><span id="fedjs"></span><span id="fedtab" class="fedtab"></span></div>
+</div>
+<div id="dlg" class="dlgw hide"><form class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgt" onsubmit="dlgBtn('ok');return false"><h3 id="dlgt"></h3><div id="dlgb"></div><div id="dlgm" class="msg" role="alert"></div><div id="dlga" class="dlga"></div></form></div>
+<div id="live" class="sr" aria-live="polite"></div>
+<script>

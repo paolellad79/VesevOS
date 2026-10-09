@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Genera i file di lingua lang/<codice>.json da tools/lang_src.json e controlla che tutto torni.
-# L'inglese va DENTRO il firmware: VesevOS/vos_lang_en.h (con la bandiera). Le altre lingue restano file (lang/).
+# L'inglese va DENTRO il firmware: VesevOS/src/core/vos_lang_en.h (con la bandiera). Le altre lingue restano file (lang/).
 # Uso: python3 tools/mklang.py        (esce con errore se qualcosa non va)
 import os, re, sys, json, glob
 from html.parser import HTMLParser
@@ -23,7 +23,7 @@ BUILTIN = ('en',)
 
 # ---- chiavi usate dal codice del firmware
 src_text = ''
-for f in sorted(glob.glob(os.path.join(FWD, '*.cpp')) + glob.glob(os.path.join(FWD, '*.ino'))):
+for f in sorted(glob.glob(os.path.join(FWD, '**', '*.cpp'), recursive=True) + glob.glob(os.path.join(FWD, '*.ino'))):
     src_text += open(f, encoding='ascii').read() + '\n'
 tr_keys = set()
 for m in re.finditer(r'\btrf?\(\s*"((?:[^"\\]|\\.)*)"', src_text):
@@ -128,8 +128,8 @@ for code, name in langs.items():
              'static const char LANG_FLAG_IT[] = %s;\nstatic const size_t LANG_EN_GZ_LEN = %d;\nstatic const uint8_t LANG_EN_GZ[] PROGMEM = {\n%s\n};\n') % (
             code, cstr(name), cstr(locales[code]), cstr(flags[code]), cstr(flags['it']), len(z), body)
         assert all(ord(c) < 128 for c in h)
-        open(os.path.join(FWD, 'vos_lang_%s.h' % code), 'w', encoding='ascii', newline='\n').write(h)
-        print('VesevOS/vos_lang_%s.h: %d voci, %d byte (compressi: %d, dentro il firmware)' % (code, len(d) - 3, len(txt), len(z)))
+        open(os.path.join(FWD, 'src', 'core', 'vos_lang_%s.h' % code), 'w', encoding='ascii', newline='\n').write(h)
+        print('VesevOS/src/core/vos_lang_%s.h: %d voci, %d byte (compressi: %d, dentro il firmware)' % (code, len(d) - 3, len(txt), len(z)))
         continue
     txt = json.dumps(d, ensure_ascii=False, separators=(',', ':'), indent=None)
     txt = txt.replace('","', '",\n"')  # una voce per riga: file leggibile e confrontabile

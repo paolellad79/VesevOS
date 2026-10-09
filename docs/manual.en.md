@@ -1,4 +1,4 @@
-# VesevOS 1.7.11 - Manual
+# VesevOS 1.7.39 - Manual
 
 Manual for people who use the board. Plain words, no programming.
 Versione italiana: [manuale.md](manuale.md). The same help is in the board's page (System > Help, or `http://192.168.4.1/#aiuto`).
@@ -80,7 +80,7 @@ MQTT, board network, Bluetooth, time server for other devices and IP filter **ar
 - **Board network** (Services > Board network, ESP-NOW): boards talk without a router, up to 3 hops. All boards need the same
   shared key (64 digits); messages without the right key are dropped. Roles: node, gateway (forwards everything to MQTT), sensor.
   Content is not encrypted: do not send personal data.
-- **Bluetooth** (same page): only to configure from a phone, turned on by hand for 10 minutes with a pairing code.
+- **Bluetooth** (same page): for phones and apps. Off by default; the page, the shell (`ble on [minutes]`) or an app (API `POST /api/ble`, optional `min`) turns it on. By default it stays on until switched off; the phone pairs with a random 6-digit code, different at each start and visible to the administrator only.
 
 ## 7. IP filter
 Security > IP filter decides who can talk to the board (my network only, allow list, block list).

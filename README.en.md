@@ -30,7 +30,7 @@ Wi-Fi, clock, files, LEDs, pins, a shell and much more, all protected by a passw
 </p>
 <p align="center"><sub>Screenshots of the control page (with sample data): Home in dark theme, Automations, startup order with the bottom terminal panel, and the phone layout.</sub></p>
 
-> **Status:** in development (version 1.7.11). The project grows in stages: see "Where we are going".
+> **Status:** in development (version 1.7.39). The project grows in stages: see "Where we are going".
 
 ## Why "VesevOS"?
 
@@ -68,6 +68,15 @@ in radio silence when needed, or communicating in alternative ways.
 | 🌍 | **For everyone** | Italian, English, Spanish and German, and a new language is just one file. |
 | 🔋 | **Reliable and frugal** | Built to survive blackouts and to use little power, even on battery. |
 
+## What's new in 1.7.39
+
+- **Bluetooth, your way**: on whenever you want, no countdown. It carries your board's name, and your phone pairs with a 6-digit code.
+- **Tidier memory**: after switching Bluetooth on and off, RAM goes back to how it was (largest free block: 79 KB, it used to drop to 47).
+- **Event Bus**: the board tells you what happens (network up/down, blocked IPs, alarms, services) and apps read it with `GET /api/events` or the `events` command.
+- **Clean, documented API**: 127 routes, proper HTTP codes, documented in Italian and English ([docs/API.en.md](docs/API.en.md)).
+- **Layered code**: drivers apart from services, small files, 8 groups of tests on the computer.
+- **Accessible**: the page meets WCAG 2.2 AA.
+
 ## What it does today
 
 - **Network**: AP mode (the board creates its own Wi-Fi network) and client mode, automatic or fixed IP, network scan, configurable host name and domain (`name.local` with mDNS).
@@ -75,7 +84,7 @@ in radio silence when needed, or communicating in alternative ways.
 - **Pin tests**: tap a pin to set an output high or low, make it blink or read it, with warnings about the risks. The test switches off by itself.
 - **Shell**, on the web and on the serial port, with many commands (type `help`).
 - **Security**: random hotspot password for every board, no factory panel password, HMAC sign-in (the password never travels), **HTTPS** with a unique certificate, up to 8 **users with roles**, per-IP lock-out, **IP filter**, **configuration checks** with alarms and change log.
-- **Services** (off by default): **MQTT** (also encrypted, mqtts), **board network** over ESP-NOW with signed messages and up to 3 hops, **Bluetooth** to configure from a phone (10 minutes).
+- **Services** (off by default): **MQTT** (also encrypted, mqtts), **board network** over ESP-NOW with signed messages and up to 3 hops, **Bluetooth** for phones and apps (turned on by the page, the shell or an app).
 - **Watchdog**: restarts hung services or the board, with an anti-loop limit.
 - **Localization**: country, radio channels and power following the country's rules, antenna, time zone, formats.
 - **Time**: NTP, manual date and time, local NTP server.

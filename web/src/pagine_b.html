@@ -1,0 +1,295 @@
+<section id="t_conf" class="hide">
+ <div class="card adm"><h3>Backup e ripristino</h3>
+  <p class="fhint">Il file di backup contiene la configurazione della scheda. Di fabbrica non contiene password e chiavi.</p>
+  <button class="btn" onclick="location.href='/api/config/download'">Scarica senza segreti</button>
+  <label class="lgck" style="display:block;margin-top:12px"><input type="checkbox" id="bk_sec" onchange="bkSec()"> Includi anche i segreti (password Wi-Fi e MQTT, utenti)</label>
+  <div id="bk_box" class="hide">
+   <div class="law">I segreti vengono cifrati con una frase che scegli tu. Chi ha il file e la frase puo entrare nella scheda e nella tua rete. Se perdi la frase i segreti non si recuperano. Custodisci il file come una password.</div>
+   <label for="bk_pw">Frase (almeno 10 caratteri)</label><input type="password" id="bk_pw" autocomplete="new-password">
+   <label for="bk_pw2">Ripeti la frase</label><input type="password" id="bk_pw2" autocomplete="new-password">
+   <label class="lgck"><input type="checkbox" id="bk_acc"> Ho letto l'avviso e lo accetto</label>
+   <button class="btn" onclick="bkExport()">Scarica con segreti (cifrato)</button>
+  </div>
+  <label style="display:block;margin-top:16px" for="cf">Ripristina da file</label><input type="file" id="cf">
+  <label for="bk_rp">Frase (solo se il file e cifrato)</label><input type="password" id="bk_rp" autocomplete="off">
+  <button class="btn gray" onclick="restoreCfg()">Ripristina</button>
+  <div id="cm" class="msg"></div></div>
+ <div class="card adm"><h3>Ripristino di fabbrica</h3>
+  <p class="fhint">Cancella impostazioni, utenti e password. La scheda riparte come nuova.</p>
+  <button class="btn red" onclick="factory()">Azzera tutto</button>
+  <div id="fzm" class="msg"></div></div>
+</section>
+<section id="t_log" class="hide">
+ <div class="card"><h3>Registro (log)</h3>
+  <div class="lgb">
+   <input id="lgq" type="search" placeholder="Filtra (es. NET, errore)" oninput="lgDraw()" aria-label="Filtra il registro">
+   <label class="lgck"><input type="checkbox" id="lgauto" checked onchange="lgAuto()"> Aggiornamento automatico</label>
+   <button class="btn gray" onclick="loadLog()"><svg class="i" aria-hidden="true"><use href="#i-reboot"/></svg><span>Aggiorna</span></button>
+   <button class="btn gray" onclick="lgDl()"><svg class="i" aria-hidden="true"><use href="#i-dl"/></svg><span>Scarica</span></button>
+   <button class="btn red" onclick="lgClear()"><svg class="i" aria-hidden="true"><use href="#i-del"/></svg><span>Svuota</span></button>
+  </div>
+  <div class="lgb">
+   <label class="lgck">Mostra fino a <select id="lgsh" onchange="lgDraw()"><option value="3">Dettaglio</option><option value="2" selected>Informazione</option><option value="1">Attenzione</option><option value="0">Errore</option></select></label>
+   <label class="lgck">Registra fino a <select id="lglv" onchange="lgSetLv()"><option value="3">Dettaglio</option><option value="2" selected>Informazione</option><option value="1">Attenzione</option><option value="0">Errore</option></select></label>
+  </div>
+  <div id="lginfo" class="fhint"></div>
+  <div id="lgdw" class="fhint hide">Il livello Dettaglio riempie il registro: usalo solo per cercare un problema.</div>
+  <pre id="lg" class="lgv" tabindex="0" aria-label="Righe del registro"></pre></div>
+ <div class="card"><h3>Diario dei riavvii</h3>
+  <p class="fhint">Gli ultimi 20 avvii restano salvati anche se la scheda si spegne: motivo, da quanto era accesa, RAM minima e task piu attivo.</p>
+  <div class="lgb"><button class="btn gray" onclick="loadBoots()"><svg class="i" aria-hidden="true"><use href="#i-reboot"/></svg><span>Aggiorna</span></button>
+   <button class="btn red" id="btclr" onclick="btClear()"><svg class="i" aria-hidden="true"><use href="#i-del"/></svg><span>Azzera il diario</span></button></div>
+  <pre id="bt" class="lgv" tabindex="0" aria-label="Diario dei riavvii"></pre></div>
+</section>
+<section id="t_sec" class="hide">
+ <div class="card"><h3>La tua password</h3><div id="pwho" class="fhint"></div>
+  <label for="p_old">Vecchia</label><input type="password" id="p_old"><label for="p_new">Nuova (min 6)</label><input type="password" id="p_new">
+  <button class="btn" onclick="chPass()">Cambia</button><div id="pm" class="msg"></div></div>
+ <div class="card adm"><h3>Seriale (cavo USB)</h3>
+  <p class="fhint">Come si comporta la seriale. Le modifiche valgono subito e restano dopo il riavvio. Gli stessi comandi si danno anche dalla seriale (scrivi: serial).</p>
+  <label for="sr_baud">Velocita (baud)</label><select id="sr_baud" onchange="srSet('baud',this.value)"></select>
+  <div id="sr_usb" class="fhint"></div>
+  <div id="sr_trial" class="msg ko hide" style="margin-top:8px"><span>Velocita nuova in prova: se non la confermi entro 20 secondi torna quella di prima.</span> <button class="btn sm" onclick="srSet('keep','1')">Conferma</button></div>
+  <label for="sr_eol">A capo</label><select id="sr_eol" onchange="srSet('eol',this.value)"></select>
+  <div class="tog"><div>Eco dei tasti che scrivi</div><button class="sw1" id="sw_sr_echo" onclick="srTog('echo')" aria-label="Eco"></button></div>
+  <div class="tog"><div>La seriale accetta comandi</div><button class="sw1" id="sw_sr_input" onclick="srTog('input')" aria-label="Comandi"></button></div>
+  <div class="tog"><div>Scrivi il registro sulla seriale</div><button class="sw1" id="sw_sr_log" onclick="srTog('log')" aria-label="Registro"></button></div>
+  <div class="tog"><div>Mostra il benvenuto quando apri il monitor</div><button class="sw1" id="sw_sr_banner" onclick="srTog('banner')" aria-label="Benvenuto"></button></div>
+  <label for="sr_tx">Attesa massima di scrittura (ms, 0-200)</label><input type="number" id="sr_tx" min="0" max="200" onchange="srSet('tx',this.value)">
+  <div id="srm" class="msg"></div></div>
+ <div class="card adm"><h3>Password sulla seriale</h3>
+  <div class="tog"><div>Proteggi la seriale (cavo USB) con la password</div><button class="sw1" id="sw_ser" onclick="serToggle()" aria-label="Seriale"></button></div>
+  <div id="serwarn" class="msg ko" style="margin-top:8px"></div>
+  <p style="color:var(--mut)">Pagina web, shell web e API sono sempre protette dalla password. Se spegni questo interruttore, chi collega il cavo USB ottiene subito la shell. Il tasto BOOT tenuto da 8 a 19 secondi azzera le password degli amministratori e riaccende la protezione.</p>
+  <div id="serm" class="msg"></div></div>
+ <div class="card adm"><h3><svg class="i hic" aria-hidden="true"><use href="#i-lockx"/></svg>Blocco degli accessi</h3>
+  <p class="fhint">Dopo troppe password sbagliate dallo stesso indirizzo, la scheda lo blocca per un po'. Ogni nuovo blocco dura il doppio (massimo 1 ora). Anche troppe richieste senza accesso contano come errore.</p>
+  <div class="agrid"><div><label for="b_f">Password sbagliate prima del blocco</label><input type="number" id="b_f" min="3" max="20"></div>
+   <div><label for="b_s">Primo blocco (secondi)</label><input type="number" id="b_s" min="10" max="3600"></div></div>
+  <button class="btn" onclick="banSave()">Salva</button><div id="bnm" class="msg"></div>
+  <h3 style="margin-top:14px">Indirizzi bloccati o sospetti</h3>
+  <table id="bntab" class="ftab"></table>
+  <button class="btn gray" onclick="banLoad()">Aggiorna</button><button class="btn red" onclick="banUn('all')">Sblocca tutti</button>
+  <p class="fhint">Dalla seriale: <code>ban</code> mostra l'elenco, <code>unban all</code> sblocca tutti.</p></div>
+</section>
+<section id="t_mqtt" class="hide">
+ <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-mqtt"/></svg>MQTT</h3>
+  <div id="mqst" class="airst"></div>
+  <p class="fhint">Servizio spento di fabbrica: la prima volta lo avvii a mano, poi puoi scegliere l'avvio automatico.</p>
+  <div class="sc" id="sc_mqtt"></div>
+  <div class="ftb op"><button class="btn gray" onclick="mqRun('test')"><span>Messaggio di prova</span></button></div>
+  <div id="mqm" class="msg"></div></div>
+ <div class="card adm"><h3>Impostazioni MQTT</h3>
+  <div class="tog"><div>Avvio automatico (parte all'accensione della scheda)</div><button class="sw1" id="mq_auto" onclick="this.classList.toggle('on')" aria-label="Avvio automatico"></button></div>
+  <div class="agrid"><div><label for="mq_host">Broker (indirizzo)</label><input id="mq_host" placeholder="es. 192.168.1.10 o broker.casa.lan" autocomplete="off"></div>
+   <div><label for="mq_port">Porta</label><input type="number" id="mq_port" min="1" max="65535" value="1883"></div>
+   <div><label for="mq_user">Utente (facoltativo)</label><input id="mq_user" autocomplete="off"></div>
+   <div><label for="mq_pass">Password (facoltativa)</label><input type="password" id="mq_pass" autocomplete="new-password"></div>
+   <div><label for="mq_pre">Prefisso degli argomenti</label><input id="mq_pre"></div>
+   <div><label for="mq_ev">Invio dello stato ogni (secondi)</label><input type="number" id="mq_ev" min="5" max="3600" value="30"></div></div>
+  <div class="tog"><div>Home Assistant: presenta la scheda da sola (sensori e pulsante Riavvia)</div><button class="sw1" id="mq_ha" onclick="this.classList.toggle('on')" aria-label="Home Assistant"></button></div>
+  <div class="tog"><div>Collegamento cifrato (mqtts, di solito porta 8883)</div><button class="sw1" id="mq_tls" onclick="this.classList.toggle('on')" aria-label="mqtts"></button></div>
+  <div id="mqtlsw" class="law hide">Con utente e password, senza cifratura la password viaggia in chiaro sulla rete.</div>
+  <button class="btn" onclick="mqSave()">Salva</button><div id="mqm2" class="msg"></div>
+  <div id="mqtopics" class="fhint"></div></div>
+ <div class="card adm"><h3>Certificato del broker (mqtts)</h3>
+  <p class="fhint">Per un broker con certificato fatto in casa incolla qui il certificato dell'autorita (CA) in formato PEM. Vuoto = autorita pubbliche note.</p>
+  <textarea id="mq_ca" rows="5" spellcheck="false" data-tt aria-label="Certificato CA in formato PEM" placeholder="-----BEGIN CERTIFICATE-----"></textarea>
+  <button class="btn gray" onclick="mqCa()">Salva certificato</button><div id="mqm3" class="msg"></div></div>
+</section>
+<section id="t_mesh" class="hide">
+ <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-mesh"/></svg>Rete tra schede (ESP-NOW)</h3>
+  <div id="msst" class="airst"></div>
+  <p class="fhint">Le schede parlano tra loro senza router, fino a 3 salti. Ogni messaggio e firmato con la chiave comune: chi non ha la chiave non puo comandare. Spenta di fabbrica.</p>
+  <div class="sc" id="sc_mesh"></div>
+  <div id="msm" class="msg"></div></div>
+ <div class="card adm"><h3>Impostazioni</h3>
+  <div class="agrid"><div><label for="ms_role">Ruolo di questa scheda</label><select id="ms_role"><option value="0">Nodo (ripete i messaggi)</option><option value="1">Gateway (annuncia il canale, invia tutto a MQTT)</option><option value="2">Sensore (manda solo il suo stato)</option></select></div>
+   <div><label for="ms_ch">Canale quando non c'e il Wi-Fi di casa</label><select id="ms_ch"></select></div></div>
+  <div class="tog"><div>Avvio automatico (parte all'accensione della scheda)</div><button class="sw1" id="ms_auto" onclick="this.classList.toggle('on')" aria-label="Avvio automatico"></button></div>
+  <label for="ms_key">Chiave comune (64 cifre esadecimali, uguale su tutte le schede)</label>
+  <div class="agrid"><div><input id="ms_key" autocomplete="off" spellcheck="false" placeholder="(salvata: non la mostro)"></div>
+   <div><button class="btn gray" onclick="msKey(1)">Mostra la chiave</button><button class="btn gray" onclick="msKey(2)">Nuova chiave</button></div></div>
+  <p class="fhint">Copia la stessa chiave sulle altre schede. Usa solo canali ammessi nel tuo paese (Sistema > Localizzazione).</p>
+  <button class="btn" onclick="msSave()">Salva</button><div id="msm2" class="msg"></div></div>
+ <div class="card"><h3>Schede vicine</h3><div style="overflow-x:auto"><table id="mstab" class="ftab"></table></div></div>
+ <div class="card op"><h3>Messaggi e comandi</h3>
+  <div class="agrid"><div><label for="ms_to">A chi</label><select id="ms_to"></select></div>
+   <div><label for="ms_tx">Messaggio di testo</label><input id="ms_tx" maxlength="150"></div></div>
+  <button class="btn" onclick="msSend(0)">Invia messaggio</button>
+  <label for="ms_cmd">Azione sull'altra scheda (es. led-color 00ff00, gpio 4 1, note ciao, reboot)</label><input id="ms_cmd" maxlength="100">
+  <button class="btn gray" onclick="msSend(1)">Esegui sull'altra scheda</button><div id="msm3" class="msg"></div>
+  <div id="msmsg" style="margin-top:10px"></div></div>
+</section>
+<section id="t_loc" class="hide">
+ <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-globe"/></svg>Paese</h3>
+  <div id="lcc" class="big"></div>
+  <button class="btn adm" onclick="mapOpen(locPick)">Cambia paese</button>
+  <div class="law">Scegli il paese dove la scheda si trova davvero: decide canali e potenza della radio. Non e consulenza legale.</div></div>
+ <div class="card"><h3>Lingua, ora e formati</h3>
+  <div class="agrid">
+   <div><label for="lc_lang">Lingua</label><select id="lc_lang"></select></div>
+   <div><label for="lc_tz">Fuso orario</label><select id="lc_tz" onchange="lcTz()"></select></div>
+   <div id="lc_tzc" class="hide"><label for="lc_posix">Regola del fuso (formato POSIX)</label><input id="lc_posix"></div>
+   <div><label for="lc_ntp">Server dell'ora (NTP)</label><input id="lc_ntp"></div>
+   <div><label for="lc_df">Formato data</label><select id="lc_df"><option value="0">GG/MM/AAAA (31/12/2026)</option><option value="1">AAAA-MM-GG (2026-12-31)</option><option value="2">MM/GG/AAAA (12/31/2026)</option></select></div>
+   <div><label for="lc_tf">Formato ora</label><select id="lc_tf"><option value="0">24 ore (18:30:00)</option><option value="1">12 ore (06:30:00 PM)</option></select></div>
+   <div><label for="lc_ds">Separatore dei decimali</label><select id="lc_ds"><option value="0">Virgola (3,5)</option><option value="1">Punto (3.5)</option></select></div>
+   <div><label for="lc_ws">Primo giorno della settimana</label><select id="lc_ws"><option value="0">Lunedi</option><option value="1">Domenica</option></select></div>
+   <div><label for="lc_tu">Unita di temperatura</label><select id="lc_tu"><option value="0">Gradi Celsius (C)</option><option value="1">Gradi Fahrenheit (F)</option></select></div>
+  </div></div>
+ <div class="card adm"><h3>Lingue</h3>
+  <div id="lglist"></div>
+  <label for="lgf" style="display:block;margin-top:12px">Carica un file di lingua (.json)</label><input type="file" id="lgf" accept=".json">
+  <button class="btn" onclick="upLang()">Carica lingua</button><div id="lgm" class="msg"></div>
+  <p style="color:var(--mut)">Italiano e inglese sono dentro il firmware. Per le altre: un file per lingua, con il nome uguale al codice (per esempio es.json). Lo stesso file traduce la pagina e i messaggi della shell.</p>
+  <div id="lgsp" style="color:var(--mut)"></div></div>
+ <div class="card adm"><button class="btn" onclick="lcSave()">Salva</button><button class="btn gray" onclick="lcDefaults()">Ripristina valori del paese</button><div id="lcm" class="msg"></div></div>
+</section>
+<section id="t_wd" class="hide">
+ <div class="card"><h3>Watchdog</h3>
+  <p class="fhint">Controlla che la scheda non resti bloccata e, se serve, la fa ripartire da sola. Non piu di 3 riavvii automatici in un'ora: poi si ferma e avvisa.</p>
+  <div id="wdst"></div></div>
+ <div class="card adm"><h3>Controlli</h3>
+  <div class="tog"><div>Servizi bloccati: prima riavvia il servizio, poi la scheda</div><button class="sw1" id="wd_task" onclick="this.classList.toggle('on')" aria-label="Servizi bloccati"></button></div>
+  <div class="tog"><div>Rete di casa assente troppo a lungo</div><button class="sw1" id="wd_net" onclick="this.classList.toggle('on')" aria-label="Rete assente"></button></div>
+  <div class="tog"><div>RAM libera troppo bassa per un minuto</div><button class="sw1" id="wd_ram" onclick="this.classList.toggle('on')" aria-label="RAM bassa"></button></div>
+  <div class="agrid"><div><label for="wd_nm">Minuti senza rete</label><input type="number" id="wd_nm" min="2" max="1440"></div>
+   <div><label for="wd_rk">Soglia RAM (KB)</label><input type="number" id="wd_rk" min="8" max="200"></div>
+   <div><label for="wd_ud">Riavvio dopo N giorni accesa (0 = mai)</label><input type="number" id="wd_ud" min="0" max="365"></div>
+   <div><label for="wd_at">Riavvio programmato (vuoto = spento)</label><input type="time" id="wd_at"></div></div>
+  <div id="wd_days" class="ftb"></div>
+  <button class="btn" onclick="wdSave()">Salva</button><div id="wdm" class="msg"></div></div>
+</section>
+<section id="t_users" class="hide">
+ <div class="card"><h3>Utenti</h3>
+  <p class="fhint">Fino a 8 utenti. Amministratore: tutto. Operatore: usa la scheda (LED, pin, automazioni, messaggi) ma non cambia rete, sicurezza e utenti. Ospite: solo guarda (Home, stato, registro). I permessi sono controllati dalla scheda, non solo dalla pagina.</p>
+  <div style="overflow-x:auto"><table id="ustab" class="ftab"></table></div><div id="usm" class="msg"></div></div>
+ <div class="card"><h3>Nuovo utente</h3>
+  <div class="agrid"><div><label for="u_n">Nome (3-20: lettere, numeri, punto, trattino)</label><input id="u_n" maxlength="20" autocomplete="off"></div>
+   <div><label for="u_r">Ruolo</label><select id="u_r"><option value="0">Ospite</option><option value="1">Operatore</option><option value="2">Amministratore</option></select></div>
+   <div><label for="u_p">Password (min 6)</label><input type="password" id="u_p" autocomplete="new-password"></div></div>
+  <button class="btn" onclick="uAdd()">Aggiungi</button><div id="usm2" class="msg"></div></div>
+</section>
+<section id="t_power" class="hide">
+ <div class="card"><h3>Risparmio energia</h3>
+  <p class="fhint">Tre livelli, da usare insieme: processore piu lento (sotto), Wi-Fi a risparmio massimo, sonno profondo. Il consumo vero dipende dalla scheda: misuralo con un tester prima di fidarti dei numeri.</p>
+  <div class="sc" id="sc_power"></div>
+  <div id="pwst" class="msg" style="margin-bottom:8px"></div>
+  <label for="pw_mode">Modo (si applica con Avvia)</label>
+  <select id="pw_mode" class="adm" onchange="pwUi()"><option value="1">Wi-Fi a risparmio massimo (la scheda resta raggiungibile)</option><option value="2">Sonno profondo a cicli</option></select>
+  <div id="pw_c" class="agrid hide"><div><label for="pw_aw">Resta sveglia (minuti, da 10 a 1440)</label><input type="number" id="pw_aw" min="10" max="1440"></div><div><label for="pw_sl">Poi dorme (minuti, da 1 a 10080)</label><input type="number" id="pw_sl" min="1" max="10080"></div></div>
+  <div id="pw_w1" class="law hide">Wi-Fi a risparmio massimo: la scheda si sveglia solo a intervalli per ascoltare la rete. Risposte e pagina piu lente; consuma meno di prima ma molto piu del sonno profondo.</div>
+  <div id="pw_w2" class="law hide">Sonno profondo: Wi-Fi, pagina, MQTT, rete tra schede e automazioni sono FERMI mentre dorme. Il cavo USB si scollega. La scheda riparte da sola dopo il tempo scelto (il timer e impreciso di qualche percento) oppure subito con il tasto RESET. L'ora si perde: torna con NTP o a mano. Non dorme nei primi 10 minuti dall'accensione, ne mentre usi la pagina, ne se la guida di configurazione non e finita.</div>
+  <button class="btn adm" onclick="pwSave()">Salva</button><div id="pwm" class="msg"></div></div>
+  <div class="card"><h3>Dormi adesso</h3>
+  <div class="agrid"><div><label for="pw_now">Minuti di sonno (da 1 a 10080)</label><input type="number" id="pw_now" min="1" max="10080" value="30"></div></div>
+  <button class="btn gray" onclick="pwNow()">Dormi per questo tempo</button><div id="pwm2" class="msg"></div>
+  <p class="fhint">Solo con il tasto RESET (senza tempo): menu in alto a destra &gt; Sleep.</p></div>
+ <div class="card"><h3>Velocita CPU</h3><select id="cpumode" onchange="setCpu()"><option value="0">Automatica (scala da sola)</option><option value="80">Fissa 80 MHz</option><option value="160">Fissa 160 MHz</option><option value="240">Fissa 240 MHz</option></select><div id="cpum" class="msg"></div></div>
+</section>
+<section id="t_selftest" class="hide">
+ <div class="card adm"><h3>Autotest</h3>
+  <p class="fhint">La scheda esegue le prove una per volta e mostra l'esito di ognuna. Sono prove di sola lettura (solo un file di prova, subito cancellato). Alla fine puoi scaricare un report di testo: nulla viene inviato fuori, lo mandi tu a chi vuoi.</p>
+  <div class="tog"><div>Prove attive (il LED fa l'arcobaleno e parte un messaggio MQTT di prova)</div><button class="sw1" id="stl_act" onclick="this.classList.toggle('on')" aria-label="Prove attive"></button></div>
+  <div class="tog"><div>Includi i nomi reali (indirizzi, nome Wi-Fi e registro) nel report</div><button class="sw1" id="stl_nm" onclick="this.classList.toggle('on')" aria-label="Nomi reali"></button></div>
+  <button class="btn" id="stl_go" onclick="stlGo()">Avvia la diagnosi</button><div id="stlm" class="msg"></div>
+  <div id="stl_bar" class="hide"></div>
+  <div id="stl_sum" class="fhint"></div>
+  <div id="stl_list"></div>
+  <div class="ftb"><a class="btn gray hide" id="stl_dl" href="/api/selftest/report" download="vesevos-report.txt">Scarica il report</a><button class="btn gray hide" id="stl_cp" onclick="stlCopy()">Copia il report</button><button class="btn gray hide" id="stl_cl" onclick="stlClear()">Chiudi e libera la memoria</button></div>
+ </div>
+</section>
+<section id="t_stat" class="hide">
+ <div class="card"><h3>Statistiche locali</h3>
+  <p class="fhint">Contano quanto si usano Wi-Fi, Bluetooth, tasto BOOT e LED. Sono statistiche locali: niente indirizzi MAC, niente indirizzi IP, niente nomi. Restano nella memoria della scheda (si azzerano al riavvio) e non vengono mai inviate fuori. Spente di fabbrica.</p>
+  <div class="sc" id="sc_stat"></div>
+  <div id="stbody"></div>
+  <a class="btn gray hide" id="st_csv" href="/api/stats.csv" download="vesevos-statistiche.csv">Scarica CSV</a><button class="btn gray adm hide" id="st_rst" onclick="stReset()">Azzera</button><div id="stm" class="msg"></div>
+  <p class="fhint">I pin e il consumo di corrente non sono ancora contati.</p></div>
+</section>
+<section id="t_mfa" class="hide">
+ <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-shield"/></svg>Verifica in due passi (MFA)</h3>
+  <p class="fhint">Oltre alla password, all'accesso serve un codice a 6 cifre che cambia ogni 30 secondi e che crei con un'app sul telefono (Google Authenticator, Microsoft Authenticator, Aegis, FreeOTP). Facoltativa, consigliata per gli amministratori.</p>
+  <div id="mfst" class="msg" style="margin-bottom:8px"></div>
+  <div class="sc" id="sc_mfa"></div><button class="btn gray hide" id="mf_rec" onclick="mfRec()">Nuovi codici di recupero</button>
+  <div id="mfact" class="hide" style="margin-top:12px">
+   <p><b>1.</b> Apri l'app e inquadra il QR (oppure scrivi la chiave a mano).</p>
+   <div class="lab prt"><div class="qrbox" id="mfqr"></div><div><div class="subt">Chiave (se non puoi inquadrare il QR)</div><div class="big" id="mfkey" style="font-family:monospace;word-break:break-all"></div></div></div>
+   <p><b>2.</b> Scrivi qui il primo codice di 6 cifre che vedi nell'app. Finche non lo confermi, l'MFA resta spento.</p>
+   <label for="mf_code">Codice</label><input id="mf_code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" onkeydown="if(event.key=='Enter')mfConfirm()">
+   <button class="btn" onclick="mfConfirm()">Conferma e accendi</button><button class="btn gray" onclick="$('mfact').className='hide'">Annulla</button></div>
+  <div id="mfrec" class="hide law" style="margin-top:12px"><b>Codici di recupero</b> (si vedono una sola volta, ognuno vale una volta). Scrivili o stampali e tienili al sicuro.
+   <div id="mfrecl" style="font-family:monospace;font-size:1.1em;margin:8px 0;line-height:1.8"></div>
+   <button class="btn gray" onclick="mfCopy()">Copia</button><button class="btn gray" onclick="window.print()">Stampa</button></div>
+  <div id="mfm" class="msg"></div>
+  <p class="fhint">Se perdi il telefono e i codici: tieni premuto il tasto BOOT della scheda per 8 secondi (con il cavo USB). Si spegne l'MFA degli amministratori e si sceglie una password nuova. Chi ha la scheda in mano ha il controllo fisico.</p></div>
+ <div class="card"><h3>L'ora e l'MFA</h3>
+  <p class="fhint">I codici dipendono dall'ora esatta (UTC). La scheda non ha batteria per l'orologio: dopo un riavvio l'ora si perde finche non torna da Internet (NTP) o la imposti tu. L'ora del telefono deve essere automatica. Fuso orario e ora legale non contano.</p>
+  <div id="mftime" class="msg"></div></div>
+ <div class="card adm" id="mfadm"><h3>Utenti e impostazioni (amministratore)</h3>
+  <div style="overflow-x:auto"><table id="mftab" class="ftab"></table></div>
+  <label for="mf_nt">Se l'ora della scheda non e valida</label>
+  <select id="mf_nt" onchange="mfSet()"><option value="0">Chiedi di impostare l'ora (consigliato)</option><option value="1">Accetta solo codici di recupero</option><option value="2">Blocca l'accesso</option></select>
+  <label for="mf_pow">Prova anti-bot all'accesso (il browser fa un piccolo calcolo prima del login)</label>
+  <select id="mf_pow" onchange="mfSet()"><option value="0">Spenta</option><option value="12">Leggera</option><option value="14">Normale (consigliata)</option><option value="16">Forte</option><option value="18">Molto forte (lenta su telefoni vecchi)</option></select>
+  <p class="fhint">Non usa servizi esterni e non salva nulla del visitatore. Dopo errori ripetuti l'indirizzo viene bloccato (Sicurezza &gt; Filtro IP).</p>
+  <div id="mfm2" class="msg"></div></div>
+</section>
+<section id="t_fw" class="hide">
+ <div class="card"><h3>Filtro IP</h3>
+  <p class="fhint">Decide chi puo parlare con la scheda. L'hotspot della scheda e la seriale USB sono sempre ammessi. Chi e fuori lista non riceve risposta. Una regola nuova vale 2 minuti: se non la confermi torna quella di prima.</p>
+  <div id="fwyou" class="law"></div>
+  <div class="agrid"><div><label for="fw_m">Modo</label><select id="fw_m"><option value="0">Spento</option><option value="1">Solo la mia rete</option><option value="2">Lista consentita</option><option value="3">Lista bloccati</option></select></div>
+   <div class="tog"><div>Filtra anche il server dell'ora (NTP)</div><button class="sw1" id="fw_ntp" onclick="this.classList.toggle('on')" aria-label="NTP"></button></div></div>
+  <label for="fw_r">Voci: una per riga, indirizzo|1|nome (anche intervallo 192.168.1.10-192.168.1.20 o rete 192.168.1.0/24; 0 = spenta)</label>
+  <textarea id="fw_r" rows="6" spellcheck="false"></textarea>
+  <button class="btn gray" onclick="fwMine()">Aggiungi il mio indirizzo</button><button class="btn" onclick="fwSave()">Prova la regola</button><button class="btn" id="fwok" onclick="fwConfirm()">Conferma</button>
+  <div id="fwtry" class="msg"></div><div id="fwm" class="msg"></div>
+  <p class="fhint">Uscite di emergenza: comando firewall off dalla seriale oppure tasto BOOT tenuto da 2 a 7 secondi.</p></div>
+ <div class="card"><h3>Ultimi rifiutati</h3><table id="fwrej" class="ftab"></table></div>
+</section>
+<section id="t_cert" class="hide">
+ <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-lockx"/></svg>Certificato della scheda</h3>
+  <p class="fhint">Il certificato e unico per questa scheda: lo crea lei, la chiave resta dentro e non esce mai. Serve a cifrare HTTPS (e in futuro gli altri servizi cifrati). Il browser avvisa "connessione non privata" perche non lo ha emesso un'autorita: e normale. Confronta l'impronta con quella del browser (lucchetto &gt; certificato) e con quella della seriale (comando cert).</p>
+  <div id="certst"></div>
+  <a class="btn gray" href="/api/tls/cert" download="vesevos.crt">Scarica il certificato (per fidarti nel browser)</a>
+  <button class="btn gray adm" onclick="tlsRegen()">Nuovo certificato</button>
+  <p class="fhint">Il certificato nuovo vale dal prossimo riavvio: il browser avvisera di nuovo. Quello creato dalla scheda dura 10 anni.</p></div>
+ <div class="card adm"><h3>Certificato tuo (facoltativo)</h3>
+  <p class="fhint">Se hai un certificato per questo nome (per esempio di una tua autorita), incollalo con la sua chiave (senza password). Vale dal prossimo riavvio.</p>
+  <label for="tls_c">Certificato (PEM)</label><textarea id="tls_c" rows="4" spellcheck="false"></textarea>
+  <label for="tls_k">Chiave privata (PEM)</label><textarea id="tls_k" rows="4" spellcheck="false"></textarea>
+  <button class="btn" onclick="tlsUp()">Carica</button><div id="tlsm2" class="msg"></div></div>
+</section>
+<section id="t_https" class="hide">
+ <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-lockx"/></svg>HTTPS</h3>
+  <p class="fhint">La pagina e le password viaggiano cifrate. Il certificato e creato dalla scheda e unico: al primo accesso il browser avvisa "connessione non privata". E normale per i dispositivi di casa: confronta l'impronta qui sotto con quella che mostra il browser (lucchetto > certificato) e con quella scritta sulla seriale.</p>
+  <div id="tlsst"></div>
+  <div class="sc" id="sc_https"></div>
+  <div class="agrid adm"><div><label for="sv_sp">Porta HTTPS (443 oppure 1024-65535)</label><input type="number" id="sv_sp" min="443" max="65535"></div></div>
+  <button class="btn gray adm" onclick="svcPort('httpsPort','sv_sp','tlsm')">Salva porta</button>
+  <div id="sv_sw" class="law hide"></div><div id="sv_spend" class="law hide"></div>
+  <div id="tlsm" class="msg"></div></div>
+</section>
+<section id="t_audit" class="hide">
+ <div class="card"><h3>Controlli della configurazione</h3>
+  <p class="fhint">La scheda controlla da sola la configurazione. Rosso: valore vietato (legge o sicurezza), corretto subito. Giallo: permesso ma rischioso, resta con un avviso. Il registro dice chi ha cambiato cosa.</p>
+  <div id="aulist"></div><button class="btn gray op" onclick="auAck(0)">Ho visto tutto</button><div id="aum" class="msg"></div></div>
+ <div class="card"><h3>Ultime modifiche</h3><div id="auhist" class="fhint"></div></div>
+</section>
+<section id="t_legal" class="hide">
+ <div class="card"><h3>Note legali</h3>
+  <p>VesevOS e software libero con doppia licenza: GPL-3.0-or-later (gratuita) oppure licenza commerciale (a pagamento, su richiesta). Il programma e fornito senza alcuna garanzia, nei limiti consentiti dalla legge. Non e consulenza legale.</p>
+  <div id="licbtn"></div><pre id="licx" class="hide" style="margin-top:10px"></pre></div>
+ <div class="card"><h3>Software e dati usati</h3><div style="overflow-x:auto"><table id="sbom" class="ftab"></table></div></div>
+ <div class="card"><h3>Dati salvati sulla scheda</h3>
+  <p>Configurazione, utenti (solo l'impronta della password, mai la password), registro di 150 righe (con gli indirizzi IP di chi accede), allarmi e ultime modifiche. Tutto resta sulla scheda: niente va fuori se non accendi tu MQTT o la rete tra schede. Il contaore e il numero di avvii non si cancellano: non sono dati personali.</p>
+  <p>Per cancellare tutto: Config > Azzera tutto, comando factory-reset oppure tasto BOOT tenuto 20 secondi.</p></div>
+ <div class="card"><h3>Software libero e normative</h3>
+  <p>VesevOS e software libero, gratuito, fornito fuori da un'attivita commerciale e senza garanzia (GPL-3.0, sezioni 15 e 16): lo usi a tuo rischio. Riferimenti: Regolamento (UE) 2024/2847 (Cyber Resilience Act): non si applica al software libero fornito fuori da attivita commerciale (considerando 18 e 19); Direttiva (UE) 2024/2853 sui prodotti difettosi, art. 2, par. 2: esclusi il software libero sviluppato o fornito fuori da attivita commerciale; Direttiva 2014/53/UE (RED) e Regolamento delegato (UE) 2022/30 (EN 18031) e UK PSTI Act 2022: obblighi di chi mette in commercio un apparecchio; Codice civile art. 1229: restano dolo e colpa grave. Se VesevOS diventa un prodotto a pagamento, questi obblighi valgono per quella versione e si dichiarera il periodo di supporto. Non e consulenza legale.</p></div>
+ <div class="card"><h3>Sicurezza</h3>
+  <p>Hai trovato un problema di sicurezza? Scrivi a paolellad79@gmail.com: risposta entro 7 giorni. Progetto gratuito: gli aggiornamenti non hanno date garantite.</p>
+  <p>Password dell'hotspot diversa per ogni scheda, accesso senza password in chiaro, HTTPS, utenti con ruoli, blocco dopo troppi errori, filtro IP, controllo della configurazione: misure richieste dalle norme sulla sicurezza dei dispositivi (UE: direttiva radio con EN 18031 e Cyber Resilience Act; Regno Unito: PSTI).</p></div>
+ <div class="card"><h3>Radio</h3><div id="lgradio"></div></div>
+</section>

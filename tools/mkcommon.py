@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Genera il file unico dei dati comuni "common" (paesi + mappa + regole radio + elenco librerie)
-# e VesevOS/vos_common_data.h (blocco compresso servito dalla pagina + tabella radio per il firmware).
+# e VesevOS/src/core/vos_common_data.h (blocco compresso servito dalla pagina + tabella radio per il firmware).
 #
 # Uso normale (non serve internet):        python3 tools/mkcommon.py
 # Rigenerare i dati sorgente (una volta):   python3 tools/mkcommon.py --sources <ne_110m.geojson> <ne_50m.geojson> <zone.tab> <iso3166.tab> <zones.json>
@@ -14,7 +14,7 @@ import os, sys, json, gzip, math
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, 'tools', 'data', 'common_src.json')
-OUT = os.path.join(ROOT, 'VesevOS', 'vos_common_data.h')
+OUT = os.path.join(ROOT, 'VesevOS', 'src', 'core', 'vos_common_data.h')
 BUDGET = 100 * 1024          # massimo compresso
 
 # ---------- regole radio 2,4 GHz (semplificate, prudenti) ----------
@@ -60,7 +60,7 @@ LANG = {'IT': 'it', 'SM': 'it', 'VA': 'it', 'CH': 'it', 'ES': 'es', 'MX': 'es', 
 
 # ---------- elenco del software usato (SBOM semplice) ----------
 SBOM = [
-    ['VesevOS', '1.7.11', 'GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial', 'https://github.com/paolellad79/VesevOS'],
+    ['VesevOS', '1.7.39', 'GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial', 'https://github.com/paolellad79/VesevOS'],
     ['Arduino-ESP32 core', '3.3.x', 'LGPL-2.1-or-later', 'https://github.com/espressif/arduino-esp32'],
     ['ESP-IDF (esp_wifi, esp_now, esp-mqtt, esp_http_server, esp_https_server, NVS)', '5.5', 'Apache-2.0', 'https://github.com/espressif/esp-idf'],
     ['Mbed TLS', '3.6', 'Apache-2.0', 'https://github.com/Mbed-TLS/mbedtls'],
@@ -156,7 +156,9 @@ def build():
         e['ntp'] = cc.lower() + '.pool.ntp.org'
         cl.append(e)
         table.append((cc, e['ch'], e['dbm']))
-    common = {'v': 1, 'countries': cl, 'regions': REGIONS,
+    import re as _re
+    apiv = int(_re.search(r'#define\s+VOS_API_VERSION\s+(\d+)', open(os.path.join(ROOT, 'VesevOS', 'src', 'core', 'vos_common.h')).read()).group(1))
+    common = {'v': 1, 'apiVersion': apiv, 'countries': cl, 'regions': REGIONS,
               'default': {'ch': 11, 'dbm': 20},
               'sbom': [{'name': a, 'ver': b, 'lic': c, 'url': d} for a, b, c, d in SBOM]}
     raw = json.dumps(common, ensure_ascii=False, separators=(',', ':')).encode('utf-8')

@@ -30,7 +30,7 @@ rete Wi-Fi, ora, file, LED, pin, shell e tante altre cose, tutto protetto da una
 </p>
 <p align="center"><sub>Schermate della pagina di controllo (con dati di esempio): Home in tema scuro, Automazioni, ordine di avvio con il terminale a pannello, e la versione per telefono.</sub></p>
 
-> **Stato:** in sviluppo (versione 1.7.11). Il progetto cresce a fasi: guarda "Dove stiamo andando".
+> **Stato:** in sviluppo (versione 1.7.39). Il progetto cresce a fasi: guarda "Dove stiamo andando".
 
 ## Perché si chiama VesevOS
 
@@ -68,6 +68,15 @@ una situazione di emergenza, in silenzio radio quando serve, o comunicando in mo
 | 🌍 | **Per tutti** | Italiano, inglese, spagnolo e tedesco, e si può aggiungere una lingua con un solo file. |
 | 🔋 | **Affidabile e frugale** | Pensato per reggere i blackout e per consumare poco, anche con la batteria. |
 
+## Novità della 1.7.39
+
+- **Bluetooth libero**: acceso quando vuoi, senza orologio. Il nome è quello della tua scheda, il telefono si abbina con un codice a 6 cifre.
+- **Memoria più ordinata**: dopo aver acceso e spento il Bluetooth la RAM torna come prima (pezzo libero più grande: 79 KB, era 47).
+- **Event Bus**: la scheda racconta cosa succede (rete su/giù, IP bloccati, allarmi, servizi) e le app lo leggono con `GET /api/events` o con il comando `events`.
+- **API pulita e documentata**: 127 rotte, codici HTTP giusti, documento in italiano e inglese ([docs/API.md](docs/API.md)).
+- **Codice a strati**: driver separati dai servizi, file piccoli, 8 gruppi di prove sul computer.
+- **Accessibile**: pagina conforme WCAG 2.2 AA.
+
 ## Cosa fa oggi
 
 - **Rete**: modo AP (la scheda crea la sua rete Wi-Fi) e modo client, IP automatico o fisso, scansione reti, nome host e dominio configurabili (`nome.local` con mDNS).
@@ -75,7 +84,7 @@ una situazione di emergenza, in silenzio radio quando serve, o comunicando in mo
 - **Prova dei pin**: tocca un pin per mettere un'uscita alta o bassa, farla lampeggiare o leggerla, con avvisi sui rischi. La prova si spegne da sola.
 - **Shell** web e seriale con molti comandi (digita `help`).
 - **Sicurezza**: password dell'hotspot casuale per ogni scheda, nessuna password di fabbrica, accesso con prova HMAC (la password non viaggia), **HTTPS** con certificato unico, fino a 8 **utenti con ruoli**, blocco per indirizzo IP, **filtro IP**, **controlli della configurazione** con allarmi e registro delle modifiche.
-- **Servizi** (spenti di fabbrica): **MQTT** (anche cifrato, mqtts), **rete tra schede** ESP-NOW con messaggi firmati e fino a 3 salti, **Bluetooth** per configurare dal telefono (10 minuti).
+- **Servizi** (spenti di fabbrica): **MQTT** (anche cifrato, mqtts), **rete tra schede** ESP-NOW con messaggi firmati e fino a 3 salti, **Bluetooth** per telefoni e applicazioni (acceso da pagina, shell o app).
 - **Watchdog**: riavvia servizi o scheda bloccati, con limite anti-giro.
 - **Localizzazione**: paese, canali e potenza della radio secondo le regole del paese, antenna, fuso, formati.
 - **Modo aereo** con scelta di come riaccendere la rete, **portale automatico** in modalità hotspot, **sleep** profondo e **registro** con filtro.

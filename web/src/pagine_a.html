@@ -1,0 +1,269 @@
+<section id="t_sum">
+ <div class="rfbar"><label for="rf">Aggiornamento</label><select id="rf" onchange="rfSet(this.value)"><option value="1">Ogni secondo</option><option value="3">Ogni 3 secondi</option><option value="5">Ogni 5 secondi</option><option value="10">Ogni 10 secondi</option><option value="30">Ogni 30 secondi</option><option value="0">Fermo (solo manuale)</option></select><button class="btn gray sm" onclick="poll()">Aggiorna ora</button></div>
+ <div class="hl" id="home"></div>
+</section>
+<section id="t_wifi" class="hide">
+ <div class="sub" id="rsub"></div>
+ <div id="r_wifi">
+  <div class="card"><h3>Reti Wi-Fi</h3>
+   <button class="btn" onclick="scan()">Cerca reti</button><div id="scanmsg" style="color:var(--mut);margin-top:6px"></div>
+   <table id="scanlist"></table></div>
+  <div class="card"><h3>Connessione client</h3>
+   <label for="w_ssid">Rete (SSID)</label><input id="w_ssid">
+   <label for="w_pass">Password Wi-Fi</label><input type="password" id="w_pass" placeholder="(lascia vuoto per non cambiare)">
+   <button class="btn" onclick="saveWifi()">Salva e collega</button>
+   <div id="wm" class="msg"></div></div>
+ </div>
+ <div id="r_ip" class="hide">
+  <div class="card"><h3>Indirizzo IP</h3>
+   <label for="w_dhcp">Indirizzo IP</label>
+   <select id="w_dhcp" onchange="dh()"><option value="1">Automatico (DHCP)</option><option value="0">Statico</option></select>
+   <div id="ipnote" style="color:var(--mut);margin-bottom:8px"></div>
+   <label for="w_ip">IP</label><input id="w_ip"><label for="w_mask">Subnet mask</label><input id="w_mask">
+   <label for="w_gw">Gateway</label><input id="w_gw"><label for="w_d1">DNS 1</label><input id="w_d1"><label for="w_d2">DNS 2</label><input id="w_d2">
+   <div id="ipmac" style="margin:6px 0 10px"></div>
+   <button class="btn" id="ipsave" onclick="saveWifi()">Salva e collega</button>
+   <div id="wm2" class="msg"></div></div>
+ </div>
+ <div id="r_nome" class="hide">
+  <div class="card"><h3>Nome del dispositivo</h3>
+   <label for="s_host">Nome host</label><input id="s_host" maxlength="32">
+   <label for="s_dom">Dominio DNS (facoltativo, es. casa.lan)</label><input id="s_dom" maxlength="60">
+   <div id="s_dn" style="color:var(--mut);margin:-6px 0 8px"></div>
+   <div id="s_fq" style="color:var(--mut);margin-bottom:8px"></div>
+   <button class="btn" onclick="saveSys()">Salva</button><div id="sm" class="msg"></div>
+   <p style="color:var(--mut)">Dopo il cambio la scheda si raggiunge anche come NOME.local (se il tuo computer supporta mDNS). La rete si riconnette per un momento.</p></div>
+ </div>
+ <div id="r_aereo" class="hide">
+  <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-plane"/></svg>Modo aereo</h3>
+   <div id="airst" class="airst"></div>
+   <p class="fhint">Spegne il Wi-Fi della scheda. Le Automazioni continuano a funzionare. Mentre e attivo la pagina NON si raggiunge.</p>
+   <label for="air_ex">Come si riattiva la rete</label>
+   <select id="air_ex" onchange="airUi()"><option value="0">Al prossimo avvio della scheda</option><option value="1">Dopo un tempo</option><option value="2">A un certo orario</option><option value="3">Fisso: solo a mano</option></select>
+   <div id="air_t" class="agrid hide"><div><label for="air_n">Tempo</label><input type="number" id="air_n" min="1" value="10"></div><div><label for="air_u">Unita</label><select id="air_u"><option value="1">secondi</option><option value="60" selected>minuti</option><option value="3600">ore</option></select></div></div>
+   <div id="air_h" class="hide"><label for="air_at">Orario</label><input type="time" id="air_at" value="07:00"></div>
+   <p class="fhint">Si spegne sempre anche a mano: comando <code>airplane off</code> dalla seriale (USB) oppure pressione breve del tasto BOOT.</p>
+   <button class="btn" onclick="airOn()"><svg class="i" aria-hidden="true"><use href="#i-plane"/></svg><span>Attiva modo aereo</span></button><div id="airm" class="msg"></div></div>
+ </div>
+</section>
+<section id="t_ap" class="hide">
+ <div class="card"><h3>Servizio Punto di accesso (AP)</h3>
+  <p class="fhint">L'hotspot e la Wi-Fi della scheda: serve per entrare quando la scheda non e collegata alla tua rete. Si accende da solo al primo avvio, dopo un ripristino con BOOT e se la tua Wi-Fi non e configurata.</p>
+  <div class="sc" id="sc_ap"></div>
+  <div id="apdep">
+   <div class="tog adm"><div>Portale automatico (il telefono apre da solo la pagina)</div><button class="sw1" id="sv_cap" onclick="svcTog('captive',this)" aria-label="Portale automatico"></button></div>
+   <p class="fhint" id="sv_apn"></p></div>
+  <div id="svm_ap" class="msg"></div></div>
+  <div class="card"><h3>Punto di accesso (AP)</h3>
+   <div id="apinfo"></div>
+   <p style="color:var(--mut)">Il punto di accesso serve quando la scheda non e collegata a nessuna rete: ti colleghi direttamente alla scheda con il Wi-Fi. Se il collegamento alla tua rete fallisce, la scheda torna da sola in questo modo.</p>
+   <button class="btn gray adm" onclick="apOnly()">Torna in modo AP</button>
+   <div id="wm3" class="msg"></div></div>
+  <div class="card adm"><h3>Nome e password dell'hotspot</h3>
+   <button class="btn" onclick="apShow()">Mostra password e QR</button><div id="apsec" style="margin-top:10px"></div>
+   <div class="agrid"><div><label for="ap_ss">Nome rete (SSID)</label><input id="ap_ss" maxlength="32"></div>
+    <div><label for="ap_pw">Password nuova (8-63 caratteri, vuoto = non cambiare)</label><input type="password" id="ap_pw" autocomplete="new-password"></div></div>
+   <button class="btn gray" onclick="apSave(0)">Salva</button><button class="btn gray" onclick="apSave(1)">Nuova password casuale</button><div id="apm" class="msg"></div>
+   <p class="fhint">Password persa? Cavo USB e tasto BOOT tenuto da 8 a 19 secondi (LED giallo): la scheda la scrive sulla seriale. Non mettere la password nel nome della rete: il nome lo vedono tutti.</p></div>
+</section>
+<section id="t_ntp" class="hide">
+ <div class="card"><h3>Servizio dell'ora (NTP)</h3>
+  <p class="fhint">Tiene l'ora della scheda uguale a quella di Internet. Serve la Wi-Fi di casa. Puoi spegnerlo e mettere l'ora a mano (Sistema &gt; Ora).</p>
+  <div class="sc" id="sc_ntp"></div>
+  <div id="ontpst" class="fhint"></div></div>
+ <div class="card adm"><h3>Impostazioni NTP</h3>
+  <label for="o_ev">Quanto spesso sincronizzare</label>
+  <select id="o_ev"><option value="15">Ogni 15 minuti</option><option value="60">Ogni ora</option><option value="360">Ogni 6 ore</option><option value="720">Ogni 12 ore</option><option value="1440">Ogni giorno</option><option value="10080">Ogni settimana</option><option value="0">Solo all'avvio</option></select>
+  <label for="o_srv">Server NTP</label><input id="o_srv">
+  <label for="o_srv2">Secondo server NTP (vuoto = nessuno)</label><input id="o_srv2">
+  <p class="fhint" id="ontpwho"></p>
+  <p class="fhint">Fuso orario, formati e unita: Sistema &gt; Localizzazione. <a href="#" onclick="show('loc');return false">Apri</a></p>
+  <label for="o_serve">Questa scheda come server NTP per altri dispositivi</label>
+  <select id="o_serve"><option value="0">No</option><option value="1">Si (UDP 123)</option></select>
+  <button class="btn" onclick="saveTime()">Salva</button><div id="om" class="msg"></div></div>
+</section>
+<section id="t_dhcp" class="hide">
+ <div class="card"><h3>DHCP (hotspot)</h3>
+  <p class="fhint">Da gli indirizzi ai telefoni e ai PC che si collegano all'hotspot della scheda. Con la Wi-Fi di casa il DHCP lo fa il tuo router, non la scheda.</p>
+  <div class="sc" id="sc_dhcp"></div>
+  <div class="agrid adm"><div><label for="sv_lease">Durata dell'indirizzo (minuti, da 10 a 1440)</label><input type="number" id="sv_lease" min="10" max="1440"></div></div>
+  <button class="btn adm" onclick="svcPort('lease','sv_lease','svm_dhcp')">Salva durata</button>
+  <div id="svm_dhcp" class="msg"></div>
+  <p class="fhint">Si puo spegnere solo quando la scheda e collegata alla tua Wi-Fi. Se lo spegni mentre l'hotspot e l'unico accesso, nessuno riesce piu a collegarsi.</p></div>
+</section>
+<section id="t_dns" class="hide">
+ <div class="card"><h3>DNS (portale automatico)</h3>
+  <p class="fhint">Nell'hotspot la scheda risponde ai nomi con il proprio indirizzo: cosi il telefono apre da solo la pagina. Serve HTTP acceso sulla porta 80.</p>
+  <div class="sc" id="sc_dns"></div>
+  <div id="svm_dns" class="msg"></div>
+  <p class="fhint">I DNS usati dalla scheda verso Internet si scelgono in Rete &gt; Wi-Fi &gt; Indirizzo IP.</p></div>
+</section>
+<section id="t_mdns" class="hide">
+ <div class="card"><h3>mDNS (NOME.local)</h3>
+  <p class="fhint">Permette di trovare la scheda con il suo nome (per esempio vesevos.local) senza sapere l'indirizzo. Se lo spegni, la scheda si raggiunge solo con l'indirizzo IP.</p>
+  <div class="sc" id="sc_mdns"></div>
+  <div id="svm_mdns" class="msg"></div></div>
+</section>
+<section id="t_ble" class="hide">
+ <div class="card adm" id="blecard"><h3>Bluetooth per telefono e applicazioni</h3>
+  <p class="fhint">Resta spento finche non lo accende la pagina, la shell o un'applicazione, e resta acceso finche non lo si spegne (l'applicazione puo anche dare un tempo). Serve circa 70 KB di memoria: se la scheda rifiuta, chiudi le altre pagine web e riprova. Il telefono si accoppia con il codice mostrato qui e scrive i comandi: wifi rete|password, country IT, name cucina, mesh 0 chiave, status, done.</p>
+  <div id="blest"></div>
+  <div class="sc" id="sc_ble"></div><div id="blem" class="msg"></div></div>
+</section>
+<section id="t_radio" class="hide">
+ <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-wifi"/></svg>Radio</h3>
+  <div class="fhint" style="font-weight:600">Impostazioni (le scegli tu)</div>
+  <div class="agrid adm">
+   <div><label for="lc_ant">Antenna</label><select id="lc_ant" onchange="lcAnt()"><option value="0">Interna (sul circuito)</option><option value="1">Esterna</option></select></div>
+   <div id="lc_gw" class="hide"><label for="lc_gain">Guadagno dell'antenna esterna (dBi)</label><input type="number" id="lc_gain" min="0" max="15" value="0"></div>
+   <div><label for="lc_tx">Potenza di trasmissione (dBm)</label><input type="range" id="lc_tx" min="2" max="20" oninput="lcTx()"><div id="lc_txv" class="fhint"></div></div>
+  </div>
+  <div class="fhint" style="font-weight:600;margin-top:12px">Informazioni (calcolate dalla scheda, non si modificano)</div>
+  <div id="lcradio"></div>
+  <div class="law">La scheda applica i limiti noti del paese scelto (canali e potenza massima) e abbassa la potenza se usi un'antenna esterna. Questo non garantisce la conformita del prodotto finito: dipende anche dall'hardware, dall'antenna, dal montaggio e dalle regole del luogo. Chi installa la scheda ne e responsabile.</div></div>
+ <div class="card adm"><button class="btn" onclick="lcSave('lcm3')">Salva</button><div id="lcm3" class="msg"></div></div>
+</section>
+<section id="t_http" class="hide">
+ <div class="card"><h3>HTTP</h3>
+  <p class="fhint">La pagina senza cifratura. Serve all'hotspot (portale automatico). Quando la scheda e collegata alla tua Wi-Fi puoi spegnerlo: consigliato, risparmia memoria.</p>
+  <div class="sc" id="sc_http"></div>
+  <div class="agrid adm"><div><label for="sv_hp">Porta HTTP (80 oppure 1024-65535)</label><input type="number" id="sv_hp" min="80" max="65535"></div></div>
+  <button class="btn adm" onclick="svcPort('httpPort','sv_hp','svm_http')">Salva porta</button>
+  <div id="sv_hw" class="law hide"></div><div id="sv_hpend" class="law hide"></div><div id="svm_http" class="msg"></div>
+  <p class="fhint">Cambiare porta non e sicurezza vera: la sicurezza resta password, filtro IP e cifratura. Il portale automatico dell'hotspot funziona solo sulla porta 80.</p></div>
+</section>
+<section id="t_shell" class="hide">
+ <div class="card"><h3>Terminale</h3>
+  <p style="color:var(--mut)">Il terminale e un pannello in basso, sempre disponibile da ogni scheda. Trascina la barra del pannello per cambiare l'altezza.</p>
+  <button class="btn" onclick="cpToggle(true)">Apri il terminale</button><button class="btn gray" onclick="cpSize(2)">A tutto schermo</button>
+  <p style="color:var(--mut)">Scorciatoia da tastiera: Ctrl + `</p></div>
+</section>
+<section id="t_auto" class="hide">
+ <div class="card"><h3>Automazioni</h3>
+  <p style="color:var(--mut)">Regole "Quando... Se... Allora..." che la scheda esegue da sola, anche senza rete: sveglie, timer, allarmi di temperatura.</p>
+  <div id="atime" class="msg"></div>
+  <div id="rlist"></div>
+  <button class="btn" onclick="rNew()">Nuova regola</button>
+  <p class="subt" style="margin-top:12px">Modelli pronti:</p>
+  <button class="btn gray" onclick="rTpl(0)">Sveglia</button><button class="btn gray" onclick="rTpl(1)">Dopo l'avvio</button><button class="btn gray" onclick="rTpl(2)">Allarme temperatura</button>
+  <div id="rm" class="msg"></div></div>
+ <div class="card rcard hide" id="redit"></div>
+</section>
+<section id="t_boot" class="hide">
+ <div class="card"><h3>Ordine di avvio</h3>
+  <p style="color:var(--mut)">Scegli in che ordine partono i servizi: trascina per la maniglia oppure usa le frecce. Quello che dipende da un altro servizio resta attaccato a lui e parte dopo. Vale dal prossimo riavvio.</p>
+  <div id="bwarn" class="msg"></div>
+  <h4 style="margin:10px 0 6px;color:var(--mut)">Sempre per primi</h4>
+  <div id="bfix"></div>
+  <h4 style="margin:14px 0 6px;color:var(--mut)">Servizi che puoi spostare</h4>
+  <div id="bl"></div>
+  <button class="btn" onclick="bSave()">Salva ordine</button><button class="btn gray" onclick="bReset()">Ripristina predefinito</button><button class="btn gray" onclick="bReboot()">Riavvia ora</button>
+  <div id="bm" class="msg"></div></div>
+</section>
+<section id="t_task" class="hide">
+ <div class="card"><h3>Task in esecuzione</h3>
+  <div id="tkinfo" style="color:var(--mut);margin-bottom:8px"></div>
+  <div style="overflow-x:auto"><table id="tktab" class="sortable"></table></div>
+  <div id="tkm" class="msg"></div></div>
+</section>
+<section id="t_ora" class="hide">
+ <div class="card"><h3>Data e ora</h3><div id="oranow" style="font-size:22px;margin-bottom:8px"></div>
+  <div id="olast" class="fhint"></div>
+  <button class="btn" onclick="syncNow()">Aggiorna ora dalla rete</button><button class="btn gray" onclick="setFromBrowser()">Usa l'ora di questo dispositivo</button><div id="om2" class="msg"></div></div>
+ <div class="card adm"><h3>Fuso orario</h3>
+  <select id="o_tz" aria-label="Fuso orario"></select>
+  <button class="btn" onclick="oraTzSave()">Salva</button><div id="om4" class="msg"></div></div>
+ <div class="card adm"><h3>Imposta a mano</h3>
+  <div class="agrid"><div><label for="o_md">Data</label><input type="date" id="o_md"></div><div><label for="o_mt">Ora</label><input type="time" id="o_mt" step="1"></div></div>
+  <button class="btn" onclick="setManual()">Imposta</button><div id="om3" class="msg"></div>
+  <p class="fhint" id="omnote">L'ora usa il fuso orario della scheda. Se la sincronizzazione NTP e attiva, alla prossima sincronizzazione l'ora torna quella della rete.</p></div>
+</section>
+<section id="t_file" class="hide">
+ <div class="card"><h3>File - memoria interna</h3>
+  <nav id="fpath" class="crumbs" data-tt aria-label="Percorso"></nav>
+  <div class="ftb">
+   <button class="btn gray" id="fupb" onclick="fUp()"><svg class="i" aria-hidden="true"><use href="#i-up"/></svg><span>Su</span></button>
+   <button class="btn gray" onclick="fMk()"><svg class="i" aria-hidden="true"><use href="#i-folder"/></svg><span>Nuova cartella</span></button>
+   <button class="btn" onclick="fNew()"><svg class="i" aria-hidden="true"><use href="#i-ftxt"/></svg><span>Nuovo file</span></button>
+   <label class="btn gray" for="fup" tabindex="0" onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();$('fup').click()}"><svg class="i" aria-hidden="true"><use href="#i-upl"/></svg><span>Carica file</span></label><input type="file" id="fup" class="sr" onchange="fUpload()">
+  </div>
+  <p class="fhint">Tocca un nome per aprirlo. Per le altre azioni usa il pulsante con i tre puntini, il tasto destro del mouse o tieni premuto sul telefono.</p>
+  <div id="fpie" class="fpie"></div><table id="ftab" class="ftab"></table><div id="fm" class="msg" role="status"></div><div id="fspace" class="fspace"></div></div>
+</section>
+<section id="t_led" class="hide">
+ <div class="card"><h3>LED</h3>
+  <label for="l_mode">Modo</label><select id="l_mode"><option value="0">Colore = stato del sistema</option><option value="1">Battito (heartbeat) colore scelto</option><option value="2">Colore fisso</option><option value="3">Spento</option></select>
+  <label for="l_col">Colore</label><input type="color" id="l_col">
+  <label for="l_br">Luminosita (0-255)</label><input type="number" id="l_br" min="0" max="255">
+  <button class="btn" onclick="saveLed()">Salva</button><div id="lm2" class="msg"></div>
+  <p style="color:var(--mut)">Colori di stato: arancio = avvio, blu = AP, giallo = connessione, verde = client collegato, rosso lampeggiante = errore.</p></div>
+</section>
+<section id="t_dmgr" class="hide">
+ <div class="card"><h3>Device Manager</h3>
+  <p class="fhint">Tutte le periferiche della scheda: servizi (MQTT, ESP-NOW, Bluetooth, statistiche) e hardware (pin, LED, tasto, USB, sensori, memoria, processore, radio). Rispondono tutte allo stesso modo all'API /api/dev e al comando shell dev. I servizi si accendono e si spengono da qui o con dev on|off nome: di fabbrica sono spenti e, spenti, non occupano memoria.</p>
+  <div id="dm_list"></div><div id="dm_m" class="msg"></div>
+ </div>
+</section>
+<section id="t_btn" class="hide">
+ <div class="card"><h3>Tasto BOOT</h3>
+  <p class="fhint">Il pulsante BOOT della scheda (GPIO0): le pressioni lunghe servono al recupero.</p>
+  <div id="dv_btn"></div>
+ </div>
+</section>
+<section id="t_usb" class="hide">
+ <div class="card"><h3>USB</h3>
+  <p class="fhint">Collegamento USB nativo del chip (seriale e JTAG).</p>
+  <div id="dv_usb"></div>
+ </div>
+</section>
+<section id="t_temp" class="hide">
+ <div class="card"><h3>Temperatura del chip</h3>
+  <p class="fhint">Sensore interno del chip. Sopra 80 C la velocita scende da sola.</p>
+  <div id="dv_temp"></div>
+ </div>
+</section>
+<section id="t_mem" class="hide">
+ <div class="card"><h3>Memoria</h3>
+  <p class="fhint">RAM interna, PSRAM, flash e file system.</p>
+  <div id="dv_mem"></div>
+ </div>
+</section>
+<section id="t_cpu" class="hide">
+ <div class="card"><h3>Processore</h3>
+  <p class="fhint">Core, velocita e carico.</p>
+  <div id="dv_cpu"></div>
+ </div>
+</section>
+<section id="t_rad" class="hide">
+ <div class="card"><h3>Radio 2,4 GHz</h3>
+  <p class="fhint">Informazioni dell'hardware radio. Paese, canali e potenza si cambiano in Rete > Radio.</p>
+  <div id="dv_rad"></div>
+ </div>
+</section>
+<section id="t_pin" class="hide">
+ <div class="card"><h3>Pin e prove</h3>
+  <p style="color:var(--mut);margin-top:0">Tocca un pin verde per provarlo. Blu = pin in uso (la linea porta a chi lo usa), grigio = vietato.</p>
+  <div id="pinchip" class="fhint"></div>
+  <div class="sub" id="pinview"></div>
+  <svg id="pinsvg" viewBox="0 0 400 480" style="width:100%;max-width:520px" role="img" aria-label="Schema della scheda con i pin"></svg>
+  <div class="ftb"><button class="btn gray" onclick="pinSvgDl()"><svg class="i" aria-hidden="true"><use href="#i-dl"/></svg><span>Scarica SVG</span></button></div>
+  <p class="fhint">Disegno della scheda con la presa USB in alto. Fronte: i pin sul bordo. Retro: le piazzole da saldare e i pad della batteria. Confronta i numeri con la scritta stampata sulla tua scheda: alcune serie hanno un ordine diverso.</p>
+  <div id="pinpanel" style="margin-top:8px"></div></div>
+ <div class="card"><h3>Pin usati dal sistema</h3><table id="pintab"></table></div>
+ <div class="card"><h3>Inventario dei pin</h3>
+  <p class="fhint">Scrivi a cosa colleghi ogni pin (per esempio "sensore porta"): il nome resta salvato nella configurazione e il sistema ti avvisa se una funzione vuole un pin gia segnato.</p>
+  <div style="overflow-x:auto"><table id="pininv" class="ftab"></table></div><div id="pinvm" class="msg"></div></div>
+</section>
+<section id="t_acc" class="hide">
+ <div class="card" id="acc"><h3>Accessibilita</h3>
+  <p class="fhint">Le scelte valgono per questo browser e restano salvate.</p>
+  <div class="agrid">
+   <div><label for="a_fs">Dimensione del testo</label><select id="a_fs" onchange="a11ySet('fs',+this.value)"><option value="0">Normale</option><option value="1">Grande</option><option value="2">Molto grande</option></select></div>
+   <div><label for="a_hc">Contrasto alto</label><select id="a_hc" onchange="a11ySet('hc',this.value)"><option value="auto">Automatico (come il dispositivo)</option><option value="on">Attivo</option><option value="off">Spento</option></select></div>
+   <div><label for="a_cb">Colori adatti ai daltonici</label><select id="a_cb" onchange="a11ySet('cb',+this.value)"><option value="0">Spento</option><option value="1">Attivo (blu, arancione, giallo)</option></select></div>
+   <div><label for="a_rm">Riduci le animazioni</label><select id="a_rm" onchange="a11ySet('rm',this.value)"><option value="auto">Automatico (come il dispositivo)</option><option value="on">Attivo</option><option value="off">Spento</option></select></div>
+  </div>
+  <div class="aprev" aria-hidden="true"><span class="apk">OK</span><span class="apw">Attenzione</span><span class="apx">Errore</span></div>
+  <button class="btn gray" onclick="a11yReset()">Ripristina</button>
+  <p class="fhint">Tastiera: Tab per spostarti, Invio per premere, Esc per chiudere finestre e menu, Ctrl + ` per il terminale. Nell'editor dei file: Ctrl+S salva, Ctrl+M cambia il comportamento del tasto Tab.</p></div>
+</section>

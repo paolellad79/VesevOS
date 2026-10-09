@@ -1328,6 +1328,20 @@
    "scope": "fw"
   },
   {
+   "it": "  events [n]      ultimi eventi del sistema (Event Bus): cambi di stato dei servizi",
+   "en": "  events [n]      latest system events (Event Bus): service state changes",
+   "es": "  events [n]      ultimos eventos del sistema (Event Bus): cambios de estado de los servicios",
+   "de": "  events [n]      letzte Systemereignisse (Event Bus): Zustandswechsel der Dienste",
+   "scope": "fw"
+  },
+  {
+   "it": "Nessun evento",
+   "en": "No events",
+   "es": "Ningun evento",
+   "de": "Keine Ereignisse",
+   "scope": "fw"
+  },
+  {
    "it": "Memoria segnata: accendi o spegni un servizio e scrivi: ram diff",
    "en": "Memory marked: turn a service on or off and type: ram diff",
    "es": "Memoria marcada: enciende o apaga un servicio y escribe: ram diff",
@@ -6032,10 +6046,10 @@
    "scope": "fw"
   },
   {
-   "it": "  ble [on|off]    Bluetooth per configurare dal telefono (10 minuti)",
-   "en": "  ble [on|off]    Bluetooth to configure from a phone (10 minutes)",
-   "es": "  ble [on|off]    Bluetooth para configurar desde el movil (10 minutos)",
-   "de": "  ble [on|off]    Bluetooth zur Einrichtung per Handy (10 Minuten)",
+   "it": "  ble [on [min]|off]  Bluetooth per telefoni e app (senza limite di tempo, o per min minuti)",
+   "en": "  ble [on [min]|off]  Bluetooth for phones and apps (no time limit, or for min minutes)",
+   "es": "  ble [on [min]|off]  Bluetooth para moviles y apps (sin limite de tiempo, o durante min minutos)",
+   "de": "  ble [on [min]|off]  Bluetooth fuer Handys und Apps (ohne Zeitlimit, oder fuer min Minuten)",
    "scope": "fw"
   },
   {
@@ -6242,17 +6256,17 @@
    "scope": "fw"
   },
   {
-   "it": "Bluetooth acceso: nome VesevOS-setup, codice %s, ancora %lu s",
-   "en": "Bluetooth on: name VesevOS-setup, code %s, %lu s left",
-   "es": "Bluetooth encendido: nombre VesevOS-setup, codigo %s, quedan %lu s",
-   "de": "Bluetooth an: Name VesevOS-setup, Code %s, noch %lu s",
+   "it": "Bluetooth acceso: nome %s, codice %s, ancora %lu s",
+   "en": "Bluetooth on: name %s, code %s, %lu s left",
+   "es": "Bluetooth encendido: nombre %s, codigo %s, quedan %lu s",
+   "de": "Bluetooth an: Name %s, Code %s, noch %lu s",
    "scope": "fw"
   },
   {
-   "it": "Bluetooth spento (ble on per accenderlo 10 minuti)",
-   "en": "Bluetooth off (ble on turns it on for 10 minutes)",
-   "es": "Bluetooth apagado (ble on lo enciende 10 minutos)",
-   "de": "Bluetooth aus (ble on schaltet es 10 Minuten ein)",
+   "it": "Bluetooth spento (ble on per accenderlo)",
+   "en": "Bluetooth off (ble on turns it on)",
+   "es": "Bluetooth apagado (ble on lo enciende)",
+   "de": "Bluetooth aus (ble on schaltet es ein)",
    "scope": "fw"
   },
   {
@@ -7187,10 +7201,10 @@
    "scope": "web"
   },
   {
-   "it": "Acceso per altri {0}. Nome: VesevOS-setup. Codice di accoppiamento: {1}",
-   "en": "On for another {0}. Name: VesevOS-setup. Pairing code: {1}",
-   "es": "Encendido otros {0}. Nombre: VesevOS-setup. Código de emparejamiento: {1}",
-   "de": "Noch {0} an. Name: VesevOS-setup. Kopplungscode: {1}",
+   "it": "Acceso per altri {0}. Nome: {2}. Codice di accoppiamento: {1}",
+   "en": "On for another {0}. Name: {2}. Pairing code: {1}",
+   "es": "Encendido otros {0}. Nombre: {2}. Código de emparejamiento: {1}",
+   "de": "Noch {0} an. Name: {2}. Kopplungscode: {1}",
    "scope": "web"
   },
   {
@@ -7250,10 +7264,10 @@
    "scope": "web"
   },
   {
-   "it": "Bluetooth per configurare dal telefono",
-   "en": "Bluetooth to configure from a phone",
-   "es": "Bluetooth para configurar desde el móvil",
-   "de": "Bluetooth zur Einrichtung per Handy",
+   "it": "Bluetooth per telefono e applicazioni",
+   "en": "Bluetooth for phone and apps",
+   "es": "Bluetooth para el móvil y las aplicaciones",
+   "de": "Bluetooth für Handy und Apps",
    "scope": "web"
   },
   {
@@ -9903,10 +9917,10 @@
    "scope": "web"
   },
   {
-   "it": "Si accende solo a mano e per 10 minuti, poi si spegne da solo. Serve circa 70 KB di memoria: se la scheda rifiuta, chiudi le altre pagine web e riprova. Il telefono si accoppia con il codice mostrato qui e scrive i comandi: wifi rete|password, country IT, name cucina, mesh 0 chiave, status, done.",
-   "en": "It turns on only by hand and for 10 minutes, then turns itself off. It needs about 70 KB of memory: if the board refuses, close the other web pages and try again. The phone pairs with the code shown here and writes the commands: wifi network|password, country IT, name kitchen, mesh 0 key, status, done.",
-   "es": "Se enciende solo a mano y durante 10 minutos, luego se apaga solo. Necesita unos 70 KB de memoria: si la placa lo rechaza, cierra las otras paginas web y vuelve a intentarlo. El telefono se empareja con el codigo mostrado aqui y escribe los comandos: wifi red|contrasena, country IT, name cocina, mesh 0 clave, status, done.",
-   "de": "Schaltet sich nur von Hand fuer 10 Minuten ein und dann von selbst wieder aus. Braucht etwa 70 KB Speicher: lehnt das Board ab, schliesse die anderen Webseiten und versuche es erneut. Das Handy koppelt mit dem hier gezeigten Code und schreibt die Befehle: wifi Netz|Passwort, country IT, name kueche, mesh 0 Schluessel, status, done.",
+   "it": "Resta spento finche non lo accende la pagina, la shell o un'applicazione, e resta acceso finche non lo si spegne (l'applicazione puo anche dare un tempo). Serve circa 70 KB di memoria: se la scheda rifiuta, chiudi le altre pagine web e riprova. Il telefono si accoppia con il codice mostrato qui e scrive i comandi: wifi rete|password, country IT, name cucina, mesh 0 chiave, status, done.",
+   "en": "It stays off until the page, the shell or an app turns it on, and stays on until it is turned off (the app can also give a time). It needs about 70 KB of memory: if the board refuses, close the other web pages and try again. The phone pairs with the code shown here and writes the commands: wifi network|password, country IT, name kitchen, mesh 0 key, status, done.",
+   "es": "Se queda apagado hasta que lo enciende la pagina, la shell o una aplicacion, y sigue encendido hasta que se apaga (la aplicacion tambien puede dar un tiempo). Necesita unos 70 KB de memoria: si la placa lo rechaza, cierra las otras paginas web y vuelve a intentarlo. El telefono se empareja con el codigo mostrado aqui y escribe los comandos: wifi red|contrasena, country IT, name cocina, mesh 0 clave, status, done.",
+   "de": "Bleibt aus, bis Seite, Shell oder eine App es einschaltet, und bleibt an, bis es ausgeschaltet wird (die App kann auch eine Zeit vorgeben). Braucht etwa 70 KB Speicher: lehnt das Board ab, schliesse die anderen Webseiten und versuche es erneut. Das Handy koppelt mit dem hier gezeigten Code und schreibt die Befehle: wifi Netz|Passwort, country IT, name kueche, mesh 0 Schluessel, status, done.",
    "scope": "web"
   },
   {
@@ -12848,6 +12862,41 @@
    "es": "Copia con secretos descargada por %s",
    "de": "Sicherung mit Geheimnissen heruntergeladen von %s",
    "scope": "fw"
+  },
+  {
+   "it": "Elenco parziale: mostrate le prime {0} voci",
+   "en": "Partial list: showing the first {0} items",
+   "es": "Lista parcial: se muestran las primeras {0} entradas",
+   "de": "Teilliste: die ersten {0} Einträge werden angezeigt",
+   "scope": "web"
+  },
+  {
+   "it": "Temp.",
+   "en": "Temp.",
+   "es": "Temp.",
+   "de": "Temp.",
+   "scope": "web"
+  },
+  {
+   "it": "Bluetooth acceso: nome %s, codice %s, senza limite di tempo (ble off per spegnerlo)",
+   "en": "Bluetooth on: name %s, code %s, no time limit (ble off turns it off)",
+   "es": "Bluetooth encendido: nombre %s, codigo %s, sin limite de tiempo (ble off lo apaga)",
+   "de": "Bluetooth an: Name %s, Code %s, ohne Zeitlimit (ble off schaltet aus)",
+   "scope": "fw"
+  },
+  {
+   "it": "Acceso, senza limite di tempo. Nome: {1}. Codice di accoppiamento: {0}",
+   "en": "On, no time limit. Name: {1}. Pairing code: {0}",
+   "es": "Encendido, sin limite de tiempo. Nombre: {1}. Código de emparejamiento: {0}",
+   "de": "An, ohne Zeitlimit. Name: {1}. Kopplungscode: {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Acceso",
+   "en": "On",
+   "es": "Encendido",
+   "de": "An",
+   "scope": "web"
   }
  ]
 }

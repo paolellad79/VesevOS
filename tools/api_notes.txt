@@ -1,0 +1,128 @@
+# Descrizione di ogni rotta API: "METODO /percorso | italiano | english". Usato da tools/mkapidoc.py. Una rotta senza riga = errore di tools/checkapi.py.
+GET / | La pagina web (compressa) | The web page (gzip)
+POST /api/airplane | Modo aereo: spegne o riaccende la radio (on, exit) | Airplane mode: radio off or on (on, exit)
+GET /api/ap | Hotspot: nome, stato, client | Hotspot: name, state, clients
+POST /api/ap | Cambia nome/password/QR dell'hotspot (new = nuova password casuale) | Change hotspot name/password/QR (new = new random password)
+GET /api/audit | Allarmi di configurazione e storico | Configuration alarms and history
+POST /api/audit/ack | Segna come letto un allarme | Mark an alarm as read
+GET /api/auth | Stato dell'accesso: utente, ruolo, pacchetti presenti, impronta del certificato | Login state: user, role, packages present, certificate fingerprint
+GET /api/ban | Elenco IP bloccati e regole di blocco | Blocked IPs and ban rules
+POST /api/ban/set | Imposta tentativi e secondi di blocco | Set failed attempts and ban seconds
+POST /api/ban/unban | Sblocca un IP | Unblock an IP
+GET /api/ble | Stato del Bluetooth | Bluetooth state
+POST /api/ble | Comando Bluetooth (a = start, restart, stop; min = limite di tempo facoltativo in minuti, 0 o assente = nessun limite) | Bluetooth command (a = start, restart, stop; min = optional time limit in minutes, 0 or missing = none)
+GET /api/boot | Ordine di avvio dei servizi | Service start order
+POST /api/boot | Salva l'ordine di avvio | Save the start order
+POST /api/boot/reset | Ordine di avvio predefinito | Default start order
+GET /api/boots | Diario dei riavvii | Reboot diary
+POST /api/boots/clear | Cancella il diario dei riavvii | Clear the reboot diary
+GET /api/common | Dati comuni (paesi, regole radio, librerie, apiVersion), in cache 24 ore | Common data (countries, radio rules, libraries, apiVersion), cached 24 h
+GET /api/config/download | Scarica la configurazione preparata | Download the prepared configuration
+POST /api/config/export | Prepara la configurazione da scaricare (acc = accetto avviso, pw = frase per i segreti) | Prepare the configuration to download (acc, pw)
+POST /api/config/restore | Ripristina la configurazione da file (t = testo, pw = frase) | Restore configuration from a file (t = text, pw = passphrase)
+POST /api/cpu | Modo CPU (automatico o fisso) | CPU mode (auto or fixed)
+GET /api/dev | Elenco periferiche del Device Manager, o una sola (id) | Device Manager list, or one device (id)
+GET /api/events | Ultimi eventi del sistema (Event Bus; argomenti: svc.state, net.state, mqtt.link, ble.link, mesh.node, time.sync, sec.ban, sec.unban, audit.new, audit.clear): since = ultimo numero visto, n = quanti (1-40, 20 di fabbrica); lost = persi | Latest system events (Event Bus; topics: svc.state, net.state, mqtt.link, ble.link, mesh.node, time.sync, sec.ban, sec.unban, audit.new, audit.clear): since = last number seen, n = how many (1-40, default 20); lost = missed
+POST /api/dev/act | Azione di una periferica (a, arg) | Device action (a, arg)
+POST /api/dev/set | Accende o spegne una periferica | Turn a device on or off
+POST /api/factory | Ripristino di fabbrica e riavvio (la parola AZZERA e controllata solo dalla pagina) | Factory reset and reboot (the word AZZERA is checked by the page only)
+POST /api/firstpass | Crea la password del primo amministratore | Create the first administrator password
+POST /api/fs/copy | Copia file | Copy a file
+POST /api/fs/del | Cancella file o cartella | Delete a file or folder
+GET /api/fs/dirs | Elenco delle sole cartelle | Folders only
+GET /api/fs/get | Scarica un file | Download a file
+GET /api/fs/list | Elenco di una cartella (max 200 voci, more:true se tagliato) | Folder list (max 200 items, more:true if cut)
+POST /api/fs/mkdir | Crea cartella | Create a folder
+POST /api/fs/ren | Rinomina o sposta | Rename or move
+POST /api/fs/save | Salva un file di testo (new = file nuovo) | Save a text file (new = new file)
+GET /api/fs/text | Legge un file di testo | Read a text file
+GET /api/fw | Regole del firewall (filtro IP) | Firewall (IP filter) rules
+POST /api/fw | Salva il filtro IP (mode, regole, ntp) | Save the IP filter
+POST /api/fw/confirm | Conferma il filtro IP dopo la prova | Confirm the IP filter after the test
+GET /api/home | Dati dei widget della Home (un solo pezzo) | Home widget data (single request)
+POST /api/identify | Fa lampeggiare il LED per riconoscere la scheda | Blink the LED to identify the board
+POST /api/lang | Lingua della scheda | Board language
+GET /api/langfile | File di lingua da scaricare | Language file download
+GET /api/langs | Lingue disponibili | Available languages
+POST /api/led | Colore, modo, luminosita del LED | LED colour, mode, brightness
+GET /api/license | Testo di una licenza (id) o elenco | Licence text (id) or list
+GET /api/log | Registro (testo) | Log (text)
+POST /api/log/clear | Svuota il registro | Clear the log
+GET /api/log/level | Livello del registro | Log level
+POST /api/log/level | Cambia livello del registro (lv) | Change log level (lv)
+POST /api/login | Accesso con nome e password (prova HMAC: nonce, hp, mac) | Login with name and password (HMAC proof)
+POST /api/login/mfa | Secondo passaggio con codice MFA | Second step with MFA code
+POST /api/login/start | Inizio accesso: chiede nonce e prova di lavoro | Login start: nonce and proof-of-work
+POST /api/logout | Esce e chiude la sessione | Log out
+GET /api/mesh | Stato della rete tra schede (ESP-NOW) | Board-to-board network (ESP-NOW) state
+POST /api/mesh | Impostazioni della rete tra schede | Mesh settings
+POST /api/mesh/key | Genera una nuova chiave | Generate a new key
+POST /api/mesh/run | Accende, spegne, riavvia (a) | Start, stop, restart (a)
+POST /api/mesh/send | Invia testo o comando a una scheda | Send text or command to a board
+GET /api/mfa | Stato MFA dell'utente | MFA state of the user
+POST /api/mfa/begin | Inizia l'attivazione MFA | Start MFA setup
+POST /api/mfa/confirm | Conferma con un codice | Confirm with a code
+POST /api/mfa/off | Spegne MFA | Turn MFA off
+POST /api/mfa/recovery | Nuovi codici di recupero | New recovery codes
+POST /api/mfa/set | Impostazioni MFA (admin) | MFA settings (admin)
+GET /api/mqtt | Stato MQTT | MQTT state
+POST /api/mqtt | Impostazioni MQTT | MQTT settings
+POST /api/mqtt/ca | Carica il certificato CA del broker | Upload the broker CA certificate
+POST /api/mqtt/run | Accende, spegne, riavvia (a) | Start, stop, restart (a)
+POST /api/passwd | Cambia la propria password (o = vecchia, n = nuova) | Change own password
+GET /api/pinmap | Mappa dei pin | Pin map
+GET /api/pinnotes | Note dei pin | Pin notes
+POST /api/pinnotes | Salva le note di un pin | Save a pin note
+GET /api/pins | Stato dei pin | Pin state
+GET /api/pins/info | Informazioni sui pin | Pin info
+GET /api/pintest | Stato della prova pin | Pin test state
+POST /api/pintest | Prova un pin (action, gpio, pull) | Test a pin
+GET /api/power | Risparmio energia: modo e tempi | Power saving: mode and times
+POST /api/power | Cambia modo e tempi | Change mode and times
+POST /api/reboot | Riavvia la scheda | Reboot the board
+GET /api/region | Paese, fuso, lingua, radio | Country, time zone, language, radio
+POST /api/region | Cambia paese, fuso, formati, antenna, potenza | Change country, zone, formats, antenna, power
+GET /api/rules | Testo delle automazioni | Automation text
+POST /api/rules | Salva le automazioni | Save automations
+POST /api/rules/run | Esegue una regola (i) | Run a rule (i)
+GET /api/selftest | Stato dell'autotest | Selftest state
+POST /api/selftest | Avvia autotest, cancella (active, clear, names) | Start selftest, clear
+GET /api/selftest/report | Rapporto dell'autotest | Selftest report
+GET /api/serial | Impostazioni della seriale | Serial settings
+POST /api/serial | Cambia una impostazione (k, v) | Change a setting (k, v)
+POST /api/serialauth | Password sulla seriale acceso/spento (on) | Serial password on/off
+GET /api/settings | Impostazioni generali (per la pagina) | General settings (for the page)
+POST /api/setup/done | Chiude la guida (ntp = tieni NTP) | Finish the guide (ntp)
+POST /api/shell | Esegue un comando della shell (c) | Run a shell command (c)
+POST /api/sleep | Mette la scheda in sonno per min minuti | Put the board to sleep for min minutes
+GET /api/stats | Statistiche d'uso (JSON) | Usage statistics (JSON)
+POST /api/stats | Accende, spegne, azzera (on, reset) | Turn on/off, reset
+GET /api/stats.csv | Statistiche in CSV | Statistics as CSV
+GET /api/status | Stato completo (versione, apiVersion, RAM, rete, CPU) | Full status (version, apiVersion, RAM, network, CPU)
+GET /api/svc | Servizi di rete: hotspot, HTTP, HTTPS, porte, DHCP, mDNS | Network services
+POST /api/svc | Cambia i servizi di rete | Change network services
+POST /api/system | Nome della scheda (hostname) e dominio | Board name (hostname) and domain
+POST /api/taskkill | Ferma un task (name) | Stop a task (name)
+GET /api/tasklist | Task in JSON | Tasks as JSON
+POST /api/taskrestart | Riavvia un task (name) | Restart a task (name)
+GET /api/tasks | Task in testo | Tasks as text
+GET /api/time | Ora e impostazioni NTP | Time and NTP settings
+POST /api/time | Impostazioni NTP | NTP settings
+POST /api/time/set | Imposta l'ora a mano (epoch o local) | Set the time by hand
+POST /api/time/sync | Sincronizza ora con NTP | Sync time with NTP
+GET /api/tls | Stato HTTPS e certificato | HTTPS and certificate state
+POST /api/tls | HTTPS: acceso, certificato, chiave, rigenera | HTTPS: on, certificate, key, regenerate
+GET /api/tls/cert | Scarica il certificato | Download the certificate
+GET /api/users | Utenti | Users
+POST /api/users/add | Aggiunge un utente | Add a user
+POST /api/users/del | Elimina un utente (i) | Delete a user (i)
+POST /api/users/pass | Cambia la password di un utente | Change a user's password
+POST /api/users/set | Cambia ruolo o attivo | Change role or active
+GET /api/wd | Watchdog: regole e stato | Watchdog rules and state
+POST /api/wd | Salva le regole del watchdog | Save watchdog rules
+POST /api/wifi/ap | Passa a solo hotspot (spegne il Wi-Fi di casa) | Hotspot only (home Wi-Fi off)
+POST /api/wifi/save | Salva il Wi-Fi di casa (ssid, pass, IP) | Save the home Wi-Fi
+GET /api/wifi/scan | Risultato della ricerca reti (max 40, more:true se tagliato) | Scan result (max 40, more:true if cut)
+POST /api/wifi/scan | Avvia la ricerca reti | Start a scan
+GET /api/wifi/test | Esito dell'ultima prova di connessione | Last connection test result
+POST /api/wifi/test | Prova la connessione a una rete senza salvare | Test a connection without saving

@@ -1,6 +1,6 @@
 # VesevOS - Release Developer (guida per chi sviluppa e rilascia)
 
-Ultimo aggiornamento: 8 ottobre 2026, versione 1.7.11. Si pubblica anche su GitHub (docs/). La procedura passo-passo sta nella checklist di rilascio (claude/VesevOS-checklist-rilascio.md nel Progetto); qui c'e il quadro per chi lavora sul codice.
+Ultimo aggiornamento: 8 ottobre 2026, versione 1.7.39. Si pubblica anche su GitHub (docs/). La procedura passo-passo sta nella checklist di rilascio (claude/VesevOS-checklist-rilascio.md nel Progetto); qui c'e il quadro per chi lavora sul codice.
 
 ## 1. Ambiente
 - Scheda: ESP32-S3 SuperMini (4 MB flash, 2 MB PSRAM, USB nativa, LED WS2812 su GPIO48, solo antenna interna).
@@ -9,7 +9,7 @@ Ultimo aggiornamento: 8 ottobre 2026, versione 1.7.11. Si pubblica anche su GitH
 - Licenza: GPL-3.0-or-later oppure licenza commerciale (COMMERCIAL.md). Il core Arduino (LGPL) non si distribuisce con il repo.
 
 ## 2. Struttura
-- `VesevOS/` firmware (vos_*.cpp/.h + VesevOS.ino). `vos_page.h` e `vos_license_data.h` sono GENERATI.
+- `VesevOS/` firmware: `VesevOS.ino` + `src/` con una cartella per strato: `core/` nucleo, `security/` accessi e cifratura, `net/` rete, `devices/` Device Manager e pin/LED, `drivers/` hardware e librerie radio (`vos_drv_*`), `packages/` servizi opzionali, `interfaces/` web e shell. Gli include sono relativi al file. `vos_page.h`, `vos_common_data.h`, `vos_lang_en.h` e `vos_license_data.h` sono GENERATI (in `src/interfaces/` e `src/core/`).
 - `web/index.html` pagina; `lang/` lingue generate.
 - `tools/`: `lang_src.json` (traduzioni it/en/es/de), `mklang.py`, `mkpage.py`, `mklicense.py`, `mkcommon.py`.
 - `tools/stub/`: finti header per compilare sul computer. `tools/webtest/`: finto server + Playwright. `tools/hosttest/`: prove sul computer (`run.sh`).
@@ -21,16 +21,17 @@ Ultimo aggiornamento: 8 ottobre 2026, versione 1.7.11. Si pubblica anche su GitH
 - Dati toccati da piu task: mutex o `portMUX`. Operazioni lunghe mai nel loopTask; watchdog alimentato.
 - Memoria: attenzione alla frammentazione; prima di aprire TLS o BLE controllare il blocco libero piu grande (`ESP.getMaxAllocHeap()`).
 - Limite 500 righe per file e nessuna duplicazione (regole del rifacimento, per gradi).
+- STRATI (schema nel Progetto: `VesevOS-schema-strati.md`): driver (`vos_drv_*`, unici a toccare l'hardware o la libreria radio) -> Device Manager (`vos_dev`) -> nucleo -> package/servizi -> interfacce (web, shell) -> app. Ogni strato usa solo quello sotto. Un servizio chiede al driver e non include mai la libreria dell'hardware. `python3 tools/checklayers.py` conta gli accessi diretti fuori dai driver: il debito di partenza e in `tools/layers_baseline.json` e puo solo calare (BLE: gia a zero).
 
 ## 4. Come si costruisce e si prova
 1. `python3 tools/mklicense.py` (se manca), `python3 tools/mklang.py` (deve finire con "ok"), `python3 tools/mkpage.py`.
 2. Compilare TUTTI i file con gli stub (g++ -c) e cercare funzioni doppie (nm).
-3. `tools/hosttest/run.sh` (serve `$CORE` = cartella `cores/esp32` del core Arduino). Oggi 144 prove.
+3. `tools/hosttest/run.sh` (serve `$CORE` = cartella `cores/esp32` del core Arduino). Oggi 162 prove. `python3 tools/checklayers.py` deve finire senza KO.
 4. Pagina: `tools/webtest/server.js` + `smoke172.js` -> "TUTTO OK".
 5. Compilazione vera e prova sulla scheda: la fa il proprietario.
 
 ## 5. Versioni
-- Funzioni nuove = numero nuovo (1.7.11). Solo correzioni di bug = lettera (1.7.9b).
+- Funzioni nuove = numero nuovo (1.7.39). Solo correzioni di bug = lettera (1.7.9b).
 - La versione va in: `vos_common.h`, `VesevOS.ino`, nome ZIP, CHANGELOG, README it/en, SBOM, `mkcommon.py`, LEGGIMI, manuali.
 - Rifacimento di architettura: un passo = una versione, mai due strati insieme.
 

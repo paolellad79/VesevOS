@@ -1,0 +1,16 @@
+# Ordine di assemblaggio di web/index.html (tools/mkweb.py). Un file per riga.
+head.html
+style.css
+body_top.html
+pagine_a.html
+pagine_b.html
+pagine_c.html
+js_base.js
+js_regole.js
+js_avvio_home.js
+js_file.js
+js_pin_accesso.js
+js_periferiche_rete.js
+js_servizi.js
+js_guida.js
+coda.html

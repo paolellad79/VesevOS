@@ -16,4 +16,4 @@ class NimBLEServer { public: void setCallbacks(NimBLEServerCallbacks*, bool = tr
 class NimBLEAdvertising { public: bool addServiceUUID(const char*) { return true; } };
 class NimBLEDevice { public: static bool init(const std::string&) { return true; } static bool deinit(bool = false) { return true; }
   static void setSecurityPasskey(uint32_t) {} static void setSecurityIOCap(uint8_t) {} static void setSecurityAuth(bool, bool, bool) {}
-  static NimBLEServer* createServer() { return nullptr; } static NimBLEAdvertising* getAdvertising() { return nullptr; } static bool startAdvertising() { return true; } };
+  static NimBLEServer* createServer() { return nullptr; } static NimBLEAdvertising* getAdvertising() { return nullptr; } static bool startAdvertising() { return true; } static bool stopAdvertising() { return true; } };

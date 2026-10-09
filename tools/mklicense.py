@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Genera: VesevOS/vos_license_data.h (testi legali nel firmware, solo ASCII) e NOTICE.txt (copia leggibile).
+# Genera: VesevOS/src/core/vos_license_data.h (testi legali nel firmware, solo ASCII) e NOTICE.txt (copia leggibile).
 # Il nome del titolare sta in tools/owner.json. Con --headers aggiorna anche la riga Copyright
 # in testa ai sorgenti (solo se il nome e stato impostato).
 # Uso: python3 tools/mklicense.py [--headers]
@@ -60,14 +60,14 @@ for i, (id_, title, text) in enumerate(DOCS):
     h.append('  { "%s", "%s", (const char*)LIC_TEXT_%d, %d, %d },' % (id_, title, i, len(text.encode('ascii')), ZS[i]))
 h.append('};')
 h.append('#define LIC_COUNT %d' % len(DOCS))
-open(os.path.join(ROOT, 'VesevOS', 'vos_license_data.h'), 'w', newline='\n', encoding='ascii').write('\n'.join(h) + '\n')
+open(os.path.join(ROOT, 'VesevOS', 'src', 'core', 'vos_license_data.h'), 'w', newline='\n', encoding='ascii').write('\n'.join(h) + '\n')
 print('vos_license_data.h: %d documenti, %d byte di testo' % (len(DOCS), sum(len(d[2]) for d in DOCS)))
 
 if '--headers' in sys.argv:
     if placeholder: sys.exit('Imposta prima il nome in tools/owner.json')
     line = '// Copyright (C) %s %s' % (own['year'], own['name'])
     n = 0
-    for f in sorted(glob.glob(os.path.join(ROOT, 'VesevOS', '*.cpp')) + glob.glob(os.path.join(ROOT, 'VesevOS', '*.h')) + glob.glob(os.path.join(ROOT, 'VesevOS', '*.ino'))):
+    for f in sorted(glob.glob(os.path.join(ROOT, 'VesevOS', '**', '*.cpp'), recursive=True) + glob.glob(os.path.join(ROOT, 'VesevOS', '**', '*.h'), recursive=True) + glob.glob(os.path.join(ROOT, 'VesevOS', '*.ino'))):
         if os.path.basename(f) in ('vos_page.h', 'vos_license_data.h'): continue
         L = open(f, encoding='ascii').read().split('\n')
         if len(L) > 1 and L[1].startswith('// Copyright (C)'): L[1] = line

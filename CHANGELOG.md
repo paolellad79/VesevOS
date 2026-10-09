@@ -1,5 +1,198 @@
 # Cronologia delle versioni
 
+## 1.7.39 (ottobre 2026) - Bluetooth: meno frammentazione della RAM (prova)
+
+- Misura sulla scheda (1.7.38): a riposo RAM libera 121 KB e pezzo piu grande 79 KB; col Bluetooth acceso libera 59 KB (costo reale ~62 KB, la stima nel codice era 45 KB: corretta) e pezzo piu grande 30 KB; DOPO lo spegnimento libera 121 KB (nessuna perdita) ma il pezzo piu grande resta 47 KB (frammentazione 61%): NimBLE lascia 2 piccoli blocchi nel mezzo della RAM.
+- Prova: al boot, prima di rete e pagina, un avvio a vuoto + spegnimento del Bluetooth (senza annunci, senza emettere radio; saltato in modo aereo). Cosi i 2 blocchi restano in fondo alla RAM e il pezzo piu grande non cala piu al primo uso. Riga nel registro: "BLE: memoria preparata al boot, blocco piu grande X KB prima, Y KB dopo". Si spegne con `#define VOS_BLE_PRIME 0`.
+- Da misurare sulla scheda: `free detail` dopo il boot (era 79 KB), dopo `ble on` e dopo `ble off`.
+
+## 1.7.38 (ottobre 2026) - Event Bus: i package pubblicano i loro eventi
+
+- Nuovi eventi (solo annunci: nessun cambiamento di comportamento, nessuna RAM in piu):
+  - `mqtt.link` (valore 1 collegato al broker / 0 scollegato), solo quando cambia;
+  - `ble.link` (1 telefono collegato / 0 scollegato);
+  - `mesh.node` (una scheda vicina nuova o ricomparsa nella rete tra schede);
+  - `time.sync` (ora sincronizzata e accettata dal server NTP).
+- Visibili con `events` e `GET /api/events`. Con questi, la pagina potra smettere di interrogare la scheda a intervalli e aggiornarsi quando succede qualcosa (passo successivo).
+
+## 1.7.37 (ottobre 2026) - Il nome Bluetooth segue il nome della scheda anche a Bluetooth acceso
+
+- Se cambi il nome della scheda (hostname) mentre il Bluetooth e acceso, il Bluetooth si spegne e si riaccende da solo col nome nuovo (circa 6 secondi), tenendo il tempo che restava se c'era un limite. Se un telefono e collegato aspetta che si scolleghi, per non interromperlo. Se lo spegni tu nel frattempo, non si riaccende.
+- Nota: il codice di accoppiamento cambia dopo la riaccensione (come a ogni accensione).
+
+## 1.7.36 (ottobre 2026) - Il nome Bluetooth e il nome della scheda
+
+- Il nome con cui il Bluetooth si annuncia non e piu fisso ("VesevOS-setup"): e il **nome della scheda** (hostname, lo stesso della rete e di mDNS). Per cambiarlo si cambia il nome della scheda; vale alla prossima accensione del Bluetooth. Le app riconoscono la scheda dall'UUID del servizio, non dal nome.
+- Pagina, shell e `/api/ble` (nuovo campo `name`) mostrano il nome vero. Dalla pagina il Bluetooth si accende e si spegne senza scadenza (il tempo si da solo da shell o API).
+
+## 1.7.35 (ottobre 2026) - Bluetooth senza timer di 10 minuti (barra Home sul limite scelto)
+
+- Il Bluetooth non si spegne piu da solo dopo 10 minuti: resta acceso finche non lo spegne la pagina, la shell (`ble off`) o un'applicazione. Il limite di tempo e ora facoltativo: `ble on 30` (shell) o `POST /api/ble` con `min=30` (da 1 a 1440); senza `min` nessun limite. Resta spento di fabbrica e solo l'amministratore lo accende.
+- La protezione non cambia: accoppiamento con codice casuale a 6 cifre, nuovo a ogni accensione, visibile solo in pagina o nella shell (mai nel registro).
+- Pagina: testo del Bluetooth aggiornato ("per telefono e applicazioni"); acceso senza limite mostra "Acceso" e il codice, nella Home il widget dice "Acceso" senza barra. Stato (`/api/ble`, `/api/status`) con i nuovi campi `lim`, `bleLim` e `bleTot`. Con un limite di tempo la Home mostra il tempo che resta e la barra (calcolata sul limite scelto); senza limite dice solo "Acceso".
+- Comando `wifi` via Bluetooth: tolto dall'elenco del lavoro (la configurazione dal Bluetooth non serve per ora).
+
+## 1.7.33 (ottobre 2026) - Event Bus: rete, blocco IP, allarmi
+
+- Nuovi eventi sull'Event Bus, tutti senza dati personali (l'indirizzo IP non compare mai: lo vede l'Operatore):
+  - `net.state` (valore = stato rete: 0 avvio, 1 hotspot, 2 prova client, 3 client collegato, 4 modalita aereo), solo quando cambia;
+  - `sec.ban` (valore = secondi di blocco) quando un IP viene bloccato; `sec.unban` (argomento `all` se si sbloccano tutti) quando si sblocca;
+  - `audit.new` (argomento = codice dell'allarme, valore 1 giallo / 2 rosso) per un nuovo allarme; `audit.clear` quando rientra.
+- Visibili con `events` (shell) e `GET /api/events`. Nessun cambiamento di comportamento. Costo RAM: nessuno (stesso anello da 24 eventi).
+
+## 1.7.32 (ottobre 2026) - Event Bus (nucleo)
+
+- **Nuovo `EventBus`** (`core/vos_eventbus.*`, classe PascalCase): chi cambia stato lo annuncia con `EventBus::publish(topic, arg, val)`; chi vuole saperlo si iscrive con `subscribe(prefisso, gestore)` oppure chiede "cosa e successo dopo il numero N" con `since`. Anello fisso di 24 eventi in RAM (circa 1,5 KB, nessun heap); i piu vecchi vengono sovrascritti e la risposta dice quanti se ne sono persi (`lost`). Fino a 8 ascoltatori; un gestore che pubblica a sua volta non fa ripartire altri gestori (niente ricorsione). Testo degli eventi ripulito (niente virgolette ne caratteri di controllo).
+- Primo evento: `svc.state` (id del servizio, nuovo stato) ogni volta che un servizio viene avviato, fermato o riavviato (Bluetooth oggi).
+- Comando shell `events [n]` (anche Operatore) e rotta `GET /api/events?since=N&n=K` (Operatore): ultimi eventi in JSON (`last`, `lost`, `ev[]`). La pagina non cambia: continua a leggere a intervalli.
+- Prove sul computer: 27 nuove (anello pieno, numero dal futuro dopo un riavvio, ascoltatori, ricorsione, testo pericoloso).
+
+## 1.7.31 (ottobre 2026) - API: documento per ogni rotta e prova sulla scheda
+
+- **Documento API generato dal codice**: `docs/API.md` (italiano) e `docs/API.en.md` (inglese) con tutte le 126 rotte: metodo, percorso, livello, cosa fa, parametri letti e codici di errore usati, piu le regole generali (accesso, formato degli errori, codici HTTP, limiti). Lo scrive `tools/mkapidoc.py` dal codice e da `tools/api_notes.txt` (descrizioni).
+- `tools/checkapi.py` ora controlla anche che il documento sia allineato al codice e che ogni rotta abbia la descrizione: una rotta nuova senza descrizione, o un parametro cambiato senza rigenerare il documento, e un errore.
+- **Nuova prova sulla scheda vera** `tools/apitest.py` (si lancia dal computer: `--user admin`, chiede la password, entra e esce da solo): ogni rotta GET risponde 200 con JSON valido, `apiVersion` giusta in `/api/common` e `/api/status`, sette prove di errore che non cambiano nulla (file o id inesistenti: devono dare 4xx, `ok:false` e un `code`), rotta inesistente = 404; opzionale la prova "senza sessione = 401".
+- Correzione: `POST /api/ban/unban` con un indirizzo che non e nell'elenco rispondeva `ok` senza fare nulla; ora risponde 404 `notfound` ("Indirizzo non trovato"), come gia fa il comando `unban` della shell.
+- Annotato nel documento: la parola AZZERA del ripristino di fabbrica e controllata solo dalla pagina (la rotta e comunque solo per admin).
+
+## 1.7.30 (ottobre 2026) - Home: temperatura sotto il grafico arancione
+
+- Nel widget CPU della Home la temperatura (es. `51.3 °C`) passa **sotto il grafico arancione**, con la scritta "Temp." e il pallino arancione come C0 e C1. Sotto "CPU" resta solo la velocita (es. `80 MHz`).
+- Solo pagina: il firmware cambia solo nella versione.
+
+## 1.7.29 (ottobre 2026) - API: versione in /api/common e liste con limite
+
+- `/api/common` ora riporta anche `apiVersion` (letta da `VOS_API_VERSION` quando si genera il file con `tools/mkcommon.py`): la versione API e visibile sia in `/api/status` sia in `/api/common` (regola API 15).
+- Liste con limite e campo `more` (regola API 13): `/api/fs/list` mostra al massimo 200 voci, `/api/wifi/scan` al massimo 40 reti; se ce ne sono di piu rispondono `more:true`. Prima una cartella con migliaia di file poteva riempire la RAM.
+- La pagina File avvisa "Elenco parziale: mostrate le prime N voci" quando l'elenco e troncato.
+- Le altre liste (registro, autodiagnosi, utenti, sessioni) hanno gia un tetto fisso nel codice.
+
+## 1.7.28 (ottobre 2026) - File piu piccoli: la pagina web divisa in pezzi
+
+- `web/index.html` (2155 righe) ora si scrive a pezzi in `web/src/` (15 file: stile, parti della pagina, 8 file di programma per argomento: base, automazioni, avvio e home, file, pin e accesso, periferiche e rete, servizi, guida). L'ordine e in `web/src/ORDINE.txt`.
+- Nuovo `tools/mkweb.py` assembla i pezzi in `web/index.html` (`--check` controlla che siano allineati). Ordine di lavoro: `mkweb.py`, `mklang.py`, `mkpage.py`.
+- La pagina prodotta e **identica byte per byte** alla 1.7.27: nessun cambio di comportamento, stessa dimensione nel firmware.
+
+## 1.7.27 (ottobre 2026) - File piu piccoli: la configurazione divisa
+
+- `vos_config.cpp` (570 righe) diviso: `vos_config.cpp` (203: valori iniziali, salva, carica, ripristino), `vos_config_export.cpp` (155: scrittura del file di testo), `vos_config_import.cpp` (236: lettura e controllo delle chiavi).
+- Solo spostamenti. Formato del file `vesevos.conf` invariato. Il test sull'host compila i tre file.
+
+## 1.7.26 (ottobre 2026) - File piu piccoli: la shell divisa per gruppi
+
+- `vos_shell.cpp` (948 righe) diviso: `vos_shell.cpp` (405: aiuti, smistamento, benvenuto, seriale, guida), `vos_shell_sys.cpp` (help, stato, file, utenti...), `vos_shell_net.cpp` (wifi, led, pin, servizi...), `vos_shell_admin.cpp` (config, mesh, mqtt, energia, reboot).
+- Aiuti condivisi in `vos_shell_int.h` (interno). Solo spostamenti, comandi invariati.
+
+## 1.7.25 (ottobre 2026) - File piu piccoli: il server web diviso per gruppi
+
+- `vos_web.cpp` (983 righe) diviso: `vos_web.cpp` (279: avvio dei server, aiuti, pagina, lingue), `vos_web_auth.cpp` (accesso, MFA, utenti), `vos_web_dev.cpp` (periferiche, pin, LED, automazioni), `vos_web_sys.cpp` (MQTT, autodiagnosi, ora, localizzazione), `vos_web_net.cpp` (configurazione, filtro IP, watchdog, servizi di rete, HTTPS), `vos_web_files.cpp` (rete tra schede, Bluetooth, file).
+- Aiuti e dati condivisi in `vos_web_int.h` (interno: gli altri moduli usano solo `vos_web.h`).
+- Solo spostamenti: stesse 126 rotte, stessi livelli (`tools/checkapi.py` lo conferma). Comportamento invariato.
+
+## 1.7.24 (ottobre 2026) - API: codici HTTP giusti
+
+- Gli errori non rispondono piu 200: il codice HTTP segue il campo `code`. `error` = 400 (dato mancante o non valido), `bad_login` = 403 (nome/password/codice errati), `forbidden` = 403, `notfound` = 404, `state` = 409 (stato non adatto: es. spegnere l'hotspot senza Wi-Fi di casa), `toobig` = 413, `blocked` = 429 (troppi errori), `off` = 503. 401 resta solo per "sessione assente" (la pagina lo usa per rimostrare il login: mai per password errata).
+- Il corpo ha sempre `ok:false`, `err` (testo) e `code`: la pagina legge come prima.
+- Comportamento invariato per l'utente.
+
+## 1.7.23 (ottobre 2026) - API: la chiave della rete schede non esce piu con GET
+
+- `/api/mesh/key` (mostra la chiave ESP-NOW) passa da GET a POST (solo admin) e scrive una riga nel registro (chi l'ha vista). La pagina e adeguata.
+- Verificate le altre GET sospette: `wifi/test`, `selftest`, `wifi/scan`, `pintest` sono sola lettura (l'avvio e gia in POST). Resta GET solo `/api/config/download` (e un scaricamento di file, admin).
+- Comportamento invariato per l'utente.
+
+## 1.7.22 (ottobre 2026) - API: versione, codici errore, elenco rotte
+
+- `GET /api/status` ha il campo `apiVersion` (oggi 1; cambia solo per rotture dell'API).
+- Gli errori hanno il campo `code` (nome breve stabile, non tradotto): `error` (generico), `blocked` (troppi errori), `unauthorized` (401), `forbidden` (403), `https_only` (403). `err` resta il testo per la pagina. Campi in piu: compatibile.
+- Nuovo `tools/checkapi.py` + `tools/api_routes.txt`: elenco di tutte le 126 rotte con metodo e livello (pubblico/ospite/operatore/admin); una rotta nuova o con livello cambiato fa fallire il controllo.
+- Comportamento invariato.
+
+## 1.7.21 (ottobre 2026) - Strati: il driver dei pin
+
+- Nuovo `src/drivers/vos_drv_gpio.{h,cpp}`: unico file con pinMode / digitalWrite / digitalRead. Lo usano prova pin, regole, tasto BOOT (avvio, autotest, Device Manager).
+- Controllo strati: tutte le famiglie a 0 accessi fuori dai driver (Bluetooth, ESP-NOW, MQTT, Wi-Fi, file, pin).
+- Comportamento invariato.
+
+## 1.7.20 (ottobre 2026) - Strati: il driver dei file
+
+- Nuovo `src/drivers/vos_drv_fs.{h,cpp}`: unico file che usa LittleFS (apri, esiste, cancella, rinomina, cartelle, spazio usato/totale). Config, diario, lingue, file, regole, MQTT, autotest, sistema, shell, web e avvio lo usano.
+- Controllo strati: file 99 -> 0 accessi fuori dal driver (restano solo i pin: 12).
+- Comportamento invariato.
+
+## 1.7.19 (ottobre 2026) - Wi-Fi: ultimi accessi nel driver
+
+- Paese/canali/potenza, risparmio energia, spegnimento prima del sonno, segnale e client dell'hotspot passano da `vos_drv_wifi`. Fuori dal driver non resta nessun accesso a `WiFi.*` (debito 40 -> 0).
+- Wi-Fi iscritto nel registro dei servizi (`wifi`, sola lettura: non si ferma da li, c'e il modo aereo).
+- Comportamento invariato.
+- 1.7.19a: rimessa `#include <esp_wifi.h>` nel driver (errore di compilazione).
+
+## 1.7.18 (ottobre 2026) - DHCP segue l'hotspot
+
+- Hotspot spento = server DHCP spento in automatico (evita un secondo DHCP sulla rete di casa).
+- Hotspot acceso da pagina o shell = DHCP acceso. Fine guida: hotspot e DHCP spenti.
+- Senza rete di casa l'hotspot forzato distribuisce comunque gli indirizzi.
+- Schede gia configurate: al primo avvio il DHCP viene spento se hotspot spento e rete di casa impostata.
+
+## 1.7.17 (ottobre 2026) - Strati: il driver Wi-Fi
+Sesto passo del riordino a strati. **Nessuna funzione nuova, comportamento invariato.**
+- Nuovo `vos_drv_wifi` (strato 1, driver): l'unico file che usa la libreria Wi-Fi di Arduino (`WiFi.*`) per la rete: modo (spento/client/hotspot/entrambi), collegamento alla rete di casa, IP statico o DHCP, hotspot, cambio canale, scansione, segnale, canale, indirizzi.
+- `vos_net` (servizio di rete) ora chiama solo il driver; la logica (quando collegarsi, quando tornare in hotspot, modo aereo, prova della rete di casa) e rimasta uguale, nello stesso ordine di chiamate.
+- Controllo strati: accessi Wi-Fi fuori dai driver da 89 a 40 (restano nei file region, selftest, power, shell, stats, fw, sys, mqtt, dev, web, wd, time: prossimo passo).
+- **Prove**: stub su tutti i file con package accesi e spenti, 181 prove sul computer, pagina con finto server.
+
+## 1.7.16 (ottobre 2026) - Strati: MQTT diviso in driver e servizio
+Quinto passo del riordino a strati. **Nessuna funzione nuova, comportamento invariato.**
+- `vos_drv_mqtt` (strato 1, driver): l'unico file che conosce il client MQTT di sistema e le autorita dei certificati. Sa aprire/chiudere il collegamento al broker, pubblicare, iscriversi e avvisare (collegato, scollegato, dati, errore).
+- `vos_mqtt` (servizio): argomenti, comandi in arrivo, stato, Home Assistant, coda dei comandi. Non chiama piu `esp_mqtt_client_*`.
+- MQTT e iscritto nel registro dei servizi (`vos_service`) come terzo servizio; pagina, shell e registro periferiche passano dal contratto. Stato: collegato = acceso, avviato ma non collegato = acceso con problema.
+- Controllo strati: accessi MQTT fuori dai driver da 11 a 0. Restano Wi-Fi 89, file 99, pin 12.
+- **Prove**: stub su tutti i file con package accesi e spenti, 181 prove sul computer, pagina con finto server.
+
+## 1.7.15 (ottobre 2026) - Strati: ESP-NOW diviso in driver e servizio
+Quarto passo del riordino a strati. **Nessuna funzione nuova, comportamento invariato.**
+- `vos_drv_espnow` (strato 1, driver): l'unico file che conosce ESP-NOW. Sa accendere/spegnere, mandare un pacchetto a tutti, dire canale e MAC, avvisare quando arriva un pacchetto. Sceglie da solo l'interfaccia (STA o hotspot).
+- `vos_mesh` (servizio): formato dei messaggi, firma, ruoli, ripetizione, nodi. Non chiama piu `esp_now_*` ne `esp_wifi_*` per canale e MAC.
+- ESP-NOW e iscritto nel registro dei servizi (`vos_service`) come secondo servizio; pagina, shell e registro periferiche passano dal contratto.
+- Controllo strati: accessi ESP-NOW fuori dai driver da 11 a 0; Wi-Fi da 95 a 89.
+- **Prove**: stub su tutti i file con package accesi e spenti, 181 prove sul computer, pagina con finto server.
+
+## 1.7.14 (ottobre 2026) - Strati: il contratto dei servizi
+Terzo passo del riordino a strati. **Nessuna funzione nuova, comportamento invariato.**
+- Nuovo `vos_service` (`src/core/`): un solo modo per avviare, fermare, riavviare e leggere lo stato di un servizio (`serviceStart/Stop/Restart/State/Ram`). Ogni servizio si descrive con una `ServiceOps` (id, nome, ruoli, stato, avvia, ferma, dettagli, RAM usata) e si iscrive con `serviceRegister()`. Stati: spento, acceso, acceso con problema, in avvio, errore.
+- Il Bluetooth e il primo servizio iscritto (`bleServiceInit()` all'avvio). Pagina, shell (`ble on/off`) e registro periferiche ora passano dal contratto; le funzioni `bleStart/bleStop` restano.
+- Nuova azione `restart` nella pagina Bluetooth (`/api/ble`, `a=restart`): ferma e riaccende; per la pausa di 5 secondi tra due accensioni puo chiedere di riprovare.
+- **Prove**: 181 prove sul computer (19 nuove sul registro dei servizi con un servizio finto), stub su tutti i file con package accesi e spenti, pagina con finto server, controllo strati (debito hardware invariato).
+
+## 1.7.13 (ottobre 2026) - Strati: i file in cartelle
+Secondo passo del riordino a strati. **Nessuna funzione nuova, nessun cambio di codice: si spostano solo i file.**
+- `VesevOS/` contiene solo `VesevOS.ino` e la cartella `src/` (Arduino IDE compila `src/` e le sue sottocartelle). Dentro `src/`, una cartella per strato:
+  - `core/` nucleo sempre presente (configurazione, log, testi, ora, watchdog, file, firmware, autotest, dati generati)
+  - `security/` accessi, HTTPS, cifratura
+  - `net/` rete e contatori di traffico
+  - `devices/` Device Manager, pin, LED
+  - `drivers/` unico posto che tocca la radio o l'hardware (oggi `vos_drv_ble`)
+  - `packages/` MQTT, ESP-NOW, Bluetooth, MFA, statistiche, automazioni, risparmio energia
+  - `interfaces/` pagina web, shell
+- Gli `#include` dei file usano percorsi relativi al file (`../core/vos_util.h`), cosi funzionano senza impostazioni particolari.
+- Gli script (`mkpage.py`, `mkcommon.py`, `mklang.py`, `mklicense.py`, `checklayers.py`) e le prove sul computer cercano i file nelle nuove cartelle; i file generati vanno in `src/core/` e `src/interfaces/`.
+- **Prove**: stub su tutti i file con i package accesi e spenti, 162 prove sul computer, pagina con finto server. La compilazione vera con Arduino IDE la fai tu.
+
+## 1.7.12 (ottobre 2026) - Strati: il Bluetooth diviso in driver e servizio
+Primo passo del riordino a strati (schema nel Progetto: `VesevOS-schema-strati.md`). **Nessuna funzione nuova, comportamento invariato.**
+- `vos_drv_ble` (strato 1, driver): l'unico file che conosce NimBLE. Sa accendere, spegnere, annunciarsi, ricevere e inviare testo, dire se un telefono e collegato.
+- `vos_ble` (ciclo di vita): controlli di memoria, 10 minuti, pausa tra due accensioni, codice di accoppiamento, stato per pagina e shell. Le funzioni pubbliche non cambiano.
+- `vos_ble_cfg` (servizio): i comandi di prima configurazione (`wifi`, `country`, `name`, `mesh`, `status`, `done`). Non conosce la radio: riceve un testo e risponde.
+- Nuovo `tools/checklayers.py`: conta gli accessi diretti all'hardware fuori dai driver; il debito di partenza (`tools/layers_baseline.json`) puo solo calare. Bluetooth: zero accessi fuori dal driver. Resto del debito: Wi-Fi 95, file 99, GPIO 12, ESP-NOW 11, MQTT 11.
+- **Prove**: 18 prove nuove sui comandi del telefono (162 in tutto), senza radio.
+
+## 1.7.11a (ottobre 2026) - Accessibilita (WCAG 2.2 AA)
+- Colori del testo piu contrastati in tema chiaro e scuro (rapporto almeno 4,5:1), bottoni rossi e link compresi.
+- Tutte le caselle hanno un'etichetta collegata; i campi senza etichetta prendono il nome dal testo guida; icone decorative nascoste ai lettori di schermo.
+- Widget e anelli cliccabili usabili da tastiera (Tab, Invio, Spazio); terminale con nome e focus da tastiera.
+- Bottoni piccoli piu alti (almeno 24 px); intestazione che va a capo su schermi stretti (320 px senza scroll orizzontale).
+- Nuovo test automatico `tools/webtest/a11y172.js` (contrasto, nomi, bersagli, focus, dialoghi, 320 px). Resta da provare con un lettore di schermo vero.
+
 ## 1.7.11 (ottobre 2026) - Device Manager, package, backup cifrato
 - **Bluetooth con NimBLE** (libreria NimBLE-Arduino 2.5.1, Apache-2.0, da installare dal gestore librerie): circa 11 KB di RAM interna in meno rispetto a prima. Si accende e si spegne anche ripetutamente.
 - **Device Manager** (un solo gruppo di menu) con tutte le periferiche: virtuali (MQTT, rete tra schede, Bluetooth, MFA, statistiche) e hardware (pin, LED, tasto BOOT, USB, temperatura, memoria, processore, radio). Tutte rispondono alle stesse regole: elenco, stato, accendi/spegni (Admin), dettagli, azioni. Nuove API `GET /api/dev`, `POST /api/dev/set` (Admin), `POST /api/dev/act` e comando `dev list|status|on|off|act`. Il menu "Stato" non c'e piu: i dati sono nei widget della Home e nelle schede Memoria, Processore e Radio.

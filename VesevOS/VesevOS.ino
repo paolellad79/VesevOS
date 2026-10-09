@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
-// VesevOS 1.7.11 - ESP32-S3 SuperMini
+// VesevOS 1.7.39 - ESP32-S3 SuperMini
 // Piccolo sistema operativo: pagina web (HTTPS), shell, utenti, rete tra schede, automazioni. Progetto in piu file.
 //
 // Impostazioni Arduino IDE consigliate:
@@ -11,30 +11,31 @@
 // Librerie da installare (Gestore librerie): PsychicHttp (hoeken, MIT) e ArduinoJson (bblanchon, MIT).
 // ESPAsyncWebServer e AsyncTCP non servono piu dalla 1.7.1.
 #include <Arduino.h>
-#include <LittleFS.h>
+#include "src/drivers/vos_drv_fs.h"
 #include <esp_log.h>
-#include "vos_ram.h"
-#include "vos_common.h"
-#include "vos_log.h"
-#include "vos_diario.h"
-#include "vos_serial.h"
-#include "vos_pins.h"
-#include "vos_config.h"
-#include "vos_auth.h"
-#include "vos_mfa.h"
-#include "vos_power.h"
-#include "vos_stats.h"
-#include "vos_sys.h"
-#include "vos_led.h"
-#include "vos_net.h"
-#include "vos_time.h"
-#include "vos_web.h"
-#include "vos_shell.h"
-#include "vos_i18n.h"
-#include "vos_boot.h"
-#include "vos_audit.h"
-#include "vos_fw.h"
-#include "vos_ble.h"
+#include "src/core/vos_ram.h"
+#include "src/core/vos_common.h"
+#include "src/core/vos_log.h"
+#include "src/core/vos_diario.h"
+#include "src/core/vos_serial.h"
+#include "src/devices/vos_pins.h"
+#include "src/core/vos_config.h"
+#include "src/security/vos_auth.h"
+#include "src/packages/vos_mfa.h"
+#include "src/packages/vos_power.h"
+#include "src/packages/vos_stats.h"
+#include "src/core/vos_sys.h"
+#include "src/devices/vos_led.h"
+#include "src/net/vos_net.h"
+#include "src/core/vos_time.h"
+#include "src/interfaces/vos_web.h"
+#include "src/interfaces/vos_shell.h"
+#include "src/core/vos_i18n.h"
+#include "src/core/vos_boot.h"
+#include "src/core/vos_audit.h"
+#include "src/core/vos_fw.h"
+#include "src/packages/vos_ble.h"
+#include "src/drivers/vos_drv_gpio.h"
 
 // Tasto BOOT (GPIO0). L'azione si decide quando lo LASCI; intanto il LED dice cosa succedera:
 //   meno di 2 s           : esce dal modo aereo
@@ -43,7 +44,7 @@
 //   20 s o piu (LED rosso) : ripristino di fabbrica (cancella tutto) e riavvio
 static void bootButton() {
   static uint32_t since = 0;
-  if (digitalRead(VOS_PIN_BOOT) == LOW) {
+  if (!drvGpioRead(VOS_PIN_BOOT)) {
     if (since == 0) since = millis();
     uint32_t held = millis() - since;
     ledSetHold(held >= 20000 ? 3 : held >= 8000 ? 2 : held >= 2000 ? 1 : 0);
@@ -95,11 +96,11 @@ void setup() {
   esp_log_level_set("httpd", ESP_LOG_NONE);
   diaryStage("pins");
   pinsInit();
-  pinMode(VOS_PIN_BOOT, INPUT_PULLUP);
+  drvGpioMode(VOS_PIN_BOOT, DG_INPUT_PULLUP);
   pinClaim(VOS_PIN_BOOT, "Sistema", "Pulsante BOOT (breve = modo aereo, 2 s = filtro IP, 8 s = password, 20 s = fabbrica)", true);
 
   diaryStage("fs");
-  if (!LittleFS.begin(true)) { vlog("FS: LittleFS non parte"); }
+  if (!drvFsBegin(true)) { vlog("FS: LittleFS non parte"); }
   powerBegin();
   diaryStage("cfg");
   if (!cfgLoad()) { vlog("CFG: nessun file, uso i valori iniziali"); cfgSave(); }
@@ -111,6 +112,7 @@ void setup() {
   diaryStage("lang");
   langInit();
   auditInit();                                     // controllo della configurazione (allarmi)
+  bleServiceInit();                                // servizi iscritti nel registro (vos_service) prima dell'avvio
   bootRun();   // sys, led, net, time, web, rules, mqtt, mesh, wd: nell'ordine scelto (con le dipendenze)
   diaryStage("avviato");
   diaryInit();                                     // dopo sysInit: contatore avvii pronto; scrive la riga AVVIO e, se anomalo, i dettagli
