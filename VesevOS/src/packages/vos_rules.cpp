@@ -13,6 +13,7 @@
 #include "../interfaces/vos_shell.h"
 #include "../drivers/vos_drv_fs.h"
 #include <time.h>
+#include <new>
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include "../drivers/vos_drv_gpio.h"
@@ -49,7 +50,8 @@ struct Rule {
 
 struct Run { bool act; int8_t rule; uint8_t step; uint32_t wake; };
 
-static Rule  g_r[MAX_RULES];
+static Rule* g_r = nullptr;           // tabella delle regole: esiste solo se c'e almeno una regola (con 0 regole non occupa RAM)
+static bool  g_taskUp = false;        // il task "rules" parte solo quando serve
 static int   g_n = 0;
 static Run   g_run[MAX_RUNS];
 static SemaphoreHandle_t g_mx = nullptr;
@@ -248,16 +250,25 @@ static bool parseAll(const String& text, Rule* out, int& n, String& err) {
   return true;
 }
 
+static void rulesTask(void*);
+static void ensureTask() {
+  if (g_taskUp) return;
+  if (xTaskCreatePinnedToCore(rulesTask, "rules", 6144, NULL, 1, NULL, 0) == pdPASS) g_taskUp = true;
+  else vlog("RULES: task non avviato (memoria)");
+}
+
 static void load(bool boot) {
   ensureMx();
   String text;
   File f = drvFsOpen(RULES_FILE, "r");
   if (f) { text = f.readString(); f.close(); }
-  static Rule tmp[MAX_RULES];
+  Rule* tmp = new (std::nothrow) Rule[MAX_RULES]();       // appoggio temporaneo (>= 256 byte: va in PSRAM), liberato a fine funzione
   int n = 0; String err;
-  if (!parseAll(text, tmp, n, err)) { vlog("RULES: file non valido (%s)", err.c_str()); n = 0; }
+  if (!tmp) { vlog("RULES: memoria insufficiente"); }
+  else if (!parseAll(text, tmp, n, err)) { vlog("RULES: file non valido (%s)", err.c_str()); n = 0; }
   xSemaphoreTake(g_mx, portMAX_DELAY);
   for (int i = 0; i < MAX_RUNS; i++) g_run[i].act = false;
+  if (n > 0 && !g_r) { g_r = new (std::nothrow) Rule[MAX_RULES](); if (!g_r) { vlog("RULES: memoria insufficiente"); n = 0; } }
   g_n = n;
   for (int i = 0; i < n; i++) {
     g_r[i] = tmp[i];
@@ -265,8 +276,11 @@ static void load(bool boot) {
     if (!boot) { if (g_r[i].tk == TK_AFTER || g_r[i].tk == TK_BOOT) g_r[i].done = true; }
     if (g_r[i].tk == TK_TEMP) g_r[i].armed = sysCpuTemp() > g_r[i].a;
   }
+  if (n == 0 && g_r) { delete[] g_r; g_r = nullptr; }
   xSemaphoreGive(g_mx);
+  delete[] tmp;
   vlog("RULES: %d regole caricate", n);
+  if (n > 0) ensureTask();
 }
 
 String rulesText() {
@@ -278,9 +292,12 @@ String rulesText() {
 
 bool rulesSave(const String& text, String& err) {
   if (text.length() > MAX_TEXT) { err = tr("File troppo grande"); return false; }
-  static Rule tmp[MAX_RULES];
+  Rule* tmp = new (std::nothrow) Rule[MAX_RULES]();
+  if (!tmp) { err = tr("Memoria insufficiente"); return false; }
   int n;
-  if (!parseAll(text, tmp, n, err)) return false;
+  bool parsed = parseAll(text, tmp, n, err);
+  delete[] tmp;
+  if (!parsed) return false;
   File f = drvFsOpen("/rules.tmp", "w");
   if (!f) { err = tr("Scrittura non riuscita"); return false; }
   size_t w = f.print(text); f.close();
@@ -478,6 +495,5 @@ void rulesInit() {
   ensureMx();
   g_startMs = millis();
   g_prevNet = netState();
-  load(true);
-  xTaskCreatePinnedToCore(rulesTask, "rules", 6144, NULL, 1, NULL, 0);
+  load(true);            // il task parte da solo se ci sono regole (ensureTask)
 }

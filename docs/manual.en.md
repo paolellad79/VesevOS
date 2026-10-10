@@ -1,4 +1,4 @@
-# VesevOS 1.7.39 - Manual
+# VesevOS 1.7.45 - Manual
 
 Manual for people who use the board. Plain words, no programming.
 Versione italiana: [manuale.md](manuale.md). The same help is in the board's page (System > Help, or `http://192.168.4.1/#aiuto`).
@@ -20,7 +20,7 @@ The first time it starts, every VesevOS board makes up its own Wi-Fi password, d
 - **After setup you can change it** (Services > Access point), together with the network name.
 
 ### Method 1 (recommended): USB cable and serial monitor
-1. Upload VesevOS to the board (Arduino IDE > Upload).
+1. Prepare the board with the guide [PREPARE-THE-BOARD.md](PREPARE-THE-BOARD.md) (recovery + VesevOS).
 2. Open Tools > Serial Monitor at 115200 and press RESET on the board.
 3. Read the welcome screen: network name (`VesevOS`), password (e.g. `k7mpq4xtr9ab`: 12 characters, lowercase letters and digits only, no symbols) and address `http://192.168.4.1`.
    Press `2` (no Enter) for English, `1` for Italian.
@@ -212,3 +212,15 @@ System > **Backup and restore** (Admin only).
 - **Include the secrets too**: tick it, choose a **phrase of at least 10 characters**, type it twice and accept the warning. The file is **encrypted** (PBKDF2-HMAC-SHA256 + AES-256-GCM): it cannot be read without the phrase. Whoever has the file and the phrase can get into the board and your network; **if you lose the phrase the secrets cannot be recovered**. Every export with secrets is written in the log.
 - **Restore from file**: choose the file (and, if it is encrypted, type the phrase). The page tells how many lines changed. A wrong phrase counts as a login failure.
 - **Factory reset**: erases settings, users and passwords; to confirm you must type the word ERASE.
+
+## 22. Updating the firmware with no cable (new in 1.7.42 - 1.7.45)
+The board holds two programs: **VesevOS** and the **recovery** (small, used only to update). The first install is done over USB: follow [PREPARE-THE-BOARD.md](PREPARE-THE-BOARD.md). After that you update from the page.
+1. User menu (Administrator only) > **Update firmware** > *Restart into recovery*. Or, from the serial port: `recovery` (says whether it is there) and `recovery now`.
+2. The page shows the recovery address, for example `http://192.168.1.50:80/`. Open it in a **private window** and type **http**, not https (the recovery is not encrypted).
+   The recovery tries your **home network** first; if it cannot find it within 30 seconds it creates the Wi-Fi network `VesevOS-recovery` (random password written on the serial port).
+3. Sign in with the user and password of a VesevOS **Administrator** (the password never travels in clear). With an empty flash and no administrators you need the 8-digit code shown on the serial port. Five mistakes = a 60-second wait.
+4. Choose the `VesevOS.ino.bin` file (not `.merged.bin`). *Expected SHA-256* is optional: if you fill it in, the file must match.
+5. *Upload and install*. First the page and then the board check: ESP32-S3 header, **VesevOS marker**, size, complete image. A wrong file is refused and **the old firmware is left untouched**; if the error comes after writing has started, the recovery stays on and you just upload the good file.
+6. After about 10 seconds VesevOS restarts. *Start VesevOS without updating* goes back. After 15 minutes without access the recovery goes back to VesevOS by itself. BOOT held at power-up = stay in the recovery.
+- The file check guarantees it is a complete VesevOS firmware; it is **not a digital signature**. Download files only from trusted sources.
+- After installing with the recovery **do not use the IDE's *Upload***: it would erase the recovery.

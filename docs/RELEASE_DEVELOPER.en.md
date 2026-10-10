@@ -1,10 +1,10 @@
 # VesevOS - Release Developer (guide for people who develop and release)
 
-Last update: 8 October 2026, version 1.7.39. Also published on GitHub (docs/). The step-by-step procedure is in the release checklist (kept in the Project); this file gives the overall picture for people working on the code.
+Last update: 10 October 2026, version 1.7.45. Also published on GitHub (docs/). The step-by-step procedure is in the release checklist (kept in the Project); this file gives the overall picture for people working on the code.
 
 ## 1. Environment
 - Board: ESP32-S3 SuperMini (4 MB flash, 2 MB PSRAM, native USB, WS2812 LED on GPIO48, internal antenna only).
-- Arduino IDE, Arduino-ESP32 core 3.3.x, "Huge APP" partition.
+- Arduino IDE, Arduino-ESP32 core 3.3.x, "Huge APP" partition (compiler only; the real table is in recovery/VesevOS_Recovery/partitions.csv: 1 MB recovery + 2.31 MB app0). A release also publishes recovery/ (sketch, scripts, README).
 - Libraries: PsychicHttp 3.1.2, ArduinoJson 7 (mbedTLS and ESP-IDF come with the core).
 - Licence: GPL-3.0-or-later or commercial licence (COMMERCIAL.md). The Arduino core (LGPL) is not shipped with the repo.
 

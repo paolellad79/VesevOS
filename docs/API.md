@@ -25,7 +25,7 @@ Versione API: **1** (campo `apiVersion` in `/api/status` e `/api/common`). Cambi
 - **Parametri:** `application/x-www-form-urlencoded`. Regola API 12: un valore non valido non deve cambiare nulla.
 - La colonna **Parametri** e la **Errori** sono lette dal codice (indicative: gli errori elencati sono quelli esplicitamente dati dalla rotta, oltre a quelli generali sopra).
 
-## Rotte (127)
+## Rotte (129)
 
 | Metodo | Percorso | Livello | Cosa fa | Parametri | Errori |
 |---|---|---|---|---|---|
@@ -110,6 +110,8 @@ Versione API: **1** (campo `apiVersion` in `/api/status` e `/api/common`). Cambi
 | GET | `/api/power` | operatore | Risparmio energia: modo e tempi | - | - |
 | POST | `/api/power` | admin | Cambia modo e tempi | `awake`, `mode`, `sleep` | `error` |
 | POST | `/api/reboot` | operatore | Riavvia la scheda | - | - |
+| GET | `/api/recovery` | admin | Dice se il recovery e presente (present 0/1, kb) | - | - |
+| POST | `/api/recovery` | admin | Riavvia nel recovery per caricare un nuovo firmware (risponde con ip) | - | `state` |
 | GET | `/api/region` | ospite | Paese, fuso, lingua, radio | - | - |
 | POST | `/api/region` | admin | Cambia paese, fuso, formati, antenna, potenza | `antenna`, `country`, `datefmt`, `decsep`, `gain`, `ntp`, `tempunit`, `timefmt`, `txpower`, `tz`, `tzname`, `weekstart` | `error` |
 | GET | `/api/rules` | operatore | Testo delle automazioni | - | - |

@@ -169,6 +169,12 @@ bool shCmdAdmin(String c, String a1, const String& line, Print& o, int role) {
     o.print(powerText());
   }
   else if (c == "reboot") { o.println(tr("Riavvio...")); delay(300); ESP.restart(); }
+  else if (c == "recovery") {
+    if (!drvRecoveryPresent()) { o.println(tr("Recovery non presente: la scheda ha ancora la tabella partizioni vecchia.")); return true; }
+    if (a1 != "now") { o.println(tr("Recovery presente. Scrivi 'recovery now' per riavviare nel recovery.")); return true; }
+    if (!drvRecoveryEnter()) { o.println(tr("Non riesco a passare al recovery.")); return true; }
+    o.println(tr("Riavvio nel recovery...")); delay(300); ESP.restart();
+  }
   else return false;
   return true;
 }

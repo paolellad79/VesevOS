@@ -9,6 +9,7 @@
 #include "../core/vos_log.h"
 #include "../core/vos_i18n.h"
 #include "../core/vos_util.h"
+#include "../core/vos_ram.h"
 #include "../core/vos_service.h"
 #include "../drivers/vos_drv_ble.h"
 #include "vos_ble_cfg.h"
@@ -72,7 +73,7 @@ bool bleStart(String& err) {
   g_name = bleWantedName();
   BleDrvConfig dc = { g_name.c_str(), BLE_SVC, BLE_CMD, BLE_RESP, g_pin, g_hello.c_str(), onRx, onLink };
   if (!drvBleBegin(dc)) { err = tr("Memoria insufficiente per il Bluetooth: chiudi la pagina web e riprova"); return false; }
-  g_on = true; armTimer();
+  g_on = true; armTimer(); ramNote("ble on");
   if (g_lim) vlog("BLE: acceso per %u minuti (il codice di accoppiamento si vede solo in pagina o nella shell)", (unsigned)g_limMin);
   else vlog("BLE: acceso, senza limite di tempo (il codice di accoppiamento si vede solo in pagina o nella shell)");   // il registro lo legge anche un ospite: niente codice qui
   return true;
@@ -83,7 +84,7 @@ static void stopImpl() {
   if (!g_on) return;
   g_on = false; g_conn = false; g_lim = false;
   drvBleEnd();
-  g_stopAt = millis(); if (!g_stopAt) g_stopAt = 1;
+  g_stopAt = millis(); if (!g_stopAt) g_stopAt = 1; ramNote("ble off");
   vlog("BLE: spento, RAM libera %u KB, blocco piu grande %u KB", (unsigned)(ESP.getFreeHeap() / 1024), (unsigned)(ESP.getMaxAllocHeap() / 1024));
 }
 

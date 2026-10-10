@@ -35,7 +35,7 @@ void shx::cmdHelp(Print& o) {
   o.println(tr("  serial [baud <n>|eol crlf|lf|cr|echo|input|log|banner on|off|tx <ms>|keep]  impostazioni della seriale"));
   o.println(tr("  uptime          da quanto e acceso (+ motivo reset, avvii)"));
   o.println(tr("  free [detail]   memoria RAM/PSRAM (detail: blocchi e frammentazione)"));
-  o.println(tr("  ram [mark|diff] stack dei task e costo dei servizi (mark, cambia qualcosa, diff)"));
+  o.println(tr("  ram [mark|diff|audit] stack dei task e costo dei servizi (audit: storico)"));
   o.println(tr("  events [n]      ultimi eventi del sistema (Event Bus): cambi di stato dei servizi"));
   o.println(tr("  df              spazio su flash"));
   o.println(tr("  temp            temperatura CPU"));
@@ -97,6 +97,7 @@ void shx::cmdHelp(Print& o) {
   o.println(tr("  reboots [clear]   diario degli ultimi 20 riavvii (motivo, durata, RAM minima) o azzera"));
   o.println(tr("  factory-reset   azzera tutto (poi riavvia)"));
   o.println(tr("  reboot          riavvia"));
+  o.println(tr("  recovery [now]  recovery (aggiornamento firmware): stato, o 'now' = riavvia nel recovery"));
   o.println(tr("  sleep [minuti]  sonno profondo (con i minuti la scheda riparte da sola; senza, solo con RESET)"));
   o.println(tr("  stats [on|off|reset]  statistiche locali (spente di fabbrica)"));
   o.println(tr("  selftest [active] [names]  autodiagnosi con report (prove attive: LED e MQTT; names: nomi reali)"));

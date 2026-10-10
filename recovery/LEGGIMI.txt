@@ -1,0 +1,25 @@
+VesevOS Recovery 0.3.0 - PASSO 3 (controlli di sicurezza sul file)
+==================================================================
+Novita rispetto alla 0.2.0: prima di attivare un firmware il recovery controlla
+  - intestazione valida per ESP32-S3 e immagine Arduino-ESP32,
+  - marchio VesevOS dentro il file (il firmware 1.7.44 lo contiene; il recovery NO),
+  - dimensione, immagine completa, e SHA-256 se lo scrivi nella pagina (facoltativo).
+Se l'intestazione e sbagliata il vecchio firmware non viene toccato. La pagina fa gli stessi controlli prima di inviare.
+Il resto e come la 0.2.0: recovery fermo con `recovery now` / BOOT / firmware non valido; rete di casa, poi hotspot dopo 30 s;
+login amministratore (o codice a 8 cifre se non ce n'e); dopo 15 minuti senza accessi torna a VesevOS.
+
+AGGIORNARE DALLA 0.2.0 (stessa tabella partizioni, niente da cancellare):
+ 1) Compila ed esporta il recovery 0.3.0 (Sketch > Esporta binario compilato). Il .bin deve essere SOTTO 1.048.576 byte.
+ 2) Compila ed esporta VesevOS 1.7.44 (serve: contiene il marchio).
+ 3) ./carica-tutto.sh /dev/cu.usbmodem14401 <cartella build del recovery> <VesevOS.ino.bin>
+
+PROVE (una alla volta)
+ F) File buono: entra nella pagina, scegli VesevOS.ino.bin 1.7.44, "Carica e installa". Deve dire "Installato e controllato (SHA-256 ...)".
+ G) SHA sbagliato: scrivi 64 caratteri a caso nel campo SHA: deve rifiutare, e il recovery resta (VesevOS non parte, e giusto: lo slot e stato reso non valido; ricarica il file buono).
+ H) File sbagliato: scegli il file del recovery (VesevOS_Recovery.ino.bin) o un file qualsiasi: la pagina deve dire "manca il marchio" o "intestazione errata" SENZA inviare niente.
+ I) Firmware vecchio (1.7.43, senza marchio): deve dire "manca il marchio". (Per installarlo comunque serve carica-firmware.sh.)
+ Restano da provare (dalla 0.2.0): hotspot con router spento, password sbagliata (blocco 60 s), tasto BOOT, 15 minuti fermo.
+
+DOPO L'INSTALLAZIONE: NON usare "Carica" dell'IDE per VesevOS (cancella il recovery). Usa carica-firmware.sh o la pagina del recovery.
+SE QUALCOSA VA STORTO: ripristino del backup:
+   python3 -m esptool --chip esp32s3 -p /dev/cu.usbmodem14401 -b 460800 write_flash 0 ~/vesevos-backup-4MB.bin

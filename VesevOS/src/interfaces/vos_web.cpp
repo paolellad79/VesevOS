@@ -8,6 +8,7 @@
 // Ogni API ha un livello: pubblica, Ospite, Operatore, Amministratore (controllo nel firmware, non solo nella pagina).
 // Il filtro IP (vos_fw) chiude la connessione senza risposta a chi non e ammesso.
 #include "vos_web_int.h"
+#include "../core/vos_ram.h"
 
 namespace webx {
 PsychicHttpServer* g_http = nullptr;
@@ -143,6 +144,7 @@ String cookieAttrs(bool secure) { return String("; Path=/; HttpOnly; SameSite=St
 esp_err_t loginDone(Res* s, Ctx& c, int idx) {
   String t = authNewSession(idx);
   vlog("WEB: accesso di %s da %s", cfg.users[idx].name.c_str(), ipToStr(c.ip).c_str());
+  ramNote("login");
   bool cleaned = false;
   if (g_cleanArm && cfg.users[idx].role == ROLE_ADMIN && !netOnAp(c.ip) && netState() == NET_CLIENT_OK && cfg.staEnabled) {
     // la scheda e stata raggiunta dalla rete di casa: si spengono le cose servite solo all'hotspot

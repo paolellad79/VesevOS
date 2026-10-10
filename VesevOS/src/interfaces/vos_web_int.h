@@ -40,6 +40,7 @@
 #include "../core/vos_diario.h"
 #include "../drivers/vos_drv_fs.h"
 #include "../drivers/vos_drv_wifi.h"
+#include "../drivers/vos_drv_ota.h"
 #include <PsychicHttp.h>
 #include <PsychicHttpsServer.h>
 

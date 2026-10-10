@@ -41,6 +41,7 @@ bool shCmdSys(String c, String a1, const String& line, Print& o, int role) {
   else if (c == "ram") {
     if (a1 == "mark") { ramMark(); o.println(tr("Memoria segnata: accendi o spegni un servizio e scrivi: ram diff")); }
     else if (a1 == "diff") { String d = ramDiff(); o.print(d.length() ? d : String(tr("Prima scrivi: ram mark")) + "\n"); }
+    else if (a1 == "audit") o.print(ramAudit());
     else o.print(ramReport());
   }
   else if (c == "events") {

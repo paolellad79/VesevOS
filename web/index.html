@@ -859,6 +859,7 @@ body[data-role="0"] .op,body[data-role="0"] .adm,body[data-role="1"] .adm{displa
 <div class="pop hide" id="um" role="menu">
  <button role="menuitem" onclick="umClose();logout()"><svg class="i"><use href="#i-out"/></svg><span><b>Logout</b><small>Chiudi la sessione su questo browser</small></span></button>
  <button role="menuitem" class="op" onclick="umClose();uReboot()"><svg class="i"><use href="#i-reboot"/></svg><span><b>Riavvia</b><small>La scheda riparte in pochi secondi</small></span></button>
+ <button role="menuitem" class="adm" onclick="umClose();uFw()"><svg class="i"><use href="#i-reboot"/></svg><span><b>Aggiorna firmware</b><small>Riavvia nel recovery e carica un nuovo file</small></span></button>
  <button role="menuitem" class="op" onclick="umClose();uSleep()"><svg class="i"><use href="#i-sleep"/></svg><span><b>Sleep</b><small>Sonno profondo: si riaccende con RESET</small></span></button>
 </div>
 <div class="pop hide" id="lpop" role="menu"></div>
@@ -1145,6 +1146,10 @@ function umClose(){$("um").className="pop hide"}
 document.addEventListener("click",function(e){var m=$("um");if(m&&!m.classList.contains("hide")&&!e.target.closest("#um"))umClose()});
 function uWait(txt,ms){dlg({title:txt,body:'<p style="margin:0">'+esc(t("La pagina si ricarica da sola quando la scheda e pronta."))+'</p>',buttons:[]});setTimeout(function(){location.reload()},ms)}
 function uReboot(){dlg({title:t("Riavviare la scheda?"),body:'<p style="margin:0">'+esc(t("La pagina resta irraggiungibile per qualche secondo."))+'</p>',ok:t("Riavvia"),onOk:function(){return post("/api/reboot",{}).then(function(r){return r.json()}).then(function(j){if(j.ok)setTimeout(function(){uWait(t("Riavvio in corso..."),10000)},50);return j.ok?"":j.err})}})}
+function uFw(){api("/api/recovery").then(function(r){return r.json()}).then(function(j){
+ if(!j.present){dlg({title:t("Aggiornare il firmware?"),body:'<p style="margin:0">'+esc(t("Il recovery non e presente su questa scheda: il firmware si aggiorna solo con il cavo USB."))+'</p>',buttons:[["ok",t("Chiudi"),""]]});return}
+ dlg({title:t("Aggiornare il firmware?"),body:'<p style="margin:0">'+esc(t("La scheda si riavvia nel recovery, una pagina separata dove carichi il file .bin di VesevOS. Servono utente e password di un amministratore."))+'</p>',ok:t("Riavvia nel recovery"),
+ onOk:function(){return post("/api/recovery",{}).then(function(r){return r.json()}).then(function(j){if(j.ok)setTimeout(function(){var u="http://"+(j.ip||"")+":80/";dlg({title:t("Scheda nel recovery"),body:'<p style="margin:0">'+esc(tf("Apri {0} in una finestra privata del browser (scrivi http, non https). Se in 30 secondi non trova la rete di casa, la scheda crea la rete Wi-Fi VesevOS-recovery: la password e sulla seriale.",u))+'</p><p style="margin:8px 0 0">'+esc(t("Dopo l'aggiornamento VesevOS riparte da solo."))+'</p>',buttons:[["ok",t("Chiudi"),""]]})},50);return j.ok?"":j.err})}})}).catch(function(){})}
 function uSleep(){dlg({title:t("Mettere la scheda in sleep?"),body:'<p style="margin:0">'+esc(t("La scheda entra in sonno profondo: Wi-Fi e LED spenti, consuma pochissimo."))+'</p><p style="margin:8px 0 0"><b>'+esc(t("Per riaccenderla premi il tasto RESET sulla scheda (o togli e ridai corrente)."))+'</b></p>',ok:t("Sleep"),danger:true,
  onOk:function(){return post("/api/sleep",{}).then(function(r){return r.json()}).then(function(j){if(j.ok)setTimeout(function(){dlg({title:t("Scheda in sleep"),body:'<p style="margin:0">'+esc(t("Premi RESET sulla scheda, poi ricarica questa pagina."))+'</p>',buttons:[["ok",t("Ricarica"),""]],onOk:function(){location.reload();return""}})},50);return j.ok?"":j.err})}})}
 function row(a,b){return '<div class="row"><span>'+a+'</span><span>'+b+'</span></div>'}

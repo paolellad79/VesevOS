@@ -1,10 +1,10 @@
 # VesevOS - Release Developer (guida per chi sviluppa e rilascia)
 
-Ultimo aggiornamento: 8 ottobre 2026, versione 1.7.39. Si pubblica anche su GitHub (docs/). La procedura passo-passo sta nella checklist di rilascio (claude/VesevOS-checklist-rilascio.md nel Progetto); qui c'e il quadro per chi lavora sul codice.
+Ultimo aggiornamento: 10 ottobre 2026, versione 1.7.45. Si pubblica anche su GitHub (docs/). La procedura passo-passo sta nella checklist di rilascio (claude/VesevOS-checklist-rilascio.md nel Progetto); qui c'e il quadro per chi lavora sul codice.
 
 ## 1. Ambiente
 - Scheda: ESP32-S3 SuperMini (4 MB flash, 2 MB PSRAM, USB nativa, LED WS2812 su GPIO48, solo antenna interna).
-- Arduino IDE, core Arduino-ESP32 3.3.x, partizione "Huge APP".
+- Arduino IDE, core Arduino-ESP32 3.3.x, partizione "Huge APP" (solo per il compilatore; la tabella vera e in recovery/VesevOS_Recovery/partitions.csv: recovery 1 MB + app0 2,31 MB). Rilascio: oltre a VesevOS/ si pubblica recovery/ (sketch, script, LEGGIMI).
 - Librerie: PsychicHttp 3.1.2, ArduinoJson 7 (altro: mbedTLS e ESP-IDF dal core).
 - Licenza: GPL-3.0-or-later oppure licenza commerciale (COMMERCIAL.md). Il core Arduino (LGPL) non si distribuisce con il repo.
 
@@ -31,7 +31,7 @@ Ultimo aggiornamento: 8 ottobre 2026, versione 1.7.39. Si pubblica anche su GitH
 5. Compilazione vera e prova sulla scheda: la fa il proprietario.
 
 ## 5. Versioni
-- Funzioni nuove = numero nuovo (1.7.39). Solo correzioni di bug = lettera (1.7.9b).
+- Funzioni nuove = numero nuovo (1.7.45). Solo correzioni di bug = lettera (1.7.9b).
 - La versione va in: `vos_common.h`, `VesevOS.ino`, nome ZIP, CHANGELOG, README it/en, SBOM, `mkcommon.py`, LEGGIMI, manuali.
 - Rifacimento di architettura: un passo = una versione, mai due strati insieme.
 

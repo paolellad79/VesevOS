@@ -52,6 +52,17 @@ void routesSys(PsychicHttpServer* S, bool sec) {
     xTaskCreate(delayedRestart, "rst", 2048, NULL, 1, NULL);
     return e;
   });
+  add(S, sec, "/api/recovery", HTTP_GET, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {      // il recovery c'e? (aggiornamento del firmware)
+    return sendJson(s, String("{\"present\":") + (drvRecoveryPresent() ? 1 : 0) + ",\"kb\":" + String((unsigned long)drvRecoverySizeKB()) + "}");
+  });
+  add(S, sec, "/api/recovery", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {  // riavvia nel recovery (pagina di caricamento del .bin)
+    if (!drvRecoveryPresent()) return ko(s, tr("Recovery non presente: la scheda ha ancora la tabella partizioni vecchia."), "state");
+    if (!drvRecoveryEnter()) return ko(s, tr("Non riesco a passare al recovery."), "state");
+    vlog("SISTEMA: riavvio nel recovery dalla pagina (%s)", who(c).c_str());
+    esp_err_t e = sendJson(s, "{\"ok\":true,\"ip\":\"" + netIpString() + "\"}");
+    xTaskCreate(delayedRestart, "rst", 2048, NULL, 1, NULL);
+    return e;
+  });
   add(S, sec, "/api/sleep", HTTP_POST, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
     g_sleepSec = has(r, "min") ? (uint32_t)(P(r, "min").toInt() * 60L) : 0;     // 0 = fino a RESET
     if (g_sleepSec > 7UL * 24 * 3600) return ko(s, tr("Sonno: da 1 minuto a 7 giorni"));

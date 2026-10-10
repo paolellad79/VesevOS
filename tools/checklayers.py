@@ -14,6 +14,7 @@ RULES = {
   'mqtt':   (r'\besp_mqtt_client_\w+|\bmqtt_client\.h',        {'vos_drv_mqtt.cpp', 'vos_drv_mqtt.h'}),
   'wifi':   (r'\bWiFi\.|\besp_wifi_\w+',                       {'vos_drv_espnow.cpp', 'vos_drv_wifi.cpp', 'vos_drv_wifi.h'}),     # il driver ESP-NOW legge solo modo e canale
   'fs':     (r'\bLittleFS\b(?!\.h)',                           {'vos_drv_fs.cpp', 'vos_drv_fs.h', 'vos_license_data.h'}),
+  'ota':    (r'\besp_partition_\w+|\besp_ota_\w+',                {'vos_drv_ota.cpp', 'vos_drv_ota.h'}),
   'gpio':   (r'\b(digitalWrite|digitalRead|pinMode|analogRead|ledcWrite|ledcAttach|neopixelWrite)\s*\(', {'vos_drv_gpio.cpp'}),
 }
 def code_only(line):

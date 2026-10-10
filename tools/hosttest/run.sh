@@ -17,6 +17,8 @@ $CXX -c "$OUT/Stream.cpp" -o "$OUT/st.o"
 $CXX -c "$HERE/shim.cpp" -o "$OUT/shim.o"
 $CXX -c "$HERE/shim_crypto.cpp" -o "$OUT/shimc.o"
 rc=0
+# il marchio del firmware non deve comparire in chiaro nel recovery (altrimenti si potrebbe caricare il recovery al posto del firmware)
+if grep -rqF "{FW:VesevOS}" "$REPO/recovery"; then echo "KO: marchio in chiaro nel recovery"; rc=1; fi
 # parti del firmware provate (vanno aggiunte qui quando si scrive un nuovo test)
 for f in vos_util vos_config vos_config_export vos_config_import vos_serial vos_log vos_crypt vos_ble_cfg vos_service vos_eventbus vos_drv_fs; do $CXX -c "$(find "$REPO/VesevOS" -name "$f.cpp")" -o "$OUT/$f.o"; done
 BASE="$OUT/vos_util.o $OUT/vos_config.o $OUT/vos_config_export.o $OUT/vos_config_import.o $OUT/vos_serial.o $OUT/vos_log.o $OUT/vos_crypt.o $OUT/vos_drv_fs.o $OUT/shimc.o $OUT/shim.o $OUT/ws.o $OUT/pr.o $OUT/st.o"

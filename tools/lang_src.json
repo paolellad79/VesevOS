@@ -1321,10 +1321,10 @@
    "scope": "fw"
   },
   {
-   "it": "  ram [mark|diff] stack dei task e costo dei servizi (mark, cambia qualcosa, diff)",
-   "en": "  ram [mark|diff] task stacks and service cost (mark, change something, diff)",
-   "es": "  ram [mark|diff] pilas de las tareas y coste de los servicios (mark, cambia algo, diff)",
-   "de": "  ram [mark|diff] Task-Stacks und Dienstkosten (mark, etwas aendern, diff)",
+   "it": "  ram [mark|diff|audit] stack dei task e costo dei servizi (audit: storico)",
+   "en": "  ram [mark|diff|audit] task stacks and service cost (audit: history)",
+   "es": "  ram [mark|diff|audit] pilas de las tareas y coste de los servicios (audit: historial)",
+   "de": "  ram [mark|diff|audit] Task-Stacks und Dienstkosten (audit: Verlauf)",
    "scope": "fw"
   },
   {
@@ -12896,6 +12896,139 @@
    "en": "On",
    "es": "Encendido",
    "de": "An",
+   "scope": "web"
+  },
+  {
+   "it": "RAM interna: totale %u KB, occupata %u KB (%u%%), libera %u KB, pezzo piu grande %u KB",
+   "en": "Internal RAM: total %u KB, used %u KB (%u%%), free %u KB, largest block %u KB",
+   "es": "RAM interna: total %u KB, ocupada %u KB (%u%%), libre %u KB, pieza mas grande %u KB",
+   "de": "Interner RAM: gesamt %u KB, belegt %u KB (%u%%), frei %u KB, groesstes Stueck %u KB",
+   "scope": "fw"
+  },
+  {
+   "it": "TLS in PSRAM: %s",
+   "en": "TLS in PSRAM: %s",
+   "es": "TLS en PSRAM: %s",
+   "de": "TLS im PSRAM: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "non disponibile",
+   "en": "not available",
+   "es": "no disponible",
+   "de": "nicht verfuegbar",
+   "scope": "fw"
+  },
+  {
+   "it": "non provato",
+   "en": "not tried",
+   "es": "no probado",
+   "de": "nicht versucht",
+   "scope": "fw"
+  },
+  {
+   "it": "Storico: secondi, evento, RAM libera, pezzo piu grande, PSRAM, variazione della RAM libera",
+   "en": "History: seconds, event, free RAM, largest block, PSRAM, change in free RAM",
+   "es": "Historial: segundos, evento, RAM libre, pieza mas grande, PSRAM, variacion de la RAM libre",
+   "de": "Verlauf: Sekunden, Ereignis, freier RAM, groesstes Stueck, PSRAM, Aenderung des freien RAM",
+   "scope": "fw"
+  },
+  {
+   "it": "  recovery [now]  recovery (aggiornamento firmware): stato, o 'now' = riavvia nel recovery",
+   "en": "  recovery [now]  recovery (firmware update): status, or 'now' = restart into recovery",
+   "es": "  recovery [now]  recovery (actualizar firmware): estado, o 'now' = reinicia en recovery",
+   "de": "  recovery [now]  Recovery (Firmware-Update): Status, oder 'now' = Neustart ins Recovery",
+   "scope": "fw"
+  },
+  {
+   "it": "Recovery non presente: la scheda ha ancora la tabella partizioni vecchia.",
+   "en": "Recovery not present: the board still has the old partition table.",
+   "es": "Recovery no presente: la placa aun tiene la tabla de particiones antigua.",
+   "de": "Recovery nicht vorhanden: die Platine hat noch die alte Partitionstabelle.",
+   "scope": "fw"
+  },
+  {
+   "it": "Recovery presente. Scrivi 'recovery now' per riavviare nel recovery.",
+   "en": "Recovery present. Type 'recovery now' to restart into recovery.",
+   "es": "Recovery presente. Escribe 'recovery now' para reiniciar en recovery.",
+   "de": "Recovery vorhanden. 'recovery now' eingeben, um ins Recovery neu zu starten.",
+   "scope": "fw"
+  },
+  {
+   "it": "Non riesco a passare al recovery.",
+   "en": "Cannot switch to recovery.",
+   "es": "No puedo pasar al recovery.",
+   "de": "Wechsel ins Recovery nicht moeglich.",
+   "scope": "fw"
+  },
+  {
+   "it": "Riavvio nel recovery...",
+   "en": "Restarting into recovery...",
+   "es": "Reiniciando en recovery...",
+   "de": "Neustart ins Recovery...",
+   "scope": "fw"
+  },
+  {
+   "it": "Aggiorna firmware",
+   "en": "Update firmware",
+   "es": "Actualizar firmware",
+   "de": "Firmware aktualisieren",
+   "scope": "web"
+  },
+  {
+   "it": "Riavvia nel recovery e carica un nuovo file",
+   "en": "Restart into recovery and upload a new file",
+   "es": "Reinicia en recovery y carga un archivo nuevo",
+   "de": "Im Recovery neu starten und neue Datei laden",
+   "scope": "web"
+  },
+  {
+   "it": "Aggiornare il firmware?",
+   "en": "Update the firmware?",
+   "es": "¿Actualizar el firmware?",
+   "de": "Firmware aktualisieren?",
+   "scope": "web"
+  },
+  {
+   "it": "Il recovery non e presente su questa scheda: il firmware si aggiorna solo con il cavo USB.",
+   "en": "The recovery is not installed on this board: the firmware can only be updated with the USB cable.",
+   "es": "El recovery no esta en esta placa: el firmware solo se actualiza con el cable USB.",
+   "de": "Das Recovery ist auf diesem Board nicht vorhanden: die Firmware kann nur per USB-Kabel aktualisiert werden.",
+   "scope": "web"
+  },
+  {
+   "it": "La scheda si riavvia nel recovery, una pagina separata dove carichi il file .bin di VesevOS. Servono utente e password di un amministratore.",
+   "en": "The board restarts into the recovery, a separate page where you upload the VesevOS .bin file. You need the user and password of an administrator.",
+   "es": "La placa se reinicia en el recovery, una pagina aparte donde cargas el archivo .bin de VesevOS. Hacen falta usuario y contraseña de un administrador.",
+   "de": "Das Board startet im Recovery neu, einer eigenen Seite zum Hochladen der VesevOS-.bin-Datei. Benutzer und Passwort eines Administrators sind nötig.",
+   "scope": "web"
+  },
+  {
+   "it": "Riavvia nel recovery",
+   "en": "Restart into recovery",
+   "es": "Reiniciar en recovery",
+   "de": "Im Recovery neu starten",
+   "scope": "web"
+  },
+  {
+   "it": "Scheda nel recovery",
+   "en": "Board in recovery",
+   "es": "Placa en recovery",
+   "de": "Board im Recovery",
+   "scope": "web"
+  },
+  {
+   "it": "Apri {0} in una finestra privata del browser (scrivi http, non https). Se in 30 secondi non trova la rete di casa, la scheda crea la rete Wi-Fi VesevOS-recovery: la password e sulla seriale.",
+   "en": "Open {0} in a private browser window (type http, not https). If it cannot find the home network within 30 seconds, the board creates the Wi-Fi network VesevOS-recovery: the password is on the serial port.",
+   "es": "Abre {0} en una ventana privada del navegador (escribe http, no https). Si en 30 segundos no encuentra la red de casa, la placa crea la red Wi-Fi VesevOS-recovery: la contraseña esta en el puerto serie.",
+   "de": "Öffne {0} in einem privaten Browserfenster (http, nicht https). Findet das Board das Heimnetz nicht innerhalb von 30 Sekunden, erstellt es das WLAN VesevOS-recovery: das Passwort steht an der seriellen Schnittstelle.",
+   "scope": "web"
+  },
+  {
+   "it": "Dopo l'aggiornamento VesevOS riparte da solo.",
+   "en": "After the update VesevOS restarts by itself.",
+   "es": "Despues de la actualizacion VesevOS se reinicia solo.",
+   "de": "Nach dem Update startet VesevOS von selbst neu.",
    "scope": "web"
   }
  ]

@@ -30,7 +30,7 @@ rete Wi-Fi, ora, file, LED, pin, shell e tante altre cose, tutto protetto da una
 </p>
 <p align="center"><sub>Schermate della pagina di controllo (con dati di esempio): Home in tema scuro, Automazioni, ordine di avvio con il terminale a pannello, e la versione per telefono.</sub></p>
 
-> **Stato:** in sviluppo (versione 1.7.39). Il progetto cresce a fasi: guarda "Dove stiamo andando".
+> **Stato:** in sviluppo (versione 1.7.45). Il progetto cresce a fasi: guarda "Dove stiamo andando".
 
 ## Perché si chiama VesevOS
 
@@ -68,14 +68,13 @@ una situazione di emergenza, in silenzio radio quando serve, o comunicando in mo
 | 🌍 | **Per tutti** | Italiano, inglese, spagnolo e tedesco, e si può aggiungere una lingua con un solo file. |
 | 🔋 | **Affidabile e frugale** | Pensato per reggere i blackout e per consumare poco, anche con la batteria. |
 
-## Novità della 1.7.39
+## Novità della 1.7.45
 
-- **Bluetooth libero**: acceso quando vuoi, senza orologio. Il nome è quello della tua scheda, il telefono si abbina con un codice a 6 cifre.
-- **Memoria più ordinata**: dopo aver acceso e spento il Bluetooth la RAM torna come prima (pezzo libero più grande: 79 KB, era 47).
-- **Event Bus**: la scheda racconta cosa succede (rete su/giù, IP bloccati, allarmi, servizi) e le app lo leggono con `GET /api/events` o con il comando `events`.
-- **API pulita e documentata**: 127 rotte, codici HTTP giusti, documento in italiano e inglese ([docs/API.md](docs/API.md)).
-- **Codice a strati**: driver separati dai servizi, file piccoli, 8 gruppi di prove sul computer.
-- **Accessibile**: pagina conforme WCAG 2.2 AA.
+- **Aggiornamento senza cavo e senza scheda SD**: dal menu utente scegli *Aggiorna firmware*, la scheda si riavvia in un piccolo **recovery** con la sua pagina, carichi il file `.bin` e VesevOS riparte con la versione nuova. Prima di attivare il file il recovery controlla che sia davvero un firmware VesevOS completo (intestazione, marchio, dimensione, SHA-256 facoltativo): un file sbagliato non rovina quello che funziona.
+- **Guida passo per passo** per preparare la scheda: [docs/GUIDA-PREPARARE-LA-SCHEDA.md](docs/GUIDA-PREPARARE-LA-SCHEDA.md).
+- **Più memoria libera**: le automazioni occupano RAM solo se ne hai create (circa 15 KB in più); nuovo comando `ram audit` che racconta dove va la memoria.
+- **API**: 129 rotte (nuove `GET`/`POST /api/recovery`), documento in italiano e inglese ([docs/API.md](docs/API.md)).
+- Prima installazione con il cavo (una volta sola, la guida spiega come); poi si aggiorna dalla pagina.
 
 ## Cosa fa oggi
 
@@ -118,7 +117,8 @@ Queste sono idee e progetti, non promesse: l'ordine può cambiare.
 
 - Scheda **ESP32-S3 SuperMini** (ESP32-S3FH4R2: 4 MB flash, 2 MB PSRAM).
 - Arduino IDE con core **esp32 3.3.x** o piu recente.
-- Librerie (Gestore librerie di Arduino IDE): **PsychicHttp** (3.1.x, MIT) e **ArduinoJson** (7.x, MIT). Non servono piu ESPAsyncWebServer e AsyncTCP.
+- Librerie (Gestore librerie di Arduino IDE): **PsychicHttp** (3.1.x, MIT), **ArduinoJson** (7.x, MIT) e **NimBLE-Arduino** (2.x, Apache-2.0).
+- Per l'aggiornamento senza cavo: Python 3 ed `esptool` (solo per la prima installazione, vedi la guida).
 - Il Bluetooth si puo togliere per risparmiare memoria: `#define VOS_WITH_BLE 0` in `vos_common.h`.
 
 ## Impostazioni Arduino IDE
@@ -128,14 +128,15 @@ Queste sono idee e progetti, non promesse: l'ordine può cambiare.
 | Scheda | ESP32S3 Dev Module |
 | PSRAM | QSPI PSRAM |
 | USB CDC On Boot | Enabled |
-| Partition Scheme | Minimal SPIFFS (1.9MB APP with OTA/190KB SPIFFS) |
+| Partition Scheme | Huge APP (3MB No OTA/1MB SPIFFS) (serve solo al compilatore: la tabella vera la scrive lo script di installazione) |
 
 ## Installazione
 
 1. Scarica o clona il repository.
 2. Apri la cartella `VesevOS/` (deve contenere `VesevOS.ino`) con Arduino IDE.
-3. Imposta la scheda come nella tabella, poi carica lo sketch.
-4. Apri il monitor seriale a 115200 per vedere i messaggi di avvio.
+3. Imposta la scheda come nella tabella.
+4. **Segui la guida [docs/GUIDA-PREPARARE-LA-SCHEDA.md](docs/GUIDA-PREPARARE-LA-SCHEDA.md)**: compili recovery e VesevOS, li installi con gli script di `recovery/` e apri il monitor seriale a 115200.
+5. Dopo la prima installazione **non usare il pulsante Carica dell'IDE**: aggiorni dalla pagina (*Aggiorna firmware*).
 
 ## Primo accesso
 

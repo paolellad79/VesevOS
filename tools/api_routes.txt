@@ -79,6 +79,8 @@ POST  /api/pintest  operatore
 GET   /api/power  operatore
 POST  /api/power  admin
 POST  /api/reboot  operatore
+GET   /api/recovery  admin
+POST  /api/recovery  admin
 GET   /api/region  ospite
 POST  /api/region  admin
 GET   /api/rules  operatore

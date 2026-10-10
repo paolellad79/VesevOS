@@ -1,4 +1,4 @@
-# VesevOS 1.7.39 - Manuale
+# VesevOS 1.7.45 - Manuale
 
 Manuale per chi usa la scheda. Parole semplici, niente programmazione.
 English version: [manual.en.md](manual.en.md). Lo stesso aiuto e nella pagina della scheda (Sistema > Aiuto, oppure `http://192.168.4.1/#aiuto`).
@@ -20,7 +20,7 @@ Ogni scheda VesevOS, la prima volta che si accende, inventa da sola una password
 - **Dopo la configurazione la puoi cambiare** (Servizi > Punto di accesso), anche il nome della rete.
 
 ### Metodo 1 (consigliato): cavo USB e monitor seriale
-1. Carica VesevOS sulla scheda (Arduino IDE > Carica).
+1. Prepara la scheda con la guida [GUIDA-PREPARARE-LA-SCHEDA.md](GUIDA-PREPARARE-LA-SCHEDA.md) (recovery + VesevOS).
 2. Apri Strumenti > Monitor seriale, velocita 115200, e premi RESET sulla scheda.
 3. Leggi la schermata di benvenuto: nome della rete (`VesevOS`), password (es. `k7mpq4xtr9ab`: 12 caratteri, tutti minuscoli e numeri, senza simboli) e indirizzo `http://192.168.4.1`.
    Vuoi l'inglese? Premi `2` (senza Invio). Per tornare all'italiano premi `1`.
@@ -213,3 +213,15 @@ Sistema > **Backup e ripristino** (solo Admin).
 - **Includi anche i segreti**: spunta, scegli una **frase di almeno 10 caratteri**, scrivila due volte e accetta l'avviso. Il file e **cifrato** (PBKDF2-HMAC-SHA256 + AES-256-GCM): senza la frase non si legge. Chi ha il file e la frase puo entrare nella scheda e nella tua rete; **se perdi la frase i segreti non si recuperano**. Ogni esportazione con segreti resta scritta nel registro.
 - **Ripristina da file**: scegli il file (e, se e cifrato, scrivi la frase). La pagina dice quante righe sono cambiate. Una frase sbagliata conta come errore di accesso.
 - **Ripristino di fabbrica**: cancella impostazioni, utenti e password; per confermare devi scrivere la parola AZZERA.
+
+## 22. Aggiornare il firmware senza cavo (novita 1.7.42 - 1.7.45)
+Sulla scheda ci sono due programmi: **VesevOS** e il **recovery** (piccolo, serve solo ad aggiornare). La prima installazione si fa con il cavo USB: segui [GUIDA-PREPARARE-LA-SCHEDA.md](GUIDA-PREPARARE-LA-SCHEDA.md). Dopo, si aggiorna dalla pagina.
+1. Menu utente (solo Amministratore) > **Aggiorna firmware** > *Riavvia nel recovery*. In alternativa, dalla seriale: `recovery` (dice se c'e) e `recovery now`.
+2. La pagina mostra l'indirizzo del recovery, per esempio `http://192.168.1.50:80/`. Aprilo in una **finestra privata** e scrivi **http**, non https (il recovery non e cifrato).
+   Il recovery prova prima la **rete di casa**; se in 30 secondi non la trova crea la rete Wi-Fi `VesevOS-recovery` (password casuale scritta sulla seriale).
+3. Entra con utente e password di un **Amministratore** di VesevOS (la password non viaggia in chiaro). Con la flash vuota, e senza amministratori, serve il codice a 8 cifre mostrato sulla seriale. Cinque errori = attesa di 60 secondi.
+4. Scegli il file `VesevOS.ino.bin` (non il `.merged.bin`). *SHA-256 atteso* e facoltativo: se lo scrivi, il file deve coincidere.
+5. *Carica e installa*. Prima la pagina e poi la scheda controllano: intestazione per ESP32-S3, **marchio VesevOS**, dimensione, immagine completa. Se il file e sbagliato viene rifiutato e **il vecchio firmware non si tocca**; se l'errore arriva a scrittura iniziata, il recovery resta acceso e basta ricaricare il file buono.
+6. Dopo circa 10 secondi VesevOS riparte. *Avvia VesevOS senza aggiornare* torna indietro. Dopo 15 minuti senza accessi il recovery torna da solo a VesevOS. Tasto BOOT premuto all'accensione = resta nel recovery.
+- Il controllo del file garantisce che e un firmware VesevOS completo; **non e una firma digitale**. Scarica i file solo da fonti fidate.
+- Dopo l'installazione con recovery **non usare *Carica* dell'IDE**: cancellerebbe il recovery.

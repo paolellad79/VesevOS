@@ -1,6 +1,6 @@
 # VesevOS - Problemi noti (Known Issues)
 
-Ultimo aggiornamento: 8 ottobre 2026, versione 1.7.39. Questo file si pubblica anche su GitHub (cartella docs/) e si aggiorna a ogni rilascio.
+Ultimo aggiornamento: 10 ottobre 2026, versione 1.7.45. Questo file si pubblica anche su GitHub (cartella docs/) e si aggiorna a ogni rilascio.
 Stato: **A** = aperto, **M** = mitigato (c'e un rimedio), **S** = in programma per la versione commerciale, **O** = in osservazione.
 
 ## Memoria (RAM)
@@ -40,6 +40,9 @@ Stato: **A** = aperto, **M** = mitigato (c'e un rimedio), **S** = in programma p
 | S25 | L'Event Bus (1.7.32-1.7.33) e confermato sulla scheda per `svc.state`, `net.state`, `sec.ban`, `sec.unban`. Manca solo da vedere `audit.new` / `audit.clear`. | B | Al primo allarme giallo (es. `frag`, memoria frammentata dopo il Bluetooth) scrivi `events`: deve comparire `audit.new` con il codice dell'allarme; quando rientra, `audit.clear`. |
 | S28 | La 1.7.38 aggiunge gli eventi `mqtt.link`, `ble.link`, `mesh.node`, `time.sync`. Provata solo con stub, **non sulla scheda**. | B | Shell `events` dopo: collegamento del telefono al Bluetooth (`ble.link 1`, poi 0 allo scollegamento); accensione/spegnimento MQTT con broker raggiungibile (`mqtt.link`); sincronizzazione NTP (`time.sync`, anche con `ntp sync`). Se hai due schede: `mesh.node` all'arrivo di una vicina. |
 | S29 | La 1.7.39 fa un avvio a vuoto del Bluetooth al boot per evitare che dopo il primo `ble on`/`ble off` il pezzo di RAM piu grande scenda da 79 a 47 KB. Provata solo con stub, **non sulla scheda**. | A | Nel log di avvio cerca "BLE: memoria preparata al boot" (prima/dopo). Poi `free detail` a riposo (prima: 121 KB liberi, pezzo piu grande 79 KB), `ble on` + `free detail`, `ble off` + `free detail`: il pezzo piu grande dopo lo spegnimento deve restare vicino a quello a riposo (prima 47 KB). Controlla che il boot non sia piu lento di piu di 1 secondo e che il Bluetooth si accenda come prima. Se la scheda si riavvia da sola al boot: rimetti `VOS_BLE_PRIME 0`. |
+| S30 | Il recovery (0.3.0) usa solo HTTP (niente cifratura), e solo in italiano, e il controllo del file verifica integrita (marchio, SHA-256 facoltativo) ma non e una firma digitale. Provato sulla scheda. | S | Per la versione commerciale: TLS nel recovery, traduzioni, firma Ed25519 dei firmware. Intanto usalo su una rete fidata e scarica i file solo da fonti fidate. |
+| S31 | Con la nuova tabella partizioni non c'e la partizione per il core dump: sulla seriale compare "No core dump partition found" (innocuo) e un crash non lascia il core dump. | O | Si valuta piu avanti (serve spazio). |
+| S32 | Dopo l'installazione con recovery il pulsante *Carica* di Arduino IDE per VesevOS cancella il recovery. | M | Aggiorna dalla pagina (Aggiorna firmware) o con `recovery/carica-firmware.sh`. Vedi la guida docs/GUIDA-PREPARARE-LA-SCHEDA.md. |
 
 ## Sicurezza (in programma per la versione commerciale)
 | # | Problema | Stato | Cosa fare |
@@ -71,4 +74,4 @@ Stato: **A** = aperto, **M** = mitigato (c'e un rimedio), **S** = in programma p
 | C2 | Servono PsychicHttp 3.1.2 e ArduinoJson 7; senza PsychicHttp non compila. | A | Installarle dal gestore librerie. |
 
 ## Come segnalare
-Mandare: versione (`ver`), `reboots`, `log 30`, `free detail` e cosa si stava facendo. Non incollare password o chiavi.
+Mandare: versione (`info`), `reboots`, `log 30`, `free detail` e cosa si stava facendo. Non incollare password o chiavi.

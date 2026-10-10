@@ -25,7 +25,7 @@ API version: **1** (`apiVersion` field in `/api/status` and `/api/common`). It c
 - **Parameters:** `application/x-www-form-urlencoded`. API rule 12: an invalid value must change nothing.
 - The **Parameters** and **Errors** columns are read from the code (indicative: the errors listed are those the route gives explicitly, besides the general ones above).
 
-## Routes (127)
+## Routes (129)
 
 | Method | Path | Level | What it does | Parameters | Errors |
 |---|---|---|---|---|---|
@@ -110,6 +110,8 @@ API version: **1** (`apiVersion` field in `/api/status` and `/api/common`). It c
 | GET | `/api/power` | operator | Power saving: mode and times | - | - |
 | POST | `/api/power` | admin | Change mode and times | `awake`, `mode`, `sleep` | `error` |
 | POST | `/api/reboot` | operator | Reboot the board | - | - |
+| GET | `/api/recovery` | admin | Tells whether the recovery is present (present 0/1, kb) | - | - |
+| POST | `/api/recovery` | admin | Reboots into the recovery to upload a new firmware (answers with ip) | - | `state` |
 | GET | `/api/region` | guest | Country, time zone, language, radio | - | - |
 | POST | `/api/region` | admin | Change country, zone, formats, antenna, power | `antenna`, `country`, `datefmt`, `decsep`, `gain`, `ntp`, `tempunit`, `timefmt`, `txpower`, `tz`, `tzname`, `weekstart` | `error` |
 | GET | `/api/rules` | operator | Automation text | - | - |

@@ -1,5 +1,55 @@
 # Cronologia delle versioni
 
+## 1.7.45 (ottobre 2026) - aggiornamento firmware, passo 4: "Aggiorna firmware" nella pagina
+
+- Nuova voce **Aggiorna firmware** nel menu utente (solo Amministratore): controlla che il recovery ci sia, poi riavvia la scheda nel recovery e mostra l'indirizzo da aprire (`http://IP:80/`, finestra privata) e cosa succede se la rete di casa non c'e (hotspot `VesevOS-recovery`, password sulla seriale).
+- Nuove rotte API `GET /api/recovery` (present, kb) e `POST /api/recovery` (riavvia nel recovery, risponde con l'IP); solo Amministratore, la seconda lascia una riga nel registro. Stesso lavoro del comando `recovery now`.
+- Recovery 0.3.0 invariato. Testi it/en/es/de, API.md/API.en.md rigenerati, prova della pagina aggiunta a smoke172.js.
+
+## 1.7.44 + Recovery 0.3.0 (ottobre 2026) - aggiornamento firmware, passo 3: controlli di sicurezza
+
+- Prima di attivare un firmware il recovery controlla: intestazione valida per ESP32-S3, immagine Arduino-ESP32, **marchio VesevOS** dentro il file, dimensione, SHA-256 (se lo scrivi nella pagina, deve coincidere) e immagine completa (`esp_ota_end`). Solo dopo imposta l'avvio.
+- Se l'intestazione e sbagliata il vecchio firmware **non viene toccato**. Se l'errore arriva dopo l'inizio della scrittura, lo slot viene reso non valido (il recovery resta e non avvia un'immagine a meta).
+- La pagina fa gli stessi controlli sul telefono/computer prima di inviare il file e mostra lo SHA-256 calcolato dalla scheda.
+- Il firmware 1.7.44 aggiunge solo il marchio `{FW:VesevOS}` (12 byte). Il marchio nel recovery e mascherato: il recovery non puo essere caricato al posto del firmware.
+- Nuove prove: `tools/hosttest/test_recheck.cpp`; stub `esp_ota_ops.h`.
+
+## Recovery 0.2.0 (ottobre 2026) - aggiornamento firmware, passo 2: il recovery con Wi-Fi
+
+- Il recovery (strada B2) ora si collega alla rete di casa (impostazioni lette dal file di configurazione di VesevOS) e, se non ci riesce in 30 s, apre un hotspot `VesevOS-recovery` con password casuale mostrata solo sulla seriale. Pagina minima: login con utente e password di un amministratore di VesevOS (stessa formula della pagina del firmware, la password non viaggia), poi carichi il `.bin` e il recovery lo scrive nello slot app0.
+- Nessun amministratore (flash vuota): serve il codice a 8 cifre mostrato sulla seriale. Cinque errori = attesa di 60 s. Dopo 15 minuti senza accessi torna da solo a VesevOS.
+- Nuova tabella partizioni: recovery 1 MB, app0 2,31 MB (indirizzo 0x110000), file invariati (stesso indirizzo, la configurazione resta). Gli script controllano che i file entrino nelle partizioni.
+- Il firmware 1.7.43 non cambia. Nuovo `tools/mkrecpage.py` (genera la pagina del recovery copiando SHA-256/HMAC dalla pagina del firmware).
+
+
+## 1.7.43 (ottobre 2026) - Recovery: `recovery now` ora resta nel recovery
+
+- Prova sulla scheda del passo 1: `recovery now` entrava nel recovery ma questo tornava subito a VesevOS (sembrava un riavvio). Ora il comando lascia un segno in NVS ("vosrec/stay") e il recovery 0.1.2 resta fermo finche non scrivi `b` (avvia VesevOS) sulla seriale.
+- Solo `vos_drv_ota.cpp` (firmware) e lo sketch del recovery. Nessun altro cambiamento.
+
+
+## 1.7.42 (ottobre 2026) - Aggiornamento firmware, passo 1: il recovery
+
+- Strada scelta per l'OTA senza scheda SD: un piccolo programma di **recupero** (partizione factory) piu un solo slot grande per VesevOS. Il firmware non deve piu stare in due slot, quindi niente dieta e il Bluetooth resta.
+- Nuovo comando `recovery` (solo Amministratore): senza argomenti dice se il recovery c'e; `recovery now` riavvia nel recovery. Nuovo driver `vos_drv_ota` (unico file con `esp_partition_*`) e regola `ota` in checklayers.
+- Nuova cartella `recovery/`: sketch `VesevOS_Recovery` 0.1.0 (per ora solo passa il comando a VesevOS), `partitions.csv` (4 MB: recovery 832 KB, app0 2,5 MB, file 640 KB), `installa.sh` (prima installazione con `esptool`).
+- Il firmware vero e proprio non cambia comportamento. Con la vecchia tabella partizioni `recovery` risponde "non presente".
+
+
+## 1.7.41 (ottobre 2026) - RAM: le regole occupano memoria solo se ci sono
+
+- Misura sulla scheda (1.7.40, `ram audit`): a riposo 55% occupata (121 KB liberi); il login alla pagina costa solo 7 KB di RAM interna (il TLS va in PSRAM: funziona); il Bluetooth acceso costa circa 62 KB; dopo `ble off` la RAM torna quasi uguale (114 KB liberi, pezzo piu grande 59 KB).
+- **Regole**: il task `rules` (stack da 6 KB) e le tre tabelle delle regole (circa 9 KB) esistevano sempre, anche con 0 regole. Ora il task parte solo quando c'e almeno una regola, e le tabelle stanno in memoria dinamica (in PSRAM se sono grandi) solo mentre servono. Con 0 regole si recuperano circa 15 KB di RAM interna.
+- `ram audit`: ogni chiamata lascia una riga "audit" nello storico, cosi la variazione tra due audit e quella vera.
+- Non toccati (decisione): gli stack di `wd`, `net`, `time`, `monitor`, `led`: il margine misurato e a riposo e non garantisce lo scenario peggiore.
+
+## 1.7.40 (ottobre 2026) - RAM: `ram audit`, lo storico che dice dove va la memoria
+
+- Nuovo comando `ram audit`: RAM interna con percentuale occupata, stato del TLS in PSRAM e uno **storico** automatico delle ultime 14 misure (avvio finito, Bluetooth acceso/spento, accesso e uscita dalla pagina) con la variazione della RAM libera tra una e l'altra. Cosi si vede quanto costa davvero il Bluetooth e quanto costa una pagina aperta.
+- Corretta la tabella degli stack: il task `wd` e di 6144 byte (era scritto 3072), quindi il margine recuperabile del comando `ram` era sbagliato per quel task.
+- Costo: 14 voci fisse da 28 byte (circa 0,4 KB, senza heap). Nessun cambio di comportamento.
+- Prima parte del passo 4 (RAM sotto il 75%): piano in `claude/funzioni/VesevOS-piano-ram-autonomo.md`.
+
 ## 1.7.39 (ottobre 2026) - Bluetooth: meno frammentazione della RAM (prova)
 
 - Misura sulla scheda (1.7.38): a riposo RAM libera 121 KB e pezzo piu grande 79 KB; col Bluetooth acceso libera 59 KB (costo reale ~62 KB, la stima nel codice era 45 KB: corretta) e pezzo piu grande 30 KB; DOPO lo spegnimento libera 121 KB (nessuna perdita) ma il pezzo piu grande resta 47 KB (frammentazione 61%): NimBLE lascia 2 piccoli blocchi nel mezzo della RAM.

@@ -30,7 +30,7 @@ Wi-Fi, clock, files, LEDs, pins, a shell and much more, all protected by a passw
 </p>
 <p align="center"><sub>Screenshots of the control page (with sample data): Home in dark theme, Automations, startup order with the bottom terminal panel, and the phone layout.</sub></p>
 
-> **Status:** in development (version 1.7.39). The project grows in stages: see "Where we are going".
+> **Status:** in development (version 1.7.45). The project grows in stages: see "Where we are going".
 
 ## Why "VesevOS"?
 
@@ -68,14 +68,13 @@ in radio silence when needed, or communicating in alternative ways.
 | 🌍 | **For everyone** | Italian, English, Spanish and German, and a new language is just one file. |
 | 🔋 | **Reliable and frugal** | Built to survive blackouts and to use little power, even on battery. |
 
-## What's new in 1.7.39
+## What's new in 1.7.45
 
-- **Bluetooth, your way**: on whenever you want, no countdown. It carries your board's name, and your phone pairs with a 6-digit code.
-- **Tidier memory**: after switching Bluetooth on and off, RAM goes back to how it was (largest free block: 79 KB, it used to drop to 47).
-- **Event Bus**: the board tells you what happens (network up/down, blocked IPs, alarms, services) and apps read it with `GET /api/events` or the `events` command.
-- **Clean, documented API**: 127 routes, proper HTTP codes, documented in Italian and English ([docs/API.en.md](docs/API.en.md)).
-- **Layered code**: drivers apart from services, small files, 8 groups of tests on the computer.
-- **Accessible**: the page meets WCAG 2.2 AA.
+- **Updates with no cable and no SD card**: from the user menu choose *Update firmware*, the board restarts into a small **recovery** with its own page, you upload the `.bin` file and VesevOS restarts with the new version. Before activating the file the recovery checks it is really a complete VesevOS firmware (header, marker, size, optional SHA-256): a wrong file does not spoil the one that works.
+- **Step-by-step guide** to prepare the board: [docs/PREPARE-THE-BOARD.md](docs/PREPARE-THE-BOARD.md).
+- **More free memory**: automations use RAM only if you created some (about 15 KB more); new `ram audit` command that tells where memory goes.
+- **API**: 129 routes (new `GET`/`POST /api/recovery`), documented in Italian and English ([docs/API.en.md](docs/API.en.md)).
+- The first install is done over the cable (once only, the guide explains how); after that you update from the page.
 
 ## What it does today
 
@@ -119,7 +118,8 @@ These are ideas and plans, not promises: the order may change.
 
 - An **ESP32-S3 SuperMini** board (ESP32-S3FH4R2: 4 MB flash, 2 MB PSRAM).
 - Arduino IDE with **esp32 core 3.3.x** or newer.
-- Libraries (Arduino IDE Library Manager): **PsychicHttp** (3.1.x, MIT) and **ArduinoJson** (7.x, MIT). ESPAsyncWebServer and AsyncTCP are no longer needed.
+- Libraries (Arduino IDE Library Manager): **PsychicHttp** (3.1.x, MIT), **ArduinoJson** (7.x, MIT) and **NimBLE-Arduino** (2.x, Apache-2.0).
+- For cable-free updates: Python 3 and `esptool` (only for the first install, see the guide).
 - Bluetooth can be left out to save memory: `#define VOS_WITH_BLE 0` in `vos_common.h`.
 
 ## Arduino IDE settings
@@ -129,14 +129,15 @@ These are ideas and plans, not promises: the order may change.
 | Board | ESP32S3 Dev Module |
 | PSRAM | QSPI PSRAM |
 | USB CDC On Boot | Enabled |
-| Partition Scheme | Minimal SPIFFS (1.9MB APP with OTA/190KB SPIFFS) |
+| Partition Scheme | Huge APP (3MB No OTA/1MB SPIFFS) (only the compiler needs it: the real table is written by the install script) |
 
 ## Installation
 
 1. Download or clone the repository.
 2. Open the `VesevOS/` folder (it must contain `VesevOS.ino`) with Arduino IDE.
-3. Set the board as in the table, then upload the sketch.
-4. Open the serial monitor at 115200 baud to see the start-up messages.
+3. Set the board as in the table.
+4. **Follow the guide [docs/PREPARE-THE-BOARD.md](docs/PREPARE-THE-BOARD.md)**: build the recovery and VesevOS, install them with the scripts in `recovery/` and open the serial monitor at 115200 baud.
+5. After the first install **do not use the IDE's Upload button**: update from the page (*Update firmware*).
 
 ## First access
 

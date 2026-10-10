@@ -1,6 +1,6 @@
 # VesevOS - Known Issues
 
-Last update: 8 October 2026, version 1.7.39. This file is also published on GitHub (docs/) and updated at every release.
+Last update: 10 October 2026, version 1.7.45. This file is also published on GitHub (docs/) and updated at every release.
 Status: **O** = open, **M** = mitigated (a workaround exists), **S** = planned for the commercial edition, **W** = watching.
 
 ## Memory (RAM)
@@ -40,6 +40,9 @@ Status: **O** = open, **M** = mitigated (a workaround exists), **S** = planned f
 | S25 | The Event Bus (1.7.32-1.7.33) is confirmed on the board for `svc.state`, `net.state`, `sec.ban`, `sec.unban`. Only `audit.new` / `audit.clear` remain to be seen. | B | At the first yellow alert (e.g. `frag`, memory fragmented after Bluetooth) run `events`: `audit.new` must appear with the alert code; when it clears, `audit.clear`. |
 | S28 | 1.7.38 adds the events `mqtt.link`, `ble.link`, `mesh.node`, `time.sync`. Tried only with stubs, **not on the board**. | B | Shell `events` after: connecting the phone to Bluetooth (`ble.link 1`, then 0 on disconnect); MQTT on/off with a reachable broker (`mqtt.link`); NTP sync (`time.sync`, also with `ntp sync`). With two boards: `mesh.node` when a neighbour appears. |
 | S29 | 1.7.39 runs a dry Bluetooth start at boot so that after the first `ble on`/`ble off` the largest RAM block does not drop from 79 to 47 KB. Tried only with stubs, **not on the board**. | A | In the boot log look for "BLE: memoria preparata al boot" (before/after). Then `free detail` at rest (before: 121 KB free, largest block 79 KB), `ble on` + `free detail`, `ble off` + `free detail`: the largest block after switching off must stay close to the one at rest (before: 47 KB). Check boot is not slower by more than 1 second and Bluetooth turns on as before. If the board restarts by itself at boot: set `VOS_BLE_PRIME 0`. |
+| S30 | The recovery (0.3.0) uses HTTP only (no encryption), is Italian only, and its file check verifies integrity (marker, optional SHA-256) but is not a digital signature. Tested on the board. | S | For the commercial version: TLS in the recovery, translations, Ed25519 firmware signatures. Meanwhile use it on a trusted network and download files only from trusted sources. |
+| S31 | With the new partition table there is no core dump partition: the serial port shows "No core dump partition found" (harmless) and a crash leaves no core dump. | O | To be evaluated later (needs space). |
+| S32 | After installing with the recovery, the Arduino IDE *Upload* button for VesevOS erases the recovery. | M | Update from the page (Update firmware) or with `recovery/carica-firmware.sh`. See docs/PREPARE-THE-BOARD.md. |
 
 ## Security (planned for the commercial edition)
 | # | Problem | Status | What to do |
@@ -71,4 +74,4 @@ Status: **O** = open, **M** = mitigated (a workaround exists), **S** = planned f
 | C2 | PsychicHttp 3.1.2 and ArduinoJson 7 are required; it does not build without PsychicHttp. | O | Install them from the Library Manager. |
 
 ## How to report
-Send: version (`ver`), `reboots`, `log 30`, `free detail` and what you were doing. Do not paste passwords or keys.
+Send: version (`info`), `reboots`, `log 30`, `free detail` and what you were doing. Do not paste passwords or keys.

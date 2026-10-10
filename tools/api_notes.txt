@@ -80,6 +80,8 @@ POST /api/pintest | Prova un pin (action, gpio, pull) | Test a pin
 GET /api/power | Risparmio energia: modo e tempi | Power saving: mode and times
 POST /api/power | Cambia modo e tempi | Change mode and times
 POST /api/reboot | Riavvia la scheda | Reboot the board
+GET /api/recovery | Dice se il recovery e presente (present 0/1, kb) | Tells whether the recovery is present (present 0/1, kb)
+POST /api/recovery | Riavvia nel recovery per caricare un nuovo firmware (risponde con ip) | Reboots into the recovery to upload a new firmware (answers with ip)
 GET /api/region | Paese, fuso, lingua, radio | Country, time zone, language, radio
 POST /api/region | Cambia paese, fuso, formati, antenna, potenza | Change country, zone, formats, antenna, power
 GET /api/rules | Testo delle automazioni | Automation text

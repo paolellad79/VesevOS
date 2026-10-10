@@ -3,6 +3,7 @@
 // VesevOS - vos_web_auth.cpp
 // Percorsi del server web: accesso, MFA, utenti. Aiuti e tipi condivisi: vos_web_int.h.
 #include "vos_web_int.h"
+#include "../core/vos_ram.h"
 
 void routesAuth(PsychicHttpServer* S, bool sec) {
   // ---- accesso: 1) sale + numero casuale  2) prova (HMAC). La password non viaggia mai. ----
@@ -80,7 +81,7 @@ void routesAuth(PsychicHttpServer* S, bool sec) {
     return sendJson(s, "{\"ok\":true,\"user\":\"" + jsonEscape(cfg.users[a].name) + "\",\"role\":2}");
   });
   add(S, sec, "/api/logout", HTTP_POST, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
-    authLogout(token(r));
+    authLogout(token(r)); ramNote("logout");
     s->addHeader("Set-Cookie", "vos=; Path=/; Max-Age=0");
     return ok(s);
   });

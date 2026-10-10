@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
-// VesevOS 1.7.39 - ESP32-S3 SuperMini
+// VesevOS 1.7.45 - ESP32-S3 SuperMini
 // Piccolo sistema operativo: pagina web (HTTPS), shell, utenti, rete tra schede, automazioni. Progetto in piu file.
 //
 // Impostazioni Arduino IDE consigliate:
@@ -80,9 +80,12 @@ static void bootButton() {
 // I blocchi grandi (buffer TLS da 16 KB, ecc.) vanno in PSRAM e lasciano libera la RAM interna.
 // Funzione del sistema: se il tuo core non la contiene il programma parte lo stesso (nessun errore di compilazione).
 extern "C" void heap_caps_malloc_extmem_enable(size_t limit) __attribute__((weak));
+// Marchio che il recovery cerca nel file prima di installarlo (non cambiare: vedi recovery/VesevOS_Recovery/recovery_check.h)
+static const char VOS_FW_MARK[] __attribute__((used)) = "{FW:VesevOS}";
 bool g_extmem = false;                                // letto da shell (comando diag)
 
 void setup() {
+  (void)*(volatile const char*)VOS_FW_MARK;          // tiene il marchio nel file anche dopo l'ottimizzazione
   diaryEarly();                                     // prima di tutto: salva l'istantanea lasciata dall'avvio precedente
   Serial.begin(115200);
 #if ARDUINO_USB_CDC_ON_BOOT
@@ -115,6 +118,7 @@ void setup() {
   bleServiceInit();                                // servizi iscritti nel registro (vos_service) prima dell'avvio
   bootRun();   // sys, led, net, time, web, rules, mqtt, mesh, wd: nell'ordine scelto (con le dipendenze)
   diaryStage("avviato");
+  ramNote("avviato");
   diaryInit();                                     // dopo sysInit: contatore avvii pronto; scrive la riga AVVIO e, se anomalo, i dettagli
   ledSetSetup(!cfg.setupDone);                     // arcobaleno lento finche la prima configurazione non e finita
   vlog("Pronto. Guida di configurazione: %s", cfg.setupDone ? "finita" : "NON finita (hotspot e HTTP forzati accesi)");   // la rete la dicono le righe NET: seguenti

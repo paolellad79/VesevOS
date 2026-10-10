@@ -1,0 +1,19 @@
+Titolo:
+1.7.45: aggiornamento firmware senza cavo (recovery 0.3.0) e guida per preparare la scheda
+
+Descrizione:
+- Nuovo recovery (cartella recovery/): si collega alla rete di casa, dopo 30 s apre l'hotspot VesevOS-recovery; pagina con login da
+  Amministratore per caricare il .bin. Controlla intestazione ESP32-S3, marchio VesevOS, dimensione, SHA-256 (facoltativo) e immagine
+  completa prima di attivarlo; un file sbagliato non tocca il vecchio firmware. Tabella partizioni: recovery 1 MB + VesevOS 2,31 MB.
+- Firmware: comando `recovery [now]`, voce di menu "Aggiorna firmware" (solo Amministratore), rotte GET/POST /api/recovery (129 rotte),
+  marchio {FW:VesevOS}. Driver vos_drv_ota (unico file con esp_partition_*/esp_ota_*).
+- RAM (1.7.40-1.7.41): `ram audit`; task e tabelle delle regole solo se ci sono regole (+15 KB liberi).
+- Guida passo per passo per preparare la scheda (it/en): docs/GUIDA-PREPARARE-LA-SCHEDA.md, docs/PREPARE-THE-BOARD.md.
+- Documenti it/en aggiornati (README, manuali capitolo 22, KNOWN_ISSUES, API, CHANGELOG), SBOM 1.7.45.
+- Prove: 9 gruppi sul computer a 0 fallite, stub senza funzioni doppie, checklayers 0, checkapi 129 rotte; sulla scheda: RAM, recovery
+  (file buono/sbagliato/SHA sbagliato, hotspot, password sbagliata, BOOT, 15 minuti) e voce di menu.
+
+Controllo legale: 🟡 (🟢 12 / 🟡 8 / 🔴 0). Gialli accettati, da sistemare prima della vendita: export crittografia; buffer TLS in PSRAM;
+pool.ntp.org senza vendor zone; solo HTTP (anche nel recovery), password admin in chiaro sulla seriale nel setup, certificato autofirmato,
+MFA spento; CRA (procedura di segnalazione e firma dei firmware); LGPL del core (ora anche nel recovery) e posix_tz_db; marchio e CE/RAEE/RoHS;
+recovery solo in italiano.
