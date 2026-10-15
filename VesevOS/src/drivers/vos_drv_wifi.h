@@ -23,6 +23,7 @@ void        drvWifiStaConfigDhcp();
 void        drvWifiStaBegin(const char* hostname, const char* ssid, const char* pass);
 DrvWifiSta  drvWifiStaStatus();
 String      drvWifiSsid();
+String      drvWifiMac(bool ap);                // MAC di fabbrica: client (ap=false) o hotspot (ap=true), "AA:BB:..." ("" se non si legge)
 int         drvWifiRssi();
 uint32_t    drvWifiLocalIp();
 uint32_t    drvWifiGateway();

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Genera i file di lingua lang/<codice>.json da tools/lang_src.json e controlla che tutto torni.
-# L'inglese va DENTRO il firmware: VesevOS/src/core/vos_lang_en.h (con la bandiera). Le altre lingue restano file (lang/).
+# Dentro il firmware c'e solo l'italiano (i testi del codice): tutte le altre lingue, inglese compreso, sono file lang/<codice>.json
+# da caricare nella scheda (guida iniziale o Lingue). La bandiera italiana va in VesevOS/src/core/vos_lang_it.h (generato). Dalla 1.7.59.
 # Uso: python3 tools/mklang.py        (esce con errore se qualcosa non va)
 import os, re, sys, json, glob
 from html.parser import HTMLParser
@@ -19,7 +20,7 @@ langs = data['langs']
 entries = data['entries']
 flags = data.get('flags', {})
 locales = data.get('locales', {})
-BUILTIN = ('en',)
+BUILTIN = ()                      # dalla 1.7.59 nessuna lingua dentro il firmware oltre all'italiano
 
 # ---- chiavi usate dal codice del firmware
 src_text = ''
@@ -56,7 +57,7 @@ for m in re.finditer(r'\b(?:window\.)?tf?\(\s*"((?:[^"\\]|\\.)*)"', js):
 for arr in ('TABS', 'RSUB', 'TKCOLS', 'GRP', 'DAYS', 'LEDM', 'AIRO', 'UNITS', 'ONOFF', 'TKS', 'CKS', 'AKS', 'BN', 'BFIX'):
     for m in re.finditer(r'\["([^"]+)","([^"]+)"\]', re.search(r'var %s=.*?;' % arr, js, re.S).group(0)):
         addw(m.group(2))
-for arr in ('SUSTEPS', 'MROLE', 'RNAME', 'WDD', 'STLW'):          # elenchi semplici di testi passati a t()
+for arr in ('SECN', 'SUSTEPS', 'MROLE', 'RNAME', 'WDD', 'STLW'):          # elenchi semplici di testi passati a t()
     for m in re.finditer(r'"([^"]+)"', re.search(r'var %s=\[.*?\];' % arr, js, re.S).group(0)):
         addw(m.group(1))
 for m in re.finditer(r'var APLAW="((?:[^"\\]|\\.)*)"', js): addw(json.loads('"' + m.group(1) + '"'))
@@ -113,7 +114,14 @@ def build(code, name):
         if e[code] != e['it']:        # se uguale all'italiano si risparmia spazio: manca = stesso testo
             d[e['it']] = e[code]
     return d
+# bandiera italiana (l'italiano e la lingua del codice, sempre presente)
+hit = ('// VesevOS - vos_lang_it.h (GENERATO da tools/mklang.py, non modificare a mano)\n#pragma once\n'
+       'static const char LANG_FLAG_IT[] = %s;\n') % json.dumps(flags['it'], ensure_ascii=True)
+open(os.path.join(FWD, 'src', 'core', 'vos_lang_it.h'), 'w', encoding='ascii', newline='\n').write(hit)
+oldh = os.path.join(FWD, 'src', 'core', 'vos_lang_en.h')
+if os.path.exists(oldh): os.remove(oldh)            # fino alla 1.7.58 l'inglese era dentro il firmware
 for code, name in langs.items():
+    if code == 'it': continue
     d = build(code, name)
     if code in BUILTIN:
         old = os.path.join(OUT, code + '.json')

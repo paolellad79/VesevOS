@@ -1,0 +1,40 @@
+[manifest]
+name=logmqtt
+title=Log al broker
+version=1
+author=VesevOS
+use=logread,mqtt,time
+who=admin
+
+[icon]
+<svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z" fill="none" stroke="#2c6fbb" stroke-width="2"/></svg>
+
+[page]
+button id=send label="Invia le ultime righe"
+switch id=auto label="Invia da solo ogni ora"
+text id=info label="Stato"
+
+[code]
+var last = 0
+def invia()
+  var ok = mqtt('log', logtail(10))
+  dev_set('info', ok ? 'Inviato' : 'MQTT non collegato')
+end
+def on_set(id, v)
+  if id == 'send'
+    invia()
+  end
+end
+def on_tick()
+  if dev_get('auto') == 1
+    var t = time()
+    if t > 0 && t - last >= 3600
+      last = t
+      invia()
+    end
+  end
+end
+
+[data]
+auto=0
+info=Pronta

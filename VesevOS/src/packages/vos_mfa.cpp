@@ -23,7 +23,6 @@ static String g_pend[VOS_MAX_USERS];      // segreti provvisori (non ancora conf
 struct Tok { String tok; int idx; uint32_t t; uint8_t tries; bool noTime; bool recOnly; bool used; };
 static Tok g_tok[2];
 
-static String hexOfBytes(const uint8_t* b, int n) { static const char* hx = "0123456789abcdef"; String r; for (int i = 0; i < n; i++) { r += hx[b[i] >> 4]; r += hx[b[i] & 15]; } return r; }
 static bool hexToBytes(const String& h, uint8_t* out, int n) {
   if ((int)h.length() != n * 2) return false;
   for (int i = 0; i < n; i++) { int a = hexNib(h[2 * i]), b = hexNib(h[2 * i + 1]); if (a < 0 || b < 0) return false; out[i] = a * 16 + b; }
@@ -73,7 +72,7 @@ bool mfaOn(int i) { return uok(i) && cfg.users[i].mfaOn && cfg.users[i].mfa.leng
 String mfaBegin(int idx, const String& host) {
   if (!uok(idx)) return "";
   uint8_t k[20]; esp_fill_random(k, 20);
-  g_pend[idx] = hexOfBytes(k, 20);
+  g_pend[idx] = hexOf(k, 20);
   String b = base32(k, 20), spaced;
   for (size_t i = 0; i < b.length(); i++) { if (i && i % 4 == 0) spaced += ' '; spaced += b[i]; }
   String label = "VesevOS:" + cfg.users[idx].name + "@" + host;

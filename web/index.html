@@ -63,7 +63,7 @@ body.cpo .cp{display:flex}body.cpo main{padding-bottom:calc(var(--ph,280px) + 24
  #hd{display:none}
  .top,.gsub,main{margin-left:0!important}.top{padding:0 12px;height:54px}.gsub{top:54px;padding:8px 12px 6px}#rsub{top:54px}.gsub{gap:4px}#gsub button,#rsub button{padding:6px 9px;font-size:12.5px}.top .lsel{max-width:84px}.top{gap:6px}.top .tname{display:none}main{padding:12px 12px 82px!important}.gsub{padding:10px 12px 0}
  .rings{grid-template-columns:repeat(3,1fr);gap:10px}.ring>svg{width:68px;height:68px}.ring .v{font-size:15px}
- .hid,.hres,.hnet,.htmp{grid-column:1/-1}}
+ .hid,.hres,.hnet,.htmp{grid-column:1/-1}.dvt .c2{width:92px}.dvt .c3{width:128px}.dvp{min-width:76px}.dvact{gap:6px}.nb{font-size:10px;min-width:0}.nb:not(.on) .nl{display:none}.nb.on{flex:2.4}.nb.on .nl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.nb svg.i{width:24px;height:24px}.nb{padding:10px 0 8px}}
 main{padding:16px 20px;max-width:1180px;margin-left:72px}
 .card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:12px}
 .card h3{margin:0 0 10px;font-size:15px;color:var(--act)}
@@ -93,6 +93,8 @@ input:disabled,select:disabled{opacity:.55;cursor:not-allowed}
 @keyframes mf{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 .msg.ok,.msg.ko{animation:mf .3s ease}.msg.out{opacity:0;transition:opacity .4s}
 table{width:100%;border-collapse:collapse}
+.dvt{table-layout:fixed}.dvt .c2{width:104px}.dvt .c3{width:140px}.dvt td{vertical-align:middle}.dvt tr.dvh th{padding:16px 6px 4px;border-bottom:0;font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}.dvt tr.dvh:first-child th{padding-top:4px}
+.dvp{min-width:84px;text-align:center;box-sizing:border-box}.dvact{display:flex;gap:10px;align-items:center;justify-content:flex-end}.dvsw{width:42px;height:24px;flex:none;display:inline-flex}
 td,th{text-align:left;padding:6px;border-bottom:1px solid var(--bd);font-size:14px}
 .msg{padding:8px;border-radius:8px;margin:8px 0;display:none}
 .msg.ok{display:block;background:var(--okbg);color:var(--okt)}
@@ -175,9 +177,18 @@ body[data-role="0"] .op,body[data-role="0"] .adm,body[data-role="1"] .adm{displa
 .fp{font:12px ui-monospace,Consolas,monospace;word-break:break-all}
 .hlp h4{margin:14px 0 4px}.hlp p{margin:4px 0}
 @media print{body *{visibility:hidden}.prt,.prt *{visibility:visible}.prt{position:absolute;left:0;top:0}}
-.sc{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:8px 0 12px}.svb{display:inline-flex;align-items:center;gap:7px;padding:4px 13px;border-radius:14px;font-weight:600;font-size:13px}.svb::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}.svb.ok{background:var(--okbg);color:var(--okt)}.svb.ko{background:var(--kobg);color:var(--kot)}
+.sc{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:8px 0 12px}.svb{display:inline-flex;align-items:center;gap:7px;padding:4px 13px;border-radius:14px;font-weight:600;font-size:13px}.svb::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}.svb.ok{background:var(--okbg);color:var(--okt)}.svb.ko{background:var(--kobg);color:var(--kot)}button.svn{cursor:pointer;border:0;font:inherit;font-size:12px}
 .svi{display:flex;gap:8px}.sib{--c:var(--mut);width:40px;height:40px;border-radius:10px;border:2px solid var(--c);background:transparent;color:var(--c);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;margin:0}.sib svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.sib.act{background:var(--c);color:#fff}.sib:disabled{--c:var(--mut);background:transparent;color:var(--mut);opacity:.4;cursor:default}.sib.sm{width:26px;height:26px;border-radius:7px;border-width:2px}.sib.sm svg{width:15px;height:15px}.tkb .svi{gap:6px}.tkb .lk{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;color:var(--mut)}.pill.w{background:var(--wa);color:#1d2a36}.sib.go{--c:#16a34a}.sib.st{--c:#dc2626}.sib.rs{--c:#d99a00}.sib.ap{--c:#2563eb}
 .wid .wt svg{width:16px;height:16px;vertical-align:-3px;margin-right:5px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.lloc{padding:8px 12px;border-top:1px solid var(--bd);font-size:12px;color:var(--mut)}
+.scfn{list-style:none;margin:0;padding:0}.scfn li{padding:5px 0;border-bottom:1px solid var(--bd);display:flex;gap:10px;flex-wrap:wrap;align-items:baseline}.scfn li:last-child{border:0}.scfn code{font:13.5px ui-monospace,Menlo,Consolas,monospace;background:var(--in);padding:2px 6px;border-radius:6px}.scfn span{color:var(--mut)}
+.scn{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+.api{width:24px;height:24px;display:block;flex:none}
+.aphd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between}.aphd .scn b{font-size:16px}.apb{display:flex;gap:8px;flex-wrap:wrap}.apctl{display:flex;flex-direction:column;gap:6px;margin-top:10px}.apc{display:grid;grid-template-columns:minmax(90px,30%) 1fr auto;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd)}.apc:last-child{border-bottom:0}.apl{font-size:14px}.apc input[type=text]{grid-column:2/4;width:100%;box-sizing:border-box}.apc input[type=range]{width:100%}.apc input[type=color]{width:64px;height:36px;padding:2px;justify-self:start;cursor:pointer}.apv{min-width:36px;text-align:right;color:var(--mut);font-variant-numeric:tabular-nums}.apg{width:100%;height:60px;color:var(--act);background:var(--g2);border-radius:8px}.apc .btn{grid-column:1/-1;justify-self:start}.apc input:disabled,.apc .sw1:disabled,.apc .btn:disabled{opacity:.5;cursor:not-allowed}.fhint.bad{color:var(--kot)}
+
+body.cx>*:not(#conn){filter:grayscale(1) blur(3px);opacity:.55;pointer-events:none}
+.suadd{margin-top:14px}.suadd input[type=file]{margin:6px 0}
+.wid.wcol .wbig{font-size:34px;line-height:1.1}.wid.wcol:not([role=button]){cursor:default}.wid.wcol .ws svg{width:14px;height:14px;vertical-align:-2px;margin-right:4px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.wid.wcol.warn{border-color:var(--ko);box-shadow:inset 0 0 0 1px var(--ko);background:var(--kobg)}.wid.wcol.warn .wt,.wid.wcol.warn .ws{color:var(--kot)}.wid.wcol.warn .ws{font-weight:600}
 </style></head>
 <body>
 <a href="#main" class="skip" onclick="var m=document.querySelector('main');m.setAttribute('tabindex','-1');m.focus();return false">Vai al contenuto</a>
@@ -187,6 +198,9 @@ body[data-role="0"] .op,body[data-role="0"] .adm,body[data-role="1"] .adm{displa
 <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M2.5 9.2a14 14 0 0 1 19 0"/><path d="M5.7 12.6a9.4 9.4 0 0 1 12.6 0"/><path d="M8.9 16a4.8 4.8 0 0 1 6.2 0"/><circle cx="12" cy="19.2" r=".9"/></symbol>
 <symbol id="i-chipn" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/></symbol>
 <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+<symbol id="i-prog" viewBox="0 0 24 24"><path d="M9 7.5 4.5 12 9 16.5"/><path d="M15 7.5l4.5 4.5-4.5 4.5"/><path d="M13.2 5.5l-2.4 13"/></symbol>
+<symbol id="i-adm" viewBox="0 0 24 24"><path d="M4 7h8M18 7h2M4 17h2M12 17h8"/><circle cx="15" cy="7" r="2.3"/><circle cx="9" cy="17" r="2.3"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5"/><path d="M12 7.8h.01"/></symbol>
 <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/><rect x="9" y="10.5" width="6" height="5" rx="1"/><path d="M10.2 10.5V9a1.8 1.8 0 0 1 3.6 0v1.5"/></symbol>
 <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
 <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></symbol>
@@ -217,6 +231,8 @@ body[data-role="0"] .op,body[data-role="0"] .adm,body[data-role="1"] .adm{displa
 <symbol id="i-mem" viewBox="0 0 24 24"><rect x="2.5" y="6.5" width="19" height="9.5" rx="1.5"/><path d="M6 9.5h2.5V13H6zM10.75 9.5h2.5V13h-2.5zM15.5 9.5H18V13h-2.5z"/><path d="M5.5 16v2.5M8.5 16v2.5M11 16v2.5M13 16v2.5M15.5 16v2.5M18.5 16v2.5"/></symbol>
 <symbol id="i-disk" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7.5" ry="2.5"/><path d="M4.5 6v12c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5V6"/><path d="M4.5 12c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5"/></symbol>
 <symbol id="i-sd" viewBox="0 0 24 24"><path d="M7 3h8.5L19 6.5V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M9.5 3v4M12 3v4M14.5 3v4"/><path d="M9 16.5h6"/><path d="M9.5 13.5h5"/></symbol>
+<symbol id="i-fvsc" viewBox="0 0 24 24"><path d="M6.5 3h7.5l4.5 4.5v12a1.5 1.5 0 0 1-1.5 1.5h-10.5a1.5 1.5 0 0 1-1.5-1.5v-15a1.5 1.5 0 0 1 1.5-1.5z"/><path d="M14 3v4.5h4.5"/><path d="M7.8 19l1.8-4.6 1.5 2 1.8-3.8h1.5l2.5 6.4z"/><path d="M12.3 10.6c.6-.7-.5-1.1 0-1.8"/></symbol>
+<symbol id="i-fvap" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><path d="M6.8 18l2.2-4.8 1.7 2.4 2.1-4h1.7l2.8 6.4z"/><path d="M14.2 9.2c-.7-.8.6-1.3 0-2.3"/></symbol>
 <symbol id="i-fcode" viewBox="0 0 24 24"><path d="M6.5 3h7.5l4.5 4.5v12a1.5 1.5 0 0 1-1.5 1.5h-10.5a1.5 1.5 0 0 1-1.5-1.5v-15a1.5 1.5 0 0 1 1.5-1.5z"/><path d="M14 3v4.5h4.5"/><path d="M10 12.5 7.8 15l2.2 2.5M14 12.5l2.2 2.5-2.2 2.5"/></symbol>
 <symbol id="i-sgo" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z"/></symbol><symbol id="i-sst" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2.2"/></symbol><symbol id="i-srs" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 1 1-2.4-5.5"/><path d="M19.5 4.5v4.5h-4.5"/></symbol><symbol id="i-sap" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></symbol>
 <symbol id="i-usb" viewBox="0 0 24 24"><path d="M12 3v15"/><circle cx="12" cy="20" r="1.8"/><path d="M12 12l-4-2.5v-2"/><rect x="6.2" y="5" width="3.6" height="2.6" rx=".5"/><path d="M12 9l4-2.5v1.5"/><circle cx="16" cy="9" r="1.6"/></symbol>
@@ -374,6 +390,27 @@ body[data-role="0"] .op,body[data-role="0"] .adm,body[data-role="1"] .adm{displa
   <div class="sc" id="sc_mdns"></div>
   <div id="svm_mdns" class="msg"></div></div>
 </section>
+<section id="t_wps" class="hide">
+ <div class="card"><h3>WPS (collegamento con il router)</h3>
+  <p class="fhint">Il router manda alla scheda il nome e la password della tua Wi-Fi: non devi scriverli. Funziona con il tasto WPS del router, oppure con un PIN. Non funziona se il router e solo WPA3 o ha il WPS spento.</p>
+  <div class="sc" id="sc_wps"></div>
+  <p class="fhint" id="wps_setup"></p>
+  <div id="wpsm" class="msg"></div></div>
+ <div class="card adm"><h3>Collega adesso</h3>
+  <div id="wps_st" class="msg" role="status" aria-live="polite"></div>
+  <div id="wps_pin" class="hide"><p class="fhint">Scrivi questo PIN nella pagina WPS del router:</p><div class="big" id="wps_pinv"></div></div>
+  <button class="btn" id="wps_go" onclick="wpsGo('pbc')">Collega con il tasto del router</button>
+  <button class="btn gray" id="wps_gp" onclick="wpsGo('pin')">Collega con il PIN</button>
+  <button class="btn gray hide" id="wps_x" onclick="wpsCancel()">Annulla</button>
+  <p class="fhint" id="wps_nt"></p>
+  <p class="fhint">Premi il pulsante qui sopra e, entro 2 minuti, il tasto WPS del router. La scheda cambia rete: se sei collegato al suo hotspot la pagina si interrompe e poi si ricollega da sola.</p></div>
+ <div class="card adm"><h3>Impostazioni WPS</h3>
+  <div class="tog"><div>Consenti il metodo con PIN</div><button class="sw1" id="wps_swp" data-tt onclick="wpsOpt('pinOk',this)" aria-label="Metodo con PIN"></button></div>
+  <p class="fhint">Il PIN lo crea la scheda a ogni prova e vale 2 minuti. Se lo lasci spento resta solo il tasto del router (piu sicuro).</p>
+  <p class="fhint" id="wps_bt"></p>
+  <p class="fhint">Chi ha la scheda in mano potrebbe collegarla alla sua rete: tieni il WPS spento (o togli l'azione dal tasto) se la scheda non e al sicuro. Lo stesso gesto ferma anche una prova in corso. Il LED lo dice: blu che respira = in attesa, verde = riuscito, rosso = errore.</p>
+  <div id="wps_om" class="msg"></div></div>
+</section>
 <section id="t_ble" class="hide">
  <div class="card adm" id="blecard"><h3>Bluetooth per telefono e applicazioni</h3>
   <p class="fhint">Resta spento finche non lo accende la pagina, la shell o un'applicazione, e resta acceso finche non lo si spegne (l'applicazione puo anche dare un tempo). Serve circa 70 KB di memoria: se la scheda rifiuta, chiudi le altre pagine web e riprova. Il telefono si accoppia con il codice mostrato qui e scrive i comandi: wifi rete|password, country IT, name cucina, mesh 0 chiave, status, done.</p>
@@ -476,9 +513,23 @@ body[data-role="0"] .op,body[data-role="0"] .adm,body[data-role="1"] .adm{displa
 </section>
 <section id="t_btn" class="hide">
  <div class="card"><h3>Tasto BOOT</h3>
-  <p class="fhint">Il pulsante BOOT della scheda (GPIO0): le pressioni lunghe servono al recupero.</p>
+  <p class="fhint">Il pulsante BOOT della scheda (GPIO0): le pressioni lunghe (2, 8 e 20 secondi) servono al recupero e non si cambiano.</p>
   <div id="dv_btn"></div>
  </div>
+
+ <div class="card adm"><h3>Azioni dei click</h3>
+  <p class="fhint">Premi e lascia il tasto in fretta, 1, 2 o 3 volte: la scheda aspetta mezzo secondo dopo l'ultimo click e poi fa l'azione scelta. Il LED fa un lampo quando ha capito.</p>
+  <label for="bt_c1">1 click</label><select id="bt_c1" onchange="btnSave(1,this)"></select>
+  <label for="bt_c2">2 click</label><select id="bt_c2" onchange="btnSave(2,this)"></select>
+  <label for="bt_c3">3 click</label><select id="bt_c3" onchange="btnSave(3,this)"></select>
+  <p class="fhint law hide" id="bt_w"></p>
+  <p class="fhint" id="bt_f"></p>
+  <div id="btm" class="msg"></div></div>
+ <div class="card adm"><h3>Prova del tasto</h3>
+  <p class="fhint">Per 60 secondi il tasto non fa niente (nemmeno le pressioni lunghe): qui vedi cosa la scheda capisce. Poi torna normale da solo.</p>
+  <button class="btn" id="bt_t" onclick="btnTest()">Avvia la prova</button>
+  <div id="bt_ts" class="msg" role="status" aria-live="polite"></div>
+  <div id="bt_tl" class="big"></div></div>
 </section>
 <section id="t_usb" class="hide">
  <div class="card"><h3>USB</h3>
@@ -523,6 +574,31 @@ body[data-role="0"] .op,body[data-role="0"] .adm,body[data-role="1"] .adm{displa
  <div class="card"><h3>Inventario dei pin</h3>
   <p class="fhint">Scrivi a cosa colleghi ogni pin (per esempio "sensore porta"): il nome resta salvato nella configurazione e il sistema ti avvisa se una funzione vuole un pin gia segnato.</p>
   <div style="overflow-x:auto"><table id="pininv" class="ftab"></table></div><div id="pinvm" class="msg"></div></div>
+</section>
+<section id="t_io" class="hide">
+ <div id="io_main">
+  <div class="card"><h3>Periferiche</h3>
+   <p class="fhint">Rele, LED, pin e ingressi con un nome (rele1, led1...). Tocca una periferica per gestirla e provarla. Le app li usano scrivendo il nome in use= e poi dev_set("rele1", 1) o dev_get("in1"). Dopo ogni riavvio le uscite sono spente.</p>
+   <div style="overflow-x:auto"><table id="io_tab" class="ftab"></table></div><div id="io_m" class="msg" role="status"></div>
+  </div>
+  <div class="card" id="io_mods"><h3>Schede modulo</h3>
+   <p class="fhint">Una scheda modulo (.vdp) descrive un modulo gia pronto, con icona e schema dei collegamenti. Scegline una: la scheda propone i pin liberi e crea le periferiche. Sono solo dati, senza codice.</p>
+   <div id="io_ml"></div>
+   <div class="ftb"><label class="btn gray" for="io_mf" tabindex="0" onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();$('io_mf').click()}"><svg class="i" aria-hidden="true"><use href="#i-upl"/></svg><span>Carica scheda modulo</span></label><input type="file" id="io_mf" class="sr" accept=".vdp,.txt" onchange="ioModUp()"></div>
+   <div id="io_mm" class="msg" role="status"></div>
+  </div>
+  <div class="card" id="io_new"><h3>Aggiungi una periferica a mano</h3>
+   <div class="agrid">
+    <div><label for="io_c">Classe</label><select id="io_c"><option value="rele">Rele</option><option value="led">LED</option><option value="pin">Pin (uscita)</option><option value="ingresso">Ingresso</option><option value="analogico">Analogico (pin 1-10)</option></select></div>
+    <div><label for="io_g">Pin (GPIO)</label><input type="number" id="io_g" min="1" inputmode="numeric"></div>
+    <div><label for="io_n">Nome (facoltativo)</label><input id="io_n" maxlength="11" autocomplete="off"></div>
+    <div><label for="io_o">Modo</label><select id="io_o"><option value="">Normale</option><option value="inv">Attivo basso (acceso = livello 0)</option><option value="up">Ingresso con pull-up</option><option value="down">Ingresso con pull-down</option></select></div>
+   </div>
+   <button class="btn" onclick="ioAdd()">Aggiungi</button><div id="io_am" class="msg"></div>
+   <p class="fhint">Il pin viene controllato: non si possono usare USB, tasto BOOT, LED della scheda, pin di avvio o pin gia usati. Massimo 16 periferiche. Un rele collegato alla rete elettrica richiede un modulo a norma e un installatore: VesevOS comanda solo il segnale.</p>
+  </div>
+ </div>
+ <div id="io_det" class="card hide"></div>
 </section>
 <section id="t_acc" class="hide">
  <div class="card" id="acc"><h3>Accessibilita</h3>
@@ -854,12 +930,62 @@ body[data-role="0"] .op,body[data-role="0"] .adm,body[data-role="1"] .adm{displa
   <p>Scrivi help per l'elenco dei comandi. Sulla seriale premi 1 o 2 per cambiare lingua.</p>
   <p><a href="https://github.com/paolellad79/VesevOS" target="_blank" rel="noopener">Manuale completo su GitHub</a></p></div>
 </section>
+<section id="t_app" class="hide">
+  <div class="card"><h3>App</h3>
+   <p style="color:var(--mut)">Programmi con una pagina propria, salvati come file .vap nella cartella /apps. Un file solo contiene manifest, icona, pagina, codice e dati. Si apre un'app, si avvia e si comanda dai suoi controlli. Una sola app alla volta (e nessuno script mentre gira).</p>
+   <div class="ftb adm">
+    <button class="btn" onclick="apNew()"><svg class="i" aria-hidden="true"><use href="#i-fvap"/></svg><span>Nuova app</span></button>
+   </div>
+   <table id="aptab" class="ftab"></table>
+   <div id="appm" class="msg" role="status"></div></div>
+  <div class="card hide" id="apcard"><div class="aphd"><span class="scn" id="aphead"></span><span class="pill" id="appill">ferma</span>
+   <span class="apb"><button class="btn" id="apgo" aria-pressed="false" onclick="apStart()">Avvia</button><button class="btn gray" id="apst" onclick="apStop()" disabled>Ferma</button><button class="btn gray" onclick="apClose()">Chiudi</button></span></div>
+   <div id="apctl" class="apctl"></div>
+   <pre id="apout" class="lgv hide" tabindex="0" aria-label="Uscita dell'app" aria-live="polite"></pre></div>
+  <div class="card adm"><h3>Come e fatto un file app</h3>
+   <ul class="scfn">
+    <li><code>[manifest]</code> <span>name (uguale al nome del file), title, version, author, use (permessi: led, time, temp, log, logread, act, btn, mqtt, gpio:N), who (admin oppure oper)</span></li>
+    <li><code>[icon]</code> <span>un solo disegno svg con forme semplici, massimo 2 KB</span></li>
+    <li><code>[page]</code> <span>un controllo per riga: switch, slider, color, text, button, chart, con id e label</span></li>
+    <li><code>[code]</code> <span>codice Berry, massimo 8 KB. Funzioni: on_set(id, valore) quando tocchi un controllo, on_tick() ogni secondo, dev_get(id), dev_set(id, valore); e led, act, log, time, temp, btn, logtail, mqtt se il manifest le permette (use)</span></li>
+    <li><code>[data]</code> <span>valori iniziali: chiave=valore (se la chiave e un controllo ne e il valore di partenza)</span></li>
+   </ul></div>
+ </section>
+<section id="t_script" class="hide">
+ <div class="card"><h3>Script</h3>
+  <p style="color:var(--mut)">Programmi in linguaggio Berry, salvati come file .vsc nella cartella /scripts. Girano in sottofondo, uno alla volta. Un ciclo deve fare pause con sleep(): senza pause per piu di 3 secondi lo script viene fermato.</p>
+  <div id="scst" class="fhint" role="status"></div>
+  <div class="ftb">
+   <button class="btn" onclick="scNew()"><svg class="i" aria-hidden="true"><use href="#i-fvsc"/></svg><span>Nuovo script</span></button>
+   <button class="btn gray" id="scstop" onclick="scStopRun()"><svg class="i" aria-hidden="true"><use href="#i-stop"/></svg><span>Ferma</span></button>
+  </div>
+  <table id="sctab" class="ftab"></table>
+  <div id="scm" class="msg" role="status"></div></div>
+ <div class="card"><h3>Uscita</h3>
+  <pre id="scout" class="lgv" tabindex="0" aria-label="Uscita dello script"></pre>
+  <p class="fhint" id="scinfo"></p></div>
+ <div class="card"><h3>Funzioni disponibili</h3>
+  <ul class="scfn">
+   <li><code>print(x)</code> <span>scrive nell'uscita</span></li>
+   <li><code>led("RRGGBB")</code> <span>colore del LED (led("auto") torna al modo normale)</span></li>
+   <li><code>act("azione")</code> <span>azione delle Automazioni; risponde "ok" o l'errore</span></li>
+   <li><code>time()</code> <span>ora in secondi (0 se l'ora non e valida)</span></li>
+   <li><code>millis()</code> <span>millisecondi dall'accensione</span></li>
+   <li><code>temp()</code> <span>temperatura del chip</span></li>
+   <li><code>log(testo)</code> <span>scrive una riga nel registro</span></li>
+   <li><code>btn()</code> <span>click liberi del tasto BOOT: 1, 2 o 3, oppure 0 se non ce ne sono (non aspetta). Vedi Dispositivi &gt; Tasto BOOT</span></li>
+   <li><code>logtail(n)</code> <span>ultime n righe del registro (1-20, massimo 2000 caratteri). Nelle app serve logread in use=: il registro puo contenere indirizzi e nomi</span></li>
+   <li><code>mqtt("nome", "testo")</code> <span>invia un testo al broker MQTT su &lt;prefisso&gt;/app/&lt;nome&gt; (vero = inviato, falso = non inviato; massimo 20 al minuto). Nelle app serve mqtt in use=</span></li>
+   <li><code>sleep(ms)</code> <span>pausa</span></li>
+  </ul></div>
+</section>
 <div class="foot"><a href="#" onclick="show('legal');return false">Note legali e licenze</a> &middot; <a href="#aiuto">Aiuto</a> &middot; <a href="https://github.com/paolellad79/VesevOS" target="_blank" rel="noopener">GitHub</a><div id="fver" style="margin-top:4px"></div></div>
 </main></div>
 <div class="pop hide" id="um" role="menu">
  <button role="menuitem" onclick="umClose();logout()"><svg class="i"><use href="#i-out"/></svg><span><b>Logout</b><small>Chiudi la sessione su questo browser</small></span></button>
  <button role="menuitem" class="op" onclick="umClose();uReboot()"><svg class="i"><use href="#i-reboot"/></svg><span><b>Riavvia</b><small>La scheda riparte in pochi secondi</small></span></button>
  <button role="menuitem" class="adm" onclick="umClose();uFw()"><svg class="i"><use href="#i-reboot"/></svg><span><b>Aggiorna firmware</b><small>Riavvia nel recovery e carica un nuovo file</small></span></button>
+ <button role="menuitem" class="adm" onclick="umClose();uRecUp()"><svg class="i"><use href="#i-reboot"/></svg><span><b>Aggiorna recovery</b><small>Carica un nuovo recovery senza cavo</small></span></button>
  <button role="menuitem" class="op" onclick="umClose();uSleep()"><svg class="i"><use href="#i-sleep"/></svg><span><b>Sleep</b><small>Sonno profondo: si riaccende con RESET</small></span></button>
 </div>
 <div class="pop hide" id="lpop" role="menu"></div>
@@ -885,6 +1011,7 @@ body[data-role="0"] .op,body[data-role="0"] .adm,body[data-role="1"] .adm{displa
   <div class="fedn"><b id="fedt"></b><small><span id="fedp"></span> · <span id="feds" class="feds"></span></small></div>
   <div class="fedbt">
    <button class="btn" onclick="fEdSave()" title="Ctrl+S"><svg class="i" aria-hidden="true"><use href="#i-save"/></svg><span>Salva</span></button>
+   <button class="btn" id="fedrun" hidden onclick="fEdRun()"><svg class="i" aria-hidden="true"><use href="#i-play"/></svg><span>Salva ed esegui</span></button>
    <button class="btn gray" onclick="fEdSaveAs()"><span>Salva come</span></button>
    <button class="btn gray" id="fedpaste" onclick="fEdPaste()"><span>Incolla</span></button>
    <button class="btn gray" onclick="fEdClear()"><span>Svuota</span></button>
@@ -896,6 +1023,7 @@ body[data-role="0"] .op,body[data-role="0"] .adm,body[data-role="1"] .adm{displa
  <div class="fedb"><pre id="fedn" aria-hidden="true"></pre><textarea id="fedx" spellcheck="false" autocapitalize="off" autocomplete="off" wrap="off" data-tt aria-label="Contenuto del file"></textarea></div>
  <div class="fedf"><span id="fedpos"></span><span id="fedsz"></span><span id="fedjs"></span><span id="fedtab" class="fedtab"></span></div>
 </div>
+<div id="conn" class="dlgw hide" style="z-index:60"><div class="dlg" role="alertdialog" aria-modal="true" aria-labelledby="cnt" aria-describedby="cnd"><h3 id="cnt">Scheda non raggiungibile</h3><p id="cnd" style="margin:0 0 12px">La pagina non riesce piu a parlare con la scheda: puo essere spenta, riavviata o fuori dalla rete. Controlla l'alimentazione e il Wi-Fi, poi premi Aggiorna.</p><div class="dlga"><button type="button" class="btn" id="cnb" onclick="location.reload()">Aggiorna</button></div></div></div>
 <div id="dlg" class="dlgw hide"><form class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgt" onsubmit="dlgBtn('ok');return false"><h3 id="dlgt"></h3><div id="dlgb"></div><div id="dlgm" class="msg" role="alert"></div><div id="dlga" class="dlga"></div></form></div>
 <div id="live" class="sr" aria-live="polite"></div>
 <script>
@@ -904,11 +1032,12 @@ body[data-role="0"] .op,body[data-role="0"] .adm,body[data-role="1"] .adm{displa
   of(j.u,j.o).then(function(r){clearTimeout(tm);rel();j.res(r)},function(e){clearTimeout(tm);rel();j.rej(e)})}
  function nx(){while(act<2&&q.length)run(q.shift())}
  window.fetch=function(u,o){return new Promise(function(res,rej){q.push({u:u,o:o,res:res,rej:rej});nx()})}})();
-var GRP=[["home","Home"],["rete","Rete"],["dm","Device Manager"],["sys","Sistema"],["sec","Sicurezza"]];
-var GMAP={home:["sum"],rete:["wifi","ap","radio","http","https","dhcp","dns","mdns"],dm:["dmgr","mqtt","mesh","ble","stat","pin","led","btn","usb","temp","mem","cpu","rad"],sys:["task","wd","log","shell","selftest","file","ora","ntp","loc","cert","conf","acc","legal","help","power","auto","boot"],sec:["sec","mfa","users","fw","audit"]};
-var GICO={home:"i-home",rete:"i-wifi",dm:"i-usb",sys:"i-gear",sec:"i-shield"};
-var TABS=[["sum","Home"],["wifi","Wi-Fi"],["mqtt","MQTT"],["mesh","Rete tra schede"],["pin","Pin"],["led","LED"],["task","Task"],["file","File"],["ora","Ora"],["loc","Localizzazione"],["auto","Automazioni"],["boot","Avvio"],["wd","Watchdog"],["log","Log"],["shell","Terminale"],["conf","Config"],["legal","Note legali"],["help","Aiuto"],["sec","Password"],["users","Utenti"],["fw","Filtro IP"],["https","HTTPS"],["audit","Compliant"],["mfa","MFA"],["cert","Certificato"],["stat","Statistiche"],["selftest","Autotest"],["power","Risparmio energia"],["acc","Accessibilita"],["ap","Punto di accesso"],["http","HTTP"],["radio","Radio"],["ntp","NTP"],["dhcp","DHCP"],["dns","DNS"],["mdns","mDNS"],["ble","Bluetooth"],["dmgr","Device Manager"],["btn","Tasto BOOT"],["usb","USB"],["temp","Temperatura del chip"],["mem","Memoria"],["cpu","Processore"],["rad","Radio 2,4 GHz"]];
-var DIAG=["task","wd","log","shell","selftest"];
+var GRP=[["home","Home"],["dev","Dispositivi"],["rete","Rete"],["prog","Programmi"],["sys","Sistema"],["sec","Sicurezza"],["adm","Admin"],["info","Informazioni"]];
+var GMAP={home:["sum"],dev:["dmgr","stat","temp","mem","cpu","led","pin","io","btn","usb","ble","rad"],rete:["wifi","wps","ap","radio","dhcp","dns","http","https","mdns","mqtt","mesh"],prog:["auto","script","app"],sys:["ora","ntp","loc","power","file","task","wd","log","shell"],sec:["sec","mfa","users","fw","cert","audit"],adm:["conf","boot","selftest"],info:["help","acc","legal"]};
+var GICO={home:"i-home",dev:"i-usb",rete:"i-wifi",prog:"i-prog",sys:"i-gear",sec:"i-shield",adm:"i-adm",info:"i-info"};
+var TABS=[["sum","Panoramica"],["wifi","Wi-Fi"],["wps","WPS"],["mqtt","MQTT"],["mesh","Rete tra schede"],["pin","Pin"],["io","Periferiche"],["led","LED"],["task","Task"],["file","File"],["ora","Ora"],["loc","Localizzazione"],["auto","Automazioni"],["script","Script"],["app","App"],["boot","Avvio"],["wd","Watchdog"],["log","Log"],["shell","Terminale"],["conf","Configurazione"],["legal","Note legali"],["help","Aiuto"],["sec","Password"],["users","Utenti"],["fw","Filtro IP"],["https","HTTPS"],["audit","Stato conformita"],["mfa","MFA"],["cert","Certificato"],["stat","Statistiche"],["selftest","Autotest"],["power","Risparmio energia"],["acc","Accessibilita"],["ap","Punto di accesso"],["http","HTTP"],["radio","Radio"],["ntp","NTP"],["dhcp","DHCP"],["dns","DNS"],["mdns","mDNS"],["ble","Bluetooth"],["dmgr","Elenco dispositivi"],["btn","Tasto BOOT"],["usb","USB"],["temp","Temperatura del chip"],["mem","Memoria"],["cpu","Processore"],["rad","Radio 2,4 GHz"]];
+var SECN=["Stato","Comandi","Radio","Diagnostica"];
+var TSEC={stat:0,temp:0,mem:0,cpu:0,led:1,pin:1,io:1,btn:1,usb:1,ble:2,rad:2,task:3,wd:3,log:3,shell:3};
 var LASTG={};
 function gOf(id){for(var g in GMAP)if(GMAP[g].indexOf(id)>=0)return g;return"home"}
 var A11Y={fs:0,hc:"auto",cb:0,rm:"auto"};try{var _a=JSON.parse(localStorage.getItem("va11y")||"{}");for(var _k in A11Y)if(_a[_k]!==undefined)A11Y[_k]=_a[_k]}catch(e){}
@@ -945,6 +1074,9 @@ if(window.matchMedia)try{matchMedia("(prefers-color-scheme: light)").addEventLis
 var DICT={},LANG="it",LANGS=[{code:"it",name:"Italiano"}];
 function t(s){var v=DICT[s];return v?v:s}
 function tf(s){var a=arguments;return t(s).replace(/\{(\d)\}/g,function(m,i){return a[+i+1]})}
+/* durata in secondi: "45 s", "12 min", "3 h 5 min", "5 g 23 h 11 min" */
+function fmtDur(n){n=Math.max(0,Math.floor(+n||0));var d=Math.floor(n/86400),h=Math.floor(n%86400/3600),m=Math.floor(n%3600/60);
+ return n<60?tf("{0} s",n):n<3600?tf("{0} min",m):n<86400?tf("{0} h",h)+" "+tf("{0} min",m):tf("{0} g",d)+" "+tf("{0} h",h)+" "+tf("{0} min",m)}
 function applyStatic(){
  var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT),n,list=[];
  while((n=w.nextNode()))list.push(n);
@@ -984,10 +1116,21 @@ function cpTitles(){var m={tbt:"Terminale",cps0:"Piccolo",cps1:"Medio",cps2:"Qua
  window.addEventListener("resize",cpApply)})();
 
 function $(i){return document.getElementById(i)}
-function api(u,o){return fetch(u,o).then(function(r){if(r.status==401){showLogin();throw 0}if(r.status==403&&location.protocol=="http:")return r.clone().json().then(function(j){if(j.err=="https"){location.href="https://"+location.hostname+"/";throw 0}return r},function(){return r});return r})}
-function post(u,d){var b=new URLSearchParams(d).toString();return api(u,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:b})}
+function api(u,o){return fetch(u,o).then(function(r){connOk();if(r.status==401){showLogin();throw 0}if(r.status==403&&location.protocol=="http:")return r.clone().json().then(function(j){if(j.err=="https"){location.href="https://"+location.hostname+"/";throw 0}return r},function(){return r});return r},function(e){connFail();throw e})}
+function post(u,d){if(/^\/api\/(reboot|sleep|factory|recovery)/.test(u))CONN.hold=Date.now()+120000;var b=new URLSearchParams(d).toString();return api(u,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:b})}
 function msg(id,t,ok){var e=$(id);clearTimeout(e._tm);e.setAttribute("role",ok?"status":"alert");e.className="msg";void e.offsetWidth;e.textContent=t;e.className="msg "+(ok?"ok":"ko");
  if(ok)e._tm=setTimeout(function(){e.classList.add("out");e._tm=setTimeout(function(){e.className="msg";e.textContent=""},400)},3000)}
+
+/* ===== scheda non raggiungibile: pagina in grigio con finestra e pulsante Aggiorna ===== */
+var CONN={bad:0,off:false,back:false,hold:0};
+function connTxt(back){CONN.back=back;$("cnt").textContent=back?t("Scheda di nuovo raggiungibile"):t("Scheda non raggiungibile");
+ $("cnd").textContent=back?t("La scheda risponde di nuovo: premi Aggiorna per ricaricare la pagina."):t("La pagina non riesce piu a parlare con la scheda: puo essere spenta, riavviata o fuori dalla rete. Controlla l'alimentazione e il Wi-Fi, poi premi Aggiorna.")}
+function connOk(){CONN.bad=0;if(CONN.off&&!CONN.back)connTxt(true)}
+function connFail(){if(Date.now()<CONN.hold)return;if(++CONN.bad<2)return;
+ if(!CONN.off){CONN.off=true;document.body.classList.add("cx");$("conn").className="dlgw";connTxt(false);setTimeout(function(){$("cnb").focus()},30)}
+ else if(CONN.back)connTxt(false)}
+setInterval(function(){if(document.hidden||Date.now()<CONN.hold)return;fetch("/api/auth",{cache:"no-store"}).then(connOk,connFail)},5000);
+window.addEventListener("offline",function(){CONN.bad=1;connFail()});
 /* ===== Automazioni ===== */
 var RU={list:[],st:[],ed:null,edi:-1,tm:null,txt:""};
 var DAYS=[["0","Lun"],["1","Mar"],["2","Mer"],["3","Gio"],["4","Ven"],["5","Sab"],["6","Dom"]];
@@ -998,9 +1141,9 @@ function lk(a,v){for(var i=0;i<a.length;i++)if(String(a[i][0])==String(v))return
 function rClean(x){return String(x).replace(/[|;\n\r]/g," ").replace(/\s+/g," ").trim()}
 function aParse(a){var w=a.split(" "),k=w[0],v=w.slice(1).join(" ");
  if(k=="led-color")return{k:"color",v:v};if(k=="led")return{k:"ledmode",v:v};if(k=="led-bright")return{k:"bright",v:+v};if(k=="led2")return null;
- if(k=="gpio")return{k:"gpio",p:+w[1],v:+w[2]};if(k=="wait")return{k:"wait",v:+v};if(k=="note")return{k:"note",v:v};if(k=="reboot")return{k:"reboot"};if(k=="airplane")return{k:"air",v:v};if(k=="mqtt")return{k:"mq",p:w[1]||"",v:w.slice(2).join(" ")};if(k=="ntp")return{k:"ntp"};return null}
+ if(k=="gpio")return{k:"gpio",p:+w[1],v:+w[2]};if(k=="wait")return{k:"wait",v:+v};if(k=="note")return{k:"note",v:v};if(k=="reboot")return{k:"reboot"};if(k=="airplane")return{k:"air",v:v};if(k=="mqtt")return{k:"mq",p:w[1]||"",v:w.slice(2).join(" ")};if(k=="ntp")return{k:"ntp"};if(k=="script")return{k:"script",v:w[1]||""};if(k=="app")return{k:"app",v:w[1]||""};if(k=="appstop")return{k:"appstop"};return null}
 function aSer(a){switch(a.k){case"color":return"led-color "+String(a.v).replace("#","").toLowerCase();case"ledmode":return"led "+a.v;case"bright":return"led-bright "+a.v;
- case"gpio":return"gpio "+a.p+" "+a.v;case"wait":return"wait "+a.v;case"note":return"note "+rClean(a.v);case"reboot":return"reboot";case"air":return"airplane "+a.v;case"mq":return"mqtt "+(String(a.p).replace(/[\s|;]/g,"")||"evento")+" "+rClean(a.v);case"ntp":return"ntp sync"}return""}
+ case"gpio":return"gpio "+a.p+" "+a.v;case"wait":return"wait "+a.v;case"note":return"note "+rClean(a.v);case"reboot":return"reboot";case"air":return"airplane "+a.v;case"mq":return"mqtt "+(String(a.p).replace(/[\s|;]/g,"")||"evento")+" "+rClean(a.v);case"ntp":return"ntp sync";case"script":return"script "+String(a.v).toLowerCase().replace(/[^a-z0-9_-]/g,"");case"app":return"app "+String(a.v).toLowerCase().replace(/[^a-z0-9_-]/g,"");case"appstop":return"appstop"}return""}
 function rParse(line){var f=line.split("|");if(f.length!=5)return null;
  var r={on:f[0].trim()=="1",name:f[1].trim(),tk:"time",h:"07:00",d:"1111111",n:60,tmp:70,ck:"-",c1:"22:00",c2:"06:00",cd:"1111111",acts:[]};
  var w=f[2].trim().split(/\s+/);
@@ -1019,7 +1162,7 @@ function aText(a){switch(a.k){case"mq":return tf("MQTT: invia \"{1}\" su {0}",a.
  case"ledmode":return tf("LED: {0}",lk(LEDM,a.v));
  case"bright":return tf("luminosita LED {0}",a.v);
  case"gpio":return tf("pin {0} {1}",a.p,lk(ONOFF,a.v));case"wait":return tf("aspetta {0}",durText(a.v));
- case"note":return tf("scrivi \"{0}\" nel registro",a.v);case"reboot":return t("riavvia la scheda");case"ntp":return t("aggiorna l'ora")}return""}
+ case"note":return tf("scrivi \"{0}\" nel registro",a.v);case"reboot":return t("riavvia la scheda");case"ntp":return t("aggiorna l'ora");case"script":return tf("avvia lo script {0}",a.v);case"app":return tf("avvia l'app {0}",a.v);case"appstop":return t("ferma l'app")}return""}
 function rSum(r){var q;
  if(r.tk=="time")q=tf("Alle {0}, {1}",r.h,dayText(r.d));else if(r.tk=="every")q=tf("Ogni {0}",durText(r.n));else if(r.tk=="after")q=tf("{0} dopo l'avvio",durText(r.n));
  else if(r.tk=="boot")q=t("All'avvio");else if(r.tk=="wifiup")q=t("Quando il Wi-Fi si collega");else if(r.tk=="wifidown")q=t("Quando il Wi-Fi si scollega");else q=tf("Quando la temperatura supera {0} C",r.tmp);
@@ -1055,9 +1198,10 @@ function dayMask(id){var o="";var b=$(id).children;for(var i=0;i<7;i++)o+=b[i].c
 var TKS=[["time","Orario (sveglia)"],["every","Ogni tanto (timer ripetuto)"],["after","Dopo l'avvio (una volta)"],["boot","All'avvio"],["wifiup","Quando il Wi-Fi si collega"],["wifidown","Quando il Wi-Fi si scollega"],["temp","Quando la temperatura supera"]];
 var CKS=[["-","Sempre"],["between","Solo in una fascia oraria"],["day","Solo in certi giorni"]];
 var AIRO=[["on boot","attivo fino al prossimo avvio"],["on 10m","attivo per 10 minuti"],["on 1h","attivo per 1 ora"],["on fisso","attivo, si spegne solo a mano"],["off","spento (rete accesa)"]];
-var AKS=[["color","LED: colore"],["ledmode","LED: modo"],["bright","LED: luminosita"],["gpio","Pin: acceso o spento"],["wait","Aspetta"],["note","Scrivi nel registro"],["air","Modo aereo"],["mq","MQTT: invia un messaggio"],["ntp","Aggiorna l'ora"],["reboot","Riavvia la scheda"]];
+var AKS=[["color","LED: colore"],["ledmode","LED: modo"],["bright","LED: luminosita"],["gpio","Pin: acceso o spento"],["wait","Aspetta"],["note","Scrivi nel registro"],["air","Modo aereo"],["mq","MQTT: invia un messaggio"],["ntp","Aggiorna l'ora"],["script","Avvia uno script"],["app","Avvia un'app"],["appstop","Ferma l'app"],["reboot","Riavvia la scheda"]];
 function unitOf(n){return n%3600==0?3600:n%60==0?60:1}
-function rEditDraw(){var r=RU.ed;
+function rScrNames(){if(ROLE<2){RU.scn=null;RU.apn=null;return}api("/api/apps").then(function(r){return r.json()}).then(function(j){RU.apn=j.ok?j.list.filter(function(x){return x.ok}).map(function(x){return x.n}):null;if(RU.ed&&$("racts"))aDraw()}).catch(function(){});api("/api/script").then(function(r){return r.json()}).then(function(j){RU.scn=j.ok?j.list.map(function(x){return x.n}):null;if(RU.ed&&$("racts"))aDraw()}).catch(function(){})}
+function rEditDraw(){var r=RU.ed;rScrNames();
  $("redit").innerHTML='<h3>'+esc(RU.edi<0?t("Nuova regola"):t("Modifica regola"))+'</h3>'+
  '<label for="r_name">'+esc(t("Nome"))+'</label><input id="r_name" maxlength="24" value="'+esc(r.name)+'" oninput="rPrev()">'+
  '<h4>'+esc(t("Quando"))+'</h4><select id="r_tk" onchange="rTrigUi()">'+selOpts(TKS,r.tk)+'</select><div id="r_tf"></div>'+
@@ -1075,16 +1219,22 @@ function rCondUi(){var r=RU.ed,k=$("r_ck").value,h="";r.ck=k;
  if(k=="between")h='<div class="arow"><span>'+esc(t("Dalle"))+'</span><input type="time" id="r_c1" value="'+esc(r.c1)+'" oninput="rPrev()"><span>'+esc(t("alle"))+'</span><input type="time" id="r_c2" value="'+esc(r.c2)+'" oninput="rPrev()"></div>';
  else if(k=="day")h=dayBtns("r_cd",r.cd);
  $("r_cf").innerHTML=h;rPrev()}
-function aDefault(k){return k=="color"?{k:k,v:"ff0000"}:k=="ledmode"?{k:k,v:"fixed"}:k=="bright"?{k:k,v:128}:k=="gpio"?{k:k,p:4,v:1}:k=="wait"?{k:k,v:5}:k=="note"?{k:k,v:""}:k=="air"?{k:k,v:"on boot"}:k=="mq"?{k:k,p:"evento",v:"ciao"}:{k:k}}
+function aDefault(k){return k=="color"?{k:k,v:"ff0000"}:k=="ledmode"?{k:k,v:"fixed"}:k=="bright"?{k:k,v:128}:k=="gpio"?{k:k,p:4,v:1}:k=="wait"?{k:k,v:5}:k=="note"?{k:k,v:""}:k=="air"?{k:k,v:"on boot"}:k=="script"?{k:k,v:""}:k=="app"?{k:k,v:""}:k=="mq"?{k:k,p:"evento",v:"ciao"}:{k:k}}
 function aAdd(){RU.ed.acts.push(aDefault("color"));aDraw()}
 function aDraw(){var h="";RU.ed.acts.forEach(function(a,i){h+='<div class="arow"><select class="ak" onchange="aKind('+i+',this.value)">'+selOpts(AKS,a.k)+'</select>';
   if(a.k=="color")h+='<input type="color" value="#'+esc(String(a.v).replace("#",""))+'" oninput="aSet('+i+',\'v\',this.value.replace(\'#\',\'\'))">';
   else if(a.k=="ledmode")h+='<select onchange="aSet('+i+',\'v\',this.value)">'+selOpts(LEDM,a.v)+'</select>';
   else if(a.k=="bright")h+='<input type="range" min="0" max="255" value="'+a.v+'" oninput="aSet('+i+',\'v\',+this.value)">';
-  else if(a.k=="gpio")h+='<input type="number" min="0" max="48" value="'+a.p+'" oninput="aSet('+i+',\'p\',+this.value)" style="max-width:90px"><select onchange="aSet('+i+',\'v\',+this.value)">'+selOpts(ONOFF,a.v)+'</select>';
+  else if(a.k=="gpio")h+='<input type="number" min="0" max="'+brdMax()+'" value="'+a.p+'" oninput="aSet('+i+',\'p\',+this.value)" style="max-width:90px"><select onchange="aSet('+i+',\'v\',+this.value)">'+selOpts(ONOFF,a.v)+'</select>';
   else if(a.k=="wait")h+='<input type="number" min="1" max="3600" value="'+a.v+'" oninput="aSet('+i+',\'v\',+this.value)" style="max-width:110px"><span>'+esc(t("secondi"))+'</span>';
   else if(a.k=="mq")h+='<input maxlength="40" value="'+esc(a.p)+'" placeholder="'+esc(t("argomento"))+'" oninput="aSet('+i+',\'p\',this.value)" style="max-width:130px"><input maxlength="60" value="'+esc(a.v)+'" placeholder="'+esc(t("testo"))+'" oninput="aSet('+i+',\'v\',this.value)">';
   else if(a.k=="air")h+='<select onchange="aSet('+i+',\'v\',this.value)">'+selOpts(AIRO,a.v)+'</select>';
+  else if(a.k=="script"){if(RU.scn&&RU.scn.length){if(!a.v)a.v=RU.scn[0];var sn=RU.scn.slice();if(a.v&&sn.indexOf(a.v)<0)sn.push(a.v);
+    h+='<select aria-label="'+esc(t("nome dello script"))+'" onchange="aSet('+i+',\'v\',this.value)">'+sn.map(function(n){return'<option value="'+esc(n)+'"'+(n==a.v?" selected":"")+'>'+esc(RU.scn.indexOf(n)<0?tf("{0} (non trovato)",n):n)+'</option>'}).join("")+'</select>'}
+   else h+='<input maxlength="24" value="'+esc(a.v)+'" placeholder="'+esc(t("nome dello script"))+'" aria-label="'+esc(t("nome dello script"))+'" oninput="aSet('+i+',\'v\',this.value)">'}
+  else if(a.k=="app"){if(RU.apn&&RU.apn.length){if(!a.v)a.v=RU.apn[0];var an=RU.apn.slice();if(a.v&&an.indexOf(a.v)<0)an.push(a.v);
+    h+='<select aria-label="'+esc(t("nome dell'app"))+'" onchange="aSet('+i+',\'v\',this.value)">'+an.map(function(n){return'<option value="'+esc(n)+'"'+(n==a.v?" selected":"")+'>'+esc(RU.apn.indexOf(n)<0?tf("{0} (non trovato)",n):n)+'</option>'}).join("")+'</select>'}
+   else h+='<input maxlength="24" value="'+esc(a.v)+'" placeholder="'+esc(t("nome dell'app"))+'" aria-label="'+esc(t("nome dell'app"))+'" oninput="aSet('+i+',\'v\',this.value)">'}
   else if(a.k=="note")h+='<input maxlength="60" value="'+esc(a.v)+'" placeholder="'+esc(t("Testo della nota"))+'" oninput="aSet('+i+',\'v\',this.value)">';
   h+='<button class="ib" onclick="aMove('+i+',-1)" aria-label="'+esc(t("Su"))+'">&uarr;</button><button class="ib" onclick="aMove('+i+',1)" aria-label="'+esc(t("Giu"))+'">&darr;</button><button class="ib" onclick="aDel('+i+')" aria-label="'+esc(t("Elimina"))+'">&#10005;</button></div>'});
  $("racts").innerHTML=h;rPrev()}
@@ -1149,7 +1299,29 @@ function uReboot(){dlg({title:t("Riavviare la scheda?"),body:'<p style="margin:0
 function uFw(){api("/api/recovery").then(function(r){return r.json()}).then(function(j){
  if(!j.present){dlg({title:t("Aggiornare il firmware?"),body:'<p style="margin:0">'+esc(t("Il recovery non e presente su questa scheda: il firmware si aggiorna solo con il cavo USB."))+'</p>',buttons:[["ok",t("Chiudi"),""]]});return}
  dlg({title:t("Aggiornare il firmware?"),body:'<p style="margin:0">'+esc(t("La scheda si riavvia nel recovery, una pagina separata dove carichi il file .bin di VesevOS. Servono utente e password di un amministratore."))+'</p>',ok:t("Riavvia nel recovery"),
- onOk:function(){return post("/api/recovery",{}).then(function(r){return r.json()}).then(function(j){if(j.ok)setTimeout(function(){var u="http://"+(j.ip||"")+":80/";dlg({title:t("Scheda nel recovery"),body:'<p style="margin:0">'+esc(tf("Apri {0} in una finestra privata del browser (scrivi http, non https). Se in 30 secondi non trova la rete di casa, la scheda crea la rete Wi-Fi VesevOS-recovery: la password e sulla seriale.",u))+'</p><p style="margin:8px 0 0">'+esc(t("Dopo l'aggiornamento VesevOS riparte da solo."))+'</p>',buttons:[["ok",t("Chiudi"),""]]})},50);return j.ok?"":j.err})}})}).catch(function(){})}
+ onOk:function(){return post("/api/recovery",{}).then(function(r){return r.json()}).then(function(j){if(j.ok)setTimeout(function(){uRecGo("http://"+(j.ip||"")+":80/")},50);return j.ok?"":j.err})}})}).catch(function(){})}
+function uRecUp(){api("/api/recovery").then(function(r){return r.json()}).then(function(j){
+ if(!j.present){dlg({title:t("Aggiornare il recovery?"),body:'<p style="margin:0">'+esc(t("Il recovery non e presente su questa scheda: si installa solo con il cavo USB."))+'</p>',buttons:[["ok",t("Chiudi"),""]]});return}
+ dlg({title:t("Aggiornare il recovery?"),body:'<p style="margin:0">'+esc(tf("Recovery installato: {0}",j.ver||t("versione sconosciuta")))+'</p><p style="margin:8px 0">'+esc(tf("Scegli il file .bin del recovery (al massimo {0} KB). La scheda lo controlla tutto prima di scriverlo: se e sbagliato il recovery attuale resta com'e.",j.kb))+'</p>'
+  +'<label for="rcf">'+esc(t("File del recovery (.bin)"))+'</label><input type="file" id="rcf" accept=".bin">'
+  +'<label for="rcs">'+esc(t("Impronta SHA-256 (facoltativa)"))+'</label><input id="rcs" autocomplete="off" spellcheck="false" maxlength="64">'
+  +'<p class="law" style="margin:8px 0 0">'+esc(t("Non spegnere la scheda durante l'aggiornamento (pochi secondi). VesevOS continua a funzionare."))+'</p>',ok:t("Aggiorna recovery"),
+  onOk:function(){var f=$("rcf").files[0],h=$("rcs").value.trim();if(!f)return t("Scegli il file");if(f.size>j.kb*1024)return t("File troppo grande per lo spazio del recovery");
+   if(h&&!/^[0-9a-fA-F]{64}$/.test(h))return t("L'impronta SHA-256 deve avere 64 cifre esadecimali");
+   var fd=new FormData();fd.append("file",f,f.name);msg("dlgm",t("Controllo e scrivo il recovery..."),true);
+   return api("/api/recovery/up"+(h?"?sha="+enc(h):""),{method:"POST",body:fd}).then(function(r){return r.json()}).then(function(k){
+    if(k.ok)setTimeout(function(){dlg({title:t("Recovery aggiornato"),body:'<p style="margin:0" role="status">'+esc(tf("Da {0} a {1}. VesevOS non si riavvia: il nuovo recovery si usa al prossimo aggiornamento del firmware.",k.from||"?",k.to))+'</p>',buttons:[["ok",t("Chiudi"),""]]})},50);
+    return k.ok?"":(k.err||t("Errore"))},function(){return t("Caricamento non riuscito")})}})}).catch(function(){})}
+function uRecPrb(x,ok,ko){var c=new AbortController(),m=setTimeout(function(){c.abort()},1500);fetch(x,{mode:"no-cors",cache:"no-store",signal:c.signal}).then(function(){clearTimeout(m);ok()},function(){clearTimeout(m);ko()})}
+function uRecOpen(u){location.href=u}
+function uRecGo(u){var st=0,t0=Date.now(),t1=0,stop=false,sec=location.protocol==="https:";
+ var go=function(){stop=true;uRecOpen(u)};
+ dlg({title:t("Scheda nel recovery"),body:'<p style="margin:0" role="status">'+esc(t("Aspetto che la scheda riparta nel recovery: la pagina si apre da sola."))+'</p>',buttons:[["ok",t("Apri ora"),""]],onOk:function(){go();return""}});
+ (function tick(){if(stop)return;
+  if(Date.now()-t0>60000){stop=true;dlg({title:t("Scheda nel recovery"),body:'<p style="margin:0">'+esc(t("Non riesco ad aprirla da sola."))+'</p><p style="margin:8px 0 0">'+esc(tf("Apri {0} in una finestra privata del browser (scrivi http, non https). Se in 30 secondi non trova la rete di casa, la scheda crea la rete Wi-Fi VesevOS-recovery: la password e sulla seriale.",u))+'</p><p style="margin:8px 0 0">'+esc(t("Dopo l'aggiornamento VesevOS riparte da solo."))+'</p>',buttons:[["ok",t("Apri il recovery"),""]],onOk:function(){uRecOpen(u);return""}});return}
+  if(st===0)uRecPrb(location.origin+"/",function(){setTimeout(tick,1000)},function(){st=1;t1=Date.now();setTimeout(tick,1000)});
+  else if(sec){if(Date.now()-t1>8000)go();else setTimeout(tick,1000)}
+  else uRecPrb(u,go,function(){setTimeout(tick,1000)})})()}
 function uSleep(){dlg({title:t("Mettere la scheda in sleep?"),body:'<p style="margin:0">'+esc(t("La scheda entra in sonno profondo: Wi-Fi e LED spenti, consuma pochissimo."))+'</p><p style="margin:8px 0 0"><b>'+esc(t("Per riaccenderla premi il tasto RESET sulla scheda (o togli e ridai corrente)."))+'</b></p>',ok:t("Sleep"),danger:true,
  onOk:function(){return post("/api/sleep",{}).then(function(r){return r.json()}).then(function(j){if(j.ok)setTimeout(function(){dlg({title:t("Scheda in sleep"),body:'<p style="margin:0">'+esc(t("Premi RESET sulla scheda, poi ricarica questa pagina."))+'</p>',buttons:[["ok",t("Ricarica"),""]],onOk:function(){location.reload();return""}})},50);return j.ok?"":j.err})}})}
 function row(a,b){return '<div class="row"><span>'+a+'</span><span>'+b+'</span></div>'}
@@ -1205,19 +1377,24 @@ function homeDraw(){var s=S;if(!s||!$("home"))return;var n=s.net,hp=Math.round(1
  h+=homeWid(s,n);
  h+='<section class="card hid"><h3>'+esc(t("Sistema"))+'</h3><div class="big">'+esc(n.host)+'</div><div class="subt">'+esc(s.chip)+" · ID "+boardId(s)+'</div><div style="height:8px"></div>'+
   row(t("Chip"),esc(s.chip)+" rev "+revs)+row(t("Processore"),tf("{0} core a {1} MHz",s.cores,mhz))+row(t("Memoria"),tf("{0} MB flash · {1} MB PSRAM",Math.round(s.flashChip/1048576),Math.round(s.psramTotal/1048576)))+
-  row(t("Acceso da"),esc(s.uptime))+row(t("Ore di vita"),tf("{0} h {1} min",Math.floor(s.lifeSec/3600),Math.floor(s.lifeSec/60)%60))+row(t("Avvii totali"),s.boots)+row(t("Ultimo reset"),esc(s.reset))+row(t("Versione"),esc(s.name+" "+s.version))+
+  row(t("Acceso da"),esc(s.uptime))+row(t("Ore di vita"),fmtDur(s.lifeSec))+row(t("Avvii totali"),s.boots)+row(t("Ultimo reset"),esc(s.reset))+row(t("Versione"),esc(s.name+" "+s.version))+
   '<button class="btn" style="margin-top:10px" onclick="identify()">'+esc(t("Trova questa scheda"))+'</button><div id="idm" class="msg"></div></section>';
 $("home").innerHTML=h}
-var HW=null,HWT=0;
+var HW=null,HWT=0,HWU=null;
 function hdTick(){var e=$("hd");if(!e)return;if(HW&&HW.tv){var c=hClock();e.textContent=c[0]+" · "+c[1]}else e.textContent=""}
-function hwFetch(){if(!document.hidden&&Date.now()-HWT>8000){HWT=Date.now();api("/api/home").then(function(r){return r.json()}).then(function(j){j.t0=Date.now();HW=j;hdTick();if(cur=="sum")homeDraw()}).catch(function(){})}}
+function hwUsers(){api("/api/svc").then(function(r){return r.json()}).then(function(j){if(typeof j.usersHttp!="number"||typeof j.usersHttps!="number")return;var n=j.usersHttp+j.usersHttps;if(n!==HWU){HWU=n;if(cur=="sum")homeDraw()}}).catch(function(){})}
+function hwFetch(){if(!document.hidden&&Date.now()-HWT>8000){HWT=Date.now();hwUsers();api("/api/home").then(function(r){return r.json()}).then(function(j){j.t0=Date.now();HW=j;hdTick();if(cur=="sum")homeDraw()}).catch(function(){})}}
 function hClock(){var A=HW;if(!A||!A.tv)return["--:--:--",t("Ora non impostata")];var p=function(x){return(x<10?"0":"")+x},ms=(A.te+(Date.now()-A.t0)/1000)*1000,d=new Date(ms+A.to*1000),H=d.getUTCHours(),ap="";
  if(A.tf){ap=H>=12?" PM":" AM";H=H%12||12}var Y=d.getUTCFullYear(),M=p(d.getUTCMonth()+1),D=p(d.getUTCDate());
  return[p(H)+":"+p(d.getUTCMinutes())+":"+p(d.getUTCSeconds())+ap,A.df==1?Y+"-"+M+"-"+D:A.df==2?M+"/"+D+"/"+Y:D+"/"+M+"/"+Y]}
 setInterval(hdTick,1000);
 function wid(tt,v,sub,go,ic){return'<div class="wid" role="button" tabindex="0" onclick="show(\''+go+'\')" onkeydown="if(event.key==\'Enter\')show(\''+go+'\')"><div class="wt"><svg class="i" aria-hidden="true"><use href="#'+ic+'"/></svg>'+esc(tt)+'</div><div class="wv">'+v+'</div>'+(sub?'<div class="ws">'+sub+'</div>':"")+'</div>'}
+function widCol(n){var many=n>1,l=tf("Collegati: {0}",n),adm=ROLE==2,
+ sub=many?'<svg class="i" aria-hidden="true"><use href="#i-bell"/></svg>'+esc(t("Attenzione: piu di un collegato")):esc(t("Sessioni web attive negli ultimi 2 minuti"));
+ return'<div class="wid wcol'+(many?" warn":"")+'" '+(adm?'role="button" tabindex="0" onclick="whoShow()" onkeydown="if(event.key==\'Enter\'||event.key==\' \')whoShow()" aria-label="'+esc(l+". "+t("Chi e collegato"))+'"':'role="group" aria-label="'+esc(l)+'"')+'><div class="wt"><svg class="i" aria-hidden="true"><use href="#i-shield"/></svg>'+esc(t("Collegati"))+'</div><div class="wv wbig">'+n+'</div><div class="ws">'+sub+'</div></div>'}
 function homeWid(s,n){hwFetch();if(!SV.httpPort)svcLoad();
  var W=HW||{},pill=function(on,a,b){return'<span class="pill'+(on?" a":"")+'">'+esc(on?a:b)+'</span>'},c=[],now=Math.floor(Date.now()/1000);
+ if(HWU!==null)c.push(widCol(HWU));
  if(SV.httpOn)c.push(wid("HTTP",esc(tf("Porta: {0}",SV.httpPort)),"","http","i-globe"));
  if(SV.httpsOn)c.push(wid("HTTPS",esc(tf("Porta: {0}",SV.httpsPort)),"","https","i-lock"));
  if(s.mqtt&&canSee("mqtt"))c.push(wid("MQTT",pill(s.mqtt==2,t("collegato"),t("non collegato")),"","mqtt","i-mqtt"));
@@ -1283,9 +1460,9 @@ function enc(s){return encodeURIComponent(s)}
 function join(a,b){return a=="/"?"/"+b:a+"/"+b}
 /* ===== File: elenco, menu azioni, finestre, editor ===== */
 var FS={list:[],used:0,total:0,max:32768,menu:null,lp:null};
-var FTXT=/\.(txt|md|log|csv|html?|css|js|conf|cfg|ini|xml|ya?ml|h|c|cpp|ino|py|sh|svg|rules)$/i,FIMG=/\.(png|jpe?g|gif|svg|ico|bmp|webp)$/i;
-var FCODE=/\.(html?|css|js|h|c|cpp|ino|py|sh|xml)$/i;
-function fIco(f){return f.d?"i-folder":/\.json$/i.test(f.n)?"i-fjson":FIMG.test(f.n)?"i-fimg":FCODE.test(f.n)?"i-fcode":(FTXT.test(f.n)||f.n.indexOf(".")<0)?"i-ftxt":"i-fbin"}
+var FTXT=/\.(txt|md|log|csv|html?|css|js|conf|cfg|ini|xml|ya?ml|h|c|cpp|ino|py|sh|svg|rules|vsc|vap)$/i,FIMG=/\.(png|jpe?g|gif|svg|ico|bmp|webp)$/i;
+var FCODE=/\.(html?|css|js|h|c|cpp|ino|py|sh|xml|vsc|vap)$/i;
+function fIco(f){return f.d?"i-folder":/\.json$/i.test(f.n)?"i-fjson":FIMG.test(f.n)?"i-fimg":/\.vsc$/i.test(f.n)?"i-fvsc":/\.vap$/i.test(f.n)?"i-fvap":FCODE.test(f.n)?"i-fcode":(FTXT.test(f.n)||f.n.indexOf(".")<0)?"i-ftxt":"i-fbin"}
 function fEditable(n){return /\.json$/i.test(n)||FTXT.test(n)||n.indexOf(".")<0}
 function fSize(n){return n<1024?n+" B":n<1048576?(n/1024).toFixed(n<10240?1:0)+" KB":(n/1048576).toFixed(1)+" MB"}
 function fDir(p){var i=p.lastIndexOf("/");return i<=0?"/":p.substring(0,i)}
@@ -1389,20 +1566,23 @@ function fUpload(){var f=$("fup").files[0];if(!f)return;$("fup").value="";
 var FE={p:"",isNew:false,orig:"",tabSp:true};
 function fEdit(p){api("/api/fs/text?path="+enc(p)).then(function(r){return r.text().then(function(x){return{ok:r.ok,x:x}})}).then(function(o){if(!o.ok){msg("fm",o.x,false);return}fEdOpen(p,o.x,false)}).catch(function(){})}
 function fEdOpen(p,x,isNew){FE.p=p;FE.isNew=isNew;FE.orig=isNew?null:x;FE.back=document.activeElement;var e=$("fedx");e.value=x;e.scrollTop=0;e.scrollLeft=0;
- $("fed").className="fed";document.body.classList.add("fedo");fEdTitle();$("fedw").className=fSys(p)?"fedw":"fedw hide";
+ $("fed").className="fed";document.body.classList.add("fedo");fEdTitle();$("fedw").className=fSys(p)?"fedw":"fedw hide";$("fedrun").hidden=!fIsScript(p);
  $("fedpaste").hidden=!(navigator.clipboard&&navigator.clipboard.readText&&window.isSecureContext);fEdUpd();setTimeout(function(){e.focus();e.setSelectionRange(0,0)},30)}
+function fIsScript(p){return /^\/scripts\/[a-z0-9_-]{1,24}\.vsc$/.test(p)}
+function fEdRun(){var n=FE.p.replace(/^.*\//,"").replace(/\.vsc$/,"");fEdSave().then(function(ok){if(!ok)return;fEdClose(true);show("script");scRun(n)})}
+function fMax(){return /\.vsc$/i.test(FE.p)?8192:/\.vap$/i.test(FE.p)?16384:FS.max}
 function fEdDirty(){return FE.isNew||$("fedx").value!==FE.orig}
 function fEdTitle(){var d=fEdDirty();$("fedt").textContent=fBase(FE.p);$("fedp").textContent=fDir(FE.p);$("feds").textContent=FE.isNew?t("Nuovo, non ancora salvato"):d?t("Modificato"):t("Salvato");$("feds").className="feds"+(d?" mod":"")}
 function fEdUpd(){var e=$("fedx"),v=e.value,ln=v.split("\n").length,h="";for(var i=1;i<=ln;i++)h+=i+"\n";if($("fedn").textContent!=h)$("fedn").textContent=h;$("fedn").scrollTop=e.scrollTop;
  var b=new TextEncoder().encode(v).length,pre=v.substring(0,e.selectionStart),r=pre.split("\n").length,c=pre.length-pre.lastIndexOf("\n");
- $("fedpos").textContent=tf("Riga {0}, colonna {1}",r,c);var free=FS.total-FS.used,over=b>FS.max,nf=FS.total&&b+8192>free+(FE.orig!=null?new TextEncoder().encode(FE.orig).length:0);
- $("fedsz").textContent=fSize(b)+" / "+fSize(FS.max)+(FS.total?" · "+tf("liberi {0}",kb(free)):"");$("fedsz").className=over||nf?"bad":"";
+ $("fedpos").textContent=tf("Riga {0}, colonna {1}",r,c);var free=FS.total-FS.used,over=b>fMax(),nf=FS.total&&b+8192>free+(FE.orig!=null?new TextEncoder().encode(FE.orig).length:0);
+ $("fedsz").textContent=fSize(b)+" / "+fSize(fMax())+(FS.total?" · "+tf("liberi {0}",kb(free)):"");$("fedsz").className=over||nf?"bad":"";
  var jm="";if(/\.json$/i.test(FE.p)&&v.trim()){var je=fJsonErr(v);jm=je?"⚠ "+je:"✓ "+t("JSON corretto")}$("fedjs").textContent=jm;$("fedjs").className=jm.charAt(0)=="⚠"?"bad":"good";
  $("fedtab").textContent=FE.tabSp?t("Tab: inserisce spazi (Ctrl+M per cambiare)"):t("Tab: passa al pulsante successivo (Ctrl+M per cambiare)");fEdTitle()}
 function fJsonErr(v){try{JSON.parse(v);return""}catch(x){var m=String(x.message),p=m.match(/position (\d+)/),l=m.match(/line (\d+) column (\d+)/);
  if(l)return tf("errore alla riga {0}, colonna {1}",l[1],l[2]);if(p){var pre=v.substring(0,+p[1]);return tf("errore alla riga {0}, colonna {1}",pre.split("\n").length,pre.length-pre.lastIndexOf("\n"))}return t("errore nel JSON")}}
 function fEdSave(asNew,path,force){var v=$("fedx").value,p=path||FE.p,b=new TextEncoder().encode(v).length;
- if(b>FS.max){msg("fedm",tf("Troppo grande: massimo {0}",fSize(FS.max)),false);return Promise.resolve(false)}
+ if(b>fMax()){msg("fedm",tf("Troppo grande: massimo {0}",fSize(fMax())),false);return Promise.resolve(false)}
  if(!force&&/\.json$/i.test(p)&&v.trim()&&fJsonErr(v)){dlg({title:t("Il JSON ha un errore"),body:'<p style="margin:0">'+esc(fJsonErr(v))+'</p><p style="margin:8px 0 0;color:var(--mut)">'+esc(t("Se lo salvi cosi, chi lo legge potrebbe non funzionare."))+'</p>',ok:t("Salva lo stesso"),danger:true,onOk:function(){fEdSave(asNew,path,true);return""}});return Promise.resolve(false)}
  return post("/api/fs/save",{path:p,text:v,"new":(FE.isNew||asNew)?"1":"0"}).then(function(r){return r.json()}).then(function(j){
   if(!j.ok&&(FE.isNew||asNew)&&j.err==t("Esiste gia")){dlg({title:t("Sostituire il file?"),body:'<p style="margin:0">'+esc(tf("{0} esiste gia.",p))+'</p>',ok:t("Sostituisci"),danger:true,onOk:function(){FE.isNew=false;return post("/api/fs/save",{path:p,text:v,"new":"0"}).then(function(r){return r.json()}).then(function(j){if(j.ok)fEdSaved(p,v);return j.ok?"":j.err})}});return false}
@@ -1524,12 +1704,105 @@ function saveLed(){post("/api/led",{mode:$("l_mode").value,color:parseInt($("l_c
 var PM=[],PSEL=-1,PWARN=false,PTM=null,PT={gpio:-1};
 var PBI=null,PV="f",PNOTE={};
 var PWR={"5V":"#d64545","3V3":"#e08a2c","GND":"#222"};
-var PFL=["43","44","1","2","3","4","5","6","7"],PFR=["5V","GND","3V3","13","12","11","10","9","8"],PIL=[38,37,34,33,21,18,17,16,15,14],PIR=[36,35,48,47,46,45,42,41,40,39];
+/* scheda: tutti i numeri arrivano dal firmware (/api/pins/info, file di scheda); senza risposta niente disegno */
+function brdLay(k){return PBI&&PBI.lay&&PBI.lay[k]?PBI.lay[k].map(String):[]}
+function brdIn(k,g){var r=PBI&&PBI[k];return !!r&&g>=r[0]&&g<=r[1]}
+function brdMax(){return PBI&&PBI.gmax!=null?PBI.gmax:""}
+function brdLoad(){return api("/api/pins/info").then(function(r){return r.json()}).then(function(b){PBI=b;var e=$("io_g");if(e)e.max=brdMax();return b}).catch(function(){})}
+/* ===== Script (Berry): elenco, avvio/stop, uscita in diretta. Il testo si modifica con l'editor dei file ===== */
+var SC={tm:0,list:[],busy:false,bg:false,name:"",out:null,fsOk:false};
+function scLoad(){scTimerStop();scPoll();SC.tm=setInterval(function(){if(cur!="script"||document.hidden){if(cur!="script")scTimerStop();return}scPoll()},1500)}
+function scTimerStop(){if(SC.tm){clearInterval(SC.tm);SC.tm=0}}
+function scPoll(){api("/api/script").then(function(r){return r.json()}).then(function(j){if(!j.ok){msg("scm",j.err,false);return}scDraw(j)}).catch(function(){})}
+function scFsInfo(){if(SC.fsOk)return;api("/api/fs/list?path=/scripts").then(function(r){return r.json()}).then(function(j){if(j.ok){FS.used=j.used;FS.total=j.total;SC.fsOk=true}}).catch(function(){})}
+function scDraw(j){SC.list=j.list;SC.busy=j.busy;SC.bg=j.bg;SC.name=j.name;scFsInfo();
+ var run=j.busy&&j.bg,st;
+ if(run)st=tf("In corso: {0}",j.name);else if(j.busy)st=t("Berry sta eseguendo un comando");else if(j.last==1)st=tf("Fermo. Ultima esecuzione finita senza errori ({0} ms).",j.ms);else if(j.last==0)st=t("Fermo. L'ultima esecuzione e finita con un errore (vedi l'uscita).");else st=t("Fermo. Nessuno script eseguito dall'accensione.");
+ var se=$("scst");if(se.textContent!=st)se.textContent=st;
+ $("scstop").disabled=!j.busy;
+ var h="";
+ if(!j.list.length)h='<tbody><tr><td colspan="3" class="fhint">'+esc(t("Nessuno script. Premi Nuovo script per crearne uno."))+'</td></tr></tbody>';
+ else{h="<tbody>";j.list.forEach(function(x){var on=run&&j.name==x.n,q=esc(x.n),oq="'"+x.n+"'";
+  h+='<tr class="'+(on?"lp":"")+'"><td><span class="scn"><svg class="i" aria-hidden="true"><use href="#i-fvsc"/></svg><b>'+q+'</b>'+(on?'<span class="pill">'+esc(t("in corso"))+'</span>':"")+'</span></td><td class="fsz">'+fSize(x.s)+'</td>'+
+   '<td class="fac tkb"><span class="svi">'+sibB("sm go","i-sgo",tf("Esegui {0}",x.n),on,j.busy,j.busy?"":"scRun("+oq+")")+sibB("sm st","i-sst",tf("Ferma {0}",x.n),false,!on,on?"scStopRun()":"")+
+   sibB("sm","i-edit",tf("Modifica {0}",x.n),false,false,"scEdit("+oq+")")+sibB("sm","i-del",tf("Elimina {0}",x.n),false,on,on?"":"scDel("+oq+")")+'</span></td></tr>'});h+="</tbody>"}
+ if(SC._h!==h){SC._h=h;$("sctab").innerHTML=h}
+ var o=(j.trunc?"... ":"")+j.out+(j.err?(j.out?"\n":"")+j.err:""),pre=$("scout");if(!o)o=t("Nessuna uscita");
+ if(pre.textContent!==o){var bot=pre.scrollTop+pre.clientHeight>=pre.scrollHeight-24;pre.textContent=o;if(bot)pre.scrollTop=pre.scrollHeight}
+ $("scinfo").textContent=tf("Esecuzioni dall'accensione: {0}. Limiti: {1} di testo, memoria 64 KB, un solo script alla volta.",j.runs,fSize(j.max))}
+function scRun(n){post("/api/script/run",{name:n}).then(function(r){return r.json()}).then(function(j){msg("scm",j.ok?tf("Avviato: {0}",n):j.err,j.ok);scPoll()}).catch(function(){})}
+function scStopRun(){post("/api/script/stop",{}).then(function(r){return r.json()}).then(function(j){msg("scm",j.ok?t("Script fermato"):j.err,j.ok);scPoll()}).catch(function(){})}
+function scPath(n){return"/scripts/"+n+".vsc"}
+function scEdit(n){api("/api/fs/text?path="+enc(scPath(n))).then(function(r){return r.text().then(function(x){return{ok:r.ok,x:x}})}).then(function(o){if(!o.ok){msg("scm",o.x,false);return}fEdOpen(scPath(n),o.x,false)}).catch(function(){})}
+function scNew(){dlg({title:t("Nuovo script"),body:'<label for="dn">'+esc(t("Nome dello script"))+'</label><input id="dn" autocomplete="off" maxlength="24" spellcheck="false" autocapitalize="off" placeholder="lampeggio"><p class="fhint" style="margin:0">'+esc(t("Da 1 a 24 caratteri: lettere minuscole, numeri, trattino e sottotrattino."))+'</p>',ok:t("Crea"),
+ onOk:function(){var n=dlgV("dn").toLowerCase().replace(/\.vsc$/,"");if(!/^[a-z0-9_-]{1,24}$/.test(n))return t("Nome non valido");if(SC.list.some(function(x){return x.n==n}))return t("Esiste gia");
+  fEdOpen(scPath(n),"# "+n+"\nprint('ciao')\n",true);return""}})}
+function scDel(n){dlg({title:t("Eliminare?"),body:'<p style="margin:0">'+esc(tf("Lo script {0} verra eliminato.",n))+'</p><p style="margin:8px 0 0;color:var(--mut)">'+esc(t("Non si puo annullare."))+'</p>',ok:t("Elimina"),danger:true,
+ onOk:function(){return post("/api/fs/del",{path:scPath(n)}).then(function(r){return r.json()}).then(function(j){scPoll();return j.ok?"":j.err})}})}
+/* ===== App (.vap): elenco, pagina generica con i controlli dichiarati, avvio e stop. Il testo si modifica con l'editor dei file ===== */
+var AP={list:[],sel:"",info:null,tm:0,run:false,busy:false,key:"",tmr:0};
+function apLoad(){apTimerStop();api("/api/apps").then(function(r){return r.json()}).then(function(j){if(!j.ok){msg("appm",j.err,false);return}AP.list=j.list;apDraw(j);if(AP.sel)apPoll();
+ AP.tm=setInterval(function(){if(cur!="app"||document.hidden){if(cur!="app")apTimerStop();return}if(AP.sel)apPoll()},1200)}).catch(function(){})}
+function apTimerStop(){if(AP.tm){clearInterval(AP.tm);AP.tm=0}}
+function apIco(x){
+ if(x.ok&&x.icon){var sv=x.icon;if(sv.indexOf("xmlns")<0)sv=sv.replace("<svg",'<svg xmlns="http://www.w3.org/2000/svg"');return'<img class="api" alt="" width="24" height="24" src="data:image/svg+xml;charset=utf-8,'+enc(sv)+'">'}
+ return'<svg class="i" aria-hidden="true"><use href="#i-fvap"/></svg>'}
+function apDraw(j){var h="";
+ if(!j.list.length)h='<tbody><tr><td colspan="3" class="fhint">'+esc(ROLE==2?t("Nessuna app. Premi Nuova app per crearne una."):t("Nessuna app disponibile per il tuo ruolo."))+'</td></tr></tbody>';
+ else{h="<tbody>";j.list.forEach(function(x){var q=esc(x.n),oq="'"+x.n+"'",nm=/^[a-z0-9_-]{1,24}$/.test(x.n);
+  h+='<tr><td><span class="scn">'+apIco(x)+'<b>'+(x.ok?esc(x.t):q)+'</b>'+(ROLE==2?'<span class="pill'+(x.ok?" v":" k")+'">'+esc(x.ok?t("valida"):t("errore"))+'</span>':'')+'</span>';
+  if(x.ok)h+='<div class="fhint">'+esc(x.n+" · "+tf("Versione {0}",x.v)+(x.a?" · "+x.a:"")+" · "+tf("Controlli: {0}",x.c)+" · "+tf("Permessi: {0}",x.u||"-"))+'</div>';
+  else h+='<div class="fhint bad">'+esc(x.e)+'</div>';
+  h+='</td><td class="fsz">'+(x.ok&&ROLE==2?fSize(x.s):"")+'</td><td class="fac tkb"><span class="svi">'+(x.ok&&nm?sibB("sm go","i-sgo",tf("Apri {0}",x.n),AP.sel==x.n,false,"apOpen("+oq+")"):"")+(ROLE==2&&nm?sibB("sm","i-edit",tf("Modifica {0}",x.n),false,false,"apEdit("+oq+")")+sibB("sm","i-del",tf("Elimina {0}",x.n),false,false,"apDel("+oq+")"):"")+'</span></td></tr>'});h+="</tbody>"}
+ if(AP._h!==h){AP._h=h;$("aptab").innerHTML=h}}
+function apPath(n){return"/apps/"+n+".vap"}
+function apEdit(n){api("/api/fs/text?path="+enc(apPath(n))).then(function(r){return r.text().then(function(x){return{ok:r.ok,x:x}})}).then(function(o){if(!o.ok){msg("appm",o.x,false);return}fEdOpen(apPath(n),o.x,false)}).catch(function(){})}
+function apTpl(n){return"[manifest]\nname="+n+"\ntitle="+n.charAt(0).toUpperCase()+n.slice(1)+"\nversion=1\nuse=led\nwho=admin\n\n[icon]\n<svg viewBox=\"0 0 24 24\"><path d=\"M5 19l4-9 3 4 3-6 4 11z\" fill=\"none\" stroke=\"#c0392b\" stroke-width=\"2\"/></svg>\n\n[page]\nswitch id=power label=\"Accesa\"\nslider id=lum label=\"Luminosita\" min=0 max=255\ntext id=info label=\"Stato\"\n\n[code]\ndef on_set(id, v)\n  if id == 'power'\n    if v == 1\n      led('ffffff')\n    else\n      led('auto')\n    end\n  end\n  if id == 'lum'\n    dev_set('info', 'Luminosita ' + str(v))\n  end\nend\n\n[data]\npower=0\n"}
+function apNew(){dlg({title:t("Nuova app"),body:'<label for="dn">'+esc(t("Nome dell'app"))+'</label><input id="dn" autocomplete="off" maxlength="24" spellcheck="false" autocapitalize="off" placeholder="lampada"><p class="fhint" style="margin:0">'+esc(t("Da 1 a 24 caratteri: lettere minuscole, numeri, trattino e sottotrattino."))+'</p>',ok:t("Crea"),
+ onOk:function(){var n=dlgV("dn").toLowerCase().replace(/\.vap$/,"");if(!/^[a-z0-9_-]{1,24}$/.test(n))return t("Nome non valido");if(AP.list.some(function(x){return x.n==n}))return t("Esiste gia");
+  fEdOpen(apPath(n),apTpl(n),true);return""}})}
+function apDel(n){dlg({title:t("Eliminare?"),body:'<p style="margin:0">'+esc(tf("L'app {0} verra eliminata.",n))+'</p><p style="margin:8px 0 0;color:var(--mut)">'+esc(t("Non si puo annullare."))+'</p>',ok:t("Elimina"),danger:true,
+ onOk:function(){if(AP.sel==n)apClose();return post("/api/fs/del",{path:apPath(n)}).then(function(r){return r.json()}).then(function(j){apLoad();return j.ok?"":j.err})}})}
+/* ---- la pagina generica dell'app: UN solo disegno nel firmware, legge i controlli dichiarati nel manifest (niente HTML dell'utente) ---- */
+function apOpen(n){api("/api/app?name="+enc(n)).then(function(r){return r.json()}).then(function(j){if(!j.ok){msg("appm",j.err,false);return}
+ AP.sel=n;AP.info=j;AP.key="";AP.run=false;apBuild();apPoll();if(AP._h){AP._h="";apLoad()}else apDraw({list:AP.list});$("apcard").scrollIntoView({block:"nearest"})}).catch(function(){})}
+function apClose(){AP.sel="";AP.info=null;AP.key="";$("apcard").className="card hide";AP._h="";apDraw({list:AP.list})}
+function apCtl(c){var id=esc(c.id),l=esc(c.l),dis=AP.run?"":" disabled",x='<div class="apc" id="apw_'+id+'">';
+ if(c.k=="switch")x+='<span class="apl" id="apt_'+id+'">'+l+'</span><button type="button" class="sw1" id="apc_'+id+'" role="switch" aria-checked="false" aria-labelledby="apt_'+id+'"'+dis+' onclick="apTog(\''+c.id+'\')"></button>';
+ else if(c.k=="slider")x+='<label class="apl" for="apc_'+id+'">'+l+'</label><input type="range" id="apc_'+id+'" min="'+(+c.mn)+'" max="'+(+c.mx)+'" value="'+(+c.mn)+'"'+dis+' oninput="apSl(\''+c.id+'\',this.value,0)" onchange="apSl(\''+c.id+'\',this.value,1)"><output class="apv" id="apo_'+id+'"></output>';
+ else if(c.k=="color")x+='<label class="apl" for="apc_'+id+'">'+l+'</label><input type="color" id="apc_'+id+'" value="#000000"'+dis+' onchange="apSend(\''+c.id+'\',this.value.slice(1))">';
+ else if(c.k=="text")x+='<label class="apl" for="apc_'+id+'">'+l+'</label><input type="text" id="apc_'+id+'" maxlength="40"'+dis+' onkeydown="if(event.key===\'Enter\')apSend(\''+c.id+'\',this.value)" onchange="apSend(\''+c.id+'\',this.value)">';
+ else if(c.k=="button")x+='<button type="button" class="btn gray" id="apc_'+id+'"'+dis+' onclick="apSend(\''+c.id+'\',1)">'+l+'</button>';
+ else x+='<span class="apl" id="apt_'+id+'">'+l+'</span><svg class="apg" id="apc_'+id+'" viewBox="0 0 200 60" preserveAspectRatio="none" role="img" aria-labelledby="apt_'+id+'"></svg><output class="apv" id="apo_'+id+'"></output>';
+ return x+'</div>'}
+function apBuild(){var j=AP.info;if(!j)return;$("apcard").className="card";
+ $("aphead").innerHTML=apIco({ok:true,icon:j.icon})+'<b>'+esc(j.t)+'</b>';
+ $("apctl").innerHTML=j.ctl.length?j.ctl.map(apCtl).join(""):'<p class="fhint">'+esc(t("Questa app non ha controlli: lavora da sola."))+'</p>'}
+function apState(j){AP.run=!!j.run;AP.busy=!!j.busy;
+ var k=(AP.run?1:0)+"|"+(AP.busy?1:0);
+ $("appill").className="pill"+(AP.run?" a":"");$("appill").textContent=AP.run?t("in esecuzione"):t("ferma");
+ $("apgo").disabled=AP.busy;$("apst").disabled=!AP.run;$("apgo").setAttribute("aria-pressed",AP.run?"true":"false");
+ if(AP.key!==k){AP.key=k;[].forEach.call($("apctl").querySelectorAll("input,button"),function(e){e.disabled=!AP.run})}
+ (j.vals||[]).forEach(function(v){var e=$("apc_"+v.id);if(!e)return;var f=document.activeElement===e;
+  if(v.n!==undefined){if(e.getAttribute("role")=="switch"){e.className="sw1"+(v.n?" on":"");e.setAttribute("aria-checked",v.n?"true":"false")}else if(e.type=="range"){if(!f)e.value=v.n;var o=$("apo_"+v.id);if(o)o.textContent=v.n}}
+  else if(v.a!==undefined)apChart(e,v.a,$("apo_"+v.id));
+  else if(v.s!==undefined&&!f){if(e.type=="color")e.value="#"+(/^[0-9a-f]{6}$/.test(v.s)?v.s:"000000");else if(e.type=="text")e.value=v.s}});
+ var o=$("apout");o.textContent=(j.out||"")+(j.err?(j.out?"\n":"")+j.err:"");o.className="lgv"+(j.err?" bad":"")+(o.textContent?"":" hide")}
+function apChart(svg,a,out){var n=a.length,mn=1e18,mx=-1e18,p="",i;if(out)out.textContent=n?a[n-1]:"";if(!n){svg.innerHTML="";return}
+ for(i=0;i<n;i++){if(a[i]<mn)mn=a[i];if(a[i]>mx)mx=a[i]}if(mx==mn){mx=mn+1}
+ for(i=0;i<n;i++)p+=(n>1?i*200/(n-1):100).toFixed(1)+","+(56-(a[i]-mn)*52/(mx-mn)).toFixed(1)+" ";
+ svg.innerHTML='<polyline points="'+p+'" fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke"/>'}
+function apPoll(){if(!AP.sel)return;var n=AP.sel;api("/api/app/state?name="+enc(n)).then(function(r){return r.json()}).then(function(j){if(n!=AP.sel)return;if(!j.ok){msg("appm",j.err,false);apClose();return}apState(j)}).catch(function(){})}
+function apStart(){post("/api/app/start",{name:AP.sel}).then(function(r){return r.json()}).then(function(j){msg("appm",j.ok?t("App avviata"):j.err,j.ok);apPoll()}).catch(function(){})}
+function apStop(){post("/api/app/stop",{name:AP.sel}).then(function(r){return r.json()}).then(function(j){msg("appm",j.ok?t("App fermata"):j.err,j.ok);apPoll()}).catch(function(){})}
+function apSend(id,v){if(!AP.run)return;post("/api/app/set",{name:AP.sel,id:id,v:v}).then(function(r){return r.json()}).then(function(j){if(!j.ok)msg("appm",j.err,false);else apPoll()}).catch(function(){})}
+function apTog(id){var e=$("apc_"+id);apSend(id,e&&e.getAttribute("aria-checked")=="true"?0:1)}
+function apSl(id,v,fin){var o=$("apo_"+id);if(o)o.textContent=v;if(fin){clearTimeout(AP.tmr);apSend(id,v);return}if(AP.tmr)return;AP.tmr=setTimeout(function(){AP.tmr=0;var e=$("apc_"+id);if(e)apSend(id,e.value)},250)}
 /* funzioni scritte sulla foto della scheda: l'ESP32-S3 puo quasi tutto su ogni pin, quindi sono indicative */
 var PFN={1:"UART PWM I2S ADC I2C SPI",2:"UART PWM I2S ADC I2C SPI",3:"UART PWM I2S ADC I2C SPI",4:"UART PWM I2S ADC I2C SPI",5:"UART PWM I2S ADC I2C SPI",6:"UART PWM I2S ADC I2C SPI",7:"UART PWM I2S ADC I2C SPI",8:"SPI I2C ADC I2S PWM UART",9:"SPI I2C ADC I2S PWM UART",10:"SPI I2C ADC I2S PWM UART",11:"SPI I2C ADC I2S PWM UART",12:"SPI I2C ADC I2S PWM UART",13:"SPI I2C ADC I2S PWM UART",14:"UART PWM I2S ADC I2C SPI",15:"UART PWM I2S ADC I2C SPI",16:"UART PWM I2S ADC I2C SPI",17:"GPIO",18:"GPIO",21:"GPIO",33:"UART PWM I2S I2C SPI",34:"UART PWM I2S I2C SPI",35:"SPI I2C I2S PWM UART",36:"SPI I2C I2S PWM UART",37:"UART PWM I2S I2C SPI",38:"UART PWM I2S I2C SPI",39:"SPI I2C I2S PWM UART",40:"SPI I2C I2S PWM UART",41:"SPI I2C I2S PWM UART",42:"SPI I2C I2S PWM UART",43:"UART0 TX",44:"UART0 RX",45:"SPI I2C I2S PWM UART",46:"SPI I2C I2S PWM UART",47:"SPI I2C I2S PWM UART",48:"SPI I2C I2S PWM UART",0:"BOOT"};
-function pinWarnTxt(g){var w=[];if(g==3||g==45||g==46||g==0)w.push(t("Pin di avvio (strapping): meglio non usarlo"));if(g>=11&&g<=16)w.push(t("ADC2: con il Wi-Fi acceso la lettura analogica non e affidabile"));if(g>=39&&g<=42)w.push(t("Usato dal debug JTAG se lo si usa"));if(g==19||g==20)w.push(t("USB: non usabile"));if(g==43||g==44)w.push(t("Console seriale: evitare"));if(g>=33&&g<=37)w.push(t("Libero con la PSRAM da 2 MB di questa scheda; occupato sulle schede con PSRAM octal"));return w.join(". ")}
-function pinPos(g){return PFL.indexOf(String(g))>=0||PFR.indexOf(String(g))>=0?t("bordo"):t("retro (piazzola)")}
-function loadPins(){api("/api/pins/info").then(function(r){return r.json()}).then(function(b){PBI=b;$("pinchip").textContent=tf("Rilevato: {0} rev {1}, {2} core, {3} GPIO nel chip ({4} usabili come uscita). Scheda: {5}.",b.chip,b.rev,b.cores,b.gpioCount,b.gpioOut,b.board);drawPins()}).catch(function(){});
+function pinWarnTxt(g){var w=[];if(!PBI)return"";if((PBI.strap||[]).indexOf(g)>=0)w.push(t("Pin di avvio (strapping): meglio non usarlo"));if(brdIn("adc2",g))w.push(t("ADC2: con il Wi-Fi acceso la lettura analogica non e affidabile"));if(brdIn("jtag",g))w.push(t("Usato dal debug JTAG se lo si usa"));if((PBI.usb||[]).indexOf(g)>=0)w.push(t("USB: non usabile"));if((PBI.uart||[]).indexOf(g)>=0)w.push(t("Console seriale: evitare"));if(brdIn("psq",g))w.push(t("Libero con la PSRAM da 2 MB di questa scheda; occupato sulle schede con PSRAM octal"));return w.join(". ")}
+function pinPos(g){var s=String(g);return brdLay("fl").indexOf(s)>=0||brdLay("fr").indexOf(s)>=0?t("bordo"):brdLay("bl").indexOf(s)>=0||brdLay("br").indexOf(s)>=0?t("retro (piazzola)"):""}
+function loadPins(){brdLoad().then(function(b){if(!b)return;$("pinchip").textContent=tf("Rilevato: {0} rev {1}, {2} core, {3} GPIO nel chip ({4} usabili come uscita). Scheda: {5}.",b.chip,b.rev,b.cores,b.gpioCount,b.gpioOut,b.board);drawPins()}).catch(function(){});
  api("/api/pins").then(function(r){return r.json()}).then(function(p){PUSE=p;
  var h="<tr><th>GPIO</th><th>"+t("Usato da")+"</th><th>"+t("Descrizione")+"</th></tr>";
  p.forEach(function(x){h+="<tr><td>"+x.gpio+"</td><td>"+esc(x.owner)+"</td><td>"+esc(x.note)+"</td></tr>"});
@@ -1543,16 +1816,18 @@ function pinV(v){PV=v;pinViewBtns();drawPins()}
 function pinInfo(g){for(var i=0;i<PM.length;i++)if(PM[i].g==g)return PM[i];return null}
 var PUSE=[];
 function pinOwner(g){for(var i=0;i<PUSE.length;i++)if(PUSE[i].gpio==g)return PUSE[i];return null}
-function drawPins(){var W=400,bx=140,bw=120,top=56,st=30,bh=10*st+50,s="",ink="#8b98a8";
- var fr=PV=="f",L=fr?PFL:PFR,R=fr?PFR:PFL;
+function drawPins(){var e=$("pinsvg");if(!PBI||!PBI.lay){e.innerHTML="";return}
+ var FL=brdLay("fl"),FR=brdLay("fr"),BL=brdLay("bl").map(Number),BR=brdLay("br").map(Number),LED=PBI.led,UA=PBI.uart||[];
+ var W=400,bx=140,bw=120,top=56,st=30,bh=Math.max(FL.length,FR.length,BL.length,BR.length,1)*st+50,s="",ink="#8b98a8";
+ var fr=PV=="f",L=fr?FL:FR,R=fr?FR:FL;
  s+='<rect x="'+bx+'" y="'+top+'" width="'+bw+'" height="'+bh+'" rx="12" fill="'+(fr?"#1f2a37":"#243246")+'" stroke="#3a4a5e"/>';
  s+='<rect x="'+(bx+bw/2-22)+'" y="'+(top-14)+'" width="44" height="22" rx="6" fill="#9aa5b1" stroke="#5c6670"/><text x="'+(bx+bw/2)+'" y="'+(top+2)+'" font-size="8" text-anchor="middle" fill="#1f2a37">USB-C</text>';
  s+='<text x="'+(bx+bw/2)+'" y="'+(top-22)+'" font-size="10" font-weight="700" text-anchor="middle" fill="'+ink+'">'+esc(fr?t("FRONTE"):t("RETRO (vista da sotto)"))+'</text>';
  if(fr){
   s+='<rect x="'+(bx+16)+'" y="'+(top+14)+'" width="30" height="14" rx="3" fill="#46566a"/><text x="'+(bx+31)+'" y="'+(top+24)+'" font-size="7" text-anchor="middle" fill="#fff">BOOT</text>';
   s+='<rect x="'+(bx+bw-46)+'" y="'+(top+14)+'" width="30" height="14" rx="3" fill="#46566a"/><text x="'+(bx+bw-31)+'" y="'+(top+24)+'" font-size="7" text-anchor="middle" fill="#fff">RESET</text>';
-  var i48=pinInfo(48),c48=48==PT.gpio?"#e0a020":(i48&&i48.owner)?"#3fa7ff":"#3a4352";
-  s+='<g style="cursor:pointer" onclick="pinSel(48)" role="button" aria-label="GPIO 48 LED RGB"><circle cx="'+(bx+bw/2)+'" cy="'+(top+44)+'" r="6" fill="'+c48+'" stroke="'+(PSEL==48?"#fff":"#0b0f14")+'"/><title>GPIO48 - LED RGB</title></g><text x="'+(bx+bw/2)+'" y="'+(top+62)+'" font-size="7" text-anchor="middle" fill="'+ink+'">LED RGB 48</text>';
+  if(LED!=null){var iL=pinInfo(LED),cL=LED==PT.gpio?"#e0a020":(iL&&iL.owner)?"#3fa7ff":"#3a4352";
+  s+='<g style="cursor:pointer" onclick="pinSel('+LED+')" role="button" aria-label="GPIO '+LED+' LED RGB"><circle cx="'+(bx+bw/2)+'" cy="'+(top+44)+'" r="6" fill="'+cL+'" stroke="'+(PSEL==LED?"#fff":"#0b0f14")+'"/><title>GPIO'+LED+' - LED RGB</title></g><text x="'+(bx+bw/2)+'" y="'+(top+62)+'" font-size="7" text-anchor="middle" fill="'+ink+'">LED RGB '+LED+'</text>'}
   s+='<circle cx="'+(bx+bw/2+28)+'" cy="'+(top+44)+'" r="3" fill="#c0392b"/><text x="'+(bx+bw/2+28)+'" y="'+(top+62)+'" font-size="6" text-anchor="middle" fill="'+ink+'">'+esc(t("LED batteria"))+'</text>';
   s+='<rect x="'+(bx+30)+'" y="'+(top+110)+'" width="60" height="60" rx="4" fill="#2b3644" stroke="#46566a"/><text x="'+(bx+60)+'" y="'+(top+143)+'" font-size="9" text-anchor="middle" fill="'+ink+'">'+esc((PBI&&PBI.chip)||"ESP32-S3")+'</text>';
   s+='<rect x="'+(bx+14)+'" y="'+(top+bh-34)+'" width="92" height="24" rx="5" fill="#e58fb3"/><text x="'+(bx+60)+'" y="'+(top+bh-18)+'" font-size="8" text-anchor="middle" fill="#5a1b35">'+esc(t("ANTENNA"))+'</text>'}
@@ -1562,17 +1837,17 @@ function drawPins(){var W=400,bx=140,bw=120,top=56,st=30,bh=10*st+50,s="",ink="#
  function col(g,x2,u){var nt=PNOTE[g];return g==PT.gpio?"#e0a020":x2.ok?(nt?"#9b6bd6":"#2e9e5b"):(x2.owner||u)?"#3fa7ff":nt?"#9b6bd6":"#3a4352"}
  function tip(g,x2,u){return"GPIO"+g+" - "+(PFN[g]||"")+(x2.why?" - "+x2.why:"")+(u?" - "+u.owner:"")+(PNOTE[g]?" - "+PNOTE[g]:"")+(pinWarnTxt(g)?" - "+pinWarnTxt(g):"")}
  function one(lab,x,y,side){var g=+lab,pw=PWR[lab];if(pw){s+='<circle cx="'+x+'" cy="'+y+'" r="11" fill="'+pw+'" stroke="#555"/><text x="'+x+'" y="'+(y+3)+'" font-size="7.5" text-anchor="middle" fill="#fff">'+lab+'</text>';return}
-  var x2=pinInfo(g)||{g:g,ok:false},u=pinOwner(g),c=col(g,x2,u),nm=g==43?"TX":g==44?"RX":"";
+  var x2=pinInfo(g)||{g:g,ok:false},u=pinOwner(g),c=col(g,x2,u),nm=g==UA[0]?"TX":g==UA[1]?"RX":"";
   s+='<g style="cursor:pointer" onclick="pinSel('+g+')" role="button" aria-label="GPIO '+g+'"><circle cx="'+x+'" cy="'+y+'" r="11" fill="'+c+'" stroke="'+(g==PSEL?"#fff":"#0b0f14")+'" stroke-width="'+(g==PSEL?2.5:1)+'"/><text x="'+x+'" y="'+(y+3)+'" font-size="8.5" font-weight="700" text-anchor="middle" fill="#fff">'+g+'</text><title>'+esc(tip(g,x2,u))+'</title></g>';
   if(nm)s+='<text x="'+(x+(side<0?16:-16))+'" y="'+(y+3)+'" font-size="7" text-anchor="'+(side<0?"start":"end")+'" fill="'+ink+'">'+nm+'</text>';
   var lab2=PNOTE[g]||(u?u.owner+(u.note?": "+u.note:""):(g==PT.gpio?t("in prova"):""));
   if(lab2){s+='<path d="M'+(x+side*12)+' '+y+'H'+(x+side*24)+'" stroke="'+c+'" stroke-width="2"/><text x="'+(x+side*28)+'" y="'+(y+3)+'" font-size="8.5" text-anchor="'+(side<0?"end":"start")+'" fill="'+c+'">'+esc(lab2.length>18?lab2.slice(0,17)+"…":lab2)+'</text>'}}
  L.forEach(function(l,i){one(l,bx,top+40+i*st,-1)});R.forEach(function(l,i){one(l,bx+bw,top+40+i*st,1)});
- if(!fr){[[PIL,bx+30],[PIR,bx+bw-30]].forEach(function(cl){cl[0].forEach(function(g,i){var y=top+36+i*st*0.9,x2=pinInfo(g)||{g:g,ok:false},u=pinOwner(g),c=col(g,x2,u);
+ if(!fr){[[BL,bx+30],[BR,bx+bw-30]].forEach(function(cl){cl[0].forEach(function(g,i){var y=top+36+i*st*0.9,x2=pinInfo(g)||{g:g,ok:false},u=pinOwner(g),c=col(g,x2,u);
   s+='<g style="cursor:pointer" onclick="pinSel('+g+')" role="button" aria-label="GPIO '+g+'"><rect x="'+(cl[1]-12)+'" y="'+(y-9)+'" width="24" height="18" rx="4" fill="'+c+'" stroke="'+(g==PSEL?"#fff":"#0b0f14")+'" stroke-width="'+(g==PSEL?2.5:1)+'"/><text x="'+cl[1]+'" y="'+(y+3)+'" font-size="8" font-weight="700" text-anchor="middle" fill="#fff">'+g+'</text><title>'+esc(tip(g,x2,u))+'</title></g>'})})}
  var ly=top+bh+26;[["#2e9e5b",t("provabile")],["#3fa7ff",t("in uso")],["#9b6bd6",t("collegato (tuo nome)")],["#3a4352",t("vietato")],["#e0a020",t("in prova")]].forEach(function(l,i){var lx=14+i*78;s+='<circle cx="'+lx+'" cy="'+ly+'" r="5" fill="'+l[0]+'"/><text x="'+(lx+9)+'" y="'+(ly+3)+'" font-size="8" fill="'+ink+'">'+esc(l[1])+'</text>'});
  if(fr)s+='<text x="'+(W/2)+'" y="'+(ly+20)+'" font-size="8" text-anchor="middle" fill="'+ink+'">'+esc(t("Gli altri pin (piazzole) sono sul retro: premi Retro."))+'</text>';
- var e=$("pinsvg");e.setAttribute("viewBox","0 0 "+W+" "+(ly+30));e.innerHTML=s}
+ e.setAttribute("viewBox","0 0 "+W+" "+(ly+30));e.innerHTML=s}
 function pinInv(){var h="<tr><th>GPIO</th><th>"+esc(t("Posizione"))+"</th><th>"+esc(t("Funzioni"))+"</th><th>"+esc(t("Stato"))+"</th><th>"+esc(t("Collegato a"))+"</th></tr>",gs=PM.map(function(x){return x.g}).sort(function(a,b){return a-b});
  gs.forEach(function(g){var x=pinInfo(g),u=pinOwner(g),st=u?u.owner:(x.ok?t("libero"):(x.why||t("vietato"))),w=pinWarnTxt(g);
   h+="<tr><td><b>"+g+"</b></td><td>"+esc(pinPos(g))+"</td><td>"+esc(PFN[g]||"")+(w?'<div class="fhint">'+esc(w)+'</div>':"")+"</td><td>"+esc(st)+"</td><td>"+(ROLE>=2?'<input maxlength="24" value="'+esc(PNOTE[g]||"")+'" aria-label="GPIO '+g+'" onchange="pinNote('+g+',this)" style="min-width:120px">':esc(PNOTE[g]||""))+"</td></tr>"});
@@ -1582,7 +1857,7 @@ function pinSvgDl(){var x='<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="h
  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([x],{type:"image/svg+xml"}));a.download="vesevos-pin.svg";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)}
 function pinSel(g){PSEL=g;drawPins();pinPanel()}
 function pinPanel(){var e=$("pinpanel"),h="";
- h+='<label for="pn_g">'+esc(t("Altro GPIO"))+'</label><input type="number" id="pn_g" min="0" max="48" value="'+(PSEL<0?"":PSEL)+'" style="width:90px" onchange="pinSel(parseInt(this.value))"> ';
+ h+='<label for="pn_g">'+esc(t("Altro GPIO"))+'</label><input type="number" id="pn_g" min="0" max="'+brdMax()+'" value="'+(PSEL<0?"":PSEL)+'" style="width:90px" onchange="pinSel(parseInt(this.value))"> ';
  var x=pinInfo(PSEL);
  if(PSEL<0){e.innerHTML=h;return}
  h+='<h3 style="margin-top:10px">GPIO'+PSEL+'</h3>';if(PFN[PSEL])h+='<div class="fhint">'+esc(PFN[PSEL])+(pinWarnTxt(PSEL)?" - "+esc(pinWarnTxt(PSEL)):"")+'</div>';
@@ -1615,11 +1890,11 @@ function saveSys(){post("/api/system",{hostname:$("s_host").value,domain:$("s_do
 function loadLangs(){
  api("/api/langs").then(function(r){return r.json()}).then(function(l){LANGS=l;fillLangSel();
   var h="<table><tr><th>"+t("Codice")+"</th><th>"+t("Lingua")+"</th><th></th></tr>";
-  l.forEach(function(x){h+="<tr><td>"+esc(x.code)+"</td><td>"+flagImg(x)+" "+esc(x.name)+"</td><td>"+(x.code=="it"||x.code=="en"?esc(t("Predefinita (nel firmware)")):'<button class="btn red" onclick="delLang(\''+esc(x.code)+'\')">'+esc(t("Elimina"))+'</button>')+"</td></tr>"});
+  l.forEach(function(x){h+="<tr><td>"+esc(x.code)+"</td><td>"+flagImg(x)+" "+esc(x.name)+"</td><td>"+(x.code=="it"?esc(t("Predefinita (nel firmware)")):'<button class="btn red" onclick="delLang(\''+esc(x.code)+'\')">'+esc(t("Elimina"))+'</button>')+"</td></tr>"});
   $("lglist").innerHTML=h+"</table>"});
  api("/api/fs/list?path=/").then(function(r){return r.json()}).then(function(j){if(j.ok)$("lgsp").textContent=tf("Memoria interna: usati {0} su {1}",kb(j.used),kb(j.total))})}
 function upLang(){var f=$("lgf").files[0];if(!f){msg("lgm",t("Scegli un file"),false);return}
- var m=f.name.match(/^([a-z0-9]{2,8})\.json$/);if(!m||m[1]=="it"||m[1]=="en"){msg("lgm",t("Il nome deve essere come en.json (codice di 2-8 lettere minuscole)"),false);return}
+ var m=f.name.match(/^([a-z0-9]{2,8})\.json$/);if(!m||m[1]=="it"){msg("lgm",t("Il nome deve essere come en.json (codice di 2-8 lettere minuscole)"),false);return}
  var code=m[1],fd=new FormData();fd.append("file",f,f.name);
  api("/api/fs/up?dir=/lang",{method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){
   if(!j.ok){msg("lgm",j.err,false);return}
@@ -1726,7 +2001,7 @@ function doMfa(){var c=$("lcode").value.trim();if(!c){msg("lm",t("Scrivi il codi
  post("/api/login/mfa",{tok:MFAT,code:c,now:Math.floor(Date.now()/1000)}).then(function(r){return r.json()}).then(function(j){if(j.ok){$("lu").disabled=false;$("lp").disabled=false;$("lmfa").className="hide";$("lbt").className="btn";loginOk(j)}else{msg("lm",j.err||t("Errore"),false);if(/Tempo scaduto/.test(j.err||"")){setTimeout(showLogin,1500)}}}).catch(function(){})}
 function logout(){post("/api/logout",{}).then(showLogin).catch(showLogin)}
 function start(){$("login").className="hide";$("app").className="";setRole(AUTH.role===undefined?ROLE:AUTH.role);USER=AUTH.user||USER;
- $("who").textContent=USER?USER+" · "+t(RNAME[ROLE]):"";buildNav();cpApply();poll();rfApply();auPoll();
+ $("who").textContent=USER?USER+" · "+t(RNAME[ROLE]):"";buildNav();cpApply();poll();brdLoad();rfApply();auPoll();
  if(!AUTH.setup&&ROLE==2)setupOpen();else if(location.hash=="#aiuto")show("help")}
 
 /* ===== lingua: bandiere ===== */
@@ -1741,22 +2016,23 @@ function langPop(e){e.stopPropagation();var m=$("lpop");if(!m.classList.contains
 document.addEventListener("click",function(e){var m=$("lpop");if(m&&!m.classList.contains("hide")&&!e.target.closest("#lpop"))m.className="pop hide"});
 
 /* ===== navigazione con ruoli ===== */
-var TMIN={dmgr:1,btn:1,usb:1,temp:1,mem:1,cpu:1,rad:1,selftest:2,stat:1,power:1,cert:1,radio:1,ntp:1,dhcp:1,dns:1,mdns:1,ble:1,ap:1,http:1,wifi:1,mqtt:1,mesh:1,pin:1,led:1,task:1,file:1,ora:1,loc:1,auto:1,boot:1,wd:1,shell:1,audit:1,https:1,users:2,fw:2};
+var TMIN={dmgr:1,btn:1,usb:1,temp:1,mem:1,cpu:1,rad:1,selftest:2,stat:1,power:1,cert:1,radio:1,ntp:1,dhcp:1,dns:1,mdns:1,ble:1,ap:1,http:1,wifi:1,wps:2,mqtt:1,mesh:1,pin:1,io:1,led:1,task:1,file:1,ora:1,loc:1,auto:1,boot:1,wd:1,shell:1,audit:1,https:1,users:2,fw:2,script:2,app:1,conf:2};
 function canSee(id){if(AUTH&&AUTH.pk&&AUTH.pk[id]===0)return false;return ROLE>=(TMIN[id]||0)}
 function gTabs(g){return GMAP[g].filter(canSee)}
 function buildNav(){var h='<svg class="i slogo" style="stroke:url(#vg)"><use href="#i-chipn"/></svg>';
- GRP.forEach(function(g){if(gTabs(g[0]).length)h+='<button class="nb" id="n_'+g[0]+'" onclick="gGo(\''+g[0]+'\')"><svg class="i"><use href="#'+GICO[g[0]]+'"/></svg>'+esc(t(g[1]))+'</button>'});$("nav").innerHTML=h;
+ GRP.forEach(function(g){if(gTabs(g[0]).length)h+='<button class="nb" id="n_'+g[0]+'" onclick="gGo(\''+g[0]+'\')" aria-label="'+esc(t(g[1]))+'" title="'+esc(t(g[1]))+'"><svg class="i"><use href="#'+GICO[g[0]]+'"/></svg><span class="nl">'+esc(t(g[1]))+'</span></button>'});$("nav").innerHTML=h;
  $("bellb").title=t("Allarmi");$("outb").title=t("Logout, riavvia o sleep");$("tbt").classList.toggle("hide",ROLE<1);themeApply();cpTitles();show(canSee(cur)?cur:"sum")}
 function gGo(g){var L=gTabs(g);show(LASTG[g]&&canSee(LASTG[g])?LASTG[g]:L[0])}
 function show(id){if(!canSee(id))id="sum";cur=id;var g=gOf(id);LASTG[g]=id;
  TABS.forEach(function(x){var e=$("t_"+x[0]);if(e)e.className=x[0]==id?"":"hide"});
  GRP.forEach(function(x){var e=$("n_"+x[0]);if(e)e.className="nb"+(x[0]==g?" on":"")});
  var L=gTabs(g),h="";if(L.length>1){L.forEach(function(k,ix){var x=null;TABS.forEach(function(y){if(y[0]==k)x=y});if(!x)return;
-  if(g=="sys"&&DIAG.indexOf(k)>=0&&(ix==0||DIAG.indexOf(L[ix-1])<0))h+='<span class="gsep">'+esc(t("Diagnostica"))+'</span>';
-  if(g=="sys"&&DIAG.indexOf(k)<0&&ix>0&&DIAG.indexOf(L[ix-1])>=0)h+='<span class="gsep"></span>';
+  var sc=TSEC[k],sp=ix>0?TSEC[L[ix-1]]:undefined;
+  if(sc!==undefined&&sc!==sp)h+='<span class="gsep">'+esc(t(SECN[sc]))+'</span>';
+  else if(sc===undefined&&sp!==undefined)h+='<span class="gsep"></span>';
   h+='<button class="'+(k==id?"on":"")+'" onclick="show(\''+k+'\')">'+esc(t(x[1]))+'</button>'})}
  $("gsub").innerHTML=h;$("gsub").className="sub gsub"+(h?"":" hide");$("alerts").className="alerts hide";
- if(id=="dmgr")dmLoad();if(["btn","usb","temp","mem","cpu","rad"].indexOf(id)>=0)dvRows(id);if(id=="shell")cpToggle(true);if(id!="auto"){clearInterval(RU.tm)}if(id=="auto")rLoad();if(id=="boot")bLoad();if(id!="task")clearInterval(TK.tm);if(id=="task")loadTasks();if(id=="pin")loadPins();if(id=="loc")loadLangs();if(id=="log"){lgInit();loadLog();lgAuto()}else clearInterval(LG.tm);if(id=="wifi")fillNet();if(id=="led")fillLed();if(id=="ora")loadTime();if(id=="file")fList(fp);
+ if(id=="dmgr")dmLoad();if(id!="wps")clearTimeout(WP.tm);if(id=="wps")wpsLoad();if(id!="io")ioStop();if(id=="io")ioLoad();if(["btn","usb","temp","mem","cpu","rad"].indexOf(id)>=0)dvRows(id);if(id=="btn")btnLoad();if(id=="shell")cpToggle(true);if(id!="auto"){clearInterval(RU.tm)}if(id=="auto")rLoad();if(id=="boot")bLoad();if(id!="script")scTimerStop();if(id!="app")apTimerStop();if(id=="script")scLoad();if(id=="app")apLoad();if(id!="task")clearInterval(TK.tm);if(id=="task")loadTasks();if(id=="pin")loadPins();if(id=="loc")loadLangs();if(id=="log"){lgInit();loadLog();lgAuto()}else clearInterval(LG.tm);if(id=="wifi")fillNet();if(id=="led")fillLed();if(id=="ora")loadTime();if(id=="file")fList(fp);
  if(id=="sec")fillSec();if(id=="sum"){homeDraw()}if(id=="mqtt")mqLoad();if(id=="mesh")msLoad();if(id=="loc")lcLoad();if(id=="wd")wdLoad();if(id=="users")usLoad();if(id=="fw")fwLoad();if(id=="https"){tlsLoad();svcLoad()}if(id=="ap"){fillNet();svcLoad()}if(id=="http"||id=="dhcp"||id=="dns"||id=="mdns")svcLoad();if(id=="ntp")loadTime();if(id=="mfa")mfLoad();if(id!="stat")clearInterval(STT);if(id=="stat"){stLoad();clearInterval(STT);STT=setInterval(stLoad,5000)}if(id=="power")pwLoad();if(id=="selftest")stlPoll();if(id=="cert")tlsLoad();if(id=="ble"&&ROLE==2){bleLoad();clearInterval(BLT);BLT=setInterval(function(){if(cur!="ble")clearInterval(BLT);else bleLoad()},3000)}if(id=="radio")lcLoad();if(id=="audit")auLoad();if(id=="legal")lgLoad();
  if(id=="help"&&location.hash!="#aiuto")try{history.replaceState(null,"","#aiuto")}catch(e){}if(id!="help"&&location.hash=="#aiuto")try{history.replaceState(null,"",location.pathname)}catch(e){}}
 window.addEventListener("hashchange",function(){if(location.hash=="#aiuto"&&loggedIn())show("help")});
@@ -1768,19 +2044,108 @@ function dvList(){return api("/api/dev").then(function(r){return r.json()}).then
 function dmLoad(){dvList().then(function(){dvDraw("dm_list","dm_m")}).catch(function(){})}
 function dvDraw(box,mm){var L=DV.filter(function(d){return canSee(d.tab)}),caps=[],h="";
  L.forEach(function(d){if(caps.indexOf(d.cap)<0)caps.push(d.cap)});
- caps.forEach(function(c){h+='<h4 class="gsep" style="margin:12px 0 4px">'+esc(c)+'</h4><table>';
+ if(L.length)h+='<table class="dvt"><colgroup><col class="c1"><col class="c2"><col class="c3"></colgroup>';
+ caps.forEach(function(c){h+='<tr class="dvh"><th scope="colgroup" colspan="3">'+esc(c)+'</th></tr>';
   L.filter(function(d){return d.cap==c}).forEach(function(d){
    var st=d.state==1?(d.sw||d.kind==0?t("acceso"):t("presente")):d.state==2?t("con problema"):t("spento");
    var cl=d.state==1?"v":d.state==2?"k":"";
-   h+='<tr><td>'+esc(d.label)+'</td><td><span class="pill '+cl+'">'+esc(st)+'</span></td><td style="text-align:right">';
-   if(d.sw&&ROLE==2)h+='<button class="sw1'+(d.state?" on":"")+'" role="switch" aria-checked="'+(d.state?"true":"false")+'" aria-label="'+esc(d.label)+'" onclick="dvSet(\''+d.id+'\','+(d.state?0:1)+',\''+box+'\',\''+mm+'\')"></button> ';
-   h+='<button class="btn gray" onclick="show(\''+d.tab+'\')">'+esc(t("Apri"))+'</button></td></tr>'});
-  h+='</table>'});
+   h+='<tr><td>'+esc(d.label)+'</td><td><span class="pill dvp '+cl+'">'+esc(st)+'</span></td><td><div class="dvact"><span class="dvsw">';
+   if(d.sw&&ROLE==2)h+='<button class="sw1'+(d.state?" on":"")+'" role="switch" aria-checked="'+(d.state?"true":"false")+'" aria-label="'+esc(d.label)+'" onclick="dvSet(\''+d.id+'\','+(d.state?0:1)+',\''+box+'\',\''+mm+'\')"></button>';
+   h+='</span><button class="btn gray" onclick="show(\''+d.tab+'\')">'+esc(t("Apri"))+'</button></div></td></tr>'})});
+ if(L.length)h+='</table>';
  $(box).innerHTML=h||'<p class="fhint">'+esc(t("Nessuna voce"))+'</p>'}
 function dvSet(id,on,box,mm){post("/api/dev/set",{id:id,on:on}).then(function(r){return r.json()}).then(function(j){msg(mm,j.ok?t("Fatto"):j.err,j.ok);setTimeout(dmLoad,600)}).catch(function(){})}
 function dvRows(tab){var id=DVT[tab]||tab;api("/api/dev?id="+id).then(function(r){return r.json()}).then(function(j){var R=(j.data&&j.data.rows)||[],h='<table>';
  R.forEach(function(x){h+='<tr><td>'+esc(x[0])+'</td><td style="text-align:right"><b>'+esc(x[1])+'</b></td></tr>'});
  $("dv_"+tab).innerHTML=h+'</table>'}).catch(function(){})}
+
+/* ===== periferiche a classi (rele, led, pin, ingresso, analogico): API /api/io, schede modulo /api/mods ===== */
+var IOCN={rele:"Rele",led:"LED",pin:"Pin (uscita)",ingresso:"Ingresso",analogico:"Analogico (pin 1-10)"},IOS={sel:"",tm:0,list:[]};
+function ioCn(c){return c=="i2c"?t("Sensore I2C (BMP280)"):t(IOCN[c]||c)}
+function ioStop(){if(IOS.tm){clearInterval(IOS.tm);IOS.tm=0}}
+function ioIco(svg){if(!svg)return'<svg class="i" aria-hidden="true"><use href="#i-chipn"/></svg>';if(svg.indexOf("xmlns")<0)svg=svg.replace("<svg",'<svg xmlns="http://www.w3.org/2000/svg"');return'<img class="api" alt="" width="24" height="24" src="data:image/svg+xml;charset=utf-8,'+enc(svg)+'">'}
+function ioFind(n){for(var i=0;i<IOS.list.length;i++)if(IOS.list[i].n==n)return IOS.list[i];return null}
+function ioNum(x,dg){return x.toLocaleString(undefined,{minimumFractionDigits:dg,maximumFractionDigits:dg})}
+function ioI2cVal(d){return d.ok?ioNum(d.v/100,1)+" °C · "+ioNum(d.p/100,1)+" hPa":t("non risponde")}
+function ioPins(d){return d.c=="i2c"?"SDA "+d.g+" · SCL "+d.g2:String(d.g)}
+function ioCanSw(d){return d.out&&(ROLE>=2||(ROLE>=1&&d.c!="rele"))}
+function ioLoad(){var sel=IOS.sel;$("io_new").className=ROLE>=2?"card":"card hide";$("io_mods").className=ROLE>=2?"card":"card hide";
+ api("/api/io").then(function(r){return r.json()}).then(function(j){IOS.list=j.io||[];
+  if(sel&&!ioFind(sel)){ioClose();return}
+  if(sel){ioDetDraw();return}
+  $("io_main").className="";$("io_det").className="card hide";ioStop();ioListDraw();if(ROLE>=2)ioModLoad()}).catch(function(){})}
+function ioListDraw(){var L=IOS.list,h="";
+ if(!L.length){$("io_tab").innerHTML='<tr><td class="fhint">'+esc(t("Nessuna voce"))+'</td></tr>';return}
+ h='<tr><th>'+esc(t("Nome"))+'</th><th>'+esc(t("Classe"))+'</th><th>GPIO</th><th>'+esc(t("Valore"))+'</th><th></th></tr>';
+ L.forEach(function(d){var v;
+  if(ioCanSw(d))v='<button class="sw1'+(d.v?" on":"")+'" role="switch" aria-checked="'+(d.v?"true":"false")+'" aria-label="'+esc(d.n)+'" onclick="ioSw(\''+d.n+'\','+(d.v?0:1)+')"></button>';
+  else if(d.c=="analogico")v='<b>'+d.v+'</b>';
+  else if(d.c=="i2c")v='<b>'+esc(ioI2cVal(d))+'</b>';
+  else v='<span class="pill dvp '+(d.v?"v":"")+'">'+esc(d.v?t("acceso"):t("spento"))+'</span>';
+  h+='<tr><td><b>'+esc(d.n)+'</b></td><td>'+esc(ioCn(d.c))+((d.f&1)?' <span class="fhint">('+esc(t("attivo basso"))+')</span>':"")+'</td><td>'+esc(ioPins(d))+'</td><td>'+v+'</td><td><button class="btn gray" onclick="ioOpen(\''+d.n+'\')">'+esc(t("Gestisci"))+'</button></td></tr>'});
+ $("io_tab").innerHTML=h}
+/* --- pagina di gestione di una periferica --- */
+function ioOpen(n){IOS.sel=n;$("io_main").className="hide";$("io_det").className="card";ioDetDraw();ioStop();IOS.tm=setInterval(ioPoll,1000)}
+function ioClose(){IOS.sel="";ioStop();$("io_det").className="card hide";$("io_main").className="";ioLoad()}
+function ioPoll(){if(cur!="io"||!IOS.sel){ioStop();return}api("/api/io").then(function(r){return r.json()}).then(function(j){IOS.list=j.io||[];if(IOS.sel&&!ioFind(IOS.sel)){ioClose();return}ioDetLive()}).catch(function(){})}
+function ioDetDraw(){var d=ioFind(IOS.sel);if(!d){ioClose();return}var adm=ROLE>=2,sw=ioCanSw(d),h='';
+ h+='<div class="aphd"><h3 style="margin:0">'+esc(d.n)+'</h3><button class="btn gray" onclick="ioClose()">'+esc(t("Indietro"))+'</button></div>';
+ h+='<table class="ftab" style="margin-top:8px"><tr><td>'+esc(t("Classe"))+'</td><td><b>'+esc(ioCn(d.c))+'</b></td></tr><tr><td>GPIO</td><td><b>'+esc(ioPins(d))+'</b></td></tr>';
+ if(d.c=="i2c")h+='<tr><td>'+esc(t("Indirizzo"))+'</td><td><b>0x'+d.a.toString(16)+'</b> · '+esc(d.d)+((d.f&8)?' · 400 kHz':' · 100 kHz')+'</td></tr>';
+ if(d.out||d.c=="ingresso")h+='<tr><td>'+esc(t("Livello"))+'</td><td><b>'+esc((d.f&1)?t("attivo basso"):t("attivo alto"))+'</b></td></tr>';
+ if(d.c=="ingresso")h+='<tr><td>'+esc(t("Resistenza"))+'</td><td><b>'+esc((d.f&2)?"pull-up":(d.f&4)?"pull-down":t("nessuna"))+'</b></td></tr>';
+ h+='<tr><td>'+esc(t("Valore"))+'</td><td id="iod_v"></td></tr></table>';
+ h+='<h4 style="margin:14px 0 6px">'+esc(t("Prova"))+'</h4>';
+ if(d.out){
+  h+='<div class="ftb">';
+  if(sw){h+='<button class="btn" onclick="ioAct(\'set\',1)">'+esc(t("Accendi"))+'</button><button class="btn gray" onclick="ioAct(\'set\',0)">'+esc(t("Spegni"))+'</button><button class="btn gray" onclick="ioAct(\'pulse\',1000)">'+esc(t("Impulso di 1 secondo"))+'</button>';
+   if(d.c!="rele")h+='<button class="btn gray" onclick="ioAct(\'blink\',5)">'+esc(t("Lampeggia per 5 secondi"))+'</button>'}
+  else h+='<span class="fhint">'+esc(t("Il rele lo prova solo l'Amministratore."))+'</span>';
+  h+='</div><p class="fhint">'+esc(d.c=="rele"?t("Il rele si riaccende al massimo una volta al secondo e non lampeggia: si consuma. Spegnere si puo sempre."):t("L'impulso e il lampeggio si spengono da soli."))+'</p>'}
+ else if(d.c=="i2c")h+='<p class="fhint">'+esc(t("Temperatura e pressione si aggiornano da sole ogni due secondi. Se il sensore non risponde, controlla i fili, l'indirizzo (0x76 o 0x77) e l'alimentazione."))+'</p>';
+ else if(d.c=="ingresso")h+='<p class="fhint">'+esc(t("Premi il pulsante o attiva il sensore: il valore qui sotto cambia da solo."))+'</p>';
+ else h+='<p class="fhint">'+esc(t("Il valore va da 0 a 4095 e si aggiorna da solo."))+'</p>';
+ h+='<div id="iod_m" class="msg" role="status"></div>';
+ if(adm)h+='<div class="ftb" style="margin-top:14px"><button class="btn gray" onclick="ioRen(\''+d.n+'\')">'+esc(t("Rinomina"))+'</button><button class="btn red" onclick="ioDel(\''+d.n+'\')">'+esc(t("Togli"))+'</button></div>';
+ h+='<p class="fhint">'+esc(d.c=="i2c"?tf("Nelle app: use={0} e poi dev_get(\"{0}\") per la temperatura (centesimi di grado) e dev_get(\"{0}.p\") per la pressione (pascal).",d.n):tf("Nelle app: use={0} e poi dev_set(\"{0}\", 1) o dev_get(\"{0}\").",d.n))+'</p>';
+ $("io_det").innerHTML=h;ioDetLive()}
+function ioDetLive(){var d=ioFind(IOS.sel),e=$("iod_v");if(!d||!e)return;
+ if(d.c=="i2c")e.innerHTML='<b>'+esc(ioI2cVal(d))+'</b>';
+ else if(d.c=="analogico")e.innerHTML='<b>'+d.v+'</b> <span class="fhint">/ 4095</span><div class="bar" style="margin-top:4px"><i style="width:'+Math.round(d.v*100/4095)+'%"></i></div>';
+ else e.innerHTML='<span class="pill dvp '+(d.v?"v":"")+'">'+esc(d.v?t("acceso"):t("spento"))+'</span>'}
+function ioAct(a,v){post("/api/dev/act",{id:IOS.sel,a:a,arg:v}).then(function(r){return r.json()}).then(function(j){if(j.ok===false)msg("iod_m",j.err,false);else msg("iod_m",t("Fatto"),true);ioPoll()}).catch(function(){})}
+/* --- schede modulo (.vdp) --- */
+function ioModLoad(){api("/api/mods").then(function(r){return r.json()}).then(function(j){var L=j.list||[],h="";
+ if(!L.length){$("io_ml").innerHTML='<p class="fhint">'+esc(t("Nessuna scheda modulo. Caricane una con il pulsante qui sotto."))+'</p>';return}
+ h='<table class="ftab">';
+ L.forEach(function(x){h+='<tr><td><span class="scn">'+ioIco(x.ok?x.icon:"")+'<b>'+esc(x.ok?x.t:x.n)+'</b></span>';
+  if(x.ok){h+='<div class="fhint">'+esc(ioCn(x.c))+' x'+x.ns+' · '+esc(x.p=="-"?t("senza alimentazione"):x.p)+(x.l?' · '+esc(x.l):"")+'</div>';if(x.w)h+='<div class="fhint">'+esc(x.w)+'</div>'}
+  else h+='<div class="fhint" style="color:var(--kot)">'+esc(x.e||"")+'</div>';
+  h+='</td><td style="text-align:right;white-space:nowrap">'+(x.ok?'<button class="btn" onclick="ioModOpen(\''+x.n+'\')">'+esc(t("Installa"))+'</button> ':"")+'<button class="btn gray" onclick="ioModDel(\''+x.n+'\')">'+esc(t("Elimina"))+'</button></td></tr>'});
+ $("io_ml").innerHTML=h+'</table>'}).catch(function(){})}
+function ioModOpen(n){api("/api/mod?name="+enc(n)).then(function(r){return r.json()}).then(function(j){if(!j.ok){msg("io_mm",j.err,false);return}
+  var b='';
+  b+=modSchema(j);
+  if(j.wiring){var sv=j.wiring;if(sv.indexOf("xmlns")<0)sv=sv.replace("<svg",'<svg xmlns="http://www.w3.org/2000/svg"');b+='<details style="margin-top:8px"><summary>'+esc(t("Disegno allegato al file"))+'</summary><img alt="'+esc(tf("Schema del modulo {0}",j.t))+'" style="width:100%;max-width:420px;background:#fff;border-radius:8px" src="data:image/svg+xml;charset=utf-8,'+enc(sv)+'"></details>'}
+  if(j.p=="230V")b+='<p class="fhint" style="color:var(--kot)"><b>'+esc(t("Rete elettrica 230 V: serve un modulo a norma e un installatore. VesevOS comanda solo il segnale."))+'</b></p>';
+  if(j.w)b+='<p class="fhint"><b>'+esc(j.w)+'</b></p>';
+  if(!j.free)b+='<p class="fhint" style="color:var(--kot)">'+esc(t("Non ci sono abbastanza pin liberi per questo modulo"))+'</p>';
+  b+='<label for="io_pf">'+esc(t("Nome (facoltativo)"))+'</label><input id="io_pf" maxlength="9" autocomplete="off" spellcheck="false" autocapitalize="off">';
+  dlg({title:j.t,body:b,ok:t("Installa"),onOk:function(){if(!j.free)return t("Non ci sono abbastanza pin liberi per questo modulo");
+   return post("/api/mod/install",{name:n,prefix:dlgV("io_pf")}).then(function(r){return r.json()}).then(function(k){if(!k.ok)return k.err;
+    var dv=k.devs||[],same=dv.length>1&&dv[0].n==dv[1].n;
+    msg("io_mm",t("Fatto")+": "+(same?dv[0].n+" ("+dv.map(function(d){return d.s+" = GPIO"+d.g}).join(", ")+")":dv.map(function(d){return d.n+" = GPIO"+d.g}).join(", ")),true);ioLoad();return""})}})}).catch(function(){})}
+function ioModUp(){var f=$("io_mf").files[0];if(!f)return;$("io_mf").value="";var n=f.name.replace(/\.(vdp|txt)$/i,"").toLowerCase();
+ if(f.size>8192){msg("io_mm",t("File troppo grande (massimo 8 KB)"),false);return}
+ f.text().then(function(x){return post("/api/mod/save",{name:n,text:x})}).then(function(r){return r.json()}).then(function(j){msg("io_mm",j.ok?t("Scheda caricata"):j.err,!!j.ok);if(j.ok)ioModLoad()}).catch(function(){})}
+function ioModDel(n){dlg({title:t("Eliminare?"),body:'<p style="margin:0">'+esc(tf("La scheda modulo {0} verra eliminata. Le periferiche gia create restano.",n))+'</p>',ok:t("Elimina"),danger:true,
+ onOk:function(){return post("/api/mod/del",{n:n,name:n}).then(function(r){return r.json()}).then(function(j){if(j.ok){ioModLoad();return""}return j.err})}})}
+function ioSw(n,v){post("/api/dev/act",{id:n,a:"set",arg:v}).then(function(r){return r.json()}).then(function(j){if(j.ok===false)msg("io_m",j.err,false);ioLoad()}).catch(function(){})}
+function ioAdd(){var g=$("io_g").value;post("/api/io/add",{cls:$("io_c").value,gpio:g,name:$("io_n").value,opt:$("io_o").value}).then(function(r){return r.json()}).then(function(j){
+ msg("io_am",j.ok?t("Fatto")+": "+j.n:j.err,!!j.ok);if(j.ok){$("io_n").value="";$("io_g").value="";ioLoad()}}).catch(function(){})}
+function ioDel(n){dlg({title:t("Togliere la periferica?"),body:'<p style="margin:0">'+esc(n)+'</p>',ok:t("Togli"),danger:true,onOk:function(){return post("/api/io/del",{n:n}).then(function(r){return r.json()}).then(function(j){if(j.ok){ioLoad();return""}return j.err})}})}
+function ioRen(n){dlg({title:t("Rinomina"),body:'<label for="dn">'+esc(t("Nuovo nome"))+'</label><input id="dn" autocomplete="off" maxlength="11" value="'+esc(n)+'">',ok:t("Rinomina"),
+ onOk:function(){var to=dlgV("dn");return post("/api/io/rename",{n:n,to:to}).then(function(r){return r.json()}).then(function(j){if(j.ok){if(IOS.sel==n)IOS.sel=to;ioLoad();return""}return j.err})}})}
 
 /* ===== dati comuni (paesi, mappa) ===== */
 var COMMON=null;
@@ -1983,7 +2348,7 @@ function svcDraw(j){if(!j||j.apOn===undefined)return;SV=j;
  $("sv_apn").textContent=j.apOn?(j.httpOn&&j.httpPort==80?"":t("Il portale automatico serve HTTP acceso sulla porta 80.")):t("Punto di accesso spento: se la Wi-Fi di casa non e raggiungibile la scheda non si vede. Recupero: tasto BOOT 8 secondi o cavo USB.");
  if(j.dhcpOn!==undefined){$("sv_lease").value=j.lease;svcSt("dhcp",j.dhcpOn);svcSt("mdns",j.mdnsOn);svcSt("dns",j.captive)}
  $("sv_hp").value=j.httpPort;$("sv_sp").value=j.httpsPort;
- var pd=!!j.pending;svcSt("http",j.httpOn,pd,!!j.runHttp);svcSt("https",j.httpsOn,pd||!!j.httpsOn!=!!AUTH.https,!!AUTH.https);
+ var pd=!!j.pending;svcSt("http",j.httpOn,pd,!!j.runHttp,j.usersHttp);svcSt("https",j.httpsOn,pd||!!j.httpsOn!=!!AUTH.https,!!AUTH.https,j.usersHttps);
  $("sv_hw").className=j.httpOn&&j.clientOk?"law":"hide";$("sv_hw").textContent=j.httpOn&&j.clientOk?t("Sei collegato alla tua Wi-Fi: puoi spegnere HTTP e usare solo HTTPS (consigliato)."):"";
  var nh=!j.httpsOn;$("sv_sw").className=nh?"law":"hide";$("sv_sw").textContent=nh?t("Senza HTTPS il traffico non e cifrato: il login non manda la password (HMAC), ma sessione e dati si leggono sulla rete. Scelta tua: usa una rete di cui ti fidi."):"";
  var pe=j.pending?t("Le modifiche valgono dopo Applica (riavvia la scheda)."):"";
@@ -2001,12 +2366,19 @@ var SVT={ap:{set:svcSet("apOn","svm_ap")},dhcp:{set:svcSet("dhcpOn","svm_dhcp")}
  ble:{set:function(v){return bleRun(v?"start":"stop")},rs:function(){return bleRun("stop").then(function(){return bleRun("start")})}},
  power:{set:function(v){return pwSave(v)}},
  mfa:{set:function(v){return v?mfBegin():mfOff(-1)},cls:""}},SVS={};
-function svcSt(id,on,pend,run){SVS[id]={on:!!on,pend:!!pend,run:run===undefined?!!on:!!run,busy:""};svcCtl(id)}
+function svcSt(id,on,pend,run,n){SVS[id]={on:!!on,pend:!!pend,run:run===undefined?!!on:!!run,busy:"",n:n};svcCtl(id)}
+/* quanti sono collegati (sessioni attive negli ultimi 2 minuti); l'amministratore apre l'elenco (who) */
+function svcN(n){var l=tf("Collegati: {0}",n);return ROLE==2?'<button type="button" class="pill svn" onclick="whoShow()" title="'+esc(t("Chi e collegato"))+'">'+esc(l)+'</button>':'<span class="pill svn">'+esc(l)+'</span>'}
+function whoShow(){api("/api/who").then(function(r){return r.json()}).then(function(j){var L=j.list||[];
+ var h=L.length?'<table class="ftab"><tr><th>'+esc(t("Utente"))+'</th><th>'+esc(t("Via"))+'</th><th>'+esc(t("Indirizzo"))+'</th><th>'+esc(t("Collegato da"))+'</th><th>'+esc(t("Ultima azione"))+'</th></tr>'+
+  L.map(function(u){return'<tr><td><b>'+esc(u.user)+'</b>'+(u.user==USER?' <span class="pill">'+esc(t("tu"))+'</span>':"")+'<br><small>'+esc(t(RNAME[u.role]||""))+'</small></td><td>'+esc(u.via.toUpperCase())+'</td><td>'+esc(u.ip)+'</td><td>'+esc(fmtDur(u.age))+(u.live?"":'<br><small>'+esc(tf("ferma da {0}",fmtDur(u.idle)))+'</small>')+'</td><td><code>'+esc(u.act)+'</code><br><small>'+esc(tf("{0} fa",fmtDur(u.actAge)))+'</small></td></tr>'}).join("")+'</table>'
+  :'<p style="margin:0">'+esc(t("Nessuno collegato dal web"))+'</p>';
+ dlg({title:t("Chi e collegato"),body:h+'<p style="margin:8px 0 0;color:var(--mut)">'+esc(t("Le letture automatiche della pagina non contano come azioni. Dalla seriale o dalla shell: comando who."))+'</p>',buttons:[["ok",t("Chiudi"),""]]})}).catch(function(){})}
 function sibB(cls,ic,lab,act,dis,oc){return'<button type="button" class="sib '+cls+(act?" act":"")+'"'+(oc?' onclick="'+oc+'"':"")+(dis?" disabled":"")+' aria-label="'+esc(lab)+'" title="'+esc(lab)+'" aria-pressed="'+(act?"true":"false")+'"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#'+ic+'"/></svg></button>'}
 function svcCtl(id){var e=$("sc_"+id),d=SVT[id],s=SVS[id];if(!e||!d||!s)return;var b=s.busy,
  B=function(k,cls,ic,lab,act,dis){return sibB(cls,ic,lab,act,dis,"svcAct('"+id+"','"+k+"')")};
- e.innerHTML='<div class="svb '+(s.run?"ok":"ko")+'" role="status">'+esc(s.run?t("Avviato"):t("Fermo"))+'</div><div class="svi '+(d.cls||"adm")+'" role="group" aria-label="'+esc(t("Controlli del servizio"))+'">'+
-  B("go","go","i-sgo",t("Avvia"),b?b=="go":s.on)+B("st","st","i-sst",t("Ferma"),b?b=="st":!s.on)+B("rs","rs","i-srs",t("Riavvia"),b=="rs",!d.rs||!s.on)+(d.ap?B("ap","ap","i-sap",t("Applica"),b=="ap",!s.pend):"")+'</div>'}
+ e.innerHTML='<div class="svb '+(s.run?"ok":"ko")+'" role="status">'+esc(s.run?t("Avviato"):t("Fermo"))+'</div>'+(s.n!==undefined&&s.run?svcN(s.n):"")+'<div class="svi '+(d.cls||"adm")+'" role="group" aria-label="'+esc(t("Controlli del servizio"))+'">'+
+  B("go","go","i-sgo",t("Avvia"),b?b=="go":s.on)+B("st","st","i-sst",t("Ferma"),b?b=="st":!s.on)+B("rs","rs","i-srs",t("Riavvia"),b=="rs",!d.rs||!s.on)+(d.ap?B("ap","ap","i-sap",t("Applica"),b?b=="ap":s.pend,!s.pend):"")+'</div>'+(d.ap&&s.pend?'<div class="law" role="status">'+esc(t("In attesa: premi Applica (riavvia la scheda) per rendere effettiva la modifica."))+'</div>':"")}
 function svcAct(id,k){var d=SVT[id],s=SVS[id];if(!d||!s||s.busy)return;if(k=="go"&&s.on||k=="st"&&!s.on)return;s.busy=k;svcCtl(id);var p=k=="rs"?d.rs():k=="ap"?uReboot():d.set(k=="go");
  Promise.resolve(p).catch(function(){}).then(function(){setTimeout(function(){var x=SVS[id];if(x&&x.busy){x.busy="";svcCtl(id)}},k=="ap"?300:1400)})}
 function svcPort(k,id,mid){var d={};d[k]=$(id).value;svcPost(d,mid)}
@@ -2087,6 +2459,98 @@ function lgLoad(){loadLic();commonLoad().then(function(c){var h='<thead><tr><th>
  api("/api/region").then(function(r){return r.json()}).then(function(r){commonLoad().then(function(){var c=COMMON.by[r.country],g=regRule(c);
   $("lgradio").innerHTML='<p>'+esc(c?tf("Paese: {0}. Canali 1-{1}, potenza massima {2} dBm EIRP.",cName(c),r.ch,r.limit):t("Paese non scelto: la radio usa le regole piu prudenti (canali 1-11)"))+'</p>'+(g?'<p>'+esc(tf("Regole: {0}",g.rule))+'</p>':"")+'<p class="fhint">'+esc(t("Il firmware rispetta i limiti del paese scelto. La conformita del prodotto finito (marchi CE, UKCA, FCC...) e responsabilita di chi lo mette in commercio. Non e consulenza legale."))+'</p>'})}).catch(function(){})}
 
+/* ===== WPS: collegamento con il router (tasto o PIN) ===== */
+var WP={tm:null,seq:0,j:null};
+SVT.wps={set:function(v){return wpsSetOn(v)}};
+function wpsLoad(){clearTimeout(WP.tm);var id=++WP.seq;api("/api/wps").then(function(r){return r.json()}).then(function(j){if(id!=WP.seq)return;wpsDraw(j)}).catch(function(){if(id==WP.seq&&cur=="wps")WP.tm=setTimeout(wpsLoad,2000)})}
+function wpsPinFmt(p){return p&&p.length==8?p.slice(0,4)+" "+p.slice(4):(p||"")}
+function wpsDraw(j){WP.j=j;if(cur!="wps")return;svcSt("wps",j.on);
+ $("wps_swp").classList.toggle("on",!!j.pinOk);$("wps_bt").textContent=j.btn?tf("Dal tasto BOOT: {0} click avviano il WPS (si cambia in Dispositivi > Tasto BOOT).",j.btn):t("Dal tasto BOOT: nessun gesto avvia il WPS (si sceglie in Dispositivi > Tasto BOOT).");
+ $("wps_setup").className=j.setup?"law":"hide";$("wps_setup").textContent=j.setup?t("Prima configurazione: il WPS funziona anche con l'interruttore spento. Dopo la guida torna a obbedire all'interruttore."):"";
+ var run=j.state==1,netOk=j.net==1||j.net==3,can=j.avail&&j.allowed&&netOk&&!run,st=$("wps_st"),txt="",cls="msg";
+ if(!j.avail)txt=t("Questo firmware non contiene il WPS");
+ else if(run)txt=j.method=="pin"?(j.pin?tf("Scrivi il PIN nel router: ancora {0} s",j.left):t("Sto creando il PIN...")):tf("In attesa del router: premi il tasto WPS (ancora {0} s)",j.left);
+ else if(j.state==2){txt=tf("Fatto: la scheda si collega a {0}.",j.ssid);cls="msg ok"}
+ else if(j.state==3){txt=j.err||t("WPS non riuscito");cls="msg ko"}
+ else if(!j.allowed)txt=t("WPS spento: accendilo con l'interruttore qui sopra");
+ else txt=t("Pronto");
+ st.className=cls;st.style.display="block";st.textContent=txt;
+ $("wps_pin").className=run&&j.method=="pin"&&j.pin?"":"hide";$("wps_pinv").textContent=wpsPinFmt(j.pin);
+ $("wps_go").disabled=!can;$("wps_gp").disabled=!can||!j.pinOk;$("wps_gp").className=j.pinOk?"btn gray":"btn gray hide";
+ $("wps_go").className=run?"btn hide":"btn";$("wps_x").className=run?"btn gray":"btn gray hide";
+ $("wps_nt").textContent=j.avail&&j.allowed&&!netOk&&!run?t("Il WPS parte solo con il Wi-Fi acceso e non in modo aereo"):"";
+ clearTimeout(WP.tm);if(run)WP.tm=setTimeout(wpsLoad,1000)}
+function wpsPost(d,mid){return post("/api/wps",d).then(function(r){return r.json()}).then(function(j){if(j.ok===false){msg(mid,j.err,false);wpsLoad();return false}wpsDraw(j);return true}).catch(function(){})}
+function wpsSetOn(v){return wpsPost({on:v?1:0},"wpsm").then(function(ok){if(ok)msg("wpsm",t("Salvato"),true)})}
+function wpsOpt(k,e){var d={};d[k]=e.classList.contains("on")?"0":"1";wpsPost(d,"wps_om").then(function(ok){if(ok)msg("wps_om",t("Salvato"),true)})}
+function wpsGo(m){var j=WP.j||{},w=j.net==3;
+ dlg({title:m=="pin"?t("Collegare con il PIN?"):t("Collegare con il tasto del router?"),
+  body:'<p style="margin:0">'+esc(w?t("La scheda si scollega dalla rete di casa per la prova. Se non riesce, ci torna da sola."):t("La scheda cerca il router mentre l'hotspot resta acceso."))+'</p><p style="margin:8px 0 0">'+esc(t("Se sei collegato all'hotspot la pagina puo interrompersi per qualche secondo."))+'</p>',
+  ok:t("Avvia"),onOk:function(){return post("/api/wps",{start:m}).then(function(r){return r.json()}).then(function(x){if(x.ok===false)return x.err;wpsDraw(x);return""})}})}
+function wpsCancel(){wpsPost({stop:1},"wpsm")}
+/* ===== Tasto BOOT: azioni dei click ===== */
+var BT={j:null,tm:null,seq:-1};
+function btnLoad(){clearTimeout(BT.tm);api("/api/btn").then(function(r){return r.json()}).then(btnDraw).catch(function(){if(cur=="btn")BT.tm=setTimeout(btnLoad,2000)})}
+function btnDraw(j){BT.j=j;
+ for(var n=1;n<=3;n++){var s=$("bt_c"+n);if(!s)continue;var h="";j.opt.forEach(function(o){h+='<option value="'+o.id+'">'+esc(o.label)+'</option>'});s.innerHTML=h;s.value=String(j.act[n-1])}
+ var w=$("bt_w"),usa=j.wpsClicks>0&&!j.wpsOn;w.className=usa?"fhint law":"fhint law hide";
+ w.textContent=usa?t("Il WPS e spento: i click non lo avviano finche non lo accendi in Rete > WPS."):"";
+ var fr=[];j.free.forEach(function(f,i){if(f)fr.push(i+1)});
+ $("bt_f").textContent=fr.length?tf("Liberi per gli script: {0} click (funzione btn()). Chi li legge e uno script in esecuzione.",fr.join(", ")):t("Nessun gesto libero per gli script: metti \"Libero\" su un gesto per dargli i click.");
+ var on=j.test>0,s=$("bt_ts");$("bt_t").textContent=on?t("Ferma la prova"):t("Avvia la prova");
+ s.className=on?"msg ok":"msg";s.style.display=on?"block":"none";
+ s.textContent=on?tf("Prova in corso: ancora {0} s. Premi il tasto.",j.test)+" "+(j.down?tf("Premuto da {0} s",(j.heldMs/1000).toFixed(1)):t("Rilasciato")):"";
+ $("bt_tl").textContent=on?j.last||"":"";
+ clearTimeout(BT.tm);if(cur=="btn"&&on)BT.tm=setTimeout(btnLoad,300)}
+function btnTest(){var on=!(BT.j&&BT.j.test>0);post("/api/btn",{test:on?1:0}).then(function(r){return r.json()}).then(btnDraw).catch(function(){})}
+function btnSave(n,e){var d={};d["c"+n]=e.value;post("/api/btn",d).then(function(r){return r.json()}).then(function(j){if(j.ok===false){msg("btm",j.err,false);btnLoad();return}btnDraw(j);msg("btm",t("Salvato"),true)}).catch(function(){})}
+/* ===== Schema dei collegamenti di una scheda modulo: disegnato dalla pagina con i dati del file (pin, tensioni, componenti) ===== */
+function modVn(v){return v=="3V3"?"3,3 V":String(v).replace("V"," V")}
+function modColN(k,hex){var m={red:t("rosso"),black:t("nero"),blue:t("blu"),green:t("verde"),yellow:t("giallo"),orange:t("arancione"),white:t("bianco"),brown:t("marrone"),purple:t("viola"),gray:t("grigio"),pink:t("rosa"),cyan:t("azzurro")};return m[k]||hex}
+function modSchema(j){
+ var out=/^(rele|led|pin)$/.test(j.c),pw=j.p,ext=(pw=="12V"||pw=="24V"||pw=="230V"),bd=(pw=="3V3"||pw=="5V"),lv=j.lv=="5V"?"5 V":"3,3 V",parts=j.parts||[],R=[],ex=null;
+ if(ext)ex={l:pw=="230V"?"230 V":"+"+modVn(pw),r:"VCC",c:"#c0392b",cn:t("rosso"),v:tf("{0} alimentazione esterna",modVn(pw)),k:"vcc"};
+ else if(bd)R.push({l:pw=="3V3"?"3V3":"5V",r:"VCC",c:"#c0392b",cn:t("rosso"),v:tf("{0} alimentazione",modVn(pw)),k:"vcc"});
+ R.push({l:"GND",r:"GND",c:"#222222",cn:t("nero"),v:ext?t("0 V (massa dell'alimentatore unita a GND della scheda)"):t("0 V (massa)"),k:"gnd"});
+ j.sig.forEach(function(s,i){var p=parts.filter(function(x){return x.s==s}),d=[];
+  p.forEach(function(x){d.push(x.v+" "+(x.k=="serie"?t("in serie"):x.k=="gnd"?t("verso GND"):t("verso l'alimentazione")))});
+  var nt=[tf("segnale a {0}",lv),out?t("scheda → modulo"):t("modulo → scheda")];
+  if(j.pull=="u")nt.push(t("pull-up interno acceso"));if(j.pull=="d")nt.push(t("pull-down interno acceso"));
+  if(j.low)nt.push(t("attivo basso (0 = acceso)"));
+  R.push({l:j.sug[i]!=null?"GPIO"+j.sug[i]:"GPIO ?",r:s,sg:s,c:j.c=="analogico"?"#d4730a":"#2d6cdf",cn:j.c=="analogico"?t("arancione"):t("blu"),v:nt.concat(d).join(" · "),k:"sig",p:p,out:out})});
+ var wp=j.pins||[],cw=wp.length>0;   // [pins] del file: nome vero del pin del modulo e colore del filo (nome o #rrggbb)
+ wp.forEach(function(w){var r=null;R.forEach(function(x){if((w.d=="VCC"&&x.k=="vcc")||(w.d=="GND"&&x.k=="gnd")||(x.k=="sig"&&x.sg==w.d))r=x});
+  if(r){r.r=w.l;r.c=/^#[0-9a-f]{6}$/.test(w.c)?w.c:r.c;r.cn=modColN(w.cn,w.c)}});
+ var y=ex?64:34,top=ex?12:12,ys=[],tot=0,svg="",tb="",h;
+ var ey=ex?30:0;
+ R.forEach(function(r){var vert=(r.p||[]).some(function(x){return x.k!="serie"});r.h=vert?86:46;ys.push(y+18);y+=r.h});
+ var H=y+6,bx=8,bw=112,mx=360,mw=112,by=ex?58:6;
+ svg='<svg viewBox="0 0 480 '+H+'" role="img" aria-label="'+esc(tf("Schema dei collegamenti di {0}",j.t))+'" style="width:100%;max-width:520px;background:#fff;border-radius:8px;font:12px sans-serif">';
+ svg+='<rect x="'+bx+'" y="'+by+'" width="'+bw+'" height="'+(H-by-6)+'" rx="6" fill="#e8f1ff" stroke="#222"/><text x="'+(bx+8)+'" y="'+(by+14)+'" fill="#222" font-weight="bold">'+esc(t("Scheda"))+'</text>';
+ svg+='<rect x="'+mx+'" y="6" width="'+mw+'" height="'+(H-12)+'" rx="6" fill="#e9f7ef" stroke="#222"/><text x="'+(mx+8)+'" y="20" fill="#222" font-weight="bold">'+esc(t("Modulo"))+'</text>';
+ if(ex){svg+='<rect x="'+bx+'" y="6" width="'+bw+'" height="44" rx="6" fill="#fff3e0" stroke="#c0392b" stroke-width="2"/><text x="'+(bx+8)+'" y="22" fill="#222" font-weight="bold">'+esc(t("Alimentatore"))+'</text><text x="'+(bx+8)+'" y="40" fill="#c0392b" font-weight="bold">'+esc(ex.l)+'</text>';
+  var ye=30;svg+='<line x1="'+(bx+bw)+'" y1="'+ye+'" x2="'+mx+'" y2="'+ye+'" stroke="#c0392b" stroke-width="3"/><circle cx="'+(bx+bw)+'" cy="'+ye+'" r="4" fill="#c0392b"/><circle cx="'+mx+'" cy="'+ye+'" r="4" fill="#c0392b"/><text x="'+(mx+8)+'" y="'+(ye+4)+'" fill="#222">VCC</text>';
+  svg+='<text x="150" y="'+(ye-6)+'" fill="#c0392b" font-weight="bold">'+esc(modVn(pw))+'</text>';
+  tb+='<tr><td>'+esc(ex.cn)+'</td><td>'+esc(t("Alimentatore"))+' '+esc(ex.l)+'</td><td>VCC</td><td>'+esc(ex.v)+'</td></tr>'}
+ R.forEach(function(r,i){var yy=ys[i],x1=bx+bw,x2=mx,col=r.c,sw=r.k=="sig"?2.5:3;
+  if(cw)svg+='<line x1="'+x1+'" y1="'+yy+'" x2="'+x2+'" y2="'+yy+'" stroke="#222" stroke-width="'+(sw+2.5)+'" stroke-linecap="round"/>';
+  svg+='<line x1="'+x1+'" y1="'+yy+'" x2="'+x2+'" y2="'+yy+'" stroke="'+col+'" stroke-width="'+sw+'" stroke-linecap="round"/><circle cx="'+x1+'" cy="'+yy+'" r="4" fill="'+col+'"/><circle cx="'+x2+'" cy="'+yy+'" r="4" fill="'+col+'"/>';
+  svg+='<text x="'+(bx+8)+'" y="'+(yy+4)+'" fill="#222" font-weight="bold">'+esc(r.l)+'</text><text x="'+(mx+8)+'" y="'+(yy+4)+'" fill="#222" font-weight="bold">'+esc(r.r)+'</text>';
+  var vt=r.k=="vcc"?modVn(pw):r.k=="gnd"?"0 V":lv,warn=r.k=="sig"&&j.lv=="5V"&&!r.out;
+  svg+='<text x="'+(x1+10)+'" y="'+(yy-7)+'" fill="'+(warn?"#c0392b":cw?"#222":col)+'" font-weight="bold">'+esc(vt+(warn?" !":"")+(cw?" · "+r.cn:""))+'</text>';
+  if(r.k=="sig"){var ax=r.out?(x2-18):(x1+18);svg+='<polygon points="'+(r.out?ax+","+(yy-5)+" "+(ax+10)+","+yy+" "+ax+","+(yy+5):(ax+10)+","+(yy-5)+" "+ax+","+yy+" "+(ax+10)+","+(yy+5))+'" fill="'+col+'"/>';
+   var vi=0;(r.p||[]).forEach(function(p){
+    if(p.k=="serie"){svg+='<rect x="212" y="'+(yy-9)+'" width="56" height="18" fill="#fff" stroke="#222" stroke-width="2"/><text x="240" y="'+(yy-14)+'" text-anchor="middle" fill="#222" font-size="11">'+esc(p.v)+'</text>'}
+    else{var px=vi++?316:164;svg+='<circle cx="'+px+'" cy="'+yy+'" r="3" fill="'+col+'"/><line x1="'+px+'" y1="'+yy+'" x2="'+px+'" y2="'+(yy+14)+'" stroke="#222" stroke-width="2"/><rect x="'+(px-8)+'" y="'+(yy+14)+'" width="16" height="26" fill="#fff" stroke="#222" stroke-width="2"/><text x="'+(px+14)+'" y="'+(yy+31)+'" fill="#222" font-size="11">'+esc(p.v)+'</text><line x1="'+px+'" y1="'+(yy+40)+'" x2="'+px+'" y2="'+(yy+52)+'" stroke="#222" stroke-width="2"/>';
+     if(p.k=="gnd")svg+='<line x1="'+(px-9)+'" y1="'+(yy+52)+'" x2="'+(px+9)+'" y2="'+(yy+52)+'" stroke="#222" stroke-width="2"/><line x1="'+(px-6)+'" y1="'+(yy+56)+'" x2="'+(px+6)+'" y2="'+(yy+56)+'" stroke="#222" stroke-width="2"/><line x1="'+(px-3)+'" y1="'+(yy+60)+'" x2="'+(px+3)+'" y2="'+(yy+60)+'" stroke="#222" stroke-width="2"/>';
+     else svg+='<text x="'+px+'" y="'+(yy+66)+'" text-anchor="middle" fill="#c0392b" font-weight="bold">'+esc(modVn(pw))+'</text>'}})}
+  tb+='<tr><td>'+esc(r.cn)+'</td><td>'+esc(r.l)+'</td><td>'+esc(r.r)+'</td><td>'+esc(r.v)+'</td></tr>'});
+ svg+='</svg>';
+ h=svg+'<table class="ftab" style="margin-top:8px"><tr><th>'+esc(t("Filo"))+'</th><th>'+esc(t("Dalla scheda"))+'</th><th>'+esc(t("Al modulo"))+'</th><th>'+esc(t("Tensione e note"))+'</th></tr>'+tb+'</table>';
+ if(j.lv=="5V"&&!out)h+='<p class="fhint" style="color:var(--kot)"><b>'+esc(t("Il segnale del modulo e a 5 V: i pin della scheda reggono solo 3,3 V. Metti un convertitore di livello o un partitore prima del pin."))+'</b></p>';
+ else if(j.lv=="5V")h+='<p class="fhint">'+esc(t("Il modulo vuole il segnale a 5 V: con i 3,3 V della scheda potrebbe non attivarsi. Controlla il datasheet."))+'</p>';
+ if(ext)h+='<p class="fhint">'+esc(t("Unisci la massa (GND) dell'alimentatore con la massa della scheda."))+'</p>';
+ return h}
 /* ===== prima configurazione guidata ===== */
 var SU={i:0,d:{},m:null,ap:null};
 var SUSTEPS=["Lingua","Paese","Nome","Antenna","Wi-Fi di casa o hotspot","Ora","Fine"];
@@ -2099,13 +2563,14 @@ function suAlready(){dlg({title:t("La scheda e gia configurata?"),body:'<p style
 function setupClose(){var e=$("setup");if(e)e.className="setup hide"}
 function suDots(){var h='<div class="sdots" aria-hidden="true">';suSteps().forEach(function(x,i){h+='<i class="'+(i<=SU.i?"on":"")+'"></i>'});return h+'</div>'}
 function setupDraw(){var i=SU.i,d=SU.d,h='<div class="sw"><div class="hero"><svg class="logo" aria-hidden="true"><use href="#i-chip"/></svg></div><h2 style="margin:0">'+esc(t("Prima configurazione"))+'</h2><div class="subt">'+esc(tf("Passo {0} di {1}: {2}",i+1,suSteps().length,t(suSteps()[i])))+'</div>'+suDots()+'<div class="card">';
- if(i==0){h+='<h3>'+esc(t("Scegli la lingua"))+'</h3><div class="lgrid">';LANGS.forEach(function(l){h+='<button type="button" class="'+(l.code==LANG?"on":"")+'" onclick="setLang(\''+esc(l.code)+'\');setTimeout(setupDraw,400)">'+flagImg(l)+'<span>'+esc(l.name)+'</span></button>'});h+='</div><p class="fhint">'+esc(t("Altre lingue si aggiungono dopo, con un file (Sistema > Localizzazione)."))+'</p>'}
+ if(i==0){h+='<h3>'+esc(t("Scegli la lingua"))+'</h3><div class="lgrid">';LANGS.forEach(function(l){h+='<button type="button" class="'+(l.code==LANG?"on":"")+'" onclick="setLang(\''+esc(l.code)+'\');setTimeout(setupDraw,400)">'+flagImg(l)+'<span>'+esc(l.name)+'</span></button>'});h+='</div><div class="suadd"><label for="sulf">'+esc(t("Aggiungi una lingua"))+'</label><input type="file" id="sulf" accept=".json" multiple onchange="suLangUp()">'+
+  '<p class="fhint">'+esc(t("Scegli uno o piu file dalla cartella lang dello ZIP (per esempio en.json). Si possono aggiungere anche dopo, in Sistema > Localizzazione."))+'</p><div id="sulm" class="msg"></div></div>'}
  else if(i==1){h+='<h3>'+esc(t("Dove si trova la scheda?"))+'</h3><div class="agrid"><div><input id="su_q" type="search" placeholder="'+esc(t("Cerca (es. Italia, IT)"))+'" oninput="suFind()"></div><div>'+cSelHtml("su_c",d.cc,"suSel(this.value)")+'</div></div><div class="law">'+esc(t("Il paese decide i canali e la potenza della radio secondo le sue leggi: scegli quello dove la scheda si trova davvero. Non e consulenza legale."))+'</div>'}
  else if(i==2){h+='<h3>'+esc(t("Come si chiama questa scheda?"))+'</h3><label for="su_h">'+esc(t("Nome host"))+'</label><input id="su_h" maxlength="32" value="'+esc(d.host)+'"><p class="fhint">'+esc(t("Lettere, numeri e trattino. La ritrovi come NOME.local sulla rete di casa."))+'</p>'}
  else if(i==3){h+='<h3>'+esc(t("Antenna"))+'</h3><select id="su_a" onchange="$(\'su_gw\').className=this.value==1?\'\':\'hide\'"><option value="0"'+(d.ant?"":" selected")+'>'+esc(t("Interna (sul circuito)"))+'</option><option value="1"'+(d.ant?" selected":"")+'>'+esc(t("Esterna"))+'</option></select>'+
   '<div id="su_gw" class="'+(d.ant?"":"hide")+'"><label for="su_g">'+esc(t("Guadagno dell'antenna esterna (dBi)"))+'</label><input type="number" id="su_g" min="0" max="15" value="'+d.gain+'"></div><p class="fhint">'+esc(t("Se non sai, lascia Interna. Con un'antenna esterna la potenza scende da sola per restare nel limite del paese."))+'</p>'}
  else if(i==4){h+='<h3>'+esc(t("Wi-Fi di casa (facoltativa)"))+'</h3><p class="fhint">'+esc(t("Scegli la rete e scrivi la password, poi premi Avanti: la scheda prova subito a collegarsi e ti dice se ha funzionato. Se la colleghi, prende l'ora da Internet e la raggiungi dalla tua rete. L'hotspot resta acceso."))+'</p>'+
-  '<button class="btn gray" type="button" onclick="suScan()">'+esc(t("Cerca reti"))+'</button><div id="su_sl"></div><label for="su_ss">'+esc(t("Rete (SSID)"))+'</label><input id="su_ss" value="'+esc(d.ssid)+'"><label for="su_pw">'+esc(t("Password Wi-Fi"))+'</label><input type="password" id="su_pw" value="'+esc(d.pass)+'" autocomplete="new-password"><div id="su_wt" class="msg" role="status"></div><h3 style="margin-top:18px">'+esc(t("Salva la password dell'hotspot"))+'</h3><div id="su_ap">'+esc(t("Carico..."))+'</div><div class="law">'+esc(t(APLAW))+'</div><p class="fhint">'+esc(t("Il QR e la stampa sono in Rete > Punto di accesso."))+'</p>'}
+  '<button class="btn gray" type="button" onclick="suScan()">'+esc(t("Cerca reti"))+'</button><div id="su_sl"></div><label for="su_ss">'+esc(t("Rete (SSID)"))+'</label><input id="su_ss" value="'+esc(d.ssid)+'"><label for="su_pw">'+esc(t("Password Wi-Fi"))+'</label><input type="password" id="su_pw" value="'+esc(d.pass)+'" autocomplete="new-password"><div id="su_wt" class="msg" role="status"></div><button class="btn gray" type="button" id="su_wps" onclick="suWps()">'+esc(t("Collega con WPS (tasto del router)"))+'</button><h3 style="margin-top:18px">'+esc(t("Salva la password dell'hotspot"))+'</h3><div id="su_ap">'+esc(t("Carico..."))+'</div><div class="law">'+esc(t(APLAW))+'</div><p class="fhint">'+esc(t("Il QR e la stampa sono in Rete > Punto di accesso."))+'</p>'}
  else if(i==5&&!d.ssid){var tzl=(COMMON.by[d.cc]||{tz:[]}).tz.slice(),to="",nw=new Date(),pz=function(n){return("0"+n).slice(-2)};if(!tzl.some(function(z){return z[1]==d.tz}))tzl.push([d.tzn,d.tz]);tzl.forEach(function(z,k){to+='<option value="'+k+'"'+(z[1]==d.tz?" selected":"")+'>'+esc(z[0])+'</option>'});SU.tzl=tzl;
   h+='<h3>'+esc(t("Imposta l'ora"))+'</h3><p class="fhint">'+esc(t("Senza Internet la scheda non sa che ora e. Controlla data, ora e fuso orario: sono quelli di questo dispositivo."))+'</p><label for="su_z">'+esc(t("Fuso orario"))+'</label><select id="su_z" onchange="suTz(this.value)">'+to+'</select><div class="agrid"><div><label for="su_d">'+esc(t("Data"))+'</label><input type="date" id="su_d" value="'+nw.getFullYear()+"-"+pz(nw.getMonth()+1)+"-"+pz(nw.getDate())+'" oninput="suTm()"></div><div><label for="su_t">'+esc(t("Ora"))+'</label><input type="time" id="su_t" step="1" value="'+pz(nw.getHours())+":"+pz(nw.getMinutes())+":"+pz(nw.getSeconds())+'" oninput="suTm()"></div></div>'}
  else{var c2=COMMON.by[d.cc];h+='<h3>'+esc(t("Tutto pronto"))+'</h3>'+row(esc(t("Paese")),esc(c2?cName(c2):"-"))+row(esc(t("Nome")),esc(d.host))+row(esc(t("Fuso orario")),esc(d.tzn)+" ("+esc(t("si cambia in Sistema > Localizzazione"))+")")+row(esc(t("Antenna")),esc(d.ant?tf("esterna, {0} dBi",d.gain):t("interna")))+row(esc(t("Rete di casa")),esc(d.ssid||t("nessuna (solo hotspot)")))+
@@ -2122,6 +2587,15 @@ function suSel(cc){if(!cc)return;var c=COMMON.by[cc],d=SU.d;d.cc=cc;$("su_c").va
  d.tz=c.tz[0][1];d.tzn=c.tz[0][0];d.f={d:c.f.d,h:c.f.h,s:c.f.s,w:c.f.w,t:c.f.t};d.ntp=c.ntp||d.ntp}
 function suScan(){$("su_sl").textContent=t("Ricerca in corso...");api("/api/wifi/scan",{method:"POST"}).then(function(){var go=function(){api("/api/wifi/scan").then(function(r){return r.json()}).then(function(j){if(j.running){setTimeout(go,1500);return}
  var h="";j.list.slice(0,10).forEach(function(n){h+='<button type="button" class="btn gray sm" onclick="$(\'su_ss\').value=this.textContent;$(\'su_pw\').focus()">'+esc(n.ssid)+'</button>'});$("su_sl").innerHTML=h||esc(t("Nessuna rete trovata"))})};setTimeout(go,3000)})}
+function suWps(){var b=$("su_wps");b.disabled=true;msg("su_wt",t("Premi il tasto WPS del router entro 2 minuti..."),true);
+ post("/api/wps",{start:"pbc"}).then(function(r){return r.json()}).then(function(j){if(j.ok===false)throw j.err;var n=0;
+  var poll=function(){setTimeout(function(){api("/api/wps").then(function(r){return r.json()}).then(function(j){n=0;
+   if(j.state==1){msg("su_wt",tf("In attesa del router: premi il tasto WPS (ancora {0} s)",j.left),true);return poll()}
+   b.disabled=false;
+   if(j.state==2)msg("su_wt",tf("Fatto: la scheda si collega a {0}. Collega il telefono a quella rete e apri https://{1}.local: la guida riparte da li.",j.ssid,SU.d.host0),true);
+   else msg("su_wt",j.err||t("WPS non riuscito"),false)
+  }).catch(function(){if(++n<40)poll();else{b.disabled=false;msg("su_wt",t("La scheda non risponde: se ha preso la rete di casa, collegati a quella"),false)}})},1000)};poll()
+ }).catch(function(e){b.disabled=false;msg("su_wt",typeof e=="string"?e:t("Errore"),false)})}
 function suWifiTest(){var d=SU.d,go=$("setup").querySelector(".sbt .btn:not(.gray)");if(go)go.disabled=true;msg("su_wt",tf("Mi collego a {0} (fino a 20 secondi)...",d.ssid),true);
  post("/api/wifi/test",{ssid:d.ssid,pass:d.pass}).then(function(r){return r.json()}).then(function(j){if(j.ok===false)throw j.err;var n=0;
   var poll=function(){setTimeout(function(){api("/api/wifi/test").then(function(r){return r.json()}).then(function(j){
@@ -2157,4 +2631,12 @@ function homeLoc(){var e=$("hlocn");if(!e)return;Promise.all([commonLoad(),api("
 function lHelp(){dlg({title:t("Aiuto"),body:$("t_help").querySelector(".hlp").innerHTML,buttons:[["ok",t("OK"),""]],onOk:function(){return""}})}
 authLoad().then(function(j){initLang(j.lang);if(j.user!==undefined){USER=j.user;start()}else showLogin()}).catch(function(){initLang("it");showLogin()});
 themeApply();
+
+/* guida, passo lingua: carica uno o piu file /lang/<codice>.json e passa alla prima lingua caricata */
+function suLangUp(){var fs=[].slice.call($("sulf").files||[]);if(!fs.length)return;var bad=fs.filter(function(f){var m=f.name.match(/^([a-z0-9]{2,8})\.json$/);return!m||m[1]=="it"});
+ if(bad.length){msg("sulm",t("Il nome deve essere come en.json (codice di 2-8 lettere minuscole)"),false);$("sulf").value="";return}
+ var first=fs[0].name.replace(".json",""),i=0;msg("sulm",t("Carico..."),true);
+ (function next(){if(i>=fs.length){api("/api/langs").then(function(r){return r.json()}).then(function(l){LANGS=l;fillLangSel();setLang(first);setTimeout(setupDraw,400)});return}
+  var f=fs[i++],fd=new FormData();fd.append("file",f,f.name);
+  api("/api/fs/up?dir=/lang",{method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){if(!j.ok){msg("sulm",f.name+": "+(j.err||t("Errore")),false);return}next()}).catch(function(){msg("sulm",t("Caricamento non riuscito"),false)})})()}
 </script></body></html>

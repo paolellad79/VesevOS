@@ -11,14 +11,14 @@ html = r'''<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name
 <title>VesevOS Recovery</title>
 <style>body{font:16px system-ui,sans-serif;margin:0;background:#101418;color:#e8edf2}main{max-width:30rem;margin:0 auto;padding:16px}
 h1{font-size:1.3rem}.c{background:#1a2128;border-radius:10px;padding:14px;margin:12px 0}input,button{font:inherit;padding:10px;border-radius:8px;border:1px solid #3a4652;background:#0e1318;color:inherit;width:100%;box-sizing:border-box;margin:6px 0}
-button{background:#2b6cb0;border:0;cursor:pointer}button:disabled{opacity:.5}.m{min-height:1.4em}.e{color:#ff8a80}.o{color:#8be28b}progress{width:100%}small{color:#9aa7b4}</style></head>
+button{background:#2b6cb0;border:0;cursor:pointer}button:disabled{opacity:.5}.m{min-height:1.4em}.e{color:#ff8a80}.o{color:#8be28b}progress{width:100%}small{color:#9aa7b4}#dz{border:2px dashed #3a4652;border-radius:8px;padding:8px;margin:6px 0}#dz.h{border-color:#2b6cb0;background:#16202b}</style></head>
 <body><main><h1>VesevOS Recovery</h1>
 <div class="c" id="a"><div id="lu1"><label>Utente<input id="u" autocomplete="username"></label></div>
 <label id="pl">Password<input id="p" type="password" autocomplete="current-password"></label>
 <button id="bl" onclick="login()">Entra</button><div class="m" id="lm"></div>
-<small>Recovery 0.3.0. Per entrare serve un amministratore di VesevOS.</small></div>
+<small>Recovery 0.4.3. Per entrare serve un amministratore di VesevOS.</small></div>
 <div class="c" id="b" hidden><div id="info" class="m"></div>
-<label>Firmware (file .bin di VesevOS)<input id="f" type="file" accept=".bin"></label>
+<div id="dz"><label>Firmware (file .bin di VesevOS)<input id="f" type="file" accept=".bin"></label><div class="m" id="fn"><small>Trascina qui il file .bin oppure usa il pulsante.</small></div></div>
 <label>SHA-256 atteso (facoltativo: lo trovi nella pagina del rilascio)<input id="sh" autocomplete="off" spellcheck="false" placeholder="64 caratteri esadecimali"></label>
 <button id="bu" onclick="up()">Carica e installa</button><progress id="pg" value="0" max="100" hidden></progress><div class="m" id="um"></div>
 <button id="bb" onclick="boot()" style="background:#3a4652">Avvia VesevOS senza aggiornare</button></div>
@@ -36,6 +36,11 @@ function login(){var u=$("u").value.trim(),p=$("p").value;$("bl").disabled=true;
  post("/api/start",{u:u}).then(function(s){if(!s.ok){done(s);return}
   var mac=hmacHex(hashPass(s.salt,p,s.iter),s.nonce);return post("/api/login",{u:u,nonce:s.nonce,mac:mac}).then(done)}).catch(function(){done({})})}
 function info(){post("/api/info",{}).then(function(j){if(j.ok){MAX=j.max||0;$("info").textContent="Firmware attuale: "+(j.app||"nessuno valido")+" - spazio massimo "+Math.floor(j.max/1024)+" KB"}})}
+function fnm(){var f=$("f").files[0];$("fn").textContent=f?f.name+" ("+Math.floor(f.size/1024)+" KB)":"Trascina qui il file .bin oppure usa il pulsante."}
+$("f").onchange=fnm;
+window.addEventListener("dragover",function(e){e.preventDefault();if(!$("b").hidden)$("dz").className="h"});
+window.addEventListener("dragleave",function(e){if(!e.relatedTarget)$("dz").className=""});
+window.addEventListener("drop",function(e){e.preventDefault();$("dz").className="";if($("b").hidden)return;var l=e.dataTransfer&&e.dataTransfer.files;if(!l||!l.length)return;if(l.length>1){msg("um","Trascina un solo file",false);return}$("f").files=l;fnm();msg("um","",true)});
 var MAX=0,MARK=String.fromCharCode(123,70,87,58,86,101,115,101,118,79,83,125);
 function chk(buf){var v=new Uint8Array(buf);if(v.length<48)return "File troppo piccolo: non e un firmware";
  if(v[0]!==0xE9)return "Non e un firmware (intestazione errata)";if((v[12]|(v[13]<<8))!==9)return "Firmware per un altro tipo di chip (serve ESP32-S3)";

@@ -49,20 +49,50 @@ void routesSys(PsychicHttpServer* S, bool sec) {
   add(S, sec, "/api/reboot", HTTP_POST, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
     vlog("SISTEMA: riavvio dalla pagina (%s)", who(c).c_str());
     esp_err_t e = ok(s);
-    xTaskCreate(delayedRestart, "rst", 2048, NULL, 1, NULL);
+    xTaskCreate(delayedRestart, "rst", 2048, (void*)"dalla pagina", 1, NULL);
     return e;
   });
+  add(S, sec, "/api/crash", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendText(s, 200, "text/plain; charset=utf-8", crashText()); });   // rapporti dei crash
+  add(S, sec, "/api/who", HTTP_GET, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, authWhoJson()); });   // chi e collegato e cosa fa
   add(S, sec, "/api/recovery", HTTP_GET, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {      // il recovery c'e? (aggiornamento del firmware)
-    return sendJson(s, String("{\"present\":") + (drvRecoveryPresent() ? 1 : 0) + ",\"kb\":" + String((unsigned long)drvRecoverySizeKB()) + "}");
+    bool pr = drvRecoveryPresent();
+    return sendJson(s, String("{\"present\":") + (pr ? 1 : 0) + ",\"kb\":" + String((unsigned long)drvRecoverySizeKB()) + ",\"ver\":\"" + jsonEscape(pr ? recVersion() : String("")) + "\"}");
   });
   add(S, sec, "/api/recovery", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {  // riavvia nel recovery (pagina di caricamento del .bin)
     if (!drvRecoveryPresent()) return ko(s, tr("Recovery non presente: la scheda ha ancora la tabella partizioni vecchia."), "state");
     if (!drvRecoveryEnter()) return ko(s, tr("Non riesco a passare al recovery."), "state");
     vlog("SISTEMA: riavvio nel recovery dalla pagina (%s)", who(c).c_str());
     esp_err_t e = sendJson(s, "{\"ok\":true,\"ip\":\"" + netIpString() + "\"}");
-    xTaskCreate(delayedRestart, "rst", 2048, NULL, 1, NULL);
+    xTaskCreate(delayedRestart, "rst", 2048, (void*)"recovery dalla pagina", 1, NULL);
     return e;
   });
+  // aggiornamento del recovery: il file va in PSRAM, si controlla tutto e solo dopo si scrive (vos_recupd). Accesso controllato anche durante l'invio.
+  static String s_recErr;
+  PsychicUploadHandler* ru = new PsychicUploadHandler();
+  ru->onUpload([sec](Req* r, const String& filename, uint64_t index, uint8_t* data, size_t len, bool final) -> esp_err_t {
+    uint32_t ip = ipOf(r);
+    if (!fwAllow(ip, false)) return ESP_FAIL;
+    int u = authSessionUser(token(r));
+    if (u < 0 || cfg.users[u].role < ROLE_ADMIN) return ESP_FAIL;
+    if (!sec && g_tlsUp && cfg.https && !netOnAp(ip)) return ESP_FAIL;
+    if (index == 0) {
+      s_recErr = "";
+      if (r->contentLength() > drvRecoverySize() + 4096) { s_recErr = tr("File troppo grande per lo spazio del recovery"); return ESP_OK; }   // si capisce subito (es. il firmware)
+      String e; if (!recUpBegin(e)) { s_recErr = e; return ESP_OK; }
+    }
+    if (s_recErr.length()) return ESP_OK;
+    recUpAdd(data, len);                                            // se e troppo grande lo dice recUpFinish
+    return ESP_OK;
+  });
+  ru->onRequest([](Req* r, Res* s) -> esp_err_t {
+    int u = authSessionUser(token(r));
+    if (u < 0 || cfg.users[u].role < ROLE_ADMIN) { recUpAbort(); return sendJson(s, "{\"ok\":false,\"err\":\"non autorizzato\"}", 401); }
+    if (s_recErr.length()) return ko(s, s_recErr);
+    String from, to, e, w = "web " + cfg.users[u].name + " " + ipToStr(ipOf(r));
+    if (!recUpFinish(qparam(r, "sha"), w, from, to, e)) return ko(s, e);
+    return sendJson(s, "{\"ok\":true,\"from\":\"" + jsonEscape(from) + "\",\"to\":\"" + jsonEscape(to) + "\"}");
+  });
+  S->on("/api/recovery/up", HTTP_POST, ru);
   add(S, sec, "/api/sleep", HTTP_POST, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
     g_sleepSec = has(r, "min") ? (uint32_t)(P(r, "min").toInt() * 60L) : 0;     // 0 = fino a RESET
     if (g_sleepSec > 7UL * 24 * 3600) return ko(s, tr("Sonno: da 1 minuto a 7 giorni"));
@@ -106,7 +136,7 @@ void routesSys(PsychicHttpServer* S, bool sec) {
     vlog("SISTEMA: ripristino di fabbrica dalla pagina (%s)", who(c).c_str());
     cfgFactoryReset();
     esp_err_t e = ok(s);
-    xTaskCreate(delayedRestart, "rst", 2048, NULL, 1, NULL);
+    xTaskCreate(delayedRestart, "rst", 2048, (void*)"ripristino di fabbrica dalla pagina", 1, NULL);
     return e;
   });
 

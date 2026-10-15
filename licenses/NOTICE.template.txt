@@ -27,7 +27,7 @@ Progetto: {REPO}
      esp_https_server, NVS), Mbed TLS, NimBLE (Bluetooth): Apache-2.0.
      Testo: "license apache2"
    - PsychicHttp (server web e HTTPS), ArduinoJson, FreeRTOS,
-     posix_tz_db (fusi orari POSIX): MIT. Testo: "license mit"
+     posix_tz_db (fusi orari POSIX), Berry (script): MIT. Testo: "license mit"
    - lwIP, LittleFS: BSD-3-Clause. Testo: "license bsd3"
    - Natural Earth (nomi dei paesi): pubblico dominio.
    - IANA tz database (fusi orari, nomi dei paesi): pubblico dominio.

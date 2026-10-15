@@ -8,16 +8,14 @@
 #include "../core/vos_util.h"
 #include "../core/vos_log.h"
 #include "../devices/vos_led.h"
-#include "../interfaces/vos_web.h"
+#include "../core/vos_hooks.h"
 #include "../core/vos_region.h"
 #include "../core/vos_fw.h"
 #include "../core/vos_wd.h"
-#include "../packages/vos_mesh.h"
-#include "../packages/vos_ble.h"
+#include "vos_wps.h"
 #include "../drivers/vos_drv_wifi.h"
 #include "../core/vos_service.h"
 #include <ESPmDNS.h>
-#include <esp_mac.h>
 #include <esp_netif.h>
 #include <DNSServer.h>
 #include <time.h>
@@ -145,8 +143,8 @@ static void airCheck() {
 }
 
 static void airEnter() {
-  meshStop();
-  bleStop();
+  wpsAbort();
+  hookCall(g_hooks.radiosOff);        // ESP-NOW e Bluetooth
   dnsStop();
   MDNS.end(); g_mdnsRun = false;
   drvWifiDisconnect(true, false);
@@ -192,13 +190,7 @@ String netStatusJson() {
 }
 
 // MAC letto dalla eFuse: funziona anche con il Wi-Fi spento o in un altro modo.
-String netMac(bool ap) {
-  uint8_t m[6] = {0};
-  if (esp_read_mac(m, ap ? ESP_MAC_WIFI_SOFTAP : ESP_MAC_WIFI_STA) != ESP_OK) return "";
-  char b[18];
-  snprintf(b, sizeof(b), "%02X:%02X:%02X:%02X:%02X:%02X", m[0], m[1], m[2], m[3], m[4], m[5]);
-  return String(b);
-}
+String netMac(bool ap) { return drvWifiMac(ap); }
 
 String netInfoText() {
   String t;
@@ -338,16 +330,17 @@ static void netTask(void*) {
     if (g_airOffReq) { g_airOffReq = false; g_reconf = true; }
     if (g_airReq || (cfg.airOn && g_state != NET_AIR)) {
       g_airReq = false;
-      if (cfg.airOn) { airEnter(); webStart(); }
+      if (cfg.airOn) { airEnter(); hookCall(g_hooks.webStart); }
     }
     if (cfg.airOn) { airCheck(); vTaskDelay(pdMS_TO_TICKS(1000)); continue; }
     if (g_reconf) {
+      wpsAbort();                                    // una prova WPS in corso non regge un cambio di rete
       g_reconf = false; fails = 0;
       if (cfg.staEnabled && cfg.staSsid.length()) {
         if (!tryClient() && apAllowed()) startAp();     // se fallisce torna AP (se il servizio AP e acceso)
       } else startAp();
       mdnsApply();
-      webStart();                       // il server parte solo ora che la rete e pronta
+      hookCall(g_hooks.webStart);                       // il server parte solo ora che la rete e pronta
     }
     if (g_svcReq) {                                  // DHCP, portale automatico e mDNS: si applicano subito, senza riavvio
       g_svcReq = false;
@@ -356,6 +349,12 @@ static void netTask(void*) {
         if (cfg.apCaptive && cfg.httpOn && cfg.httpPort == 80) dnsStart(); else dnsStop();
       }
       mdnsApply();
+    }
+    wpsTick();                                       // WPS: avvio, attesa, esito (solo qui si tocca il Wi-Fi)
+    if (wpsActive()) {                               // durante il WPS niente scansioni, prove o recuperi di rete
+      if (g_dns) g_dns->processNextRequest();
+      vTaskDelay(pdMS_TO_TICKS(1000));
+      continue;
     }
     if (g_scanReq) { g_scanReq = false; doScan(); }
     if (g_tReq) { g_tReq = false; doTest(); }
@@ -385,6 +384,7 @@ static const ServiceOps NET_OPS = { "wifi", "Wi-Fi", "Rete", "net", ROLE_OPER, R
 
 void netInit() {
   serviceRegister(&NET_OPS);
+  wpsInit();
   g_reconf = true;
   if (!cfg.apOn && cfg.dhcpOn && cfg.staEnabled && cfg.staSsid.length()) {     // schede configurate prima della 1.7.18: hotspot spento ma DHCP rimasto acceso
     cfg.dhcpOn = false; cfgSetOrigin("DHCP segue hotspot"); cfgSave(); vlog("NET: hotspot spento, spengo anche il DHCP");

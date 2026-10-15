@@ -7,7 +7,6 @@
 #include "vos_log.h"
 #include "vos_audit.h"
 #include "../drivers/vos_drv_fs.h"
-#include <Preferences.h>
 #include "vos_config_int.h"
 
 static String q(const String& v) {            // 'valore' con escape OpenWrt
@@ -34,6 +33,9 @@ String cfgExport(bool withSecrets) {
   opt(s, "cpu", String(cfg.cpuMhz));
   opt(s, "stat", cfg.statOn ? "1" : "0");
   opt(s, "loglv", String((int)cfg.logLevel));
+  opt(s, "btn1", String((int)cfg.btnAct[0]));
+  opt(s, "btn2", String((int)cfg.btnAct[1]));
+  opt(s, "btn3", String((int)cfg.btnAct[2]));
   opt(s, "serbaud", String((unsigned long)cfg.serBaud));
   opt(s, "sereol", String((int)cfg.serEol));
   opt(s, "sertx", String((int)cfg.serTx));
@@ -53,6 +55,8 @@ String cfgExport(bool withSecrets) {
   opt(s, "dhcp", cfg.dhcpOn ? "1" : "0");
   opt(s, "lease", String(cfg.dhcpLease));
   opt(s, "mdns", cfg.mdnsOn ? "1" : "0");
+  opt(s, "wps", cfg.wpsOn ? "1" : "0");
+  opt(s, "wpspin", cfg.wpsPin ? "1" : "0");
   opt(s, "httpon", cfg.httpOn ? "1" : "0");
   opt(s, "httpport", String(cfg.httpPort));
   opt(s, "httpsport", String(cfg.httpsPort));
@@ -146,7 +150,7 @@ String cfgExport(bool withSecrets) {
   opt(s, "at", String(cfg.wdAt));
   opt(s, "days", String(cfg.wdDays));
   s += "\nconfig pins 'pins'\n";
-  for (int i = 0; i < 49; i++) if (cfg.pinNote[i].length()) opt(s, ("n" + String(i)).c_str(), cfg.pinNote[i]);
+  for (int i = 0; i < VOS_GPIO_COUNT; i++) if (cfg.pinNote[i].length()) opt(s, ("n" + String(i)).c_str(), cfg.pinNote[i]);
   s += "\nconfig sd 'sd'\n";
   opt(s, "enabled", cfg.sdEnabled ? "1" : "0");
   opt(s, "cs", String(cfg.sdCs)); opt(s, "sck", String(cfg.sdSck));

@@ -52,3 +52,16 @@ inline const char* rcFinalErr(const RecCheck& c, uint32_t maxSize) {
   if (!c.mark) return "Non e un firmware VesevOS (manca il marchio)";
   return nullptr;
 }
+
+// Cerca il marchio in una partizione gia scritta (app0) leggendo a blocchi. NON si ferma agli spazi vuoti (0xFF): le immagini ESP hanno
+// riempimenti fino a 64 KB tra un blocco e l'altro e il marchio puo stare dopo. rd(ctx, offset, buf, n) legge n byte; false = errore.
+typedef bool (*RcRead)(void* ctx, uint32_t off, uint8_t* buf, size_t n);
+inline bool rcScanMark(RcRead rd, void* ctx, uint32_t size, uint8_t* buf, size_t bn) {
+  RecCheck c; rcInit(c);
+  for (uint32_t off = 0; off + bn <= size; off += (uint32_t)bn) {
+    if (!rd(ctx, off, buf, bn)) return false;
+    rcFeed(c, buf, bn);
+    if (c.mark) return true;
+  }
+  return false;
+}

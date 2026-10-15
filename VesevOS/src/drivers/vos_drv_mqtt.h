@@ -6,7 +6,7 @@
 // Non conosce argomenti, comandi, Home Assistant: sono del servizio (vos_mqtt). Le stringhe passate devono restare vive finche il client esiste.
 #pragma once
 #include <Arduino.h>
-#include "../core/vos_common.h"
+#include "../boards/vos_packages.h"
 
 #if VOS_WITH_MQTT
 struct MqttDrvConfig {

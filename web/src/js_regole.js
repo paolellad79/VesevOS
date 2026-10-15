@@ -8,9 +8,9 @@ function lk(a,v){for(var i=0;i<a.length;i++)if(String(a[i][0])==String(v))return
 function rClean(x){return String(x).replace(/[|;\n\r]/g," ").replace(/\s+/g," ").trim()}
 function aParse(a){var w=a.split(" "),k=w[0],v=w.slice(1).join(" ");
  if(k=="led-color")return{k:"color",v:v};if(k=="led")return{k:"ledmode",v:v};if(k=="led-bright")return{k:"bright",v:+v};if(k=="led2")return null;
- if(k=="gpio")return{k:"gpio",p:+w[1],v:+w[2]};if(k=="wait")return{k:"wait",v:+v};if(k=="note")return{k:"note",v:v};if(k=="reboot")return{k:"reboot"};if(k=="airplane")return{k:"air",v:v};if(k=="mqtt")return{k:"mq",p:w[1]||"",v:w.slice(2).join(" ")};if(k=="ntp")return{k:"ntp"};return null}
+ if(k=="gpio")return{k:"gpio",p:+w[1],v:+w[2]};if(k=="wait")return{k:"wait",v:+v};if(k=="note")return{k:"note",v:v};if(k=="reboot")return{k:"reboot"};if(k=="airplane")return{k:"air",v:v};if(k=="mqtt")return{k:"mq",p:w[1]||"",v:w.slice(2).join(" ")};if(k=="ntp")return{k:"ntp"};if(k=="script")return{k:"script",v:w[1]||""};if(k=="app")return{k:"app",v:w[1]||""};if(k=="appstop")return{k:"appstop"};return null}
 function aSer(a){switch(a.k){case"color":return"led-color "+String(a.v).replace("#","").toLowerCase();case"ledmode":return"led "+a.v;case"bright":return"led-bright "+a.v;
- case"gpio":return"gpio "+a.p+" "+a.v;case"wait":return"wait "+a.v;case"note":return"note "+rClean(a.v);case"reboot":return"reboot";case"air":return"airplane "+a.v;case"mq":return"mqtt "+(String(a.p).replace(/[\s|;]/g,"")||"evento")+" "+rClean(a.v);case"ntp":return"ntp sync"}return""}
+ case"gpio":return"gpio "+a.p+" "+a.v;case"wait":return"wait "+a.v;case"note":return"note "+rClean(a.v);case"reboot":return"reboot";case"air":return"airplane "+a.v;case"mq":return"mqtt "+(String(a.p).replace(/[\s|;]/g,"")||"evento")+" "+rClean(a.v);case"ntp":return"ntp sync";case"script":return"script "+String(a.v).toLowerCase().replace(/[^a-z0-9_-]/g,"");case"app":return"app "+String(a.v).toLowerCase().replace(/[^a-z0-9_-]/g,"");case"appstop":return"appstop"}return""}
 function rParse(line){var f=line.split("|");if(f.length!=5)return null;
  var r={on:f[0].trim()=="1",name:f[1].trim(),tk:"time",h:"07:00",d:"1111111",n:60,tmp:70,ck:"-",c1:"22:00",c2:"06:00",cd:"1111111",acts:[]};
  var w=f[2].trim().split(/\s+/);
@@ -29,7 +29,7 @@ function aText(a){switch(a.k){case"mq":return tf("MQTT: invia \"{1}\" su {0}",a.
  case"ledmode":return tf("LED: {0}",lk(LEDM,a.v));
  case"bright":return tf("luminosita LED {0}",a.v);
  case"gpio":return tf("pin {0} {1}",a.p,lk(ONOFF,a.v));case"wait":return tf("aspetta {0}",durText(a.v));
- case"note":return tf("scrivi \"{0}\" nel registro",a.v);case"reboot":return t("riavvia la scheda");case"ntp":return t("aggiorna l'ora")}return""}
+ case"note":return tf("scrivi \"{0}\" nel registro",a.v);case"reboot":return t("riavvia la scheda");case"ntp":return t("aggiorna l'ora");case"script":return tf("avvia lo script {0}",a.v);case"app":return tf("avvia l'app {0}",a.v);case"appstop":return t("ferma l'app")}return""}
 function rSum(r){var q;
  if(r.tk=="time")q=tf("Alle {0}, {1}",r.h,dayText(r.d));else if(r.tk=="every")q=tf("Ogni {0}",durText(r.n));else if(r.tk=="after")q=tf("{0} dopo l'avvio",durText(r.n));
  else if(r.tk=="boot")q=t("All'avvio");else if(r.tk=="wifiup")q=t("Quando il Wi-Fi si collega");else if(r.tk=="wifidown")q=t("Quando il Wi-Fi si scollega");else q=tf("Quando la temperatura supera {0} C",r.tmp);
@@ -65,9 +65,10 @@ function dayMask(id){var o="";var b=$(id).children;for(var i=0;i<7;i++)o+=b[i].c
 var TKS=[["time","Orario (sveglia)"],["every","Ogni tanto (timer ripetuto)"],["after","Dopo l'avvio (una volta)"],["boot","All'avvio"],["wifiup","Quando il Wi-Fi si collega"],["wifidown","Quando il Wi-Fi si scollega"],["temp","Quando la temperatura supera"]];
 var CKS=[["-","Sempre"],["between","Solo in una fascia oraria"],["day","Solo in certi giorni"]];
 var AIRO=[["on boot","attivo fino al prossimo avvio"],["on 10m","attivo per 10 minuti"],["on 1h","attivo per 1 ora"],["on fisso","attivo, si spegne solo a mano"],["off","spento (rete accesa)"]];
-var AKS=[["color","LED: colore"],["ledmode","LED: modo"],["bright","LED: luminosita"],["gpio","Pin: acceso o spento"],["wait","Aspetta"],["note","Scrivi nel registro"],["air","Modo aereo"],["mq","MQTT: invia un messaggio"],["ntp","Aggiorna l'ora"],["reboot","Riavvia la scheda"]];
+var AKS=[["color","LED: colore"],["ledmode","LED: modo"],["bright","LED: luminosita"],["gpio","Pin: acceso o spento"],["wait","Aspetta"],["note","Scrivi nel registro"],["air","Modo aereo"],["mq","MQTT: invia un messaggio"],["ntp","Aggiorna l'ora"],["script","Avvia uno script"],["app","Avvia un'app"],["appstop","Ferma l'app"],["reboot","Riavvia la scheda"]];
 function unitOf(n){return n%3600==0?3600:n%60==0?60:1}
-function rEditDraw(){var r=RU.ed;
+function rScrNames(){if(ROLE<2){RU.scn=null;RU.apn=null;return}api("/api/apps").then(function(r){return r.json()}).then(function(j){RU.apn=j.ok?j.list.filter(function(x){return x.ok}).map(function(x){return x.n}):null;if(RU.ed&&$("racts"))aDraw()}).catch(function(){});api("/api/script").then(function(r){return r.json()}).then(function(j){RU.scn=j.ok?j.list.map(function(x){return x.n}):null;if(RU.ed&&$("racts"))aDraw()}).catch(function(){})}
+function rEditDraw(){var r=RU.ed;rScrNames();
  $("redit").innerHTML='<h3>'+esc(RU.edi<0?t("Nuova regola"):t("Modifica regola"))+'</h3>'+
  '<label for="r_name">'+esc(t("Nome"))+'</label><input id="r_name" maxlength="24" value="'+esc(r.name)+'" oninput="rPrev()">'+
  '<h4>'+esc(t("Quando"))+'</h4><select id="r_tk" onchange="rTrigUi()">'+selOpts(TKS,r.tk)+'</select><div id="r_tf"></div>'+
@@ -85,16 +86,22 @@ function rCondUi(){var r=RU.ed,k=$("r_ck").value,h="";r.ck=k;
  if(k=="between")h='<div class="arow"><span>'+esc(t("Dalle"))+'</span><input type="time" id="r_c1" value="'+esc(r.c1)+'" oninput="rPrev()"><span>'+esc(t("alle"))+'</span><input type="time" id="r_c2" value="'+esc(r.c2)+'" oninput="rPrev()"></div>';
  else if(k=="day")h=dayBtns("r_cd",r.cd);
  $("r_cf").innerHTML=h;rPrev()}
-function aDefault(k){return k=="color"?{k:k,v:"ff0000"}:k=="ledmode"?{k:k,v:"fixed"}:k=="bright"?{k:k,v:128}:k=="gpio"?{k:k,p:4,v:1}:k=="wait"?{k:k,v:5}:k=="note"?{k:k,v:""}:k=="air"?{k:k,v:"on boot"}:k=="mq"?{k:k,p:"evento",v:"ciao"}:{k:k}}
+function aDefault(k){return k=="color"?{k:k,v:"ff0000"}:k=="ledmode"?{k:k,v:"fixed"}:k=="bright"?{k:k,v:128}:k=="gpio"?{k:k,p:4,v:1}:k=="wait"?{k:k,v:5}:k=="note"?{k:k,v:""}:k=="air"?{k:k,v:"on boot"}:k=="script"?{k:k,v:""}:k=="app"?{k:k,v:""}:k=="mq"?{k:k,p:"evento",v:"ciao"}:{k:k}}
 function aAdd(){RU.ed.acts.push(aDefault("color"));aDraw()}
 function aDraw(){var h="";RU.ed.acts.forEach(function(a,i){h+='<div class="arow"><select class="ak" onchange="aKind('+i+',this.value)">'+selOpts(AKS,a.k)+'</select>';
   if(a.k=="color")h+='<input type="color" value="#'+esc(String(a.v).replace("#",""))+'" oninput="aSet('+i+',\'v\',this.value.replace(\'#\',\'\'))">';
   else if(a.k=="ledmode")h+='<select onchange="aSet('+i+',\'v\',this.value)">'+selOpts(LEDM,a.v)+'</select>';
   else if(a.k=="bright")h+='<input type="range" min="0" max="255" value="'+a.v+'" oninput="aSet('+i+',\'v\',+this.value)">';
-  else if(a.k=="gpio")h+='<input type="number" min="0" max="48" value="'+a.p+'" oninput="aSet('+i+',\'p\',+this.value)" style="max-width:90px"><select onchange="aSet('+i+',\'v\',+this.value)">'+selOpts(ONOFF,a.v)+'</select>';
+  else if(a.k=="gpio")h+='<input type="number" min="0" max="'+brdMax()+'" value="'+a.p+'" oninput="aSet('+i+',\'p\',+this.value)" style="max-width:90px"><select onchange="aSet('+i+',\'v\',+this.value)">'+selOpts(ONOFF,a.v)+'</select>';
   else if(a.k=="wait")h+='<input type="number" min="1" max="3600" value="'+a.v+'" oninput="aSet('+i+',\'v\',+this.value)" style="max-width:110px"><span>'+esc(t("secondi"))+'</span>';
   else if(a.k=="mq")h+='<input maxlength="40" value="'+esc(a.p)+'" placeholder="'+esc(t("argomento"))+'" oninput="aSet('+i+',\'p\',this.value)" style="max-width:130px"><input maxlength="60" value="'+esc(a.v)+'" placeholder="'+esc(t("testo"))+'" oninput="aSet('+i+',\'v\',this.value)">';
   else if(a.k=="air")h+='<select onchange="aSet('+i+',\'v\',this.value)">'+selOpts(AIRO,a.v)+'</select>';
+  else if(a.k=="script"){if(RU.scn&&RU.scn.length){if(!a.v)a.v=RU.scn[0];var sn=RU.scn.slice();if(a.v&&sn.indexOf(a.v)<0)sn.push(a.v);
+    h+='<select aria-label="'+esc(t("nome dello script"))+'" onchange="aSet('+i+',\'v\',this.value)">'+sn.map(function(n){return'<option value="'+esc(n)+'"'+(n==a.v?" selected":"")+'>'+esc(RU.scn.indexOf(n)<0?tf("{0} (non trovato)",n):n)+'</option>'}).join("")+'</select>'}
+   else h+='<input maxlength="24" value="'+esc(a.v)+'" placeholder="'+esc(t("nome dello script"))+'" aria-label="'+esc(t("nome dello script"))+'" oninput="aSet('+i+',\'v\',this.value)">'}
+  else if(a.k=="app"){if(RU.apn&&RU.apn.length){if(!a.v)a.v=RU.apn[0];var an=RU.apn.slice();if(a.v&&an.indexOf(a.v)<0)an.push(a.v);
+    h+='<select aria-label="'+esc(t("nome dell'app"))+'" onchange="aSet('+i+',\'v\',this.value)">'+an.map(function(n){return'<option value="'+esc(n)+'"'+(n==a.v?" selected":"")+'>'+esc(RU.apn.indexOf(n)<0?tf("{0} (non trovato)",n):n)+'</option>'}).join("")+'</select>'}
+   else h+='<input maxlength="24" value="'+esc(a.v)+'" placeholder="'+esc(t("nome dell'app"))+'" aria-label="'+esc(t("nome dell'app"))+'" oninput="aSet('+i+',\'v\',this.value)">'}
   else if(a.k=="note")h+='<input maxlength="60" value="'+esc(a.v)+'" placeholder="'+esc(t("Testo della nota"))+'" oninput="aSet('+i+',\'v\',this.value)">';
   h+='<button class="ib" onclick="aMove('+i+',-1)" aria-label="'+esc(t("Su"))+'">&uarr;</button><button class="ib" onclick="aMove('+i+',1)" aria-label="'+esc(t("Giu"))+'">&darr;</button><button class="ib" onclick="aDel('+i+')" aria-label="'+esc(t("Elimina"))+'">&#10005;</button></div>'});
  $("racts").innerHTML=h;rPrev()}

@@ -4,26 +4,23 @@
 // Autodiagnosi: 16 prove, una per volta in un task a parte (cede il processore, non blocca il watchdog).
 // Solo lettura, tranne un file di prova in LittleFS (subito cancellato). Le prove attive (LED, MQTT) solo se richieste.
 #include "vos_selftest.h"
-#include "vos_common.h"
-#include "vos_config.h"
-#include "vos_i18n.h"
-#include "vos_util.h"
-#include "vos_sys.h"
+#include "../core/vos_common.h"
+#include "../core/vos_config.h"
+#include "../core/vos_i18n.h"
+#include "../core/vos_util.h"
+#include "../core/vos_sys.h"
 #include "../net/vos_net.h"
-#include "../interfaces/vos_web.h"
+#include "../core/vos_hooks.h"
+#include "../core/vos_service.h"
 #include "../security/vos_tls.h"
-#include "vos_time.h"
-#include "vos_audit.h"
+#include "../core/vos_time.h"
+#include "../core/vos_audit.h"
 #include "../security/vos_auth.h"
-#include "../packages/vos_mfa.h"
-#include "vos_region.h"
+#include "../core/vos_region.h"
 #include "../devices/vos_pins.h"
 #include "../devices/vos_led.h"
-#include "vos_log.h"
-#include "../packages/vos_mqtt.h"
-#include "../packages/vos_mesh.h"
-#include "../packages/vos_ble.h"
-#include "vos_diario.h"
+#include "../core/vos_log.h"
+#include "../core/vos_diario.h"
 #include "../drivers/vos_drv_wifi.h"
 #include "../drivers/vos_drv_fs.h"
 #include <esp_system.h>
@@ -114,7 +111,7 @@ static void tCfg() {
   int red = auditCount(AUD_RED), yel = auditCount(AUD_YELLOW);
   uint8_t st = SELF_OK;
   if (!cfgLastSaveOk() || red) st = SELF_ERR; else if (yel || !cfg.setupDone) st = SELF_WARN;
-  rep(st, trf("Ultimo salvataggio: %s; guida finita: %s; avvisi rossi %d, gialli %d (scheda Compliant)", cfgLastSaveOk() ? tr("riuscito") : tr("FALLITO"), yn(cfg.setupDone), red, yel));
+  rep(st, trf("Ultimo salvataggio: %s; guida finita: %s; avvisi rossi %d, gialli %d (scheda Stato conformita)", cfgLastSaveOk() ? tr("riuscito") : tr("FALLITO"), yn(cfg.setupDone), red, yel));
 }
 static void tNet() {
   title(tr("Rete Wi-Fi"));
@@ -131,9 +128,12 @@ static void tNet() {
   d += trf("; MAC %s", maskMac(netMac(false)).c_str());
   rep(st, d);
 }
+// MQTT, ESP-NOW e Bluetooth: lo stato arriva dal registro dei servizi (acceso = non SVC_OFF; MQTT collegato = SVC_ON)
+static bool svcRun(const char* id) { return serviceState(id) != SVC_OFF; }
+
 static void tWeb() {
   title(tr("Pagina web"));
-  bool https = webHttpsUp(); uint8_t st = SELF_OK;
+  bool https = hookWebHttpsUp(); uint8_t st = SELF_OK;
   if (!cfg.httpOn && !cfg.https) st = SELF_ERR;
   else if (cfg.https && !https) st = tlsPending() ? SELF_WARN : SELF_ERR;
   else if (!cfg.https) st = SELF_WARN;
@@ -150,7 +150,7 @@ static void tTime() {
 static void tSvc() {
   title(tr("Servizi attivi"));
   rep(SELF_OK, trf("Hotspot %s, DHCP %s, HTTP %s, HTTPS %s, MQTT %s (collegato: %s), ESP-NOW %s, Bluetooth %s, NTP %s, energia modo %d, statistiche %s",
-    onoff(cfg.apOn), onoff(cfg.dhcpOn), onoff(cfg.httpOn), onoff(webHttpsUp()), onoff(mqttRunning()), yn(mqttConnected()), onoff(meshRunning()), onoff(bleRunning()), onoff(cfg.ntpOn), (int)cfg.pwMode, onoff(cfg.statOn)));
+    onoff(cfg.apOn), onoff(cfg.dhcpOn), onoff(cfg.httpOn), onoff(hookWebHttpsUp()), onoff(svcRun("mqtt")), yn(serviceState("mqtt") == SVC_ON), onoff(svcRun("mesh")), onoff(svcRun("ble")), onoff(cfg.ntpOn), (int)cfg.pwMode, onoff(cfg.statOn)));
 }
 static void tTasks() {
   title(tr("Task e watchdog"));
@@ -163,7 +163,7 @@ static void tTasks() {
 static void tSec() {
   title(tr("Sicurezza e accessi"));
   int adm = 0, mfa = 0;
-  for (int i = 0; i < VOS_MAX_USERS; i++) if (cfg.users[i].name.length() && cfg.users[i].on && cfg.users[i].role == ROLE_ADMIN) { adm++; if (mfaOn(i)) mfa++; }
+  for (int i = 0; i < VOS_MAX_USERS; i++) if (cfg.users[i].name.length() && cfg.users[i].on && cfg.users[i].role == ROLE_ADMIN) { adm++; if (hookMfaOn(i)) mfa++; }
   uint8_t st = SELF_OK;
   if (!authIsSet()) st = SELF_ERR; else if (!cfg.https || !cfg.serialAuth || !cfg.powBits || cfg.banFails > 10) st = SELF_WARN;
   rep(st, trf("Password impostata: %s; HTTPS %s; seriale protetta: %s; prova di lavoro al login %u bit; blocco IP dopo %u errori; amministratori %d (con MFA %d)",
@@ -199,9 +199,9 @@ static void tActLed() {
 static void tActMqtt() {
   title(tr("MQTT (prova attiva)"));
   if (!g_active) { rep(SELF_SKIP, tr("Solo con le prove attive")); return; }
-  if (!mqttRunning()) { rep(SELF_SKIP, tr("MQTT fermo")); return; }
-  if (!mqttConnected()) { rep(SELF_WARN, tr("MQTT avviato ma non collegato al broker")); return; }
-  bool ok = mqttPublishRel("selftest", "ok", false);
+  if (!svcRun("mqtt")) { rep(SELF_SKIP, tr("MQTT fermo")); return; }
+  if (serviceState("mqtt") != SVC_ON) { rep(SELF_WARN, tr("MQTT avviato ma non collegato al broker")); return; }
+  bool ok = hookMqttPublish("selftest", "ok");
   rep(ok ? SELF_OK : SELF_ERR, ok ? tr("Messaggio di prova inviato al broker") : tr("Invio del messaggio di prova fallito"));
 }
 

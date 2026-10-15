@@ -8,3 +8,4 @@ void drvGpioMode(int gpio, DrvGpioMode m) {
 }
 void drvGpioWrite(int gpio, bool high) { digitalWrite(gpio, high ? HIGH : LOW); }
 bool drvGpioRead(int gpio) { return digitalRead(gpio) != LOW; }
+int  drvGpioAnalog(int gpio) { return analogRead(gpio); }

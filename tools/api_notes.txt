@@ -1,6 +1,8 @@
 # Descrizione di ogni rotta API: "METODO /percorso | italiano | english". Usato da tools/mkapidoc.py. Una rotta senza riga = errore di tools/checkapi.py.
 GET / | La pagina web (compressa) | The web page (gzip)
 POST /api/airplane | Modo aereo: spegne o riaccende la radio (on, exit) | Airplane mode: radio off or on (on, exit)
+GET /api/app | App: dettaglio e controllo di un file /apps/<name>.vap (permessi u, controlli ctl, icona, byte). L'operatore solo se who=oper | App: details and check of a file /apps/<name>.vap (permissions u, controls ctl, icon, bytes). Operator only if who=oper
+GET /api/apps | App: elenco di /apps/*.vap con controllo del formato (n, ok, t titolo, v versione, a autore, w chi la usa, u permessi, c controlli, icon, e errore). L'operatore vede solo le app valide con who=oper | Apps: list of /apps/*.vap with format check (n, ok, t title, v version, a author, w who may use, u permissions, c controls, icon, e error). The operator sees only valid apps with who=oper
 GET /api/ap | Hotspot: nome, stato, client | Hotspot: name, state, clients
 POST /api/ap | Cambia nome/password/QR dell'hotspot (new = nuova password casuale) | Change hotspot name/password/QR (new = new random password)
 GET /api/audit | Allarmi di configurazione e storico | Configuration alarms and history
@@ -41,6 +43,8 @@ POST /api/fw | Salva il filtro IP (mode, regole, ntp) | Save the IP filter
 POST /api/fw/confirm | Conferma il filtro IP dopo la prova | Confirm the IP filter after the test
 GET /api/home | Dati dei widget della Home (un solo pezzo) | Home widget data (single request)
 POST /api/identify | Fa lampeggiare il LED per riconoscere la scheda | Blink the LED to identify the board
+GET /api/btn | Tasto BOOT: act (azione di 1, 2 e 3 click: 0 libero (per gli script), 1 esce dal modo aereo, 2 WPS, 3 trova la scheda), opt (azioni possibili con il nome), wpsClicks (click che avviano il WPS, 0 = nessuno), wpsOn (WPS consentito), free (per ogni gesto: libero per gli script), script (c'e uno script che legge i click), test (secondi rimasti di prova, 0 = spenta), down, heldMs, seq, last (ultimo gesto capito in prova) | BOOT button: act (action of 1, 2 and 3 clicks: 0 free (for scripts), 1 leave airplane mode, 2 WPS, 3 find the board), opt (possible actions with name), wpsClicks (clicks that start WPS, 0 = none), wpsOn (WPS allowed), free (per gesture: free for scripts), script (a script is reading the clicks), test (test seconds left, 0 = off), down, heldMs, seq, last (last gesture understood in test)
+POST /api/btn | Tasto BOOT (solo Admin): c1, c2, c3 = azione (0-3) per 1, 2, 3 click; test=1|0 (prova di 60 s: il tasto non fa niente); ritorna lo stato | BOOT button (Admin only): c1, c2, c3 = action (0-3) for 1, 2, 3 clicks; test=1|0 (60 s test: the button does nothing); returns the state
 POST /api/lang | Lingua della scheda | Board language
 GET /api/langfile | File di lingua da scaricare | Language file download
 GET /api/langs | Lingue disponibili | Available languages
@@ -80,13 +84,16 @@ POST /api/pintest | Prova un pin (action, gpio, pull) | Test a pin
 GET /api/power | Risparmio energia: modo e tempi | Power saving: mode and times
 POST /api/power | Cambia modo e tempi | Change mode and times
 POST /api/reboot | Riavvia la scheda | Reboot the board
-GET /api/recovery | Dice se il recovery e presente (present 0/1, kb) | Tells whether the recovery is present (present 0/1, kb)
+GET /api/recovery | Dice se il recovery e presente e la sua versione (present 0/1, kb, ver) | Tells whether the recovery is present and its version (present 0/1, kb, ver)
 POST /api/recovery | Riavvia nel recovery per caricare un nuovo firmware (risponde con ip) | Reboots into the recovery to upload a new firmware (answers with ip)
 GET /api/region | Paese, fuso, lingua, radio | Country, time zone, language, radio
 POST /api/region | Cambia paese, fuso, formati, antenna, potenza | Change country, zone, formats, antenna, power
 GET /api/rules | Testo delle automazioni | Automation text
 POST /api/rules | Salva le automazioni | Save automations
 POST /api/rules/run | Esegue una regola (i) | Run a rule (i)
+GET /api/script | Script: elenco di /scripts (n, s = byte), in corso (busy, name), ultima uscita (out, err), limite max | Scripts: list of /scripts (n, s = bytes), running (busy, name), last output (out, err), limit max
+POST /api/script/run | Avvia uno script di /scripts in sottofondo (name) | Start a script from /scripts in the background (name)
+POST /api/script/stop | Ferma lo script in corso | Stop the running script
 GET /api/selftest | Stato dell'autotest | Selftest state
 POST /api/selftest | Avvia autotest, cancella (active, clear, names) | Start selftest, clear
 GET /api/selftest/report | Rapporto dell'autotest | Selftest report
@@ -128,3 +135,21 @@ GET /api/wifi/scan | Risultato della ricerca reti (max 40, more:true se tagliato
 POST /api/wifi/scan | Avvia la ricerca reti | Start a scan
 GET /api/wifi/test | Esito dell'ultima prova di connessione | Last connection test result
 POST /api/wifi/test | Prova la connessione a una rete senza salvare | Test a connection without saving
+
+GET /api/app/state | App: stato dell'app (name) - run in esecuzione, busy motore occupato, vals valori dei controlli (n numero, s testo, a punti del grafico), out e err ultima uscita | App: app state (name) - run running, busy engine busy, vals control values (n number, s text, a chart points), out and err last output
+POST /api/app/set | App: comando di un controllo della pagina (name, id, v): arriva all'app come on_set(id, valore); valori controllati | App: command from a page control (name, id, v): reaches the app as on_set(id, value); values are checked
+POST /api/app/start | App: avvia un'app (name). Una sola alla volta, esclude gli script. L'operatore solo se who=oper | App: start an app (name). One at a time, excludes scripts. Operator only if who=oper
+POST /api/app/stop | App: ferma l'app in corso (name). L'operatore solo se who=oper | App: stop the running app (name). Operator only if who=oper
+GET /api/io | Periferiche a classi (rele, led, pin, ingresso, analogico): max, io[] con n nome, c classe, g GPIO, f opzioni (1 attivo basso, 2 pull-up, 4 pull-down), v valore, out uscita | Device classes (relay, led, pin, input, analog): max, io[] with n name, c class, g GPIO, f options (1 active low, 2 pull-up, 4 pull-down), v value, out output
+POST /api/io/add | Crea una periferica (cls classe, gpio pin, name facoltativo, opt inv/up/down). Il pin e controllato; risponde con il nome | Creates a device (cls class, gpio pin, name optional, opt inv/up/down). The pin is checked; replies with the name
+POST /api/io/del | Toglie una periferica (n nome): l'uscita si spegne e il pin torna libero | Removes a device (n name): the output is switched off and the pin is freed
+POST /api/io/rename | Cambia il nome di una periferica (n nome, to nuovo nome) | Renames a device (n name, to new name)
+GET /api/mods | Schede modulo .vdp in /devs: elenco (n nome, ok, t titolo, c classe, p alimentazione, ns segnali, v versione, a autore, l licenza, w avviso, sig segnali, icon svg, e errore) | Module cards .vdp in /devs: list (n name, ok, t title, c class, p power, ns signals, v version, a author, l license, w warning, sig signals, icon svg, e error)
+GET /api/mod | Una scheda modulo (name): dettagli, livello del segnale (lv: 3V3 o 5V), componenti da aggiungere (parts: k serie|gnd|vcc, v valore, s segnale), eventuale svg allegato (wiring) e pin liberi proposti (sug); la pagina disegna lo schema da questi dati | One module card (name): details, signal level (lv: 3V3 or 5V), components to add (parts: k serie|gnd|vcc, v value, s signal), optional attached svg (wiring) and suggested free pins (sug); the page draws the diagram from these data
+POST /api/mod/install | Installa una scheda modulo (name, prefix facoltativo): crea le periferiche sui pin proposti, tutto o niente | Installs a module card (name, optional prefix): creates the devices on the suggested pins, all or nothing
+POST /api/mod/save | Controlla e salva una scheda modulo /devs/<name>.vdp (name, text); un file non valido viene rifiutato | Checks and saves a module card /devs/<name>.vdp (name, text); an invalid file is rejected
+POST /api/mod/del | Elimina una scheda modulo (name); le periferiche gia create restano | Deletes a module card (name); devices already created stay
+GET /api/wps | Stato del WPS (solo Admin): avail, on (servizio acceso), allowed, pinOk (metodo PIN consentito), btn (con quanti click del tasto BOOT parte il WPS, 0 = nessuno), setup (prima configurazione), net, state (0 fermo, 1 in attesa, 2 riuscito, 3 errore), method (pbc o pin), left (secondi rimasti), pin (solo mentre aspetta con il PIN), ssid (dopo il successo, mai la password), err | WPS status (Admin only): avail, on (service on), allowed, pinOk (PIN method allowed), btn (how many BOOT button clicks start WPS, 0 = none), setup (first setup), net, state (0 idle, 1 waiting, 2 done, 3 error), method (pbc or pin), left (seconds left), pin (only while waiting with the PIN), ssid (after success, never the password), err
+POST /api/wps | WPS (solo Admin): on (accende o spegne il servizio), pinOk (impostazione), start=pbc|pin (avvia: la scheda riceve nome e password della Wi-Fi di casa dal router entro 2 minuti), stop=1 (annulla); ritorna lo stato | WPS (Admin only): on (turns the service on or off), pinOk (setting), start=pbc|pin (starts: the board receives the home Wi-Fi name and password from the router within 2 minutes), stop=1 (cancels); returns the status
+GET /api/who | Chi e collegato dal web e cosa sta facendo (utente, ruolo, ip, via http/https, da quanto, ultima azione) | Who is connected from the web and what they are doing (user, role, ip, via http/https, since when, last action)
+GET /api/crash | Rapporti degli ultimi crash (motivo, task, PC, backtrace), testo | Reports of the last crashes (reason, task, PC, backtrace), text

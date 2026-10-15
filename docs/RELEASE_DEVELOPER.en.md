@@ -26,7 +26,7 @@ Last update: 10 October 2026, version 1.7.45. Also published on GitHub (docs/). 
 ## 4. Build and test
 1. `python3 tools/mklicense.py` (if missing), `python3 tools/mklang.py` (must end with "ok"), `python3 tools/mkpage.py`.
 2. Compile ALL files with the stubs (g++ -c) and look for duplicate functions (nm).
-3. `tools/hosttest/run.sh` (needs `$CORE` = the `cores/esp32` folder of the Arduino core). Currently 162 tests. `python3 tools/checklayers.py` must end without KO.
+3. `tools/hosttest/run.sh` (needs `$CORE` = the `cores/esp32` folder of the Arduino core). Currently 162 tests. `python3 tools/checklayers.py` must end without KO (it also checks the Arduino dependency: `String`, `Serial`, `millis/micros/delay` and `#include <Arduino.h>` outside `vos_drv_*`; today's debt is in `tools/layers_baseline.json` and can only go down).
 4. Page: `tools/webtest/server.js` + `smoke172.js` -> "TUTTO OK".
 5. Real build and test on the board: done by the owner.
 

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
-// VesevOS 1.7.45 - ESP32-S3 SuperMini
+// VesevOS 1.7.65a - ESP32-S3 SuperMini
 // Piccolo sistema operativo: pagina web (HTTPS), shell, utenti, rete tra schede, automazioni. Progetto in piu file.
 //
 // Impostazioni Arduino IDE consigliate:
@@ -12,13 +12,16 @@
 // ESPAsyncWebServer e AsyncTCP non servono piu dalla 1.7.1.
 #include <Arduino.h>
 #include "src/drivers/vos_drv_fs.h"
+#include "src/vos_wire.h"
 #include <esp_log.h>
 #include "src/core/vos_ram.h"
 #include "src/core/vos_common.h"
 #include "src/core/vos_log.h"
 #include "src/core/vos_diario.h"
+#include "src/core/vos_crash.h"
 #include "src/core/vos_serial.h"
 #include "src/devices/vos_pins.h"
+#include "src/devices/vos_io.h"
 #include "src/core/vos_config.h"
 #include "src/security/vos_auth.h"
 #include "src/packages/vos_mfa.h"
@@ -27,6 +30,7 @@
 #include "src/core/vos_sys.h"
 #include "src/devices/vos_led.h"
 #include "src/net/vos_net.h"
+#include "src/packages/vos_btn.h"
 #include "src/core/vos_time.h"
 #include "src/interfaces/vos_web.h"
 #include "src/interfaces/vos_shell.h"
@@ -34,11 +38,12 @@
 #include "src/core/vos_boot.h"
 #include "src/core/vos_audit.h"
 #include "src/core/vos_fw.h"
+#include "src/core/vos_wd.h"
 #include "src/packages/vos_ble.h"
 #include "src/drivers/vos_drv_gpio.h"
 
 // Tasto BOOT (GPIO0). L'azione si decide quando lo LASCI; intanto il LED dice cosa succedera:
-//   meno di 2 s           : esce dal modo aereo
+//   meno di 2 s (click)    : 1, 2 o 3 click veloci fanno l'azione scelta nella pagina (di fabbrica: 1 = esce dal modo aereo, 2 = WPS)
 //   2-7 s   (LED azzurro)  : spegne il filtro IP (uscita di emergenza)
 //   8-19 s  (LED giallo)   : azzera le password degli amministratori + mostra sulla seriale la password dell'hotspot
 //   20 s o piu (LED rosso) : ripristino di fabbrica (cancella tutto) e riavvio
@@ -54,11 +59,13 @@ static void bootButton() {
   uint32_t held = millis() - since;
   since = 0;
   ledSetHold(0);
+  if (held >= 2000) btnLongRelease();
+  if (btnTestActive()) { if (held >= 2000) btnTestLong(held); else if (held >= 50) btnClick(); return; }   // modo prova: niente azioni
   cfgSetOrigin("tasto BOOT");
   statNote(held >= 20000 ? ST_BOOT_20S : held >= 8000 ? ST_BOOT_8S : held >= 2000 ? ST_BOOT_2S : ST_BOOT_SHORT);
   if (held >= 20000) {
     vlog("SISTEMA: ripristino di fabbrica con il tasto BOOT");
-    cfgFactoryReset(); delay(300); ESP.restart();
+    cfgFactoryReset(); sysReboot("ripristino di fabbrica con il tasto BOOT", 300);
   } else if (held >= 8000) {
     authResetAdmin();
     int mf = mfaOffAdmins();
@@ -69,11 +76,11 @@ static void bootButton() {
     webAllowFirstPass();
     shellSerialShowPass();
     ledSetFault(true); delay(1500); ledSetFault(false);
-    if (svc) { delay(300); ESP.restart(); }   // porte e server si applicano al riavvio
+    if (svc) sysReboot("tasto BOOT 8 s", 300);   // porte e server si applicano al riavvio
   } else if (held >= 2000) {
     fwOff("tasto BOOT");
-  } else if (held >= 50 && netAirplane()) {
-    netAirplaneOff("tasto BOOT");
+  } else if (held >= 50) {
+    btnClick();
   }
 }
 
@@ -86,7 +93,10 @@ bool g_extmem = false;                                // letto da shell (comando
 
 void setup() {
   (void)*(volatile const char*)VOS_FW_MARK;          // tiene il marchio nel file anche dopo l'ottimizzazione
+  vosWire();                                        // collega pagina e package ai ganci del nucleo (prima di ogni avvio)
   diaryEarly();                                     // prima di tutto: salva l'istantanea lasciata dall'avvio precedente
+  crashEarly();                                     // rapporto dell'eventuale crash precedente (memoria RTC)
+  crashInstall();                                   // da qui un crash lascia motivo e backtrace
   Serial.begin(115200);
 #if ARDUINO_USB_CDC_ON_BOOT
   Serial.setTxTimeoutMs(10);                       // attesa massima 10 ms a scrittura (era 100): se il PC non legge, loop non si ferma per secondi; con 0 si perdevano pezzi di testo
@@ -100,7 +110,7 @@ void setup() {
   diaryStage("pins");
   pinsInit();
   drvGpioMode(VOS_PIN_BOOT, DG_INPUT_PULLUP);
-  pinClaim(VOS_PIN_BOOT, "Sistema", "Pulsante BOOT (breve = modo aereo, 2 s = filtro IP, 8 s = password, 20 s = fabbrica)", true);
+  pinClaim(VOS_PIN_BOOT, "Sistema", "Pulsante BOOT (click = azioni scelte, 2 s = filtro IP, 8 s = password, 20 s = fabbrica)", true);
 
   diaryStage("fs");
   if (!drvFsBegin(true)) { vlog("FS: LittleFS non parte"); }
@@ -111,7 +121,10 @@ void setup() {
   serialApply();                                   // velocita, attesa di scrittura
   setenv("TZ", cfg.tz.c_str(), 1); tzset();         // il fuso subito: cosi le righe del registro hanno l'ora locale fin dall'inizio
   vlog("%s %s in avvio", VOS_NAME, VOS_VERSION);
+  crashBoot();                                      // se il riavvio viene da un crash: log e /crash.txt
 
+  diaryStage("io");
+  ioInit();                                        // periferiche a classi (rele, led, pin...): uscite spente
   diaryStage("lang");
   langInit();
   auditInit();                                     // controllo della configurazione (allarmi)
@@ -127,11 +140,12 @@ void setup() {
 void loop() {
   static bool first = true; if (first) { first = false; diaryStage("L:start"); }
   diaryStage("L:shell");  shellSerialPoll();
-  diaryStage("L:button"); bootButton();
+  diaryStage("L:button"); bootButton(); btnTick(!drvGpioRead(VOS_PIN_BOOT));
   diaryStage("L:ble");    bleTick();
   diaryStage("L:power");  powerTick();
   diaryStage("L:stats");  statsTick();
   diaryStage("L:pin");    pinTestTick();
+  diaryStage("L:io");     ioTick();
   diaryStage("L:stable"); bootStable();
   diaryStage("L:serial"); serialTick();
   diaryStage("L:wdt");    feedLoopWDT();

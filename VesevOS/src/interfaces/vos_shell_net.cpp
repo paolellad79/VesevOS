@@ -2,6 +2,10 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_shell_net.cpp
 // Comandi della shell: Wi-Fi, rete, LED, pin, periferiche, lingua, licenze. Aiuti e include: vos_shell_int.h.
+#include "../devices/vos_io.h"
+#include "../devices/vos_mod.h"
+#include "../net/vos_wps.h"
+#include "../packages/vos_btn.h"
 #include "vos_shell_int.h"
 
 bool shCmdNet(String c, String a1, const String& line, Print& o, int role) {
@@ -34,7 +38,7 @@ bool shCmdNet(String c, String a1, const String& line, Print& o, int role) {
     o.println(trf("RAM libera %u KB, minima %u KB, blocco piu grande %u KB, PSRAM libera %u KB", (unsigned)(ESP.getFreeHeap() / 1024), (unsigned)(ESP.getMinFreeHeap() / 1024), (unsigned)(ESP.getMaxAllocHeap() / 1024), (unsigned)(ESP.getFreePsram() / 1024)));
     o.println(trf("/flash usati %u KB su %u KB", (unsigned)(drvFsUsed() / 1024), (unsigned)(drvFsTotal() / 1024)));
     o.println(trf("Blocchi grandi (TLS) in PSRAM: %s", g_extmem ? tr("attivo") : tr("non attivo")));
-    { String pk; if (VOS_WITH_BLE) pk += "BLE "; if (VOS_WITH_MQTT) pk += "MQTT "; if (VOS_WITH_MESH) pk += "ESP-NOW "; if (VOS_WITH_MFA) pk += "MFA "; if (VOS_WITH_STATS) pk += "Statistiche"; pk.trim(); o.println(trf("Package nel firmware: %s", pk.length() ? pk.c_str() : "-")); }
+    { String pk; if (VOS_WITH_BLE) pk += "BLE "; if (VOS_WITH_MQTT) pk += "MQTT "; if (VOS_WITH_MESH) pk += "ESP-NOW "; if (VOS_WITH_MFA) pk += "MFA "; if (VOS_WITH_STATS) pk += "Statistiche "; if (VOS_WITH_WPS) pk += "WPS"; pk.trim(); o.println(trf("Package nel firmware: %s", pk.length() ? pk.c_str() : "-")); }
     o.println(trf("Buffer HTTPS (TLS) in PSRAM: %s", ramTlsState() > 0 ? tr("attivo") : ramTlsState() < 0 ? tr("non disponibile in questo core") : tr("non attivo")));
     o.println(trf("Utente password impostata: %s   Ora valida: %s", authIsSet() ? tr("si") : tr("no"), timeValid() ? tr("si") : tr("no")));
   }
@@ -133,7 +137,7 @@ bool shCmdNet(String c, String a1, const String& line, Print& o, int role) {
     String id = a1.length() ? a1 : String("notice");
     int li = licFind(id);
     if (li < 0) { o.println(trf("Licenza sconosciuta. Disponibili: %s", licIds().c_str())); return true; }
-    if (licZ(li)) { o.println(tr("Il testo completo delle licenze si legge dalla pagina (Sistema > Note legali) e nel file LICENSE del progetto.")); return true; }
+    if (licZ(li)) { o.println(tr("Il testo completo delle licenze si legge dalla pagina (Informazioni > Note legali) e nel file LICENSE del progetto.")); return true; }
     const char* tx = licText(li); size_t n = licSize(li);
     for (size_t off = 0; off < n; off += 256) {            // a blocchi, senza copiare tutto in RAM
       size_t k = (n - off < 256) ? (n - off) : 256;
@@ -172,6 +176,66 @@ bool shCmdNet(String c, String a1, const String& line, Print& o, int role) {
       o.println(out.length() ? out : String("ok")); return true;
     }
     o.println(tr("Uso: dev [status <nome>|on <nome>|off <nome>|act <nome> <azione> [arg]]"));
+  }
+  else if (c == "io") {
+    if (role < ROLE_ADMIN) { o.println(tr("Il tuo ruolo non permette questo comando")); return true; }
+    String a2 = argAt(line, 2), a3 = argAt(line, 3), err;
+    if (a1 == "" || a1 == "list") { o.print(ioText()); return true; }
+    if (a1 == "add") {
+      String nm, opt, outN;
+      for (int k = 4; k <= 8; k++) {
+        String t = argAt(line, k); t.toLowerCase();
+        if (t == "inv" || t == "up" || t == "down" || t == "fast" || t.startsWith("scl=") || t.startsWith("addr=") || t.startsWith("drv=")) opt += t + ","; else if (t.length() && !nm.length()) nm = t;
+      }
+      if (!ioAdd(a2, a3.toInt(), nm, opt, outN, err)) { o.println(err); return true; }
+      o.println(trf("Creata: %s", outN.c_str())); return true;
+    }
+    if (a1 == "del") {
+      if (!ioRemove(a2, err)) { o.println(err); return true; }
+      auditEvent(AUD_INFO, "", trf("periferica %s tolta (%s)", a2.c_str(), "terminale")); o.println("ok"); return true;
+    }
+    if (a1 == "rename") { if (!ioRename(a2, a3, err)) { o.println(err); return true; } o.println("ok"); return true; }
+    if (a1 == "set") { if (!ioSet(a2, a3.toInt() || a3 == "on", role, err)) { o.println(err); return true; } o.println("ok"); return true; }
+    if (a1 == "get") { int v = 0; if (!ioGet(a2, v, err)) { o.println(err); return true; } o.println(String(v)); return true; }
+    o.println(tr("Uso: io [list|add <classe> <pin> [nome] [inv|up|down|scl=N addr=0x76]|del <nome>|rename <nome> <nuovo>|set <nome> <0|1>|get <nome>]"));
+  }
+  else if (c == "btn") {
+    if (a1 == "" || a1 == "status") { o.print(btnText()); return true; }
+    if (role < ROLE_ADMIN) { o.println(tr("Il tuo ruolo non permette questo comando")); return true; }
+    String a2 = argAt(line, 2), err;
+    int act = a2 == "niente" ? BA_NONE : a2 == "aereo" ? BA_AIR_OFF : a2 == "wps" ? BA_WPS : a2 == "trova" ? BA_FIND : -1;
+    if ((a1 == "1" || a1 == "2" || a1 == "3") && act >= 0) {
+      if (!btnSetAction(a1.toInt(), act, err)) { o.println(err); return true; }
+      cfgSetOrigin("shell"); cfgSave(); o.print(btnText()); return true;
+    }
+    o.println(tr("Uso: btn [1|2|3 niente|aereo|wps|trova]"));
+  }
+  else if (c == "wps") {
+    if (role < ROLE_ADMIN) { o.println(tr("Il tuo ruolo non permette questo comando")); return true; }
+    String a2 = argAt(line, 2), err;
+    bool on2 = (a2 == "on"), off2 = (a2 == "off");
+    if (a1 == "" || a1 == "status") { o.print(wpsText()); return true; }
+    if (a1 == "on" || a1 == "off") { if (!wpsSetOn(a1 == "on", err)) { o.println(err); return true; } o.print(wpsText()); return true; }
+    if (a1 == "pin" && (on2 || off2)) {
+      cfg.wpsPin = on2;
+      cfgSetOrigin("shell"); cfgSave(); o.print(wpsText()); return true;
+    }
+    if (a1 == "start") {
+      if (!wpsStart(a2 == "pin", "shell", err)) { o.println(err); return true; }
+      o.println(a2 == "pin" ? tr("WPS con PIN avviato: guarda il PIN con 'wps' e scrivilo nel router entro 2 minuti.") : tr("WPS avviato: premi il tasto WPS del router entro 2 minuti."));
+      return true;
+    }
+    if (a1 == "stop") { wpsStop(); o.println(tr("WPS annullato")); return true; }
+    o.println(tr("Uso: wps [status|on|off|pin on|off|start [pin]|stop]"));
+  }
+  else if (c == "mod") {
+    if (role < ROLE_ADMIN) { o.println(tr("Il tuo ruolo non permette questo comando")); return true; }
+    String a2 = argAt(line, 2), a3 = argAt(line, 3), err, out;
+    if (a1 == "" || a1 == "list") { o.print(modListText()); return true; }
+    if (a1 == "info") { o.print(modInfoText(a2)); return true; }
+    if (a1 == "install") { if (!modInstall(a2, a3, out, err)) { o.println(err); return true; } o.println(out); return true; }
+    if (a1 == "del") { if (!modDelete(a2, err)) { o.println(err); return true; } o.println("ok"); return true; }
+    o.println(tr("Uso: mod [list|info <nome>|install <nome> [prefisso]|del <nome>]"));
   }
   else if (c == "pins") {
     for (int i = 0; i < pinCount(); i++) {

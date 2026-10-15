@@ -1,4 +1,4 @@
-// VesevOS Recovery 0.3.0 - passo 3 della strada B2 (recupero con Wi-Fi + controlli di sicurezza sul file).
+// VesevOS Recovery 0.4.4 - strada B2: recupero con Wi-Fi + controlli di sicurezza sul file + LED di stato + file trascinabile sulla pagina + diagnostica dell'avvio.
 // Licenza: GPL-3.0 (come VesevOS).
 // Cosa fa:
 //  - Se VesevOS e valido e nessuno ha chiesto il recovery: dopo 3 s passa a VesevOS (come la 0.1.x).
@@ -8,7 +8,15 @@
 //  - Se non esiste nessun amministratore (flash vuota): serve il codice a 8 cifre mostrato sulla seriale.
 // Controlli prima di attivare un firmware (passo 3): intestazione ESP32-S3, marchio VesevOS, dimensione, SHA-256 (facoltativo,
 // se lo scrivi nella pagina), immagine completa (esp_ota_end). Se l'intestazione e sbagliata il vecchio firmware NON viene toccato.
-// Comandi sulla seriale (115200): i = info, b = avvia VesevOS, r = riavvia.
+// LED di stato (stesso LED RGB di VesevOS, pin e luminosita letti da /vesevos.conf): arancione lento = in attesa; azzurro veloce = scrittura
+// in corso; verde fisso = finito; rosso fisso = errore (dopo 10 s torna in attesa). Con VesevOS valido e in avvio il LED resta spento.
+// Diagnostica (0.4.1): all'avvio e con "i" scrive il motivo dell'ultimo riavvio, quale partizione ha scelto il bootloader, lo stato di app0 e il segno
+// "passaggio a VesevOS". Se l'ultima volta il passaggio a VesevOS e finito con un ritorno al recovery, il recovery RESTA fermo (niente giri a vuoto).
+// Protezione (0.4.3): prima di passare ad app0 il recovery cerca nel suo contenuto il marchio VesevOS (lo stesso controllo del file caricato).
+// Se manca (per esempio nello slot c'e un altro recovery o un file sbagliato) NON passa e resta fermo. Il comando seriale b forza il passaggio.
+// Marchio del recovery (0.4.4): VesevOS 1.7.58+ lo cerca quando aggiorni il recovery dalla pagina (Aggiorna recovery) e ne legge la versione.
+// Senza marchio VesevOS rifiuta il file: cosi il firmware non puo finire al posto del recovery.
+// Comandi sulla seriale (115200): i = info, b = avvia VesevOS (anche senza marchio), r = riavvia.
 // Arduino IDE: stessa scheda del firmware; "USB CDC On Boot" = Enabled. Tabella partizioni: partitions.csv accanto allo sketch.
 // Limite di spazio del recovery: 1 MB (vedi partitions.csv): lo script di installazione controlla la dimensione.
 #include <Arduino.h>
@@ -27,8 +35,10 @@
 #include "recovery_page.h"
 #include "recovery_check.h"
 
-#define REC_VERSION "0.3.0"
+#define REC_VERSION "0.4.4"
 #define BOOT_PIN 0
+// non cambiare il formato "{REC:VesevOS:" + versione + "}": vedi VesevOS/src/core/vos_imgcheck.h
+static const char REC_MARK[] __attribute__((used)) = "{REC:VesevOS:" REC_VERSION "}";
 #define HANDOVER_MS 3000
 #define STA_WAIT_MS 30000UL
 #define IDLE_MS 900000UL        // 15 minuti senza accessi: se VesevOS e valido, ci torna da solo
@@ -75,6 +85,7 @@ static bool sameStr(const String& a, const String& b) {   // confronto a tempo c
 // ---------- configurazione di VesevOS (file /vesevos.conf in LittleFS) ----------
 struct RecUser { String name, salt, hash; int role = 0; bool on = false; };
 struct RecCfg {
+  int ledPin = 48, ledBr = 80;      // LED RGB integrato (WS2812), come in VesevOS
   String host = "vesevos", ssid, pass, ip, mask, gw, dns1, dns2, country;
   bool staOn = false, dhcp = true;
   RecUser users[8];
@@ -121,6 +132,10 @@ static void loadConfig() {
     String v = parseQuoted(l, sp);
     if (type == "system") { if (k == "hostname" && v.length()) rc.host = v; }
     else if (type == "region") { if (k == "country") rc.country = v; }
+    else if (type == "led") {
+      if (k == "pin") { int n = v.toInt(); if (n >= 0 && n <= 48) rc.ledPin = n; }
+      else if (k == "brightness") { int n = v.toInt(); if (n >= 0 && n <= 255) rc.ledBr = n < 40 ? 40 : n; }
+    }
     else if (type == "client") {
       if (k == "enabled") rc.staOn = (v == "1");
       else if (k == "ssid") rc.ssid = v;
@@ -148,6 +163,28 @@ static int userFind(const String& n) {
   return -1;
 }
 
+// ---------- LED di stato ----------
+enum { LS_WAIT, LS_WRITE, LS_DONE, LS_ERR };
+static uint8_t g_ledSt = LS_WAIT;
+static bool g_ledOn = false;
+static uint32_t g_ledErrT = 0, g_ledKey = 0xFFFFFFFFUL;
+static void ledTick() {
+  if (!g_ledOn) return;
+  uint32_t n = millis();
+  if (g_ledSt == LS_ERR && n - g_ledErrT > 10000UL) g_ledSt = LS_WAIT;
+  uint8_t r = 0, g = 0, b = 0;
+  switch (g_ledSt) {
+    case LS_WAIT:  if ((n % 1600UL) < 800UL) { r = 255; g = 120; } break;          // arancione lento
+    case LS_WRITE: if ((n / 150UL) & 1) { g = 160; b = 255; } break;                // azzurro veloce
+    case LS_DONE:  g = 255; break;                                                  // verde fisso
+    default:       r = 255; break;                                                  // rosso fisso
+  }
+  r = (uint8_t)((uint16_t)r * rc.ledBr / 255); g = (uint8_t)((uint16_t)g * rc.ledBr / 255); b = (uint8_t)((uint16_t)b * rc.ledBr / 255);
+  uint32_t key = ((uint32_t)r << 16) | ((uint32_t)g << 8) | b;
+  if (key != g_ledKey) { g_ledKey = key; rgbLedWrite(rc.ledPin, r, g, b); }
+}
+static void ledSet(uint8_t st) { g_ledSt = st; if (st == LS_ERR) g_ledErrT = millis(); ledTick(); }
+
 // ---------- partizioni / avvio ----------
 static const esp_partition_t* app0() {
   return esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_OTA_0, NULL);
@@ -163,6 +200,16 @@ static bool app0Valid(char* name, size_t nl, char* ver, size_t vl) {
   snprintf(ver, vl, "%s", d.version);
   return true;
 }
+// Il firmware dentro app0 e VesevOS? Si cerca il marchio (mascherato, come per il file caricato). Risultato ricordato: -1 = da controllare.
+static int8_t g_fwMark = -1;
+static bool partRead(void* ctx, uint32_t off, uint8_t* buf, size_t n) { return esp_partition_read((const esp_partition_t*)ctx, off, buf, n) == ESP_OK; }
+static bool app0Fw() {
+  if (g_fwMark >= 0) return g_fwMark == 1;
+  const esp_partition_t* p = app0();
+  static uint8_t buf[2048];
+  g_fwMark = (p && rcScanMark(partRead, (void*)p, p->size, buf, sizeof buf)) ? 1 : 0;
+  return g_fwMark == 1;
+}
 static bool stayFlag(bool set, bool val) {      // segno lasciato da VesevOS ("recovery now")
   Preferences p;
   if (!p.begin("vosrec", set ? false : true)) return false;
@@ -171,8 +218,17 @@ static bool stayFlag(bool set, bool val) {      // segno lasciato da VesevOS ("r
   p.end();
   return r;
 }
+static bool handFlag(bool set, bool val) {      // segno "sto passando a VesevOS": se al riavvio e ancora acceso, VesevOS non e partito
+  Preferences p;
+  if (!p.begin("vosrec", set ? false : true)) return false;
+  bool r;
+  if (set) { p.putBool("hand", val); r = val; } else r = p.getBool("hand", false);
+  p.end();
+  return r;
+}
 static void startApp() {
   stayFlag(true, false);
+  handFlag(true, true);
   const esp_partition_t* p = app0();
   if (!p) { Serial.println("[recovery] app0 non trovata"); return; }
   esp_err_t e = esp_ota_set_boot_partition(p);
@@ -268,7 +324,7 @@ static void hInfo() {
   if (!authed()) { jsonOut(401, jerr("Non autorizzato")); return; }
   g_lastAct = millis();
   char n[40], v[40];
-  String a = app0Valid(n, sizeof n, v, sizeof v) ? String(n) + " " + String(v) : String("");
+  String a = app0Valid(n, sizeof n, v, sizeof v) ? (app0Fw() ? String(n) + " " + String(v) : String("NON e VesevOS (manca il marchio)")) : String("");
   const esp_partition_t* p = app0();
   jsonOut(200, "{\"ok\":true,\"app\":\"" + a + "\",\"max\":" + String(p ? (unsigned long)p->size : 0UL) + "}");
 }
@@ -276,6 +332,7 @@ static void hBoot() {
   if (!authed()) { jsonOut(401, jerr("Non autorizzato")); return; }
   char n[40], v[40];
   if (!app0Valid(n, sizeof n, v, sizeof v)) { jsonOut(409, jerr("Non c'e un firmware valido da avviare")); return; }
+  if (!app0Fw()) { jsonOut(409, jerr("Nello slot non c'e VesevOS (manca il marchio): carica il firmware")); return; }
   jsonOut(200, "{\"ok\":true}");
   delay(300);
   startApp();
@@ -292,6 +349,7 @@ static void shaStop() { if (g_shaOn) { mbedtls_sha256_free(&g_sha); g_shaOn = fa
 // (primo settore cancellato) cosi il recovery non prova ad avviare un'immagine a meta.
 static void upFail(const String& why) {
   g_upOk = false; g_upErr = why;
+  ledSet(LS_ERR);
   if (g_oBegun) {
     esp_ota_abort(g_oh);
     const esp_partition_t* p = app0();
@@ -303,6 +361,7 @@ static void upFail(const String& why) {
 static void hUploadDone() {
   if (g_upOk) {
     stayFlag(true, false);
+    ledSet(LS_DONE);
     jsonOut(200, "{\"ok\":true,\"sha\":\"" + g_upSha + "\"}");
     Serial.println("[recovery] firmware installato: riavvio");
     delay(600);
@@ -314,15 +373,17 @@ static void hUpload() {
   if (u.status == UPLOAD_FILE_START) {
     g_lastAct = millis();
     shaStop();
-    g_oBegun = false; g_upSha = "";
+    g_oBegun = false; g_upSha = ""; g_fwMark = -1;
     g_upOk = authed(); g_upErr = g_upOk ? "" : "Non autorizzato";
     if (g_upOk) {
       Serial.printf("[recovery] ricevo %s\n", u.filename.c_str());
+      ledSet(LS_WRITE);
       rcInit(g_chk);
       mbedtls_sha256_init(&g_sha); mbedtls_sha256_starts(&g_sha, 0); g_shaOn = true;
     }
   } else if (u.status == UPLOAD_FILE_WRITE) {
     if (!g_upOk) return;
+    ledTick();
     rcFeed(g_chk, u.buf, u.currentSize);
     mbedtls_sha256_update(&g_sha, u.buf, u.currentSize);
     if (!g_oBegun) {                                  // primo pezzo: controllo l'intestazione PRIMA di cancellare qualcosa
@@ -348,6 +409,7 @@ static void hUpload() {
     g_oBegun = false;
     if (esp_ota_set_boot_partition(p) != ESP_OK) { upFail("Non riesco a impostare l'avvio"); return; }
     shaStop();
+    g_fwMark = 1;                                       // il marchio c'era (rcFinalErr)
     Serial.printf("[recovery] controlli superati, SHA-256 %s\n", g_upSha.c_str());
   } else if (u.status == UPLOAD_FILE_ABORTED) {
     upFail("Caricamento interrotto");
@@ -373,7 +435,7 @@ static void startNet() {
     Serial.printf("[recovery] mi collego alla rete di casa (fino a %d s)...\n", (int)(STA_WAIT_MS / 1000));
     WiFi.begin(rc.ssid.c_str(), rc.pass.c_str());
     uint32_t t0 = millis();
-    while (WiFi.status() != WL_CONNECTED && millis() - t0 < STA_WAIT_MS) delay(200);
+    while (WiFi.status() != WL_CONNECTED && millis() - t0 < STA_WAIT_MS) { ledTick(); delay(50); }
   }
   if (WiFi.status() != WL_CONNECTED) {
     WiFi.disconnect(true);
@@ -400,41 +462,89 @@ static void startNet() {
   netInfo();
 }
 
+static const char* rstName(esp_reset_reason_t r) {
+  switch (r) {
+    case ESP_RST_POWERON: return "accensione";
+    case ESP_RST_EXT: return "tasto RESET";
+    case ESP_RST_SW: return "riavvio da programma";
+    case ESP_RST_PANIC: return "ERRORE GRAVE (panic)";
+    case ESP_RST_INT_WDT: return "watchdog (interrupt)";
+    case ESP_RST_TASK_WDT: return "watchdog (task)";
+    case ESP_RST_WDT: return "watchdog";
+    case ESP_RST_DEEPSLEEP: return "uscita dal sonno";
+    case ESP_RST_BROWNOUT: return "CALO DI TENSIONE";
+    case ESP_RST_USB: return "USB";
+    default: return "altro";
+  }
+}
+static const char* imgState(const esp_partition_t* p, int* err) {
+  esp_ota_img_states_t st;
+  *err = 0;
+  if (!p) return "n/d";
+  esp_err_t e = esp_ota_get_state_partition(p, &st);
+  if (e != ESP_OK) { *err = (int)e; return "senza stato"; }
+  switch (st) {
+    case ESP_OTA_IMG_NEW: return "nuova";
+    case ESP_OTA_IMG_PENDING_VERIFY: return "in prova (non confermata)";
+    case ESP_OTA_IMG_VALID: return "valida";
+    case ESP_OTA_IMG_INVALID: return "SCARTATA (invalida)";
+    case ESP_OTA_IMG_ABORTED: return "ABBANDONATA (rollback)";
+    default: return "indefinita";
+  }
+}
+// Perche siamo qui? Scrive: motivo dell'ultimo riavvio, partizione in esecuzione, partizione scelta dal bootloader (otadata), ultima scartata, stato di app0.
+static void diag() {
+  const esp_partition_t *run = esp_ota_get_running_partition(), *bt = esp_ota_get_boot_partition(), *inv = esp_ota_get_last_invalid_partition();
+  int er;
+  const char* st = imgState(app0(), &er);
+  Serial.printf("[recovery] diagnostica: riavvio per %s; in esecuzione 0x%X; scelta del bootloader 0x%X; ultima scartata %s; app0 %s (err %d); segno passaggio %s\n",
+                rstName(esp_reset_reason()), run ? (unsigned)run->address : 0u, bt ? (unsigned)bt->address : 0u,
+                inv ? "SI" : "nessuna", st, er, handFlag(false, false) ? "ACCESO" : "spento");
+}
+
 static void info() {
   char n[40] = "", v[40] = "";
   const esp_partition_t* p = app0();
   Serial.printf("\n[recovery %s] app0: ", REC_VERSION);
   if (p) Serial.printf("indirizzo 0x%X, dimensione %u KB, ", (unsigned)p->address, (unsigned)(p->size / 1024));
   else Serial.print("partizione NON trovata, ");
-  if (app0Valid(n, sizeof n, v, sizeof v)) Serial.printf("firmware \"%s\" versione %s\n", n, v);
+  if (app0Valid(n, sizeof n, v, sizeof v)) Serial.printf("firmware \"%s\" versione %s%s\n", n, v, app0Fw() ? "" : " - ATTENZIONE: NON e VesevOS (manca il marchio)");
   else Serial.println("nessun firmware valido");
+  diag();
   netInfo();
 }
 
 void setup() {
+  (void)*(volatile const char*)REC_MARK;             // tiene il marchio nel file anche dopo l'ottimizzazione
   Serial.begin(115200);
   pinMode(BOOT_PIN, INPUT_PULLUP);
   delay(1500);  // tempo per aprire il monitor seriale
   Serial.printf("\n\n=== VesevOS Recovery %s ===\n", REC_VERSION);
   char n[40], v[40];
   bool ok = app0Valid(n, sizeof n, v, sizeof v);
+  bool notFw = ok && !app0Fw();                   // c'e un programma in app0 ma non e VesevOS (es. un altro recovery)
+  if (notFw) ok = false;
   bool stay = stayFlag(false, false);
   bool boot = (digitalRead(BOOT_PIN) == LOW);
+  bool back = handFlag(false, false);             // l'ultima volta siamo passati a VesevOS ma siamo tornati qui: non riprovare all'infinito
   info();
-  if (ok && !stay && !boot) {
+  if (back) handFlag(true, false);                // riprova al prossimo accensione/RESET
+  if (ok && !stay && !boot && !back) {
     Serial.printf("[recovery] avvio %s tra %d s (tieni premuto BOOT all'accensione per restare qui)\n", n, HANDOVER_MS / 1000);
     delay(HANDOVER_MS);
     startApp();
     return;
   }
-  Serial.println(stay ? "[recovery] richiesto da VesevOS: resto qui" : boot ? "[recovery] tasto BOOT premuto: resto qui" : "[recovery] niente da avviare: resto qui");
+  Serial.println(notFw ? "[recovery] in app0 non c'e VesevOS (manca il marchio): resto qui, carica il firmware dalla pagina o con carica-firmware.sh" : back ? "[recovery] il passaggio a VesevOS non ha funzionato (siamo tornati qui): resto qui per non girare a vuoto. Premi RESET per riprovare, oppure carica un firmware dalla pagina" : stay ? "[recovery] richiesto da VesevOS: resto qui" : boot ? "[recovery] tasto BOOT premuto: resto qui" : "[recovery] niente da avviare: resto qui");
   loadConfig();
+  g_ledOn = true; ledSet(LS_WAIT);
   startNet();
 }
 
 void loop() {
   static uint32_t last = 0;
   if (g_net) server.handleClient();
+  ledTick();
   while (Serial.available()) {
     int c = Serial.read();
     if (c == 'i') info();
@@ -444,7 +554,7 @@ void loop() {
   if (g_tok.length() && millis() - g_tokT > TOKEN_MS) g_tok = "";
   if (g_net && millis() - g_lastAct > IDLE_MS) {
     char n[40], v[40];
-    if (app0Valid(n, sizeof n, v, sizeof v)) { Serial.println("[recovery] nessun accesso da 15 minuti: torno a VesevOS"); startApp(); }
+    if (app0Valid(n, sizeof n, v, sizeof v) && app0Fw()) { Serial.println("[recovery] nessun accesso da 15 minuti: torno a VesevOS"); startApp(); }
     g_lastAct = millis();
   }
   if (millis() - last > 15000) { last = millis(); Serial.println("[recovery] in attesa (i = info, b = avvia VesevOS, r = riavvia)"); }

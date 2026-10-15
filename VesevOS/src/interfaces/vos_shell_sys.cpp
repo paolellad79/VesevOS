@@ -36,7 +36,7 @@ bool shCmdSys(String c, String a1, const String& line, Print& o, int role) {
     o.println(trf("Acceso da: %s", uptimeStr(sysUptimeSec()).c_str()));
     o.println(trf("Ultimo reset: %s", sysResetReason().c_str()));
     o.println(trf("Avvii totali: %lu", (unsigned long)sysBootCount()));
-    o.println(trf("Ore di vita: %lu h %lu min", (unsigned long)(sysLifeSec() / 3600UL), (unsigned long)((sysLifeSec() / 60UL) % 60UL)));
+    { char dur[48]; durStr(sysLifeSec(), dur, sizeof dur); o.println(trf("Ore di vita: %s", dur)); }
   }
   else if (c == "ram") {
     if (a1 == "mark") { ramMark(); o.println(tr("Memoria segnata: accendi o spegni un servizio e scrivi: ram diff")); }

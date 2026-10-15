@@ -16,12 +16,12 @@ static int g_n = 0;
 
 void pinsInit() {
   g_n = 0;
-  pinClaim(19, "USB", "USB D-  (nativo)", true);
-  pinClaim(20, "USB", "USB D+  (nativo)", true);
+  pinClaim(VOS_PIN_USB_DM, "USB", "USB D-  (nativo)", true);
+  pinClaim(VOS_PIN_USB_DP, "USB", "USB D+  (nativo)", true);
 }
 
 bool pinClaim(uint8_t gpio, const char* owner, const char* note, bool fixed) {
-  if (gpio < 49 && cfg.pinNote[gpio].length()) vlog("PIN: GPIO%u e segnato come collegato a '%s' ma %s lo vuole usare", (unsigned)gpio, cfg.pinNote[gpio].c_str(), owner);
+  if (gpio < VOS_GPIO_COUNT && cfg.pinNote[gpio].length()) vlog("PIN: GPIO%u e segnato come collegato a '%s' ma %s lo vuole usare", (unsigned)gpio, cfg.pinNote[gpio].c_str(), owner);
   for (int i = 0; i < g_n; i++) {
     if (g_pins[i].gpio == gpio) {
       if (strcmp(g_pins[i].owner, owner) == 0) { g_pins[i].note = note; return true; }
@@ -76,15 +76,15 @@ static bool g_tBlinkOn = false;
 static volatile bool g_rqHas = false;
 static volatile int g_rqPin = -1, g_rqAct = TA_NONE, g_rqPull = 0;
 
-// ESP32-S3: i GPIO 22-25 non esistono, 26-32 sono flash/PSRAM; 33-37 sono liberi con PSRAM quad (SuperMini 2 MB)
-static bool pinExists(int g) { return (g >= 0 && g <= 21) || (g >= 33 && g <= 48); }
+// quali GPIO esistono lo dice il file di scheda (boards/)
+static bool pinExists(int g) { return VOS_GPIO_EXISTS(g); }
 
 const char* pinTestBlock(int g) {
   if (!pinExists(g)) return tr("Pin inesistente su questa scheda");
-  if (g == 19 || g == 20) return tr("USB: serve al collegamento con il PC");
-  if (g == 48) return tr("LED RGB della scheda");
-  if (g == 0) return tr("Tasto BOOT");
-  if (g == 3 || g == 45 || g == 46) return tr("Pin di avvio: meglio non toccarlo");
+  if (g == VOS_PIN_USB_DM || g == VOS_PIN_USB_DP) return tr("USB: serve al collegamento con il PC");
+  if (g == VOS_PIN_LED_RGB) return tr("LED RGB della scheda");
+  if (g == VOS_PIN_BOOT) return tr("Tasto BOOT");
+  if (VOS_GPIO_STRAP(g)) return tr("Pin di avvio: meglio non toccarlo");
   if (pinIsUsed(g) && g != g_tPin) return tr("Gia usato dal sistema");
   // (se l'utente lo ha segnato come collegato a qualcosa, la prova e permessa ma la pagina avvisa)
   return nullptr;
@@ -150,7 +150,7 @@ String pinTestJson() {
 String pinMapJson() {
   String j = "[";
   bool first = true;
-  for (int g = 0; g <= 48; g++) {
+  for (int g = 0; g <= VOS_GPIO_MAX; g++) {
     if (!pinExists(g)) continue;
     if (!first) j += ",";
     first = false;
@@ -166,12 +166,12 @@ String pinMapJson() {
 
 // ---- rilevamento: il chip si interroga, la scheda no (i piedini saldati li conosce solo la tabella) ----
 #ifndef SOC_GPIO_PIN_COUNT
-#define SOC_GPIO_PIN_COUNT 49
+#define SOC_GPIO_PIN_COUNT VOS_GPIO_COUNT
 #endif
 String pinNotesJson() {
   String j = "{";
   bool first = true;
-  for (int g = 0; g < 49; g++) if (cfg.pinNote[g].length()) { if (!first) j += ","; first = false; j += "\"" + String(g) + "\":\"" + jsonEscape(cfg.pinNote[g]) + "\""; }
+  for (int g = 0; g < VOS_GPIO_COUNT; g++) if (cfg.pinNote[g].length()) { if (!first) j += ","; first = false; j += "\"" + String(g) + "\":\"" + jsonEscape(cfg.pinNote[g]) + "\""; }
   return j + "}";
 }
 
@@ -195,6 +195,15 @@ String pinBoardJson() {
              ",\"cores\":" + String((int)ESP.getChipCores()) + ",\"gpioCount\":" + String(SOC_GPIO_PIN_COUNT) +
              ",\"gpioValid\":" + String(valid) + ",\"gpioOut\":" + String(out) +
              ",\"board\":\"" VOS_BOARD "\",\"flash\":" + String((unsigned long)ESP.getFlashChipSize()) +
-             ",\"psram\":" + String((unsigned long)ESP.getPsramSize()) + "}";
-  return j;
+             ",\"psram\":" + String((unsigned long)ESP.getPsramSize());
+  // dal file di scheda: la pagina non scrive piu a mano numeri di pin
+  char b[384]; size_t k = (size_t)snprintf(b, sizeof b,
+    ",\"gmax\":%d,\"led\":%d,\"ledType\":\"" VOS_LED_TYPE "\",\"boot\":%d,\"usb\":[%d,%d],\"adc\":[%d,%d],\"adc2\":[%d,%d],\"jtag\":[%d,%d],\"uart\":[%d,%d],\"psq\":[%d,%d],\"strap\":[",
+    VOS_GPIO_MAX, VOS_PIN_LED_RGB, VOS_PIN_BOOT, VOS_PIN_USB_DM, VOS_PIN_USB_DP, VOS_ADC_FIRST, VOS_ADC_LAST, VOS_ADC2_FIRST, VOS_ADC2_LAST,
+    VOS_JTAG_FIRST, VOS_JTAG_LAST, VOS_PIN_UART_TX, VOS_PIN_UART_RX, VOS_PSRAMQ_FIRST, VOS_PSRAMQ_LAST);
+  bool first = true;
+  for (int g = 0; g <= VOS_GPIO_MAX && k < sizeof b - 8; g++)
+    if (VOS_GPIO_EXISTS(g) && (VOS_GPIO_STRAP(g) || g == VOS_PIN_BOOT)) { k += (size_t)snprintf(b + k, sizeof b - k, first ? "%d" : ",%d", g); first = false; }
+  j += b;
+  return j + "],\"lay\":" VOS_BOARD_LAYOUT "}";
 }

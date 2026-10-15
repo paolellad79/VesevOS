@@ -91,7 +91,7 @@ in radio silence when needed, or communicating in alternative ways.
 - **CPU**: automatic or fixed speed (80/160/240 MHz), internal temperature, alarm when too hot.
 - **LED**: WS2812 RGB LED (system status, heartbeat tied to CPU load, fixed color).
 - **Configuration** in OpenWrt style (`/vesevos.conf`), downloadable and restorable.
-- **Languages**: Italian and English inside the firmware (with flags; keys 1 and 2 switch language on the serial); Spanish and German as separate files (`lang/`).
+- **Languages**: Italian inside the firmware; English, Spanish and German as files (`lang/`) to upload in the first-run wizard ("Add a language") or in System > Localization. Flags, and switching from the serial too (number keys). Since 1.7.59 English is no longer inside the firmware (59 KB less).
 - **Legal notes**, software list (SBOM) and manual in the page and in the shell (`legal`, `license`). Manual: [docs/manual.en.md](docs/manual.en.md).
 
 ## Where we are going
@@ -108,7 +108,7 @@ These are ideas and plans, not promises: the order may change.
 
 **Further ahead**
 - [ ] **Guided first-time setup** (language, password, country, Wi-Fi, time).
-- [ ] **SD card** and **Lua apps** confined to a "cage" on the SD card.
+- [ ] **SD card** and **Berry apps** confined to a "cage" on the SD card.
 - [ ] **Plug-and-play accessory catalog**: pick the sensor from a list and VesevOS shows how to wire it and installs what is needed.
 - [ ] **SD card** (1.8.0) and **OTA update from the page** (1.8.1).
 - [ ] **Radio silence mode** and **power saving** for solar-powered use.
@@ -167,7 +167,7 @@ VesevOS/      Arduino sketch (VesevOS.ino + .h/.cpp files)
 web/          web page in HTML (source of vos_page.h, gzip-compressed)
 docs/         manual, known issues (KNOWN_ISSUES) and release guide (RELEASE_DEVELOPER), in Italian and English
 assets/       README banner and screenshots
-lang/         language files (es, de) - GENERATED from tools/lang_src.json; English is inside the firmware
+lang/         language files (en, es, de) - GENERATED from tools/lang_src.json; only Italian is inside the firmware
 licenses/     license texts (GPL, LGPL, Apache, MIT, BSD) and legal notice template
 tools/        mkpage.py (page), mklang.py (languages), mklicense.py (legal texts), mkcommon.py (country list),
               stub/ (check every file without a board: compila.sh), data/ (country data source)
@@ -211,6 +211,6 @@ Dual license:
 - **Commercial license**: for using VesevOS in closed products. See `COMMERCIAL.md`.
 
 Ownership, third-party library licenses and regulatory references: see `NOTICE.txt` (also on the
-page, System > Legal notes tab, and in the shell with `license`).
+page, Information > Legal notes tab, and in the shell with `license`).
 
 Copyright (C) 2026 Domenico Paolella.

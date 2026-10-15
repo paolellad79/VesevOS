@@ -28,8 +28,11 @@ Progetto: https://github.com/paolellad79/VesevOS
      Testo: "license apache2"
    - PsychicHttp (server web e HTTPS), ArduinoJson, FreeRTOS,
      posix_tz_db (fusi orari POSIX): MIT. Testo: "license mit"
+   - Berry (interprete di script, copia modificata in VesevOS/src/third_party/berry):
+     MIT, Copyright (c) 2018-2020 Guan Wenliang. Testo: "license mit"
+   - wpa_supplicant (dentro ESP-IDF, usato dal WPS): BSD-3-Clause.
    - lwIP, LittleFS: BSD-3-Clause. Testo: "license bsd3"
-   - Natural Earth (nomi dei paesi): pubblico dominio.
+   - Natural Earth (nomi dei paesi): pubblico dominio (CC0).
    - IANA tz database (fusi orari, nomi dei paesi): pubblico dominio.
    Chi distribuisce un firmware compilato deve rispettare anche queste
    licenze (per esempio fornire i testi e, per la LGPL del core Arduino,
@@ -47,6 +50,9 @@ Progetto: https://github.com/paolellad79/VesevOS
      2003 n. 196 e successive modifiche. VesevOS non invia dati personali a
      terzi. MQTT e la rete tra schede inviano dati solo se li accendi tu.
      Eventuali funzioni statistiche future saranno facoltative (opt-in).
+     Il registro (logtail) puo contenere indirizzi IP e nomi utente: resta
+     sulla scheda e va verso l'esterno solo se accendi MQTT e scegli i
+     messaggi da inviare.
    - Prodotti: chi costruisce o vende apparecchi con VesevOS e responsabile
      della loro conformita (marcatura CE), tra cui: Direttiva 2014/53/UE
      (apparecchiature radio), Direttiva 2014/30/UE (compatibilita
@@ -66,7 +72,8 @@ Progetto: https://github.com/paolellad79/VesevOS
      garantita per gli aggiornamenti.
    - Marchi: "VesevOS" e il nome del progetto. Espressif, Arduino e gli
      altri nomi citati sono marchi dei rispettivi titolari; il loro uso qui
-     non implica approvazione o collaborazione.
+     non implica approvazione o collaborazione. "WPS" e "Wi-Fi" sono marchi della
+     Wi-Fi Alliance: qui indicano solo la funzione tecnica.
 
 4. CONTRIBUTI
    Chi contribuisce con codice accetta le condizioni di CONTRIBUTING.md.

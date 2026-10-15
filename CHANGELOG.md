@@ -1,5 +1,203 @@
 # Cronologia delle versioni
 
+## 1.7.65a (ottobre 2026) - Prove con AddressSanitizer e nuovi controlli degli strati
+
+- Prove sul computer (`tools/hosttest/run.sh`, `prova_iocfg.sh`): **AddressSanitizer + UBSan di fabbrica** (`ASAN=0` li spegne; circa 10% piu lente). Trovati e corretti: (1) `vos_bmp280.cpp`: scorrimento a sinistra di valori negativi (comportamento non definito) nel calcolo della pressione, ora moltiplicazioni per 2^n (stesso risultato); (2) `test_recheck.cpp`: scrittura oltre la fine di un'immagine di prova (difetto della prova, non del firmware).
+- Nuova prova `tools/hosttest/test_hooks.cpp` (68 prove): `vosWire()` riempie TUTTI i ganci di `core/vos_hooks.h`, nessun gancio e usato senza controllo di nullo, un gancio vuoto da risposte sicure.
+- `tools/checklayers.py`, tre controlli nuovi con debito di partenza (solo in discesa): `e_idf` (include `esp_*.h`/`driver/*.h` fuori dai driver: 24 in 19 file), `f_rtos` (primitive FreeRTOS fuori da drivers/ e core/: 52 in 14 file), `cicli` (moduli che si includono a vicenda: 6 gruppi; tra cartelle 0). Provati su copia con una violazione per tipo (tutti danno KO).
+- Documentati in `docs/progetto/REGOLE-ARCHITETTURA.md` e `CLAUDE.md`.
+- Nessun cambio di comportamento sulla scheda. Controllo legale: non applicabile (strumenti di sviluppo e un'equivalenza matematica).
+
+## 1.7.65 (ottobre 2026) - Nessun include verso l'alto
+
+- Gli ultimi 8 include verso i livelli alti sono spariti: **debito "ordine" da 8 a 0**. Il controllo di `checklayers` ora e a tolleranza zero (nessuna voce di debito).
+- `drivers/` non include piu `core/` (5 include): gli interruttori dei package (`VOS_WITH_*`) stanno in `boards/vos_packages.h` (li include anche `vos_common.h`, quindi nulla cambia per il resto); il driver WPS non traduce piu: `drvWpsStart` restituisce un codice (`DrvWpsErr`) e il testo lo sceglie `net/vos_wps.cpp` (stesse frasi di prima).
+- `devices/vos_dev.cpp` non include piu `net/`: il MAC si legge con il nuovo `drvWifiMac()` del driver Wi-Fi (`netMac()` lo richiama).
+- `packages/` non include piu `interfaces/`: due nuovi ganci in `core/vos_hooks.h` (`shellExec` per le azioni delle regole, `webIdleSec` per il risparmio energia), riempiti da `vos_wire.cpp`.
+- `tools/checklayers.py`: ai driver e permesso includere `boards/` (livello 0). Debito `String`: -2 (2428 contro 2430).
+- Nessun cambio di comportamento visibile.
+- Controllo legale: non applicabile (riorganizzazione interna, nessuna funzione, dato o servizio nuovo).
+
+## 1.7.64a (ottobre 2026) - Compila anche con Berry spento
+
+- `vos_rules.cpp` usava `appNameValid` (package app/Berry): con `VOS_WITH_BERRY=0` il collegamento falliva. Ora usa `utilNameOk` (stessa regola: 1-24 caratteri a-z 0-9 - _), nessun cambio di comportamento.
+- `tools/stub/compila.sh`: variabile facoltativa `VOS_EXTRA` per provare i package spenti (esempio `VOS_EXTRA="-DVOS_WITH_BERRY=0" tools/stub/compila.sh`). Attenzione: gli stub controllano solo la sintassi, i simboli mancanti si vedono solo con la compilazione vera.
+- Provato con compilazione vera: Berry spento (2.124.291 byte) e Berry + BLE + MQTT + ESP-NOW + MFA spenti insieme (1.766.287 byte).
+- Controllo legale: non applicabile (correzione di compilazione).
+
+## 1.7.64 (ottobre 2026) - Il nucleo non include piu i livelli alti
+
+- `core/` non include piu `devices/`, `net/` e `security/`: **17 include in meno** (debito "ordine" da 25 a 8; restano drivers->core 5, devices->net 1, packages->interfaces 2).
+- `vos_selftest` passa da `core/` a `packages/` (guarda tutti gli strati). Nuovi ganci espliciti in `core/vos_hooks.h` (LED: avvio, allarme, guasto, spegnimento; rete: avvio e stato; traffico; uscite spente; periferica accesa/spenta), riempiti in `src/vos_wire.cpp`. `devOffId()` in `devices/vos_dev`.
+- `/api/status`: i campi `net` e traffico (`inBps`, `outBps`, `inHist`, `outHist`) li aggiunge ora il livello web (`vos_web_auth.cpp`), non piu `sysStatusJson()`. Stessi campi, cambia solo la posizione nel JSON.
+- `tools/checklayers.py`: tabella `ALLOWED` delle coppie di cartelle consentite (anche verso il basso); una coppia fuori tabella e debito o errore. Provato con include sbagliati su copia (net->security, security->net: KO).
+- Nessun cambio di comportamento visibile. Debito `String`: +1 riga in `vos_dev.cpp` (`devOffId`), 2430 contro 2429.
+- Controllo legale: non applicabile (riorganizzazione interna, nessuna funzione, dato o servizio nuovo).
+
+## Strumenti (15 ottobre 2026) - Ordine dei livelli (nessun cambio al firmware)
+
+- `tools/checklayers.py`: nuova famiglia **ordine**. Ogni cartella puo includere solo livelli piu bassi (boards < drivers < core < security < devices < net < packages < interfaces < vos_wire/.ino). Include verso l'alto = debito per coppia "da->a" in `layers_baseline.json`: oggi 25 (core->devices 8, core->net 7, core->security 2, drivers->core 5, devices->net 1, packages->interfaces 2). Puo solo scendere; una coppia nuova e un errore.
+- Ordine scritto in `docs/progetto/REGOLE-ARCHITETTURA.md` e nella mappa di `CLAUDE.md`.
+- Controllo legale: non applicabile (solo strumenti di sviluppo).
+
+## 1.7.63a (ottobre 2026) - CPU e HTTPS, rapporto dei crash piu chiaro
+- **CPU automatica con HTTPS acceso: mai sotto 160 MHz** (anche se HTTPS si accende dopo l'avvio: risale subito). A 80 MHz la stretta di mano TLS teneva occupata la CPU oltre 5 s e faceva scattare il Task watchdog (analisi `docs/progetto/analisi-crash-38-2026-10-15.md`). Sopra 80 C resta la protezione: si scende comunque a 80 MHz.
+- CPU **fissa** sotto 160 MHz con HTTPS acceso: riga nel registro e avviso giallo in pagina (it/en/es/de); l'avviso sparisce quando la velocita o HTTPS cambiano.
+- Rapporto dei crash (`/crash.txt`, comando `crash`): il panico del Task watchdog ora si chiama "Task watchdog" e non piu "Syscall" (nome che il core 3.3.x da a quel panico).
+- Controllo legale: radio non applicabile (nessun cambio di canali/potenza); cybersecurity: migliora la disponibilita (meno riavvii) senza cambiare accessi o cifratura; privacy, licenze, marchi, export, IA non applicabili; accessibilita: nuovo avviso solo testo, tradotto. Valutazione preliminare, non consulenza legale.
+
+## 1.7.63 (ottobre 2026) - Strati in ordine: ganci, riavvio unico, NVS nel driver, niente doppioni
+- **Strati**: `core/`, `devices/` e `net/` non includono piu `packages/` o `interfaces/` (erano 21 righe, ora 0). Lo stato di MQTT, ESP-NOW e Bluetooth si legge dal registro dei servizi (`serviceState`); il resto (avvio di pagina/regole/MQTT/ESP-NOW, HTTPS acceso, chiusura dei collegamenti HTTPS fermi, MFA, messaggio MQTT di prova, click WPS del tasto BOOT, radio spente in modo aereo) passa da ganci in `core/vos_hooks.h`. Li riempie `src/vos_wire.cpp` (`vosWire()`, prima riga di `setup()`), l'unico file insieme a `VesevOS.ino` che conosce tutti gli strati.
+- **Device Manager**: le periferiche virtuali dei package (MQTT, ESP-NOW, Bluetooth, MFA, statistiche) passano da `devices/vos_dev.cpp` a `packages/vos_dev_pkg.cpp` e si iscrivono con `devSetVirtual()`. Stesso elenco, stesso ordine.
+- **Riavvio unico**: nuovo `sysReboot(motivo, attesa)` in `core/vos_wd` e driver `drivers/vos_drv_sys` (unico `ESP.restart()`). Ci passano pagina (riavvio, recovery, fabbrica), shell (`reboot`, `factory-reset`, `recovery now`), regole (`reboot`), tasto BOOT (20 s e 8 s) e watchdog (`wdReboot`, che in piu conta per l'antiloop). Il motivo va nel diario dei riavvii come ultima riga ("Riavvio: ..."). Novita visibile solo li.
+- **NVS**: `Preferences` solo nel driver `drivers/vos_drv_nvs.h` (`DrvNvs`, stessi nomi, composizione). Toccati vos_wd, vos_boot, vos_sys, vos_config, vos_tls, vos_drv_ota; tolti 2 include inutili (config import/export). Stesse chiavi, stessi namespace.
+- **Doppioni**: `hexOf` (crypt, recupd, mfa), il nome valido di script e schede (`utilNameOk`, era in berry e mod) e l'errore "Riga N:" (`utilLineErr`, era in app e mod) ora sono in `vos_util`.
+- **checklayers**: nuove famiglie `nvs` e `restart` (0 fuori dai driver) e controllo `strati` (include verso l'alto da core/devices/net/security/drivers/boards: deve restare 0, senza debito). Corretto lo scanner: un `/*` dentro un commento di riga (es. `/apps/*.be`) nascondeva il codice seguente. Il debito String vero sale cosi da 2199 a 2429 (+230 righe che lo scanner non vedeva in vos_app, vos_mod, vos_berry_scripts e vos_shell_admin; nessuna String nuova). Base riscritta.
+- Prove: `test_util` (hexOf, utilNameOk, utilLineErr), `test_wps` usa il gancio del tasto BOOT.
+- Controllo legale: non applicabile per radio, privacy, licenze, marchi, export, IA e accessibilita (nessuna funzione, dato o libreria nuova). Cybersecurity: il riavvio passa da un solo punto e lascia traccia nel diario (aiuta l'analisi, in linea con lo spirito di EN 18031/CRA sulla registrazione degli eventi; norme che potrebbero essere cambiate, valutazione non legale). Nessun dato personale nel motivo (solo testi fissi e nomi delle regole).
+
+## 1.7.62e (ottobre 2026) - File sorgente sotto le 500 righe
+- `vos_berry.cpp` (631 righe) diviso in 3: `vos_berry.cpp` (esecuzione, funzioni dello script, script salvati, avvio: 467), `vos_berry_mem.cpp` (memoria con tetto e uscita print: 90), `vos_berry_scripts.cpp` (elenco, stato, uscita, stop: 123). Stato comune in `vos_berry_int.h` (spazio dei nomi `vosberry`).
+- `vos_rules.cpp` (505 righe) diviso: testo delle regole e stato per la pagina in `vos_rules_state.cpp` (33); tipi e stato comuni in `vos_rules_int.h` (spazio dei nomi `vosrules`). `vos_rules.cpp` ora 447.
+- Solo codice spostato: **nessun cambio di comportamento**. Nessun sorgente (firmware e pagina, esclusi i file generati e `third_party`) supera piu 500 righe.
+- Debito "Arduino" di `checklayers` non aumentato (String 2207 -> 2205, time 167, include 51): tra i file si condividono solo dati e funzioni senza String. Base `tools/layers_baseline.json` riscritta perche il codice ha cambiato file.
+- Prove: `test_berry` include anche i 2 file nuovi.
+- Controllo legale: non applicabile (nessuna funzione nuova, nessun dato, nessuna libreria).
+
+## 1.7.62d (ottobre 2026) - Avvisi ADC2 anche su GPIO 17 e 18
+- File di scheda SuperMini: `VOS_ADC2_LAST` da 16 a 18 (sull'ESP32-S3 l'ADC2 copre GPIO 11-20; 19/20 sono USB e hanno gia il loro avviso). La pagina avvisa "ADC2: con il Wi-Fi acceso..." anche su 17 e 18. Nessun numero scritto a mano nella pagina.
+- **Controllo legale**: non applicabile.
+
+## 1.7.62c (ottobre 2026) - La pagina prende i pin dal file di scheda
+- `/api/pins/info` aggiunge i dati del file di scheda: `gmax` (GPIO piu alto), `led`, `ledType`, `boot`, `usb`, `adc`, `adc2`, `jtag`, `uart`, `psq` (pin liberi con PSRAM quad), `strap` (calcolato da `VOS_GPIO_STRAP` + tasto BOOT) e `lay` (disegno: piedini del fronte e piazzole del retro). Nuove voci nel file di scheda: `VOS_ADC2_*`, `VOS_JTAG_*`, `VOS_PIN_UART_*`, `VOS_PSRAMQ_*`, `VOS_BOARD_LAYOUT`, con `static_assert`.
+- Pagina: niente piu `max=48`, LED 48, TX/RX 43/44, elenchi dei piedini e intervalli degli avvisi scritti a mano. Il disegno, la posizione (bordo/retro), gli avvisi dei pin e i limiti dei campi GPIO (Pin, regole, pannello pin, aggiunta periferica) arrivano dal firmware; i dati si caricano all'accesso. Senza risposta il disegno resta vuoto e i campi senza massimo (il firmware controlla comunque).
+- **Nessun cambio di comportamento sulla SuperMini**: stessi numeri, stesso disegno. Restano nella pagina le funzioni indicative dei pin (`PFN`, dipendono dal chip S3, non dalla scheda).
+- **Controllo legale** (valutazione preliminare, non consulenza legale; le norme possono essere cambiate): non applicabile per radio, privacy, licenze, marchi, export, IA; cybersecurity: la rotta resta in sola lettura con lo stesso livello d'accesso (ospite) e rivela solo dati della scheda gia mostrati nella pagina; accessibilita: disegno invariato (pulsanti con nome).
+
+## 1.7.62b (ottobre 2026) - Widget "Collegati" nella Home
+- Nella Home un riquadro mostra quante sessioni web sono attive (HTTP + HTTPS, dati gia presenti in `/api/svc`). Con piu di un collegato il riquadro diventa rosso con icona e testo "Attenzione: piu di un collegato". Solo l'Admin puo aprirlo (clic o Invio) per vedere "Chi e collegato"; per gli altri ruoli e solo un numero. Se il firmware non manda i campi il riquadro non compare.
+- Prova: `tools/webtest/home_collegati.js`.
+- **Controllo legale** (valutazione preliminare, non consulenza legale; le norme possono essere cambiate): privacy: il numero e visibile a tutti i ruoli, l'elenco con utenti e IP solo all'Admin (come prima); accessibilita: ruolo button/group, etichetta, tastiera, colore accompagnato da testo e icona; il resto non applicabile.
+
+## 1.7.62a (ottobre 2026) - Salvataggio sicuro delle periferiche (io.cfg)
+- `io.cfg` si scrive su un file temporaneo controllato (byte scritti, dimensione riletta, spazio libero) e poi si scambia; la versione buona precedente resta in `io.cfg.bak`. Lista vuota = file tolto (mai piu un file a 0 byte). All'avvio, se `io.cfg` manca, e vuoto o illeggibile, si usa la copia (avviso giallo nell'audit).
+- Aggiungi, togli e rinomina rispondono "Spazio esaurito" / "Impossibile scrivere" se il file non si scrive, e l'elenco non cambia; allarme `iocfg` nell'audit finche un salvataggio non riesce.
+- Le righe valide non caricate all'avvio (pin occupato) restano nel file e non spariscono al salvataggio successivo.
+- Un blocco (mutex) protegge modifiche, elenco e ciclo `ioTick` tra web, terminale e app. `io del` dal terminale ora scrive nell'audit come la pagina.
+- Prova: `tools/hosttest/prova_iocfg.sh` (74 prove: disco pieno, scrittura persa, copia, righe tenute).
+- **Controllo legale** (valutazione preliminare, non consulenza legale; le norme possono essere cambiate): cybersecurity (EN 18031 / CRA): migliora integrita e tracciabilita (audit della rimozione da terminale); il resto non applicabile.
+
+## 1.7.62 (ottobre 2026) - File di scheda per la SuperMini
+
+- Nuova cartella `VesevOS/src/boards/`: il **file di scheda** (`vos_board_s3_supermini.h`) raccoglie i numeri che dipendono dalla scheda: LED (pin 48, WS2812), tasto BOOT (0), pin USB (19/20), GPIO esistenti (0-21 e 33-48), pin di avvio (3/45/46), ADC (1-10), I2C di fabbrica (8/9), pin consigliati, flash 4 MB, PSRAM 2 MB e le funzioni presenti (`VOS_HAS_*`). La scelta sta in `boards/vos_board.h`: di fabbrica e la SuperMini, senza nessun flag; un'altra scheda si sceglie con `-DVOS_BOARD_FILE="file.h"`.
+- Usati da `vos_pins`, `vos_io` (`ioSuggest`, analogico), `vos_led`/`vos_config` (LED e tasto), inventario dei pin (49 voci = `VOS_GPIO_COUNT`), import della configurazione, permessi `gpio:N` delle app e banner della shell. `static_assert` fermano la compilazione se il file di scheda e incoerente.
+- **Nessun cambio di comportamento**: stessi pin validi, stessi riservati, stessi elenchi consigliati, stesso banner. Resta fuori di proposito (passi successivi): pagina web (`max=48`, disegno della scheda), recovery, driver per CPU/temperatura, partizioni.
+- Controllo degli strati: nuova famiglia **scheda** (pin, limiti dei GPIO, chip, flash/PSRAM/partizioni, CPU/temperatura/LED scritti a mano fuori da `boards/`). Pin e limiti: 0 rimasti; restano nel debito chip 3, memoria 14, sistema 7.
+- Prove: nuova `test_board` (293 prove): pin esistenti, riservati e motivi per GPIO -2..50, mappa dei pin e `ioSuggest` per ogni classe uguali a prima.
+- **Controllo legale** (valutazione preliminare, non consulenza legale; le norme possono essere cambiate): nessun cambio di radio, rete, dati o servizi. Cambiare scheda in futuro richiede una nuova valutazione radio (antenna, potenza, canali, marcature) e cybersecurity.
+
+## 1.7.61 (ottobre 2026) - Sensori I2C (BMP280) e colori dei fili
+
+- Nuova classe **`i2c`** nelle periferiche e nelle schede `.vdp`: legge un sensore **BMP280** (temperatura e pressione; accetta anche un BME280, senza umidita). Indirizzo 0x76 o 0x77, 100 o 400 kHz. Un solo sensore I2C per volta (un solo bus).
+- Shell: `io add i2c <sda> [nome] scl=N addr=0x76 drv=bmp280 fast`. Nelle app: `dev_get("nome")` = centesimi di grado, `dev_get("nome.p")` = pascal. La pagina Periferiche e Dispositivi mostrano "25,1 C" e "1006,5 hPa", oppure "non risponde".
+- Il bus si tocca solo nel driver `drivers/vos_drv_i2c` (errori e timeout da 20 ms, niente attese lunghe). Le letture avvengono solo nel ciclo principale; se il sensore non risponde si riprova a intervalli crescenti (da 2 a 30 s) e dopo 3 errori risulta "non risponde". Le pagine web usano l'ultimo valore, non toccano il bus. I pin SDA e SCL sono controllati e riservati come gli altri.
+- Nuova sezione **`[pins]`** nelle schede `.vdp`: `ETICHETTA=destinazione,colore` (nome vero del pin del modulo, `vcc`/`gnd`/segnale, colore per nome o `#rrggbb`, validati). La pagina disegna i fili con quei colori e scrive il nome del colore nel disegno e nella tabella (non solo colore). Massimo 8 fili. Le schede vecchie senza `[pins]` funzionano come prima; `/io.cfg` vecchio resta leggibile.
+- Catalogo `periferiche/`: `bmp280.vdp` 2.0 (ora FUNZIONA), nuovo `bmp280-77.vdp`, `ldr.vdp` 1.1, `dht11.vdp` 1.1 (resta SOLO SCHEMA), indice con SHA-256 nuovi.
+- Controllo degli strati: nuova famiglia `i2c` (Wire solo nel driver); il debito `String` cala (vos_dev, vos_io, vos_mod).
+- Prove: `test_bmp280` (vettore Bosch: 25,08 C e 100653 Pa), `test_io` e `test_mod` ampliati, nuova prova pagina `tools/webtest/i2c.js`. Il backoff completo non si prova sul computer (usa il tempo vero): da vedere sulla scheda.
+- **Controllo legale** (valutazione preliminare, non consulenza legale; le norme possono essere cambiate): radio non applicabile; cybersecurity: il bus e locale, nessuna rete nuova, solo l'Admin aggiunge periferiche, driver scelti da elenco fisso (niente codice dai file); privacy: i valori restano sulla scheda, nessun invio; licenze: nessuna libreria nuova (Wire e del core, formule di compensazione dal datasheet Bosch, scritte da noi), file del catalogo CC0; marchi: nomi dei componenti usati solo per descrivere; export/IA: non applicabile; accessibilita: colori sempre accompagnati dal nome; sicurezza elettrica: avvisi `warn` e livello 3V3 nei file.
+
+## 1.7.60a (ottobre 2026) - Durate con i giorni
+
+- Le durate lunghe ora mostrano anche i **giorni**: "Ore di vita 143 h 11 min" diventa **"5 g 23 h 11 min"** (pagina Stato e comando `info`). Forma unica: `45 s`, `12 min`, `3 h 5 min`, `5 g 23 h 11 min` (dal giorno in su i pezzi in mezzo restano anche se zero, es. `1 g 0 h 0 min`).
+- Lo stesso vale per la finestra "Chi e collegato" (Collegato da, ferma da, N fa). "Acceso da" mostrava gia i giorni e non cambia.
+- Una funzione sola per la pagina (`fmtDur`) e una per il firmware (`durStr`, in `vos_util`). I valori dell'API restano in secondi.
+- Prove: `test_util` (0 s, 59 s, 60 s, 3599, 3600, 86399, 86400, 90061, 5 giorni, valore enorme).
+- **Controllo legale**: non applicabile (solo formato di un testo).
+
+## 1.7.60 (ottobre 2026) - Script e app: registro e MQTT
+
+- Nuova funzione Berry **`logtail(n)`**: ultime n righe del registro (1-20, massimo 2000 caratteri). Nelle app serve il permesso nuovo **`logread`** in `use=`.
+- Nuova funzione Berry **`mqtt("nome", "testo")`**: pubblica su `<prefisso>/app/<nome>` (vero/falso). Nelle app serve `mqtt` in `use=` (il permesso c'era gia ma non faceva nulla). Tetto 20 messaggi al minuto (oltre il tetto restituisce falso e l'app continua); scrive solo sotto `app/`, quindi un'app non puo mandare comandi alla scheda (`cmd`) ne falsificare `status` e `state`.
+- Esempio: `docs/esempi/app/logmqtt.vap`. Manuale: capitolo 26. SMTP (email diretta) escluso di proposito: l'inoltro lo fa il broker.
+- Prove: `test_berry` 205 (nomi non validi, tetto, permessi nelle app). Provata sulla scheda .38 con un broker finto: logtail, mqtt (falso senza broker, vero con broker), tetto 20 al minuto, app d'esempio. Non provata: MQTT con TLS reale.
+- **Controllo legale**: privacy (il registro puo contenere IP e nomi: serve il permesso `logread`, lo da l'Admin installando l'app; nessun invio parte da solo, MQTT e spento di fabbrica); cybersecurity (argomento limitato a `app/`, tetto di invii, nessuna credenziale nuova); licenze, marchi, radio, export, IA: non applicabile. Le norme (GDPR, CRA) possono essere cambiate: non e consulenza legale.
+
+## 1.7.59 (ottobre 2026) - Chi e collegato (who)
+
+- Nei widget **HTTP** e **HTTPS** (Servizi) c'e il numero dei collegati: sessioni che hanno fatto una richiesta negli ultimi 2 minuti, divise per HTTP/HTTPS. L'Amministratore ci clicca e vede l'elenco.
+- Nuovo comando **`who`** (seriale e shell web, solo Amministratore): utente, ruolo, HTTP/HTTPS, indirizzo, da quanto e collegato, da quanto e fermo, ultima azione (es. `POST svc`). Le letture automatiche della pagina (stato, allarmi, servizi) non contano come azioni. Riga in piu per la seriale USB: bloccata/sbloccata e ultimo comando (solo la prima parola, mai la password).
+- Nuova rotta `GET /api/who` (admin); `GET /api/svc` ha anche `usersHttp` e `usersHttps`.
+- Sessioni web contemporanee: da 6 a **10** (circa 300 byte di RAM in piu).
+- Prova pagina nuova: `tools/webtest/who.js`.
+- **Stabilita** (possibili cause dei crash visti nel diario delle schede):
+  - Event Bus: l'anti-ricorsione e ora **per task**. Prima era un segno unico: se due task pubblicavano insieme, l'evento del secondo spariva in silenzio. Nuova prova in `test_eventbus`.
+  - Sessioni, numeri casuali e blocchi IP sono protetti da un blocco: i server HTTP e HTTPS (due task) li toccavano insieme senza protezione.
+  - MQTT: l'ultimo errore e un numero invece di un testo condiviso tra il task del client e la pagina.
+  - Registro (allarmi e storico) protetto da un blocco.
+- **Rapporto dei crash** senza partizione di core dump: al crash (errore grave, watchdog dei task o degli interrupt) il gestore del core Arduino salva nella memoria RTC motivo, core, task, PC e 16 indirizzi del backtrace; all'avvio dopo finiscono nel log e in `/crash.txt` (ultimi 5, file di sistema). Comando `crash [clear|test]` (Amministratore), rotta `GET /api/crash` (Operatore). Gli indirizzi si traducono con il `.elf` della stessa versione.
+- **Firmware piu leggero (-78 KB, ora circa 207 KB liberi)**: l'inglese non e piu dentro il firmware ma e un file `lang/en.json` come spagnolo e tedesco (-59 KB); tolto `sscanf` (data/ora e periferiche lette a mano).
+- **Guida iniziale**: nel passo "Lingua" c'e **Aggiungi una lingua**: si scelgono uno o piu file dalla cartella `lang` dello ZIP e la scheda passa alla prima caricata.
+- Corretto: i file di lingua piu grandi di 64 KB venivano rifiutati (spagnolo e tedesco pesano circa 185 KB e non si caricavano). Limite ora 256 KB (in PSRAM).
+- **Registro**: lo storico (ultime 20 righe) resta anche dopo il riavvio, nel file di sistema `/audit.log` (nascosto alle API dei file, riscritto oltre 6 KB).
+- Caricamenti: limite della libreria web portato a 4 MB, cosi i file troppo grandi ricevono il messaggio tradotto della rotta invece di un errore in inglese con la connessione chiusa. L'aggiornamento del recovery rifiuta subito un file piu grande dello spazio (es. il firmware).
+
+## 1.7.58 (ottobre 2026) - Aggiornare il recovery dalla pagina
+
+- Nuova voce del menu utente **Aggiorna recovery** (solo Amministratore): mostra la versione del recovery installato, carichi il `.bin` del recovery (SHA-256 facoltativo). Anche dalla shell: `recovery update <file> [sha256]` (file gia caricato in Sistema > File).
+- Il file va tutto in PSRAM e viene controllato **prima** di toccare il recovery: programma ESP32-S3 Arduino, segmenti e somma di controllo, impronta SHA-256 interna, **marchio del recovery**, dimensione. Il firmware al posto del recovery viene rifiutato. Se il file e sbagliato il recovery vecchio resta com'e.
+- Scrittura sicura: prima si controlla che all'avvio parta VesevOS (se la corrente salta, VesevOS parte lo stesso); l'intestazione si scrive per ultima; poi si rilegge tutto e si confronta. Riga nel registro: "recovery aggiornato A -> B (chi)".
+- `GET /api/recovery` ha anche `ver`; nuova rotta di caricamento `POST /api/recovery/up?sha=` (admin).
+- Recovery **0.4.4**: porta il marchio `REC_MARK` con la versione (serve per l'aggiornamento dalla pagina).
+- Prove: nuova `tools/hosttest/test_imgcheck.cpp` (46 prove; con `VOS_REC_BIN`/`VOS_FW_BIN` prova anche i .bin veri), controllo "marchio del recovery in chiaro nel firmware", nuova prova pagina `tools/webtest/recup.js`.
+
+## 1.7.57a (ottobre 2026) - Pulizia del codice
+
+- Tolti i 14 avvisi del compilatore (con tutti gli avvisi accesi): 6 variabili/funzioni mai usate, contatori `volatile` scritti nel modo nuovo, spazio del testo dell'orario di riavvio programmato. Nessun cambio di comportamento.
+- `tools/stub/compila.sh` funziona anche su Mac (le funzioni inline non risultano piu "doppie").
+
+## 1.7.57 (ottobre 2026) - Schema dei collegamenti disegnato dalla pagina, con tensioni e componenti
+
+- Le **schede modulo (.vdp)** hanno due chiavi nuove: `level=3V3|5V` (livello del segnale) e `part=serie|gnd|vcc,valore,segnale` (fino a 4 componenti da aggiungere). Il parser le controlla; le schede vecchie funzionano uguale.
+- Prima di installare la pagina **disegna lo schema** dai dati: scheda con i pin (5V/3V3, GND, GPIO proposti) e modulo, fili rosso/nero/blu con la tensione scritta, frecce di direzione, resistenze e altri componenti con il valore, riquadro "Alimentatore" per 12/24/230 V. Tabella filo / dalla scheda / al modulo / tensione e note (colori anche a parole). Avvisi: segnale a 5 V su un ingresso, 230 V.
+- `[wiring]` diventa facoltativo ("Disegno allegato al file" sotto lo schema). Le 7 schede di esempio non lo hanno piu: usano level e part (LED con 330 ohm in serie, LDR con 10 kohm verso GND).
+- `GET /api/mod` ha anche `lv` e `parts`. `mod info` (seriale) mostra livello e componenti.
+
+## 1.7.56b (ottobre 2026) - Il tasto BOOT per gli script
+
+- Un gesto del tasto (1, 2 o 3 click) messo su **Libero** (di fabbrica il 3 click) e dato agli script: la nuova funzione Berry `btn()` torna 1, 2 o 3 (0 = nessun click, non aspetta). Vale per gli script di /scripts e per le app con `btn` in `use=`.
+- Senza uno script in esecuzione i click liberi si perdono (nessun click vecchio arriva dopo). Coda di 3 click. In modo prova non arrivano allo script.
+- Nella pagina del tasto: elenco dei gesti liberi. `GET /api/btn` ha `free` e `script`.
+
+## 1.7.56a (ottobre 2026) - Tasto BOOT: click configurabili e prova
+
+- Pagina **Dispositivi > Tasto BOOT**: scegli l'azione di **1, 2 e 3 click** veloci (niente, esce dal modo aereo, WPS, trova la scheda). Di fabbrica: 1 = modo aereo, 2 = WPS, 3 = niente. La scheda aspetta mezzo secondo dopo l'ultimo click (3 click scattano subito). Il LED fa un lampo quando ha capito il gesto.
+- **Prova del tasto**: per 60 secondi il tasto non fa niente (nemmeno 2, 8 e 20 secondi) e la pagina mostra tempo, tasto premuto/rilasciato e l'ultimo gesto capito.
+- Tolto l'interruttore *Avvia dal tasto BOOT* del WPS (ora e un'azione dei click) e il comando `wps button`. Nuovo comando `btn`, rotte `GET/POST /api/btn`, chiavi `btn1`, `btn2`, `btn3` nel backup, evento `btn.click`.
+- Le pressioni lunghe (2, 8, 20 s) non cambiano.
+
+## 1.7.56 (ottobre 2026) - WPS: collegarsi al router senza scrivere la password
+
+- Nuova scheda **Rete > WPS** (solo Amministratore) con interruttore Avvia/Ferma (spento di fabbrica), metodo a **pulsante** del router e metodo con **PIN** (spento di fabbrica; PIN nuovo a ogni prova, 2 minuti, mai nel registro).
+- **Tasto BOOT**: pressione breve (con "Avvia dal tasto BOOT" acceso, o prima della fine della guida) avvia o annulla il WPS; in modo aereo esce dal modo aereo come prima. Gli altri tempi non cambiano. LED: blu che respira = attesa, verde = riuscito, rosso = errore.
+- Se riesce: rete e password salvate, DHCP, voce nel registro dei controlli (giallo, da "Visto"). Se non riesce: la scheda torna com'era. Il WPS lavora solo nel task di rete.
+- Pulsante *Collega con WPS* nel passo Wi-Fi della guida. Comando seriale `wps`. Rotte `GET/POST /api/wps`. Package `VOS_WITH_WPS` (mettere 0 se il link non trova il WPS nelle librerie).
+- Nuovi: `net/vos_wps.*`, `drivers/vos_drv_wps.*`, `tools/hosttest/test_wps.cpp` (50 prove), `tools/webtest/wps.js` (9 passi), stub `esp_wps.h`. Testi it/en/es/de, manuale cap. 25, KNOWN_ISSUES F11.
+
+## 1.7.47 - 1.7.55 (ottobre 2026) - Berry, app, periferiche, schede modulo
+
+Riassunto riunito (le voci singole non furono scritte allora).
+- 1.7.47-1.7.49a: interprete **Berry** (MIT) per gli script `.vsc` in `/scripts` (sostituisce l'idea Lua, scartata il 10/10); comando `script`; funzioni `led()`, `act()`, `time()`, `temp()`, `log()`, `sleep()`.
+- 1.7.50-1.7.52: pagina Script, app `.vap` (un file solo con manifest e permessi `use=`), pagina Dispositivi.
+- 1.7.53: esecuzione delle app (un solo motore Berry), menu nuovi a due livelli, Device Manager.
+- 1.7.54: periferiche e pin (`vos_io`). 1.7.55: schede modulo `.vdp` (`vos_mod`, cartella `docs/devs`).
+- Controllo legale: Berry MIT (compatibile con GPL-3.0 e licenza commerciale), copyright indicato in NOTICE.txt.
+
+## 1.7.46 (ottobre 2026) - Servizi: dopo Ferma la pagina dice che manca Applica
+
+- Nelle schede dei servizi (HTTP, HTTPS...), quando una modifica e salvata ma non ancora attiva (serve **Applica**, che riavvia la scheda), compare la scritta "In attesa: premi Applica..." e il pulsante Applica si evidenzia. Prima restava "Avviato" con Ferma acceso e sembrava un difetto.
+- Solo la pagina (nessun cambio al firmware oltre al numero di versione). Testi it/en/es/de, prova aggiunta a smoke172.js.
+
 ## 1.7.45 (ottobre 2026) - aggiornamento firmware, passo 4: "Aggiorna firmware" nella pagina
 
 - Nuova voce **Aggiorna firmware** nel menu utente (solo Amministratore): controlla che il recovery ci sia, poi riavvia la scheda nel recovery e mostra l'indirizzo da aprire (`http://IP:80/`, finestra privata) e cosa succede se la rete di casa non c'e (hotspot `VesevOS-recovery`, password sulla seriale).

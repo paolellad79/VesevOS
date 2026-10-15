@@ -3,6 +3,8 @@
 // VesevOS - vos_shell.cpp
 #include "vos_shell.h"
 #include "vos_shell_int.h"
+static String g_serCmd;                 // ultimo comando dalla seriale (solo la prima parola: niente password nel who)
+static uint32_t g_serCmdT = 0;
 String shx::argAt(const String& s, int idx) {
   int n = 0, i = 0;
   while (i < (int)s.length()) {
@@ -55,6 +57,8 @@ void shx::cmdHelp(Print& o) {
   o.println(tr("  date [set AAAA-MM-GG HH:MM]  data e ora (mostra o imposta)"));
   o.println(tr("  ntp [on|off|sync|every <min>]  stato NTP / accendi, spegni / risincronizza / frequenza"));
   o.println(tr("  cpu [auto|80|160|240]  velocita CPU"));
+  o.println(tr("  wps [on|off|pin on|off|start [pin]|stop]  collegamento alla Wi-Fi di casa con il WPS (solo Admin)"));
+  o.println(tr("  btn [1|2|3 niente|aereo|wps|trova]  azioni dei click del tasto BOOT (cambiare: solo Admin)"));
   o.println(tr("  hostname [nome] mostra o cambia il nome host"));
   o.println(tr("  domain [nome|-] mostra, cambia o toglie il dominio"));
   o.println(tr("  info            riassunto: versione, chip, memoria, rete, MAC"));
@@ -75,6 +79,8 @@ void shx::cmdHelp(Print& o) {
   o.println(tr("  lang [codice]   mostra o cambia la lingua (it, en, ...)"));
   o.println(tr("  license [id]    note legali e licenze (notice, gpl3, lgpl21, apache2, mit, bsd3)"));
   o.println(tr("  dev [status <nome>|on <nome>|off <nome>|act <nome> <azione> [arg]]  periferiche (MQTT, Bluetooth, pin, LED, memoria...)"));
+  o.println(tr("  io [list|add <classe> <pin> [nome]|del|rename|set|get]  periferiche a classi (rele, led, pin, ingresso, analogico, i2c)"));
+  o.println(tr("  mod [list|info|install|del]  schede modulo .vdp (rele, sensori...) da installare sui pin"));
   o.println(tr("  pins            pin usati"));
   o.println(tr("  pin <n> [high|low|blink|read [up|down]|off]  prova un pin (si spegne da solo)"));
   o.println(tr("  config          mostra configurazione (senza password)"));
@@ -97,7 +103,12 @@ void shx::cmdHelp(Print& o) {
   o.println(tr("  reboots [clear]   diario degli ultimi 20 riavvii (motivo, durata, RAM minima) o azzera"));
   o.println(tr("  factory-reset   azzera tutto (poi riavvia)"));
   o.println(tr("  reboot          riavvia"));
-  o.println(tr("  recovery [now]  recovery (aggiornamento firmware): stato, o 'now' = riavvia nel recovery"));
+  o.println(tr("  berry [codice]  prova al volo codice Berry (print, led, act, time, millis, temp, log, sleep); senza argomenti: stato"));
+  o.println(tr("  script [list|run <nome>|stop|out]  script salvati in /scripts (.vsc), in sottofondo"));
+  o.println(tr("  app [list|info|start|stop|set|out]  app salvate in /apps (.vap): elenco, controllo, avvio (una alla volta), valori"));
+  o.println(tr("  who             chi e collegato (web e seriale) e cosa sta facendo"));
+  o.println(tr("  crash [clear|test]  rapporti degli ultimi crash (motivo, task, backtrace); test = crash di prova"));
+  o.println(tr("  recovery [now|update <file>]  recovery: stato, 'now' = riavvia nel recovery, 'update' = aggiorna il recovery da un file"));
   o.println(tr("  sleep [minuti]  sonno profondo (con i minuti la scheda riparte da sola; senza, solo con RESET)"));
   o.println(tr("  stats [on|off|reset]  statistiche locali (spente di fabbrica)"));
   o.println(tr("  selftest [active] [names]  autodiagnosi con report (prove attive: LED e MQTT; names: nomi reali)"));
@@ -174,7 +185,13 @@ void shellWelcome(Print& o, bool full) {
   o.println();
   wBar(o);
   { String l = "|   /\\      " + String(VOS_NAME) + " " + VOS_VERSION; while (l.length() < WW - 1) l += ' '; o.println(l + "|"); }
-  { String l = "|  /  \\     " + String(VOS_BOARD) + " - 4 MB flash, 2 MB PSRAM"; while (l.length() < WW - 1) l += ' '; o.println(l + "|"); }
+#define VOS_STR_(x) #x
+#define VOS_STR(x) VOS_STR_(x)
+#if VOS_HAS_PSRAM
+  { String l = "|  /  \\     " VOS_BOARD " - " VOS_STR(VOS_FLASH_MB) " MB flash, " VOS_STR(VOS_PSRAM_MB) " MB PSRAM"; while (l.length() < WW - 1) l += ' '; o.println(l + "|"); }
+#else
+  { String l = "|  /  \\     " VOS_BOARD " - " VOS_STR(VOS_FLASH_MB) " MB flash"; while (l.length() < WW - 1) l += ' '; o.println(l + "|"); }
+#endif
   { String l = "| /____\\    github.com/paolellad79/VesevOS"; while (l.length() < WW - 1) l += ' '; o.println(l + "|"); }
   wBar(o);
   if (full) {
@@ -219,6 +236,13 @@ static bool g_fullWelcome = false;
 static bool serialLocked() { return authIsSet() && cfg.serialAuth && !serialAuthed(); }
 
 static void prompt() { serOut().print(serialLocked() ? "password: " : "vesevos> "); }
+
+String shellSerialWho() {
+  if (!cfg.serIn) return String(tr("seriale: comandi spenti")) + "\n";
+  String st = serialLocked() ? String(tr("bloccata (serve la password)")) : String(tr("sbloccata"));
+  if (!g_serCmd.length()) return trf("seriale (USB): %s", st.c_str()) + "\n";
+  return trf("seriale (USB): %s, ultimo comando '%s' %lu s fa", st.c_str(), g_serCmd.c_str(), (unsigned long)((millis() - g_serCmdT) / 1000UL)) + "\n";
+}
 
 void shellSerialShowPass() { g_fullWelcome = true; }   // tasto BOOT 8 s: rimostra la password dell'hotspot
 
@@ -397,7 +421,7 @@ void shellSerialPoll() {
         else if (authCheck(l)) { serialAuthSet(true); serOut().println(tr("Accesso eseguito.")); }
         else serOut().println(tr("Password errata."));
       } else if (l == "logout") { serialAuthSet(false); serOut().println(tr("Uscito.")); }
-      else { cfgSetOrigin("seriale"); shellExec(l, serOut(), ROLE_ADMIN); }
+      else { g_serCmd = argAt(l, 0); g_serCmdT = millis(); cfgSetOrigin("seriale"); shellExec(l, serOut(), ROLE_ADMIN); }
       prompt();
     } else {
       String e; utilEditKey(g_buf, g_esc, ch, e, 200);          // Backspace, Ctrl+U, Ctrl+C e lettere

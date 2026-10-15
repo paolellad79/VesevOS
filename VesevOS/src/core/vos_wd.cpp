@@ -3,16 +3,17 @@
 // VesevOS - vos_wd.cpp
 #include "vos_wd.h"
 #include "vos_config.h"
-#include "../net/vos_net.h"
 #include "vos_sys.h"
 #include "vos_log.h"
 #include "vos_i18n.h"
 #include "vos_util.h"
 #include "vos_time.h"
 #include "vos_audit.h"
-#include "../devices/vos_dev.h"
 #include "../drivers/vos_drv_wifi.h"
-#include <Preferences.h>
+#include "../drivers/vos_drv_nvs.h"
+#include "../drivers/vos_drv_sys.h"
+#include "vos_diario.h"
+#include "vos_hooks.h"
 #include <time.h>
 
 #define WD_N 10
@@ -45,7 +46,7 @@ void wdStalest(char* out, size_t n) {
 
 // antiloop: ricorda gli orari (in secondi di vita) degli ultimi 3 riavvii automatici
 void wdReboot(const String& why) {
-  Preferences p;
+  DrvNvs p;
   if (p.begin("vos", false)) {
     uint32_t life = sysLifeSec();
     uint32_t a = p.getUInt("wd1", 0), b = p.getUInt("wd2", 0);
@@ -55,12 +56,20 @@ void wdReboot(const String& why) {
     p.end();
   }
   vlog("WATCHDOG: riavvio automatico (%s)", why.c_str());
-  delay(300);
-  ESP.restart();
+  sysReboot(why.c_str(), 300);
+}
+
+// ogni riavvio voluto passa da qui: il motivo resta nel diario dei riavvii (ultima riga dell'avvio che finisce)
+void sysReboot(const char* why, uint32_t waitMs) {
+  char b[64];
+  snprintf(b, sizeof(b), "Riavvio: %s", why ? why : "?");
+  diaryNote(b);
+  if (waitMs) vTaskDelay(pdMS_TO_TICKS(waitMs));
+  drvSysRestart();
 }
 
 static bool tooMany() {
-  Preferences p; uint32_t c = 0;
+  DrvNvs p; uint32_t c = 0;
   if (p.begin("vos", true)) { c = p.getUInt("wd3", 0); p.end(); }
   return c && sysLifeSec() - c < 3600UL;            // 3 riavvii nell'ultima ora di vita
 }
@@ -70,15 +79,15 @@ static bool tooMany() {
 // Recovery restano. Vale fino al prossimo riavvio: niente viene cambiato nella configurazione salvata.
 static void degrade(const String& why, const char* culprit) {
   String off, err;
+  hookCall(g_hooks.ioAllOff);                                       // rele e altre uscite: stato sicuro (spente)
   bool opt = culprit && (!strcmp(culprit, "mqtt") || !strcmp(culprit, "mesh") || !strcmp(culprit, "led"));
   if (opt) {
-    if (!strcmp(culprit, "led")) sysTaskKill("led", err); else devSet(culprit, false, err);
+    if (!strcmp(culprit, "led")) sysTaskKill("led", err); else hookDevOff(culprit);
     off = culprit;
   } else {
     const char* ids[] = {"mqtt", "mesh", "ble"};
     for (int i = 0; i < 3; i++) {
-      const DevOps* d = devFind(ids[i]);
-      if (d && d->state && d->state() && devSet(ids[i], false, err)) { if (off.length()) off += ", "; off += ids[i]; }
+      if (hookDevIsOn(ids[i]) && hookDevOff(ids[i])) { if (off.length()) off += ", "; off += ids[i]; }
     }
   }
   g_degraded = true;
@@ -120,7 +129,7 @@ static void wdTask(void*) {
     }
     // 2) rete assente (non in modo aereo, solo se il Wi-Fi di casa e configurato)
     if (cfg.wdNet && !cfg.airOn && cfg.staEnabled && cfg.staSsid.length()) {
-      if (netState() == NET_CLIENT_OK) g_netLost = 0;
+      if (hookNetState() == NET_CLIENT_OK) g_netLost = 0;
       else if (!g_netLost) g_netLost = now ? now : 1;
       else if (now - g_netLost > (uint32_t)cfg.wdNetMin * 60000UL) { g_netLost = 0; act(trf("rete assente da %u minuti", (unsigned)cfg.wdNetMin)); }
     } else g_netLost = 0;
@@ -136,7 +145,7 @@ static void wdTask(void*) {
       time_t t = time(NULL); struct tm lt; localtime_r(&t, &lt);
       int wd = (lt.tm_wday + 6) % 7;                         // 0 = lunedi
       if ((cfg.wdDays >> wd) & 1 && lt.tm_hour * 60 + lt.tm_min == cfg.wdAt && lt.tm_sec < 5) {
-        char b[8]; snprintf(b, sizeof(b), "%02d:%02d", cfg.wdAt / 60, cfg.wdAt % 60);
+        char b[12]; snprintf(b, sizeof(b), "%02d:%02d", cfg.wdAt / 60, cfg.wdAt % 60);
         wdReboot(trf("riavvio programmato %s", b));
       }
     }
@@ -146,7 +155,7 @@ static void wdTask(void*) {
 static void wdStart() { xTaskCreatePinnedToCore(wdTask, "wd", 6144, NULL, 3, NULL, 0); }
 
 void wdInit() {
-  Preferences p;
+  DrvNvs p;
   if (p.begin("vos", false)) { g_reason = p.getString("wdwhy", ""); p.remove("wdwhy"); p.end(); }
   if (g_reason.length()) { vlog("WATCHDOG: l'ultimo riavvio e stato automatico (%s)", g_reason.c_str()); auditEvent(AUD_YELLOW, "wdlast", trf("Ultimo riavvio automatico: %s", g_reason.c_str())); }
   // il ciclo principale (seriale, tasto BOOT) e protetto anche dal watchdog del chip

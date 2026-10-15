@@ -3,10 +3,10 @@
 // VesevOS - vos_fw.cpp
 #include "vos_fw.h"
 #include "vos_config.h"
-#include "../net/vos_net.h"
 #include "vos_util.h"
 #include "vos_log.h"
 #include "vos_i18n.h"
+#include "vos_hooks.h"
 #include "../drivers/vos_drv_wifi.h"
 
 #define TRY_MS (120UL * 1000UL)
@@ -32,7 +32,7 @@ bool fwAllow(uint32_t ip, bool ntp) {
   if (ip == 0x7F000001UL) return true;
   switch (cfg.fwMode) {
     case 1: {                                                // solo la mia rete
-      if (netState() != NET_CLIENT_OK) return true;
+      if (hookNetState() != NET_CLIENT_OK) return true;
       uint32_t me = drvWifiLocalIp(), m = drvWifiMask();
       return m && ((ip & m) == (me & m));
     }

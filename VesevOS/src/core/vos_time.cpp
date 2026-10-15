@@ -6,10 +6,10 @@
 #include "vos_sys.h"
 #include "vos_i18n.h"
 #include "vos_config.h"
-#include "../net/vos_net.h"
 #include "vos_util.h"
 #include "vos_log.h"
 #include "vos_audit.h"
+#include "vos_hooks.h"
 #include "../drivers/vos_drv_wifi.h"
 #include <AsyncUDP.h>
 #include <sys/time.h>
@@ -54,8 +54,18 @@ bool timeEveryValid(long m) {
 
 // "AAAA-MM-GG HH:MM" o "AAAA-MM-GG HH:MM:SS" nell'ora locale della scheda
 bool timeSetLocal(const String& s, String& err) {
-  int Y, M, D, h, mi, se = 0;
-  int n = sscanf(s.c_str(), "%d-%d-%d %d:%d:%d", &Y, &M, &D, &h, &mi, &se);
+  // lettura a mano (niente sscanf: tirava dentro circa 16 KB di libreria): numeri separati da - - spazio : e : facoltativo
+  long v[6] = {0, 0, 0, 0, 0, 0}; int n = 0;
+  const char* p = s.c_str(); const char SEP[] = "-- ::";
+  while (n < 6) {
+    while (*p == ' ' && n == 3) p++;
+    char* e; long x = strtol(p, &e, 10);
+    if (e == p) break;
+    v[n++] = x; p = e;
+    if (n == 6 || *p != SEP[n - 1]) break;
+    p++;
+  }
+  int Y = (int)v[0], M = (int)v[1], D = (int)v[2], h = (int)v[3], mi = (int)v[4], se = (int)v[5];
   if (n < 5 || Y < 2024 || Y > 2099 || M < 1 || M > 12 || D < 1 || D > 31 || h < 0 || h > 23 || mi < 0 || mi > 59 || se < 0 || se > 59) {
     err = tr("Data o ora non valida (AAAA-MM-GG HH:MM)"); return false;
   }
@@ -159,7 +169,7 @@ static void timeTask(void*) {
       g_apply = false; g_ntpStarted = false;
       if (!cfg.ntpServe) stopServer();
     }
-    NetState ns = netState();
+    NetState ns = hookNetState();
     if (cfg.ntpOn && ns == NET_CLIENT_OK && !g_ntpStarted) {
       // frequenza: 0 = solo all'avvio (intervallo massimo, circa 49 giorni)
       sntp_set_sync_interval(cfg.ntpEvery ? cfg.ntpEvery * 60000UL : 0xFFFFFFF0UL);

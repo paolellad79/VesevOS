@@ -7,7 +7,6 @@
 #include "vos_log.h"
 #include "vos_audit.h"
 #include "../drivers/vos_drv_fs.h"
-#include <Preferences.h>
 #include "vos_config_int.h"
 
 static bool hexOnly(const String& v, size_t len) {
@@ -31,7 +30,6 @@ bool cfgParseRange(const String& txt, uint32_t& a, uint32_t& b) {
   b = a; return true;
 }
 
-static int g_userSec = -1;   // sezione utente in lettura
 
 // Applica una chiave. section = nome sezione, k = chiave
 bool g_cfgHadSetupKey = false;      // il file ha la riga "setup" (scritta dalla 1.7.1 in poi)
@@ -40,6 +38,7 @@ static void applyKey(const String& sec, const String& k, const String& v) {
     if (k == "hostname" && hostnameValid(v)) cfg.hostname = v;
     else if (k == "domain" && domainValid(v)) cfg.domain = v;
     else if (k == "stat") cfg.statOn = (v == "1");
+    else if (k == "btn1" || k == "btn2" || k == "btn3") { int a = v.toInt(); if (a >= 0 && a <= 3) cfg.btnAct[k[3] - '1'] = (uint8_t)a; }
     else if (k == "serbaud") { uint32_t b = (uint32_t)v.toInt(); if (b >= 1200 && b <= 2000000) cfg.serBaud = b; }
     else if (k == "sereol") cfg.serEol = (uint8_t)constrain((int)v.toInt(), 0, 2);
     else if (k == "sertx") cfg.serTx = (uint8_t)constrain((int)v.toInt(), 0, 200);
@@ -57,7 +56,7 @@ static void applyKey(const String& sec, const String& k, const String& v) {
     else if (k == "https") cfg.https = (v != "0");
   }
   else if (sec == "pins") {
-    if (k.length() >= 2 && k[0] == 'n') { int g = k.substring(1).toInt(); if (g >= 0 && g < 49 && v.length() <= 24) cfg.pinNote[g] = v; }
+    if (k.length() >= 2 && k[0] == 'n') { int g = k.substring(1).toInt(); if (g >= 0 && g < VOS_GPIO_COUNT && v.length() <= 24) cfg.pinNote[g] = v; }
   }
   else if (sec == "svc") {
     if (k == "apon") cfg.apOn = (v != "0");
@@ -65,6 +64,8 @@ static void applyKey(const String& sec, const String& k, const String& v) {
     else if (k == "dhcp") cfg.dhcpOn = (v != "0");
     else if (k == "lease") { int m = v.toInt(); if (m >= 10 && m <= 1440) cfg.dhcpLease = m; }
     else if (k == "mdns") cfg.mdnsOn = (v != "0");
+    else if (k == "wps") cfg.wpsOn = (v == "1");
+    else if (k == "wpspin") cfg.wpsPin = (v == "1");
     else if (k == "httpon") cfg.httpOn = (v != "0");
     else if (k == "httpport") { int n = v.toInt(); if (n == 80 || (n >= 1024 && n <= 65535)) cfg.httpPort = n; }
     else if (k == "httpsport") { int n = v.toInt(); if (n == 443 || (n >= 1024 && n <= 65535)) cfg.httpsPort = n; }
@@ -126,7 +127,7 @@ static void applyKey(const String& sec, const String& k, const String& v) {
     if (k == "mode") cfg.ledMode = constrain(v.toInt(), 0, 3);
     else if (k == "color") cfg.ledColor = (uint32_t)strtoul(v.c_str(), NULL, 10) & 0xFFFFFF;
     else if (k == "brightness") cfg.ledBrightness = constrain(v.toInt(), 0, 255);
-    else if (k == "pin") { int p = v.toInt(); if (p >= 0 && p <= 48) cfg.ledPin = p; }
+    else if (k == "pin") { int p = v.toInt(); if (p >= 0 && p <= VOS_GPIO_MAX) cfg.ledPin = p; }
   } else if (sec == "led2") {
     // LED aggiuntivo tolto nella 1.7.0: la sezione dei file vecchi si ignora
   } else if (sec == "mqtt") {

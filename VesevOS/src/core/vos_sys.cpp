@@ -1,29 +1,24 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_sys.cpp
-#include "../packages/vos_ble.h"
-#include "../net/vos_traffic.h"
+#include "vos_hooks.h"
 #include "vos_sys.h"
 #include "vos_diario.h"
-#include "../devices/vos_led.h"
 #include "../drivers/vos_drv_wifi.h"
 #include <esp_sleep.h>
 #include "vos_i18n.h"
 #include "vos_util.h"
 #include "vos_log.h"
-#include "../net/vos_net.h"
-#include "../packages/vos_mqtt.h"
-#include "../devices/vos_led.h"
+#include "vos_service.h"
 #include "vos_config.h"
 #include "esp_timer.h"
 #include "esp_heap_caps.h"
 #include "esp_system.h"
 #include "esp_freertos_hooks.h"
 #include "../drivers/vos_drv_fs.h"
-#include <Preferences.h>
+#include "../drivers/vos_drv_nvs.h"
 #include "vos_wd.h"
 #include "vos_serial.h"
-#include "../interfaces/vos_web.h"
 #include "vos_audit.h"
 #include "vos_fw.h"
 
@@ -46,8 +41,8 @@ static char g_topName[16] = "";      // task piu attivo (non IDLE), aggiornato o
 static int  g_topPct = 0;
 static bool g_hot = false;      // allarme temperatura
 
-static bool idle0() { g_idle[0]++; return false; }
-static bool idle1() { g_idle[1]++; return false; }
+static bool idle0() { g_idle[0] = g_idle[0] + 1; return false; }
+static bool idle1() { g_idle[1] = g_idle[1] + 1; return false; }
 
 static String resetName(int r) {
   switch (r) {
@@ -72,7 +67,7 @@ static void lifeSave() {
   uint32_t up = (uint32_t)(esp_timer_get_time() / 1000000ULL);
   g_lifeBase += up - g_lifeSaved;
   g_lifeSaved = up;
-  Preferences p;
+  DrvNvs p;
   if (p.begin("vos", false)) { p.putUInt("life", g_lifeBase); p.end(); }
 }
 
@@ -150,9 +145,9 @@ static void monitorTask(void*) {
     { static uint32_t ftick = 0; ftick++;                      // ogni 10 s: la RAM e a pezzi troppo piccoli? (avviso in pagina, spento con un po' di margine)
       if (ftick % 10 == 0 && ftick > 30) {
         uint32_t big = ESP.getMaxAllocHeap();
-        if (bleRunning() || big > 40000) auditClear("frag");        // con il Bluetooth acceso il pezzo piccolo e normale (se ne va quando si spegne)
+        if (serviceState("ble") == SVC_ON || big > 40000) auditClear("frag");        // con il Bluetooth acceso il pezzo piccolo e normale (se ne va quando si spegne)
         else if (big < 30000) auditEvent(AUD_YELLOW, "frag", tr("Memoria frammentata: il pezzo di RAM libero piu grande e piccolo. Chiudi la pagina web o spegni i servizi che non servono: si libera da sola"));
-        webTrimIdle();                                      // RAM a pezzi e nessuno usa la pagina: chiude i collegamenti HTTPS fermi
+        hookCall(g_hooks.webTrimIdle);                                      // RAM a pezzi e nessuno usa la pagina: chiude i collegamenti HTTPS fermi
       } }
     { static uint32_t dtick = 0; dtick++;
       diaryTick(dtick, ESP.getMinFreeHeap(), g_topName, g_topPct, mhz);
@@ -161,24 +156,31 @@ static void monitorTask(void*) {
                                  g_topName[0] ? g_topName : "-", g_topPct, g_cpu, g_cpu0, g_cpu1, (unsigned)mhz, (int)g_temp, (unsigned)(ESP.getFreeHeap() / 1024), (unsigned)(ESP.getMinFreeHeap() / 1024)); }
     { static uint32_t lifeTick = 0; if (++lifeTick >= 600) { lifeTick = 0; lifeSave(); } }   // ogni 10 minuti
     // allarme: sopra 80 C LED rosso lampeggiante, torna normale sotto 75 C
-    if (!g_hot && g_temp > 80.0f) { g_hot = true; ledSetFault(true); vlog("ATTENZIONE: temperatura CPU alta (%.1f C)", g_temp); }
-    else if (g_hot && g_temp < 75.0f) { g_hot = false; ledSetFault(false); vlog("Temperatura CPU tornata normale (%.1f C)", g_temp); }
+    if (!g_hot && g_temp > 80.0f) { g_hot = true; hookLedFault(true); vlog("ATTENZIONE: temperatura CPU alta (%.1f C)", g_temp); }
+    else if (g_hot && g_temp < 75.0f) { g_hot = false; hookLedFault(false); vlog("Temperatura CPU tornata normale (%.1f C)", g_temp); }
     // scalatura automatica: sale subito se serve, scende piano se la CPU e libera
     {
       uint32_t target = mhz;
+      bool tls = hookWebHttpsUp();
+      uint32_t floorMhz = tls ? 160 : 80;  // con HTTPS acceso mai sotto 160: a 80 MHz la stretta di mano TLS blocca la CPU oltre 5 s (Task watchdog, analisi del 15/10)
+      { static bool warned = false;        // velocita fissa troppo bassa per HTTPS: avviso giallo in pagina
+        bool low = tls && cfg.cpuMhz != 0 && cfg.cpuMhz < 160;
+        if (low && !warned) { warned = true; vlog("ATTENZIONE: CPU fissa a %u MHz con HTTPS acceso", (unsigned)cfg.cpuMhz); auditEvent(AUD_YELLOW, "cpulow", tr("CPU fissa sotto 160 MHz con HTTPS acceso: la scheda puo bloccarsi e riavviarsi. Usa il modo automatico o almeno 160 MHz")); }
+        else if (!low && warned) { warned = false; auditClear("cpulow"); } }
       bool settle = millis() < 60000;      // primo minuto: niente cambi di frequenza (Wi-Fi, NTP e HTTPS si assestano; un cambio dopo un reset da USB ha dato un Task watchdog)
       if (settle && g_temp <= 80.0f) { lowCount = 0; }
       else if (cfg.cpuMhz != 0) { target = (g_temp > 80.0f) ? 80 : cfg.cpuMhz; lowCount = 0; }   // velocita fissa
       else if (g_temp > 80.0f) { target = 80; lowCount = 0; }
       else if (g_cpu >= 60) { target = (mhz <= 80) ? 160 : 240; lowCount = 0; }
-      else if (g_cpu < 20) { if (++lowCount >= 5) { lowCount = 0; target = (mhz > 160) ? 160 : 80; } }
+      else if (mhz < floorMhz) { target = floorMhz; lowCount = 0; }   // HTTPS acceso dopo: risale subito
+      else if (g_cpu < 20) { if (++lowCount >= 5) { lowCount = 0; target = (mhz > 160) ? 160 : floorMhz; } }
       else lowCount = 0;
       if (target != mhz) { setCpuFrequencyMhz(target); skip = true; }
     }
     { static uint32_t ftk = 0;
       if (ftk++ % 30 == 0) { size_t ft = drvFsTotal(); g_flPct = ft ? (uint8_t)constrain((int)(100ULL * drvFsUsed() / ft), 0, 100) : 0; }
     }
-    trafficTick();
+    hookCall(g_hooks.trafficTick);
     uint32_t ht = ESP.getHeapSize(), pt = ESP.getPsramSize();
     uint8_t rp = ht ? (uint8_t)constrain((int)(100 - 100ULL * ESP.getFreeHeap() / ht), 0, 100) : 0;
     uint8_t pp = pt ? (uint8_t)constrain((int)(100 - 100ULL * ESP.getFreePsram() / pt), 0, 100) : 0;
@@ -201,7 +203,7 @@ void sysApplyCpuMode() {
 
 void sysInit() {
   setCpuFrequencyMhz(cfg.cpuMhz ? cfg.cpuMhz : 160);   // se automatico parte da 160 e poi scala da solo
-  Preferences p;
+  DrvNvs p;
   p.begin("vos", false);
   g_boot = p.getUInt("boots", 0) + 1;
   p.putUInt("boots", g_boot);
@@ -263,12 +265,10 @@ String sysStatusJson() {
   j += "\"psramTotal\":" + String(ESP.getPsramSize()) + ",";
   j += "\"flashUsed\":" + String((unsigned long)flashU) + ",";
   j += "\"flashTotal\":" + String((unsigned long)flashT) + ",";
-  j += "\"net\":" + netStatusJson() + ",";
-  j += "\"mqtt\":" + String(mqttConnected() ? 2 : mqttRunning() ? 1 : 0) + ",";
+  j += "\"mqtt\":" + String(serviceState("mqtt") == SVC_ON ? 2 : serviceState("mqtt") != SVC_OFF ? 1 : 0) + ",";
   j += "\"cpuHist\":" + sysCpuHistoryJson() + ",";
   j += "\"cpu0Hist\":" + histJson(g_c0H, g_cpuHn) + ",\"cpu1Hist\":" + histJson(g_c1H, g_cpuHn) + ",";
   j += "\"ramHist\":" + histJson(g_ramH, g_cpuHn) + ",\"psHist\":" + histJson(g_psH, g_cpuHn) + ",\"flHist\":" + histJson(g_flH, g_cpuHn) + ",";
-  j += trafficJson() + ",";
   j += "\"tempHist\":" + sysTempHistoryJson();
   j += "}";
   return j;
@@ -372,7 +372,7 @@ bool sysTaskRestart(const String& name, String& err) {
 void sysSleep() {
   vlog("SISTEMA: sonno profondo (si riaccende con RESET)");
   Serial.flush();
-  ledShutdown();
+  hookCall(g_hooks.ledShutdown);
   drvWifiShutdown();
   delay(100);
   esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);

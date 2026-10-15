@@ -1,8 +1,8 @@
 /* ===== File: elenco, menu azioni, finestre, editor ===== */
 var FS={list:[],used:0,total:0,max:32768,menu:null,lp:null};
-var FTXT=/\.(txt|md|log|csv|html?|css|js|conf|cfg|ini|xml|ya?ml|h|c|cpp|ino|py|sh|svg|rules)$/i,FIMG=/\.(png|jpe?g|gif|svg|ico|bmp|webp)$/i;
-var FCODE=/\.(html?|css|js|h|c|cpp|ino|py|sh|xml)$/i;
-function fIco(f){return f.d?"i-folder":/\.json$/i.test(f.n)?"i-fjson":FIMG.test(f.n)?"i-fimg":FCODE.test(f.n)?"i-fcode":(FTXT.test(f.n)||f.n.indexOf(".")<0)?"i-ftxt":"i-fbin"}
+var FTXT=/\.(txt|md|log|csv|html?|css|js|conf|cfg|ini|xml|ya?ml|h|c|cpp|ino|py|sh|svg|rules|vsc|vap)$/i,FIMG=/\.(png|jpe?g|gif|svg|ico|bmp|webp)$/i;
+var FCODE=/\.(html?|css|js|h|c|cpp|ino|py|sh|xml|vsc|vap)$/i;
+function fIco(f){return f.d?"i-folder":/\.json$/i.test(f.n)?"i-fjson":FIMG.test(f.n)?"i-fimg":/\.vsc$/i.test(f.n)?"i-fvsc":/\.vap$/i.test(f.n)?"i-fvap":FCODE.test(f.n)?"i-fcode":(FTXT.test(f.n)||f.n.indexOf(".")<0)?"i-ftxt":"i-fbin"}
 function fEditable(n){return /\.json$/i.test(n)||FTXT.test(n)||n.indexOf(".")<0}
 function fSize(n){return n<1024?n+" B":n<1048576?(n/1024).toFixed(n<10240?1:0)+" KB":(n/1048576).toFixed(1)+" MB"}
 function fDir(p){var i=p.lastIndexOf("/");return i<=0?"/":p.substring(0,i)}
@@ -106,20 +106,23 @@ function fUpload(){var f=$("fup").files[0];if(!f)return;$("fup").value="";
 var FE={p:"",isNew:false,orig:"",tabSp:true};
 function fEdit(p){api("/api/fs/text?path="+enc(p)).then(function(r){return r.text().then(function(x){return{ok:r.ok,x:x}})}).then(function(o){if(!o.ok){msg("fm",o.x,false);return}fEdOpen(p,o.x,false)}).catch(function(){})}
 function fEdOpen(p,x,isNew){FE.p=p;FE.isNew=isNew;FE.orig=isNew?null:x;FE.back=document.activeElement;var e=$("fedx");e.value=x;e.scrollTop=0;e.scrollLeft=0;
- $("fed").className="fed";document.body.classList.add("fedo");fEdTitle();$("fedw").className=fSys(p)?"fedw":"fedw hide";
+ $("fed").className="fed";document.body.classList.add("fedo");fEdTitle();$("fedw").className=fSys(p)?"fedw":"fedw hide";$("fedrun").hidden=!fIsScript(p);
  $("fedpaste").hidden=!(navigator.clipboard&&navigator.clipboard.readText&&window.isSecureContext);fEdUpd();setTimeout(function(){e.focus();e.setSelectionRange(0,0)},30)}
+function fIsScript(p){return /^\/scripts\/[a-z0-9_-]{1,24}\.vsc$/.test(p)}
+function fEdRun(){var n=FE.p.replace(/^.*\//,"").replace(/\.vsc$/,"");fEdSave().then(function(ok){if(!ok)return;fEdClose(true);show("script");scRun(n)})}
+function fMax(){return /\.vsc$/i.test(FE.p)?8192:/\.vap$/i.test(FE.p)?16384:FS.max}
 function fEdDirty(){return FE.isNew||$("fedx").value!==FE.orig}
 function fEdTitle(){var d=fEdDirty();$("fedt").textContent=fBase(FE.p);$("fedp").textContent=fDir(FE.p);$("feds").textContent=FE.isNew?t("Nuovo, non ancora salvato"):d?t("Modificato"):t("Salvato");$("feds").className="feds"+(d?" mod":"")}
 function fEdUpd(){var e=$("fedx"),v=e.value,ln=v.split("\n").length,h="";for(var i=1;i<=ln;i++)h+=i+"\n";if($("fedn").textContent!=h)$("fedn").textContent=h;$("fedn").scrollTop=e.scrollTop;
  var b=new TextEncoder().encode(v).length,pre=v.substring(0,e.selectionStart),r=pre.split("\n").length,c=pre.length-pre.lastIndexOf("\n");
- $("fedpos").textContent=tf("Riga {0}, colonna {1}",r,c);var free=FS.total-FS.used,over=b>FS.max,nf=FS.total&&b+8192>free+(FE.orig!=null?new TextEncoder().encode(FE.orig).length:0);
- $("fedsz").textContent=fSize(b)+" / "+fSize(FS.max)+(FS.total?" · "+tf("liberi {0}",kb(free)):"");$("fedsz").className=over||nf?"bad":"";
+ $("fedpos").textContent=tf("Riga {0}, colonna {1}",r,c);var free=FS.total-FS.used,over=b>fMax(),nf=FS.total&&b+8192>free+(FE.orig!=null?new TextEncoder().encode(FE.orig).length:0);
+ $("fedsz").textContent=fSize(b)+" / "+fSize(fMax())+(FS.total?" · "+tf("liberi {0}",kb(free)):"");$("fedsz").className=over||nf?"bad":"";
  var jm="";if(/\.json$/i.test(FE.p)&&v.trim()){var je=fJsonErr(v);jm=je?"⚠ "+je:"✓ "+t("JSON corretto")}$("fedjs").textContent=jm;$("fedjs").className=jm.charAt(0)=="⚠"?"bad":"good";
  $("fedtab").textContent=FE.tabSp?t("Tab: inserisce spazi (Ctrl+M per cambiare)"):t("Tab: passa al pulsante successivo (Ctrl+M per cambiare)");fEdTitle()}
 function fJsonErr(v){try{JSON.parse(v);return""}catch(x){var m=String(x.message),p=m.match(/position (\d+)/),l=m.match(/line (\d+) column (\d+)/);
  if(l)return tf("errore alla riga {0}, colonna {1}",l[1],l[2]);if(p){var pre=v.substring(0,+p[1]);return tf("errore alla riga {0}, colonna {1}",pre.split("\n").length,pre.length-pre.lastIndexOf("\n"))}return t("errore nel JSON")}}
 function fEdSave(asNew,path,force){var v=$("fedx").value,p=path||FE.p,b=new TextEncoder().encode(v).length;
- if(b>FS.max){msg("fedm",tf("Troppo grande: massimo {0}",fSize(FS.max)),false);return Promise.resolve(false)}
+ if(b>fMax()){msg("fedm",tf("Troppo grande: massimo {0}",fSize(fMax())),false);return Promise.resolve(false)}
  if(!force&&/\.json$/i.test(p)&&v.trim()&&fJsonErr(v)){dlg({title:t("Il JSON ha un errore"),body:'<p style="margin:0">'+esc(fJsonErr(v))+'</p><p style="margin:8px 0 0;color:var(--mut)">'+esc(t("Se lo salvi cosi, chi lo legge potrebbe non funzionare."))+'</p>',ok:t("Salva lo stesso"),danger:true,onOk:function(){fEdSave(asNew,path,true);return""}});return Promise.resolve(false)}
  return post("/api/fs/save",{path:p,text:v,"new":(FE.isNew||asNew)?"1":"0"}).then(function(r){return r.json()}).then(function(j){
   if(!j.ok&&(FE.isNew||asNew)&&j.err==t("Esiste gia")){dlg({title:t("Sostituire il file?"),body:'<p style="margin:0">'+esc(tf("{0} esiste gia.",p))+'</p>',ok:t("Sostituisci"),danger:true,onOk:function(){FE.isNew=false;return post("/api/fs/save",{path:p,text:v,"new":"0"}).then(function(r){return r.json()}).then(function(j){if(j.ok)fEdSaved(p,v);return j.ok?"":j.err})}});return false}
@@ -241,4 +244,8 @@ function saveLed(){post("/api/led",{mode:$("l_mode").value,color:parseInt($("l_c
 var PM=[],PSEL=-1,PWARN=false,PTM=null,PT={gpio:-1};
 var PBI=null,PV="f",PNOTE={};
 var PWR={"5V":"#d64545","3V3":"#e08a2c","GND":"#222"};
-var PFL=["43","44","1","2","3","4","5","6","7"],PFR=["5V","GND","3V3","13","12","11","10","9","8"],PIL=[38,37,34,33,21,18,17,16,15,14],PIR=[36,35,48,47,46,45,42,41,40,39];
+/* scheda: tutti i numeri arrivano dal firmware (/api/pins/info, file di scheda); senza risposta niente disegno */
+function brdLay(k){return PBI&&PBI.lay&&PBI.lay[k]?PBI.lay[k].map(String):[]}
+function brdIn(k,g){var r=PBI&&PBI[k];return !!r&&g>=r[0]&&g<=r[1]}
+function brdMax(){return PBI&&PBI.gmax!=null?PBI.gmax:""}
+function brdLoad(){return api("/api/pins/info").then(function(r){return r.json()}).then(function(b){PBI=b;var e=$("io_g");if(e)e.max=brdMax();return b}).catch(function(){})}

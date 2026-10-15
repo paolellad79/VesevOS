@@ -26,7 +26,7 @@ DOCS = [  # id, titolo, testo
     ('gpl3',   'GNU General Public License v3.0', rd('licenses/GPL-3.0.txt')),
     ('lgpl21', 'GNU Lesser General Public License v2.1', rd('licenses/LGPL-2.1.txt')),
     ('apache2', 'Apache License 2.0', rd('licenses/Apache-2.0.txt')),
-    ('mit',    'MIT License (PsychicHttp, ArduinoJson, FreeRTOS, posix_tz_db)', rd('licenses/MIT.txt')),
+    ('mit',    'MIT License (PsychicHttp, ArduinoJson, FreeRTOS, posix_tz_db, Berry)', rd('licenses/MIT.txt')),
     ('bsd3',   'BSD 3-Clause License (lwIP, LittleFS)', rd('licenses/BSD-3-Clause.txt')),
 ]
 def cstr(t, step=7000):

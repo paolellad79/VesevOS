@@ -36,12 +36,16 @@
 #include "vos_web.h"
 #include "../packages/vos_power.h"
 #include "../packages/vos_stats.h"
-#include "../core/vos_selftest.h"
+#include "../packages/vos_berry.h"
+#include "../packages/vos_app.h"
+#include "../packages/vos_selftest.h"
 #include "../core/vos_diario.h"
 extern bool g_extmem;                 // definita in VesevOS.ino: i blocchi grandi vanno in PSRAM?
 #include "../drivers/vos_drv_fs.h"
 #include "../drivers/vos_drv_wifi.h"
 #include "../drivers/vos_drv_ota.h"
+#include "../core/vos_recupd.h"
+#include "../core/vos_crash.h"
 
 
 namespace shx {

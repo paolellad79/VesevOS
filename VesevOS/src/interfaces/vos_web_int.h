@@ -12,6 +12,7 @@
 #include "../security/vos_auth.h"
 #include "../core/vos_sys.h"
 #include "../net/vos_net.h"
+#include "../net/vos_wps.h"
 #include "../packages/vos_mqtt.h"
 #include "../devices/vos_led.h"
 #include "../devices/vos_pins.h"
@@ -36,11 +37,13 @@
 #include "../packages/vos_power.h"
 #include "../packages/vos_stats.h"
 #include "../core/vos_log.h"
-#include "../core/vos_selftest.h"
+#include "../packages/vos_selftest.h"
 #include "../core/vos_diario.h"
 #include "../drivers/vos_drv_fs.h"
 #include "../drivers/vos_drv_wifi.h"
 #include "../drivers/vos_drv_ota.h"
+#include "../core/vos_recupd.h"
+#include "../core/vos_crash.h"
 #include <PsychicHttp.h>
 #include <PsychicHttpsServer.h>
 
@@ -100,3 +103,5 @@ void routesDev(PsychicHttpServer* S, bool sec);     // vos_web_dev.cpp  : perife
 void routesSys(PsychicHttpServer* S, bool sec);     // vos_web_sys.cpp  : MQTT, autodiagnosi, ora, localizzazione
 void routesNet(PsychicHttpServer* S, bool sec);     // vos_web_net.cpp  : configurazione, filtro IP, watchdog, servizi di rete, HTTPS
 void routesFiles(PsychicHttpServer* S, bool sec);   // vos_web_files.cpp: rete tra schede, Bluetooth, file
+void routesScript(PsychicHttpServer* S, bool sec);  // vos_web_script.cpp: pagina Script (elenco, stato, avvio, stop)
+void routesApp(PsychicHttpServer* S, bool sec);     // vos_web_app.cpp: pagina App (elenco e controllo dei file .vap)

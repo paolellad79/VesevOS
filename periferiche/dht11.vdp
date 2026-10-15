@@ -1,0 +1,30 @@
+# Scheda periferica VesevOS (dati propri, licenza CC0). Controlla sempre i collegamenti sul datasheet del tuo modulo.
+# Stato: SOLO SCHEMA. Il firmware non ha ancora il driver DHT (protocollo a un filo con tempi in microsecondi):
+# la classe "ingresso" qui sotto serve solo a descrivere il pin DATA, non legge temperatura e umidita.
+# Modulo a 3 pin (con resistenza di pull-up gia montata): VCC, DATA, GND. Sensore nudo a 4 piedini: 1 VCC, 2 DATA, 3 non usato, 4 GND
+# (il sensore nudo vuole una resistenza da 4,7-10 kohm tra DATA e VCC).
+#
+# FILI ([pins]: pin del modulo = dove va sulla scheda, colore del filo)
+#   VCC   -> 3V3                      rosso   (alimentazione; il DHT11 accetta anche 5 V ma il segnale resta a 3,3 V con 3V3)
+#   DATA  -> un pin libero (GPIO)     giallo  (segnale)
+#   GND   -> GND                      nero    (massa)
+# Letture: al massimo una al secondo. Il DHT11 misura 0-50 C (circa +-2 C) e 20-80 % di umidita (circa +-5 %).
+[module]
+name=dht11
+title=Sensore DHT11 (solo schema)
+class=ingresso
+pull=none
+power=3V3
+level=3V3
+author=VesevOS
+version=1.1
+license=CC0
+warn=Solo schema: il driver DHT non c'e ancora, non legge temperatura e umidita
+[signals]
+DATA
+[pins]
+VCC=vcc,red
+DATA=DATA,yellow
+GND=gnd,black
+[icon]
+<svg viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2" fill="none" stroke="#2b7bbd" stroke-width="2"/><path d="M9 8h6M9 12h6M9 16h6" stroke="#2b7bbd" stroke-width="2"/></svg>

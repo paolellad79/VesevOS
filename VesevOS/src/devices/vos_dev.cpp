@@ -9,16 +9,12 @@
 #include "../core/vos_util.h"
 #include "../core/vos_log.h"
 #include "../core/vos_sys.h"
-#include "../net/vos_net.h"
+#include "../drivers/vos_drv_wifi.h"
 #include "vos_led.h"
 #include "vos_pins.h"
+#include "vos_io.h"
 #include "../core/vos_region.h"
 #include "../core/vos_service.h"
-#include "../packages/vos_mqtt.h"
-#include "../packages/vos_mesh.h"
-#include "../packages/vos_ble.h"
-#include "../packages/vos_mfa.h"
-#include "../packages/vos_stats.h"
 #include "../drivers/vos_drv_wifi.h"
 #include "../drivers/vos_drv_fs.h"
 #include <esp_heap_caps.h>
@@ -40,44 +36,6 @@ struct Rows {
 };
 static String kb(size_t b) { return String((unsigned long)(b / 1024)) + " KB"; }
 static String yn(bool b) { return String(b ? tr("si") : tr("no")); }
-static String errJson(const String& e) { return "{\"ok\":false,\"err\":\"" + jsonEscape(e) + "\"}"; }
-
-// ================= periferiche virtuali =================
-#if VOS_WITH_MQTT
-static int  st_mqtt() { return serviceState("mqtt"); }
-static bool set_mqtt(bool on, String& err) { if (!on) return serviceStop("mqtt", err); return serviceStart("mqtt", err); }
-static bool act_mqtt(const String& a, const String& arg, int role, String& out, String& err) {
-  if (a == "test") {
-    if (role < ROLE_OPER) { err = tr("Il tuo ruolo non permette questo comando"); return false; }
-    if (!mqttPublishRel("test", "VesevOS " VOS_VERSION)) { err = tr("MQTT non collegato"); return false; }
-    out = "{\"ok\":true}"; return true;
-  }
-  err = tr("Azione non valida"); return false;
-}
-#endif
-#if VOS_WITH_MESH
-static int  st_mesh() { return serviceState("mesh"); }
-static bool set_mesh(bool on, String& err) { if (!on) return serviceStop("mesh", err); return serviceStart("mesh", err); }
-#endif
-#if VOS_WITH_BLE
-static int  st_ble() { return serviceState("ble"); }
-static bool set_ble(bool on, String& err) { if (!on) return serviceStop("ble", err); return serviceStart("ble", err); }
-#endif
-#if VOS_WITH_MFA
-static int  st_mfa() { for (int i = 0; i < VOS_MAX_USERS; i++) if (cfg.users[i].name.length() && mfaOn(i)) return 1; return 0; }
-static String js_mfa() {
-  int n = 0, t = 0;
-  for (int i = 0; i < VOS_MAX_USERS; i++) if (cfg.users[i].name.length()) { t++; if (mfaOn(i)) n++; }
-  return "{\"users\":" + String(t) + ",\"on\":" + String(n) + "}";
-}
-#endif
-#if VOS_WITH_STATS
-static int  st_stat() { return cfg.statOn ? 1 : 0; }
-static bool set_stat(bool on, String& err) {
-  if (on && !cfg.statOn) statsReset();
-  cfg.statOn = on; cfgSetOrigin("periferiche"); cfgSave(); return true;
-}
-#endif
 
 // ================= hardware (Device Manager) =================
 static int st_one() { return 1; }
@@ -138,7 +96,7 @@ static bool act_led(const String& a, const String& arg, int role, String& out, S
 static String js_boot() {
   Rows r;
   r.add(tr("Premuto adesso"), yn(!drvGpioRead(VOS_PIN_BOOT)));
-  r.add(tr("Pressione breve"), tr("modo aereo"));
+  r.add(tr("Click veloci"), tr("1, 2 o 3: azioni scelte qui sopra"));
   r.add(tr("Tenuto 2 secondi"), tr("filtro IP"));
   r.add(tr("Tenuto 8 secondi"), tr("password"));
   r.add(tr("Tenuto 20 secondi"), tr("ripristino di fabbrica"));
@@ -188,27 +146,12 @@ static String js_rad() {
   r.add(tr("Limite del paese"), String(regionLimitDbm()) + " dBm");
   r.add(tr("Potenza in uso"), String(regionTxDbm()) + " dBm");
   r.add(tr("Antenna"), cfg.antExt ? String(tr("esterna")) + " (" + String((int)cfg.antGain) + " dBi)" : String(tr("interna")));
-  r.add("MAC Wi-Fi", netMac(false));
+  r.add("MAC Wi-Fi", drvWifiMac(false));
   return r.done();
 }
 
 // ================= la tabella =================
 static const DevOps DEVS[] = {
-#if VOS_WITH_MQTT
-  { "mqtt", "MQTT",              "Messaggi",   DEV_VIRT, "mqtt", ROLE_OPER,  st_mqtt, set_mqtt, mqttStatusJson, act_mqtt },
-#endif
-#if VOS_WITH_MESH
-  { "mesh", "ESP-NOW",           "Radio",      DEV_VIRT, "mesh", ROLE_GUEST, st_mesh, set_mesh, meshJson,       nullptr },
-#endif
-#if VOS_WITH_BLE
-  { "ble",  "Bluetooth",         "Radio",      DEV_VIRT, "ble",  ROLE_ADMIN, st_ble,  set_ble,  bleJson,        nullptr },
-#endif
-#if VOS_WITH_MFA
-  { "mfa",  "MFA (due passaggi)", "Sicurezza", DEV_VIRT, "mfa",  ROLE_GUEST, st_mfa,  nullptr,  js_mfa,         nullptr },
-#endif
-#if VOS_WITH_STATS
-  { "stat", "Statistiche",       "Misure",     DEV_VIRT, "stat", ROLE_OPER,  st_stat, set_stat, statsJson,      nullptr },
-#endif
   { "pin",  "Pin (GPIO)",        "Ingressi e uscite", DEV_HW, "pin",  ROLE_GUEST, st_one, nullptr, pinsJson,    act_pin },
   { "led",  "LED di stato",      "Luce",       DEV_HW,   "led",  ROLE_GUEST, st_led,  set_led,  js_led,         act_led },
   { "boot", "Tasto BOOT",        "Pulsante",   DEV_HW,   "btn", ROLE_GUEST, st_one,  nullptr,  js_boot,        nullptr },
@@ -218,23 +161,35 @@ static const DevOps DEVS[] = {
   { "cpu",  "Processore",        "Risorse",    DEV_HW,   "cpu",  ROLE_GUEST, st_one,  nullptr,  js_cpu,         nullptr },
   { "rad",  "Radio 2,4 GHz",     "Radio",      DEV_HW,   "rad",  ROLE_GUEST, st_rad,  nullptr,  js_rad,         nullptr },
 };
-#define NDEV ((int)(sizeof(DEVS) / sizeof(DEVS[0])))
+#define NHW ((int)(sizeof(DEVS) / sizeof(DEVS[0])))
 
+// periferiche virtuali dei package (MQTT, ESP-NOW, Bluetooth, MFA, statistiche): le iscrive il package (devSetVirtual), stanno in testa
+static const DevOps* g_virt = nullptr;
+static int g_nvirt = 0;
+void devSetVirtual(const DevOps* list, int n) { g_virt = list; g_nvirt = list ? n : 0; }
+
+#define NDEV (g_nvirt + NHW)
 int devCount() { return NDEV; }
-const DevOps* devAt(int i) { return (i >= 0 && i < NDEV) ? &DEVS[i] : nullptr; }
+const DevOps* devAt(int i) { return (i < 0 || i >= NDEV) ? nullptr : i < g_nvirt ? &g_virt[i] : &DEVS[i - g_nvirt]; }
 const DevOps* devFind(const String& id) {
-  for (int i = 0; i < NDEV; i++) if (id == DEVS[i].id) return &DEVS[i];
+  for (int i = 0; i < NDEV; i++) if (id == devAt(i)->id) return devAt(i);
   return nullptr;
 }
 
 String devListJson() {
   String j = "{\"dev\":[";
   for (int i = 0; i < NDEV; i++) {
-    const DevOps& d = DEVS[i];
+    const DevOps& d = *devAt(i);
     if (i) j += ",";
     j += "{\"id\":\"" + String(d.id) + "\",\"label\":\"" + jsonEscape(tr(d.label)) + "\",\"cap\":\"" + jsonEscape(tr(d.cap)) +
          "\",\"kind\":" + String((int)d.kind) + ",\"tab\":\"" + String(d.tab) + "\",\"state\":" + String(d.state()) +
          ",\"sw\":" + String(d.set ? 1 : 0) + ",\"act\":" + String(d.act ? 1 : 0) + "}";
+  }
+  for (int k = 0; k < ioCount(); k++) {                 // periferiche create dall'utente (classi)
+    String n = ioNameAt(k);
+    if (NDEV || k) j += ",";
+    j += "{\"id\":\"" + n + "\",\"label\":\"" + n + " (" + jsonEscape(tr(ioClassName(n))) + ")\",\"cap\":\"" + jsonEscape(tr("Periferiche")) +
+         "\",\"kind\":1,\"tab\":\"io\",\"state\":" + String(ioState(n)) + ",\"sw\":" + String(ioCanSwitch(n) ? 1 : 0) + ",\"act\":1}";
   }
   return j + "]}";
 }
@@ -242,16 +197,28 @@ String devListJson() {
 String devListText() {
   String t;
   for (int i = 0; i < NDEV; i++) {
-    const DevOps& d = DEVS[i];
+    const DevOps& d = *devAt(i);
     int s = d.state();
     String id = d.id; while (id.length() < 6) id += ' ';
     t += id + (d.kind == DEV_HW ? tr("hardware ") : tr("virtuale ")) + " " + (s == 1 ? tr("acceso") : s == 2 ? tr("con problema") : tr("spento")) +
          "  " + tr(d.label) + (d.set ? "" : String(" (") + tr("solo stato") + ")") + "\n";
   }
+  for (int k = 0; k < ioCount(); k++) {
+    String n = ioNameAt(k), id = n; while (id.length() < 6) id += ' ';
+    String st = ioState(n) == 1 ? tr("acceso") : tr("spento");
+    if (!strcmp(ioClassName(n), "i2c")) { int tv = 0; String e; if (ioGet(n, tv, e)) { char x[24]; snprintf(x, sizeof x, "%.1f C", tv / 100.0f); st = x; } else st = tr("non risponde"); }
+    t += id + tr("hardware ") + " " + st + "  " + n + " (" + tr(ioClassName(n)) + ")\n";
+  }
   return t;
 }
 
 String devStatusJson(const String& id, int role) {
+  if (ioHas(id)) {
+    if (role < ROLE_OPER) return "";
+    int v = 0; String e; ioGet(id, v, e);
+    char x[72]; snprintf(x, sizeof x, "\",\"state\":%d,\"sw\":%d,\"data\":{\"v\":%d}}", ioState(id), ioCanSwitch(id) ? 1 : 0, v);
+    return "{\"id\":\"" + id + "\",\"kind\":1,\"class\":\"" + ioClassName(id) + x;
+  }
   const DevOps* d = devFind(id);
   if (!d || role < d->jsonRole) return "";
   return "{\"id\":\"" + String(d->id) + "\",\"label\":\"" + jsonEscape(tr(d->label)) + "\",\"kind\":" + String((int)d->kind) +
@@ -259,6 +226,7 @@ String devStatusJson(const String& id, int role) {
 }
 
 bool devSet(const String& id, bool on, String& err) {
+  if (ioHas(id)) return ioSet(id, on ? 1 : 0, ROLE_ADMIN, err);       // chi arriva qui e gia Admin (percorso e shell)
   const DevOps* d = devFind(id);
   if (!d) { err = tr("Periferica sconosciuta"); return false; }
   if (!d->set) { err = tr("Questa periferica non si accende o si spegne da qui"); return false; }
@@ -268,9 +236,24 @@ bool devSet(const String& id, bool on, String& err) {
 }
 
 bool devAct(const String& id, const String& a, const String& arg, int role, String& out, String& err) {
+  if (ioHas(id)) {
+    out = "";
+    if (a == "get") { int v = 0; if (!ioGet(id, v, err)) return false; out = "{\"v\":" + String(v) + "}"; return true; }
+    if (a == "set" || a == "toggle") {
+      int v = 0;
+      if (a == "toggle") { ioGet(id, v, err); v = !v; } else v = arg.toInt() ? 1 : 0;
+      if (!ioSet(id, v, role, err)) return false;
+      out = "{\"v\":" + String(v) + "}"; return true;
+    }
+    if (a == "pulse") { if (!ioPulse(id, (uint32_t)arg.toInt(), role, err)) return false; out = "{\"ok\":true}"; return true; }
+    if (a == "blink") { if (!ioBlink(id, (uint32_t)arg.toInt(), role, err)) return false; out = "{\"ok\":true}"; return true; }
+    err = tr("Azione non valida"); return false;
+  }
   const DevOps* d = devFind(id);
   if (!d) { err = tr("Periferica sconosciuta"); return false; }
   if (!d->act) { err = tr("Questa periferica non ha azioni"); return false; }
   out = "";
   return d->act(a, arg, role, out, err);
 }
+
+bool devOffId(const char* id) { String e; return devSet(id, false, e); }

@@ -104,6 +104,27 @@
   <div class="sc" id="sc_mdns"></div>
   <div id="svm_mdns" class="msg"></div></div>
 </section>
+<section id="t_wps" class="hide">
+ <div class="card"><h3>WPS (collegamento con il router)</h3>
+  <p class="fhint">Il router manda alla scheda il nome e la password della tua Wi-Fi: non devi scriverli. Funziona con il tasto WPS del router, oppure con un PIN. Non funziona se il router e solo WPA3 o ha il WPS spento.</p>
+  <div class="sc" id="sc_wps"></div>
+  <p class="fhint" id="wps_setup"></p>
+  <div id="wpsm" class="msg"></div></div>
+ <div class="card adm"><h3>Collega adesso</h3>
+  <div id="wps_st" class="msg" role="status" aria-live="polite"></div>
+  <div id="wps_pin" class="hide"><p class="fhint">Scrivi questo PIN nella pagina WPS del router:</p><div class="big" id="wps_pinv"></div></div>
+  <button class="btn" id="wps_go" onclick="wpsGo('pbc')">Collega con il tasto del router</button>
+  <button class="btn gray" id="wps_gp" onclick="wpsGo('pin')">Collega con il PIN</button>
+  <button class="btn gray hide" id="wps_x" onclick="wpsCancel()">Annulla</button>
+  <p class="fhint" id="wps_nt"></p>
+  <p class="fhint">Premi il pulsante qui sopra e, entro 2 minuti, il tasto WPS del router. La scheda cambia rete: se sei collegato al suo hotspot la pagina si interrompe e poi si ricollega da sola.</p></div>
+ <div class="card adm"><h3>Impostazioni WPS</h3>
+  <div class="tog"><div>Consenti il metodo con PIN</div><button class="sw1" id="wps_swp" data-tt onclick="wpsOpt('pinOk',this)" aria-label="Metodo con PIN"></button></div>
+  <p class="fhint">Il PIN lo crea la scheda a ogni prova e vale 2 minuti. Se lo lasci spento resta solo il tasto del router (piu sicuro).</p>
+  <p class="fhint" id="wps_bt"></p>
+  <p class="fhint">Chi ha la scheda in mano potrebbe collegarla alla sua rete: tieni il WPS spento (o togli l'azione dal tasto) se la scheda non e al sicuro. Lo stesso gesto ferma anche una prova in corso. Il LED lo dice: blu che respira = in attesa, verde = riuscito, rosso = errore.</p>
+  <div id="wps_om" class="msg"></div></div>
+</section>
 <section id="t_ble" class="hide">
  <div class="card adm" id="blecard"><h3>Bluetooth per telefono e applicazioni</h3>
   <p class="fhint">Resta spento finche non lo accende la pagina, la shell o un'applicazione, e resta acceso finche non lo si spegne (l'applicazione puo anche dare un tempo). Serve circa 70 KB di memoria: se la scheda rifiuta, chiudi le altre pagine web e riprova. Il telefono si accoppia con il codice mostrato qui e scrive i comandi: wifi rete|password, country IT, name cucina, mesh 0 chiave, status, done.</p>
@@ -206,9 +227,23 @@
 </section>
 <section id="t_btn" class="hide">
  <div class="card"><h3>Tasto BOOT</h3>
-  <p class="fhint">Il pulsante BOOT della scheda (GPIO0): le pressioni lunghe servono al recupero.</p>
+  <p class="fhint">Il pulsante BOOT della scheda (GPIO0): le pressioni lunghe (2, 8 e 20 secondi) servono al recupero e non si cambiano.</p>
   <div id="dv_btn"></div>
  </div>
+
+ <div class="card adm"><h3>Azioni dei click</h3>
+  <p class="fhint">Premi e lascia il tasto in fretta, 1, 2 o 3 volte: la scheda aspetta mezzo secondo dopo l'ultimo click e poi fa l'azione scelta. Il LED fa un lampo quando ha capito.</p>
+  <label for="bt_c1">1 click</label><select id="bt_c1" onchange="btnSave(1,this)"></select>
+  <label for="bt_c2">2 click</label><select id="bt_c2" onchange="btnSave(2,this)"></select>
+  <label for="bt_c3">3 click</label><select id="bt_c3" onchange="btnSave(3,this)"></select>
+  <p class="fhint law hide" id="bt_w"></p>
+  <p class="fhint" id="bt_f"></p>
+  <div id="btm" class="msg"></div></div>
+ <div class="card adm"><h3>Prova del tasto</h3>
+  <p class="fhint">Per 60 secondi il tasto non fa niente (nemmeno le pressioni lunghe): qui vedi cosa la scheda capisce. Poi torna normale da solo.</p>
+  <button class="btn" id="bt_t" onclick="btnTest()">Avvia la prova</button>
+  <div id="bt_ts" class="msg" role="status" aria-live="polite"></div>
+  <div id="bt_tl" class="big"></div></div>
 </section>
 <section id="t_usb" class="hide">
  <div class="card"><h3>USB</h3>
@@ -253,6 +288,31 @@
  <div class="card"><h3>Inventario dei pin</h3>
   <p class="fhint">Scrivi a cosa colleghi ogni pin (per esempio "sensore porta"): il nome resta salvato nella configurazione e il sistema ti avvisa se una funzione vuole un pin gia segnato.</p>
   <div style="overflow-x:auto"><table id="pininv" class="ftab"></table></div><div id="pinvm" class="msg"></div></div>
+</section>
+<section id="t_io" class="hide">
+ <div id="io_main">
+  <div class="card"><h3>Periferiche</h3>
+   <p class="fhint">Rele, LED, pin e ingressi con un nome (rele1, led1...). Tocca una periferica per gestirla e provarla. Le app li usano scrivendo il nome in use= e poi dev_set("rele1", 1) o dev_get("in1"). Dopo ogni riavvio le uscite sono spente.</p>
+   <div style="overflow-x:auto"><table id="io_tab" class="ftab"></table></div><div id="io_m" class="msg" role="status"></div>
+  </div>
+  <div class="card" id="io_mods"><h3>Schede modulo</h3>
+   <p class="fhint">Una scheda modulo (.vdp) descrive un modulo gia pronto, con icona e schema dei collegamenti. Scegline una: la scheda propone i pin liberi e crea le periferiche. Sono solo dati, senza codice.</p>
+   <div id="io_ml"></div>
+   <div class="ftb"><label class="btn gray" for="io_mf" tabindex="0" onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();$('io_mf').click()}"><svg class="i" aria-hidden="true"><use href="#i-upl"/></svg><span>Carica scheda modulo</span></label><input type="file" id="io_mf" class="sr" accept=".vdp,.txt" onchange="ioModUp()"></div>
+   <div id="io_mm" class="msg" role="status"></div>
+  </div>
+  <div class="card" id="io_new"><h3>Aggiungi una periferica a mano</h3>
+   <div class="agrid">
+    <div><label for="io_c">Classe</label><select id="io_c"><option value="rele">Rele</option><option value="led">LED</option><option value="pin">Pin (uscita)</option><option value="ingresso">Ingresso</option><option value="analogico">Analogico (pin 1-10)</option></select></div>
+    <div><label for="io_g">Pin (GPIO)</label><input type="number" id="io_g" min="1" inputmode="numeric"></div>
+    <div><label for="io_n">Nome (facoltativo)</label><input id="io_n" maxlength="11" autocomplete="off"></div>
+    <div><label for="io_o">Modo</label><select id="io_o"><option value="">Normale</option><option value="inv">Attivo basso (acceso = livello 0)</option><option value="up">Ingresso con pull-up</option><option value="down">Ingresso con pull-down</option></select></div>
+   </div>
+   <button class="btn" onclick="ioAdd()">Aggiungi</button><div id="io_am" class="msg"></div>
+   <p class="fhint">Il pin viene controllato: non si possono usare USB, tasto BOOT, LED della scheda, pin di avvio o pin gia usati. Massimo 16 periferiche. Un rele collegato alla rete elettrica richiede un modulo a norma e un installatore: VesevOS comanda solo il segnale.</p>
+  </div>
+ </div>
+ <div id="io_det" class="card hide"></div>
 </section>
 <section id="t_acc" class="hide">
  <div class="card" id="acc"><h3>Accessibilita</h3>

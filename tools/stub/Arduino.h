@@ -22,7 +22,7 @@ typedef bool boolean; typedef uint8_t byte;
 struct EspClass{uint32_t getFreeHeap(){return 0;} uint32_t getHeapSize(){return 0;} uint32_t getMinFreeHeap(){return 0;} uint32_t getMaxAllocHeap(){return 0;} uint32_t getFreePsram(){return 0;} uint32_t getPsramSize(){return 0;} const char*getChipModel(){return "";} uint8_t getChipRevision(){return 0;} uint8_t getChipCores(){return 2;} const char*getSdkVersion(){return "";} const char*getCoreVersion(){return "";} void restart(){} uint32_t getFlashChipSize(){return 0;} uint32_t getCpuFreqMHz(){return 0;} uint64_t getEfuseMac(){return 0;} uint32_t getSketchSize(){return 0;} uint32_t getFreeSketchSpace(){return 0;}};
 extern EspClass ESP;
 unsigned long millis(); unsigned long micros(); void delay(unsigned long); uint32_t getCpuFrequencyMhz(); bool setCpuFrequencyMhz(uint32_t);
-void pinMode(uint8_t,uint8_t); void digitalWrite(uint8_t,uint8_t); int digitalRead(uint8_t); void yield();
+void pinMode(uint8_t,uint8_t); void digitalWrite(uint8_t,uint8_t); int digitalRead(uint8_t); int analogRead(uint8_t); void yield();
 void enableLoopWDT(); void disableLoopWDT(); void feedLoopWDT();
 #define HIGH 1
 #define LOW 0
@@ -42,3 +42,7 @@ inline bool isDigit(char c){return c>=48&&c<=57;}
 inline bool psramFound(){return true;} inline void* ps_malloc(size_t n){return malloc(n);}
 #include "esp_random.h"
 #include "IPAddress.h"
+// gestore dei crash del core Arduino (esp32-hal.h)
+typedef struct { int core; const char* reason; const void* pc; bool backtrace_corrupt; bool backtrace_continues; unsigned int backtrace_len; unsigned int backtrace[60]; } arduino_panic_info_t;
+typedef void (*arduino_panic_handler_t)(arduino_panic_info_t* info, void* arg);
+inline void set_arduino_panic_handler(arduino_panic_handler_t, void*) {}

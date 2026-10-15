@@ -14,4 +14,5 @@ void shellWelcome(Print& out, bool full);
 
 // Gestione shell seriale (da chiamare spesso dal loop o da un task)
 void shellSerialPoll();
+String shellSerialWho();      // riga "seriale" per il comando who (stato e ultimo comando, solo la prima parola)
 void shellSerialShowPass();   // tasto BOOT 8 s: rimostra la schermata con la password dell'hotspot

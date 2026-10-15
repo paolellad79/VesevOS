@@ -4,6 +4,7 @@
 #include "vos_drv_wifi.h"
 #include <WiFi.h>
 #include <esp_wifi.h>
+#include <esp_mac.h>
 
 static uint32_t toNum(IPAddress a) { return ((uint32_t)a[0] << 24) | ((uint32_t)a[1] << 16) | ((uint32_t)a[2] << 8) | (uint32_t)a[3]; }
 static IPAddress toIp(uint32_t v) { return IPAddress((v >> 24) & 255, (v >> 16) & 255, (v >> 8) & 255, v & 255); }
@@ -73,3 +74,11 @@ int    drvWifiScanRssi(int i) { return WiFi.RSSI(i); }
 int    drvWifiScanChannel(int i) { return WiFi.channel(i); }
 bool   drvWifiScanOpen(int i) { return WiFi.encryptionType(i) == WIFI_AUTH_OPEN; }
 void   drvWifiScanClear() { WiFi.scanDelete(); }
+
+String drvWifiMac(bool ap) {
+  uint8_t m[6] = {0};
+  if (esp_read_mac(m, ap ? ESP_MAC_WIFI_SOFTAP : ESP_MAC_WIFI_STA) != ESP_OK) return "";
+  char b[18];
+  snprintf(b, sizeof(b), "%02X:%02X:%02X:%02X:%02X:%02X", m[0], m[1], m[2], m[3], m[4], m[5]);
+  return String(b);
+}

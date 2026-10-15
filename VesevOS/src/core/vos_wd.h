@@ -14,4 +14,5 @@ String wdJson();
 String wdText();
 void   wdStalest(char* out, size_t n);        // servizio con il battito piu vecchio ("nome 12s"), per il diario
 String wdLastReason();                        // motivo dell'ultimo riavvio automatico ("" se nessuno)
-void   wdReboot(const String& why);           // riavvio con motivo salvato (anche da altri moduli)
+void   wdReboot(const String& why);           // riavvio AUTOMATICO: conta per l'antiloop, poi sysReboot
+void   sysReboot(const char* why, uint32_t waitMs);   // UNICO punto di riavvio: motivo nel diario dei riavvii, attesa, poi il driver

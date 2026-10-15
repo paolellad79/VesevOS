@@ -11,3 +11,4 @@ enum DrvGpioMode : uint8_t { DG_INPUT = 0, DG_INPUT_PULLUP = 1, DG_INPUT_PULLDOW
 void drvGpioMode(int gpio, DrvGpioMode m);
 void drvGpioWrite(int gpio, bool high);
 bool drvGpioRead(int gpio);
+int  drvGpioAnalog(int gpio);          // lettura analogica 0..4095 (ADC1: GPIO1-10 sul S3)

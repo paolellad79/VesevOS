@@ -22,11 +22,13 @@ struct DevOps {
   bool (*act)(const String& a, const String& arg, int role, String& out, String& err);   // azioni (nullptr = nessuna)
 };
 
+void           devSetVirtual(const DevOps* list, int n);   // periferiche virtuali dei package (le iscrive packages/vos_dev_pkg), in testa all'elenco
 int            devCount();
 const DevOps*  devAt(int i);
 const DevOps*  devFind(const String& id);
 String         devListJson();                          // {"dev":[{id,label,cap,kind,tab,state,sw,act}]}
 String         devListText();                          // per la shell
 String         devStatusJson(const String& id, int role);   // dettagli; "" se non esiste o ruolo insufficiente
+bool           devOffId(const char* id);                  // spegne la periferica (per il watchdog); false se non c'e o non si spegne
 bool           devSet(const String& id, bool on, String& err);
 bool           devAct(const String& id, const String& a, const String& arg, int role, String& out, String& err);

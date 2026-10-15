@@ -8,7 +8,7 @@
 // Con VOS_WITH_BLE = 0 il driver non c'e.
 #pragma once
 #include <Arduino.h>
-#include "../core/vos_common.h"
+#include "../boards/vos_packages.h"
 
 #if VOS_WITH_BLE
 typedef void (*BleRxCb)(const String& text);      // e arrivato un testo (chiamata dal task Bluetooth: solo mettere da parte, lavoro lungo no)

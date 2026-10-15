@@ -8,7 +8,7 @@
 #include "../devices/vos_led.h"
 #include "../core/vos_log.h"
 #include "../core/vos_i18n.h"
-#include "../interfaces/vos_web.h"
+#include "../core/vos_hooks.h"
 #include "../drivers/vos_drv_wifi.h"
 #include <esp_sleep.h>
 #include <driver/gpio.h>
@@ -74,7 +74,7 @@ void powerTick() {
   applyPs();
   if (cfg.pwMode != 2 || !cfg.setupDone) return;
   if (sleepInSec() > 0) return;
-  if (webIdleSec() < 60) return;                       // qualcuno sta usando la pagina: si aspetta
+  if (hookWebIdleSec() < 60) return;                       // qualcuno sta usando la pagina: si aspetta
   powerSleepNow(cfg.pwSleep * 60UL);
 }
 

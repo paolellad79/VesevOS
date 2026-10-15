@@ -6,7 +6,7 @@
 #include "../core/vos_log.h"
 #include "../core/vos_i18n.h"
 #include "../core/vos_util.h"
-#include <Preferences.h>
+#include "../drivers/vos_drv_nvs.h"
 #include "esp_random.h"
 #include "mbedtls/pk.h"
 #include "mbedtls/ecp.h"
@@ -94,7 +94,7 @@ static bool generate(bool apply) {
   mbedtls_x509write_crt_free(&crt);
   mbedtls_pk_free(&key);
   if (!ok) { vlog("TLS: creazione del certificato non riuscita"); return false; }
-  Preferences p;
+  DrvNvs p;
   if (p.begin("tls", false)) { p.putString("cert", cert); p.putString("key", kpem); p.putString("name", cfg.hostname); p.putBool("custom", false); p.end(); }
   if (apply) { g_cert = cert; g_key = kpem; g_fp = fp; g_name = cfg.hostname; g_custom = false; }   // mai mentre il server lo sta usando
   else g_pending = true;
@@ -104,7 +104,7 @@ static bool generate(bool apply) {
 
 bool tlsEnsure() {
   if (!g_cert.length()) {
-    Preferences p;
+    DrvNvs p;
     if (p.begin("tls", true)) { g_cert = p.getString("cert", ""); g_key = p.getString("key", ""); g_name = p.getString("name", ""); g_custom = p.getBool("custom", false); p.end(); }
     if (g_cert.length()) g_fp = fpOfPem(g_cert);
   }
@@ -126,7 +126,7 @@ bool tlsSetCustom(const String& cert, const String& key, String& err) {
   int r = mbedtls_pk_parse_key(&k, (const unsigned char*)key.c_str(), key.length() + 1, NULL, 0, rng, NULL);
   mbedtls_pk_free(&k);
   if (r != 0) { err = tr("Chiave non valida (deve essere senza password)"); return false; }
-  Preferences p;
+  DrvNvs p;
   if (!p.begin("tls", false)) { err = tr("Memoria non disponibile"); return false; }
   p.putString("cert", cert); p.putString("key", key); p.putString("name", cfg.hostname); p.putBool("custom", true); p.end();
   g_pending = true;                                    // il server in funzione usa ancora il vecchio: vale dal riavvio

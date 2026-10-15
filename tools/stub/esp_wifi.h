@@ -21,3 +21,7 @@ esp_err_t esp_wifi_get_channel(uint8_t* primary, wifi_second_chan_t* second);
 esp_err_t esp_wifi_set_promiscuous(bool en);
 typedef enum { WIFI_PS_NONE, WIFI_PS_MIN_MODEM, WIFI_PS_MAX_MODEM } wifi_ps_type_t;
 esp_err_t esp_wifi_set_ps(wifi_ps_type_t type);
+// --- per il WPS (vos_drv_wps) ---
+typedef struct { uint8_t ssid[32]; uint8_t password[64]; } wifi_sta_config_t;
+typedef union { wifi_sta_config_t sta; } wifi_config_t;
+esp_err_t esp_wifi_get_config(wifi_interface_t interface, wifi_config_t* conf);

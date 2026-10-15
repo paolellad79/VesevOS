@@ -22,7 +22,19 @@
 #if VOS_WITH_MQTT
 static volatile bool g_conn = false, g_onConnect = false, g_stopReq = false;
 static volatile uint32_t g_sent = 0, g_recv = 0;
-static String g_lastErr = "";
+// ultimo errore come NUMERO: lo scrive anche il task del client MQTT e un numero si legge da un altro task senza rischi
+// (un String condiviso tra task puo rompere la memoria). Il testo tradotto si fa solo quando serve (errText).
+enum { ME_NONE = 0, ME_REFUSED, ME_UNREACH, ME_NOHOST, ME_NOMEM };
+static volatile uint8_t g_err = ME_NONE;
+static const char* errText() {
+  switch (g_err) {
+    case ME_REFUSED: return tr("Broker: accesso rifiutato (utente o password?)");
+    case ME_UNREACH: return tr("Broker non raggiungibile");
+    case ME_NOHOST: return tr("Manca l'indirizzo del broker");
+    case ME_NOMEM: return tr("Memoria insufficiente");
+    default: return "";
+  }
+}
 static String g_uri, g_user, g_pass, g_id, g_will, g_ca;   // restano vivi finche il client esiste
 static SemaphoreHandle_t g_mx = NULL;
 #define QN 4
@@ -43,20 +55,20 @@ bool mqttPublishRel(const String& sub, const String& payload, bool retain) {
   if (!drvMqttIsOpen() || !g_conn) return false;
   String t = mqttPrefix() + "/" + sub;
   bool ok = drvMqttPublish(t.c_str(), payload.c_str(), payload.length(), 0, retain);
-  if (ok) g_sent++;
+  if (ok) g_sent = g_sent + 1;
   return ok;
 }
 
 static void pubAbs(const String& topic, const String& payload, bool retain) {
-  if (drvMqttPublish(topic.c_str(), payload.c_str(), payload.length(), 1, retain)) g_sent++;
+  if (drvMqttPublish(topic.c_str(), payload.c_str(), payload.length(), 1, retain)) g_sent = g_sent + 1;
 }
 
 // dal driver (task del client MQTT): si mettono da parte i dati, si lavora nel task del servizio
-static void onConnect() { bool was = g_conn; g_conn = true; g_onConnect = true; g_lastErr = ""; if (!was) EventBus::publish("mqtt.link", "", 1); }
+static void onConnect() { bool was = g_conn; g_conn = true; g_onConnect = true; g_err = ME_NONE; if (!was) EventBus::publish("mqtt.link", "", 1); }
 static void onDisconnect() { bool was = g_conn; if (g_conn) vlog("MQTT: scollegato dal broker"); g_conn = false; if (was) EventBus::publish("mqtt.link", "", 0); }
-static void onError(bool refused) { g_lastErr = refused ? tr("Broker: accesso rifiutato (utente o password?)") : tr("Broker non raggiungibile"); }
+static void onError(bool refused) { g_err = refused ? ME_REFUSED : ME_UNREACH; }
 static void onData(const char* topic, int topicLen, const char* data, int dataLen, int totalLen) {
-  g_recv++;
+  g_recv = g_recv + 1;
   if (dataLen <= 0 || dataLen > 200 || totalLen != dataLen) return;   // solo comandi brevi, in un pezzo
   String t = String(topic).substring(0, topicLen);
   if (t != mqttPrefix() + "/cmd") return;
@@ -148,7 +160,7 @@ static void mqttTask(void*) {
 void mqttStart() {
   if (mqttRunning()) mqttStop();
   if (!g_mx) g_mx = xSemaphoreCreateMutex();
-  if (!cfg.mqttHost.length()) { g_lastErr = tr("Manca l'indirizzo del broker"); vlog("MQTT: manca l'indirizzo del broker"); return; }
+  if (!cfg.mqttHost.length()) { g_err = ME_NOHOST; vlog("MQTT: manca l'indirizzo del broker"); return; }
   g_uri = String(cfg.mqttTls ? "mqtts://" : "mqtt://") + cfg.mqttHost + ":" + String(cfg.mqttPort);
   g_user = cfg.mqttUser; g_pass = cfg.mqttPass; g_id = devId();
   g_will = mqttPrefix() + "/status";
@@ -159,7 +171,7 @@ void mqttStart() {
   }
   MqttDrvConfig dc = { g_uri.c_str(), g_id.c_str(), g_user.c_str(), g_pass.c_str(), g_will.c_str(), "offline", g_ca.c_str(), cfg.mqttTls, 30, 10000,
                        onConnect, onDisconnect, onData, onError };
-  if (!drvMqttBegin(dc)) { g_lastErr = tr("Memoria insufficiente"); return; }
+  if (!drvMqttBegin(dc)) { g_err = ME_NOMEM; return; }
   g_stopReq = false;
   xTaskCreatePinnedToCore(mqttTask, "mqtt", 6144, NULL, 1, NULL, 1);
   vlog("MQTT: avvio verso %s (argomenti %s/...)", g_uri.c_str(), mqttPrefix().c_str());
@@ -195,7 +207,7 @@ String mqttStatusJson() {
   j += ",\"prefix\":\"" + jsonEscape(cfg.mqttPrefix) + "\",\"prefixUsed\":\"" + jsonEscape(mqttPrefix()) + "\"";
   j += ",\"every\":" + String(cfg.mqttEvery) + ",\"ha\":" + String(cfg.mqttHa ? "true" : "false") +
        ",\"tls\":" + String(cfg.mqttTls ? "true" : "false") + ",\"hasCa\":" + String(drvFsExists("/mqtt-ca.pem") ? "true" : "false");
-  j += ",\"sent\":" + String((unsigned long)g_sent) + ",\"recv\":" + String((unsigned long)g_recv) + ",\"err\":\"" + jsonEscape(g_lastErr) + "\"}";
+  j += ",\"sent\":" + String((unsigned long)g_sent) + ",\"recv\":" + String((unsigned long)g_recv) + ",\"err\":\"" + jsonEscape(errText()) + "\"}";
   return j;
 }
 
@@ -205,7 +217,7 @@ String mqttStatusText() {
   t += trf("Broker: %s:%u  avvio automatico: %s", cfg.mqttHost.length() ? cfg.mqttHost.c_str() : "-", (unsigned)cfg.mqttPort, cfg.mqttAuto ? "si" : "no") + "\n";
   t += trf("Argomenti: %s/state, %s/cmd", mqttPrefix().c_str(), mqttPrefix().c_str()) + "\n";
   t += trf("Inviati %lu, ricevuti %lu", (unsigned long)g_sent, (unsigned long)g_recv) + "\n";
-  if (g_lastErr.length()) t += trf("Ultimo errore: %s", g_lastErr.c_str()) + "\n";
+  if (g_err != ME_NONE) t += trf("Ultimo errore: %s", errText()) + "\n";
   return t;
 }
 #endif  // VOS_WITH_MQTT

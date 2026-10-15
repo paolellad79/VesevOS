@@ -12,6 +12,8 @@ P="$1"; D="$2"; F="$3"
 B="$D/VesevOS_Recovery.ino.bootloader.bin"; T="$D/VesevOS_Recovery.ino.partitions.bin"; R="$D/VesevOS_Recovery.ino.bin"
 for f in "$B" "$T" "$R"; do [ -f "$f" ] || { echo "Manca il file: $f"; exit 1; }; done
 [ -n "$F" ] && [ ! -f "$F" ] && { echo "Manca il file: $F"; exit 1; }
+. "$(cd "$(dirname "$0")" && pwd)/controlli.sh"
+vos_chk_rec "$R"; [ -n "$F" ] && vos_chk_fw "$F"
 sz() { stat -f%z "$1" 2>/dev/null || stat -c%s "$1"; }
 [ "$(sz "$R")" -gt 1048576 ] && { echo "STOP: il recovery ($(sz "$R") byte) supera 1 MB: non entra nella sua partizione."; exit 1; }
 [ -n "$F" ] && [ "$(sz "$F")" -gt 2424832 ] && { echo "STOP: il firmware ($(sz "$F") byte) supera lo slot (2.424.832 byte)."; exit 1; }

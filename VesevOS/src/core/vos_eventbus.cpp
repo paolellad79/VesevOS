@@ -10,7 +10,11 @@ static Event     g_ring[EventBus::CAP];
 static uint32_t  g_seq = 0;
 static SubSlot   g_sub[EventBus::MAXSUB];
 static SemaphoreHandle_t g_mx = nullptr;
-static volatile uint8_t  g_depth = 0;        // anti-ricorsione: un gestore che pubblica non fa partire altri gestori
+// anti-ricorsione PER TASK: un gestore che pubblica non fa partire altri gestori, ma due task diversi che pubblicano insieme
+// vengono serviti tutti e due (prima il segno era unico e l'evento del secondo task spariva in silenzio)
+#define EB_TASKS 6
+static TaskHandle_t g_inT[EB_TASKS];
+static bool         g_inU[EB_TASKS];
 
 static void lockEb()   { if (!g_mx) g_mx = xSemaphoreCreateMutex(); if (g_mx) xSemaphoreTake(g_mx, portMAX_DELAY); }
 static void unlockEb() { if (g_mx) xSemaphoreGive(g_mx); }
@@ -30,12 +34,14 @@ void EventBus::publish(const char* topic, const char* arg, int32_t val) {
   e.seq = ++g_seq; if (e.seq == 0) e.seq = ++g_seq;
   g_ring[e.seq % CAP] = e;
   SubSlot subs[MAXSUB]; memcpy(subs, g_sub, sizeof(subs));   // gestori chiamati FUORI dal blocco
+  TaskHandle_t me = xTaskGetCurrentTaskHandle();
+  int slot = -1;
+  for (int i = 0; i < EB_TASKS; i++) if (g_inU[i] && g_inT[i] == me) { unlockEb(); return; }   // pubblicato da un gestore di questo task
+  for (int i = 0; i < EB_TASKS; i++) if (!g_inU[i]) { g_inU[i] = true; g_inT[i] = me; slot = i; break; }
   unlockEb();
-  if (g_depth > 0) return;
-  g_depth++;
   for (int i = 0; i < MAXSUB; i++)
     if (subs[i].h && strncmp(e.topic, subs[i].prefix, strlen(subs[i].prefix)) == 0) subs[i].h(e);
-  g_depth--;
+  if (slot >= 0) { lockEb(); g_inU[slot] = false; unlockEb(); }
 }
 
 bool EventBus::subscribe(const char* prefix, Handler h) {
@@ -100,4 +106,4 @@ String EventBus::json(uint32_t seq, int max) {
 
 uint32_t EventBus::ramBytes() { return sizeof(g_ring) + sizeof(g_sub) + 16; }
 
-void EventBus::reset() { lockEb(); g_seq = 0; memset(g_ring, 0, sizeof(g_ring)); memset(g_sub, 0, sizeof(g_sub)); unlockEb(); }
+void EventBus::reset() { lockEb(); g_seq = 0; memset(g_ring, 0, sizeof(g_ring)); memset(g_sub, 0, sizeof(g_sub)); memset(g_inU, 0, sizeof(g_inU)); unlockEb(); }

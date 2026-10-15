@@ -4,6 +4,9 @@
 // Percorsi del server web: periferiche, pin, LED, automazioni. Aiuti e tipi condivisi: vos_web_int.h.
 #include "vos_web_int.h"
 #include "../core/vos_eventbus.h"
+#include "../devices/vos_io.h"
+#include "../devices/vos_mod.h"
+#include "../packages/vos_btn.h"
 
 void routesDev(PsychicHttpServer* S, bool sec) {
   // ---- periferiche (virtuali e hardware): stesso modo di rispondere per tutte ----
@@ -23,6 +26,30 @@ void routesDev(PsychicHttpServer* S, bool sec) {
     if (!devAct(P(r, "id"), P(r, "a"), P(r, "arg"), c.role, out, e)) return ko(s, e);
     return out.length() ? sendJson(s, out) : ok(s);
   });
+  // Periferiche a classi (rele, led, pin, ingresso, analogico, i2c): elenco per chi puo vedere, modifiche solo Admin
+  add(S, sec, "/api/io", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, ioListJson()); });
+  add(S, sec, "/api/io/add", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    String nm, e;
+    if (!ioAdd(P(r, "cls"), P(r, "gpio").toInt(), P(r, "name"), P(r, "opt"), nm, e)) return ko(s, e);
+    auditEvent(AUD_INFO, "", trf("periferica %s creata (%s)", nm.c_str(), who(c).c_str()));
+    return sendJson(s, "{\"ok\":true,\"n\":\"" + nm + "\"}");
+  });
+  add(S, sec, "/api/io/del", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    String e; if (!ioRemove(P(r, "n"), e)) return ko(s, e);
+    auditEvent(AUD_INFO, "", trf("periferica %s tolta (%s)", P(r, "n").c_str(), who(c).c_str())); return ok(s);
+  });
+  add(S, sec, "/api/io/rename", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t { String e; return ioRename(P(r, "n"), P(r, "to"), e) ? ok(s) : ko(s, e); });
+  // Schede modulo (.vdp): elenco e dettagli per chi puo vedere; installare, caricare ed eliminare solo Admin
+  add(S, sec, "/api/mods", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, modListJson()); });
+  add(S, sec, "/api/mod", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, modInfoJson(P(r, "name"))); });
+  add(S, sec, "/api/mod/install", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    String out, e;
+    if (!modInstall(P(r, "name"), P(r, "prefix"), out, e)) return ko(s, e);
+    auditEvent(AUD_INFO, "", trf("scheda modulo %s installata (%s)", P(r, "name").c_str(), who(c).c_str()));
+    return sendJson(s, out);
+  });
+  add(S, sec, "/api/mod/save", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t { String e; return modSave(P(r, "name"), P(r, "text"), e) ? ok(s) : ko(s, e); });
+  add(S, sec, "/api/mod/del", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t { String e; return modDelete(P(r, "name"), e) ? ok(s) : ko(s, e); });
   add(S, sec, "/api/pins", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, pinsJson()); });
   add(S, sec, "/api/pins/info", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, pinBoardJson()); });
   add(S, sec, "/api/pinmap", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, pinMapJson()); });
@@ -62,6 +89,20 @@ void routesDev(PsychicHttpServer* S, bool sec) {
     cfg.serialAuth = (P(r, "on") != "0"); cfgSave();
     vlog("SICUREZZA: password sulla seriale %s", cfg.serialAuth ? "attivata" : "disattivata");
     return ok(s);
+  });
+  // ---- tasto BOOT: azione di 1, 2 e 3 click ----
+  add(S, sec, "/api/btn", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, btnJson()); });
+  add(S, sec, "/api/btn", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    String e; bool any = false;
+    for (int n = 1; n <= BTN_CLICKS; n++) {
+      String k = "c" + String(n);
+      if (!has(r, k.c_str())) continue;
+      if (!btnSetAction(n, (int)P(r, k.c_str()).toInt(), e)) return ko(s, e);
+      any = true;
+    }
+    if (has(r, "test")) btnTestSet(P(r, "test") == "1");
+    if (any) { cfgSetOrigin("web admin " + ipToStr(c.ip)); cfgSave(); }
+    return sendJson(s, btnJson());
   });
   add(S, sec, "/api/identify", HTTP_POST, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t { ledIdentify(10000); return ok(s); });
   add(S, sec, "/api/tasklist", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, sysTasksJson()); });

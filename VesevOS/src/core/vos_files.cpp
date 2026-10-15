@@ -24,7 +24,7 @@ String fsClean(const String& in) {
 }
 
 bool fsProtected(const String& p) {
-  return p.startsWith("/vesevos.conf");
+  return p.startsWith("/vesevos.conf") || p == "/audit.log" || p == "/crash.txt";   // configurazione e storico del registro: solo dal firmware
 }
 
 static bool okPath(const String& raw, String& p, String& err) {

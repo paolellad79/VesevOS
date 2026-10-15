@@ -47,8 +47,10 @@ struct VosConfig {
   String ip, mask, gw, dns1, dns2;
   String authSalt, authHash;     // SOLO per leggere i file vecchi (1.7.0): diventano l'utente "admin"
   VosUser users[VOS_MAX_USERS];
-  String pinNote[49];            // inventario pin: "collegato a ..." scritto dall'utente (indice = GPIO)
+  String pinNote[VOS_GPIO_COUNT];            // inventario pin: "collegato a ..." scritto dall'utente (indice = GPIO)
   bool   apQr;                   // true = il QR Wi-Fi dell'hotspot si vede in Home a chi e entrato
+  bool   wpsOn, wpsPin;         // WPS: servizio acceso (di fabbrica spento), metodo PIN consentito
+  uint8_t btnAct[3];            // tasto BOOT: azione di 1, 2 e 3 click (vedi packages/vos_btn.h)
   uint32_t serBaud;              // seriale: velocita (solo UART; con USB nativa non conta). Di fabbrica 115200
   uint8_t  serEol, serTx;        // a-capo: 0 CR+LF, 1 LF, 2 CR; attesa massima di scrittura in ms
   bool     serEcho, serIn, serLogOut, serBanner;   // eco dei tasti, accetta comandi, scrive il log, mostra il benvenuto all'apertura

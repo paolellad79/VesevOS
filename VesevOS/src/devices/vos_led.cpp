@@ -33,6 +33,10 @@ static volatile int g_alarm = 0, g_hold = 0;
 void ledSetSetup(bool on) { g_setup = on; }
 void ledSetAlarm(int level) { g_alarm = level; }
 void ledSetHold(int stage) { g_hold = stage; }
+static volatile int g_wps = 0;
+void ledSetWps(int stage) { g_wps = stage; }
+static volatile int32_t g_script = -1;         // colore imposto da uno script Berry (-1 = nessuno)
+void ledScript(int32_t rgb) { g_script = rgb < 0 ? -1 : (rgb & 0xFFFFFF); }
 
 // tinta 0..359 -> colore pieno
 static void hue(uint32_t h, uint8_t& r, uint8_t& g, uint8_t& b) {
@@ -93,6 +97,17 @@ static void ledTask(void*) {
       put(255, 0, 0, ((now / 150) & 1) ? cfg.ledBrightness : 0);
       vTaskDelay(pdMS_TO_TICKS(30)); continue;
     }
+    // WPS: blu che sale e scende piano (3 s, senza lampeggi), poi verde o rosso fisso per qualche secondo
+    { int w = g_wps;
+      if (w) {
+        uint8_t br = cfg.ledBrightness < 60 ? 60 : cfg.ledBrightness;
+        if (w == 1) { float v = 0.15f + 0.85f * (0.5f + 0.5f * sinf((float)(now % 3000) * 6.2831853f / 3000.0f)); put(0, 90, 255, (uint8_t)(br * v)); }
+        else if (w == 2) put(0, 255, 0, br); else put(255, 0, 0, br);
+        vTaskDelay(pdMS_TO_TICKS(30)); continue;
+      } }
+    // colore imposto da uno script (Berry): vale al posto del modo scelto, ma non copre errore grave, tasto BOOT e "trova questa scheda"
+    { int32_t sc = g_script;
+      if (sc >= 0) { put((sc >> 16) & 255, (sc >> 8) & 255, sc & 255, cfg.ledBrightness); vTaskDelay(pdMS_TO_TICKS(20)); continue; } }
     // prima configurazione: arcobaleno LENTO (un giro ogni 6 s, nessun lampeggio: adatto anche a chi e sensibile alla luce)
     if (g_setup) {
       uint8_t r, g, b; hue((now / (6000 / 360)) % 360, r, g, b);

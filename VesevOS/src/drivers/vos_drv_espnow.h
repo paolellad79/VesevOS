@@ -6,7 +6,7 @@
 // Non conosce il formato dei messaggi, le chiavi, i ruoli: sono del servizio (vos_mesh).
 #pragma once
 #include <Arduino.h>
-#include "../core/vos_common.h"
+#include "../boards/vos_packages.h"
 
 #if VOS_WITH_MESH
 typedef void (*EspNowRxFn)(const uint8_t* data, int len, int8_t rssi);   // chiamata dal task Wi-Fi: solo copiare e uscire

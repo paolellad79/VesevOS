@@ -1,0 +1,15 @@
+Schede modulo di esempio (.vdp) - VesevOS 1.7.57
+=================================================
+Sono file di testo con la descrizione di un modulo (rele, LED, pulsante, sensore): classe, segnali, alimentazione, livello del segnale, componenti da aggiungere e icona. Lo schema dei collegamenti lo disegna la pagina da questi dati (pin, tensioni, resistenze).
+Contengono SOLO DATI, nessun codice. Licenza: CC0 (uso libero).
+
+Come si usano
+  1. Apri la pagina della scheda: Dispositivi > Periferiche > Schede modulo > "Carica scheda modulo" e scegli il file .vdp.
+  2. Tocca "Installa": vedi lo schema, i pin proposti (liberi e sicuri) e il nome. "Installa" crea le periferiche.
+  3. Collega i fili come nello schema. Ogni periferica ha poi la sua pagina di gestione con le prove.
+  Dalla seriale: mod list, mod info <nome>, mod install <nome> [prefisso], mod del <nome>.
+
+IMPORTANTE: controlla sempre i collegamenti sul datasheet del TUO modulo (tensione, livello attivo, resistenze). Uno schema sbagliato puo
+danneggiare il modulo o la scheda. I rele collegati alla rete elettrica (230 V) richiedono un installatore.
+
+Formato: vedi claude/funzioni/VesevOS-formato-vdp.md nel Progetto. Le schede di questa cartella si rigenerano con: python3 tools/mkdevs.py

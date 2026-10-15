@@ -3,11 +3,12 @@
   of(j.u,j.o).then(function(r){clearTimeout(tm);rel();j.res(r)},function(e){clearTimeout(tm);rel();j.rej(e)})}
  function nx(){while(act<2&&q.length)run(q.shift())}
  window.fetch=function(u,o){return new Promise(function(res,rej){q.push({u:u,o:o,res:res,rej:rej});nx()})}})();
-var GRP=[["home","Home"],["rete","Rete"],["dm","Device Manager"],["sys","Sistema"],["sec","Sicurezza"]];
-var GMAP={home:["sum"],rete:["wifi","ap","radio","http","https","dhcp","dns","mdns"],dm:["dmgr","mqtt","mesh","ble","stat","pin","led","btn","usb","temp","mem","cpu","rad"],sys:["task","wd","log","shell","selftest","file","ora","ntp","loc","cert","conf","acc","legal","help","power","auto","boot"],sec:["sec","mfa","users","fw","audit"]};
-var GICO={home:"i-home",rete:"i-wifi",dm:"i-usb",sys:"i-gear",sec:"i-shield"};
-var TABS=[["sum","Home"],["wifi","Wi-Fi"],["mqtt","MQTT"],["mesh","Rete tra schede"],["pin","Pin"],["led","LED"],["task","Task"],["file","File"],["ora","Ora"],["loc","Localizzazione"],["auto","Automazioni"],["boot","Avvio"],["wd","Watchdog"],["log","Log"],["shell","Terminale"],["conf","Config"],["legal","Note legali"],["help","Aiuto"],["sec","Password"],["users","Utenti"],["fw","Filtro IP"],["https","HTTPS"],["audit","Compliant"],["mfa","MFA"],["cert","Certificato"],["stat","Statistiche"],["selftest","Autotest"],["power","Risparmio energia"],["acc","Accessibilita"],["ap","Punto di accesso"],["http","HTTP"],["radio","Radio"],["ntp","NTP"],["dhcp","DHCP"],["dns","DNS"],["mdns","mDNS"],["ble","Bluetooth"],["dmgr","Device Manager"],["btn","Tasto BOOT"],["usb","USB"],["temp","Temperatura del chip"],["mem","Memoria"],["cpu","Processore"],["rad","Radio 2,4 GHz"]];
-var DIAG=["task","wd","log","shell","selftest"];
+var GRP=[["home","Home"],["dev","Dispositivi"],["rete","Rete"],["prog","Programmi"],["sys","Sistema"],["sec","Sicurezza"],["adm","Admin"],["info","Informazioni"]];
+var GMAP={home:["sum"],dev:["dmgr","stat","temp","mem","cpu","led","pin","io","btn","usb","ble","rad"],rete:["wifi","wps","ap","radio","dhcp","dns","http","https","mdns","mqtt","mesh"],prog:["auto","script","app"],sys:["ora","ntp","loc","power","file","task","wd","log","shell"],sec:["sec","mfa","users","fw","cert","audit"],adm:["conf","boot","selftest"],info:["help","acc","legal"]};
+var GICO={home:"i-home",dev:"i-usb",rete:"i-wifi",prog:"i-prog",sys:"i-gear",sec:"i-shield",adm:"i-adm",info:"i-info"};
+var TABS=[["sum","Panoramica"],["wifi","Wi-Fi"],["wps","WPS"],["mqtt","MQTT"],["mesh","Rete tra schede"],["pin","Pin"],["io","Periferiche"],["led","LED"],["task","Task"],["file","File"],["ora","Ora"],["loc","Localizzazione"],["auto","Automazioni"],["script","Script"],["app","App"],["boot","Avvio"],["wd","Watchdog"],["log","Log"],["shell","Terminale"],["conf","Configurazione"],["legal","Note legali"],["help","Aiuto"],["sec","Password"],["users","Utenti"],["fw","Filtro IP"],["https","HTTPS"],["audit","Stato conformita"],["mfa","MFA"],["cert","Certificato"],["stat","Statistiche"],["selftest","Autotest"],["power","Risparmio energia"],["acc","Accessibilita"],["ap","Punto di accesso"],["http","HTTP"],["radio","Radio"],["ntp","NTP"],["dhcp","DHCP"],["dns","DNS"],["mdns","mDNS"],["ble","Bluetooth"],["dmgr","Elenco dispositivi"],["btn","Tasto BOOT"],["usb","USB"],["temp","Temperatura del chip"],["mem","Memoria"],["cpu","Processore"],["rad","Radio 2,4 GHz"]];
+var SECN=["Stato","Comandi","Radio","Diagnostica"];
+var TSEC={stat:0,temp:0,mem:0,cpu:0,led:1,pin:1,io:1,btn:1,usb:1,ble:2,rad:2,task:3,wd:3,log:3,shell:3};
 var LASTG={};
 function gOf(id){for(var g in GMAP)if(GMAP[g].indexOf(id)>=0)return g;return"home"}
 var A11Y={fs:0,hc:"auto",cb:0,rm:"auto"};try{var _a=JSON.parse(localStorage.getItem("va11y")||"{}");for(var _k in A11Y)if(_a[_k]!==undefined)A11Y[_k]=_a[_k]}catch(e){}
@@ -44,6 +45,9 @@ if(window.matchMedia)try{matchMedia("(prefers-color-scheme: light)").addEventLis
 var DICT={},LANG="it",LANGS=[{code:"it",name:"Italiano"}];
 function t(s){var v=DICT[s];return v?v:s}
 function tf(s){var a=arguments;return t(s).replace(/\{(\d)\}/g,function(m,i){return a[+i+1]})}
+/* durata in secondi: "45 s", "12 min", "3 h 5 min", "5 g 23 h 11 min" */
+function fmtDur(n){n=Math.max(0,Math.floor(+n||0));var d=Math.floor(n/86400),h=Math.floor(n%86400/3600),m=Math.floor(n%3600/60);
+ return n<60?tf("{0} s",n):n<3600?tf("{0} min",m):n<86400?tf("{0} h",h)+" "+tf("{0} min",m):tf("{0} g",d)+" "+tf("{0} h",h)+" "+tf("{0} min",m)}
 function applyStatic(){
  var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT),n,list=[];
  while((n=w.nextNode()))list.push(n);
@@ -83,7 +87,18 @@ function cpTitles(){var m={tbt:"Terminale",cps0:"Piccolo",cps1:"Medio",cps2:"Qua
  window.addEventListener("resize",cpApply)})();
 
 function $(i){return document.getElementById(i)}
-function api(u,o){return fetch(u,o).then(function(r){if(r.status==401){showLogin();throw 0}if(r.status==403&&location.protocol=="http:")return r.clone().json().then(function(j){if(j.err=="https"){location.href="https://"+location.hostname+"/";throw 0}return r},function(){return r});return r})}
-function post(u,d){var b=new URLSearchParams(d).toString();return api(u,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:b})}
+function api(u,o){return fetch(u,o).then(function(r){connOk();if(r.status==401){showLogin();throw 0}if(r.status==403&&location.protocol=="http:")return r.clone().json().then(function(j){if(j.err=="https"){location.href="https://"+location.hostname+"/";throw 0}return r},function(){return r});return r},function(e){connFail();throw e})}
+function post(u,d){if(/^\/api\/(reboot|sleep|factory|recovery)/.test(u))CONN.hold=Date.now()+120000;var b=new URLSearchParams(d).toString();return api(u,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:b})}
 function msg(id,t,ok){var e=$(id);clearTimeout(e._tm);e.setAttribute("role",ok?"status":"alert");e.className="msg";void e.offsetWidth;e.textContent=t;e.className="msg "+(ok?"ok":"ko");
  if(ok)e._tm=setTimeout(function(){e.classList.add("out");e._tm=setTimeout(function(){e.className="msg";e.textContent=""},400)},3000)}
+
+/* ===== scheda non raggiungibile: pagina in grigio con finestra e pulsante Aggiorna ===== */
+var CONN={bad:0,off:false,back:false,hold:0};
+function connTxt(back){CONN.back=back;$("cnt").textContent=back?t("Scheda di nuovo raggiungibile"):t("Scheda non raggiungibile");
+ $("cnd").textContent=back?t("La scheda risponde di nuovo: premi Aggiorna per ricaricare la pagina."):t("La pagina non riesce piu a parlare con la scheda: puo essere spenta, riavviata o fuori dalla rete. Controlla l'alimentazione e il Wi-Fi, poi premi Aggiorna.")}
+function connOk(){CONN.bad=0;if(CONN.off&&!CONN.back)connTxt(true)}
+function connFail(){if(Date.now()<CONN.hold)return;if(++CONN.bad<2)return;
+ if(!CONN.off){CONN.off=true;document.body.classList.add("cx");$("conn").className="dlgw";connTxt(false);setTimeout(function(){$("cnb").focus()},30)}
+ else if(CONN.back)connTxt(false)}
+setInterval(function(){if(document.hidden||Date.now()<CONN.hold)return;fetch("/api/auth",{cache:"no-store"}).then(connOk,connFail)},5000);
+window.addEventListener("offline",function(){CONN.bad=1;connFail()});

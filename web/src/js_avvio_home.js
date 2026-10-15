@@ -40,7 +40,29 @@ function uReboot(){dlg({title:t("Riavviare la scheda?"),body:'<p style="margin:0
 function uFw(){api("/api/recovery").then(function(r){return r.json()}).then(function(j){
  if(!j.present){dlg({title:t("Aggiornare il firmware?"),body:'<p style="margin:0">'+esc(t("Il recovery non e presente su questa scheda: il firmware si aggiorna solo con il cavo USB."))+'</p>',buttons:[["ok",t("Chiudi"),""]]});return}
  dlg({title:t("Aggiornare il firmware?"),body:'<p style="margin:0">'+esc(t("La scheda si riavvia nel recovery, una pagina separata dove carichi il file .bin di VesevOS. Servono utente e password di un amministratore."))+'</p>',ok:t("Riavvia nel recovery"),
- onOk:function(){return post("/api/recovery",{}).then(function(r){return r.json()}).then(function(j){if(j.ok)setTimeout(function(){var u="http://"+(j.ip||"")+":80/";dlg({title:t("Scheda nel recovery"),body:'<p style="margin:0">'+esc(tf("Apri {0} in una finestra privata del browser (scrivi http, non https). Se in 30 secondi non trova la rete di casa, la scheda crea la rete Wi-Fi VesevOS-recovery: la password e sulla seriale.",u))+'</p><p style="margin:8px 0 0">'+esc(t("Dopo l'aggiornamento VesevOS riparte da solo."))+'</p>',buttons:[["ok",t("Chiudi"),""]]})},50);return j.ok?"":j.err})}})}).catch(function(){})}
+ onOk:function(){return post("/api/recovery",{}).then(function(r){return r.json()}).then(function(j){if(j.ok)setTimeout(function(){uRecGo("http://"+(j.ip||"")+":80/")},50);return j.ok?"":j.err})}})}).catch(function(){})}
+function uRecUp(){api("/api/recovery").then(function(r){return r.json()}).then(function(j){
+ if(!j.present){dlg({title:t("Aggiornare il recovery?"),body:'<p style="margin:0">'+esc(t("Il recovery non e presente su questa scheda: si installa solo con il cavo USB."))+'</p>',buttons:[["ok",t("Chiudi"),""]]});return}
+ dlg({title:t("Aggiornare il recovery?"),body:'<p style="margin:0">'+esc(tf("Recovery installato: {0}",j.ver||t("versione sconosciuta")))+'</p><p style="margin:8px 0">'+esc(tf("Scegli il file .bin del recovery (al massimo {0} KB). La scheda lo controlla tutto prima di scriverlo: se e sbagliato il recovery attuale resta com'e.",j.kb))+'</p>'
+  +'<label for="rcf">'+esc(t("File del recovery (.bin)"))+'</label><input type="file" id="rcf" accept=".bin">'
+  +'<label for="rcs">'+esc(t("Impronta SHA-256 (facoltativa)"))+'</label><input id="rcs" autocomplete="off" spellcheck="false" maxlength="64">'
+  +'<p class="law" style="margin:8px 0 0">'+esc(t("Non spegnere la scheda durante l'aggiornamento (pochi secondi). VesevOS continua a funzionare."))+'</p>',ok:t("Aggiorna recovery"),
+  onOk:function(){var f=$("rcf").files[0],h=$("rcs").value.trim();if(!f)return t("Scegli il file");if(f.size>j.kb*1024)return t("File troppo grande per lo spazio del recovery");
+   if(h&&!/^[0-9a-fA-F]{64}$/.test(h))return t("L'impronta SHA-256 deve avere 64 cifre esadecimali");
+   var fd=new FormData();fd.append("file",f,f.name);msg("dlgm",t("Controllo e scrivo il recovery..."),true);
+   return api("/api/recovery/up"+(h?"?sha="+enc(h):""),{method:"POST",body:fd}).then(function(r){return r.json()}).then(function(k){
+    if(k.ok)setTimeout(function(){dlg({title:t("Recovery aggiornato"),body:'<p style="margin:0" role="status">'+esc(tf("Da {0} a {1}. VesevOS non si riavvia: il nuovo recovery si usa al prossimo aggiornamento del firmware.",k.from||"?",k.to))+'</p>',buttons:[["ok",t("Chiudi"),""]]})},50);
+    return k.ok?"":(k.err||t("Errore"))},function(){return t("Caricamento non riuscito")})}})}).catch(function(){})}
+function uRecPrb(x,ok,ko){var c=new AbortController(),m=setTimeout(function(){c.abort()},1500);fetch(x,{mode:"no-cors",cache:"no-store",signal:c.signal}).then(function(){clearTimeout(m);ok()},function(){clearTimeout(m);ko()})}
+function uRecOpen(u){location.href=u}
+function uRecGo(u){var st=0,t0=Date.now(),t1=0,stop=false,sec=location.protocol==="https:";
+ var go=function(){stop=true;uRecOpen(u)};
+ dlg({title:t("Scheda nel recovery"),body:'<p style="margin:0" role="status">'+esc(t("Aspetto che la scheda riparta nel recovery: la pagina si apre da sola."))+'</p>',buttons:[["ok",t("Apri ora"),""]],onOk:function(){go();return""}});
+ (function tick(){if(stop)return;
+  if(Date.now()-t0>60000){stop=true;dlg({title:t("Scheda nel recovery"),body:'<p style="margin:0">'+esc(t("Non riesco ad aprirla da sola."))+'</p><p style="margin:8px 0 0">'+esc(tf("Apri {0} in una finestra privata del browser (scrivi http, non https). Se in 30 secondi non trova la rete di casa, la scheda crea la rete Wi-Fi VesevOS-recovery: la password e sulla seriale.",u))+'</p><p style="margin:8px 0 0">'+esc(t("Dopo l'aggiornamento VesevOS riparte da solo."))+'</p>',buttons:[["ok",t("Apri il recovery"),""]],onOk:function(){uRecOpen(u);return""}});return}
+  if(st===0)uRecPrb(location.origin+"/",function(){setTimeout(tick,1000)},function(){st=1;t1=Date.now();setTimeout(tick,1000)});
+  else if(sec){if(Date.now()-t1>8000)go();else setTimeout(tick,1000)}
+  else uRecPrb(u,go,function(){setTimeout(tick,1000)})})()}
 function uSleep(){dlg({title:t("Mettere la scheda in sleep?"),body:'<p style="margin:0">'+esc(t("La scheda entra in sonno profondo: Wi-Fi e LED spenti, consuma pochissimo."))+'</p><p style="margin:8px 0 0"><b>'+esc(t("Per riaccenderla premi il tasto RESET sulla scheda (o togli e ridai corrente)."))+'</b></p>',ok:t("Sleep"),danger:true,
  onOk:function(){return post("/api/sleep",{}).then(function(r){return r.json()}).then(function(j){if(j.ok)setTimeout(function(){dlg({title:t("Scheda in sleep"),body:'<p style="margin:0">'+esc(t("Premi RESET sulla scheda, poi ricarica questa pagina."))+'</p>',buttons:[["ok",t("Ricarica"),""]],onOk:function(){location.reload();return""}})},50);return j.ok?"":j.err})}})}
 function row(a,b){return '<div class="row"><span>'+a+'</span><span>'+b+'</span></div>'}
@@ -96,19 +118,24 @@ function homeDraw(){var s=S;if(!s||!$("home"))return;var n=s.net,hp=Math.round(1
  h+=homeWid(s,n);
  h+='<section class="card hid"><h3>'+esc(t("Sistema"))+'</h3><div class="big">'+esc(n.host)+'</div><div class="subt">'+esc(s.chip)+" · ID "+boardId(s)+'</div><div style="height:8px"></div>'+
   row(t("Chip"),esc(s.chip)+" rev "+revs)+row(t("Processore"),tf("{0} core a {1} MHz",s.cores,mhz))+row(t("Memoria"),tf("{0} MB flash · {1} MB PSRAM",Math.round(s.flashChip/1048576),Math.round(s.psramTotal/1048576)))+
-  row(t("Acceso da"),esc(s.uptime))+row(t("Ore di vita"),tf("{0} h {1} min",Math.floor(s.lifeSec/3600),Math.floor(s.lifeSec/60)%60))+row(t("Avvii totali"),s.boots)+row(t("Ultimo reset"),esc(s.reset))+row(t("Versione"),esc(s.name+" "+s.version))+
+  row(t("Acceso da"),esc(s.uptime))+row(t("Ore di vita"),fmtDur(s.lifeSec))+row(t("Avvii totali"),s.boots)+row(t("Ultimo reset"),esc(s.reset))+row(t("Versione"),esc(s.name+" "+s.version))+
   '<button class="btn" style="margin-top:10px" onclick="identify()">'+esc(t("Trova questa scheda"))+'</button><div id="idm" class="msg"></div></section>';
 $("home").innerHTML=h}
-var HW=null,HWT=0;
+var HW=null,HWT=0,HWU=null;
 function hdTick(){var e=$("hd");if(!e)return;if(HW&&HW.tv){var c=hClock();e.textContent=c[0]+" · "+c[1]}else e.textContent=""}
-function hwFetch(){if(!document.hidden&&Date.now()-HWT>8000){HWT=Date.now();api("/api/home").then(function(r){return r.json()}).then(function(j){j.t0=Date.now();HW=j;hdTick();if(cur=="sum")homeDraw()}).catch(function(){})}}
+function hwUsers(){api("/api/svc").then(function(r){return r.json()}).then(function(j){if(typeof j.usersHttp!="number"||typeof j.usersHttps!="number")return;var n=j.usersHttp+j.usersHttps;if(n!==HWU){HWU=n;if(cur=="sum")homeDraw()}}).catch(function(){})}
+function hwFetch(){if(!document.hidden&&Date.now()-HWT>8000){HWT=Date.now();hwUsers();api("/api/home").then(function(r){return r.json()}).then(function(j){j.t0=Date.now();HW=j;hdTick();if(cur=="sum")homeDraw()}).catch(function(){})}}
 function hClock(){var A=HW;if(!A||!A.tv)return["--:--:--",t("Ora non impostata")];var p=function(x){return(x<10?"0":"")+x},ms=(A.te+(Date.now()-A.t0)/1000)*1000,d=new Date(ms+A.to*1000),H=d.getUTCHours(),ap="";
  if(A.tf){ap=H>=12?" PM":" AM";H=H%12||12}var Y=d.getUTCFullYear(),M=p(d.getUTCMonth()+1),D=p(d.getUTCDate());
  return[p(H)+":"+p(d.getUTCMinutes())+":"+p(d.getUTCSeconds())+ap,A.df==1?Y+"-"+M+"-"+D:A.df==2?M+"/"+D+"/"+Y:D+"/"+M+"/"+Y]}
 setInterval(hdTick,1000);
 function wid(tt,v,sub,go,ic){return'<div class="wid" role="button" tabindex="0" onclick="show(\''+go+'\')" onkeydown="if(event.key==\'Enter\')show(\''+go+'\')"><div class="wt"><svg class="i" aria-hidden="true"><use href="#'+ic+'"/></svg>'+esc(tt)+'</div><div class="wv">'+v+'</div>'+(sub?'<div class="ws">'+sub+'</div>':"")+'</div>'}
+function widCol(n){var many=n>1,l=tf("Collegati: {0}",n),adm=ROLE==2,
+ sub=many?'<svg class="i" aria-hidden="true"><use href="#i-bell"/></svg>'+esc(t("Attenzione: piu di un collegato")):esc(t("Sessioni web attive negli ultimi 2 minuti"));
+ return'<div class="wid wcol'+(many?" warn":"")+'" '+(adm?'role="button" tabindex="0" onclick="whoShow()" onkeydown="if(event.key==\'Enter\'||event.key==\' \')whoShow()" aria-label="'+esc(l+". "+t("Chi e collegato"))+'"':'role="group" aria-label="'+esc(l)+'"')+'><div class="wt"><svg class="i" aria-hidden="true"><use href="#i-shield"/></svg>'+esc(t("Collegati"))+'</div><div class="wv wbig">'+n+'</div><div class="ws">'+sub+'</div></div>'}
 function homeWid(s,n){hwFetch();if(!SV.httpPort)svcLoad();
  var W=HW||{},pill=function(on,a,b){return'<span class="pill'+(on?" a":"")+'">'+esc(on?a:b)+'</span>'},c=[],now=Math.floor(Date.now()/1000);
+ if(HWU!==null)c.push(widCol(HWU));
  if(SV.httpOn)c.push(wid("HTTP",esc(tf("Porta: {0}",SV.httpPort)),"","http","i-globe"));
  if(SV.httpsOn)c.push(wid("HTTPS",esc(tf("Porta: {0}",SV.httpsPort)),"","https","i-lock"));
  if(s.mqtt&&canSee("mqtt"))c.push(wid("MQTT",pill(s.mqtt==2,t("collegato"),t("non collegato")),"","mqtt","i-mqtt"));

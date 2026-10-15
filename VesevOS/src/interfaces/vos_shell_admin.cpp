@@ -77,7 +77,7 @@ bool shCmdAdmin(String c, String a1, const String& line, Print& o, int role) {
   }
   else if (c == "legal") {
     o.println(String(VOS_NAME) + " " + VOS_VERSION + " - GPL-3.0-or-later / " + tr("licenza commerciale"));
-    o.println(tr("Software di terzi e testi delle licenze: comando license, pagina Sistema > Note legali."));
+    o.println(tr("Software di terzi e testi delle licenze: comando license, pagina Informazioni > Note legali."));
     o.println(tr("Dati salvati sulla scheda: configurazione, utenti (solo impronta della password), registro (150 righe con indirizzi IP), allarmi. Nessun dato va fuori dalla scheda se non attivi tu MQTT o la rete tra schede."));
     o.println(tr("Cancellare tutto: factory-reset oppure tasto BOOT 20 secondi."));
     o.println(tr("Sicurezza: segnala i problemi a paolellad79@gmail.com (risposta entro 7 giorni). Progetto gratuito: gli aggiornamenti non hanno date garantite."));
@@ -101,7 +101,7 @@ bool shCmdAdmin(String c, String a1, const String& line, Print& o, int role) {
   else if (c == "factory-reset") {
     o.println(tr("Azzero tutto e riavvio..."));
     vlog("SISTEMA: ripristino di fabbrica dalla shell");
-    cfgFactoryReset(); delay(300); ESP.restart();
+    cfgFactoryReset(); sysReboot("ripristino di fabbrica dalla shell", 300);
   }
   else if (c == "airplane" || c == "aereo") {
     if (a1 == "off") { netAirplaneOff("dalla shell"); o.println(tr("Modalita aereo spenta: la rete riparte")); }
@@ -168,12 +168,60 @@ bool shCmdAdmin(String c, String a1, const String& line, Print& o, int role) {
     if (a1 != "" && a1 != "status") { cfgSave(); o.println(tr("Salvato e applicato.")); }
     o.print(powerText());
   }
-  else if (c == "reboot") { o.println(tr("Riavvio...")); delay(300); ESP.restart(); }
+  else if (c == "reboot") { o.println(tr("Riavvio...")); sysReboot("comando reboot", 300); }
+  else if (c == "script" || c == "berry") {
+    // script: elenco, avvio, stop, uscita degli script salvati in /scripts (.vsc).  berry <codice>: prova al volo.
+    // (berry list|run|stop|out funzionano ancora come scorciatoie dei comandi script)
+    String code = restFrom(line, 1), err;
+    bool scr = (c == "script");
+    if (code.length() == 0) { o.print(scr ? String(tr("Uso: script list | script run <nome> | script stop | script out")) + "\n" + berryList() : berryStatusText()); return true; }
+    if (a1 == "list" && code == "list") { o.print(berryList()); return true; }
+    if (a1 == "out" && code == "out") { o.print(berryOutText()); return true; }
+    if (a1 == "stop" && code == "stop") { o.println(berryStop(err) ? String(tr("Script fermato")) : err); return true; }
+    if (a1 == "run") {
+      String nm = argAt(line, 2);
+      if (!nm.length()) { o.println(tr("Uso: script run <nome>  (file /scripts/<nome>.vsc)")); return true; }
+      if (!berryStart(nm, err)) { o.println(err); return true; }
+      o.println(trf("Script avviato: %s (script out = uscita, script stop = ferma)", nm.c_str()));
+      return true;
+    }
+    if (scr) { o.println(tr("Uso: script list | script run <nome> | script stop | script out")); return true; }
+    String out;
+    bool ok = berryEval(code, out, err);
+    vlog("BERRY: script eseguito dalla shell (%u caratteri, %s)", (unsigned)code.length(), ok ? "ok" : "errore");
+    if (out.length()) { o.print(out); if (!out.endsWith("\n")) o.println(); }
+    if (!ok) o.println(err.length() ? err : String(tr("Errore")));
+  }
+  else if (c == "app") {
+    // app: elenco, controllo, avvio, stop, valori e uscita dei file /apps/*.vap (una sola app alla volta, nel motore Berry)
+    String nm = argAt(line, 2), err;
+    if (a1 == "list") o.print(appListText());
+    else if ((a1 == "info" || a1 == "check") && nm.length()) o.print(appInfoText(nm));
+    else if (a1 == "start" && nm.length()) { if (appStart(nm, err, 2, "shell")) o.println(trf("App avviata: %s (app out = uscita, app stop %s = ferma)", nm.c_str(), nm.c_str())); else o.println(err); }
+    else if (a1 == "stop" && nm.length()) o.println(appStop(nm, err, 2) ? String(tr("App fermata")) : err);
+    else if (a1 == "set" && nm.length() && argAt(line, 3).length()) { if (appSet(nm, argAt(line, 3), restFrom(line, 4), err, 2)) o.println(tr("Fatto")); else o.println(err); }
+    else if (a1 == "out") o.print(appRunText());
+    else o.println(tr("Uso: app list | app info <nome> | app start <nome> | app stop <nome> | app set <nome> <id> <valore> | app out"));
+  }
+  else if (c == "crash") {
+    if (a1 == "clear") o.println(crashClear() ? tr("Rapporti dei crash cancellati") : tr("Errore"));
+    else if (a1 == "test") { o.println(tr("Crash di prova: la scheda si riavvia e lascia il rapporto (comando crash)")); vlog("SISTEMA: crash di prova chiesto dalla shell"); delay(300); abort(); }
+    else o.print(crashText());
+  }
+  else if (c == "who") { o.print(authWhoText()); o.print(shellSerialWho()); }
   else if (c == "recovery") {
     if (!drvRecoveryPresent()) { o.println(tr("Recovery non presente: la scheda ha ancora la tabella partizioni vecchia.")); return true; }
-    if (a1 != "now") { o.println(tr("Recovery presente. Scrivi 'recovery now' per riavviare nel recovery.")); return true; }
+    if (a1 == "update") {
+      String f = argAt(line, 2), from, to, err;
+      if (!f.length()) { o.println(tr("Uso: recovery update <file.bin> [sha256]  (prima carica il file in Sistema > File)")); return true; }
+      o.println(tr("Controllo e scrivo il recovery: non spegnere la scheda..."));
+      if (recUpFromFile(f, argAt(line, 3), "shell", from, to, err)) o.println(trf("Recovery aggiornato: %s -> %s", from.length() ? from.c_str() : "?", to.c_str()));
+      else o.println(err);
+      return true;
+    }
+    if (a1 != "now") { String v = recVersion(); o.println(trf("Recovery presente (versione %s). 'recovery now' = riavvia nel recovery, 'recovery update <file>' = aggiornalo.", v.length() ? v.c_str() : "?")); return true; }
     if (!drvRecoveryEnter()) { o.println(tr("Non riesco a passare al recovery.")); return true; }
-    o.println(tr("Riavvio nel recovery...")); delay(300); ESP.restart();
+    o.println(tr("Riavvio nel recovery...")); sysReboot("recovery dalla shell", 300);
   }
   else return false;
   return true;

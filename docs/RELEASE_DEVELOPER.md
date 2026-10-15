@@ -26,7 +26,7 @@ Ultimo aggiornamento: 10 ottobre 2026, versione 1.7.45. Si pubblica anche su Git
 ## 4. Come si costruisce e si prova
 1. `python3 tools/mklicense.py` (se manca), `python3 tools/mklang.py` (deve finire con "ok"), `python3 tools/mkpage.py`.
 2. Compilare TUTTI i file con gli stub (g++ -c) e cercare funzioni doppie (nm).
-3. `tools/hosttest/run.sh` (serve `$CORE` = cartella `cores/esp32` del core Arduino). Oggi 162 prove. `python3 tools/checklayers.py` deve finire senza KO.
+3. `tools/hosttest/run.sh` (serve `$CORE` = cartella `cores/esp32` del core Arduino). Oggi 162 prove. `python3 tools/checklayers.py` deve finire senza KO (controlla anche la dipendenza da Arduino: `String`, `Serial`, `millis/micros/delay` e `#include <Arduino.h>` fuori da `vos_drv_*`; il debito di oggi sta in `tools/layers_baseline.json` e puo solo calare).
 4. Pagina: `tools/webtest/server.js` + `smoke172.js` -> "TUTTO OK".
 5. Compilazione vera e prova sulla scheda: la fa il proprietario.
 

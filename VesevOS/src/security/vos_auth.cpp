@@ -8,8 +8,10 @@
 #include "../core/vos_log.h"
 #include "../core/vos_i18n.h"
 #include "mbedtls/md.h"
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 
-#define MAX_SESSIONS 6
+#define MAX_SESSIONS 10
 #define SESSION_MS   (30UL * 60UL * 1000UL)
 #define MAX_FAILS    5
 #define LOCK_MS      (60UL * 1000UL)
@@ -17,8 +19,13 @@
 #define MAX_NONCES   8
 #define NONCE_MS     60000UL
 
-struct Session { String token; uint32_t last; int user; bool used; };
+struct Session { String token; uint32_t last; int user; bool used; uint32_t ip, t0, actT; bool secure; char act[32]; };
+#define WHO_ACTIVE_MS 120000UL                     // "collegato" = ha fatto una richiesta negli ultimi 2 minuti (la pagina aperta interroga ogni pochi secondi)
 static Session g_sess[MAX_SESSIONS];
+// Sessioni, numeri casuali e blocchi IP sono usati INSIEME dai due server (HTTP e HTTPS sono due task) e dalla shell:
+// un blocco (ricorsivo) li protegge. Creato all'avvio, prima di qualunque richiesta.
+static SemaphoreHandle_t g_amx = xSemaphoreCreateRecursiveMutex();
+struct AuthLock { AuthLock() { if (g_amx) xSemaphoreTakeRecursive(g_amx, portMAX_DELAY); } ~AuthLock() { if (g_amx) xSemaphoreGiveRecursive(g_amx); } };
 static uint8_t  g_fails = 0;
 static uint32_t g_lockUntil = 0;
 static bool g_serialAuthed = false;
@@ -159,6 +166,7 @@ static String hmacHex(const String& key, const String& msg) {
 }
 
 String authLoginStart(const String& name) {
+  AuthLock L;
   if (!g_secret.length()) g_secret = randomHex(16);
   int i = userFind(name);
   String salt = userOk(i) ? cfg.users[i].salt : sha256Hex(g_secret + name).substring(0, 32);   // nome sconosciuto: sale finto ma stabile
@@ -212,10 +220,11 @@ static void banFail(Ban* b, const char* why) {
   EventBus::publish("sec.ban", "", (int32_t)secs);     // l'indirizzo NON va nell'evento (lo vede anche l'Operatore): solo la durata
 }
 
-bool authIpBlocked(uint32_t ip, uint32_t& wait) { return banActive(banSlot(ip, false), wait); }
-bool authFailIp(uint32_t ip, const char* why) { Ban* b = banSlot(ip, true); uint32_t w = 0; banFail(b, why); return banActive(b, w); }
+bool authIpBlocked(uint32_t ip, uint32_t& wait) { AuthLock L; return banActive(banSlot(ip, false), wait); }
+bool authFailIp(uint32_t ip, const char* why) { AuthLock L; Ban* b = banSlot(ip, true); uint32_t w = 0; banFail(b, why); return banActive(b, w); }
 
 int authLoginFinish(uint32_t ip, const String& name, const String& nonce, const String& mac, int& idx, uint32_t& wait) {
+  AuthLock L;
   idx = -1;
   Ban* b = banSlot(ip, true);
   if (banActive(b, wait)) return 2;
@@ -238,6 +247,7 @@ int authLoginFinish(uint32_t ip, const String& name, const String& nonce, const 
 }
 
 void authNoteDenied(uint32_t ip) {
+  AuthLock L;
   Ban* b = banSlot(ip, true);
   uint32_t now = millis();
   if (now - b->deniedT0 > 60000UL) { b->deniedT0 = now; b->denied = 0; }
@@ -245,6 +255,7 @@ void authNoteDenied(uint32_t ip) {
 }
 
 String authBanJson() {
+  AuthLock L;
   String j = "{\"fails\":" + String(cfg.banFails) + ",\"secs\":" + String((unsigned long)cfg.banSecs) + ",\"list\":[";
   bool first = true;
   for (int i = 0; i < BAN_SLOTS; i++) {
@@ -257,6 +268,7 @@ String authBanJson() {
 }
 
 String authBanText() {
+  AuthLock L;
   String t; int n = 0;
   for (int i = 0; i < BAN_SLOTS; i++) {
     Ban* b = &g_ban[i]; if (!b->ip || (!b->fails && !b->until && !b->level)) continue;
@@ -268,6 +280,7 @@ String authBanText() {
 }
 
 bool authUnban(const String& ip) {
+  AuthLock L;
   bool any = false;
   for (int i = 0; i < BAN_SLOTS; i++) {
     if (!g_ban[i].ip) continue;
@@ -279,7 +292,8 @@ bool authUnban(const String& ip) {
 }
 
 // ---------- sessioni ----------
-String authNewSession(int user) {
+String authNewSession(int user, uint32_t ip, bool secure) {
+  AuthLock L;
   int slot = 0; uint32_t oldest = 0xFFFFFFFF;
   for (int i = 0; i < MAX_SESSIONS; i++) {
     if (!g_sess[i].used) { slot = i; break; }
@@ -289,10 +303,81 @@ String authNewSession(int user) {
   g_sess[slot].last = millis();
   g_sess[slot].user = user;
   g_sess[slot].used = true;
+  g_sess[slot].ip = ip; g_sess[slot].secure = secure; g_sess[slot].t0 = g_sess[slot].actT = g_sess[slot].last;
+  strcpy(g_sess[slot].act, "login");
   return g_sess[slot].token;
 }
 
+// letture che la pagina fa da sola ogni pochi secondi: non sono "azioni" dell'utente
+static bool whoPoll(const char* p) {
+  static const char* const P[] = {"/api/status", "/api/audit", "/api/auth", "/api/common", "/api/svc", "/api/stats"};
+  for (const char* x : P) if (strcmp(p, x) == 0) return true;
+  return false;
+}
+
+void authSessionNote(const String& token, uint32_t ip, bool secure, bool post, const char* path) {
+  AuthLock L;
+  if (token.length() != 32) return;
+  for (int i = 0; i < MAX_SESSIONS; i++) {
+    Session& s = g_sess[i];
+    if (!s.used || s.token != token) continue;
+    s.ip = ip; s.secure = secure;
+    if (!post && whoPoll(path)) return;
+    if (strncmp(path, "/api/", 5) == 0) path += 5;
+    snprintf(s.act, sizeof(s.act), "%s %s", post ? "POST" : "GET", path);
+    s.actT = millis();
+    return;
+  }
+}
+
+static bool whoLive(const Session& s) { return s.used && millis() - s.last < WHO_ACTIVE_MS && userOk(s.user); }
+
+int authSessionCount(int via) {
+  AuthLock L;
+  int n = 0;
+  for (int i = 0; i < MAX_SESSIONS; i++) if (whoLive(g_sess[i]) && (via < 0 || (int)g_sess[i].secure == via)) n++;
+  return n;
+}
+
+String authWhoJson() {
+  AuthLock L;
+  String j = "{\"list\":["; bool first = true; uint32_t now = millis();
+  for (int i = 0; i < MAX_SESSIONS; i++) {
+    const Session& s = g_sess[i];
+    if (!s.used || now - s.last > SESSION_MS || !userOk(s.user)) continue;
+    if (!first) j += ","; first = false;
+    j += "{\"user\":\"" + jsonEscape(cfg.users[s.user].name) + "\",\"role\":" + String(cfg.users[s.user].role) + ",\"ip\":\"" + ipToStr(s.ip) +
+         "\",\"via\":\"" + (s.secure ? "https" : "http") + "\",\"live\":" + (whoLive(s) ? "true" : "false") +
+         ",\"age\":" + String((now - s.t0) / 1000UL) + ",\"idle\":" + String((now - s.last) / 1000UL) +
+         ",\"act\":\"" + jsonEscape(s.act) + "\",\"actAge\":" + String((now - s.actT) / 1000UL) + "}";
+  }
+  return j + "]}";
+}
+
+static String whoDur(uint32_t s) {
+  if (s < 60) return String(s) + "s";
+  if (s < 3600) return String(s / 60) + "m";
+  return String(s / 3600) + "h" + String((s % 3600) / 60) + "m";
+}
+
+String authWhoText() {
+  AuthLock L;
+  String t; uint32_t now = millis(); int n = 0;
+  for (int i = 0; i < MAX_SESSIONS; i++) {
+    const Session& s = g_sess[i];
+    if (!s.used || now - s.last > SESSION_MS || !userOk(s.user)) continue;
+    char b[160];
+    snprintf(b, sizeof(b), "%-10s %-14s %-5s %-15s %6s %6s  %s (%s)\n", cfg.users[s.user].name.c_str(), roleName(cfg.users[s.user].role),
+             s.secure ? "https" : "http", ipToStr(s.ip).c_str(), whoDur((now - s.t0) / 1000UL).c_str(),
+             whoLive(s) ? whoDur((now - s.last) / 1000UL).c_str() : "-", s.act, whoDur((now - s.actT) / 1000UL).c_str());
+    t += b; n++;
+  }
+  String h = String(tr("UTENTE     RUOLO          VIA   INDIRIZZO           DA  FERMO  ULTIMA AZIONE")) + "\n";
+  return n ? h + t : String(tr("Nessuno collegato dal web")) + "\n";
+}
+
 int authSessionUser(const String& token) {
+  AuthLock L;
   if (token.length() != 32) return -1;
   for (int i = 0; i < MAX_SESSIONS; i++) {
     if (g_sess[i].used && g_sess[i].token == token) {
@@ -307,11 +392,13 @@ int authSessionUser(const String& token) {
 }
 
 void authLogout(const String& token) {
+  AuthLock L;
   for (int i = 0; i < MAX_SESSIONS; i++)
     if (g_sess[i].used && g_sess[i].token == token) g_sess[i].used = false;
 }
 
 void authLogoutUser(int idx) {
+  AuthLock L;
   for (int i = 0; i < MAX_SESSIONS; i++) if (g_sess[i].used && g_sess[i].user == idx) g_sess[i].used = false;
 }
 
@@ -346,7 +433,7 @@ void authResetAdmin() {
   if (a < 0) for (int i = 0; i < VOS_MAX_USERS; i++) if (!cfg.users[i].name.length()) { a = i; cfg.users[i].name = "admin"; break; }
   if (a < 0) a = 0;
   cfg.users[a].role = ROLE_ADMIN; cfg.users[a].on = true; cfg.users[a].salt = ""; cfg.users[a].hash = "";
-  for (int i = 0; i < MAX_SESSIONS; i++) g_sess[i].used = false;
+  { AuthLock L; for (int i = 0; i < MAX_SESSIONS; i++) g_sess[i].used = false; }
   g_serialAuthed = false;
   cfg.serIn = true;                                  // la seriale torna ad accettare comandi
   vlog("AUTH: password degli amministratori azzerate con il tasto BOOT (primo accesso: '%s')", cfg.users[a].name.c_str());

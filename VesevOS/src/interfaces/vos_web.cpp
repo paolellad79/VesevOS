@@ -95,6 +95,7 @@ void add(PsychicHttpServer* srv, bool secure, const char* path, int method, uint
       int u = authSessionUser(token(r));
       if (u < 0) { authNoteDenied(c.ip); return sendJson(s, "{\"ok\":false,\"err\":\"non autorizzato\",\"code\":\"unauthorized\"}", 401); }
       c.user = u; c.role = cfg.users[u].role;
+      authSessionNote(token(r), c.ip, secure, method == HTTP_POST, r->pathCStr());   // per "chi e collegato" (who)
       if (c.role + 1 < lvl) return sendJson(s, "{\"ok\":false,\"err\":\"" + jsonEscape(tr("Il tuo ruolo non permette questa operazione")) + "\",\"code\":\"forbidden\"}", 403);
     }
     if (method == HTTP_POST) cfgSetOrigin(who(c));
@@ -111,7 +112,8 @@ String svcJson() {
          ",\"httpsOn\":" + (cfg.https ? "true" : "false") + ",\"httpsPort\":" + String(cfg.httpsPort) +
          ",\"runHttp\":" + String(g_runHttpPort) + ",\"runHttps\":" + String(g_runHttpsPort) +
          ",\"pending\":" + (pend ? "true" : "false") + ",\"sta\":" + (cfg.staEnabled && cfg.staSsid.length() ? "true" : "false") +
-         ",\"clientOk\":" + (netState() == NET_CLIENT_OK ? "true" : "false") + "}";
+         ",\"clientOk\":" + (netState() == NET_CLIENT_OK ? "true" : "false") +
+         ",\"usersHttp\":" + String(authSessionCount(0)) + ",\"usersHttps\":" + String(authSessionCount(1)) + "}";
 }
 
 String settingsJson() {
@@ -128,7 +130,7 @@ String settingsJson() {
   return j;
 }
 
-void delayedRestart(void*) { vTaskDelay(pdMS_TO_TICKS(800)); ESP.restart(); }
+void delayedRestart(void* why) { vTaskDelay(pdMS_TO_TICKS(800)); sysReboot(why ? (const char*)why : "pagina", 0); }   // why = testo fisso (letterale)
 volatile uint32_t g_sleepSec = 0;
 void delayedSleep(void*) { vTaskDelay(pdMS_TO_TICKS(800)); if (g_sleepSec) powerSleepNow(g_sleepSec); else sysSleep(); }
 
@@ -142,7 +144,7 @@ String cookieAttrs(bool secure) { return String("; Path=/; HttpOnly; SameSite=St
 
 // dopo password (e codice MFA) giusti: sessione, cookie, pulizia di fine guida
 esp_err_t loginDone(Res* s, Ctx& c, int idx) {
-  String t = authNewSession(idx);
+  String t = authNewSession(idx, c.ip, c.secure);
   vlog("WEB: accesso di %s da %s", cfg.users[idx].name.c_str(), ipToStr(c.ip).c_str());
   ramNote("login");
   bool cleaned = false;
@@ -191,7 +193,7 @@ static void routesCore(PsychicHttpServer* S, bool sec) {
     String j = String("{\"set\":") + (authIsSet() ? "true" : "false") + ",\"setup\":" + (cfg.setupDone ? "true" : "false") +
                ",\"lang\":\"" + jsonEscape(cfg.lang) + "\",\"secure\":" + (c.secure ? "true" : "false") +
                ",\"https\":" + (g_tlsUp && cfg.https ? "true" : "false") + ",\"fp\":\"" + (g_tlsUp ? tlsFingerprint() : String("")) + "\"" +
-               ",\"ble\":" + (VOS_WITH_BLE ? "true" : "false") + ",\"pk\":{\"ble\":" + String(VOS_WITH_BLE) + ",\"mqtt\":" + String(VOS_WITH_MQTT) + ",\"mesh\":" + String(VOS_WITH_MESH) + ",\"mfa\":" + String(VOS_WITH_MFA) + ",\"stat\":" + String(VOS_WITH_STATS) + "}" + ",\"hp\":" + String(g_runHttpPort) + ",\"sp\":" + String(g_runHttpsPort) + timePubJson();
+               ",\"ble\":" + (VOS_WITH_BLE ? "true" : "false") + ",\"pk\":{\"ble\":" + String(VOS_WITH_BLE) + ",\"mqtt\":" + String(VOS_WITH_MQTT) + ",\"mesh\":" + String(VOS_WITH_MESH) + ",\"mfa\":" + String(VOS_WITH_MFA) + ",\"stat\":" + String(VOS_WITH_STATS) + ",\"wps\":" + String(VOS_WITH_WPS) + ",\"script\":" + String(VOS_WITH_BERRY) + ",\"app\":" + String(VOS_WITH_BERRY) + "}" + ",\"hp\":" + String(g_runHttpPort) + ",\"sp\":" + String(g_runHttpsPort) + timePubJson();
     if (!authIsSet()) { int a = authFirstAdmin(); j += ",\"first\":\"" + jsonEscape(a >= 0 ? cfg.users[a].name : String("admin")) + "\""; }
     if (u >= 0) j += ",\"user\":\"" + jsonEscape(cfg.users[u].name) + "\",\"role\":" + String(cfg.users[u].role);
     return sendJson(s, j + "}");
@@ -210,8 +212,6 @@ static void routesCore(PsychicHttpServer* S, bool sec) {
   add(S, sec, "/api/langs", HTTP_GET, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, langListJson()); });
   add(S, sec, "/api/langfile", HTTP_GET, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
     String code = P(r, "code");
-    size_t n = 0; const uint8_t* b = langBuiltinJson(code, n);
-    if (b) { s->addHeader("Cache-Control", "no-cache"); s->addHeader("Content-Encoding", "gzip"); return s->send(200, "application/json; charset=utf-8", b, n); }
     String path = "/lang/" + code + ".json";
     if (code == "it" || !langCodeValid(code) || !drvFsExists(path)) return notFound(s);
     PsychicFileResponse f(s, drvFsHandle(), path, "application/json; charset=utf-8");
@@ -232,6 +232,8 @@ static void routes(PsychicHttpServer* S, bool sec) {
   routesSys(S, sec);
   routesNet(S, sec);
   routesFiles(S, sec);
+  routesScript(S, sec);
+  routesApp(S, sec);
 }
 
 void webInit() {
@@ -257,6 +259,7 @@ void webStart() {
     g_http->config.max_open_sockets = 3;               // basta per hotspot e portale automatico; HTTP e un server in piu, tiene poca RAM
     g_http->config.lru_purge_enable = true;            // quando i collegamenti sono finiti chiude il piu vecchio invece di rifiutare il nuovo
     g_http->maxRequestBodySize = 48 * 1024;
+    g_http->maxUploadSize = 4UL * 1024 * 1024;         // oltre questo la libreria risponde in inglese e chiude: i limiti veri li controllano le rotte (messaggi tradotti)
     routes(g_http, false);
     g_http->start();
     g_runHttpPort = port;
@@ -269,6 +272,7 @@ void webStart() {
     g_https->ssl_config.httpd.max_open_sockets = 2;      // ogni connessione cifrata usa circa 40 KB di RAM
     g_https->ssl_config.httpd.lru_purge_enable = true;   // finiti i collegamenti chiude il piu vecchio invece di rifiutare il nuovo
     g_https->maxRequestBodySize = 48 * 1024;
+    g_https->maxUploadSize = 4UL * 1024 * 1024;
     g_https->setCertificate(tlsCertPem().c_str(), tlsKeyPem().c_str());
     routes(g_https, true);
     g_tlsUp = g_https->start() == ESP_OK;

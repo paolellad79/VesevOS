@@ -54,7 +54,7 @@ static uint8_t g_me[6];
 static uint32_t g_seq = 0;
 static uint16_t g_boot = 0;
 static uint8_t g_key[32];
-static uint32_t g_lastBeacon = 0, g_lastState = 0, g_lastHop = 0;
+static uint32_t g_lastBeacon = 0, g_lastHop = 0;
 static uint32_t g_sent = 0, g_recv = 0, g_bad = 0;
 static const uint8_t BCAST[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 

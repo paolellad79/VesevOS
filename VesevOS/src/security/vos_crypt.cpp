@@ -4,6 +4,7 @@
 // Formato (una riga): VOSENC1 <giri> <sale 16 byte> <iv 12 byte> <testo cifrato> <etichetta 16 byte>   (tutto in esadecimale)
 #include "vos_crypt.h"
 #include "../core/vos_i18n.h"
+#include "../core/vos_util.h"
 #include "mbedtls/md.h"
 #include "mbedtls/gcm.h"
 #include <esp_random.h>
@@ -31,12 +32,6 @@ static bool kdf(const String& pass, const uint8_t* salt, uint32_t iter, uint8_t*
   return true;
 }
 
-static String hexOf(const uint8_t* b, size_t n) {
-  static const char H[] = "0123456789abcdef";
-  String s; s.reserve(n * 2);
-  for (size_t i = 0; i < n; i++) { s += H[b[i] >> 4]; s += H[b[i] & 15]; }
-  return s;
-}
 static int nib(char c) { return c >= '0' && c <= '9' ? c - '0' : c >= 'a' && c <= 'f' ? c - 'a' + 10 : c >= 'A' && c <= 'F' ? c - 'A' + 10 : -1; }
 static bool unhex(const String& h, uint8_t* out, size_t n) {
   if (h.length() != n * 2) return false;

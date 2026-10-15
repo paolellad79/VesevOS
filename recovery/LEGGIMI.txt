@@ -1,24 +1,47 @@
-VesevOS Recovery 0.3.0 - PASSO 3 (controlli di sicurezza sul file)
-==================================================================
-Novita rispetto alla 0.2.0: prima di attivare un firmware il recovery controlla
-  - intestazione valida per ESP32-S3 e immagine Arduino-ESP32,
-  - marchio VesevOS dentro il file (il firmware 1.7.44 lo contiene; il recovery NO),
-  - dimensione, immagine completa, e SHA-256 se lo scrivi nella pagina (facoltativo).
-Se l'intestazione e sbagliata il vecchio firmware non viene toccato. La pagina fa gli stessi controlli prima di inviare.
-Il resto e come la 0.2.0: recovery fermo con `recovery now` / BOOT / firmware non valido; rete di casa, poi hotspot dopo 30 s;
-login amministratore (o codice a 8 cifre se non ce n'e); dopo 15 minuti senza accessi torna a VesevOS.
+VesevOS Recovery 0.4.4 (LED di stato + file trascinabile + diagnostica + protezioni + marchio del recovery)
+===============================================================================
+Novita della 0.4.4: il recovery porta un suo MARCHIO con la versione. Da VesevOS 1.7.58 puoi aggiornare il recovery dalla pagina
+(menu utente > Aggiorna recovery) o dalla shell (recovery update <file>), senza cavo. VesevOS controlla tutto il file prima di scriverlo
+(programma ESP32-S3, somma e impronta interna, marchio del recovery, dimensione) e rifiuta il firmware al posto del recovery.
+I recovery fino alla 0.4.3 non hanno il marchio: la pagina mostra "versione sconosciuta"; caricando il file 0.4.4 dalla pagina si sistemano.
 
-AGGIORNARE DALLA 0.2.0 (stessa tabella partizioni, niente da cancellare):
- 1) Compila ed esporta il recovery 0.3.0 (Sketch > Esporta binario compilato). Il .bin deve essere SOTTO 1.048.576 byte.
- 2) Compila ed esporta VesevOS 1.7.44 (serve: contiene il marchio).
- 3) ./carica-tutto.sh /dev/cu.usbmodem14401 <cartella build del recovery> <VesevOS.ino.bin>
+Novita della 0.4.3 (corregge un errore della 0.4.2: cercava il marchio e si fermava dopo 8 KB di spazio vuoto, quindi diceva "NON e VesevOS" anche con il firmware giusto; ora cerca in tutto app0, prova nuova in test_recheck).
+Protezione (dopo lo sbaglio dell'11/10: un recovery finito per errore nello slot di VesevOS faceva girare la scheda a vuoto):
+  - Il recovery, prima di passare ad app0, cerca dentro il marchio di VesevOS. Se manca (altro recovery, file sbagliato) NON passa e resta fermo,
+    con il messaggio sulla seriale; la pagina dice "NON e VesevOS". Il comando seriale `b` forza il passaggio.
+  - Gli script installa.sh, carica-tutto.sh, carica-firmware.sh (con il nuovo controlli.sh accanto) rifiutano: il recovery al posto del firmware,
+    il firmware al posto del recovery, il file ".merged.bin" e file che non sono programmi ESP32. Per saltare i controlli: FORZA=1 ./carica-...sh
+  - Prova dei controlli: tools/hosttest/test_scripts.sh (11 prove).
+Novita della 0.4.1 (gia presente): DIAGNOSTICA dell'avvio e ANTI-GIRO. All'accensione e con "i" scrive una riga "diagnostica": motivo dell'ultimo riavvio
+(accensione, RESET, ERRORE GRAVE, watchdog, calo di tensione...), partizione in esecuzione (0x10000 = recovery), partizione scelta dal
+bootloader (0x110000 = VesevOS), stato di app0 (valida / in prova / scartata / rollback) e il "segno passaggio". Se dopo "passo a VesevOS"
+si torna qui, il recovery RESTA fermo (arancione lento) invece di rifare il giro: premi RESET per riprovare o carica un firmware dalla pagina.
+
+Novita rispetto alla 0.3.0:
+  - LED DI STATO (lo stesso LED RGB di VesevOS; pin e luminosita letti da /vesevos.conf):
+      arancione lento = in attesa del file (anche mentre cerca la rete di casa)
+      azzurro veloce  = scrittura in corso
+      verde fisso     = finito (la scheda riparte)
+      rosso fisso     = errore (dopo 10 s torna arancione)
+    Se VesevOS e valido e sta solo partendo, il LED resta spento (il recovery non lo tocca).
+  - TRASCINAMENTO: sulla pagina del recovery puoi trascinare il file .bin sulla zona tratteggiata (oltre al pulsante "scegli file").
+    Un solo file; stessi controlli di prima (intestazione, marchio, dimensione, SHA-256 facoltativo). Dal telefono: solo il pulsante.
+  - Insieme a questa versione, la pagina di VesevOS (1.7.53) apre da sola il recovery dopo "Riavvia nel recovery" (nessuna modifica
+    al recovery per questo: se la scheda passa all'hotspot VesevOS-recovery il cambio di Wi-Fi resta a mano).
+Il resto e come la 0.3.0: recovery fermo con `recovery now` / BOOT / firmware non valido; rete di casa, poi hotspot dopo 30 s;
+login amministratore (o codice a 8 cifre se non ce n'e); controlli sul file; dopo 15 minuti senza accessi torna a VesevOS.
+
+AGGIORNARE DALLA 0.3.0 (stessa tabella partizioni, niente da cancellare):
+ 1) Compila ed esporta il recovery 0.4.3 (Sketch > Esporta binario compilato). Il .bin deve essere SOTTO 1.048.576 byte
+    (la 0.3.0 era 1.008.007: dimmi la nuova misura).
+ 2) ./carica-tutto.sh /dev/cu.usbmodem14401 <cartella build del recovery> <VesevOS.ino.bin>   (come prima)
 
 PROVE (una alla volta)
- F) File buono: entra nella pagina, scegli VesevOS.ino.bin 1.7.44, "Carica e installa". Deve dire "Installato e controllato (SHA-256 ...)".
- G) SHA sbagliato: scrivi 64 caratteri a caso nel campo SHA: deve rifiutare, e il recovery resta (VesevOS non parte, e giusto: lo slot e stato reso non valido; ricarica il file buono).
- H) File sbagliato: scegli il file del recovery (VesevOS_Recovery.ino.bin) o un file qualsiasi: la pagina deve dire "manca il marchio" o "intestazione errata" SENZA inviare niente.
- I) Firmware vecchio (1.7.43, senza marchio): deve dire "manca il marchio". (Per installarlo comunque serve carica-firmware.sh.)
- Restano da provare (dalla 0.2.0): hotspot con router spento, password sbagliata (blocco 60 s), tasto BOOT, 15 minuti fermo.
+ A) Seriale: "=== VesevOS Recovery 0.4.3 ===". Il LED lampeggia arancione lento.
+ B) Pagina: entra, trascina VesevOS.ino.bin sulla zona tratteggiata (si colora di blu mentre trascini, poi mostra nome e KB).
+ C) "Carica e installa": LED azzurro veloce durante la scrittura, poi verde fisso, poi la scheda riparte.
+ D) File sbagliato (VesevOS_Recovery.ino.bin): la pagina rifiuta; se il rifiuto arriva dalla scheda, LED rosso 10 s, poi arancione.
+ E) Da VesevOS: menu utente > Aggiorna firmware > Riavvia nel recovery: la pagina deve aprire da sola il recovery.
 
 DOPO L'INSTALLAZIONE: NON usare "Carica" dell'IDE per VesevOS (cancella il recovery). Usa carica-firmware.sh o la pagina del recovery.
 SE QUALCOSA VA STORTO: ripristino del backup:

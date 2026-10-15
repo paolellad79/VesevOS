@@ -7,7 +7,7 @@
 #include "vos_log.h"
 #include "vos_audit.h"
 #include "../drivers/vos_drv_fs.h"
-#include <Preferences.h>
+#include "../drivers/vos_drv_nvs.h"
 #include "vos_config_int.h"
 
 #define CFG_FILE "/vesevos.conf"
@@ -23,7 +23,9 @@ void cfgDefaults() {
   cfg.serialAuth = true;
   cfg.serBaud = 115200; cfg.serEol = 0; cfg.serTx = 10; cfg.serEcho = true; cfg.serIn = true; cfg.serLogOut = true; cfg.serBanner = true;
   cfg.apQr = true;
-  for (int i = 0; i < 49; i++) cfg.pinNote[i] = "";
+  cfg.wpsOn = false; cfg.wpsPin = false;
+  cfg.btnAct[0] = 1; cfg.btnAct[1] = 2; cfg.btnAct[2] = 0;   // 1 click: esce dal modo aereo; 2 click: WPS; 3 click: niente
+  for (int i = 0; i < VOS_GPIO_COUNT; i++) cfg.pinNote[i] = "";
   cfg.apPass = "";                          // creata al primo avvio, unica per ogni scheda (vedi cfgLoad)
   cfg.staEnabled = false;
   cfg.staSsid = ""; cfg.staPass = "";
@@ -68,10 +70,10 @@ static String fileHash(const char* path) {
   String t = f.readString(); f.close();
   return sha256Hex(t);
 }
-static void hashSave(const String& h) { Preferences p; if (p.begin("vos", false)) { p.putString("cfgh", h); p.end(); } }
+static void hashSave(const String& h) { DrvNvs p; if (p.begin("vos", false)) { p.putString("cfgh", h); p.end(); } }
 bool cfgFileChanged() {
   if (!drvFsExists(CFG_FILE)) return false;
-  Preferences p; String saved;
+  DrvNvs p; String saved;
   if (p.begin("vos", true)) { saved = p.getString("cfgh", ""); p.end(); }
   if (!saved.length()) return false;                 // prima volta: niente da confrontare
   return fileHash(CFG_FILE) != saved;
@@ -196,7 +198,7 @@ void cfgFactoryReset() {
   drvFsRemove(CFG_BAK);
   drvFsRemove(CFG_TMP);
   drvFsRemove("/mqtt-ca.pem");
-  Preferences p;
+  DrvNvs p;
   if (p.begin("vos", false)) { p.remove("cfgh"); p.remove("audit"); p.end(); }
   if (p.begin("tls", false)) { p.clear(); p.end(); }
   cfgDefaults();

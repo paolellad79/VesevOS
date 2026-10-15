@@ -7,6 +7,10 @@ static int got = 0, gotAll = 0; static int32_t lastVal = -1; static char lastTop
 static void onSvc(const Event& e) { got++; lastVal = e.val; strcpy(lastTopic, e.topic); }
 static void onAll(const Event& e) { gotAll++; }
 static void onRec(const Event& e) { EventBus::publish("x.inner", "", 1); gotAll += 100; }   // gestore che pubblica: non deve ricorrere
+// un altro task pubblica mentre il primo sta ancora servendo un evento: il suo evento NON deve sparire (errore fino alla 1.7.58)
+static int g_t1, g_t2, gotB = 0;
+static void onA(const Event& e) { if (strcmp(e.topic, "a") == 0) { g_stubTask = &g_t2; EventBus::publish("b"); g_stubTask = &g_t1; } }
+static void onB(const Event& e) { if (strcmp(e.topic, "b") == 0) gotB++; }
 
 int main() {
   EventBus::reset();
@@ -70,6 +74,14 @@ int main() {
   CHECK(EventBus::subscribe("", onRec));
   EventBus::publish("go");
   CHECK(gotAll == 100 && EventBus::lastSeq() == 2);                        // l'evento interno e registrato, ma non richiama il gestore
+  // due task: l'evento del secondo arriva ai gestori; lo stesso task resta protetto dalla ricorsione
+  EventBus::reset(); gotB = 0; g_stubTask = &g_t1;
+  CHECK(EventBus::subscribe("a", onA) && EventBus::subscribe("b", onB));
+  EventBus::publish("a");
+  CHECK(gotB == 1);
+  EventBus::publish("b");
+  CHECK(gotB == 2);                                                        // il segno del task si libera alla fine
+  g_stubTask = nullptr;
   CHECK(EventBus::ramBytes() > 0 && EventBus::ramBytes() < 2200);
   return done("eventbus");
 }

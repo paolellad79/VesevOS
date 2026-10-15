@@ -1,7 +1,7 @@
 # VesevOS 1.7.45 - Manual
 
 Manual for people who use the board. Plain words, no programming.
-Versione italiana: [manuale.md](manuale.md). The same help is in the board's page (System > Help, or `http://192.168.4.1/#aiuto`).
+Versione italiana: [manuale.md](manuale.md). The same help is in the board's page (Information > Help, or `http://192.168.4.1/#aiuto`).
 
 > Not legal advice. The laws mentioned only explain why the board works this way.
 
@@ -42,7 +42,7 @@ The receiver chooses the panel password at first access and may change the Wi-Fi
 
 | BOOT button (hold, then release) | LED colour | What it does |
 |---|---|---|
-| under 2 seconds | - | leaves airplane mode |
+| under 2 seconds (1, 2 or 3 quick clicks) | - | the action chosen in Devices > BOOT button (factory: 1 click leaves airplane mode, 2 clicks start WPS) |
 | 2 to 7 seconds | light blue | turns off the IP filter (if you locked yourself out) |
 | 8 to 19 seconds | yellow | clears the administrators' passwords and prints the Wi-Fi password on the serial |
 | 20 seconds or more | red | factory reset: erases everything, new Wi-Fi password |
@@ -90,7 +90,7 @@ The board's hotspot and the serial are always allowed. Emergency exits: `firewal
 ## 8. Watchdog and checks
 - **Watchdog** (Services > Watchdog): if a service hangs it restarts it, then the board. Optional: missing network, low RAM, scheduled restart.
 - **Reduced mode** (1.7.11): after 3 automatic restarts in one hour the board **stops restarting and does not stay stuck**: if it knows which service hung (MQTT, board network, LED) it switches off only that one; if it does not (network, RAM, a basic service) it switches off MQTT, the board network and Bluetooth. The web page, log, update and recovery stay active. The Watchdog page says what was switched off and why. It lasts until the next restart; the saved configuration does not change.
-- **Compliant** (Security > Compliant): the board checks its configuration. Red = forbidden value (law or security), fixed at once.
+- **Compliance status** (Security > Compliance status): the board checks its configuration. Red = forbidden value (law or security), fixed at once.
   Yellow = allowed but risky. The log says who changed what (page, serial, file).
 
 ## 9. Data and privacy
@@ -118,7 +118,7 @@ On the serial, at an empty line, keys `1` and `2` change language.
 - **Services**: Access point (AP), HTTP, HTTPS, MQTT, Board network, Automations, Tasks, Watchdog, Boot, Terminal.
 - **Peripherals** (was Hardware): Pins (front/back drawing and inventory), LED.
 - **System**: Status, Files, Time, Localization (language too), Log, Config, Accessibility, Legal notes, Help.
-- **Security**: Password (serial password too), Users, IP filter, Compliant.
+- **Security**: Password (serial password too), Users, IP filter, Compliance status.
 
 **Service controls (the same everywhere)**
 - At the top there is the **status banner**: **Started** (green) or **Stopped** (red). Below, four icons with a coloured background for the state: **Start** (green), **Stop** (red), **Restart** (yellow, grey when the service is stopped or cannot restart), **Apply** (blue, HTTP and HTTPS only).
@@ -134,7 +134,7 @@ rules cannot be exceeded; (3) no identical passwords.
   with BOOT 8 seconds or from the serial line. The **automatic portal** (the phone opens the page by itself) works only with HTTP on port 80.
 - **HTTP**: not encrypted. It serves the hotspot. While connected to your Wi-Fi you may turn it off: recommended, saves memory.
 - **HTTPS**: encrypted (recommended). You may also turn it off and use HTTP only: your choice, everything works, but session and data are
-  not encrypted (login never sends the password) and Compliant shows a yellow warning.
+  not encrypted (login never sends the password) and Compliance status shows a yellow warning.
 - **Ports**: HTTP 80 or 1024-65535, HTTPS 443 or 1024-65535, never the same. **They apply after a restart** (the page tells you). Changing the port
   is not real security: security stays password, IP filter and encryption. Links and QR codes show the port.
 
@@ -183,7 +183,7 @@ a warning appears if you test a pin already marked. GP33-37 are free with this b
 
 
 ## 17. Self-test (new in 1.7.7)
-System > Self-test (Admin only). Press **Start diagnosis**: 16 tests one at a time, each with result OK / Warning / Error / Skipped. At the end **Download report** (or **Copy**). No passwords, keys or tokens; MAC, Wi-Fi name, IP and log are hidden unless "real names" is ticked. "Active tests" blinks the LED and sends a test MQTT message. Serial: `selftest [active] [names]`. **Close and free memory** deletes the report.
+Administration > Self-test (Admin only). Press **Start diagnosis**: 16 tests one at a time, each with result OK / Warning / Error / Skipped. At the end **Download report** (or **Copy**). No passwords, keys or tokens; MAC, Wi-Fi name, IP and log are hidden unless "real names" is ticked. "Active tests" blinks the LED and sends a test MQTT message. Serial: `selftest [active] [names]`. **Close and free memory** deletes the report.
 
 
 ## 18. Log and reboot journal (new in 1.7.8)
@@ -216,11 +216,50 @@ System > **Backup and restore** (Admin only).
 ## 22. Updating the firmware with no cable (new in 1.7.42 - 1.7.45)
 The board holds two programs: **VesevOS** and the **recovery** (small, used only to update). The first install is done over USB: follow [PREPARE-THE-BOARD.md](PREPARE-THE-BOARD.md). After that you update from the page.
 1. User menu (Administrator only) > **Update firmware** > *Restart into recovery*. Or, from the serial port: `recovery` (says whether it is there) and `recovery now`.
-2. The page shows the recovery address, for example `http://192.168.1.50:80/`. Open it in a **private window** and type **http**, not https (the recovery is not encrypted).
+2. The page waits for the board to restart and **opens the recovery by itself** (usually within seconds; "Open now" to skip the wait). If it cannot, it shows the address, for example `http://192.168.1.50:80/`: open it in a **private window** and type **http**, not https (the recovery is not encrypted).
    The recovery tries your **home network** first; if it cannot find it within 30 seconds it creates the Wi-Fi network `VesevOS-recovery` (random password written on the serial port).
 3. Sign in with the user and password of a VesevOS **Administrator** (the password never travels in clear). With an empty flash and no administrators you need the 8-digit code shown on the serial port. Five mistakes = a 60-second wait.
 4. Choose the `VesevOS.ino.bin` file (not `.merged.bin`). *Expected SHA-256* is optional: if you fill it in, the file must match.
-5. *Upload and install*. First the page and then the board check: ESP32-S3 header, **VesevOS marker**, size, complete image. A wrong file is refused and **the old firmware is left untouched**; if the error comes after writing has started, the recovery stays on and you just upload the good file.
-6. After about 10 seconds VesevOS restarts. *Start VesevOS without updating* goes back. After 15 minutes without access the recovery goes back to VesevOS by itself. BOOT held at power-up = stay in the recovery.
+5. Pick the file with the button or **drag it** onto the page (on a phone, button only). *Upload and install*. First the page and then the board check: ESP32-S3 header, **VesevOS marker**, size, complete image. A wrong file is refused and **the old firmware is left untouched**; if the error comes after writing has started, the recovery stays on and you just upload the good file.
+6. The board **LED** shows the state: slow orange = waiting for the file; fast cyan = writing; solid green = done; red = error (back to orange after 10 seconds). After about 10 seconds VesevOS restarts. *Start VesevOS without updating* goes back. After 15 minutes without access the recovery goes back to VesevOS by itself. BOOT held at power-up = stay in the recovery.
 - The file check guarantees it is a complete VesevOS firmware; it is **not a digital signature**. Download files only from trusted sources.
 - After installing with the recovery **do not use the IDE's *Upload***: it would erase the recovery.
+
+## 23. Device classes: relay, LED, pin, input (new in 1.7.54)
+- **Where**: Devices > Periferiche (Devices). Choose the *class* (relay, LED, output pin, input, analog), the *pin* and, if you like, a *name*: with no name the board calls them rele1, led1, pin1, in1, adc1. Names are lowercase letters without accents and digits (2-11 characters); change them with *Rename*. Maximum 16 devices. They are stored in `/io.cfg` (not in the configuration backup), with a copy of the last good version in `/io.cfg.bak`. If the file storage is full the board answers "Spazio esaurito" (no space left) and the list does not change. A device not loaded at boot (pin in use) stays in the file and comes back when the pin is free.
+- **Checked pins**: the board refuses USB (19, 20), BOOT (0), RGB LED (48), boot pins (3, 45, 46), pins that do not exist or are already in use. Analog works only on pins 1-10. (SuperMini numbers: they come from the firmware board file, and the page reads them from there.)
+- **Active low**: for relay modules that switch on with level 0.
+- **Safety**: after every restart, after a crash or in the watchdog reduced mode all outputs are **off**. The relay is switched only by the Administrator (operator and apps only if the Admin granted the permission) and changes at most once per second. A relay connected to mains power (230 V) needs a certified module and an installer: VesevOS only drives the signal.
+- **Commands**: page; shell `io list`, `io add rele 5 [name] [inv]`, `io del <name>`, `io rename <name> <new>`, `io set <name> 1`, `io get <name>`; `dev on|off <name>` and `dev act <name> set 1`.
+- **In apps**: write the name in `use=` (for example `use=rele1,in1`); then `dev_set("rele1", 1)` and `dev_get("in1")` (input: 0/1, analog: 0-4095). Without the name in `use=` the app stops with "permission missing".
+- **Device list**: the devices you create appear under *Periferiche*.
+
+## 24. Module cards and a page for each device (new in 1.7.55)
+- **Page for each device**: in Devices > Periferiche tap *Manage*. You see class, pin, level, live value and the **tests**: Switch on, Switch off, 1-second pulse, Blink for 5 seconds (LED and pin only; the relay does not blink). Inputs and analog devices show a value that updates by itself. *Rename* and *Remove* (Admin) are here too. Pulse and blinking switch off by themselves; *switching off* is always possible, at once.
+- **Module card (.vdp)**: a text file describing a module (class, signals, icon, SVG diagram). Data only. Folder `/devs`. Examples are in `docs/devs` (1-, 2- and 4-channel relay, LED, button, PIR sensor, LDR).
+- **How to use**: Periferiche > *Upload module card*, then *Install*: the board shows the diagram, suggests free and safe pins, and creates the devices (all or nothing). You can choose the name (pompa1, pompa2...).
+- **Wiring diagram (new in 1.7.57)**: the page draws it from the card data. The board with its pins (5V or 3V3, GND, suggested GPIOs) on the left, the module on the right. Coloured wires: **red** supply, **black** ground, **blue** signal (orange if analog), with the **voltage written** on the wire and an arrow for the direction. Resistors and other parts to add are drawn with their value (e.g. 330 ohm in series with the LED). Below is a table wire / from the board / to the module / voltage and notes: colours are also written in words. 12, 24 or 230 V supplies show a "Power supply" box: join its ground to the board GND. If the module signal is 5 V on an input a red warning appears: the pins only tolerate 3.3 V.
+- **For card authors**: add `level=3V3|5V` (signal level) and up to 4 lines `part=serie|gnd|vcc,value,signal` (for example `part=serie,330 ohm,OUT`) to `[module]`. The `[wiring]` section is no longer needed: if present it shows below as "Drawing attached to the file". Full format: claude/funzioni/VesevOS-formato-vdp.md in the Project.
+- **Serial**: `mod list`, `mod info <name>`, `mod install <name> [prefix]`, `mod del <name>`.
+- **Warning**: always check the connections on your module's datasheet. A wrong diagram can damage the module. For 230 V you need an installer.
+
+## 25. WPS: join the router without typing the password (new in 1.7.56)
+- **What it is for**: the router sends the board the name and password of your home Wi-Fi. You do not type them. The board saves them and connects.
+- **Where**: Rete (Network) > **WPS** (Administrator only). At the top there is the switch (Start/Stop): **off** from the factory. The first-setup guide has a *Connect with WPS* button (it also works with the switch off until the guide is finished).
+- **Button method**: press *Connect with the router button*, then within 2 minutes press the WPS button on the router.
+- **PIN method** (off from the factory, turn it on in the WPS settings): the board creates a new 8-digit PIN at every try and shows it; you enter it on the router's WPS page within 2 minutes. The PIN is never written to the log.
+- **From the BOOT button**: by default **2 quick clicks** start WPS and 2 clicks again cancel it (WPS must be on, or the guide not finished). 1 click leaves airplane mode. The actions for 1, 2 and 3 clicks are chosen in *Devices > BOOT button* (free for scripts, leave airplane mode, WPS, find the board); the board waits half a second after the last click. A gesture set to **Free** does nothing by itself: if a script (or an app with `btn` in `use=`) is running, it reads those clicks with `btn()` (1, 2 or 3; 0 if there are none; it does not wait, so use it in a loop with `sleep`). With no script running the free clicks are lost. The other times do not change (2 s IP filter, 8 s password, 20 s factory). The same page has a **Button test**: for 60 seconds the button does nothing (not even the long presses) and the page shows what the board understands. Note: BOOT held while the board powers up enters download mode (this is not WPS).
+- **LED**: slow breathing blue = waiting, solid green for 3 s = done, solid red for 3 s = error.
+- **What happens**: during the try the hotspot stays on. On success the name and password replace the old ones, the address becomes automatic (DHCP) and the board joins the new network; if you were on the hotspot the page drops, reconnect your phone to the home network. On failure the board goes back as it was. A line is left in the checks log ("The home Wi-Fi was changed with WPS").
+- **Limits**: it does not work with WPA3-only routers or with WPS turned off on the router; two routers in WPS at once can be confused; 2.4 GHz only. It starts only with Wi-Fi on (not in airplane mode).
+- **Serial**: `wps` (status), `wps on|off`, `wps pin on|off`, `wps button on|off`, `wps start [pin]`, `wps stop` (Administrator only).
+- **Safety**: with WPS on and mapped to a button gesture, whoever holds the board can connect it to their own network: if the board is not safe, remove the gesture or turn WPS off. WPS is a trademark of the Wi-Fi Alliance.
+
+## 26. Scripts and apps: reading the log and writing to the MQTT broker (new in 1.7.60)
+- **`logtail(n)`**: returns the last `n` lines of the log (1 to 20, 10 by default), at most 2000 characters. Always available in scripts; in apps it needs `logread` in `use=`.
+- **`mqtt("name", "text")`**: sends the text to the broker on the topic `<prefix>/app/<name>`. Returns true if it was sent, false if it was not sent (MQTT not connected or over the limit). The name has 1 to 40 characters (a-z, 0-9, `_`, `-`, `/`), the text up to 2048. At most **20 messages per minute**. In apps it needs `mqtt` in `use=`.
+- **Where it goes**: only under `app/`. An app cannot write to `cmd` (the board commands), `status` or `state`.
+- **MQTT must be on** (Network > MQTT, off by default) and you need a broker. Forwarding to email is done by a program of your own (for example Home Assistant, Node-RED, ntfy): the board does not talk to mail servers.
+- **Example**: `docs/esempi/app/logmqtt.vap` (copy it to /apps): a button and an "every hour" switch that send the last 10 log lines to `<prefix>/app/log`.
+- **Flashlight example**: `docs/esempi/script/torcia.vsc` (copy it to /scripts and start it). One click of the BOOT button turns the white LED on, the next click turns it off; it also turns off by itself after 10 minutes (change `MINUTI`, 0 = never). First set **Free** on the gesture you want in *Devices > BOOT button* (by default only 3 clicks are free). The white LED is bright and gets warm.
+- **Privacy**: the log can contain IP addresses and names. Whoever installs the app (Administrator only) decides with `logread` and `mqtt` whether it may read it and send it out. If the broker is outside your home, use encrypted MQTT (user and password) and choose who receives the data.

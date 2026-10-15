@@ -57,6 +57,15 @@ String uptimeStr(uint64_t s) {
   return r;
 }
 
+void durStr(uint64_t s, char* b, size_t n) {
+  if (!b || !n) return;
+  unsigned long d = (unsigned long)(s / 86400ULL), h = (unsigned long)(s % 86400ULL / 3600ULL), m = (unsigned long)(s % 3600ULL / 60ULL);
+  if (s < 60)         snprintf(b, n, "%lu %s", (unsigned long)s, tr("s"));
+  else if (s < 3600)  snprintf(b, n, "%lu %s", m, tr("min"));
+  else if (s < 86400) snprintf(b, n, "%lu %s %lu %s", h, tr("h"), m, tr("min"));
+  else                snprintf(b, n, "%lu %s %lu %s %lu %s", d, tr("g"), h, tr("h"), m, tr("min"));
+}
+
 String cleanAscii(const String& s) {
   String o; o.reserve(s.length());
   for (size_t i = 0; i < s.length(); i++) {
@@ -91,11 +100,23 @@ String sha256Hex(const String& s) {
   mbedtls_sha256_update(&ctx, (const unsigned char*)s.c_str(), s.length());
   mbedtls_sha256_finish(&ctx, out);
   mbedtls_sha256_free(&ctx);
+  return hexOf(out, 32);
+}
+
+String hexOf(const uint8_t* b, size_t n) {
   static const char* hx = "0123456789abcdef";
-  String r; r.reserve(64);
-  for (int i = 0; i < 32; i++) { r += hx[out[i] >> 4]; r += hx[out[i] & 15]; }
+  String r; r.reserve(n * 2);
+  for (size_t i = 0; i < n; i++) { r += hx[b[i] >> 4]; r += hx[b[i] & 15]; }
   return r;
 }
+
+bool utilNameOk(const String& n) {
+  if (n.length() < 1 || n.length() > 24) return false;
+  for (size_t i = 0; i < n.length(); i++) { char c = n[i]; if (!((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_')) return false; }
+  return true;
+}
+
+bool utilLineErr(String& err, int line, const char* msg) { err = String(trf("Riga %d: ", line)) + msg; return false; }
 
 String randomHex(int bytes) {
   static const char* hx = "0123456789abcdef";
@@ -187,3 +208,45 @@ bool utilEditKey(String& buf, uint8_t& esc, char ch, String& echo, size_t maxLen
   if (ch >= 32 && ch < 127) { if (buf.length() < maxLen) { buf += ch; echo = String(ch); } return true; }
   return false;
 }
+
+// ---------- SVG ammesso: solo forme semplici (icone delle app e delle schede modulo) ----------
+static bool svgTagAllowed(const String& t) {
+  static const char* ok[] = {"svg", "g", "path", "circle", "rect", "ellipse", "line", "polyline", "polygon", "title"};
+  for (const char* o : ok) if (t == o) return true;
+  return false;
+}
+bool utilSvgSafe(const String& svg, size_t maxLen) {
+  if (svg.length() < 10 || svg.length() > maxLen) return false;
+  String l = svg; l.toLowerCase();
+  if (!l.startsWith("<svg") || !l.endsWith("</svg>")) return false;
+  static const char* bad[] = {"script", "href", "url(", "data:", "style", "@import", "&", "<!", "<?", "expression", "base64", "xlink"};
+  for (const char* b : bad) if (l.indexOf(b) >= 0) return false;
+  size_t i = 0, n = l.length();
+  int tags = 0;
+  while (i < n) {
+    if (l[i] != '<') { i++; continue; }
+    size_t j = i + 1; bool closing = false;
+    if (j < n && l[j] == '/') { closing = true; j++; }
+    String name;
+    while (j < n && l[j] != ' ' && l[j] != '/' && l[j] != '>' && l[j] != '\n' && l[j] != '\t' && l[j] != '\r') { name += l[j]; j++; }
+    if (!svgTagAllowed(name) || ++tags > 60) return false;
+    if (closing) { while (j < n && l[j] != '>') j++; i = j + 1; continue; }
+    // attributi: nessun nome che inizi per "on" (onclick, onload...)
+    while (j < n && l[j] != '>') {
+      while (j < n && (l[j] == ' ' || l[j] == '\n' || l[j] == '\t' || l[j] == '\r' || l[j] == '/')) j++;
+      if (j >= n || l[j] == '>') break;
+      String an;
+      while (j < n && l[j] != '=' && l[j] != ' ' && l[j] != '>' && l[j] != '/' && l[j] != '\n' && l[j] != '\t' && l[j] != '\r') { an += l[j]; j++; }
+      if (an.startsWith("on") || an.length() == 0) return false;
+      if (j < n && l[j] == '=') {
+        j++;
+        if (j < n && (l[j] == '"' || l[j] == '\'')) { char q = l[j++]; while (j < n && l[j] != q) j++; if (j >= n) return false; j++; }
+        else { while (j < n && l[j] != ' ' && l[j] != '>') j++; }
+      }
+    }
+    if (j >= n) return false;
+    i = j + 1;
+  }
+  return tags >= 2;
+}
+

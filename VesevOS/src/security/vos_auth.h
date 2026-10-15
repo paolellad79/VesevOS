@@ -33,8 +33,13 @@ String authBanJson();
 String authBanText();
 bool   authUnban(const String& ip);               // "all" o un indirizzo
 // ---- sessioni ----
-String authNewSession(int userIdx);
+String authNewSession(int userIdx, uint32_t ip = 0, bool secure = false);
 int    authSessionUser(const String& token);      // indice utente o -1
+// "chi e collegato": ogni richiesta con sessione aggiorna indirizzo, HTTP/HTTPS e l'ultima azione (le letture periodiche della pagina non contano)
+void   authSessionNote(const String& token, uint32_t ip, bool secure, bool post, const char* path);
+int    authSessionCount(int via);                 // sessioni attive negli ultimi 2 minuti: 0 = HTTP, 1 = HTTPS, -1 = tutte
+String authWhoJson();                             // {"list":[{user,role,ip,via,age,idle,act,actAge}...]}
+String authWhoText();
 void   authLogout(const String& token);
 void   authLogoutUser(int idx);                   // chiude tutte le sessioni di un utente
 String authCookieFromHeader(const String& cookieHeader);

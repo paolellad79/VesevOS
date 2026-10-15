@@ -6,13 +6,12 @@
 #include "vos_util.h"
 #include "vos_log.h"
 #include "../drivers/vos_drv_fs.h"
-#include "vos_lang_en.h"
-#include "vos_inflate.h"
+#include "vos_lang_it.h"
 #include <stdarg.h>
 #include <stdio.h>
 
 #define LANG_DIR      "/lang"
-#define LANG_MAX_SIZE 65536
+#define LANG_MAX_SIZE 262144        // i file it/en/es/de pesano circa 185 KB (fino alla 1.7.58 il limite era 64 KB: es e de venivano rifiutati); finisce in PSRAM
 
 struct LangEntry { const char* k; const char* v; };
 struct LangDict { char* buf; LangEntry* ent; int n; String code; };
@@ -89,14 +88,7 @@ static char* readStr(char*& p) {
 // Carica /lang/<code>.json. Ritorna true se ha almeno una voce.
 static bool loadFile(const String& code, String& err) {
   char* buf = nullptr; size_t got = 0;
-  if (code == "en") {                                // inglese: dentro il firmware
-    size_t raw = gzipRawSize(LANG_EN_GZ, LANG_EN_GZ_LEN);
-    buf = raw ? (char*)bigAlloc(raw + 1) : nullptr;
-    if (!buf) { err = tr("Memoria esaurita"); return false; }
-    got = gzipUnpack(LANG_EN_GZ, LANG_EN_GZ_LEN, (uint8_t*)buf, raw);
-    if (got != raw) { free(buf); err = tr("Lingua non installata"); return false; }
-    buf[got] = 0;
-  } else {
+  {                                                  // dalla 1.7.59 anche l'inglese e un file (prima era dentro il firmware: 59 KB)
     String path = String(LANG_DIR) + "/" + code + ".json";
     File f = drvFsOpen(path, "r");
     if (!f || f.isDirectory()) { err = tr("Lingua non installata"); return false; }
@@ -182,12 +174,8 @@ String trf(const char* it, ...) {
   return r;
 }
 
-bool langBuiltin(const String& c) { return c == "it" || c == "en"; }
+bool langBuiltin(const String& c) { return c == "it"; }
 
-const uint8_t* langBuiltinJson(const String& code, size_t& len) {      // compresso (gzip): la pagina lo riceve cosi
-  if (code == "en") { len = LANG_EN_GZ_LEN; return LANG_EN_GZ; }
-  len = 0; return nullptr;
-}
 
 // Valore di una chiave speciale ("_name", "_locale", "_flag") cercata nell'inizio del testo
 static String headKey(const char* txt, const char* key) {
@@ -228,7 +216,7 @@ static String item(const String& code, const String& name, const String& loc, co
 }
 
 String langListJson() {
-  String j = "[" + item("it", "Italiano", "it-IT", LANG_FLAG_IT) + "," + item("en", LANG_EN_NAME, LANG_EN_LOCALE, LANG_EN_FLAG);
+  String j = "[" + item("it", "Italiano", "it-IT", LANG_FLAG_IT);
   File d = drvFsOpen(LANG_DIR);
   if (d && d.isDirectory()) {
     for (File e = d.openNextFile(); e; e = d.openNextFile()) {
@@ -250,7 +238,6 @@ String langListJson() {
 int langList(String* codes, String* names, int max) {
   int n = 0;
   if (n < max) { codes[n] = "it"; names[n] = "Italiano"; n++; }
-  if (n < max) { codes[n] = "en"; names[n] = LANG_EN_NAME; n++; }
   File d = drvFsOpen(LANG_DIR);
   if (d && d.isDirectory()) {
     for (File e = d.openNextFile(); e && n < max; e = d.openNextFile()) {

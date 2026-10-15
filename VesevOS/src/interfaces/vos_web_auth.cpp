@@ -4,6 +4,8 @@
 // Percorsi del server web: accesso, MFA, utenti. Aiuti e tipi condivisi: vos_web_int.h.
 #include "vos_web_int.h"
 #include "../core/vos_ram.h"
+#include "../net/vos_net.h"
+#include "../net/vos_traffic.h"
 
 void routesAuth(PsychicHttpServer* S, bool sec) {
   // ---- accesso: 1) sale + numero casuale  2) prova (HMAC). La password non viaggia mai. ----
@@ -76,7 +78,7 @@ void routesAuth(PsychicHttpServer* S, bool sec) {
     if (a < 0 || !userSetPassword(a, P(r, "p"), e)) return ko(s, e.length() ? e : String(tr("Errore")));
     cfg.users[a].on = true; cfg.users[a].role = ROLE_ADMIN;
     cfgSetOrigin("primo accesso " + ipToStr(c.ip)); cfgSave();
-    String t = authNewSession(a);
+    String t = authNewSession(a, c.ip, c.secure);
     s->addHeader("Set-Cookie", ("vos=" + t + cookieAttrs(c.secure)).c_str());
     return sendJson(s, "{\"ok\":true,\"user\":\"" + jsonEscape(cfg.users[a].name) + "\",\"role\":2}");
   });
@@ -124,6 +126,10 @@ void routesAuth(PsychicHttpServer* S, bool sec) {
     cfg.banFails = f; cfg.banSecs = sc; cfgSave(); return ok(s);
   });
 
-  add(S, sec, "/api/status", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, sysStatusJson()); });
+  add(S, sec, "/api/status", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { 
+    auto j = sysStatusJson();                       // net e traffico stanno sopra il nucleo: si aggiungono qui
+    j.remove(j.length() - 1);
+    j += ",\"net\":"; j += netStatusJson(); j += ","; j += trafficJson(); j += "}";
+    return sendJson(s, j); });
   add(S, sec, "/api/settings", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, settingsJson()); });
 }

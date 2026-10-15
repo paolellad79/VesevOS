@@ -23,9 +23,10 @@ Versione API: **1** (campo `apiVersion` in `/api/status` e `/api/common`). Cambi
 
 - **Limiti:** corpo massimo 48 KB; elenco file 200 voci, ricerca reti 40 reti (oltre: `more:true`). Date in secondi Unix (UTC), durate in secondi, dimensioni in byte.
 - **Parametri:** `application/x-www-form-urlencoded`. Regola API 12: un valore non valido non deve cambiare nulla.
+- **Caricamento file** (`multipart/form-data`, solo admin, fuori dalla tabella): `POST /api/fs/up?dir=` (file in memoria interna); `POST /api/recovery/up?sha=` (nuovo recovery: va tutto in PSRAM, si controlla e solo dopo si scrive; risponde `{"ok":true,"from":"0.4.3","to":"0.4.4"}`; `sha` facoltativo).
 - La colonna **Parametri** e la **Errori** sono lette dal codice (indicative: gli errori elencati sono quelli esplicitamente dati dalla rotta, oltre a quelli generali sopra).
 
-## Rotte (129)
+## Rotte (153)
 
 | Metodo | Percorso | Livello | Cosa fa | Parametri | Errori |
 |---|---|---|---|---|---|
@@ -33,6 +34,12 @@ Versione API: **1** (campo `apiVersion` in `/api/status` e `/api/common`). Cambi
 | POST | `/api/airplane` | operatore | Modo aereo: spegne o riaccende la radio (on, exit) | `exit`, `on`, `param` | `error` |
 | GET | `/api/ap` | ospite | Hotspot: nome, stato, client | - | - |
 | POST | `/api/ap` | admin | Cambia nome/password/QR dell'hotspot (new = nuova password casuale) | `new`, `pass`, `qr`, `ssid` | `error` |
+| GET | `/api/app` | operatore | App: dettaglio e controllo di un file /apps/<name>.vap (permessi u, controlli ctl, icona, byte). L'operatore solo se who=oper | `name` | - |
+| POST | `/api/app/set` | operatore | App: comando di un controllo della pagina (name, id, v): arriva all'app come on_set(id, valore); valori controllati | `id`, `name`, `v` | `error` |
+| POST | `/api/app/start` | operatore | App: avvia un'app (name). Una sola alla volta, esclude gli script. L'operatore solo se who=oper | `name` | `error` |
+| GET | `/api/app/state` | operatore | App: stato dell'app (name) - run in esecuzione, busy motore occupato, vals valori dei controlli (n numero, s testo, a punti del grafico), out e err ultima uscita | `name` | - |
+| POST | `/api/app/stop` | operatore | App: ferma l'app in corso (name). L'operatore solo se who=oper | `name` | `state` |
+| GET | `/api/apps` | operatore | App: elenco di /apps/*.vap con controllo del formato (n, ok, t titolo, v versione, a autore, w chi la usa, u permessi, c controlli, icon, e errore). L'operatore vede solo le app valide con who=oper | - | - |
 | GET | `/api/audit` | ospite | Allarmi di configurazione e storico | - | - |
 | POST | `/api/audit/ack` | operatore | Segna come letto un allarme | `n` | - |
 | GET | `/api/auth` | pubblico | Stato dell'accesso: utente, ruolo, pacchetti presenti, impronta del certificato | - | - |
@@ -46,11 +53,14 @@ Versione API: **1** (campo `apiVersion` in `/api/status` e `/api/common`). Cambi
 | POST | `/api/boot/reset` | admin | Ordine di avvio predefinito | - | - |
 | GET | `/api/boots` | operatore | Diario dei riavvii | - | - |
 | POST | `/api/boots/clear` | admin | Cancella il diario dei riavvii | - | - |
+| GET | `/api/btn` | operatore | Tasto BOOT: act (azione di 1, 2 e 3 click: 0 libero (per gli script), 1 esce dal modo aereo, 2 WPS, 3 trova la scheda), opt (azioni possibili con il nome), wpsClicks (click che avviano il WPS, 0 = nessuno), wpsOn (WPS consentito), free (per ogni gesto: libero per gli script), script (c'e uno script che legge i click), test (secondi rimasti di prova, 0 = spenta), down, heldMs, seq, last (ultimo gesto capito in prova) | - | - |
+| POST | `/api/btn` | admin | Tasto BOOT (solo Admin): c1, c2, c3 = azione (0-3) per 1, 2, 3 click; test=1 | `test` | `error` |
 | GET | `/api/common` | pubblico | Dati comuni (paesi, regole radio, librerie, apiVersion), in cache 24 ore | - | - |
 | GET | `/api/config/download` | admin | Scarica la configurazione preparata | - | - |
 | POST | `/api/config/export` | admin | Prepara la configurazione da scaricare (acc = accetto avviso, pw = frase per i segreti) | `acc`, `pw` | `error` |
 | POST | `/api/config/restore` | admin | Ripristina la configurazione da file (t = testo, pw = frase) | `pw`, `t` | `error`, `toobig` |
 | POST | `/api/cpu` | admin | Modo CPU (automatico o fisso) | `mode` | `error` |
+| GET | `/api/crash` | operatore | Rapporti degli ultimi crash (motivo, task, PC, backtrace), testo | - | - |
 | GET | `/api/dev` | operatore | Elenco periferiche del Device Manager, o una sola (id) | `id` | - |
 | POST | `/api/dev/act` | operatore | Azione di una periferica (a, arg) | `a`, `arg`, `id` | `error` |
 | POST | `/api/dev/set` | admin | Accende o spegne una periferica | `id`, `on` | `error` |
@@ -71,6 +81,10 @@ Versione API: **1** (campo `apiVersion` in `/api/status` e `/api/common`). Cambi
 | POST | `/api/fw/confirm` | admin | Conferma il filtro IP dopo la prova | - | - |
 | GET | `/api/home` | ospite | Dati dei widget della Home (un solo pezzo) | - | - |
 | POST | `/api/identify` | operatore | Fa lampeggiare il LED per riconoscere la scheda | - | - |
+| GET | `/api/io` | operatore | Periferiche a classi (rele, led, pin, ingresso, analogico): max, io[] con n nome, c classe, g GPIO, f opzioni (1 attivo basso, 2 pull-up, 4 pull-down), v valore, out uscita | - | - |
+| POST | `/api/io/add` | admin | Crea una periferica (cls classe, gpio pin, name facoltativo, opt inv/up/down). Il pin e controllato; risponde con il nome | `cls`, `gpio`, `name`, `opt` | `error` |
+| POST | `/api/io/del` | admin | Toglie una periferica (n nome): l'uscita si spegne e il pin torna libero | `n` | `error` |
+| POST | `/api/io/rename` | admin | Cambia il nome di una periferica (n nome, to nuovo nome) | `n`, `to` | `error` |
 | POST | `/api/lang` | admin | Lingua della scheda | `code` | `error` |
 | GET | `/api/langfile` | pubblico | File di lingua da scaricare | `code` | - |
 | GET | `/api/langs` | pubblico | Lingue disponibili | - | - |
@@ -95,6 +109,11 @@ Versione API: **1** (campo `apiVersion` in `/api/status` e `/api/common`). Cambi
 | POST | `/api/mfa/off` | ospite | Spegne MFA | `i` | `forbidden` |
 | POST | `/api/mfa/recovery` | ospite | Nuovi codici di recupero | - | `forbidden`, `state` |
 | POST | `/api/mfa/set` | admin | Impostazioni MFA (admin) | `nt`, `pow` | `error` |
+| GET | `/api/mod` | operatore | Una scheda modulo (name): dettagli, livello del segnale (lv: 3V3 o 5V), componenti da aggiungere (parts: k serie | `name` | - |
+| POST | `/api/mod/del` | admin | Elimina una scheda modulo (name); le periferiche gia create restano | `name` | `error` |
+| POST | `/api/mod/install` | admin | Installa una scheda modulo (name, prefix facoltativo): crea le periferiche sui pin proposti, tutto o niente | `name`, `prefix` | `error` |
+| POST | `/api/mod/save` | admin | Controlla e salva una scheda modulo /devs/<name>.vdp (name, text); un file non valido viene rifiutato | `name`, `text` | `error` |
+| GET | `/api/mods` | operatore | Schede modulo .vdp in /devs: elenco (n nome, ok, t titolo, c classe, p alimentazione, ns segnali, v versione, a autore, l licenza, w avviso, sig segnali, icon svg, e errore) | - | - |
 | GET | `/api/mqtt` | operatore | Stato MQTT | - | - |
 | POST | `/api/mqtt` | admin | Impostazioni MQTT | `auto`, `clearpass`, `every`, `ha`, `host`, `pass`, `port`, `prefix`, `tls`, `user` | `error`, `toobig` |
 | POST | `/api/mqtt/ca` | admin | Carica il certificato CA del broker | `pem` | `error` |
@@ -110,13 +129,16 @@ Versione API: **1** (campo `apiVersion` in `/api/status` e `/api/common`). Cambi
 | GET | `/api/power` | operatore | Risparmio energia: modo e tempi | - | - |
 | POST | `/api/power` | admin | Cambia modo e tempi | `awake`, `mode`, `sleep` | `error` |
 | POST | `/api/reboot` | operatore | Riavvia la scheda | - | - |
-| GET | `/api/recovery` | admin | Dice se il recovery e presente (present 0/1, kb) | - | - |
-| POST | `/api/recovery` | admin | Riavvia nel recovery per caricare un nuovo firmware (risponde con ip) | - | `state` |
+| GET | `/api/recovery` | admin | Dice se il recovery e presente e la sua versione (present 0/1, kb, ver) | - | - |
+| POST | `/api/recovery` | admin | Riavvia nel recovery per caricare un nuovo firmware (risponde con ip) | `sha` | `error`, `state` |
 | GET | `/api/region` | ospite | Paese, fuso, lingua, radio | - | - |
 | POST | `/api/region` | admin | Cambia paese, fuso, formati, antenna, potenza | `antenna`, `country`, `datefmt`, `decsep`, `gain`, `ntp`, `tempunit`, `timefmt`, `txpower`, `tz`, `tzname`, `weekstart` | `error` |
 | GET | `/api/rules` | operatore | Testo delle automazioni | - | - |
 | POST | `/api/rules` | operatore | Salva le automazioni | `text` | `error` |
 | POST | `/api/rules/run` | operatore | Esegue una regola (i) | `i` | `error` |
+| GET | `/api/script` | admin | Script: elenco di /scripts (n, s = byte), in corso (busy, name), ultima uscita (out, err), limite max | - | - |
+| POST | `/api/script/run` | admin | Avvia uno script di /scripts in sottofondo (name) | `name` | `error`, `state` |
+| POST | `/api/script/stop` | admin | Ferma lo script in corso | - | `state` |
 | GET | `/api/selftest` | admin | Stato dell'autotest | - | - |
 | POST | `/api/selftest` | admin | Avvia autotest, cancella (active, clear, names) | `active`, `clear`, `names` | `error` |
 | GET | `/api/selftest/report` | admin | Rapporto dell'autotest | - | `notfound` |
@@ -152,9 +174,12 @@ Versione API: **1** (campo `apiVersion` in `/api/status` e `/api/common`). Cambi
 | POST | `/api/users/set` | admin | Cambia ruolo o attivo | `i`, `on`, `role` | `error` |
 | GET | `/api/wd` | operatore | Watchdog: regole e stato | - | - |
 | POST | `/api/wd` | admin | Salva le regole del watchdog | `at`, `days`, `net`, `netmin`, `ram`, `ramkb`, `task`, `updays` | - |
+| GET | `/api/who` | admin | Chi e collegato dal web e cosa sta facendo (utente, ruolo, ip, via http/https, da quanto, ultima azione) | - | - |
 | POST | `/api/wifi/ap` | admin | Passa a solo hotspot (spegne il Wi-Fi di casa) | - | - |
 | POST | `/api/wifi/save` | admin | Salva il Wi-Fi di casa (ssid, pass, IP) | `cleanup`, `d1`, `d2`, `dhcp`, `gw`, `ip`, `mask`, `pass`, `ssid` | `error` |
 | GET | `/api/wifi/scan` | operatore | Risultato della ricerca reti (max 40, more:true se tagliato) | - | - |
 | POST | `/api/wifi/scan` | operatore | Avvia la ricerca reti | - | - |
 | GET | `/api/wifi/test` | admin | Esito dell'ultima prova di connessione | - | - |
 | POST | `/api/wifi/test` | admin | Prova la connessione a una rete senza salvare | `pass`, `ssid` | `error` |
+| GET | `/api/wps` | admin | Stato del WPS (solo Admin): avail, on (servizio acceso), allowed, pinOk (metodo PIN consentito), btn (con quanti click del tasto BOOT parte il WPS, 0 = nessuno), setup (prima configurazione), net, state (0 fermo, 1 in attesa, 2 riuscito, 3 errore), method (pbc o pin), left (secondi rimasti), pin (solo mentre aspetta con il PIN), ssid (dopo il successo, mai la password), err | - | - |
+| POST | `/api/wps` | admin | WPS (solo Admin): on (accende o spegne il servizio), pinOk (impostazione), start=pbc | `on`, `pinOk`, `start`, `stop` | `error`, `state` |

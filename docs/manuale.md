@@ -1,7 +1,7 @@
 # VesevOS 1.7.45 - Manuale
 
 Manuale per chi usa la scheda. Parole semplici, niente programmazione.
-English version: [manual.en.md](manual.en.md). Lo stesso aiuto e nella pagina della scheda (Sistema > Aiuto, oppure `http://192.168.4.1/#aiuto`).
+English version: [manual.en.md](manual.en.md). Lo stesso aiuto e nella pagina della scheda (Informazioni > Aiuto, oppure `http://192.168.4.1/#aiuto`).
 
 > Non e consulenza legale. Le leggi citate servono a spiegare perche la scheda funziona cosi.
 
@@ -42,7 +42,7 @@ Chi la riceve, al primo accesso, sceglie la password del pannello e, se vuole, c
 
 | Tasto BOOT (tieni premuto, poi lascia) | Colore del LED | Cosa fa |
 |---|---|---|
-| meno di 2 secondi | - | esce dal modo aereo |
+| meno di 2 secondi (1, 2 o 3 click veloci) | - | l'azione scelta in Dispositivi > Tasto BOOT (di fabbrica: 1 click esce dal modo aereo, 2 click avviano il WPS) |
 | da 2 a 7 secondi | azzurro | spegne il filtro IP (se ti sei chiuso fuori) |
 | da 8 a 19 secondi | giallo | azzera le password degli amministratori e scrive la password Wi-Fi sulla seriale |
 | 20 secondi o piu | rosso | ripristino di fabbrica: cancella tutto, nuova password Wi-Fi |
@@ -90,7 +90,7 @@ L'hotspot della scheda e la seriale sono sempre ammessi. Uscite di emergenza: `f
 ## 8. Watchdog e controlli
 - **Watchdog** (Servizi > Watchdog): se un servizio si blocca lo riavvia, poi riavvia la scheda. Facoltativi: rete assente, RAM bassa, riavvio programmato.
 - **Modalita ridotta** (1.7.11): dopo 3 riavvii automatici in un'ora la scheda **non si riavvia piu** e non resta ferma: se sa quale servizio si e bloccato (MQTT, rete tra schede, LED) spegne solo quello; se non lo sa (rete, RAM, servizio di base) spegne MQTT, rete tra schede e Bluetooth. Pagina web, registro, aggiornamento e recupero restano attivi. La pagina Watchdog dice cosa e stato spento e perche. Vale fino al prossimo riavvio; la configurazione salvata non cambia.
-- **Compliant** (Sicurezza > Compliant): la scheda controlla la configurazione. Rosso = valore vietato (legge o sicurezza),
+- **Stato conformita** (Sicurezza > Stato conformita): la scheda controlla la configurazione. Rosso = valore vietato (legge o sicurezza),
   corretto subito. Giallo = permesso ma rischioso. Il registro dice chi ha cambiato cosa (pagina, seriale, file).
 
 ## 9. Dati e privacy
@@ -118,7 +118,7 @@ Sulla seriale, a riga vuota, i tasti `1` e `2` cambiano lingua.
 - **Servizi**: Punto di accesso (AP), HTTP, HTTPS, MQTT, Rete tra schede, Automazioni, Task, Watchdog, Avvio, Terminale.
 - **Periferiche** (ex Hardware): Pin (schema fronte/retro e inventario), LED.
 - **Sistema**: Stato, File, Ora, Localizzazione (qui anche la lingua), Log, Config, Accessibilita, Note legali, Aiuto.
-- **Sicurezza**: Password (qui anche la password della seriale), Utenti, Filtro IP, Compliant.
+- **Sicurezza**: Password (qui anche la password della seriale), Utenti, Filtro IP, Stato conformita.
 
 **Controlli dei servizi (uguali per tutti)**
 - In alto c'e il **banner di stato**: **Avviato** (verde) o **Fermo** (rosso). Sotto, quattro icone con il fondo colorato per lo stato: **Avvia** (verde), **Ferma** (rosso), **Riavvia** (giallo, grigio se il servizio e fermo o non si puo riavviare), **Applica** (blu, solo HTTP e HTTPS).
@@ -134,7 +134,7 @@ del paese non si superano; (3) niente password uguali per tutti.
   con BOOT 8 secondi o dalla seriale. Il **portale automatico** (il telefono apre da solo la pagina) funziona solo con HTTP sulla porta 80.
 - **HTTP**: senza cifratura. Serve all'hotspot. Collegato alla tua Wi-Fi puoi spegnerlo: consigliato, risparmia memoria.
 - **HTTPS**: cifrato (consigliato). Puoi anche spegnerlo e usare solo HTTP: scelta tua, funziona tutto, ma sessione e dati non sono cifrati
-  (il login non manda la password) e Compliant mostra un avviso giallo.
+  (il login non manda la password) e Stato conformita mostra un avviso giallo.
 - **Porte**: HTTP 80 o da 1024 a 65535, HTTPS 443 o da 1024 a 65535, mai la stessa. **Valgono dal riavvio** (la pagina avvisa). Cambiare
   porta non e sicurezza vera: la sicurezza resta password, filtro IP e cifratura. Link e QR mostrano la porta.
 
@@ -184,7 +184,7 @@ PSRAM da 2 MB di questa scheda (occupati sulle schede con PSRAM octal).
 
 
 ## 17. Autotest (novita 1.7.7)
-Sistema > Autotest (solo Admin). Premi **Avvia la diagnosi**: 16 prove una per volta, ognuna con esito OK / Avviso / Errore / Saltata. Alla fine **Scarica il report** (o **Copia**). Senza password, chiavi o token; MAC, nome Wi-Fi, IP e registro sono oscurati salvo "nomi reali". "Prove attive" accende il LED e invia un messaggio MQTT di prova. Seriale: `selftest [active] [names]`. **Chiudi e libera la memoria** cancella il report.
+Amministrazione > Autotest (solo Admin). Premi **Avvia la diagnosi**: 16 prove una per volta, ognuna con esito OK / Avviso / Errore / Saltata. Alla fine **Scarica il report** (o **Copia**). Senza password, chiavi o token; MAC, nome Wi-Fi, IP e registro sono oscurati salvo "nomi reali". "Prove attive" accende il LED e invia un messaggio MQTT di prova. Seriale: `selftest [active] [names]`. **Chiudi e libera la memoria** cancella il report.
 
 
 ## 18. Log e diario dei riavvii (novita 1.7.8)
@@ -217,11 +217,50 @@ Sistema > **Backup e ripristino** (solo Admin).
 ## 22. Aggiornare il firmware senza cavo (novita 1.7.42 - 1.7.45)
 Sulla scheda ci sono due programmi: **VesevOS** e il **recovery** (piccolo, serve solo ad aggiornare). La prima installazione si fa con il cavo USB: segui [GUIDA-PREPARARE-LA-SCHEDA.md](GUIDA-PREPARARE-LA-SCHEDA.md). Dopo, si aggiorna dalla pagina.
 1. Menu utente (solo Amministratore) > **Aggiorna firmware** > *Riavvia nel recovery*. In alternativa, dalla seriale: `recovery` (dice se c'e) e `recovery now`.
-2. La pagina mostra l'indirizzo del recovery, per esempio `http://192.168.1.50:80/`. Aprilo in una **finestra privata** e scrivi **http**, non https (il recovery non e cifrato).
+2. La pagina aspetta che la scheda riparta e **apre da sola** il recovery (di solito in pochi secondi; "Apri ora" per anticipare). Se non ci riesce, ti mostra l'indirizzo, per esempio `http://192.168.1.50:80/`: aprilo in una **finestra privata** e scrivi **http**, non https (il recovery non e cifrato).
    Il recovery prova prima la **rete di casa**; se in 30 secondi non la trova crea la rete Wi-Fi `VesevOS-recovery` (password casuale scritta sulla seriale).
 3. Entra con utente e password di un **Amministratore** di VesevOS (la password non viaggia in chiaro). Con la flash vuota, e senza amministratori, serve il codice a 8 cifre mostrato sulla seriale. Cinque errori = attesa di 60 secondi.
 4. Scegli il file `VesevOS.ino.bin` (non il `.merged.bin`). *SHA-256 atteso* e facoltativo: se lo scrivi, il file deve coincidere.
-5. *Carica e installa*. Prima la pagina e poi la scheda controllano: intestazione per ESP32-S3, **marchio VesevOS**, dimensione, immagine completa. Se il file e sbagliato viene rifiutato e **il vecchio firmware non si tocca**; se l'errore arriva a scrittura iniziata, il recovery resta acceso e basta ricaricare il file buono.
-6. Dopo circa 10 secondi VesevOS riparte. *Avvia VesevOS senza aggiornare* torna indietro. Dopo 15 minuti senza accessi il recovery torna da solo a VesevOS. Tasto BOOT premuto all'accensione = resta nel recovery.
+5. Scegli il file con il pulsante oppure **trascinalo** sulla pagina (dal telefono solo il pulsante). *Carica e installa*. Prima la pagina e poi la scheda controllano: intestazione per ESP32-S3, **marchio VesevOS**, dimensione, immagine completa. Se il file e sbagliato viene rifiutato e **il vecchio firmware non si tocca**; se l'errore arriva a scrittura iniziata, il recovery resta acceso e basta ricaricare il file buono.
+6. Il **LED** della scheda dice lo stato: arancione lento = attesa del file; azzurro veloce = scrittura in corso; verde fisso = finito; rosso = errore (dopo 10 secondi torna arancione). Dopo circa 10 secondi VesevOS riparte. *Avvia VesevOS senza aggiornare* torna indietro. Dopo 15 minuti senza accessi il recovery torna da solo a VesevOS. Tasto BOOT premuto all'accensione = resta nel recovery.
 - Il controllo del file garantisce che e un firmware VesevOS completo; **non e una firma digitale**. Scarica i file solo da fonti fidate.
 - Dopo l'installazione con recovery **non usare *Carica* dell'IDE**: cancellerebbe il recovery.
+
+## 23. Periferiche a classi: rele, LED, pin, ingressi (novita 1.7.54)
+- **Dove**: Dispositivi > Periferiche. Scegli la *classe* (rele, LED, pin in uscita, ingresso, analogico), il *pin* e, se vuoi, un *nome*: senza nome la scheda li chiama rele1, led1, pin1, in1, adc1. I nomi sono lettere minuscole senza accento e numeri (2-11 caratteri); si possono cambiare con *Rinomina*. Massimo 16 periferiche. Sono salvate in `/io.cfg` (non nel backup della configurazione), con una copia dell'ultima versione buona in `/io.cfg.bak`. Se la memoria dei file e piena la scheda risponde "Spazio esaurito" e l'elenco non cambia. Una periferica non caricata all'avvio (pin occupato) resta nel file e torna quando il pin e libero.
+- **Pin controllati**: la scheda rifiuta USB (19, 20), BOOT (0), LED RGB (48), pin di avvio (3, 45, 46), pin che non esistono o gia usati. L'analogico funziona solo sui pin 1-10. (Numeri della SuperMini: vengono dal file di scheda del firmware, e la pagina li mostra da li.)
+- **Attivo basso**: per i moduli rele che si accendono con livello 0.
+- **Sicurezza**: dopo ogni riavvio, dopo un crash o in modalita ridotta del watchdog tutte le uscite sono **spente**. Il rele lo comanda solo l'Amministratore (operatore e app solo se l'Admin ha dato il permesso) e cambia al massimo una volta al secondo. Un rele collegato alla rete elettrica (230 V) richiede un modulo a norma e un installatore: VesevOS comanda solo il segnale.
+- **Comandi**: pagina; shell `io list`, `io add rele 5 [nome] [inv]`, `io del <nome>`, `io rename <nome> <nuovo>`, `io set <nome> 1`, `io get <nome>`; `dev on|off <nome>` e `dev act <nome> set 1`.
+- **Nelle app**: scrivi il nome in `use=` (per esempio `use=rele1,in1`); poi `dev_set("rele1", 1)` e `dev_get("in1")` (ingresso: 0/1, analogico: 0-4095). Senza il nome in `use=` l'app si ferma con "permesso mancante".
+- **Elenco dispositivi**: le periferiche create compaiono sotto *Periferiche*.
+
+## 24. Schede modulo e pagina di ogni periferica (novita 1.7.55)
+- **Pagina di ogni periferica**: in Dispositivi > Periferiche tocca *Gestisci*. Vedi classe, pin, livello, valore dal vivo e le **prove**: Accendi, Spegni, Impulso di 1 secondo, Lampeggia per 5 secondi (solo LED e pin; il rele non lampeggia). Gli ingressi e gli analogici mostrano il valore che cambia da solo. Da qui si usa anche *Rinomina* e *Togli* (Admin). Impulso e lampeggio si spengono da soli; *spegnere* si puo sempre, subito.
+- **Scheda modulo (.vdp)**: file di testo con la descrizione di un modulo (classe, segnali, icona, schema SVG). Contiene solo dati. Cartella `/devs`. Nel Progetto/GitHub trovi esempi in `docs/devs` (rele a 1, 2 e 4 canali, LED, pulsante, sensore PIR, LDR).
+- **Come si usa**: Periferiche > *Carica scheda modulo*, poi *Installa*: la scheda mostra lo schema, propone i pin liberi e sicuri, e crea le periferiche (tutto o niente). Il nome si puo scegliere (pompa1, pompa2...).
+- **Schema dei collegamenti (novita 1.7.57)**: lo disegna la pagina dai dati della scheda. A sinistra la scheda con i pin (5V o 3V3, GND, GPIO proposti), a destra il modulo. Fili colorati: **rosso** alimentazione, **nero** massa, **blu** segnale (arancione se analogico), con la **tensione scritta** sul filo e una freccia per la direzione. Resistenze e altri componenti da aggiungere sono disegnati con il valore (es. 330 ohm in serie al LED). Sotto c'e una tabella filo / dalla scheda / al modulo / tensione e note: i colori sono scritti anche a parole. Alimentazioni a 12, 24 o 230 V mostrano un riquadro "Alimentatore": unisci la sua massa a GND della scheda. Se il segnale del modulo e a 5 V su un ingresso compare un avviso rosso: i pin reggono solo 3,3 V.
+- **Per chi scrive schede**: nel file `[module]` si aggiungono `level=3V3|5V` (livello del segnale) e fino a 4 righe `part=serie|gnd|vcc,valore,segnale` (per esempio `part=serie,330 ohm,OUT`). La sezione `[wiring]` non serve piu: se c'e, si vede sotto come "Disegno allegato al file". Formato completo: claude/funzioni/VesevOS-formato-vdp.md nel Progetto.
+- **Seriale**: `mod list`, `mod info <nome>`, `mod install <nome> [prefisso]`, `mod del <nome>`.
+- **Attenzione**: controlla sempre i collegamenti sul datasheet del tuo modulo. Uno schema sbagliato puo danneggiare il modulo. Per i 230 V serve un installatore.
+
+## 25. WPS: collegarsi al router senza scrivere la password (novita 1.7.56)
+- **A cosa serve**: il router manda alla scheda il nome e la password della Wi-Fi di casa. Non li digiti. La scheda li salva e si collega.
+- **Dove**: Rete > **WPS** (solo Amministratore). In alto c'e l'interruttore (Avvia/Ferma): di fabbrica e **spento**. Nella guida di prima configurazione c'e il pulsante *Collega con WPS* (funziona anche con l'interruttore spento, finche la guida non e finita).
+- **Metodo a pulsante**: premi *Collega con il tasto del router*, poi entro 2 minuti premi il tasto WPS del router.
+- **Metodo con PIN** (spento di fabbrica, si accende nelle impostazioni WPS): la scheda crea un PIN a 8 cifre nuovo a ogni prova e lo mostra; lo scrivi nella pagina WPS del router entro 2 minuti. Il PIN non finisce nel registro.
+- **Dal tasto BOOT**: di fabbrica **2 click veloci** avviano il WPS e 2 click di nuovo lo annullano (serve il WPS acceso, o la guida non finita). 1 click esce dal modo aereo. Le azioni di 1, 2 e 3 click si scelgono in *Dispositivi > Tasto BOOT* (libero per gli script, esce dal modo aereo, WPS, trova la scheda); la scheda aspetta mezzo secondo dopo l'ultimo click. Un gesto su **Libero** non fa niente di suo: se uno script (o un'app con `btn` in `use=`) e in esecuzione, legge quei click con `btn()` (1, 2 o 3; 0 se non ce ne sono; non aspetta, quindi si usa in un ciclo con `sleep`). Senza script in esecuzione i click liberi si perdono. Gli altri tempi non cambiano (2 s filtro IP, 8 s password, 20 s fabbrica). In quella pagina c'e anche la **Prova del tasto**: per 60 secondi il tasto non fa niente (nemmeno le pressioni lunghe) e la pagina mostra cosa la scheda capisce. Attenzione: BOOT premuto mentre la scheda si accende la porta in modo scarico (non e il WPS).
+- **LED**: blu che sale e scende piano = in attesa, verde fisso 3 s = riuscito, rosso fisso 3 s = errore.
+- **Cosa succede**: durante la prova l'hotspot resta acceso. Se riesce, nome e password sostituiscono quelli di prima, l'indirizzo diventa automatico (DHCP) e la scheda si collega alla rete nuova; se eri sull'hotspot la pagina si interrompe, riconnetti il telefono alla rete di casa. Se non riesce, la scheda torna com'era. Resta una voce nel registro dei controlli ("La Wi-Fi di casa e stata cambiata con il WPS").
+- **Limiti**: non funziona con router solo WPA3 o con il WPS spento sul router; due router in WPS insieme possono confondersi; solo 2,4 GHz. Parte solo con il Wi-Fi acceso (non in modo aereo).
+- **Seriale**: `wps` (stato), `wps on|off`, `wps pin on|off`, `wps button on|off`, `wps start [pin]`, `wps stop` (solo Amministratore).
+- **Sicurezza**: chi ha la scheda in mano con il WPS acceso e mappato su un gesto del tasto puo collegarla alla sua rete: se la scheda non e al sicuro togli il gesto o spegni il WPS. Il WPS e un marchio della Wi-Fi Alliance.
+
+## 26. Script e app: leggere il registro e scrivere al broker MQTT (novita 1.7.60)
+- **`logtail(n)`**: restituisce le ultime `n` righe del registro (da 1 a 20, di fabbrica 10), al massimo 2000 caratteri. Negli script c'e sempre; nelle app serve `logread` in `use=`.
+- **`mqtt("nome", "testo")`**: invia il testo al broker sull'argomento `<prefisso>/app/<nome>`. Risponde vero se e partito, falso se non e stato inviato (MQTT non collegato o oltre il tetto). Il nome ha da 1 a 40 caratteri (a-z, 0-9, `_`, `-`, `/`), il testo fino a 2048. Massimo **20 messaggi al minuto**. Nelle app serve `mqtt` in `use=`.
+- **Dove arriva**: solo sotto `app/`. Un'app non puo scrivere su `cmd` (i comandi della scheda), `status` o `state`.
+- **Serve MQTT acceso** (Rete > MQTT, spento di fabbrica) e un broker. Dal broker l'inoltro per email lo fai con un programma tuo (per esempio Home Assistant, Node-RED, ntfy): la scheda non parla con i server di posta.
+- **Esempio**: `docs/esempi/app/logmqtt.vap` (copialo in /apps): un pulsante e un interruttore "ogni ora" che mandano le ultime 10 righe su `<prefisso>/app/log`.
+- **Esempio torcia**: `docs/esempi/script/torcia.vsc` (copialo in /scripts e avvialo). Un click del tasto BOOT accende il LED bianco, il click dopo lo spegne; si spegne anche da solo dopo 10 minuti (cambi `MINUTI`, 0 = mai). Prima metti **Libero** sul gesto che vuoi usare in *Dispositivi > Tasto BOOT* (di fabbrica sono liberi solo i 3 click). Il LED bianco e forte e scalda.
+- **Privacy**: il registro puo contenere indirizzi IP e nomi. Chi installa l'app (solo Amministratore) decide con `logread` e `mqtt` se puo leggerlo e mandarlo fuori. Se il broker e fuori casa, usa MQTT cifrato (utente e password) e scegli tu chi riceve i dati.

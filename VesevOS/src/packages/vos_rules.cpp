@@ -3,14 +3,17 @@
 // VesevOS - vos_rules.cpp
 #include "vos_rules.h"
 #include "vos_mqtt.h"
+#include "vos_berry.h"
+#include "vos_app.h"
+#include "../core/vos_hooks.h"
 #include "../core/vos_i18n.h"
 #include "../core/vos_util.h"
 #include "../core/vos_log.h"
+#include "../core/vos_wd.h"
 #include "../net/vos_net.h"
 #include "../core/vos_sys.h"
 #include "../core/vos_time.h"
 #include "../devices/vos_pins.h"
-#include "../interfaces/vos_shell.h"
 #include "../drivers/vos_drv_fs.h"
 #include <time.h>
 #include <new>
@@ -18,50 +21,18 @@
 #include <freertos/semphr.h>
 #include "../drivers/vos_drv_gpio.h"
 
-#define RULES_FILE   "/rules.txt"
-#define MAX_RULES    24
-#define MAX_RUNS     4
-#define MAX_TEXT     4096
-#define MAX_ACTS     8
-#define LOOP_MAX     10      // piu di 10 esecuzioni in un minuto = antiloop
+#include "vos_rules_int.h"
 
-enum { TK_TIME = 0, TK_EVERY, TK_AFTER, TK_BOOT, TK_WIFIUP, TK_WIFIDOWN, TK_TEMP };
-enum { CK_NONE = 0, CK_BETWEEN, CK_DAY };
-
-struct Rule {
-  bool     on;
-  char     name[25];
-  uint8_t  tk;
-  uint16_t a;            // minuti del giorno (time), secondi (every/after), gradi (temp)
-  uint8_t  dmask;        // giorni (bit 0 = lunedi)
-  uint8_t  ck;
-  uint16_t c1, c2;       // fascia oraria (minuti)
-  uint8_t  cmask;
-  String   acts;
-  // stato in esecuzione
-  uint32_t lastMs;
-  int32_t  lastMin;
-  bool     done, armed, off;
-  uint32_t nfire;
-  time_t   lastEpoch;
-  uint32_t ring[LOOP_MAX];
-  uint8_t  ringN;
-};
-
-struct Run { bool act; int8_t rule; uint8_t step; uint32_t wake; };
-
-static Rule* g_r = nullptr;           // tabella delle regole: esiste solo se c'e almeno una regola (con 0 regole non occupa RAM)
+namespace vosrules { Rule* g_r = nullptr; }           // tabella delle regole: esiste solo se c'e almeno una regola (con 0 regole non occupa RAM)
 static bool  g_taskUp = false;        // il task "rules" parte solo quando serve
-static int   g_n = 0;
-static Run   g_run[MAX_RUNS];
-static SemaphoreHandle_t g_mx = nullptr;
+namespace vosrules { int   g_n = 0; }
+namespace vosrules { Run   g_run[MAX_RUNS]; }
+namespace vosrules { SemaphoreHandle_t g_mx = nullptr; }
 static uint64_t g_mine = 0;           // pin gestiti dalle regole
-static bool  g_first = true;          // primo caricamento dopo l'avvio
 static uint32_t g_startMs = 0;
-static bool  g_bootFired = false;
 static NetState g_prevNet = NET_BOOT;
 
-static void ensureMx() { if (!g_mx) g_mx = xSemaphoreCreateMutex(); }
+void vosrules::ensureMx() { if (!g_mx) g_mx = xSemaphoreCreateMutex(); }
 static bool pinMine(int g) { return g >= 0 && g < 64 && ((g_mine >> g) & 1); }
 
 // ---------- utilita ----------
@@ -166,6 +137,9 @@ static bool actionCheck(const String& a, String& err) {
   else if (w == "note") { if (restOf(a, 1).length() < 1) { err = tr("Manca il testo della nota"); return false; } }
   else if (w == "reboot") { }
   else if (w == "mqtt") { if (a1.length() < 1 || a1.length() > 60) { err = tr("Uso: mqtt <argomento> <testo>"); return false; } }
+  else if (w == "script") { if (!berryNameValid(a1)) { err = tr("Nome script non valido (1-24 caratteri: lettere minuscole, numeri, trattino, sottotrattino)"); return false; } }
+  else if (w == "app") { if (!utilNameOk(a1)) { err = tr("Nome app non valido"); return false; } }
+  else if (w == "appstop") { }
   else if (w == "ntp") { if (a1 != "sync") { err = tr("Azione non ammessa"); return false; } }
   else { err = tr("Azione non ammessa"); return false; }
   return true;
@@ -283,13 +257,6 @@ static void load(bool boot) {
   if (n > 0) ensureTask();
 }
 
-String rulesText() {
-  File f = drvFsOpen(RULES_FILE, "r");
-  if (!f) return "";
-  String s = f.readString(); f.close();
-  return s;
-}
-
 bool rulesSave(const String& text, String& err) {
   if (text.length() > MAX_TEXT) { err = tr("File troppo grande"); return false; }
   Rule* tmp = new (std::nothrow) Rule[MAX_RULES]();
@@ -336,14 +303,17 @@ static uint32_t doAction(const String& a, const char* rn) {
   if (w == "note") { vlog("RULES %s: %s", rn, restOf(a, 1).c_str()); return 0; }
   if (w == "gpio") { doGpio(word(a, 1).toInt(), word(a, 2).toInt(), rn); return 0; }
   if (w == "mqtt") { if (!mqttPublishRel(word(a, 1), restOf(a, 2))) vlog("RULES %s: MQTT non collegato", rn); return 0; }
+  if (w == "script") { String e; if (!berryQueue(word(a, 1), e, rn)) vlog("RULES %s: script %s non avviato: %s", rn, word(a, 1).c_str(), e.c_str()); return 0; }
+  if (w == "app") { String e; if (!appStart(word(a, 1), e, 2, rn)) vlog("RULES %s: app %s non avviata: %s", rn, word(a, 1).c_str(), e.c_str()); return 0; }
+  if (w == "appstop") { String cur, e; if (berryAppRunning(cur) && !appStop(cur, e, 2)) vlog("RULES %s: app %s non fermata: %s", rn, cur.c_str(), e.c_str()); return 0; }
   if (w == "reboot") {
     if (millis() < 60000UL) { vlog("RULES %s: riavvio ignorato (meno di 60 s dall'avvio)", rn); return 0; }
     vlog("RULES %s: riavvio", rn);
-    delay(300); ESP.restart();
+    char b[40]; snprintf(b, sizeof(b), "regola %s", rn); sysReboot(b, 300);
     return 0;
   }
   NullPrint np;
-  shellExec(a, np, true);
+  hookShellExec(a.c_str(), np, true);
   return 0;
 }
 
@@ -460,27 +430,6 @@ static void rulesTask(void*) {
     xSemaphoreGive(g_mx);
     vTaskDelay(pdMS_TO_TICKS(250));
   }
-}
-
-String rulesStatusJson() {
-  String j = "[";
-  ensureMx();
-  xSemaphoreTake(g_mx, portMAX_DELAY);
-  for (int i = 0; i < g_n; i++) {
-    if (i) j += ",";
-    String last = "";
-    if (g_r[i].lastEpoch) {
-      struct tm tmv; localtime_r(&g_r[i].lastEpoch, &tmv);
-      char b[24]; strftime(b, sizeof(b), "%Y-%m-%d %H:%M:%S", &tmv);
-      last = b;
-    }
-    bool run = false;
-    for (int k = 0; k < MAX_RUNS; k++) if (g_run[k].act && g_run[k].rule == i) run = true;
-    j += "{\"i\":" + String(i) + ",\"last\":\"" + last + "\",\"n\":" + String((unsigned long)g_r[i].nfire) +
-         ",\"off\":" + (g_r[i].off ? "true" : "false") + ",\"run\":" + (run ? "true" : "false") + "}";
-  }
-  xSemaphoreGive(g_mx);
-  return j + "]";
 }
 
 bool rulesAction(const String& action, String& err, const char* who) {

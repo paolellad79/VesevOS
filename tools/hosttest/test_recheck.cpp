@@ -6,9 +6,10 @@
 
 static std::vector<uint8_t> goodImage(size_t total, bool mark) {
   std::vector<uint8_t> v(total, 0x11);
-  v[0] = 0xE9; v[12] = 0x09; v[13] = 0x00;
-  v[32] = 0x32; v[33] = 0x54; v[34] = 0xCD; v[35] = 0xAB;
-  if (mark) memcpy(&v[1000], "{FW:VesevOS}", 12);
+  auto S = [&](size_t i, uint8_t b) { if (i < v.size()) v[i] = b; };      // immagini piu corte di 36 byte: solo i byte che ci stanno
+  S(0, 0xE9); S(12, 0x09); S(13, 0x00);
+  S(32, 0x32); S(33, 0x54); S(34, 0xCD); S(35, 0xAB);
+  if (mark && v.size() >= 1012) memcpy(&v[1000], "{FW:VesevOS}", 12);
   return v;
 }
 static RecCheck feedAll(const std::vector<uint8_t>& v, size_t chunk) {
@@ -16,6 +17,12 @@ static RecCheck feedAll(const std::vector<uint8_t>& v, size_t chunk) {
   for (size_t i = 0; i < v.size(); i += chunk) rcFeed(c, &v[i], (i + chunk <= v.size()) ? chunk : v.size() - i);
   return c;
 }
+
+
+// ricerca del marchio in app0 (rcScanMark): deve trovarlo anche dopo grandi spazi vuoti (errore del 11/10: si fermava dopo 8 KB di 0xFF)
+struct Mem { const std::vector<uint8_t>* v; };
+static bool memRead(void* ctx, uint32_t off, uint8_t* buf, size_t n) { const Mem* m = (const Mem*)ctx; if (off + n > m->v->size()) return false; memcpy(buf, &(*m->v)[off], n); return true; }
+static bool scanImg(const std::vector<uint8_t>& v) { Mem m{&v}; uint8_t b[2048]; return rcScanMark(memRead, &m, (uint32_t)v.size(), b, sizeof b); }
 
 int main() {
   // il marchio mascherato torna in chiaro
@@ -55,6 +62,21 @@ int main() {
   CHECK(strstr(rcHeaderErr(feedAll(h, 100)), "Arduino-ESP32") != nullptr);
   auto small = goodImage(20, false);
   CHECK(strstr(rcHeaderErr(feedAll(small, 20)), "piccolo") != nullptr);
+
+  // scansione di app0
+  { std::vector<uint8_t> big(2 * 1024 * 1024, 0x22);
+    CHECK(!scanImg(big));                                                   // nessun marchio
+    memcpy(&big[1500000], "{FW:VesevOS}", 12);                              // marchio lontano
+    CHECK(scanImg(big));
+    std::vector<uint8_t> gap(2 * 1024 * 1024, 0xFF);                        // spazi vuoti da 128 KB prima del marchio (il caso che falliva)
+    memset(&gap[0], 0x33, 100000); memcpy(&gap[1000000], "{FW:VesevOS}", 12);
+    CHECK(scanImg(gap));
+    std::vector<uint8_t> edge(8192, 0x44); memcpy(&edge[2044], "{FW:VesevOS}", 12); // a cavallo di due blocchi da 2048
+    CHECK(scanImg(edge));
+    std::vector<uint8_t> last(8192, 0x44); memcpy(&last[8192 - 12], "{FW:VesevOS}", 12); // proprio in fondo
+    CHECK(scanImg(last));
+    std::vector<uint8_t> none(8192, 0xFF);
+    CHECK(!scanImg(none)); }
 
   // file vuoto
   RecCheck e; rcInit(e);

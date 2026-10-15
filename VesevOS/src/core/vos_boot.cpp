@@ -9,15 +9,10 @@
 #include "vos_util.h"
 #include "vos_log.h"
 #include "vos_sys.h"
-#include "../devices/vos_led.h"
-#include "../net/vos_net.h"
 #include "vos_time.h"
-#include "../interfaces/vos_web.h"
-#include "../packages/vos_rules.h"
-#include "../packages/vos_mqtt.h"
-#include "../packages/vos_mesh.h"
+#include "vos_hooks.h"
 #include "vos_wd.h"
-#include <Preferences.h>
+#include "../drivers/vos_drv_nvs.h"
 
 #define NSVC 9
 
@@ -28,17 +23,25 @@ struct Svc {
   uint8_t parent;    // genitore nella vista ad albero (255 = nessuno)
 };
 
+// pagina, regole, MQTT e ESP-NOW stanno sopra il nucleo: si avviano attraverso i ganci (vos_hooks.h)
+static void webInitH()   { hookCall(g_hooks.webInit); }
+static void rulesInitH() { hookCall(g_hooks.rulesInit); }
+static void mqttInitH()  { hookCall(g_hooks.mqttInit); }
+static void meshInitH()  { hookCall(g_hooks.meshInit); }
+static void ledInitH()   { hookCall(g_hooks.ledInit); }
+static void netInitH()   { hookCall(g_hooks.netInit); }
+
 enum { S_SYS = 0, S_LED, S_NET, S_TIME, S_WEB, S_RULES, S_MQTT, S_MESH, S_WD };
 
 static const Svc SV[NSVC] = {
   { "sys",   sysInit,   0,                                  255 },
-  { "led",   ledInit,   0,                                  255 },
-  { "net",   netInit,   0,                                  255 },
+  { "led",   ledInitH,  0,                                  255 },
+  { "net",   netInitH,  0,                                  255 },
   { "time",  timeInit,  (uint16_t)(1 << S_NET),              S_NET },
-  { "web",   webInit,   (uint16_t)((1 << S_NET) | (1 << S_SYS)), S_NET },
-  { "rules", rulesInit, (uint16_t)((1 << S_TIME) | (1 << S_SYS)), S_TIME },
-  { "mqtt",  mqttInit,  (uint16_t)((1 << S_NET) | (1 << S_SYS)), S_NET },
-  { "mesh",  meshInit,  (uint16_t)((1 << S_NET) | (1 << S_SYS)), S_NET },
+  { "web",   webInitH,   (uint16_t)((1 << S_NET) | (1 << S_SYS)), S_NET },
+  { "rules", rulesInitH, (uint16_t)((1 << S_TIME) | (1 << S_SYS)), S_TIME },
+  { "mqtt",  mqttInitH, (uint16_t)((1 << S_NET) | (1 << S_SYS)), S_NET },
+  { "mesh",  meshInitH, (uint16_t)((1 << S_NET) | (1 << S_SYS)), S_NET },
   { "wd",    wdInit,    (uint16_t)(1 << S_SYS),                 S_SYS },
 };
 
@@ -91,7 +94,7 @@ static String orderCsv(const int* o) {
 }
 
 void bootRun() {
-  Preferences p;
+  DrvNvs p;
   p.begin("vos", false);
   String saved = p.getString("border", "");
   g_try = p.getUChar("btry", 0);
@@ -123,7 +126,7 @@ void bootStable() {
   if (g_stable || millis() < 60000UL) return;
   g_stable = true;
   if (g_custom || g_try) {
-    Preferences p; p.begin("vos", false); p.putUChar("btry", 0); p.end();
+    DrvNvs p; p.begin("vos", false); p.putUChar("btry", 0); p.end();
     g_try = 0;
   }
 }
@@ -133,7 +136,7 @@ bool bootSetOrder(const String& csv, String& result, String& err) {
   int o[NSVC];
   sortOrder(csv, o);
   result = orderCsv(o);
-  Preferences p; p.begin("vos", false);
+  DrvNvs p; p.begin("vos", false);
   if (result == DEF_ORDER) p.remove("border"); else p.putString("border", result);
   p.putUChar("btry", 0);
   p.end();
@@ -142,7 +145,7 @@ bool bootSetOrder(const String& csv, String& result, String& err) {
 }
 
 void bootResetOrder() {
-  Preferences p; p.begin("vos", false); p.remove("border"); p.putUChar("btry", 0); p.end();
+  DrvNvs p; p.begin("vos", false); p.remove("border"); p.putUChar("btry", 0); p.end();
   vlog("BOOT: ordine di avvio predefinito");
 }
 

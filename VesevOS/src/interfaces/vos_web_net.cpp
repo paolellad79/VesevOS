@@ -83,6 +83,21 @@ void routesNet(PsychicHttpServer* S, bool sec) {
     return sendJson(s, svcJson());
   });
 
+  // ---- WPS: collegamento alla Wi-Fi di casa con il router (pulsante o PIN) ----
+  add(S, sec, "/api/wps", HTTP_GET, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, wpsJson()); });
+  add(S, sec, "/api/wps", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    String e;
+    if (has(r, "on") && !wpsSetOn(P(r, "on") == "1", e)) return ko(s, e);
+    if (has(r, "pinOk")) {
+      cfg.wpsPin = P(r, "pinOk") == "1";
+      cfgSetOrigin("web admin " + ipToStr(c.ip)); cfgSave();
+    }
+    String go = P(r, "start");
+    if (go == "pbc" || go == "pin") { if (!wpsStart(go == "pin", ("web " + ipToStr(c.ip)).c_str(), e)) return ko(s, e, "state"); }
+    else if (P(r, "stop") == "1") wpsStop();
+    return sendJson(s, wpsJson());
+  });
+
   // ---- HTTPS ----
   add(S, sec, "/api/tls", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, tlsJson()); });
   add(S, sec, "/api/tls/cert", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t {      // il certificato e pubblico: serve per "fidarsi" nel browser

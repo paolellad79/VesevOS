@@ -1,5 +1,6 @@
 // VesevOS - prove sul computer: funzioni di utilita (vos_util.cpp)
 #include <Arduino.h>
+#include <string>
 #include "vos_util.h"
 #include "mini.h"
 
@@ -25,6 +26,20 @@ int main() {
   CHECK(uptimeStr(61) == "1min 1s");
   CHECK(uptimeStr(3600) == "1h 0min 0s");
   CHECK(uptimeStr(86400 + 3661) == "1g 1h 1min 1s");
+  // durata con i giorni
+  auto D = [](uint64_t s) { char b[48]; durStr(s, b, sizeof b); return std::string(b); };
+  CHECK(D(0) == "0 s");
+  CHECK(D(59) == "59 s");
+  CHECK(D(60) == "1 min");
+  CHECK(D(3599) == "59 min");
+  CHECK(D(3600) == "1 h 0 min");
+  CHECK(D(86399) == "23 h 59 min");
+  CHECK(D(86400) == "1 g 0 h 0 min");
+  CHECK(D(90061) == "1 g 1 h 1 min");
+  CHECK(D(5ULL * 86400 + 23 * 3600 + 11 * 60 + 30) == "5 g 23 h 11 min");
+  CHECK(D(143ULL * 3600 + 11 * 60) == "5 g 23 h 11 min");
+  CHECK(D(4294967295ULL) == "49710 g 6 h 28 min");
+  CHECK(D(18446744073709551615ULL).length() > 0);
   // testo pulito
   CHECK(cleanAscii("ciao\r\nmondo") == "ciao\nmondo");
   CHECK(cleanAscii("a\xC3\xA8" "b") == "a??b");
@@ -32,6 +47,10 @@ int main() {
   // SHA-256 (valori noti)
   CHECK(sha256Hex("abc") == "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
   CHECK(sha256Hex("") == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+  { const uint8_t b[] = {0x00, 0x0f, 0xa5, 0xff}; CHECK(hexOf(b, 4) == "000fa5ff"); CHECK(hexOf(b, 0) == ""); }   // 1.7.63: un solo hexOf
+  CHECK(utilNameOk("a")); CHECK(utilNameOk("bmp280_77-x")); CHECK(utilNameOk("abcdefghijklmnopqrstuvwx"));
+  CHECK(!utilNameOk("")); CHECK(!utilNameOk("abcdefghijklmnopqrstuvwxy")); CHECK(!utilNameOk("Bmp")); CHECK(!utilNameOk("a b")); CHECK(!utilNameOk("a.vsc"));
+  { String e; CHECK(!utilLineErr(e, 7, "x")); CHECK(e.indexOf("7") >= 0 && e.endsWith("x")); }
   // numeri casuali
   String r = randomHex(16);
   CHECK(r.length() == 32);

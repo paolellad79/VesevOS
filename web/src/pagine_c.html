@@ -20,12 +20,62 @@
   <p>Scrivi help per l'elenco dei comandi. Sulla seriale premi 1 o 2 per cambiare lingua.</p>
   <p><a href="https://github.com/paolellad79/VesevOS" target="_blank" rel="noopener">Manuale completo su GitHub</a></p></div>
 </section>
+<section id="t_app" class="hide">
+  <div class="card"><h3>App</h3>
+   <p style="color:var(--mut)">Programmi con una pagina propria, salvati come file .vap nella cartella /apps. Un file solo contiene manifest, icona, pagina, codice e dati. Si apre un'app, si avvia e si comanda dai suoi controlli. Una sola app alla volta (e nessuno script mentre gira).</p>
+   <div class="ftb adm">
+    <button class="btn" onclick="apNew()"><svg class="i" aria-hidden="true"><use href="#i-fvap"/></svg><span>Nuova app</span></button>
+   </div>
+   <table id="aptab" class="ftab"></table>
+   <div id="appm" class="msg" role="status"></div></div>
+  <div class="card hide" id="apcard"><div class="aphd"><span class="scn" id="aphead"></span><span class="pill" id="appill">ferma</span>
+   <span class="apb"><button class="btn" id="apgo" aria-pressed="false" onclick="apStart()">Avvia</button><button class="btn gray" id="apst" onclick="apStop()" disabled>Ferma</button><button class="btn gray" onclick="apClose()">Chiudi</button></span></div>
+   <div id="apctl" class="apctl"></div>
+   <pre id="apout" class="lgv hide" tabindex="0" aria-label="Uscita dell'app" aria-live="polite"></pre></div>
+  <div class="card adm"><h3>Come e fatto un file app</h3>
+   <ul class="scfn">
+    <li><code>[manifest]</code> <span>name (uguale al nome del file), title, version, author, use (permessi: led, time, temp, log, logread, act, btn, mqtt, gpio:N), who (admin oppure oper)</span></li>
+    <li><code>[icon]</code> <span>un solo disegno svg con forme semplici, massimo 2 KB</span></li>
+    <li><code>[page]</code> <span>un controllo per riga: switch, slider, color, text, button, chart, con id e label</span></li>
+    <li><code>[code]</code> <span>codice Berry, massimo 8 KB. Funzioni: on_set(id, valore) quando tocchi un controllo, on_tick() ogni secondo, dev_get(id), dev_set(id, valore); e led, act, log, time, temp, btn, logtail, mqtt se il manifest le permette (use)</span></li>
+    <li><code>[data]</code> <span>valori iniziali: chiave=valore (se la chiave e un controllo ne e il valore di partenza)</span></li>
+   </ul></div>
+ </section>
+<section id="t_script" class="hide">
+ <div class="card"><h3>Script</h3>
+  <p style="color:var(--mut)">Programmi in linguaggio Berry, salvati come file .vsc nella cartella /scripts. Girano in sottofondo, uno alla volta. Un ciclo deve fare pause con sleep(): senza pause per piu di 3 secondi lo script viene fermato.</p>
+  <div id="scst" class="fhint" role="status"></div>
+  <div class="ftb">
+   <button class="btn" onclick="scNew()"><svg class="i" aria-hidden="true"><use href="#i-fvsc"/></svg><span>Nuovo script</span></button>
+   <button class="btn gray" id="scstop" onclick="scStopRun()"><svg class="i" aria-hidden="true"><use href="#i-stop"/></svg><span>Ferma</span></button>
+  </div>
+  <table id="sctab" class="ftab"></table>
+  <div id="scm" class="msg" role="status"></div></div>
+ <div class="card"><h3>Uscita</h3>
+  <pre id="scout" class="lgv" tabindex="0" aria-label="Uscita dello script"></pre>
+  <p class="fhint" id="scinfo"></p></div>
+ <div class="card"><h3>Funzioni disponibili</h3>
+  <ul class="scfn">
+   <li><code>print(x)</code> <span>scrive nell'uscita</span></li>
+   <li><code>led("RRGGBB")</code> <span>colore del LED (led("auto") torna al modo normale)</span></li>
+   <li><code>act("azione")</code> <span>azione delle Automazioni; risponde "ok" o l'errore</span></li>
+   <li><code>time()</code> <span>ora in secondi (0 se l'ora non e valida)</span></li>
+   <li><code>millis()</code> <span>millisecondi dall'accensione</span></li>
+   <li><code>temp()</code> <span>temperatura del chip</span></li>
+   <li><code>log(testo)</code> <span>scrive una riga nel registro</span></li>
+   <li><code>btn()</code> <span>click liberi del tasto BOOT: 1, 2 o 3, oppure 0 se non ce ne sono (non aspetta). Vedi Dispositivi &gt; Tasto BOOT</span></li>
+   <li><code>logtail(n)</code> <span>ultime n righe del registro (1-20, massimo 2000 caratteri). Nelle app serve logread in use=: il registro puo contenere indirizzi e nomi</span></li>
+   <li><code>mqtt("nome", "testo")</code> <span>invia un testo al broker MQTT su &lt;prefisso&gt;/app/&lt;nome&gt; (vero = inviato, falso = non inviato; massimo 20 al minuto). Nelle app serve mqtt in use=</span></li>
+   <li><code>sleep(ms)</code> <span>pausa</span></li>
+  </ul></div>
+</section>
 <div class="foot"><a href="#" onclick="show('legal');return false">Note legali e licenze</a> &middot; <a href="#aiuto">Aiuto</a> &middot; <a href="https://github.com/paolellad79/VesevOS" target="_blank" rel="noopener">GitHub</a><div id="fver" style="margin-top:4px"></div></div>
 </main></div>
 <div class="pop hide" id="um" role="menu">
  <button role="menuitem" onclick="umClose();logout()"><svg class="i"><use href="#i-out"/></svg><span><b>Logout</b><small>Chiudi la sessione su questo browser</small></span></button>
  <button role="menuitem" class="op" onclick="umClose();uReboot()"><svg class="i"><use href="#i-reboot"/></svg><span><b>Riavvia</b><small>La scheda riparte in pochi secondi</small></span></button>
  <button role="menuitem" class="adm" onclick="umClose();uFw()"><svg class="i"><use href="#i-reboot"/></svg><span><b>Aggiorna firmware</b><small>Riavvia nel recovery e carica un nuovo file</small></span></button>
+ <button role="menuitem" class="adm" onclick="umClose();uRecUp()"><svg class="i"><use href="#i-reboot"/></svg><span><b>Aggiorna recovery</b><small>Carica un nuovo recovery senza cavo</small></span></button>
  <button role="menuitem" class="op" onclick="umClose();uSleep()"><svg class="i"><use href="#i-sleep"/></svg><span><b>Sleep</b><small>Sonno profondo: si riaccende con RESET</small></span></button>
 </div>
 <div class="pop hide" id="lpop" role="menu"></div>
@@ -51,6 +101,7 @@
   <div class="fedn"><b id="fedt"></b><small><span id="fedp"></span> · <span id="feds" class="feds"></span></small></div>
   <div class="fedbt">
    <button class="btn" onclick="fEdSave()" title="Ctrl+S"><svg class="i" aria-hidden="true"><use href="#i-save"/></svg><span>Salva</span></button>
+   <button class="btn" id="fedrun" hidden onclick="fEdRun()"><svg class="i" aria-hidden="true"><use href="#i-play"/></svg><span>Salva ed esegui</span></button>
    <button class="btn gray" onclick="fEdSaveAs()"><span>Salva come</span></button>
    <button class="btn gray" id="fedpaste" onclick="fEdPaste()"><span>Incolla</span></button>
    <button class="btn gray" onclick="fEdClear()"><span>Svuota</span></button>
@@ -62,6 +113,7 @@
  <div class="fedb"><pre id="fedn" aria-hidden="true"></pre><textarea id="fedx" spellcheck="false" autocapitalize="off" autocomplete="off" wrap="off" data-tt aria-label="Contenuto del file"></textarea></div>
  <div class="fedf"><span id="fedpos"></span><span id="fedsz"></span><span id="fedjs"></span><span id="fedtab" class="fedtab"></span></div>
 </div>
+<div id="conn" class="dlgw hide" style="z-index:60"><div class="dlg" role="alertdialog" aria-modal="true" aria-labelledby="cnt" aria-describedby="cnd"><h3 id="cnt">Scheda non raggiungibile</h3><p id="cnd" style="margin:0 0 12px">La pagina non riesce piu a parlare con la scheda: puo essere spenta, riavviata o fuori dalla rete. Controlla l'alimentazione e il Wi-Fi, poi premi Aggiorna.</p><div class="dlga"><button type="button" class="btn" id="cnb" onclick="location.reload()">Aggiorna</button></div></div></div>
 <div id="dlg" class="dlgw hide"><form class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgt" onsubmit="dlgBtn('ok');return false"><h3 id="dlgt"></h3><div id="dlgb"></div><div id="dlgm" class="msg" role="alert"></div><div id="dlga" class="dlga"></div></form></div>
 <div id="live" class="sr" aria-live="polite"></div>
 <script>

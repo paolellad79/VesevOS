@@ -8,28 +8,76 @@
 #include "vos_i18n.h"
 #include "vos_log.h"
 #include "vos_util.h"
-#include "../devices/vos_led.h"
 #include "vos_time.h"
+#include "vos_hooks.h"
+#include "../drivers/vos_drv_fs.h"
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 
 #define MAX_AL 16
 #define MAX_HIST 20
 struct Alarm { String key; String text; uint8_t lv; bool ack; bool used; uint32_t since; };
 static Alarm g_al[MAX_AL];
 static String g_hist[MAX_HIST]; static int g_histN = 0;
+// Allarmi e storico sono toccati da piu task (pagina HTTP, HTTPS, ciclo principale): un blocco ricorsivo li protegge.
+static SemaphoreHandle_t g_aumx = xSemaphoreCreateRecursiveMutex();
+struct AudLock { AudLock() { if (g_aumx) xSemaphoreTakeRecursive(g_aumx, portMAX_DELAY); } ~AudLock() { if (g_aumx) xSemaphoreGiveRecursive(g_aumx); } };
+
+// Lo storico resta anche dopo un riavvio: ogni riga va anche in /audit.log (file di sistema, nascosto alle API dei file).
+// Il file si riscrive con le sole ultime righe quando supera HIST_FILE_MAX: poca scrittura sulla flash.
+#define HIST_FILE "/audit.log"
+#define HIST_FILE_MAX 6144
+static bool g_histLoaded = false;
+static void histLoad() {
+  if (g_histLoaded || !drvFsTotal()) return;           // file system non ancora pronto: si riprova alla prossima riga
+  g_histLoaded = true;
+  File f = drvFsOpen(HIST_FILE, "r");
+  if (!f) return;
+  String old[MAX_HIST]; int n = 0;
+  while (f.available()) {
+    String l = f.readStringUntil('\n'); l.trim();
+    if (!l.length()) continue;
+    if (n < MAX_HIST) old[n++] = l; else { for (int i = 1; i < MAX_HIST; i++) old[i - 1] = old[i]; old[MAX_HIST - 1] = l; }
+  }
+  f.close();
+  // le righe vecchie vanno prima di quelle scritte in questo avvio prima del caricamento
+  String cur[MAX_HIST]; int cn = g_histN; for (int i = 0; i < cn; i++) cur[i] = g_hist[i];
+  g_histN = 0;
+  for (int i = 0; i < n + cn; i++) {
+    const String& l = i < n ? old[i] : cur[i - n];
+    if (g_histN < MAX_HIST) g_hist[g_histN++] = l; else { for (int k = 1; k < MAX_HIST; k++) g_hist[k - 1] = g_hist[k]; g_hist[MAX_HIST - 1] = l; }
+  }
+}
+static void histSave(const String& l) {
+  if (!drvFsTotal()) return;
+  File f = drvFsOpen(HIST_FILE, "a");
+  if (!f) return;
+  size_t sz = f.size(); f.print(l); f.print('\n'); f.close();
+  if (sz + l.length() + 1 <= HIST_FILE_MAX) return;
+  f = drvFsOpen(HIST_FILE, "w");                         // troppo grande: restano le ultime righe
+  if (!f) return;
+  for (int i = 0; i < g_histN; i++) { f.print(g_hist[i]); f.print('\n'); }
+  f.close();
+}
 
 static void hist(const String& line) {
+  AudLock L;
+  histLoad();
   String l = timeNowStr() + "  " + line;
+  l.replace("\n", " ");
   if (g_histN < MAX_HIST) g_hist[g_histN++] = l;
   else { for (int i = 1; i < MAX_HIST; i++) g_hist[i - 1] = g_hist[i]; g_hist[MAX_HIST - 1] = l; }
+  histSave(l);
 }
 
 static void ledUpdate() {
   int red = 0, yel = 0;
   for (int i = 0; i < MAX_AL; i++) if (g_al[i].used && !g_al[i].ack) { if (g_al[i].lv == AUD_RED) red++; else if (g_al[i].lv == AUD_YELLOW) yel++; }
-  ledSetAlarm(red ? 2 : (yel ? 1 : 0));
+  hookLedAlarm(red ? 2 : (yel ? 1 : 0));
 }
 
 void auditEvent(AuditLevel lv, const String& key, const String& text) {
+  AudLock L;
   if (lv == AUD_INFO) { vlog("AUDIT: %s", text.c_str()); hist(text); return; }
   int free = -1;
   for (int i = 0; i < MAX_AL; i++) {
@@ -48,6 +96,7 @@ void auditEvent(AuditLevel lv, const String& key, const String& text) {
 }
 
 void auditClear(const String& key) {
+  AudLock L;
   for (int i = 0; i < MAX_AL; i++) if (g_al[i].used && g_al[i].key == key) { g_al[i].used = false; g_al[i].key = ""; EventBus::publish("audit.clear", key.c_str(), 0); }
   ledUpdate();
 }
@@ -63,6 +112,7 @@ static bool hasAdmin() {
 
 // Valori vietati: si correggono sempre (anche se arrivano da un file ripristinato o modificato a mano)
 void auditFix() {
+  AudLock L;
   if (cfgApPassWeak(cfg.apPass)) {
     cfg.apPass = cfgNewApPass();
     auditEvent(AUD_RED, "appass", tr("Password dell'hotspot debole o uguale per tutti: sostituita con una nuova (vedi seriale o Rete > Punto di accesso)"));
@@ -84,6 +134,7 @@ void auditFix() {
 }
 
 void auditRefresh() {
+  AudLock L;
   cond(!cfgLastSaveOk(), AUD_RED, "saveerr", tr("Salvataggio della configurazione fallito: le modifiche si perdono al riavvio (memoria piena?)"));
   cond(!cfg.setupDone, AUD_YELLOW, "setupnd", tr("Guida di configurazione non finita: hotspot e HTTP restano forzati accesi a ogni avvio"));
   cond(cfg.setupDone && !hasAdmin(), AUD_RED, "noadmin", tr("Nessun amministratore attivo: tieni premuto BOOT 8 s per crearlo di nuovo"));
@@ -105,6 +156,7 @@ static String sectionOf(const String& txt, int pos) {
 }
 
 void auditDiff(const String& o, const String& n, const String& origin) {
+  AudLock L;
   int i = 0, shown = 0;
   while (i < (int)n.length()) {
     int e = n.indexOf('\n', i); if (e < 0) e = n.length();
@@ -141,12 +193,15 @@ void auditInit() {
 }
 
 int auditCount(AuditLevel lv) {
+  AudLock L;
   int n = 0;
   for (int i = 0; i < MAX_AL; i++) if (g_al[i].used && !g_al[i].ack && g_al[i].lv == lv) n++;
   return n;
 }
 
 String auditJson() {
+  AudLock L;
+  histLoad();
   String j = "{\"alarms\":[";
   bool first = true;
   for (int i = 0; i < MAX_AL; i++) {
@@ -161,6 +216,7 @@ String auditJson() {
 }
 
 String auditText() {
+  AudLock L;
   String t; int n = 0;
   for (int i = 0; i < MAX_AL; i++) {
     if (!g_al[i].used) continue;
@@ -171,6 +227,7 @@ String auditText() {
 }
 
 bool auditAck(int n) {
+  AudLock L;
   bool any = false;
   for (int i = 0; i < MAX_AL; i++) {
     if (!g_al[i].used || (n && i != n - 1)) continue;

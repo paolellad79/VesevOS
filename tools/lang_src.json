@@ -2035,13 +2035,6 @@
    "scope": "web"
   },
   {
-   "it": "Config",
-   "en": "Settings",
-   "es": "Ajustes",
-   "de": "Konfig",
-   "scope": "web"
-  },
-  {
    "it": "  license [id]    note legali e licenze (notice, gpl3, lgpl21, apache2, mit, bsd3)",
    "en": "  license [id]    legal notices and licenses (notice, gpl3, lgpl21, apache2, mit, bsd3)",
    "es": "  license [id]    avisos legales y licencias (notice, gpl3, lgpl21, apache2, mit, bsd3)",
@@ -2560,24 +2553,10 @@
    "scope": "web"
   },
   {
-   "it": "Ore di vita: %lu h %lu min",
-   "en": "Lifetime hours: %lu h %lu min",
-   "es": "Horas de vida: %lu h %lu min",
-   "de": "Lebensdauer: %lu h %lu min",
-   "scope": "fw"
-  },
-  {
    "it": "Ore di vita",
    "en": "Lifetime hours",
    "es": "Horas de vida",
    "de": "Lebensdauer",
-   "scope": "web"
-  },
-  {
-   "it": "{0} h {1} min",
-   "en": "{0} h {1} min",
-   "es": "{0} h {1} min",
-   "de": "{0} h {1} min",
    "scope": "web"
   },
   {
@@ -6879,10 +6858,10 @@
    "scope": "fw"
   },
   {
-   "it": "Software di terzi e testi delle licenze: comando license, pagina Sistema > Note legali.",
-   "en": "Third-party software and license texts: license command, page System > Legal notes.",
-   "es": "Software de terceros y textos de licencias: comando license, pagina Sistema > Avisos legales.",
-   "de": "Software Dritter und Lizenztexte: Befehl license, Seite System > Rechtliches.",
+   "it": "Software di terzi e testi delle licenze: comando license, pagina Informazioni > Note legali.",
+   "en": "Third-party software and license texts: license command, page Information > Legal notes.",
+   "es": "Software de terceros y textos de licencias: comando license, pagina Informacion > Avisos legales.",
+   "de": "Software Dritter und Lizenztexte: Befehl license, Seite Informationen > Rechtliches.",
    "scope": "fw"
   },
   {
@@ -7159,10 +7138,10 @@
    "scope": "fw"
   },
   {
-   "it": "Pulsante BOOT (breve = modo aereo, 2 s = filtro IP, 8 s = password, 20 s = fabbrica)",
-   "en": "BOOT button (short = airplane mode, 2 s = IP filter, 8 s = password, 20 s = factory)",
-   "es": "Boton BOOT (corto = modo avion, 2 s = filtro IP, 8 s = contrasena, 20 s = fabrica)",
-   "de": "BOOT-Taste (kurz = Flugmodus, 2 s = IP-Filter, 8 s = Passwort, 20 s = Werkszustand)",
+   "it": "Pulsante BOOT (click = azioni scelte, 2 s = filtro IP, 8 s = password, 20 s = fabbrica)",
+   "en": "BOOT button (clicks = chosen actions, 2 s = IP filter, 8 s = password, 20 s = factory)",
+   "es": "Boton BOOT (clics = acciones elegidas, 2 s = filtro IP, 8 s = contrasena, 20 s = fabrica)",
+   "de": "BOOT-Taste (Klicks = gewaehlte Aktionen, 2 s = IP-Filter, 8 s = Passwort, 20 s = Werkszustand)",
    "scope": "fw"
   },
   {
@@ -8790,20 +8769,6 @@
    "scope": "fw"
   },
   {
-   "it": "Compliant",
-   "en": "Compliant",
-   "es": "Cumplimiento",
-   "de": "Konformitaet",
-   "scope": "web"
-  },
-  {
-   "it": "Altre lingue si aggiungono dopo, con un file (Sistema > Localizzazione).",
-   "en": "More languages can be added later with a file (System > Localization).",
-   "es": "Otros idiomas se anaden despues, con un archivo (Sistema > Localizacion).",
-   "de": "Weitere Sprachen kommen spaeter per Datei dazu (System > Lokalisierung).",
-   "scope": "web"
-  },
-  {
    "it": "La scheda usa un certificato fatto da lei: il browser avvisa la prima volta. Confronta l'impronta (Servizi > HTTPS) e prosegui.",
    "en": "The board uses a certificate it made itself: the browser warns the first time. Compare the fingerprint (Services > HTTPS) and continue.",
    "es": "La placa usa un certificado propio: el navegador avisa la primera vez. Compara la huella (Servicios > HTTPS) y sigue.",
@@ -9196,10 +9161,10 @@
    "scope": "web"
   },
   {
-   "it": "Il testo completo delle licenze si legge dalla pagina (Sistema > Note legali) e nel file LICENSE del progetto.",
-   "en": "The full license texts can be read in the web page (System > Legal notes) and in the project's LICENSE file.",
-   "es": "El texto completo de las licencias se lee en la pagina (Sistema > Notas legales) y en el archivo LICENSE del proyecto.",
-   "de": "Die vollstaendigen Lizenztexte stehen auf der Webseite (System > Rechtliches) und in der Datei LICENSE des Projekts.",
+   "it": "Il testo completo delle licenze si legge dalla pagina (Informazioni > Note legali) e nel file LICENSE del progetto.",
+   "en": "The full license texts can be read in the web page (Information > Legal notes) and in the project's LICENSE file.",
+   "es": "El texto completo de las licencias se lee en la pagina (Informacion > Notas legales) y en el archivo LICENSE del proyecto.",
+   "de": "Die vollstaendigen Lizenztexte stehen auf der Webseite (Informationen > Rechtliches) und in der Datei LICENSE des Projekts.",
    "scope": "fw"
   },
   {
@@ -11324,10 +11289,10 @@
    "scope": "fw"
   },
   {
-   "it": "Ultimo salvataggio: %s; guida finita: %s; avvisi rossi %d, gialli %d (scheda Compliant)",
-   "en": "Last save: %s; guide finished: %s; red alerts %d, yellow %d (Compliant tab)",
-   "es": "Ultimo guardado: %s; guia terminada: %s; avisos rojos %d, amarillos %d (pestana Compliant)",
-   "de": "Letztes Speichern: %s; Assistent fertig: %s; rote Warnungen %d, gelbe %d (Tab Compliant)",
+   "it": "Ultimo salvataggio: %s; guida finita: %s; avvisi rossi %d, gialli %d (scheda Stato conformita)",
+   "en": "Last save: %s; guide finished: %s; red alerts %d, yellow %d (Compliance status tab)",
+   "es": "Ultimo guardado: %s; guia terminada: %s; avisos rojos %d, amarillos %d (pestana Estado de cumplimiento)",
+   "de": "Letztes Speichern: %s; Assistent fertig: %s; rote Warnungen %d, gelbe %d (Tab Konformitaetsstatus)",
    "scope": "fw"
   },
   {
@@ -12003,6 +11968,13 @@
    "scope": "fw"
   },
   {
+   "it": "CPU fissa sotto 160 MHz con HTTPS acceso: la scheda puo bloccarsi e riavviarsi. Usa il modo automatico o almeno 160 MHz",
+   "en": "CPU fixed below 160 MHz with HTTPS on: the board may freeze and restart. Use automatic mode or at least 160 MHz",
+   "es": "CPU fija por debajo de 160 MHz con HTTPS activo: la placa puede bloquearse y reiniciarse. Usa el modo automatico o al menos 160 MHz",
+   "de": "CPU fest unter 160 MHz bei aktivem HTTPS: die Platine kann haengen und neu starten. Automatikmodus oder mindestens 160 MHz verwenden",
+   "scope": "fw"
+  },
+  {
    "it": "Memoria frammentata: il pezzo di RAM libero piu grande e piccolo. Chiudi la pagina web o spegni i servizi che non servono: si libera da sola",
    "en": "Memory is fragmented: the largest free piece of RAM is small. Close the web page or stop services you do not need: it frees itself",
    "es": "Memoria fragmentada: la pieza libre de RAM mas grande es pequena. Cierra la pagina web o detiene servicios que no necesitas: se libera sola",
@@ -12332,13 +12304,6 @@
    "scope": "fw"
   },
   {
-   "it": "Pressione breve",
-   "en": "Short press",
-   "es": "Pulsacion corta",
-   "de": "Kurzer Druck",
-   "scope": "fw"
-  },
-  {
    "it": "Processore",
    "en": "Processor",
    "es": "Procesador",
@@ -12514,13 +12479,6 @@
    "scope": "fw"
   },
   {
-   "it": "modo aereo",
-   "en": "airplane mode",
-   "es": "modo avion",
-   "de": "Flugmodus",
-   "scope": "fw"
-  },
-  {
    "it": "non scelto",
    "en": "not chosen",
    "es": "no elegido",
@@ -12581,13 +12539,6 @@
    "en": "Device Manager",
    "es": "Gestor de dispositivos",
    "de": "Geraetemanager",
-   "scope": "web"
-  },
-  {
-   "it": "Il pulsante BOOT della scheda (GPIO0): le pressioni lunghe servono al recupero.",
-   "en": "The board's BOOT button (GPIO0): long presses are used for recovery.",
-   "es": "El boton BOOT de la placa (GPIO0): las pulsaciones largas sirven para la recuperacion.",
-   "de": "Die BOOT-Taste der Platine (GPIO0): lange Druecke dienen der Wiederherstellung.",
    "scope": "web"
   },
   {
@@ -12934,24 +12885,10 @@
    "scope": "fw"
   },
   {
-   "it": "  recovery [now]  recovery (aggiornamento firmware): stato, o 'now' = riavvia nel recovery",
-   "en": "  recovery [now]  recovery (firmware update): status, or 'now' = restart into recovery",
-   "es": "  recovery [now]  recovery (actualizar firmware): estado, o 'now' = reinicia en recovery",
-   "de": "  recovery [now]  Recovery (Firmware-Update): Status, oder 'now' = Neustart ins Recovery",
-   "scope": "fw"
-  },
-  {
    "it": "Recovery non presente: la scheda ha ancora la tabella partizioni vecchia.",
    "en": "Recovery not present: the board still has the old partition table.",
    "es": "Recovery no presente: la placa aun tiene la tabla de particiones antigua.",
    "de": "Recovery nicht vorhanden: die Platine hat noch die alte Partitionstabelle.",
-   "scope": "fw"
-  },
-  {
-   "it": "Recovery presente. Scrivi 'recovery now' per riavviare nel recovery.",
-   "en": "Recovery present. Type 'recovery now' to restart into recovery.",
-   "es": "Recovery presente. Escribe 'recovery now' para reiniciar en recovery.",
-   "de": "Recovery vorhanden. 'recovery now' eingeben, um ins Recovery neu zu starten.",
    "scope": "fw"
   },
   {
@@ -13029,6 +12966,3366 @@
    "en": "After the update VesevOS restarts by itself.",
    "es": "Despues de la actualizacion VesevOS se reinicia solo.",
    "de": "Nach dem Update startet VesevOS von selbst neu.",
+   "scope": "web"
+  },
+  {
+   "it": "In attesa: premi Applica (riavvia la scheda) per rendere effettiva la modifica.",
+   "en": "Waiting: press Apply (restarts the board) to make the change effective.",
+   "es": "En espera: pulsa Aplicar (reinicia la placa) para que el cambio surta efecto.",
+   "de": "Wartet: Auf Anwenden drücken (startet das Board neu), damit die Änderung wirksam wird.",
+   "scope": "web"
+  },
+  {
+   "it": "Script vuoto o troppo lungo",
+   "en": "Empty script or too long",
+   "es": "Script vacio o demasiado largo",
+   "de": "Skript leer oder zu lang",
+   "scope": "fw"
+  },
+  {
+   "it": "RAM interna troppo bassa per avviare uno script",
+   "en": "Internal RAM too low to start a script",
+   "es": "RAM interna demasiado baja para iniciar un script",
+   "de": "Interner RAM zu knapp, um ein Skript zu starten",
+   "scope": "fw"
+  },
+  {
+   "it": "Berry e occupato con un altro script",
+   "en": "Berry is busy with another script",
+   "es": "Berry esta ocupado con otro script",
+   "de": "Berry ist mit einem anderen Skript beschaeftigt",
+   "scope": "fw"
+  },
+  {
+   "it": "Non riesco ad avviare lo script",
+   "en": "Cannot start the script",
+   "es": "No puedo iniciar el script",
+   "de": "Skript kann nicht gestartet werden",
+   "scope": "fw"
+  },
+  {
+   "it": "Lo script non risponde",
+   "en": "The script is not responding",
+   "es": "El script no responde",
+   "de": "Das Skript antwortet nicht",
+   "scope": "fw"
+  },
+  {
+   "it": "(tetto memoria %lu KB, tempo %lu s)",
+   "en": "(memory limit %lu KB, time %lu s)",
+   "es": "(limite de memoria %lu KB, tiempo %lu s)",
+   "de": "(Speichergrenze %lu KB, Zeit %lu s)",
+   "scope": "fw"
+  },
+  {
+   "it": "Esecuzioni: %lu",
+   "en": "Runs: %lu",
+   "es": "Ejecuciones: %lu",
+   "de": "Ausfuehrungen: %lu",
+   "scope": "fw"
+  },
+  {
+   "it": "Ultima: %s, %lu ms, memoria massima %lu byte, non liberata %lu byte",
+   "en": "Last: %s, %lu ms, peak memory %lu bytes, not freed %lu bytes",
+   "es": "Ultima: %s, %lu ms, memoria maxima %lu bytes, sin liberar %lu bytes",
+   "de": "Letzte: %s, %lu ms, Spitzenspeicher %lu Bytes, nicht freigegeben %lu Bytes",
+   "scope": "fw"
+  },
+  {
+   "it": "Funzioni: print, led, act, time, millis, temp, log, sleep, btn",
+   "en": "Functions: print, led, act, time, millis, temp, log, sleep, btn",
+   "es": "Funciones: print, led, act, time, millis, temp, log, sleep, btn",
+   "de": "Funktionen: print, led, act, time, millis, temp, log, sleep, btn",
+   "scope": "fw"
+  },
+  {
+   "it": "  berry [codice]  prova al volo codice Berry (print, led, act, time, millis, temp, log, sleep); senza argomenti: stato",
+   "en": "  berry [code]    try Berry code right away (print, led, act, time, millis, temp, log, sleep); no arguments: status",
+   "es": "  berry [codigo]  prueba codigo Berry al momento (print, led, act, time, millis, temp, log, sleep); sin argumentos: estado",
+   "de": "  berry [Code]    Berry-Code sofort ausprobieren (print, led, act, time, millis, temp, log, sleep); ohne Argumente: Status",
+   "scope": "fw"
+  },
+  {
+   "it": "  script [list|run <nome>|stop|out]  script salvati in /scripts (.vsc), in sottofondo",
+   "en": "  script [list|run <name>|stop|out]  scripts saved in /scripts (.vsc), run in the background",
+   "es": "  script [list|run <nombre>|stop|out]  scripts guardados en /scripts (.vsc), en segundo plano",
+   "de": "  script [list|run <Name>|stop|out]  in /scripts gespeicherte Skripte (.vsc), im Hintergrund",
+   "scope": "fw"
+  },
+  {
+   "it": "Nome script non valido (1-24 caratteri: lettere minuscole, numeri, trattino, sottotrattino)",
+   "en": "Invalid script name (1-24 characters: lowercase letters, digits, hyphen, underscore)",
+   "es": "Nombre de script no valido (1-24 caracteres: minusculas, numeros, guion, guion bajo)",
+   "de": "Ungueltiger Skriptname (1-24 Zeichen: Kleinbuchstaben, Ziffern, Bindestrich, Unterstrich)",
+   "scope": "fw"
+  },
+  {
+   "it": "Script non trovato: scrivi 'script list'",
+   "en": "Script not found: type 'script list'",
+   "es": "Script no encontrado: escribe 'script list'",
+   "de": "Skript nicht gefunden: 'script list' eingeben",
+   "scope": "fw"
+  },
+  {
+   "it": "Nessuno script in corso",
+   "en": "No script running",
+   "es": "Ningun script en marcha",
+   "de": "Kein Skript laeuft",
+   "scope": "fw"
+  },
+  {
+   "it": "in corso",
+   "en": "running",
+   "es": "en marcha",
+   "de": "laeuft",
+   "scope": "fw"
+  },
+  {
+   "it": "Nessuno script in /scripts. Esempio: write /scripts/prova.vsc print('ciao')",
+   "en": "No scripts in /scripts. Example: write /scripts/test.vsc print('hello')",
+   "es": "Ningun script en /scripts. Ejemplo: write /scripts/prueba.vsc print('hola')",
+   "de": "Keine Skripte in /scripts. Beispiel: write /scripts/test.vsc print('hallo')",
+   "scope": "fw"
+  },
+  {
+   "it": "Script in /scripts: %d",
+   "en": "Scripts in /scripts: %d",
+   "es": "Scripts en /scripts: %d",
+   "de": "Skripte in /scripts: %d",
+   "scope": "fw"
+  },
+  {
+   "it": "Script: %s",
+   "en": "Script: %s",
+   "es": "Script: %s",
+   "de": "Skript: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "le righe piu vecchie sono state tolte",
+   "en": "older lines were dropped",
+   "es": "las lineas mas antiguas se han quitado",
+   "de": "aeltere Zeilen wurden entfernt",
+   "scope": "fw"
+  },
+  {
+   "it": "Nessuna uscita",
+   "en": "No output",
+   "es": "Sin salida",
+   "de": "Keine Ausgabe",
+   "scope": "fw"
+  },
+  {
+   "it": "In corso: %s",
+   "en": "Running: %s",
+   "es": "En marcha: %s",
+   "de": "Laeuft: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "In corso: comando",
+   "en": "Running: command",
+   "es": "En marcha: comando",
+   "de": "Laeuft: Befehl",
+   "scope": "fw"
+  },
+  {
+   "it": "Comandi: berry <codice> | script list | script run <nome> | script stop | script out",
+   "en": "Commands: berry <code> | script list | script run <name> | script stop | script out",
+   "es": "Comandos: berry <codigo> | script list | script run <nombre> | script stop | script out",
+   "de": "Befehle: berry <Code> | script list | script run <Name> | script stop | script out",
+   "scope": "fw"
+  },
+  {
+   "it": "Script fermato",
+   "en": "Script stopped",
+   "es": "Script detenido",
+   "de": "Skript gestoppt",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: script run <nome>  (file /scripts/<nome>.vsc)",
+   "en": "Usage: script run <name>  (file /scripts/<name>.vsc)",
+   "es": "Uso: script run <nombre>  (archivo /scripts/<nombre>.vsc)",
+   "de": "Verwendung: script run <Name>  (Datei /scripts/<Name>.vsc)",
+   "scope": "fw"
+  },
+  {
+   "it": "Script avviato: %s (script out = uscita, script stop = ferma)",
+   "en": "Script started: %s (script out = output, script stop = stop)",
+   "es": "Script iniciado: %s (script out = salida, script stop = detener)",
+   "de": "Skript gestartet: %s (script out = Ausgabe, script stop = Stopp)",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: script list | script run <nome> | script stop | script out",
+   "en": "Usage: script list | script run <name> | script stop | script out",
+   "es": "Uso: script list | script run <nombre> | script stop | script out",
+   "de": "Verwendung: script list | script run <Name> | script stop | script out",
+   "scope": "fw"
+  },
+  {
+   "it": "act(\"azione\")",
+   "en": "act(\"action\")",
+   "es": "act(\"accion\")",
+   "de": "act(\"Aktion\")",
+   "scope": "web"
+  },
+  {
+   "it": "led(\"RRGGBB\")",
+   "en": "led(\"RRGGBB\")",
+   "es": "led(\"RRGGBB\")",
+   "de": "led(\"RRGGBB\")",
+   "scope": "web"
+  },
+  {
+   "it": "log(testo)",
+   "en": "log(text)",
+   "es": "log(texto)",
+   "de": "log(Text)",
+   "scope": "web"
+  },
+  {
+   "it": "millis()",
+   "en": "millis()",
+   "es": "millis()",
+   "de": "millis()",
+   "scope": "web"
+  },
+  {
+   "it": "print(x)",
+   "en": "print(x)",
+   "es": "print(x)",
+   "de": "print(x)",
+   "scope": "web"
+  },
+  {
+   "it": "sleep(ms)",
+   "en": "sleep(ms)",
+   "es": "sleep(ms)",
+   "de": "sleep(ms)",
+   "scope": "web"
+  },
+  {
+   "it": "temp()",
+   "en": "temp()",
+   "es": "temp()",
+   "de": "temp()",
+   "scope": "web"
+  },
+  {
+   "it": "time()",
+   "en": "time()",
+   "es": "time()",
+   "de": "time()",
+   "scope": "web"
+  },
+  {
+   "it": "Avviato: {0}",
+   "en": "Started: {0}",
+   "es": "Iniciado: {0}",
+   "de": "Gestartet: {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Berry sta eseguendo un comando",
+   "en": "Berry is running a command",
+   "es": "Berry esta ejecutando un comando",
+   "de": "Berry fuehrt einen Befehl aus",
+   "scope": "web"
+  },
+  {
+   "it": "Da 1 a 24 caratteri: lettere minuscole, numeri, trattino e sottotrattino.",
+   "en": "1 to 24 characters: lowercase letters, digits, hyphen and underscore.",
+   "es": "De 1 a 24 caracteres: letras minusculas, numeros, guion y guion bajo.",
+   "de": "1 bis 24 Zeichen: Kleinbuchstaben, Ziffern, Bindestrich und Unterstrich.",
+   "scope": "web"
+  },
+  {
+   "it": "Elimina {0}",
+   "en": "Delete {0}",
+   "es": "Eliminar {0}",
+   "de": "{0} loeschen",
+   "scope": "web"
+  },
+  {
+   "it": "Esecuzioni dall'accensione: {0}. Limiti: {1} di testo, memoria 64 KB, un solo script alla volta.",
+   "en": "Runs since power-on: {0}. Limits: {1} of text, 64 KB of memory, one script at a time.",
+   "es": "Ejecuciones desde el encendido: {0}. Limites: {1} de texto, memoria 64 KB, un solo script a la vez.",
+   "de": "Ausfuehrungen seit dem Einschalten: {0}. Grenzen: {1} Text, 64 KB Speicher, nur ein Skript gleichzeitig.",
+   "scope": "web"
+  },
+  {
+   "it": "Esegui {0}",
+   "en": "Run {0}",
+   "es": "Ejecutar {0}",
+   "de": "{0} ausfuehren",
+   "scope": "web"
+  },
+  {
+   "it": "Ferma {0}",
+   "en": "Stop {0}",
+   "es": "Detener {0}",
+   "de": "{0} stoppen",
+   "scope": "web"
+  },
+  {
+   "it": "Fermo. L'ultima esecuzione e finita con un errore (vedi l'uscita).",
+   "en": "Stopped. The last run ended with an error (see the output).",
+   "es": "Detenido. La ultima ejecucion termino con un error (mira la salida).",
+   "de": "Gestoppt. Der letzte Lauf endete mit einem Fehler (siehe Ausgabe).",
+   "scope": "web"
+  },
+  {
+   "it": "Fermo. Nessuno script eseguito dall'accensione.",
+   "en": "Stopped. No script has run since power-on.",
+   "es": "Detenido. Ningun script se ha ejecutado desde el encendido.",
+   "de": "Gestoppt. Seit dem Einschalten lief kein Skript.",
+   "scope": "web"
+  },
+  {
+   "it": "Fermo. Ultima esecuzione finita senza errori ({0} ms).",
+   "en": "Stopped. The last run finished without errors ({0} ms).",
+   "es": "Detenido. La ultima ejecucion termino sin errores ({0} ms).",
+   "de": "Gestoppt. Der letzte Lauf endete ohne Fehler ({0} ms).",
+   "scope": "web"
+  },
+  {
+   "it": "Funzioni disponibili",
+   "en": "Available functions",
+   "es": "Funciones disponibles",
+   "de": "Verfuegbare Funktionen",
+   "scope": "web"
+  },
+  {
+   "it": "In corso: {0}",
+   "en": "Running: {0}",
+   "es": "En curso: {0}",
+   "de": "Laeuft: {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Lo script {0} verra eliminato.",
+   "en": "The script {0} will be deleted.",
+   "es": "El script {0} se eliminara.",
+   "de": "Das Skript {0} wird geloescht.",
+   "scope": "web"
+  },
+  {
+   "it": "Modifica {0}",
+   "en": "Edit {0}",
+   "es": "Editar {0}",
+   "de": "{0} bearbeiten",
+   "scope": "web"
+  },
+  {
+   "it": "Nessuno script. Premi Nuovo script per crearne uno.",
+   "en": "No scripts. Press New script to create one.",
+   "es": "Ningun script. Pulsa Nuevo script para crear uno.",
+   "de": "Keine Skripte. Mit Neues Skript legst du eines an.",
+   "scope": "web"
+  },
+  {
+   "it": "Nome dello script",
+   "en": "Script name",
+   "es": "Nombre del script",
+   "de": "Name des Skripts",
+   "scope": "web"
+  },
+  {
+   "it": "Nuovo script",
+   "en": "New script",
+   "es": "Nuevo script",
+   "de": "Neues Skript",
+   "scope": "web"
+  },
+  {
+   "it": "Programmi in linguaggio Berry, salvati come file .vsc nella cartella /scripts. Girano in sottofondo, uno alla volta. Un ciclo deve fare pause con sleep(): senza pause per piu di 3 secondi lo script viene fermato.",
+   "en": "Programs in the Berry language, saved as .vsc files in the /scripts folder. They run in the background, one at a time. A loop must pause with sleep(): without pauses for more than 3 seconds the script is stopped.",
+   "es": "Programas en lenguaje Berry, guardados como archivos .vsc en la carpeta /scripts. Se ejecutan en segundo plano, uno a la vez. Un bucle debe hacer pausas con sleep(): sin pausas durante mas de 3 segundos el script se detiene.",
+   "de": "Programme in der Sprache Berry, als .vsc-Dateien im Ordner /scripts gespeichert. Sie laufen im Hintergrund, eines nach dem anderen. Eine Schleife muss mit sleep() pausieren: ohne Pause laenger als 3 Sekunden wird das Skript gestoppt.",
+   "scope": "web"
+  },
+  {
+   "it": "Salva ed esegui",
+   "en": "Save and run",
+   "es": "Guardar y ejecutar",
+   "de": "Speichern und ausfuehren",
+   "scope": "web"
+  },
+  {
+   "it": "Script",
+   "en": "Script",
+   "es": "Script",
+   "de": "Skript",
+   "scope": "web"
+  },
+  {
+   "it": "Uscita",
+   "en": "Output",
+   "es": "Salida",
+   "de": "Ausgabe",
+   "scope": "web"
+  },
+  {
+   "it": "azione delle Automazioni; risponde \"ok\" o l'errore",
+   "en": "Automation action; answers \"ok\" or the error",
+   "es": "accion de las Automatizaciones; responde \"ok\" o el error",
+   "de": "Aktion der Automatisierungen; antwortet \"ok\" oder den Fehler",
+   "scope": "web"
+  },
+  {
+   "it": "colore del LED (led(\"auto\") torna al modo normale)",
+   "en": "LED colour (led(\"auto\") goes back to the normal mode)",
+   "es": "color del LED (led(\"auto\") vuelve al modo normal)",
+   "de": "LED-Farbe (led(\"auto\") kehrt zum normalen Modus zurueck)",
+   "scope": "web"
+  },
+  {
+   "it": "millisecondi dall'accensione",
+   "en": "milliseconds since power-on",
+   "es": "milisegundos desde el encendido",
+   "de": "Millisekunden seit dem Einschalten",
+   "scope": "web"
+  },
+  {
+   "it": "ora in secondi (0 se l'ora non e valida)",
+   "en": "time in seconds (0 if the time is not valid)",
+   "es": "hora en segundos (0 si la hora no es valida)",
+   "de": "Zeit in Sekunden (0, wenn die Zeit ungueltig ist)",
+   "scope": "web"
+  },
+  {
+   "it": "pausa",
+   "en": "pause",
+   "es": "pausa",
+   "de": "Pause",
+   "scope": "web"
+  },
+  {
+   "it": "scrive nell'uscita",
+   "en": "writes to the output",
+   "es": "escribe en la salida",
+   "de": "schreibt in die Ausgabe",
+   "scope": "web"
+  },
+  {
+   "it": "scrive una riga nel registro",
+   "en": "writes a line to the log",
+   "es": "escribe una linea en el registro",
+   "de": "schreibt eine Zeile ins Protokoll",
+   "scope": "web"
+  },
+  {
+   "it": "temperatura del chip",
+   "en": "chip temperature",
+   "es": "temperatura del chip",
+   "de": "Chip-Temperatur",
+   "scope": "web"
+  },
+  {
+   "it": "Script gia in coda",
+   "en": "Script already queued",
+   "es": "Script ya en cola",
+   "de": "Skript bereits in der Warteschlange",
+   "scope": "fw"
+  },
+  {
+   "it": "Coda piena (massimo 4 script in attesa)",
+   "en": "Queue full (at most 4 scripts waiting)",
+   "es": "Cola llena (maximo 4 scripts en espera)",
+   "de": "Warteschlange voll (hoechstens 4 Skripte warten)",
+   "scope": "fw"
+  },
+  {
+   "it": "Avvia uno script",
+   "en": "Run a script",
+   "es": "Ejecutar un script",
+   "de": "Ein Skript starten",
+   "scope": "web"
+  },
+  {
+   "it": "avvia lo script {0}",
+   "en": "run the script {0}",
+   "es": "ejecutar el script {0}",
+   "de": "Skript {0} starten",
+   "scope": "web"
+  },
+  {
+   "it": "nome dello script",
+   "en": "script name",
+   "es": "nombre del script",
+   "de": "Skriptname",
+   "scope": "web"
+  },
+  {
+   "it": "App in /apps: %d",
+   "en": "Apps in /apps: %d",
+   "es": "Apps en /apps: %d",
+   "de": "Apps in /apps: %d",
+   "scope": "fw"
+  },
+  {
+   "it": "Chi la usa: %s",
+   "en": "Who may use it: %s",
+   "es": "Quien puede usarla: %s",
+   "de": "Wer sie nutzen darf: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Chi la usa: admin oppure oper",
+   "en": "Who may use it: admin or oper",
+   "es": "Quien puede usarla: admin u oper",
+   "de": "Wer sie nutzen darf: admin oder oper",
+   "scope": "fw"
+  },
+  {
+   "it": "Chiave sconosciuta nel manifest",
+   "en": "Unknown key in the manifest",
+   "es": "Clave desconocida en el manifest",
+   "de": "Unbekannter Schluessel im Manifest",
+   "scope": "fw"
+  },
+  {
+   "it": "Codice troppo lungo (massimo 8 KB)",
+   "en": "Code too long (at most 8 KB)",
+   "es": "Codigo demasiado largo (maximo 8 KB)",
+   "de": "Code zu lang (hoechstens 8 KB)",
+   "scope": "fw"
+  },
+  {
+   "it": "Codice: %d byte, file: %d byte",
+   "en": "Code: %d bytes, file: %d bytes",
+   "es": "Codigo: %d bytes, archivo: %d bytes",
+   "de": "Code: %d Byte, Datei: %d Byte",
+   "scope": "fw"
+  },
+  {
+   "it": "Controlli: %d",
+   "en": "Controls: %d",
+   "es": "Controles: %d",
+   "de": "Bedienelemente: %d",
+   "scope": "fw"
+  },
+  {
+   "it": "Controllo non valido (switch, slider, color, text, button, chart)",
+   "en": "Invalid control (switch, slider, color, text, button, chart)",
+   "es": "Control no valido (switch, slider, color, text, button, chart)",
+   "de": "Ungueltiges Bedienelement (switch, slider, color, text, button, chart)",
+   "scope": "fw"
+  },
+  {
+   "it": "Dati iniziali: %d",
+   "en": "Initial data: %d",
+   "es": "Datos iniciales: %d",
+   "de": "Anfangsdaten: %d",
+   "scope": "fw"
+  },
+  {
+   "it": "Dato non valido (chiave a-z 0-9 _, valore massimo 40 caratteri)",
+   "en": "Invalid data (key a-z 0-9 _, value at most 40 characters)",
+   "es": "Dato no valido (clave a-z 0-9 _, valor maximo 40 caracteres)",
+   "de": "Ungueltiger Wert (Schluessel a-z 0-9 _, Wert hoechstens 40 Zeichen)",
+   "scope": "fw"
+  },
+  {
+   "it": "ERRORE",
+   "en": "ERROR",
+   "es": "ERROR",
+   "de": "FEHLER",
+   "scope": "fw"
+  },
+  {
+   "it": "File troppo grande (massimo 16 KB)",
+   "en": "File too big (at most 16 KB)",
+   "es": "Archivo demasiado grande (maximo 16 KB)",
+   "de": "Datei zu gross (hoechstens 16 KB)",
+   "scope": "fw"
+  },
+  {
+   "it": "Icona non ammessa (un solo svg con forme semplici, massimo 2 KB)",
+   "en": "Icon not allowed (a single svg with simple shapes, at most 2 KB)",
+   "es": "Icono no admitido (un solo svg con formas simples, maximo 2 KB)",
+   "de": "Symbol nicht erlaubt (ein einzelnes svg mit einfachen Formen, hoechstens 2 KB)",
+   "scope": "fw"
+  },
+  {
+   "it": "Icona: no",
+   "en": "Icon: no",
+   "es": "Icono: no",
+   "de": "Symbol: nein",
+   "scope": "fw"
+  },
+  {
+   "it": "Icona: si",
+   "en": "Icon: yes",
+   "es": "Icono: si",
+   "de": "Symbol: ja",
+   "scope": "fw"
+  },
+  {
+   "it": "Id ripetuto",
+   "en": "Repeated id",
+   "es": "Id repetido",
+   "de": "Id doppelt",
+   "scope": "fw"
+  },
+  {
+   "it": "Manca [manifest] con name=",
+   "en": "Missing [manifest] with name=",
+   "es": "Falta [manifest] con name=",
+   "de": "[manifest] mit name= fehlt",
+   "scope": "fw"
+  },
+  {
+   "it": "Manca la sezione [code]",
+   "en": "Missing the [code] section",
+   "es": "Falta la seccion [code]",
+   "de": "Der Abschnitt [code] fehlt",
+   "scope": "fw"
+  },
+  {
+   "it": "Nessuna app in /apps. Si crea dalla pagina App (Programmi > App)",
+   "en": "No apps in /apps. Create one from the App page (Programs > App)",
+   "es": "Ninguna app en /apps. Se crea desde la pagina App (Programas > App)",
+   "de": "Keine Apps in /apps. Anlegen ueber die Seite App (Programs > App)",
+   "scope": "fw"
+  },
+  {
+   "it": "Nome app non valido",
+   "en": "Invalid app name",
+   "es": "Nombre de app no valido",
+   "de": "Ungueltiger App-Name",
+   "scope": "fw"
+  },
+  {
+   "it": "Nome non valido o diverso dal nome del file",
+   "en": "Invalid name or different from the file name",
+   "es": "Nombre no valido o distinto del nombre del archivo",
+   "de": "Ungueltiger Name oder anders als der Dateiname",
+   "scope": "fw"
+  },
+  {
+   "it": "Parametro non valido per questo controllo",
+   "en": "Invalid parameter for this control",
+   "es": "Parametro no valido para este control",
+   "de": "Ungueltiger Parameter fuer dieses Bedienelement",
+   "scope": "fw"
+  },
+  {
+   "it": "Permessi: %s",
+   "en": "Permissions: %s",
+   "es": "Permisos: %s",
+   "de": "Berechtigungen: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Riga %d: ",
+   "en": "Line %d: ",
+   "es": "Linea %d: ",
+   "de": "Zeile %d: ",
+   "scope": "fw"
+  },
+  {
+   "it": "Riga fuori da una sezione",
+   "en": "Line outside a section",
+   "es": "Linea fuera de una seccion",
+   "de": "Zeile ausserhalb eines Abschnitts",
+   "scope": "fw"
+  },
+  {
+   "it": "Serve chiave=valore",
+   "en": "Needs key=value",
+   "es": "Hace falta clave=valor",
+   "de": "Schluessel=Wert noetig",
+   "scope": "fw"
+  },
+  {
+   "it": "Serve id (a-z, 0-9, _ massimo 12)",
+   "en": "An id is needed (a-z, 0-9, _ at most 12)",
+   "es": "Hace falta un id (a-z, 0-9, _ maximo 12)",
+   "de": "Eine Id ist noetig (a-z, 0-9, _ hoechstens 12)",
+   "scope": "fw"
+  },
+  {
+   "it": "Sezione ripetuta",
+   "en": "Repeated section",
+   "es": "Seccion repetida",
+   "de": "Abschnitt doppelt",
+   "scope": "fw"
+  },
+  {
+   "it": "Sezione sconosciuta (ammesse: manifest, icon, page, code, data)",
+   "en": "Unknown section (allowed: manifest, icon, page, code, data)",
+   "es": "Seccion desconocida (admitidas: manifest, icon, page, code, data)",
+   "de": "Unbekannter Abschnitt (erlaubt: manifest, icon, page, code, data)",
+   "scope": "fw"
+  },
+  {
+   "it": "Testo non valido (1-24 caratteri, niente caratteri di controllo)",
+   "en": "Invalid text (1-24 characters, no control characters)",
+   "es": "Texto no valido (1-24 caracteres, sin caracteres de control)",
+   "de": "Ungueltiger Text (1-24 Zeichen, keine Steuerzeichen)",
+   "scope": "fw"
+  },
+  {
+   "it": "Troppi controlli (massimo 12)",
+   "en": "Too many controls (at most 12)",
+   "es": "Demasiados controles (maximo 12)",
+   "de": "Zu viele Bedienelemente (hoechstens 12)",
+   "scope": "fw"
+  },
+  {
+   "it": "Troppi dati (massimo 12)",
+   "en": "Too many data items (at most 12)",
+   "es": "Demasiados datos (maximo 12)",
+   "de": "Zu viele Daten (hoechstens 12)",
+   "scope": "fw"
+  },
+  {
+   "it": "Versione non valida (solo cifre e punti, massimo 10)",
+   "en": "Invalid version (digits and dots only, at most 10)",
+   "es": "Version no valida (solo cifras y puntos, maximo 10)",
+   "de": "Ungueltige Version (nur Ziffern und Punkte, hoechstens 10)",
+   "scope": "fw"
+  },
+  {
+   "it": "Come e fatto un file app",
+   "en": "How an app file is made",
+   "es": "Como es un archivo de app",
+   "de": "So ist eine App-Datei aufgebaut",
+   "scope": "web"
+  },
+  {
+   "it": "Controlli: {0}",
+   "en": "Controls: {0}",
+   "es": "Controles: {0}",
+   "de": "Bedienelemente: {0}",
+   "scope": "web"
+  },
+  {
+   "it": "L'app {0} verra eliminata.",
+   "en": "The app {0} will be deleted.",
+   "es": "La app {0} se eliminara.",
+   "de": "Die App {0} wird geloescht.",
+   "scope": "web"
+  },
+  {
+   "it": "Nessuna app. Premi Nuova app per crearne una.",
+   "en": "No apps. Press New app to create one.",
+   "es": "Ninguna app. Pulsa Nueva app para crear una.",
+   "de": "Keine Apps. Mit Neue App legst du eine an.",
+   "scope": "web"
+  },
+  {
+   "it": "Nome dell'app",
+   "en": "App name",
+   "es": "Nombre de la app",
+   "de": "Name der App",
+   "scope": "web"
+  },
+  {
+   "it": "Nuova app",
+   "en": "New app",
+   "es": "Nueva app",
+   "de": "Neue App",
+   "scope": "web"
+  },
+  {
+   "it": "Permessi: {0}",
+   "en": "Permissions: {0}",
+   "es": "Permisos: {0}",
+   "de": "Berechtigungen: {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Versione {0}",
+   "en": "Version {0}",
+   "es": "Version {0}",
+   "de": "Version {0}",
+   "scope": "web"
+  },
+  {
+   "it": "[code]",
+   "en": "[code]",
+   "es": "[code]",
+   "de": "[code]",
+   "scope": "web"
+  },
+  {
+   "it": "[data]",
+   "en": "[data]",
+   "es": "[data]",
+   "de": "[data]",
+   "scope": "web"
+  },
+  {
+   "it": "[icon]",
+   "en": "[icon]",
+   "es": "[icon]",
+   "de": "[icon]",
+   "scope": "web"
+  },
+  {
+   "it": "[manifest]",
+   "en": "[manifest]",
+   "es": "[manifest]",
+   "de": "[manifest]",
+   "scope": "web"
+  },
+  {
+   "it": "[page]",
+   "en": "[page]",
+   "es": "[page]",
+   "de": "[page]",
+   "scope": "web"
+  },
+  {
+   "it": "errore",
+   "en": "error",
+   "es": "error",
+   "de": "Fehler",
+   "scope": "web"
+  },
+  {
+   "it": "name (uguale al nome del file), title, version, author, use (permessi: led, time, temp, log, logread, act, btn, mqtt, gpio:N), who (admin oppure oper)",
+   "en": "name (same as the file name), title, version, author, use (permissions: led, time, temp, log, logread, act, btn, mqtt, gpio:N), who (admin or oper)",
+   "es": "name (igual al nombre del archivo), title, version, author, use (permisos: led, time, temp, log, logread, act, btn, mqtt, gpio:N), who (admin u oper)",
+   "de": "name (wie der Dateiname), title, version, author, use (Berechtigungen: led, time, temp, log, logread, act, btn, mqtt, gpio:N), who (admin oder oper)",
+   "scope": "web"
+  },
+  {
+   "it": "un controllo per riga: switch, slider, color, text, button, chart, con id e label",
+   "en": "one control per line: switch, slider, color, text, button, chart, with id and label",
+   "es": "un control por linea: switch, slider, color, text, button, chart, con id y label",
+   "de": "ein Bedienelement pro Zeile: switch, slider, color, text, button, chart, mit id und label",
+   "scope": "web"
+  },
+  {
+   "it": "un solo disegno svg con forme semplici, massimo 2 KB",
+   "en": "a single svg drawing with simple shapes, at most 2 KB",
+   "es": "un solo dibujo svg con formas simples, maximo 2 KB",
+   "de": "eine einzelne svg-Zeichnung mit einfachen Formen, hoechstens 2 KB",
+   "scope": "web"
+  },
+  {
+   "it": "valida",
+   "en": "valid",
+   "es": "valida",
+   "de": "gueltig",
+   "scope": "web"
+  },
+  {
+   "it": "{0} (non trovato)",
+   "en": "{0} (not found)",
+   "es": "{0} (no encontrado)",
+   "de": "{0} (nicht gefunden)",
+   "scope": "web"
+  },
+  {
+   "it": "Admin",
+   "en": "Admin",
+   "es": "Admin",
+   "de": "Admin",
+   "scope": "web"
+  },
+  {
+   "it": "Configurazione",
+   "en": "Settings",
+   "es": "Configuracion",
+   "de": "Konfiguration",
+   "scope": "web"
+  },
+  {
+   "it": "Dispositivi",
+   "en": "Devices",
+   "es": "Dispositivos",
+   "de": "Geraete",
+   "scope": "web"
+  },
+  {
+   "it": "Elenco dispositivi",
+   "en": "Device list",
+   "es": "Lista de dispositivos",
+   "de": "Geraeteliste",
+   "scope": "web"
+  },
+  {
+   "it": "Informazioni",
+   "en": "Information",
+   "es": "Informacion",
+   "de": "Informationen",
+   "scope": "web"
+  },
+  {
+   "it": "Panoramica",
+   "en": "Overview",
+   "es": "Resumen",
+   "de": "Uebersicht",
+   "scope": "web"
+  },
+  {
+   "it": "Programmi",
+   "en": "Programs",
+   "es": "Programas",
+   "de": "Programme",
+   "scope": "web"
+  },
+  {
+   "it": "Stato conformita",
+   "en": "Compliance status",
+   "es": "Estado de cumplimiento",
+   "de": "Konformitaetsstatus",
+   "scope": "web"
+  },
+  {
+   "it": "Comandi",
+   "en": "Controls",
+   "es": "Controles",
+   "de": "Steuerung",
+   "scope": "web"
+  },
+  {
+   "it": "  app [list|info|start|stop|set|out]  app salvate in /apps (.vap): elenco, controllo, avvio (una alla volta), valori",
+   "en": "  app [list|info|start|stop|set|out]  apps saved in /apps (.vap): list, check, start (one at a time), values",
+   "es": "  app [list|info|start|stop|set|out]  apps guardadas en /apps (.vap): lista, control, inicio (una a la vez), valores",
+   "de": "  app [list|info|start|stop|set|out]  Apps in /apps (.vap): Liste, Pruefung, Start (eine nach der anderen), Werte",
+   "scope": "fw"
+  },
+  {
+   "it": "App avviata: %s (app out = uscita, app stop %s = ferma)",
+   "en": "App started: %s (app out = output, app stop %s = stop)",
+   "es": "App iniciada: %s (app out = salida, app stop %s = parar)",
+   "de": "App gestartet: %s (app out = Ausgabe, app stop %s = stoppen)",
+   "scope": "fw"
+  },
+  {
+   "it": "App fermata",
+   "en": "App stopped",
+   "es": "App detenida",
+   "de": "App gestoppt",
+   "scope": "fw"
+  },
+  {
+   "it": "App gia in esecuzione",
+   "en": "App already running",
+   "es": "La app ya esta en ejecucion",
+   "de": "App laeuft bereits",
+   "scope": "fw"
+  },
+  {
+   "it": "App occupata, riprova",
+   "en": "App busy, try again",
+   "es": "App ocupada, vuelve a intentarlo",
+   "de": "App beschaeftigt, bitte erneut versuchen",
+   "scope": "fw"
+  },
+  {
+   "it": "Controllo non valido",
+   "en": "Invalid control",
+   "es": "Control no valido",
+   "de": "Ungueltiges Steuerelement",
+   "scope": "fw"
+  },
+  {
+   "it": "File valido. Si avvia con: app start <nome>",
+   "en": "Valid file. Start it with: app start <name>",
+   "es": "Archivo valido. Se inicia con: app start <nombre>",
+   "de": "Gueltige Datei. Start mit: app start <Name>",
+   "scope": "fw"
+  },
+  {
+   "it": "L'app non e in esecuzione",
+   "en": "The app is not running",
+   "es": "La app no esta en ejecucion",
+   "de": "Die App laeuft nicht",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: app list | app info <nome> | app start <nome> | app stop <nome> | app set <nome> <id> <valore> | app out",
+   "en": "Usage: app list | app info <name> | app start <name> | app stop <name> | app set <name> <id> <value> | app out",
+   "es": "Uso: app list | app info <nombre> | app start <nombre> | app stop <nombre> | app set <nombre> <id> <valor> | app out",
+   "de": "Verwendung: app list | app info <Name> | app start <Name> | app stop <Name> | app set <Name> <id> <Wert> | app out",
+   "scope": "fw"
+  },
+  {
+   "it": "Valore fuori limite",
+   "en": "Value out of range",
+   "es": "Valor fuera de limites",
+   "de": "Wert ausserhalb der Grenzen",
+   "scope": "fw"
+  },
+  {
+   "it": "App avviata",
+   "en": "App started",
+   "es": "App iniciada",
+   "de": "App gestartet",
+   "scope": "web"
+  },
+  {
+   "it": "Apri {0}",
+   "en": "Open {0}",
+   "es": "Abrir {0}",
+   "de": "{0} oeffnen",
+   "scope": "web"
+  },
+  {
+   "it": "Avvia un'app",
+   "en": "Start an app",
+   "es": "Iniciar una app",
+   "de": "App starten",
+   "scope": "web"
+  },
+  {
+   "it": "Ferma l'app",
+   "en": "Stop the app",
+   "es": "Detener la app",
+   "de": "App stoppen",
+   "scope": "web"
+  },
+  {
+   "it": "Nessuna app disponibile per il tuo ruolo.",
+   "en": "No apps available for your role.",
+   "es": "No hay apps disponibles para tu rol.",
+   "de": "Keine Apps fuer deine Rolle verfuegbar.",
+   "scope": "web"
+  },
+  {
+   "it": "Programmi con una pagina propria, salvati come file .vap nella cartella /apps. Un file solo contiene manifest, icona, pagina, codice e dati. Si apre un'app, si avvia e si comanda dai suoi controlli. Una sola app alla volta (e nessuno script mentre gira).",
+   "en": "Programs with a page of their own, saved as .vap files in the /apps folder. One file holds manifest, icon, page, code and data. You open an app, start it and drive it from its controls. One app at a time (and no script while it runs).",
+   "es": "Programas con una pagina propia, guardados como archivos .vap en la carpeta /apps. Un solo archivo contiene manifiesto, icono, pagina, codigo y datos. Se abre una app, se inicia y se maneja con sus controles. Una sola app a la vez (y ningun script mientras funciona).",
+   "de": "Programme mit eigener Seite, als .vap-Dateien im Ordner /apps gespeichert. Eine Datei enthaelt Manifest, Symbol, Seite, Code und Daten. Man oeffnet eine App, startet sie und steuert sie mit ihren Bedienelementen. Immer nur eine App (und kein Skript, solange sie laeuft).",
+   "scope": "web"
+  },
+  {
+   "it": "Questa app non ha controlli: lavora da sola.",
+   "en": "This app has no controls: it works on its own.",
+   "es": "Esta app no tiene controles: trabaja sola.",
+   "de": "Diese App hat keine Bedienelemente: sie arbeitet allein.",
+   "scope": "web"
+  },
+  {
+   "it": "avvia l'app {0}",
+   "en": "start the app {0}",
+   "es": "iniciar la app {0}",
+   "de": "App {0} starten",
+   "scope": "web"
+  },
+  {
+   "it": "codice Berry, massimo 8 KB. Funzioni: on_set(id, valore) quando tocchi un controllo, on_tick() ogni secondo, dev_get(id), dev_set(id, valore); e led, act, log, time, temp, btn, logtail, mqtt se il manifest le permette (use)",
+   "en": "Berry code, max 8 KB. Functions: on_set(id, value) when you touch a control, on_tick() every second, dev_get(id), dev_set(id, value); plus led, act, log, time, temp, btn, logtail, mqtt if the manifest allows them (use)",
+   "es": "codigo Berry, maximo 8 KB. Funciones: on_set(id, valor) al tocar un control, on_tick() cada segundo, dev_get(id), dev_set(id, valor); y led, act, log, time, temp, btn, logtail, mqtt si el manifiesto lo permite (use)",
+   "de": "Berry-Code, maximal 8 KB. Funktionen: on_set(id, Wert) beim Beruehren eines Bedienelements, on_tick() jede Sekunde, dev_get(id), dev_set(id, Wert); dazu led, act, log, time, temp, btn, logtail, mqtt, wenn das Manifest sie erlaubt (use)",
+   "scope": "web"
+  },
+  {
+   "it": "ferma",
+   "en": "stopped",
+   "es": "detenida",
+   "de": "gestoppt",
+   "scope": "web"
+  },
+  {
+   "it": "ferma l'app",
+   "en": "stop the app",
+   "es": "detener la app",
+   "de": "App stoppen",
+   "scope": "web"
+  },
+  {
+   "it": "in esecuzione",
+   "en": "running",
+   "es": "en ejecucion",
+   "de": "laeuft",
+   "scope": "web"
+  },
+  {
+   "it": "nome dell'app",
+   "en": "app name",
+   "es": "nombre de la app",
+   "de": "App-Name",
+   "scope": "web"
+  },
+  {
+   "it": "valori iniziali: chiave=valore (se la chiave e un controllo ne e il valore di partenza)",
+   "en": "initial values: key=value (if the key is a control, it is its starting value)",
+   "es": "valores iniciales: clave=valor (si la clave es un control, es su valor de partida)",
+   "de": "Anfangswerte: Schluessel=Wert (ist der Schluessel ein Bedienelement, ist es dessen Startwert)",
+   "scope": "web"
+  },
+  {
+   "it": "Aspetto che la scheda riparta nel recovery: la pagina si apre da sola.",
+   "en": "Waiting for the board to restart in recovery: the page opens by itself.",
+   "es": "Espero a que la placa reinicie en recovery: la pagina se abre sola.",
+   "de": "Ich warte, bis das Board im Recovery neu startet: die Seite öffnet sich von selbst.",
+   "scope": "web"
+  },
+  {
+   "it": "Apri ora",
+   "en": "Open now",
+   "es": "Abrir ahora",
+   "de": "Jetzt öffnen",
+   "scope": "web"
+  },
+  {
+   "it": "Apri il recovery",
+   "en": "Open recovery",
+   "es": "Abrir el recovery",
+   "de": "Recovery öffnen",
+   "scope": "web"
+  },
+  {
+   "it": "Non riesco ad aprirla da sola.",
+   "en": "I cannot open it by myself.",
+   "es": "No puedo abrirla sola.",
+   "de": "Ich kann sie nicht selbst öffnen.",
+   "scope": "web"
+  },
+  {
+   "it": "  io [list|add <classe> <pin> [nome]|del|rename|set|get]  periferiche a classi (rele, led, pin, ingresso, analogico, i2c)",
+   "en": "  io [list|add <class> <pin> [name]|del|rename|set|get]  device classes (relay, led, pin, input, analog, i2c)",
+   "es": "  io [list|add <clase> <pin> [nombre]|del|rename|set|get]  clases de dispositivos (rele, led, pin, entrada, analogico, i2c)",
+   "de": "  io [list|add <Klasse> <Pin> [Name]|del|rename|set|get]  Geraeteklassen (Relais, LED, Pin, Eingang, analog, i2c)",
+   "scope": "fw"
+  },
+  {
+   "it": "Analogico: solo i pin 1-10 (gli altri disturbano il Wi-Fi)",
+   "en": "Analog: only pins 1-10 (the others interfere with Wi-Fi)",
+   "es": "Analogico: solo los pines 1-10 (los demas molestan al Wi-Fi)",
+   "de": "Analog: nur die Pins 1-10 (die anderen stoeren das WLAN)",
+   "scope": "fw"
+  },
+  {
+   "it": "Classe non valida (rele, led, pin, ingresso, analogico, i2c)",
+   "en": "Invalid class (rele, led, pin, ingresso, analogico, i2c)",
+   "es": "Clase no valida (rele, led, pin, ingresso, analogico, i2c)",
+   "de": "Ungueltige Klasse (rele, led, pin, ingresso, analogico, i2c)",
+   "scope": "fw"
+  },
+  {
+   "it": "Creata: %s",
+   "en": "Created: %s",
+   "es": "Creada: %s",
+   "de": "Erstellt: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Il rele lo comanda solo l'Amministratore",
+   "en": "Only the Administrator can switch the relay",
+   "es": "El rele solo lo controla el Administrador",
+   "de": "Das Relais schaltet nur der Administrator",
+   "scope": "fw"
+  },
+  {
+   "it": "Nessuna periferica. Aggiungi: io add <classe> <pin> [nome] [inv|up|down]",
+   "en": "No devices. Add one: io add <class> <pin> [name] [inv|up|down]",
+   "es": "Ningun dispositivo. Anade: io add <clase> <pin> [nombre] [inv|up|down]",
+   "de": "Keine Geraete. Hinzufuegen: io add <Klasse> <Pin> [Name] [inv|up|down]",
+   "scope": "fw"
+  },
+  {
+   "it": "Nome riservato: scegline un altro",
+   "en": "Reserved name: choose another",
+   "es": "Nombre reservado: elige otro",
+   "de": "Reservierter Name: waehle einen anderen",
+   "scope": "fw"
+  },
+  {
+   "it": "Nome: da 2 a 11 caratteri",
+   "en": "Name: 2 to 11 characters",
+   "es": "Nombre: de 2 a 11 caracteres",
+   "de": "Name: 2 bis 11 Zeichen",
+   "scope": "fw"
+  },
+  {
+   "it": "Nome: solo lettere minuscole senza accento e numeri, e deve iniziare con una lettera",
+   "en": "Name: lowercase letters without accents and digits only, and it must start with a letter",
+   "es": "Nombre: solo letras minusculas sin acento y numeros, y debe empezar por una letra",
+   "de": "Name: nur Kleinbuchstaben ohne Akzent und Ziffern, und er muss mit einem Buchstaben beginnen",
+   "scope": "fw"
+  },
+  {
+   "it": "Periferiche",
+   "en": "Devices",
+   "es": "Dispositivos",
+   "de": "Geraete",
+   "scope": "fw"
+  },
+  {
+   "it": "Permesso non ammesso (led, time, temp, log, logread, act, btn, mqtt, gpio:N o il nome di una periferica come rele1)",
+   "en": "Permission not allowed (led, time, temp, log, logread, act, btn, mqtt, gpio:N or the name of a device such as rele1)",
+   "es": "Permiso no admitido (led, time, temp, log, logread, act, btn, mqtt, gpio:N o el nombre de un dispositivo como rele1)",
+   "de": "Berechtigung nicht erlaubt (led, time, temp, log, logread, act, btn, mqtt, gpio:N oder der Name eines Geraets wie rele1)",
+   "scope": "fw"
+  },
+  {
+   "it": "Questa periferica non e un'uscita",
+   "en": "This device is not an output",
+   "es": "Este dispositivo no es una salida",
+   "de": "Dieses Geraet ist kein Ausgang",
+   "scope": "fw"
+  },
+  {
+   "it": "Troppe periferiche (massimo 16)",
+   "en": "Too many devices (maximum 16)",
+   "es": "Demasiados dispositivos (maximo 16)",
+   "de": "Zu viele Geraete (maximal 16)",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: io [list|add <classe> <pin> [nome] [inv|up|down|scl=N addr=0x76]|del <nome>|rename <nome> <nuovo>|set <nome> <0|1>|get <nome>]",
+   "en": "Usage: io [list|add <class> <pin> [name] [inv|up|down|scl=N addr=0x76]|del <name>|rename <name> <new>|set <name> <0|1>|get <name>]",
+   "es": "Uso: io [list|add <clase> <pin> [nombre] [inv|up|down|scl=N addr=0x76]|del <nombre>|rename <nombre> <nuevo>|set <nombre> <0|1>|get <nombre>]",
+   "de": "Aufruf: io [list|add <Klasse> <Pin> [Name] [inv|up|down|scl=N addr=0x76]|del <Name>|rename <Name> <neu>|set <Name> <0|1>|get <Name>]",
+   "scope": "fw"
+  },
+  {
+   "it": "periferica %s creata (%s)",
+   "en": "device %s created (%s)",
+   "es": "dispositivo %s creado (%s)",
+   "de": "Geraet %s erstellt (%s)",
+   "scope": "fw"
+  },
+  {
+   "it": "periferica %s tolta (%s)",
+   "en": "device %s removed (%s)",
+   "es": "dispositivo %s eliminado (%s)",
+   "de": "Geraet %s entfernt (%s)",
+   "scope": "fw"
+  },
+  {
+   "it": "Analogico (pin 1-10)",
+   "en": "Analog (pins 1-10)",
+   "es": "Analogico (pines 1-10)",
+   "de": "Analog (Pins 1-10)",
+   "scope": "web"
+  },
+  {
+   "it": "Attivo basso (acceso = livello 0)",
+   "en": "Active low (on = level 0)",
+   "es": "Activo bajo (encendido = nivel 0)",
+   "de": "Aktiv niedrig (an = Pegel 0)",
+   "scope": "web"
+  },
+  {
+   "it": "Classe",
+   "en": "Class",
+   "es": "Clase",
+   "de": "Klasse",
+   "scope": "web"
+  },
+  {
+   "it": "Il pin viene controllato: non si possono usare USB, tasto BOOT, LED della scheda, pin di avvio o pin gia usati. Massimo 16 periferiche. Un rele collegato alla rete elettrica richiede un modulo a norma e un installatore: VesevOS comanda solo il segnale.",
+   "en": "The pin is checked: USB, the BOOT button, the board LED, boot pins and pins already in use cannot be used. Maximum 16 devices. A relay connected to mains power needs a certified module and an installer: VesevOS only drives the signal.",
+   "es": "El pin se comprueba: no se pueden usar USB, el boton BOOT, el LED de la placa, los pines de arranque ni los pines ya usados. Maximo 16 dispositivos. Un rele conectado a la red electrica necesita un modulo homologado y un instalador: VesevOS solo controla la senal.",
+   "de": "Der Pin wird geprüft: USB, die BOOT-Taste, die Board-LED, Boot-Pins und bereits belegte Pins sind nicht erlaubt. Höchstens 16 Geräte. Ein Relais am Stromnetz braucht ein zugelassenes Modul und einen Installateur: VesevOS steuert nur das Signal.",
+   "scope": "web"
+  },
+  {
+   "it": "Ingresso",
+   "en": "Input",
+   "es": "Entrada",
+   "de": "Eingang",
+   "scope": "web"
+  },
+  {
+   "it": "Ingresso con pull-down",
+   "en": "Input with pull-down",
+   "es": "Entrada con pull-down",
+   "de": "Eingang mit Pull-down",
+   "scope": "web"
+  },
+  {
+   "it": "Ingresso con pull-up",
+   "en": "Input with pull-up",
+   "es": "Entrada con pull-up",
+   "de": "Eingang mit Pull-up",
+   "scope": "web"
+  },
+  {
+   "it": "Nome (facoltativo)",
+   "en": "Name (optional)",
+   "es": "Nombre (opcional)",
+   "de": "Name (optional)",
+   "scope": "web"
+  },
+  {
+   "it": "Pin (uscita)",
+   "en": "Pin (output)",
+   "es": "Pin (salida)",
+   "de": "Pin (Ausgang)",
+   "scope": "web"
+  },
+  {
+   "it": "Rele",
+   "en": "Relay",
+   "es": "Rele",
+   "de": "Relais",
+   "scope": "web"
+  },
+  {
+   "it": "Togli",
+   "en": "Remove",
+   "es": "Quitar",
+   "de": "Entfernen",
+   "scope": "web"
+  },
+  {
+   "it": "Togliere la periferica?",
+   "en": "Remove the device?",
+   "es": "¿Quitar el dispositivo?",
+   "de": "Gerät entfernen?",
+   "scope": "web"
+  },
+  {
+   "it": "Valore",
+   "en": "Value",
+   "es": "Valor",
+   "de": "Wert",
+   "scope": "web"
+  },
+  {
+   "it": "attivo basso",
+   "en": "active low",
+   "es": "activo bajo",
+   "de": "aktiv niedrig",
+   "scope": "web"
+  },
+  {
+   "it": "  mod [list|info|install|del]  schede modulo .vdp (rele, sensori...) da installare sui pin",
+   "en": "  mod [list|info|install|del]  module cards .vdp (relay, sensors...) to install on pins",
+   "es": "  mod [list|info|install|del]  fichas de modulo .vdp (rele, sensores...) para instalar en los pines",
+   "de": "  mod [list|info|install|del]  Modulkarten .vdp (Relais, Sensoren...) zum Installieren auf Pins",
+   "scope": "fw"
+  },
+  {
+   "it": "Alimentazione",
+   "en": "Power supply",
+   "es": "Alimentacion",
+   "de": "Spannungsversorgung",
+   "scope": "fw"
+  },
+  {
+   "it": "Avviso non valido (1-80 caratteri)",
+   "en": "Invalid warning (1-80 characters)",
+   "es": "Aviso no valido (1-80 caracteres)",
+   "de": "Ungueltige Warnung (1-80 Zeichen)",
+   "scope": "fw"
+  },
+  {
+   "it": "Chiave sconosciuta",
+   "en": "Unknown key",
+   "es": "Clave desconocida",
+   "de": "Unbekannter Schluessel",
+   "scope": "fw"
+  },
+  {
+   "it": "File troppo grande (massimo 8 KB)",
+   "en": "File too large (maximum 8 KB)",
+   "es": "Archivo demasiado grande (maximo 8 KB)",
+   "de": "Datei zu gross (hoechstens 8 KB)",
+   "scope": "fw"
+  },
+  {
+   "it": "Il rele non si fa lampeggiare",
+   "en": "The relay cannot be blinked",
+   "es": "El rele no se hace parpadear",
+   "de": "Das Relais wird nicht zum Blinken gebracht",
+   "scope": "fw"
+  },
+  {
+   "it": "Manca [module] con name=",
+   "en": "Missing [module] with name=",
+   "es": "Falta [module] con name=",
+   "de": "[module] mit name= fehlt",
+   "scope": "fw"
+  },
+  {
+   "it": "Manca class=",
+   "en": "Missing class=",
+   "es": "Falta class=",
+   "de": "class= fehlt",
+   "scope": "fw"
+  },
+  {
+   "it": "Manca la sezione [signals] con almeno un segnale",
+   "en": "Missing [signals] section with at least one signal",
+   "es": "Falta la seccion [signals] con al menos una senal",
+   "de": "Abschnitt [signals] mit mindestens einem Signal fehlt",
+   "scope": "fw"
+  },
+  {
+   "it": "Nessuna scheda modulo in /devs. Si caricano dalla pagina Periferiche",
+   "en": "No module cards in /devs. Upload them from the Devices page",
+   "es": "Ninguna ficha de modulo en /devs. Se cargan desde la pagina Dispositivos",
+   "de": "Keine Modulkarten in /devs. Sie werden auf der Seite Geraete hochgeladen",
+   "scope": "fw"
+  },
+  {
+   "it": "Non ci sono abbastanza pin liberi per questo modulo",
+   "en": "Not enough free pins for this module",
+   "es": "No hay suficientes pines libres para este modulo",
+   "de": "Nicht genug freie Pins fuer dieses Modul",
+   "scope": "fw"
+  },
+  {
+   "it": "Schede modulo in /devs: %d",
+   "en": "Module cards in /devs: %d",
+   "es": "Fichas de modulo en /devs: %d",
+   "de": "Modulkarten in /devs: %d",
+   "scope": "fw"
+  },
+  {
+   "it": "Schema non ammesso (un solo svg con forme semplici, massimo 4 KB)",
+   "en": "Diagram not allowed (a single svg with simple shapes, maximum 4 KB)",
+   "es": "Esquema no admitido (un solo svg con formas simples, maximo 4 KB)",
+   "de": "Schema nicht erlaubt (ein einziges svg mit einfachen Formen, hoechstens 4 KB)",
+   "scope": "fw"
+  },
+  {
+   "it": "Segnale non valido (1-8 caratteri: lettere, numeri, _)",
+   "en": "Invalid signal (1-8 characters: letters, digits, _)",
+   "es": "Senal no valida (1-8 caracteres: letras, numeros, _)",
+   "de": "Ungueltiges Signal (1-8 Zeichen: Buchstaben, Ziffern, _)",
+   "scope": "fw"
+  },
+  {
+   "it": "Segnale ripetuto",
+   "en": "Repeated signal",
+   "es": "Senal repetida",
+   "de": "Signal doppelt",
+   "scope": "fw"
+  },
+  {
+   "it": "Sezione sconosciuta (ammesse: module, signals, icon, wiring, pins)",
+   "en": "Unknown section (allowed: module, signals, icon, wiring, pins)",
+   "es": "Seccion desconocida (admitidas: module, signals, icon, wiring, pins)",
+   "de": "Unbekannter Abschnitt (erlaubt: module, signals, icon, wiring, pins)",
+   "scope": "fw"
+  },
+  {
+   "it": "Testo non valido (1-32 caratteri, niente caratteri di controllo)",
+   "en": "Invalid text (1-32 characters, no control characters)",
+   "es": "Texto no valido (1-32 caracteres, sin caracteres de control)",
+   "de": "Ungueltiger Text (1-32 Zeichen, keine Steuerzeichen)",
+   "scope": "fw"
+  },
+  {
+   "it": "Troppi segnali (massimo 8)",
+   "en": "Too many signals (maximum 8)",
+   "es": "Demasiadas senales (maximo 8)",
+   "de": "Zu viele Signale (hoechstens 8)",
+   "scope": "fw"
+  },
+  {
+   "it": "Troppo presto: il rele si riaccende al massimo una volta al secondo",
+   "en": "Too soon: the relay switches on again at most once per second",
+   "es": "Demasiado pronto: el rele se vuelve a encender como maximo una vez por segundo",
+   "de": "Zu frueh: das Relais schaltet hoechstens einmal pro Sekunde wieder ein",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: mod [list|info <nome>|install <nome> [prefisso]|del <nome>]",
+   "en": "Usage: mod [list|info <name>|install <name> [prefix]|del <name>]",
+   "es": "Uso: mod [list|info <nombre>|install <nombre> [prefijo]|del <nombre>]",
+   "de": "Aufruf: mod [list|info <Name>|install <Name> [Praefix]|del <Name>]",
+   "scope": "fw"
+  },
+  {
+   "it": "active: low oppure high",
+   "en": "active: low or high",
+   "es": "active: low o high",
+   "de": "active: low oder high",
+   "scope": "fw"
+  },
+  {
+   "it": "active=low non vale per la classe analogico",
+   "en": "active=low does not apply to the analog class",
+   "es": "active=low no vale para la clase analogico",
+   "de": "active=low gilt nicht fuer die Klasse analogico",
+   "scope": "fw"
+  },
+  {
+   "it": "power: 3V3, 5V, 12V, 24V, 230V oppure none",
+   "en": "power: 3V3, 5V, 12V, 24V, 230V or none",
+   "es": "power: 3V3, 5V, 12V, 24V, 230V o none",
+   "de": "power: 3V3, 5V, 12V, 24V, 230V oder none",
+   "scope": "fw"
+  },
+  {
+   "it": "pull vale solo per la classe ingresso",
+   "en": "pull applies only to the ingresso (input) class",
+   "es": "pull vale solo para la clase ingresso (entrada)",
+   "de": "pull gilt nur fuer die Klasse ingresso (Eingang)",
+   "scope": "fw"
+  },
+  {
+   "it": "pull: none, up oppure down",
+   "en": "pull: none, up or down",
+   "es": "pull: none, up o down",
+   "de": "pull: none, up oder down",
+   "scope": "fw"
+  },
+  {
+   "it": "scheda modulo %s installata (%s)",
+   "en": "module card %s installed (%s)",
+   "es": "ficha de modulo %s instalada (%s)",
+   "de": "Modulkarte %s installiert (%s)",
+   "scope": "fw"
+  },
+  {
+   "it": "Accendi",
+   "en": "Switch on",
+   "es": "Encender",
+   "de": "Einschalten",
+   "scope": "web"
+  },
+  {
+   "it": "Aggiungi una periferica a mano",
+   "en": "Add a device by hand",
+   "es": "Anadir un dispositivo a mano",
+   "de": "Geraet von Hand hinzufügen",
+   "scope": "web"
+  },
+  {
+   "it": "Carica scheda modulo",
+   "en": "Upload module card",
+   "es": "Cargar ficha de modulo",
+   "de": "Modulkarte hochladen",
+   "scope": "web"
+  },
+  {
+   "it": "Gestisci",
+   "en": "Manage",
+   "es": "Gestionar",
+   "de": "Verwalten",
+   "scope": "web"
+  },
+  {
+   "it": "Il rele lo prova solo l'Amministratore.",
+   "en": "Only the Administrator can test the relay.",
+   "es": "El rele solo lo prueba el Administrador.",
+   "de": "Das Relais testet nur der Administrator.",
+   "scope": "web"
+  },
+  {
+   "it": "Il rele si riaccende al massimo una volta al secondo e non lampeggia: si consuma. Spegnere si puo sempre.",
+   "en": "The relay switches on again at most once per second and does not blink: it wears out. Switching off is always possible.",
+   "es": "El rele se vuelve a encender como maximo una vez por segundo y no parpadea: se desgasta. Apagar siempre se puede.",
+   "de": "Das Relais schaltet höchstens einmal pro Sekunde wieder ein und blinkt nicht: es nutzt sich ab. Ausschalten geht immer.",
+   "scope": "web"
+  },
+  {
+   "it": "Il valore va da 0 a 4095 e si aggiorna da solo.",
+   "en": "The value goes from 0 to 4095 and updates by itself.",
+   "es": "El valor va de 0 a 4095 y se actualiza solo.",
+   "de": "Der Wert reicht von 0 bis 4095 und aktualisiert sich selbst.",
+   "scope": "web"
+  },
+  {
+   "it": "Impulso di 1 secondo",
+   "en": "1-second pulse",
+   "es": "Pulso de 1 segundo",
+   "de": "1-Sekunden-Impuls",
+   "scope": "web"
+  },
+  {
+   "it": "Installa",
+   "en": "Install",
+   "es": "Instalar",
+   "de": "Installieren",
+   "scope": "web"
+  },
+  {
+   "it": "L'impulso e il lampeggio si spengono da soli.",
+   "en": "The pulse and the blinking switch off by themselves.",
+   "es": "El pulso y el parpadeo se apagan solos.",
+   "de": "Impuls und Blinken schalten sich von selbst aus.",
+   "scope": "web"
+  },
+  {
+   "it": "La scheda modulo {0} verra eliminata. Le periferiche gia create restano.",
+   "en": "The module card {0} will be deleted. Devices already created stay.",
+   "es": "La ficha de modulo {0} se eliminara. Los dispositivos ya creados se quedan.",
+   "de": "Die Modulkarte {0} wird gelöscht. Bereits erstellte Geräte bleiben.",
+   "scope": "web"
+  },
+  {
+   "it": "Lampeggia per 5 secondi",
+   "en": "Blink for 5 seconds",
+   "es": "Parpadear 5 segundos",
+   "de": "5 Sekunden blinken",
+   "scope": "web"
+  },
+  {
+   "it": "Livello",
+   "en": "Level",
+   "es": "Nivel",
+   "de": "Pegel",
+   "scope": "web"
+  },
+  {
+   "it": "Nelle app: use={0} e poi dev_set(\"{0}\", 1) o dev_get(\"{0}\").",
+   "en": "In apps: use={0} and then dev_set(\"{0}\", 1) or dev_get(\"{0}\").",
+   "es": "En las apps: use={0} y luego dev_set(\"{0}\", 1) o dev_get(\"{0}\").",
+   "de": "In Apps: use={0} und dann dev_set(\"{0}\", 1) oder dev_get(\"{0}\").",
+   "scope": "web"
+  },
+  {
+   "it": "Nessuna scheda modulo. Caricane una con il pulsante qui sotto.",
+   "en": "No module cards. Upload one with the button below.",
+   "es": "Ninguna ficha de modulo. Carga una con el boton de abajo.",
+   "de": "Keine Modulkarten. Lade eine mit der Schaltfläche unten hoch.",
+   "scope": "web"
+  },
+  {
+   "it": "Premi il pulsante o attiva il sensore: il valore qui sotto cambia da solo.",
+   "en": "Press the button or trigger the sensor: the value below changes by itself.",
+   "es": "Pulsa el boton o activa el sensor: el valor de abajo cambia solo.",
+   "de": "Drücke den Taster oder löse den Sensor aus: der Wert unten ändert sich von selbst.",
+   "scope": "web"
+  },
+  {
+   "it": "Prova",
+   "en": "Test",
+   "es": "Prueba",
+   "de": "Test",
+   "scope": "web"
+  },
+  {
+   "it": "Rele, LED, pin e ingressi con un nome (rele1, led1...). Tocca una periferica per gestirla e provarla. Le app li usano scrivendo il nome in use= e poi dev_set(\"rele1\", 1) o dev_get(\"in1\"). Dopo ogni riavvio le uscite sono spente.",
+   "en": "Relays, LEDs, pins and inputs with a name (rele1, led1...). Tap a device to manage and test it. Apps use them by writing the name in use= and then dev_set(\"rele1\", 1) or dev_get(\"in1\"). After every restart the outputs are off.",
+   "es": "Reles, LED, pines y entradas con un nombre (rele1, led1...). Toca un dispositivo para gestionarlo y probarlo. Las apps los usan escribiendo el nombre en use= y luego dev_set(\"rele1\", 1) o dev_get(\"in1\"). Tras cada reinicio las salidas estan apagadas.",
+   "de": "Relais, LEDs, Pins und Eingänge mit einem Namen (rele1, led1...). Tippe auf ein Gerät, um es zu verwalten und zu testen. Apps nutzen sie, indem sie den Namen in use= schreiben und dann dev_set(\"rele1\", 1) oder dev_get(\"in1\") aufrufen. Nach jedem Neustart sind die Ausgänge aus.",
+   "scope": "web"
+  },
+  {
+   "it": "Resistenza",
+   "en": "Resistor",
+   "es": "Resistencia",
+   "de": "Widerstand",
+   "scope": "web"
+  },
+  {
+   "it": "Rete elettrica 230 V: serve un modulo a norma e un installatore. VesevOS comanda solo il segnale.",
+   "en": "Mains 230 V: a certified module and an installer are needed. VesevOS only drives the signal.",
+   "es": "Red electrica 230 V: hace falta un modulo homologado y un instalador. VesevOS solo controla la senal.",
+   "de": "Netzspannung 230 V: Es braucht ein zugelassenes Modul und einen Installateur. VesevOS steuert nur das Signal.",
+   "scope": "web"
+  },
+  {
+   "it": "Scheda caricata",
+   "en": "Card uploaded",
+   "es": "Ficha cargada",
+   "de": "Karte hochgeladen",
+   "scope": "web"
+  },
+  {
+   "it": "Schede modulo",
+   "en": "Module cards",
+   "es": "Fichas de modulo",
+   "de": "Modulkarten",
+   "scope": "web"
+  },
+  {
+   "it": "Schema del modulo {0}",
+   "en": "Wiring diagram of module {0}",
+   "es": "Esquema del modulo {0}",
+   "de": "Schaltplan des Moduls {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Una scheda modulo (.vdp) descrive un modulo gia pronto, con icona e schema dei collegamenti. Scegline una: la scheda propone i pin liberi e crea le periferiche. Sono solo dati, senza codice.",
+   "en": "A module card (.vdp) describes a ready-made module, with an icon and a wiring diagram. Pick one: the board suggests free pins and creates the devices. They are data only, no code.",
+   "es": "Una ficha de modulo (.vdp) describe un modulo ya hecho, con icono y esquema de conexiones. Elige una: la placa propone los pines libres y crea los dispositivos. Son solo datos, sin codigo.",
+   "de": "Eine Modulkarte (.vdp) beschreibt ein fertiges Modul mit Symbol und Schaltplan. Wähle eine: Das Board schlägt freie Pins vor und erstellt die Geräte. Es sind nur Daten, kein Code.",
+   "scope": "web"
+  },
+  {
+   "it": "attivo alto",
+   "en": "active high",
+   "es": "activo alto",
+   "de": "aktiv hoch",
+   "scope": "web"
+  },
+  {
+   "it": "senza alimentazione",
+   "en": "no power supply",
+   "es": "sin alimentacion",
+   "de": "ohne Versorgung",
+   "scope": "web"
+  },
+  {
+   "it": "nessuna",
+   "en": "none",
+   "es": "ninguna",
+   "de": "keine",
+   "scope": "web"
+  },
+  {
+   "it": "Classe del modulo",
+   "en": "Module class",
+   "es": "Clase del modulo",
+   "de": "Klasse des Moduls",
+   "scope": "fw"
+  },
+  {
+   "it": "Avviso del modulo",
+   "en": "Module warning",
+   "es": "Aviso del modulo",
+   "de": "Warnung des Moduls",
+   "scope": "fw"
+  },
+  {
+   "it": "La pagina non riesce piu a parlare con la scheda: puo essere spenta, riavviata o fuori dalla rete. Controlla l'alimentazione e il Wi-Fi, poi premi Aggiorna.",
+   "en": "The page can no longer talk to the board: it may be off, restarting or out of the network. Check the power and the Wi-Fi, then press Refresh.",
+   "es": "La pagina ya no puede hablar con la placa: puede estar apagada, reiniciando o fuera de la red. Revisa la alimentacion y el Wi-Fi, luego pulsa Actualizar.",
+   "de": "Die Seite kann nicht mehr mit dem Board sprechen: Es kann ausgeschaltet sein, neu starten oder außerhalb des Netzwerks sein. Prüfe Strom und WLAN und drücke dann Aktualisieren.",
+   "scope": "web"
+  },
+  {
+   "it": "La scheda risponde di nuovo: premi Aggiorna per ricaricare la pagina.",
+   "en": "The board answers again: press Refresh to reload the page.",
+   "es": "La placa responde de nuevo: pulsa Actualizar para recargar la pagina.",
+   "de": "Das Board antwortet wieder: Drücke Aktualisieren, um die Seite neu zu laden.",
+   "scope": "web"
+  },
+  {
+   "it": "Scheda di nuovo raggiungibile",
+   "en": "Board reachable again",
+   "es": "Placa de nuevo accesible",
+   "de": "Board wieder erreichbar",
+   "scope": "web"
+  },
+  {
+   "it": "Scheda non raggiungibile",
+   "en": "Board not reachable",
+   "es": "Placa no accesible",
+   "de": "Board nicht erreichbar",
+   "scope": "web"
+  },
+  {
+   "it": "Il WPS non parte (radio spenta o gia in uso)",
+   "en": "WPS does not start (radio off or already in use)",
+   "es": "El WPS no arranca (radio apagada o ya en uso)",
+   "de": "WPS startet nicht (Funk aus oder schon in Benutzung)",
+   "scope": "fw"
+  },
+  {
+   "it": "Il WPS parte solo con il Wi-Fi in funzione (non in modo aereo, non durante un collegamento)",
+   "en": "WPS only starts with Wi-Fi working (not in airplane mode, not while connecting)",
+   "es": "El WPS solo arranca con el Wi-Fi en marcha (no en modo avion, no mientras se conecta)",
+   "de": "WPS startet nur bei laufendem WLAN (nicht im Flugmodus, nicht waehrend der Verbindung)",
+   "scope": "fw"
+  },
+  {
+   "it": "Il metodo PIN non e consentito: attivalo nelle impostazioni WPS",
+   "en": "The PIN method is not allowed: turn it on in the WPS settings",
+   "es": "El metodo PIN no esta permitido: activalo en los ajustes del WPS",
+   "de": "Die PIN-Methode ist nicht erlaubt: schalte sie in den WPS-Einstellungen ein",
+   "scope": "fw"
+  },
+  {
+   "it": "Il router non ha accettato (due router in WPS insieme? riprova)",
+   "en": "The router did not accept (two routers in WPS at once? try again)",
+   "es": "El router no acepto (dos routers en WPS a la vez? vuelve a probar)",
+   "de": "Der Router hat nicht akzeptiert (zwei Router gleichzeitig im WPS? versuche es erneut)",
+   "scope": "fw"
+  },
+  {
+   "it": "Il router non ha mandato dati validi",
+   "en": "The router did not send valid data",
+   "es": "El router no envio datos validos",
+   "de": "Der Router hat keine gueltigen Daten gesendet",
+   "scope": "fw"
+  },
+  {
+   "it": "In corso (%s): premi il tasto WPS del router.",
+   "en": "Running (%s): press the WPS button on the router.",
+   "es": "En curso (%s): pulsa el boton WPS del router.",
+   "de": "Laeuft (%s): druecke die WPS-Taste am Router.",
+   "scope": "fw"
+  },
+  {
+   "it": "La Wi-Fi di casa e stata cambiata con il WPS",
+   "en": "The home Wi-Fi was changed with WPS",
+   "es": "El Wi-Fi de casa se cambio con el WPS",
+   "de": "Das Heim-WLAN wurde per WPS geaendert",
+   "scope": "fw"
+  },
+  {
+   "it": "Metodo PIN: %s",
+   "en": "PIN method: %s",
+   "es": "Metodo PIN: %s",
+   "de": "PIN-Methode: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "PIN",
+   "en": "PIN",
+   "es": "PIN",
+   "de": "PIN",
+   "scope": "fw"
+  },
+  {
+   "it": "PIN da scrivere nel router: %s",
+   "en": "PIN to enter in the router: %s",
+   "es": "PIN que debes escribir en el router: %s",
+   "de": "PIN zum Eingeben im Router: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "PIN in arrivo...",
+   "en": "PIN coming...",
+   "es": "PIN en camino...",
+   "de": "PIN kommt...",
+   "scope": "fw"
+  },
+  {
+   "it": "Tempo scaduto: il router non ha risposto (il WPS puo essere spento sul router)",
+   "en": "Time is up: the router did not answer (WPS may be off on the router)",
+   "es": "Tiempo agotado: el router no respondio (puede que el WPS este apagado en el router)",
+   "de": "Zeit abgelaufen: der Router hat nicht geantwortet (WPS ist am Router evtl. aus)",
+   "scope": "fw"
+  },
+  {
+   "it": "Ultima prova: non riuscita - %s",
+   "en": "Last try: failed - %s",
+   "es": "Ultimo intento: fallido - %s",
+   "de": "Letzter Versuch: fehlgeschlagen - %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Ultima prova: riuscita, rete '%s'",
+   "en": "Last try: succeeded, network '%s'",
+   "es": "Ultimo intento: correcto, red '%s'",
+   "de": "Letzter Versuch: erfolgreich, Netz '%s'",
+   "scope": "fw"
+  },
+  {
+   "it": "WPS annullato",
+   "en": "WPS cancelled",
+   "es": "WPS cancelado",
+   "de": "WPS abgebrochen",
+   "scope": "fw"
+  },
+  {
+   "it": "WPS avviato: premi il tasto WPS del router entro 2 minuti.",
+   "en": "WPS started: press the WPS button on the router within 2 minutes.",
+   "es": "WPS iniciado: pulsa el boton WPS del router en menos de 2 minutos.",
+   "de": "WPS gestartet: druecke innerhalb von 2 Minuten die WPS-Taste am Router.",
+   "scope": "fw"
+  },
+  {
+   "it": "WPS con PIN avviato: guarda il PIN con 'wps' e scrivilo nel router entro 2 minuti.",
+   "en": "WPS with PIN started: see the PIN with 'wps' and enter it in the router within 2 minutes.",
+   "es": "WPS con PIN iniciado: mira el PIN con 'wps' y escribelo en el router en menos de 2 minutos.",
+   "de": "WPS mit PIN gestartet: zeige die PIN mit 'wps' an und gib sie innerhalb von 2 Minuten im Router ein.",
+   "scope": "fw"
+  },
+  {
+   "it": "WPS gia in corso",
+   "en": "WPS already running",
+   "es": "El WPS ya esta en curso",
+   "de": "WPS laeuft bereits",
+   "scope": "fw"
+  },
+  {
+   "it": "WPS non presente in questa versione del firmware",
+   "en": "WPS is not in this firmware version",
+   "es": "El WPS no esta en esta version del firmware",
+   "de": "WPS ist in dieser Firmware-Version nicht enthalten",
+   "scope": "fw"
+  },
+  {
+   "it": "WPS spento: accendilo prima",
+   "en": "WPS is off: turn it on first",
+   "es": "El WPS esta apagado: enciendelo primero",
+   "de": "WPS ist aus: schalte es zuerst ein",
+   "scope": "fw"
+  },
+  {
+   "it": "WPS: %s",
+   "en": "WPS: %s",
+   "es": "WPS: %s",
+   "de": "WPS: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "acceso (prima configurazione)",
+   "en": "on (first setup)",
+   "es": "activo (primera configuracion)",
+   "de": "an (Ersteinrichtung)",
+   "scope": "fw"
+  },
+  {
+   "it": "consentito",
+   "en": "allowed",
+   "es": "permitido",
+   "de": "erlaubt",
+   "scope": "fw"
+  },
+  {
+   "it": "non consentito",
+   "en": "not allowed",
+   "es": "no permitido",
+   "de": "nicht erlaubt",
+   "scope": "fw"
+  },
+  {
+   "it": "pulsante",
+   "en": "button",
+   "es": "boton",
+   "de": "Taste",
+   "scope": "fw"
+  },
+  {
+   "it": "WPS",
+   "en": "WPS",
+   "es": "WPS",
+   "de": "WPS",
+   "scope": "web"
+  },
+  {
+   "it": "WPS (collegamento con il router)",
+   "en": "WPS (connect with the router)",
+   "es": "WPS (conexion con el router)",
+   "de": "WPS (Verbindung mit dem Router)",
+   "scope": "web"
+  },
+  {
+   "it": "Il router manda alla scheda il nome e la password della tua Wi-Fi: non devi scriverli. Funziona con il tasto WPS del router, oppure con un PIN. Non funziona se il router e solo WPA3 o ha il WPS spento.",
+   "en": "The router sends the board the name and password of your Wi-Fi: you do not have to type them. It works with the WPS button on the router, or with a PIN. It does not work if the router is WPA3-only or has WPS turned off.",
+   "es": "El router envia a la placa el nombre y la contrasena de tu Wi-Fi: no tienes que escribirlos. Funciona con el boton WPS del router o con un PIN. No funciona si el router es solo WPA3 o tiene el WPS apagado.",
+   "de": "Der Router schickt der Platine Name und Passwort deines WLANs: du musst sie nicht tippen. Es geht mit der WPS-Taste am Router oder mit einer PIN. Es geht nicht, wenn der Router nur WPA3 kann oder WPS aus ist.",
+   "scope": "web"
+  },
+  {
+   "it": "Collega adesso",
+   "en": "Connect now",
+   "es": "Conectar ahora",
+   "de": "Jetzt verbinden",
+   "scope": "web"
+  },
+  {
+   "it": "Scrivi questo PIN nella pagina WPS del router:",
+   "en": "Enter this PIN in the router's WPS page:",
+   "es": "Escribe este PIN en la pagina WPS del router:",
+   "de": "Gib diese PIN auf der WPS-Seite des Routers ein:",
+   "scope": "web"
+  },
+  {
+   "it": "Collega con il tasto del router",
+   "en": "Connect with the router button",
+   "es": "Conectar con el boton del router",
+   "de": "Mit der Router-Taste verbinden",
+   "scope": "web"
+  },
+  {
+   "it": "Collega con il PIN",
+   "en": "Connect with the PIN",
+   "es": "Conectar con el PIN",
+   "de": "Mit der PIN verbinden",
+   "scope": "web"
+  },
+  {
+   "it": "Premi il pulsante qui sopra e, entro 2 minuti, il tasto WPS del router. La scheda cambia rete: se sei collegato al suo hotspot la pagina si interrompe e poi si ricollega da sola.",
+   "en": "Press the button above and, within 2 minutes, the WPS button on the router. The board changes network: if you are connected to its hotspot the page drops and then reconnects by itself.",
+   "es": "Pulsa el boton de arriba y, en menos de 2 minutos, el boton WPS del router. La placa cambia de red: si estas conectado a su hotspot la pagina se corta y luego se reconecta sola.",
+   "de": "Druecke die Taste oben und innerhalb von 2 Minuten die WPS-Taste am Router. Die Platine wechselt das Netz: bist du mit ihrem Hotspot verbunden, bricht die Seite ab und verbindet sich dann von selbst wieder.",
+   "scope": "web"
+  },
+  {
+   "it": "Impostazioni WPS",
+   "en": "WPS settings",
+   "es": "Ajustes del WPS",
+   "de": "WPS-Einstellungen",
+   "scope": "web"
+  },
+  {
+   "it": "Consenti il metodo con PIN",
+   "en": "Allow the PIN method",
+   "es": "Permitir el metodo con PIN",
+   "de": "PIN-Methode erlauben",
+   "scope": "web"
+  },
+  {
+   "it": "Metodo con PIN",
+   "en": "PIN method",
+   "es": "Metodo con PIN",
+   "de": "PIN-Methode",
+   "scope": "web"
+  },
+  {
+   "it": "Il PIN lo crea la scheda a ogni prova e vale 2 minuti. Se lo lasci spento resta solo il tasto del router (piu sicuro).",
+   "en": "The board creates the PIN at every try and it is valid for 2 minutes. If you leave it off, only the router button remains (safer).",
+   "es": "La placa crea el PIN en cada intento y vale 2 minutos. Si lo dejas apagado solo queda el boton del router (mas seguro).",
+   "de": "Die Platine erzeugt die PIN bei jedem Versuch, sie gilt 2 Minuten. Bleibt sie aus, gibt es nur die Router-Taste (sicherer).",
+   "scope": "web"
+  },
+  {
+   "it": "Collega con WPS (tasto del router)",
+   "en": "Connect with WPS (router button)",
+   "es": "Conectar con WPS (boton del router)",
+   "de": "Mit WPS verbinden (Router-Taste)",
+   "scope": "web"
+  },
+  {
+   "it": "Prima configurazione: il WPS funziona anche con l'interruttore spento. Dopo la guida torna a obbedire all'interruttore.",
+   "en": "First setup: WPS also works with the switch off. After the guide it obeys the switch again.",
+   "es": "Primera configuracion: el WPS funciona tambien con el interruptor apagado. Despues de la guia vuelve a obedecer al interruptor.",
+   "de": "Ersteinrichtung: WPS geht auch mit ausgeschaltetem Schalter. Nach dem Assistenten gilt wieder der Schalter.",
+   "scope": "web"
+  },
+  {
+   "it": "Questo firmware non contiene il WPS",
+   "en": "This firmware does not contain WPS",
+   "es": "Este firmware no incluye el WPS",
+   "de": "Diese Firmware enthaelt kein WPS",
+   "scope": "web"
+  },
+  {
+   "it": "Sto creando il PIN...",
+   "en": "Creating the PIN...",
+   "es": "Creando el PIN...",
+   "de": "PIN wird erzeugt...",
+   "scope": "web"
+  },
+  {
+   "it": "Scrivi il PIN nel router: ancora {0} s",
+   "en": "Enter the PIN in the router: {0} s left",
+   "es": "Escribe el PIN en el router: quedan {0} s",
+   "de": "Gib die PIN im Router ein: noch {0} s",
+   "scope": "web"
+  },
+  {
+   "it": "In attesa del router: premi il tasto WPS (ancora {0} s)",
+   "en": "Waiting for the router: press the WPS button ({0} s left)",
+   "es": "Esperando al router: pulsa el boton WPS (quedan {0} s)",
+   "de": "Warte auf den Router: druecke die WPS-Taste (noch {0} s)",
+   "scope": "web"
+  },
+  {
+   "it": "Fatto: la scheda si collega a {0}.",
+   "en": "Done: the board is connecting to {0}.",
+   "es": "Hecho: la placa se conecta a {0}.",
+   "de": "Fertig: die Platine verbindet sich mit {0}.",
+   "scope": "web"
+  },
+  {
+   "it": "WPS non riuscito",
+   "en": "WPS did not work",
+   "es": "El WPS no funciono",
+   "de": "WPS hat nicht geklappt",
+   "scope": "web"
+  },
+  {
+   "it": "WPS spento: accendilo con l'interruttore qui sopra",
+   "en": "WPS is off: turn it on with the switch above",
+   "es": "El WPS esta apagado: enciendelo con el interruptor de arriba",
+   "de": "WPS ist aus: schalte es mit dem Schalter oben ein",
+   "scope": "web"
+  },
+  {
+   "it": "Il WPS parte solo con il Wi-Fi acceso e non in modo aereo",
+   "en": "WPS only starts with Wi-Fi on and not in airplane mode",
+   "es": "El WPS solo arranca con el Wi-Fi encendido y no en modo avion",
+   "de": "WPS startet nur bei eingeschaltetem WLAN und nicht im Flugmodus",
+   "scope": "web"
+  },
+  {
+   "it": "Collegare con il PIN?",
+   "en": "Connect with the PIN?",
+   "es": "Conectar con el PIN?",
+   "de": "Mit der PIN verbinden?",
+   "scope": "web"
+  },
+  {
+   "it": "Collegare con il tasto del router?",
+   "en": "Connect with the router button?",
+   "es": "Conectar con el boton del router?",
+   "de": "Mit der Router-Taste verbinden?",
+   "scope": "web"
+  },
+  {
+   "it": "La scheda si scollega dalla rete di casa per la prova. Se non riesce, ci torna da sola.",
+   "en": "The board leaves your home network for the try. If it fails, it goes back by itself.",
+   "es": "La placa se desconecta de la red de casa para la prueba. Si falla, vuelve sola.",
+   "de": "Die Platine trennt sich fuer den Versuch vom Heimnetz. Klappt es nicht, kehrt sie von selbst zurueck.",
+   "scope": "web"
+  },
+  {
+   "it": "La scheda cerca il router mentre l'hotspot resta acceso.",
+   "en": "The board looks for the router while the hotspot stays on.",
+   "es": "La placa busca el router mientras el hotspot sigue encendido.",
+   "de": "Die Platine sucht den Router, waehrend der Hotspot an bleibt.",
+   "scope": "web"
+  },
+  {
+   "it": "Se sei collegato all'hotspot la pagina puo interrompersi per qualche secondo.",
+   "en": "If you are connected to the hotspot the page may drop for a few seconds.",
+   "es": "Si estas conectado al hotspot la pagina puede cortarse unos segundos.",
+   "de": "Bist du mit dem Hotspot verbunden, kann die Seite kurz abbrechen.",
+   "scope": "web"
+  },
+  {
+   "it": "Premi il tasto WPS del router entro 2 minuti...",
+   "en": "Press the WPS button on the router within 2 minutes...",
+   "es": "Pulsa el boton WPS del router en menos de 2 minutos...",
+   "de": "Druecke innerhalb von 2 Minuten die WPS-Taste am Router...",
+   "scope": "web"
+  },
+  {
+   "it": "Fatto: la scheda si collega a {0}. Collega il telefono a quella rete e apri https://{1}.local: la guida riparte da li.",
+   "en": "Done: the board is connecting to {0}. Connect your phone to that network and open https://{1}.local: the guide restarts from there.",
+   "es": "Hecho: la placa se conecta a {0}. Conecta el telefono a esa red y abre https://{1}.local: la guia sigue desde alli.",
+   "de": "Fertig: die Platine verbindet sich mit {0}. Verbinde das Handy mit diesem Netz und oeffne https://{1}.local: der Assistent geht dort weiter.",
+   "scope": "web"
+  },
+  {
+   "it": "La scheda non risponde: se ha preso la rete di casa, collegati a quella",
+   "en": "The board does not answer: if it joined your home network, connect to that one",
+   "es": "La placa no responde: si se unio a la red de casa, conectate a esa",
+   "de": "Die Platine antwortet nicht: hat sie sich mit dem Heimnetz verbunden, verbinde dich mit diesem",
+   "scope": "web"
+  },
+  {
+   "it": "  wps [on|off|pin on|off|start [pin]|stop]  collegamento alla Wi-Fi di casa con il WPS (solo Admin)",
+   "en": "  wps [on|off|pin on|off|start [pin]|stop]  connect to the home Wi-Fi with WPS (Admin only)",
+   "es": "  wps [on|off|pin on|off|start [pin]|stop]  conexion a la Wi-Fi de casa con WPS (solo Admin)",
+   "de": "  wps [on|off|pin on|off|start [pin]|stop]  Verbindung zum Heim-WLAN per WPS (nur Admin)",
+   "scope": "fw"
+  },
+  {
+   "it": "  btn [1|2|3 niente|aereo|wps|trova]  azioni dei click del tasto BOOT (cambiare: solo Admin)",
+   "en": "  btn [1|2|3 niente|aereo|wps|trova]  actions of the BOOT button clicks (changing: Admin only)",
+   "es": "  btn [1|2|3 niente|aereo|wps|trova]  acciones de los clics del boton BOOT (cambiar: solo Admin)",
+   "de": "  btn [1|2|3 niente|aereo|wps|trova]  Aktionen der BOOT-Tasten-Klicks (aendern: nur Admin)",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: wps [status|on|off|pin on|off|start [pin]|stop]",
+   "en": "Use: wps [status|on|off|pin on|off|start [pin]|stop]",
+   "es": "Uso: wps [status|on|off|pin on|off|start [pin]|stop]",
+   "de": "Nutzung: wps [status|on|off|pin on|off|start [pin]|stop]",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: btn [1|2|3 niente|aereo|wps|trova]",
+   "en": "Use: btn [1|2|3 niente|aereo|wps|trova]",
+   "es": "Uso: btn [1|2|3 niente|aereo|wps|trova]",
+   "de": "Nutzung: btn [1|2|3 niente|aereo|wps|trova]",
+   "scope": "fw"
+  },
+  {
+   "it": "%d click: %s",
+   "en": "%d click(s): %s",
+   "es": "%d clic(s): %s",
+   "de": "%d Klick(s): %s",
+   "scope": "fw"
+  },
+  {
+   "it": "1, 2 o 3: azioni scelte qui sopra",
+   "en": "1, 2 or 3: actions chosen above",
+   "es": "1, 2 o 3: acciones elegidas arriba",
+   "de": "1, 2 oder 3: oben gewaehlte Aktionen",
+   "scope": "fw"
+  },
+  {
+   "it": "Avvia o annulla il WPS",
+   "en": "Starts or cancels WPS",
+   "es": "Inicia o cancela el WPS",
+   "de": "Startet oder bricht WPS ab",
+   "scope": "fw"
+  },
+  {
+   "it": "Click veloci",
+   "en": "Quick clicks",
+   "es": "Clics rapidos",
+   "de": "Schnelle Klicks",
+   "scope": "fw"
+  },
+  {
+   "it": "Esce dal modo aereo",
+   "en": "Leaves airplane mode",
+   "es": "Sale del modo avion",
+   "de": "Beendet den Flugmodus",
+   "scope": "fw"
+  },
+  {
+   "it": "Fa l'arcobaleno sul LED (trova la scheda)",
+   "en": "Rainbow on the LED (find the board)",
+   "es": "Arcoiris en el LED (encuentra la placa)",
+   "de": "Regenbogen auf der LED (Platine finden)",
+   "scope": "fw"
+  },
+  {
+   "it": "Libero (lo usano gli script)",
+   "en": "Free (used by scripts)",
+   "es": "Libre (lo usan los scripts)",
+   "de": "Frei (von Skripten genutzt)",
+   "scope": "fw"
+  },
+  {
+   "it": "Tasto BOOT: %d click avviano il WPS",
+   "en": "BOOT button: %d click(s) start WPS",
+   "es": "Boton BOOT: %d clic(s) inician el WPS",
+   "de": "BOOT-Taste: %d Klick(s) starten WPS",
+   "scope": "fw"
+  },
+  {
+   "it": "Tasto BOOT: nessun gesto avvia il WPS",
+   "en": "BOOT button: no gesture starts WPS",
+   "es": "Boton BOOT: ningun gesto inicia el WPS",
+   "de": "BOOT-Taste: keine Geste startet WPS",
+   "scope": "fw"
+  },
+  {
+   "it": "1 click",
+   "en": "1 click",
+   "es": "1 clic",
+   "de": "1 Klick",
+   "scope": "web"
+  },
+  {
+   "it": "2 click",
+   "en": "2 clicks",
+   "es": "2 clics",
+   "de": "2 Klicks",
+   "scope": "web"
+  },
+  {
+   "it": "3 click",
+   "en": "3 clicks",
+   "es": "3 clics",
+   "de": "3 Klicks",
+   "scope": "web"
+  },
+  {
+   "it": "Azioni dei click",
+   "en": "Click actions",
+   "es": "Acciones de los clics",
+   "de": "Klick-Aktionen",
+   "scope": "web"
+  },
+  {
+   "it": "Chi ha la scheda in mano potrebbe collegarla alla sua rete: tieni il WPS spento (o togli l'azione dal tasto) se la scheda non e al sicuro. Lo stesso gesto ferma anche una prova in corso. Il LED lo dice: blu che respira = in attesa, verde = riuscito, rosso = errore.",
+   "en": "Whoever holds the board could connect it to their own network: keep WPS off (or remove the action from the button) if the board is not safe. The same gesture also stops a running attempt. The LED tells you: breathing blue = waiting, green = done, red = error.",
+   "es": "Quien tenga la placa en la mano podria conectarla a su propia red: deja el WPS apagado (o quita la accion del boton) si la placa no esta segura. El mismo gesto tambien detiene una prueba en curso. El LED lo indica: azul que respira = esperando, verde = hecho, rojo = error.",
+   "de": "Wer die Platine in der Hand hat, koennte sie mit seinem eigenen Netz verbinden: Lass WPS aus (oder entferne die Aktion von der Taste), wenn die Platine nicht sicher liegt. Dieselbe Geste bricht auch einen laufenden Versuch ab. Die LED zeigt es: blau atmend = wartet, gruen = fertig, rot = Fehler.",
+   "scope": "web"
+  },
+  {
+   "it": "Dal tasto BOOT: nessun gesto avvia il WPS (si sceglie in Dispositivi > Tasto BOOT).",
+   "en": "From the BOOT button: no gesture starts WPS (choose in Devices > BOOT button).",
+   "es": "Desde el boton BOOT: ningun gesto inicia el WPS (se elige en Dispositivos > Boton BOOT).",
+   "de": "Ueber die BOOT-Taste: keine Geste startet WPS (Auswahl unter Geraete > BOOT-Taste).",
+   "scope": "web"
+  },
+  {
+   "it": "Dal tasto BOOT: {0} click avviano il WPS (si cambia in Dispositivi > Tasto BOOT).",
+   "en": "From the BOOT button: {0} click(s) start WPS (change in Devices > BOOT button).",
+   "es": "Desde el boton BOOT: {0} clic(s) inician el WPS (se cambia en Dispositivos > Boton BOOT).",
+   "de": "Ueber die BOOT-Taste: {0} Klick(s) starten WPS (aendern unter Geraete > BOOT-Taste).",
+   "scope": "web"
+  },
+  {
+   "it": "Il WPS e spento: i click non lo avviano finche non lo accendi in Rete > WPS.",
+   "en": "WPS is off: the clicks do not start it until you turn it on in Network > WPS.",
+   "es": "El WPS esta apagado: los clics no lo inician hasta que lo enciendas en Red > WPS.",
+   "de": "WPS ist aus: Die Klicks starten es erst, wenn du es unter Netzwerk > WPS einschaltest.",
+   "scope": "web"
+  },
+  {
+   "it": "Il pulsante BOOT della scheda (GPIO0): le pressioni lunghe (2, 8 e 20 secondi) servono al recupero e non si cambiano.",
+   "en": "The BOOT button of the board (GPIO0): the long presses (2, 8 and 20 seconds) are for recovery and cannot be changed.",
+   "es": "El boton BOOT de la placa (GPIO0): las pulsaciones largas (2, 8 y 20 segundos) sirven para la recuperacion y no se cambian.",
+   "de": "Die BOOT-Taste der Platine (GPIO0): Die langen Druecke (2, 8 und 20 Sekunden) dienen der Wiederherstellung und lassen sich nicht aendern.",
+   "scope": "web"
+  },
+  {
+   "it": "Premi e lascia il tasto in fretta, 1, 2 o 3 volte: la scheda aspetta mezzo secondo dopo l'ultimo click e poi fa l'azione scelta. Il LED fa un lampo quando ha capito.",
+   "en": "Press and release the button quickly, 1, 2 or 3 times: the board waits half a second after the last click and then does the chosen action. The LED flashes when it understood.",
+   "es": "Pulsa y suelta el boton rapido, 1, 2 o 3 veces: la placa espera medio segundo tras el ultimo clic y hace la accion elegida. El LED parpadea cuando lo ha entendido.",
+   "de": "Druecke und lasse die Taste schnell los, 1, 2 oder 3 Mal: Die Platine wartet eine halbe Sekunde nach dem letzten Klick und fuehrt dann die gewaehlte Aktion aus. Die LED blitzt, wenn sie es verstanden hat.",
+   "scope": "web"
+  },
+  {
+   "it": "prova: non eseguito",
+   "en": "test: not executed",
+   "es": "prueba: no ejecutado",
+   "de": "Test: nicht ausgefuehrt",
+   "scope": "fw"
+  },
+  {
+   "it": "%d s: %s",
+   "en": "%d s: %s",
+   "es": "%d s: %s",
+   "de": "%d s: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "azzera le password",
+   "en": "resets the passwords",
+   "es": "restablece las contrasenas",
+   "de": "setzt die Passwoerter zurueck",
+   "scope": "fw"
+  },
+  {
+   "it": "spegne il filtro IP",
+   "en": "turns the IP filter off",
+   "es": "apaga el filtro IP",
+   "de": "schaltet den IP-Filter aus",
+   "scope": "fw"
+  },
+  {
+   "it": "Prova del tasto",
+   "en": "Button test",
+   "es": "Prueba del boton",
+   "de": "Tastentest",
+   "scope": "web"
+  },
+  {
+   "it": "Per 60 secondi il tasto non fa niente (nemmeno le pressioni lunghe): qui vedi cosa la scheda capisce. Poi torna normale da solo.",
+   "en": "For 60 seconds the button does nothing (not even the long presses): here you see what the board understands. Then it goes back to normal by itself.",
+   "es": "Durante 60 segundos el boton no hace nada (ni siquiera las pulsaciones largas): aqui ves lo que entiende la placa. Luego vuelve a la normalidad solo.",
+   "de": "60 Sekunden lang tut die Taste nichts (auch keine langen Druecke): Hier siehst du, was die Platine versteht. Danach ist alles von selbst wieder normal.",
+   "scope": "web"
+  },
+  {
+   "it": "Avvia la prova",
+   "en": "Start the test",
+   "es": "Iniciar la prueba",
+   "de": "Test starten",
+   "scope": "web"
+  },
+  {
+   "it": "Ferma la prova",
+   "en": "Stop the test",
+   "es": "Detener la prueba",
+   "de": "Test beenden",
+   "scope": "web"
+  },
+  {
+   "it": "Prova in corso: ancora {0} s. Premi il tasto.",
+   "en": "Test running: {0} s left. Press the button.",
+   "es": "Prueba en curso: faltan {0} s. Pulsa el boton.",
+   "de": "Test laeuft: noch {0} s. Druecke die Taste.",
+   "scope": "web"
+  },
+  {
+   "it": "Premuto da {0} s",
+   "en": "Pressed for {0} s",
+   "es": "Pulsado desde hace {0} s",
+   "de": "Seit {0} s gedrueckt",
+   "scope": "web"
+  },
+  {
+   "it": "Rilasciato",
+   "en": "Released",
+   "es": "Soltado",
+   "de": "Losgelassen",
+   "scope": "web"
+  },
+  {
+   "it": "btn()",
+   "en": "btn()",
+   "es": "btn()",
+   "de": "btn()",
+   "scope": "web"
+  },
+  {
+   "it": "logtail(n)",
+   "en": "logtail(n)",
+   "es": "logtail(n)",
+   "de": "logtail(n)",
+   "scope": "web"
+  },
+  {
+   "it": "mqtt(\"nome\", \"testo\")",
+   "en": "mqtt(\"name\", \"text\")",
+   "es": "mqtt(\"nombre\", \"texto\")",
+   "de": "mqtt(\"Name\", \"Text\")",
+   "scope": "web"
+  },
+  {
+   "it": "click liberi del tasto BOOT: 1, 2 o 3, oppure 0 se non ce ne sono (non aspetta). Vedi Dispositivi > Tasto BOOT",
+   "en": "free BOOT button clicks: 1, 2 or 3, or 0 if there are none (does not wait). See Devices > BOOT button",
+   "es": "clics libres del boton BOOT: 1, 2 o 3, o 0 si no hay (no espera). Ver Dispositivos > Boton BOOT",
+   "de": "freie Klicks der BOOT-Taste: 1, 2 oder 3, oder 0 falls keine (wartet nicht). Siehe Geraete > BOOT-Taste",
+   "scope": "web"
+  },
+  {
+   "it": "ultime n righe del registro (1-20, massimo 2000 caratteri). Nelle app serve logread in use=: il registro puo contenere indirizzi e nomi",
+   "en": "last n lines of the log (1-20, at most 2000 characters). In apps it needs logread in use=: the log can contain addresses and names",
+   "es": "ultimas n lineas del registro (1-20, maximo 2000 caracteres). En las apps hace falta logread en use=: el registro puede contener direcciones y nombres",
+   "de": "letzte n Zeilen des Protokolls (1-20, hoechstens 2000 Zeichen). In Apps braucht es logread in use=: das Protokoll kann Adressen und Namen enthalten",
+   "scope": "web"
+  },
+  {
+   "it": "invia un testo al broker MQTT su <prefisso>/app/<nome> (vero = inviato, falso = non inviato; massimo 20 al minuto). Nelle app serve mqtt in use=",
+   "en": "sends a text to the MQTT broker on <prefix>/app/<name> (true = sent, false = not sent; at most 20 per minute). In apps it needs mqtt in use=",
+   "es": "envia un texto al broker MQTT en <prefijo>/app/<nombre> (verdadero = enviado, falso = no enviado; maximo 20 por minuto). En las apps hace falta mqtt en use=",
+   "de": "sendet einen Text an den MQTT-Broker auf <Praefix>/app/<Name> (wahr = gesendet, falsch = nicht gesendet; hoechstens 20 pro Minute). In Apps braucht es mqtt in use=",
+   "scope": "web"
+  },
+  {
+   "it": "Liberi per gli script: {0} click (funzione btn()). Chi li legge e uno script in esecuzione.",
+   "en": "Free for scripts: {0} click(s) (function btn()). A running script reads them.",
+   "es": "Libres para los scripts: {0} clic(s) (funcion btn()). Los lee un script en ejecucion.",
+   "de": "Frei fuer Skripte: {0} Klick(s) (Funktion btn()). Ein laufendes Skript liest sie.",
+   "scope": "web"
+  },
+  {
+   "it": "Nessun gesto libero per gli script: metti \"Libero\" su un gesto per dargli i click.",
+   "en": "No gesture is free for scripts: set \"Free\" on a gesture to give it the clicks.",
+   "es": "Ningun gesto libre para los scripts: pon \"Libre\" en un gesto para darle los clics.",
+   "de": "Keine Geste ist fuer Skripte frei: Stelle eine Geste auf \"Frei\", um ihm die Klicks zu geben.",
+   "scope": "web"
+  },
+  {
+   "it": "Componente",
+   "en": "Component",
+   "es": "Componente",
+   "de": "Bauteil",
+   "scope": "fw"
+  },
+  {
+   "it": "Livello del segnale",
+   "en": "Signal level",
+   "es": "Nivel de la senal",
+   "de": "Signalpegel",
+   "scope": "fw"
+  },
+  {
+   "it": "Troppi componenti (massimo 4)",
+   "en": "Too many components (maximum 4)",
+   "es": "Demasiados componentes (maximo 4)",
+   "de": "Zu viele Bauteile (maximal 4)",
+   "scope": "fw"
+  },
+  {
+   "it": "Valore del componente non valido (1-12 caratteri)",
+   "en": "Invalid component value (1-12 characters)",
+   "es": "Valor del componente no valido (1-12 caracteres)",
+   "de": "Ungueltiger Bauteilwert (1-12 Zeichen)",
+   "scope": "fw"
+  },
+  {
+   "it": "level: 3V3 oppure 5V",
+   "en": "level: 3V3 or 5V",
+   "es": "level: 3V3 o 5V",
+   "de": "level: 3V3 oder 5V",
+   "scope": "fw"
+  },
+  {
+   "it": "part: il segnale non e nella sezione [signals]",
+   "en": "part: the signal is not in the [signals] section",
+   "es": "part: la senal no esta en la seccion [signals]",
+   "de": "part: das Signal steht nicht im Abschnitt [signals]",
+   "scope": "fw"
+  },
+  {
+   "it": "part: serie|gnd|vcc,valore,segnale",
+   "en": "part: serie|gnd|vcc,value,signal",
+   "es": "part: serie|gnd|vcc,valor,senal",
+   "de": "part: serie|gnd|vcc,Wert,Signal",
+   "scope": "fw"
+  },
+  {
+   "it": "0 V (massa dell'alimentatore unita a GND della scheda)",
+   "en": "0 V (supply ground joined to the board GND)",
+   "es": "0 V (masa de la fuente unida al GND de la placa)",
+   "de": "0 V (Masse des Netzteils mit GND der Platine verbunden)",
+   "scope": "web"
+  },
+  {
+   "it": "0 V (massa)",
+   "en": "0 V (ground)",
+   "es": "0 V (masa)",
+   "de": "0 V (Masse)",
+   "scope": "web"
+  },
+  {
+   "it": "Al modulo",
+   "en": "To the module",
+   "es": "Al modulo",
+   "de": "Zum Modul",
+   "scope": "web"
+  },
+  {
+   "it": "Dalla scheda",
+   "en": "From the board",
+   "es": "De la placa",
+   "de": "Von der Platine",
+   "scope": "web"
+  },
+  {
+   "it": "Alimentatore",
+   "en": "Power supply",
+   "es": "Fuente de alimentacion",
+   "de": "Netzteil",
+   "scope": "web"
+  },
+  {
+   "it": "Disegno allegato al file",
+   "en": "Drawing attached to the file",
+   "es": "Dibujo adjunto al archivo",
+   "de": "Der Datei beigefuegte Zeichnung",
+   "scope": "web"
+  },
+  {
+   "it": "Filo",
+   "en": "Wire",
+   "es": "Cable",
+   "de": "Kabel",
+   "scope": "fw"
+  },
+  {
+   "it": "Il modulo vuole il segnale a 5 V: con i 3,3 V della scheda potrebbe non attivarsi. Controlla il datasheet.",
+   "en": "The module wants a 5 V signal: with the 3.3 V of the board it may not switch on. Check the datasheet.",
+   "es": "El modulo quiere la senal a 5 V: con los 3,3 V de la placa puede no activarse. Revisa la hoja de datos.",
+   "de": "Das Modul braucht ein 5-V-Signal: Mit den 3,3 V der Platine schaltet es evtl. nicht. Pruefe das Datenblatt.",
+   "scope": "web"
+  },
+  {
+   "it": "Il segnale del modulo e a 5 V: i pin della scheda reggono solo 3,3 V. Metti un convertitore di livello o un partitore prima del pin.",
+   "en": "The module signal is 5 V: the board pins only tolerate 3.3 V. Put a level shifter or a divider before the pin.",
+   "es": "La senal del modulo es de 5 V: los pines de la placa solo toleran 3,3 V. Pon un convertidor de nivel o un divisor antes del pin.",
+   "de": "Das Modulsignal hat 5 V: Die Pins der Platine vertragen nur 3,3 V. Setze einen Pegelwandler oder Spannungsteiler vor den Pin.",
+   "scope": "web"
+  },
+  {
+   "it": "Modulo",
+   "en": "Module",
+   "es": "Modulo",
+   "de": "Modul",
+   "scope": "web"
+  },
+  {
+   "it": "Scheda",
+   "en": "Board",
+   "es": "Placa",
+   "de": "Platine",
+   "scope": "web"
+  },
+  {
+   "it": "Schema dei collegamenti di {0}",
+   "en": "Wiring diagram of {0}",
+   "es": "Esquema de conexiones de {0}",
+   "de": "Anschlussplan von {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Tensione e note",
+   "en": "Voltage and notes",
+   "es": "Tension y notas",
+   "de": "Spannung und Hinweise",
+   "scope": "web"
+  },
+  {
+   "it": "Unisci la massa (GND) dell'alimentatore con la massa della scheda.",
+   "en": "Join the ground (GND) of the power supply with the ground of the board.",
+   "es": "Une la masa (GND) de la fuente con la masa de la placa.",
+   "de": "Verbinde die Masse (GND) des Netzteils mit der Masse der Platine.",
+   "scope": "web"
+  },
+  {
+   "it": "arancione",
+   "en": "orange",
+   "es": "naranja",
+   "de": "orange",
+   "scope": "web"
+  },
+  {
+   "it": "blu",
+   "en": "blue",
+   "es": "azul",
+   "de": "blau",
+   "scope": "web"
+  },
+  {
+   "it": "nero",
+   "en": "black",
+   "es": "negro",
+   "de": "schwarz",
+   "scope": "web"
+  },
+  {
+   "it": "rosso",
+   "en": "red",
+   "es": "rojo",
+   "de": "rot",
+   "scope": "web"
+  },
+  {
+   "it": "attivo basso (0 = acceso)",
+   "en": "active low (0 = on)",
+   "es": "activo en bajo (0 = encendido)",
+   "de": "aktiv niedrig (0 = an)",
+   "scope": "web"
+  },
+  {
+   "it": "modulo → scheda",
+   "en": "module → board",
+   "es": "modulo → placa",
+   "de": "Modul → Platine",
+   "scope": "web"
+  },
+  {
+   "it": "scheda → modulo",
+   "en": "board → module",
+   "es": "placa → modulo",
+   "de": "Platine → Modul",
+   "scope": "web"
+  },
+  {
+   "it": "pull-down interno acceso",
+   "en": "internal pull-down on",
+   "es": "pull-down interno activo",
+   "de": "interner Pull-down an",
+   "scope": "web"
+  },
+  {
+   "it": "pull-up interno acceso",
+   "en": "internal pull-up on",
+   "es": "pull-up interno activo",
+   "de": "interner Pull-up an",
+   "scope": "web"
+  },
+  {
+   "it": "segnale a {0}",
+   "en": "signal at {0}",
+   "es": "senal a {0}",
+   "de": "Signal mit {0}",
+   "scope": "web"
+  },
+  {
+   "it": "{0} alimentazione",
+   "en": "{0} supply",
+   "es": "{0} alimentacion",
+   "de": "{0} Versorgung",
+   "scope": "web"
+  },
+  {
+   "it": "{0} alimentazione esterna",
+   "en": "{0} external supply",
+   "es": "{0} alimentacion externa",
+   "de": "{0} externe Versorgung",
+   "scope": "web"
+  },
+  {
+   "it": "in serie",
+   "en": "in series",
+   "es": "en serie",
+   "de": "in Reihe",
+   "scope": "web"
+  },
+  {
+   "it": "verso GND",
+   "en": "to GND",
+   "es": "hacia GND",
+   "de": "nach GND",
+   "scope": "web"
+  },
+  {
+   "it": "verso l'alimentazione",
+   "en": "to the supply",
+   "es": "hacia la alimentacion",
+   "de": "zur Versorgung",
+   "scope": "web"
+  },
+  {
+   "it": "File troppo piccolo: non e un programma",
+   "en": "File too small: it is not a program",
+   "es": "Archivo demasiado pequeno: no es un programa",
+   "de": "Datei zu klein: kein Programm",
+   "scope": "fw"
+  },
+  {
+   "it": "Non e un programma ESP32 (intestazione errata)",
+   "en": "Not an ESP32 program (wrong header)",
+   "es": "No es un programa ESP32 (cabecera erronea)",
+   "de": "Kein ESP32-Programm (falscher Header)",
+   "scope": "fw"
+  },
+  {
+   "it": "Programma per un altro tipo di chip (serve ESP32-S3)",
+   "en": "Program for another chip type (ESP32-S3 needed)",
+   "es": "Programa para otro tipo de chip (se necesita ESP32-S3)",
+   "de": "Programm fuer einen anderen Chip (ESP32-S3 noetig)",
+   "scope": "fw"
+  },
+  {
+   "it": "Non e un programma Arduino-ESP32 valido",
+   "en": "Not a valid Arduino-ESP32 program",
+   "es": "No es un programa Arduino-ESP32 valido",
+   "de": "Kein gueltiges Arduino-ESP32-Programm",
+   "scope": "fw"
+  },
+  {
+   "it": "File troppo grande per lo spazio del recovery",
+   "en": "File too large for the recovery space",
+   "es": "Archivo demasiado grande para el espacio del recovery",
+   "de": "Datei zu gross fuer den Recovery-Bereich",
+   "scope": "fw"
+  },
+  {
+   "it": "File rovinato (segmenti)",
+   "en": "Damaged file (segments)",
+   "es": "Archivo danado (segmentos)",
+   "de": "Beschaedigte Datei (Segmente)",
+   "scope": "fw"
+  },
+  {
+   "it": "File incompleto",
+   "en": "Incomplete file",
+   "es": "Archivo incompleto",
+   "de": "Unvollstaendige Datei",
+   "scope": "fw"
+  },
+  {
+   "it": "File rovinato (somma di controllo)",
+   "en": "Damaged file (checksum)",
+   "es": "Archivo danado (suma de control)",
+   "de": "Beschaedigte Datei (Pruefsumme)",
+   "scope": "fw"
+  },
+  {
+   "it": "File incompleto o con dati in piu",
+   "en": "Incomplete file or extra data",
+   "es": "Archivo incompleto o con datos de mas",
+   "de": "Unvollstaendige Datei oder zusaetzliche Daten",
+   "scope": "fw"
+  },
+  {
+   "it": "Un altro caricamento del recovery e in corso",
+   "en": "Another recovery upload is in progress",
+   "es": "Hay otra carga del recovery en curso",
+   "de": "Ein anderer Recovery-Upload laeuft",
+   "scope": "fw"
+  },
+  {
+   "it": "Memoria PSRAM insufficiente per il file",
+   "en": "Not enough PSRAM for the file",
+   "es": "PSRAM insuficiente para el archivo",
+   "de": "Nicht genug PSRAM fuer die Datei",
+   "scope": "fw"
+  },
+  {
+   "it": "VesevOS non sta partendo dal suo spazio (app0): aggiornamento annullato",
+   "en": "VesevOS is not running from its slot (app0): update cancelled",
+   "es": "VesevOS no arranca desde su espacio (app0): actualizacion cancelada",
+   "de": "VesevOS laeuft nicht aus seinem Bereich (app0): Update abgebrochen",
+   "scope": "fw"
+  },
+  {
+   "it": "Non riesco a impostare l'avvio di VesevOS: recovery non toccato",
+   "en": "Cannot set VesevOS as boot app: recovery not touched",
+   "es": "No puedo fijar el arranque de VesevOS: recovery sin tocar",
+   "de": "Kann VesevOS nicht als Start setzen: Recovery unveraendert",
+   "scope": "fw"
+  },
+  {
+   "it": "Errore nel cancellare il recovery: ricaricalo",
+   "en": "Error erasing the recovery: upload it again",
+   "es": "Error al borrar el recovery: vuelve a cargarlo",
+   "de": "Fehler beim Loeschen des Recovery: erneut hochladen",
+   "scope": "fw"
+  },
+  {
+   "it": "Errore nello scrivere il recovery: ricaricalo",
+   "en": "Error writing the recovery: upload it again",
+   "es": "Error al escribir el recovery: vuelve a cargarlo",
+   "de": "Fehler beim Schreiben des Recovery: erneut hochladen",
+   "scope": "fw"
+  },
+  {
+   "it": "Il recovery scritto non corrisponde al file: ricaricalo",
+   "en": "The written recovery does not match the file: upload it again",
+   "es": "El recovery escrito no coincide con el archivo: vuelve a cargarlo",
+   "de": "Das geschriebene Recovery stimmt nicht mit der Datei ueberein: erneut hochladen",
+   "scope": "fw"
+  },
+  {
+   "it": "File rovinato (impronta interna sbagliata)",
+   "en": "Damaged file (wrong internal hash)",
+   "es": "Archivo danado (huella interna erronea)",
+   "de": "Beschaedigte Datei (falscher interner Hash)",
+   "scope": "fw"
+  },
+  {
+   "it": "Non e un recovery VesevOS (manca il marchio): forse e il firmware?",
+   "en": "Not a VesevOS recovery (mark missing): is it the firmware?",
+   "es": "No es un recovery VesevOS (falta la marca): es el firmware?",
+   "de": "Kein VesevOS-Recovery (Kennung fehlt): ist es die Firmware?",
+   "scope": "fw"
+  },
+  {
+   "it": "L'impronta SHA-256 deve avere 64 cifre esadecimali",
+   "en": "The SHA-256 hash must have 64 hex digits",
+   "es": "La huella SHA-256 debe tener 64 cifras hexadecimales",
+   "de": "Der SHA-256-Hash muss 64 Hex-Ziffern haben",
+   "scope": "fw"
+  },
+  {
+   "it": "Impronta SHA-256 diversa: il file non e quello atteso",
+   "en": "SHA-256 hash differs: the file is not the expected one",
+   "es": "Huella SHA-256 distinta: el archivo no es el esperado",
+   "de": "SHA-256-Hash abweichend: nicht die erwartete Datei",
+   "scope": "fw"
+  },
+  {
+   "it": "recovery aggiornato %s -> %s (%s)",
+   "en": "recovery updated %s -> %s (%s)",
+   "es": "recovery actualizado %s -> %s (%s)",
+   "de": "Recovery aktualisiert %s -> %s (%s)",
+   "scope": "fw"
+  },
+  {
+   "it": "Uso: recovery update <file.bin> [sha256]  (prima carica il file in Sistema > File)",
+   "en": "Usage: recovery update <file.bin> [sha256]  (first upload the file in System > Files)",
+   "es": "Uso: recovery update <file.bin> [sha256]  (primero carga el archivo en Sistema > Archivos)",
+   "de": "Verwendung: recovery update <file.bin> [sha256]  (Datei zuerst unter System > Dateien hochladen)",
+   "scope": "fw"
+  },
+  {
+   "it": "Controllo e scrivo il recovery: non spegnere la scheda...",
+   "en": "Checking and writing the recovery: do not power off the board...",
+   "es": "Compruebo y escribo el recovery: no apagues la placa...",
+   "de": "Pruefe und schreibe das Recovery: Platine nicht ausschalten...",
+   "scope": "fw"
+  },
+  {
+   "it": "Recovery aggiornato: %s -> %s",
+   "en": "Recovery updated: %s -> %s",
+   "es": "Recovery actualizado: %s -> %s",
+   "de": "Recovery aktualisiert: %s -> %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Recovery presente (versione %s). 'recovery now' = riavvia nel recovery, 'recovery update <file>' = aggiornalo.",
+   "en": "Recovery present (version %s). 'recovery now' = restart into recovery, 'recovery update <file>' = update it.",
+   "es": "Recovery presente (version %s). 'recovery now' = reinicia en recovery, 'recovery update <file>' = actualizalo.",
+   "de": "Recovery vorhanden (Version %s). 'recovery now' = Neustart ins Recovery, 'recovery update <file>' = aktualisieren.",
+   "scope": "fw"
+  },
+  {
+   "it": "  recovery [now|update <file>]  recovery: stato, 'now' = riavvia nel recovery, 'update' = aggiorna il recovery da un file",
+   "en": "  recovery [now|update <file>]  recovery: status, 'now' = restart into recovery, 'update' = update the recovery from a file",
+   "es": "  recovery [now|update <file>]  recovery: estado, 'now' = reinicia en recovery, 'update' = actualiza el recovery desde un archivo",
+   "de": "  recovery [now|update <file>]  Recovery: Status, 'now' = Neustart ins Recovery, 'update' = Recovery aus einer Datei aktualisieren",
+   "scope": "fw"
+  },
+  {
+   "it": "Aggiorna recovery",
+   "en": "Update recovery",
+   "es": "Actualizar recovery",
+   "de": "Recovery aktualisieren",
+   "scope": "web"
+  },
+  {
+   "it": "Carica un nuovo recovery senza cavo",
+   "en": "Upload a new recovery without a cable",
+   "es": "Carga un nuevo recovery sin cable",
+   "de": "Neues Recovery ohne Kabel hochladen",
+   "scope": "web"
+  },
+  {
+   "it": "Aggiornare il recovery?",
+   "en": "Update the recovery?",
+   "es": "¿Actualizar el recovery?",
+   "de": "Recovery aktualisieren?",
+   "scope": "web"
+  },
+  {
+   "it": "Il recovery non e presente su questa scheda: si installa solo con il cavo USB.",
+   "en": "The recovery is not present on this board: it can only be installed with the USB cable.",
+   "es": "El recovery no está en esta placa: solo se instala con el cable USB.",
+   "de": "Auf dieser Platine ist kein Recovery: es lässt sich nur per USB-Kabel installieren.",
+   "scope": "web"
+  },
+  {
+   "it": "Recovery installato: {0}",
+   "en": "Installed recovery: {0}",
+   "es": "Recovery instalado: {0}",
+   "de": "Installiertes Recovery: {0}",
+   "scope": "web"
+  },
+  {
+   "it": "versione sconosciuta",
+   "en": "unknown version",
+   "es": "versión desconocida",
+   "de": "unbekannte Version",
+   "scope": "web"
+  },
+  {
+   "it": "Scegli il file .bin del recovery (al massimo {0} KB). La scheda lo controlla tutto prima di scriverlo: se e sbagliato il recovery attuale resta com'e.",
+   "en": "Choose the recovery .bin file (at most {0} KB). The board checks all of it before writing: if it is wrong the current recovery stays as it is.",
+   "es": "Elige el archivo .bin del recovery (como máximo {0} KB). La placa lo comprueba entero antes de escribirlo: si es erróneo, el recovery actual queda igual.",
+   "de": "Wähle die .bin-Datei des Recovery (höchstens {0} KB). Die Platine prüft sie vollständig vor dem Schreiben: ist sie falsch, bleibt das aktuelle Recovery unverändert.",
+   "scope": "web"
+  },
+  {
+   "it": "File del recovery (.bin)",
+   "en": "Recovery file (.bin)",
+   "es": "Archivo del recovery (.bin)",
+   "de": "Recovery-Datei (.bin)",
+   "scope": "web"
+  },
+  {
+   "it": "Impronta SHA-256 (facoltativa)",
+   "en": "SHA-256 hash (optional)",
+   "es": "Huella SHA-256 (opcional)",
+   "de": "SHA-256-Hash (optional)",
+   "scope": "web"
+  },
+  {
+   "it": "Non spegnere la scheda durante l'aggiornamento (pochi secondi). VesevOS continua a funzionare.",
+   "en": "Do not power off the board during the update (a few seconds). VesevOS keeps running.",
+   "es": "No apagues la placa durante la actualización (pocos segundos). VesevOS sigue funcionando.",
+   "de": "Platine während des Updates nicht ausschalten (wenige Sekunden). VesevOS läuft weiter.",
+   "scope": "web"
+  },
+  {
+   "it": "Scegli il file",
+   "en": "Choose the file",
+   "es": "Elige el archivo",
+   "de": "Datei wählen",
+   "scope": "web"
+  },
+  {
+   "it": "Controllo e scrivo il recovery...",
+   "en": "Checking and writing the recovery...",
+   "es": "Compruebo y escribo el recovery...",
+   "de": "Prüfe und schreibe das Recovery...",
+   "scope": "web"
+  },
+  {
+   "it": "Recovery aggiornato",
+   "en": "Recovery updated",
+   "es": "Recovery actualizado",
+   "de": "Recovery aktualisiert",
+   "scope": "web"
+  },
+  {
+   "it": "Da {0} a {1}. VesevOS non si riavvia: il nuovo recovery si usa al prossimo aggiornamento del firmware.",
+   "en": "From {0} to {1}. VesevOS does not restart: the new recovery is used at the next firmware update.",
+   "es": "De {0} a {1}. VesevOS no se reinicia: el nuevo recovery se usa en la próxima actualización del firmware.",
+   "de": "Von {0} auf {1}. VesevOS startet nicht neu: das neue Recovery wird beim nächsten Firmware-Update verwendet.",
+   "scope": "web"
+  },
+  {
+   "it": "  who             chi e collegato (web e seriale) e cosa sta facendo",
+   "en": "  who             who is connected (web and serial) and what they are doing",
+   "es": "  who             quien esta conectado (web y serie) y que hace",
+   "de": "  who             wer verbunden ist (Web und seriell) und was er tut",
+   "scope": "fw"
+  },
+  {
+   "it": "Nessuno collegato dal web",
+   "en": "Nobody connected from the web",
+   "es": "Nadie conectado desde la web",
+   "de": "Niemand ueber das Web verbunden",
+   "scope": "fw"
+  },
+  {
+   "it": "UTENTE     RUOLO          VIA   INDIRIZZO           DA  FERMO  ULTIMA AZIONE",
+   "en": "USER       ROLE           VIA   ADDRESS            FOR   IDLE  LAST ACTION",
+   "es": "USUARIO    ROL            VIA   DIRECCION        DESDE  INACT  ULTIMA ACCION",
+   "de": "BENUTZER   ROLLE          VIA   ADRESSE           SEIT   RUHT  LETZTE AKTION",
+   "scope": "fw"
+  },
+  {
+   "it": "bloccata (serve la password)",
+   "en": "locked (password needed)",
+   "es": "bloqueada (se necesita la contrasena)",
+   "de": "gesperrt (Passwort noetig)",
+   "scope": "fw"
+  },
+  {
+   "it": "sbloccata",
+   "en": "unlocked",
+   "es": "desbloqueada",
+   "de": "entsperrt",
+   "scope": "fw"
+  },
+  {
+   "it": "seriale (USB): %s",
+   "en": "serial (USB): %s",
+   "es": "serie (USB): %s",
+   "de": "seriell (USB): %s",
+   "scope": "fw"
+  },
+  {
+   "it": "seriale (USB): %s, ultimo comando '%s' %lu s fa",
+   "en": "serial (USB): %s, last command '%s' %lu s ago",
+   "es": "serie (USB): %s, ultimo comando '%s' hace %lu s",
+   "de": "seriell (USB): %s, letzter Befehl '%s' vor %lu s",
+   "scope": "fw"
+  },
+  {
+   "it": "seriale: comandi spenti",
+   "en": "serial: commands off",
+   "es": "serie: comandos desactivados",
+   "de": "seriell: Befehle aus",
+   "scope": "fw"
+  },
+  {
+   "it": "Collegati: {0}",
+   "en": "Connected: {0}",
+   "es": "Conectados: {0}",
+   "de": "Verbunden: {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Chi e collegato",
+   "en": "Who is connected",
+   "es": "Quién está conectado",
+   "de": "Wer ist verbunden",
+   "scope": "web"
+  },
+  {
+   "it": "Via",
+   "en": "Via",
+   "es": "Vía",
+   "de": "Über",
+   "scope": "web"
+  },
+  {
+   "it": "Collegato da",
+   "en": "Connected for",
+   "es": "Conectado desde hace",
+   "de": "Verbunden seit",
+   "scope": "web"
+  },
+  {
+   "it": "Ultima azione",
+   "en": "Last action",
+   "es": "Última acción",
+   "de": "Letzte Aktion",
+   "scope": "web"
+  },
+  {
+   "it": "ferma da {0}",
+   "en": "idle for {0}",
+   "es": "inactiva desde hace {0}",
+   "de": "ruht seit {0}",
+   "scope": "web"
+  },
+  {
+   "it": "Le letture automatiche della pagina non contano come azioni. Dalla seriale o dalla shell: comando who.",
+   "en": "The page's automatic reads do not count as actions. From the serial port or the shell: command who.",
+   "es": "Las lecturas automáticas de la página no cuentan como acciones. Desde el puerto serie o la shell: comando who.",
+   "de": "Automatische Abfragen der Seite zählen nicht als Aktionen. Über die serielle Schnittstelle oder die Shell: Befehl who.",
+   "scope": "web"
+  },
+  {
+   "it": "Rapporti dei crash cancellati",
+   "en": "Crash reports deleted",
+   "es": "Informes de fallos borrados",
+   "de": "Absturzberichte geloescht",
+   "scope": "fw"
+  },
+  {
+   "it": "  crash [clear|test]  rapporti degli ultimi crash (motivo, task, backtrace); test = crash di prova",
+   "en": "  crash [clear|test]  reports of the last crashes (reason, task, backtrace); test = test crash",
+   "es": "  crash [clear|test]  informes de los ultimos fallos (motivo, tarea, backtrace); test = fallo de prueba",
+   "de": "  crash [clear|test]  Berichte der letzten Abstuerze (Grund, Task, Backtrace); test = Testabsturz",
+   "scope": "fw"
+  },
+  {
+   "it": "Nessun crash registrato",
+   "en": "No crash recorded",
+   "es": "Ningun fallo registrado",
+   "de": "Kein Absturz aufgezeichnet",
+   "scope": "fw"
+  },
+  {
+   "it": "Per file e riga: xtensa-esp32s3-elf-addr2line -pfiaC -e VesevOS.ino.elf <indirizzi> (con il .elf della stessa versione)",
+   "en": "For file and line: xtensa-esp32s3-elf-addr2line -pfiaC -e VesevOS.ino.elf <addresses> (with the .elf of the same version)",
+   "es": "Para archivo y linea: xtensa-esp32s3-elf-addr2line -pfiaC -e VesevOS.ino.elf <direcciones> (con el .elf de la misma version)",
+   "de": "Fuer Datei und Zeile: xtensa-esp32s3-elf-addr2line -pfiaC -e VesevOS.ino.elf <Adressen> (mit der .elf derselben Version)",
+   "scope": "fw"
+  },
+  {
+   "it": "Crash di prova: la scheda si riavvia e lascia il rapporto (comando crash)",
+   "en": "Test crash: the board restarts and leaves the report (command crash)",
+   "es": "Fallo de prueba: la placa se reinicia y deja el informe (comando crash)",
+   "de": "Testabsturz: die Platine startet neu und hinterlaesst den Bericht (Befehl crash)",
+   "scope": "fw"
+  },
+  {
+   "it": "Aggiungi una lingua",
+   "en": "Add a language",
+   "es": "Añadir un idioma",
+   "de": "Sprache hinzufügen",
+   "scope": "web"
+  },
+  {
+   "it": "Scegli uno o piu file dalla cartella lang dello ZIP (per esempio en.json). Si possono aggiungere anche dopo, in Sistema > Localizzazione.",
+   "en": "Choose one or more files from the lang folder of the ZIP (for example en.json). They can also be added later, in System > Localization.",
+   "es": "Elige uno o más archivos de la carpeta lang del ZIP (por ejemplo en.json). También se pueden añadir después, en Sistema > Localización.",
+   "de": "Wähle eine oder mehrere Dateien aus dem Ordner lang des ZIP (zum Beispiel en.json). Sie lassen sich auch später hinzufügen, unter System > Lokalisierung.",
+   "scope": "web"
+  },
+  {
+   "it": "Ore di vita: %s",
+   "en": "Lifetime hours: %s",
+   "es": "Horas de vida: %s",
+   "de": "Lebensdauer: %s",
+   "scope": "fw"
+  },
+  {
+   "it": "Driver I2C sconosciuto (ammesso: bmp280)",
+   "en": "Unknown I2C driver (allowed: bmp280)",
+   "es": "Controlador I2C desconocido (admitido: bmp280)",
+   "de": "Unbekannter I2C-Treiber (erlaubt: bmp280)",
+   "scope": "fw"
+  },
+  {
+   "it": "C'e gia un sensore I2C (un solo bus)",
+   "en": "There is already an I2C sensor (only one bus)",
+   "es": "Ya hay un sensor I2C (un solo bus)",
+   "de": "Es gibt schon einen I2C-Sensor (nur ein Bus)",
+   "scope": "fw"
+  },
+  {
+   "it": "Indirizzo I2C del BMP280: 0x76 oppure 0x77",
+   "en": "BMP280 I2C address: 0x76 or 0x77",
+   "es": "Direccion I2C del BMP280: 0x76 o 0x77",
+   "de": "I2C-Adresse des BMP280: 0x76 oder 0x77",
+   "scope": "fw"
+  },
+  {
+   "it": "SDA e SCL devono essere due pin diversi",
+   "en": "SDA and SCL must be two different pins",
+   "es": "SDA y SCL deben ser dos pines distintos",
+   "de": "SDA und SCL muessen zwei verschiedene Pins sein",
+   "scope": "fw"
+  },
+  {
+   "it": "Il sensore non risponde",
+   "en": "The sensor does not answer",
+   "es": "El sensor no responde",
+   "de": "Der Sensor antwortet nicht",
+   "scope": "fw"
+  },
+  {
+   "it": "non risponde",
+   "en": "no answer",
+   "es": "no responde",
+   "de": "antwortet nicht",
+   "scope": "fw"
+  },
+  {
+   "it": "Indirizzo I2C non valido (da 0x08 a 0x77)",
+   "en": "Invalid I2C address (0x08 to 0x77)",
+   "es": "Direccion I2C no valida (de 0x08 a 0x77)",
+   "de": "Ungueltige I2C-Adresse (0x08 bis 0x77)",
+   "scope": "fw"
+  },
+  {
+   "it": "freq: 100000 oppure 400000",
+   "en": "freq: 100000 or 400000",
+   "es": "freq: 100000 o 400000",
+   "de": "freq: 100000 oder 400000",
+   "scope": "fw"
+  },
+  {
+   "it": "Manca driver= (classe i2c)",
+   "en": "Missing driver= (i2c class)",
+   "es": "Falta driver= (clase i2c)",
+   "de": "driver= fehlt (Klasse i2c)",
+   "scope": "fw"
+  },
+  {
+   "it": "Classe i2c: i segnali sono SDA e SCL, in questo ordine",
+   "en": "i2c class: the signals are SDA and SCL, in this order",
+   "es": "Clase i2c: las senales son SDA y SCL, en este orden",
+   "de": "Klasse i2c: die Signale sind SDA und SCL, in dieser Reihenfolge",
+   "scope": "fw"
+  },
+  {
+   "it": "active e pull non valgono per la classe i2c",
+   "en": "active and pull do not apply to the i2c class",
+   "es": "active y pull no valen para la clase i2c",
+   "de": "active und pull gelten nicht fuer die Klasse i2c",
+   "scope": "fw"
+  },
+  {
+   "it": "driver, addr e freq valgono solo per la classe i2c",
+   "en": "driver, addr and freq apply only to the i2c class",
+   "es": "driver, addr y freq valen solo para la clase i2c",
+   "de": "driver, addr und freq gelten nur fuer die Klasse i2c",
+   "scope": "fw"
+  },
+  {
+   "it": "pins: ETICHETTA=destinazione,colore",
+   "en": "pins: LABEL=destination,color",
+   "es": "pins: ETIQUETA=destino,color",
+   "de": "pins: BESCHRIFTUNG=Ziel,Farbe",
+   "scope": "fw"
+  },
+  {
+   "it": "Troppi fili in [pins] (massimo 8)",
+   "en": "Too many wires in [pins] (maximum 8)",
+   "es": "Demasiados cables en [pins] (maximo 8)",
+   "de": "Zu viele Kabel in [pins] (hoechstens 8)",
+   "scope": "fw"
+  },
+  {
+   "it": "Pin ripetuto in [pins]",
+   "en": "Repeated pin in [pins]",
+   "es": "Pin repetido en [pins]",
+   "de": "Pin in [pins] doppelt",
+   "scope": "fw"
+  },
+  {
+   "it": "Colore non valido (nome come red, rosso, nero, oppure #rrggbb)",
+   "en": "Invalid color (a name like red, rosso, nero, or #rrggbb)",
+   "es": "Color no valido (un nombre como red, rosso, nero, o #rrggbb)",
+   "de": "Ungueltige Farbe (ein Name wie red, rosso, nero, oder #rrggbb)",
+   "scope": "fw"
+  },
+  {
+   "it": "pins: la destinazione non e vcc, gnd o un segnale di [signals]",
+   "en": "pins: the destination is not vcc, gnd or a signal of [signals]",
+   "es": "pins: el destino no es vcc, gnd ni una senal de [signals]",
+   "de": "pins: das Ziel ist weder vcc, gnd noch ein Signal aus [signals]",
+   "scope": "fw"
+  },
+  {
+   "it": "pins: manca il filo di un segnale",
+   "en": "pins: a signal has no wire",
+   "es": "pins: falta el cable de una senal",
+   "de": "pins: fuer ein Signal fehlt das Kabel",
+   "scope": "fw"
+  },
+  {
+   "it": "verde",
+   "en": "green",
+   "es": "verde",
+   "de": "gruen",
+   "scope": "web"
+  },
+  {
+   "it": "giallo",
+   "en": "yellow",
+   "es": "amarillo",
+   "de": "gelb",
+   "scope": "web"
+  },
+  {
+   "it": "bianco",
+   "en": "white",
+   "es": "blanco",
+   "de": "weiss",
+   "scope": "web"
+  },
+  {
+   "it": "marrone",
+   "en": "brown",
+   "es": "marron",
+   "de": "braun",
+   "scope": "web"
+  },
+  {
+   "it": "viola",
+   "en": "purple",
+   "es": "violeta",
+   "de": "violett",
+   "scope": "web"
+  },
+  {
+   "it": "grigio",
+   "en": "gray",
+   "es": "gris",
+   "de": "grau",
+   "scope": "web"
+  },
+  {
+   "it": "rosa",
+   "en": "pink",
+   "es": "rosa",
+   "de": "rosa",
+   "scope": "web"
+  },
+  {
+   "it": "azzurro",
+   "en": "light blue",
+   "es": "celeste",
+   "de": "hellblau",
+   "scope": "web"
+  },
+  {
+   "it": "Sensore I2C (BMP280)",
+   "en": "I2C sensor (BMP280)",
+   "es": "Sensor I2C (BMP280)",
+   "de": "I2C-Sensor (BMP280)",
+   "scope": "web"
+  },
+  {
+   "it": "Temperatura e pressione si aggiornano da sole ogni due secondi. Se il sensore non risponde, controlla i fili, l'indirizzo (0x76 o 0x77) e l'alimentazione.",
+   "en": "Temperature and pressure update by themselves every two seconds. If the sensor does not answer, check the wires, the address (0x76 or 0x77) and the power.",
+   "es": "La temperatura y la presion se actualizan solas cada dos segundos. Si el sensor no responde, revisa los cables, la direccion (0x76 o 0x77) y la alimentacion.",
+   "de": "Temperatur und Druck werden alle zwei Sekunden von selbst aktualisiert. Antwortet der Sensor nicht, pruefe die Kabel, die Adresse (0x76 oder 0x77) und die Stromversorgung.",
+   "scope": "web"
+  },
+  {
+   "it": "Nelle app: use={0} e poi dev_get(\"{0}\") per la temperatura (centesimi di grado) e dev_get(\"{0}.p\") per la pressione (pascal).",
+   "en": "In apps: use={0}, then dev_get(\"{0}\") for the temperature (hundredths of a degree) and dev_get(\"{0}.p\") for the pressure (pascal).",
+   "es": "En las apps: use={0} y luego dev_get(\"{0}\") para la temperatura (centesimas de grado) y dev_get(\"{0}.p\") para la presion (pascales).",
+   "de": "In Apps: use={0}, dann dev_get(\"{0}\") fuer die Temperatur (Hundertstel Grad) und dev_get(\"{0}.p\") fuer den Druck (Pascal).",
+   "scope": "web"
+  },
+  {
+   "it": "Impossibile salvare le periferiche (io.cfg): nessuna modifica fatta. Controlla lo spazio libero",
+   "en": "Cannot save the peripherals (io.cfg): nothing was changed. Check the free space",
+   "es": "No se pueden guardar los perifericos (io.cfg): no se ha cambiado nada. Revisa el espacio libre",
+   "de": "Peripheriegeraete (io.cfg) koennen nicht gespeichert werden: nichts wurde geaendert. Freien Speicher pruefen",
+   "scope": "fw"
+  },
+  {
+   "it": "io.cfg era vuoto o illeggibile: uso la copia di sicurezza (io.cfg.bak)",
+   "en": "io.cfg was empty or unreadable: using the backup copy (io.cfg.bak)",
+   "es": "io.cfg estaba vacio o ilegible: uso la copia de seguridad (io.cfg.bak)",
+   "de": "io.cfg war leer oder unlesbar: die Sicherungskopie (io.cfg.bak) wird verwendet",
+   "scope": "fw"
+  },
+  {
+   "it": "io.cfg illeggibile e senza copia di sicurezza: nessuna periferica caricata",
+   "en": "io.cfg is unreadable and there is no backup copy: no peripherals loaded",
+   "es": "io.cfg es ilegible y no hay copia de seguridad: no se ha cargado ningun periferico",
+   "de": "io.cfg ist unlesbar und es gibt keine Sicherungskopie: keine Peripheriegeraete geladen",
+   "scope": "fw"
+  },
+  {
+   "it": "Alcune periferiche di io.cfg non sono state caricate (pin occupato): restano nel file",
+   "en": "Some peripherals in io.cfg were not loaded (pin in use): they stay in the file",
+   "es": "Algunos perifericos de io.cfg no se han cargado (pin ocupado): siguen en el archivo",
+   "de": "Einige Peripheriegeraete in io.cfg wurden nicht geladen (Pin belegt): sie bleiben in der Datei",
+   "scope": "fw"
+  },
+  {
+   "it": "Collegati",
+   "en": "Connected",
+   "es": "Conectados",
+   "de": "Verbunden",
+   "scope": "web"
+  },
+  {
+   "it": "Sessioni web attive negli ultimi 2 minuti",
+   "en": "Web sessions active in the last 2 minutes",
+   "es": "Sesiones web activas en los últimos 2 minutos",
+   "de": "Aktive Websitzungen in den letzten 2 Minuten",
+   "scope": "web"
+  },
+  {
+   "it": "Attenzione: piu di un collegato",
+   "en": "Warning: more than one connection",
+   "es": "Atención: hay más de una conexión",
+   "de": "Achtung: mehr als eine Verbindung",
    "scope": "web"
   }
  ]
