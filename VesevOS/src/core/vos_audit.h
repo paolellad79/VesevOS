@@ -6,18 +6,21 @@
 //  GIALLO = valore permesso ma rischioso: resta, con un avviso fisso.
 //  INFO   = solo una riga nel registro (chi ha cambiato cosa).
 #pragma once
-#include <Arduino.h>
+#include <stdint.h>
+#include "vos_heapbuf.h"
+
+#define AUDIT_JSON_MAX 16384                          // tetto del JSON degli allarmi e dello storico
 
 enum AuditLevel : uint8_t { AUD_INFO = 0, AUD_YELLOW = 1, AUD_RED = 2 };
 
 void   auditFix();                                   // corregge i valori vietati (chiamata da cfgSave)
 void   auditRefresh();                               // ricalcola gli allarmi
-void   auditDiff(const String& oldTxt, const String& newTxt, const String& origin);   // registro delle modifiche
-void   auditEvent(AuditLevel lv, const String& key, const String& text);              // evento da altri moduli
-void   auditClear(const String& key);                // l'evento non c'e piu
+void   auditDiff(const char* oldTxt, const char* newTxt, const char* origin);   // registro delle modifiche
+void   auditEvent(AuditLevel lv, const char* key, const char* text);              // evento da altri moduli
+void   auditClear(const char* key);                // l'evento non c'e piu
 void   auditTick();                                  // ogni minuto: file cambiato fuori dal pannello?
 int    auditCount(AuditLevel lv);                    // allarmi attivi di quel livello (non visti)
-String auditJson();                                  // {"alarms":[...],"history":[...]}
-String auditText();
+void   auditJson(HeapBuf& j);                                // {"alarms":[...],"history":[...]}
+void   auditText(HeapBuf& t);
 bool   auditAck(int n);                              // presa visione; 0 = tutti (se la causa resta, l'allarme resta in elenco)
 void   auditInit();

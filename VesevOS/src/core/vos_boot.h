@@ -3,10 +3,14 @@
 // VesevOS - vos_boot.h
 // Ordine di avvio dei servizi, con dipendenze.
 #pragma once
-#include <Arduino.h>
+#include "vos_errbuf.h"
+#include <stddef.h>
+#include <stdint.h>
+#include "vos_heapbuf.h"
 
 void   bootRun();                                              // avvia i servizi nell'ordine scelto (da setup)
 void   bootStable();                                           // da chiamare nel loop: dopo 60 s l'avvio e riuscito
-String bootJson();                                             // ordine, dipendenze, tempi (per la pagina)
-bool   bootSetOrder(const String& csv, String& result, String& err);   // salva (correggendo con le dipendenze)
+#define BOOT_JSON_MAX 2048
+bool   bootJson(HeapBuf& out);                                 // ordine, dipendenze, tempi (per la pagina)
+bool   bootSetOrder(const char* csv, char* result, size_t resultLen, ErrBuf& err);   // salva (correggendo con le dipendenze)
 void   bootResetOrder();                                       // torna all'ordine predefinito

@@ -27,6 +27,10 @@ int main() {
   CHECK(!serialSet("input", "no", e) && cfg.serIn);
   CHECK(!serialSet("echo", "false", e) && cfg.serEcho);
   CHECK(!serialSet("colore", "rosso", e));                       // impostazione che non esiste
+  CHECK(serialSet("tx", " 7", e) && cfg.serTx == 7);             // come String::toInt() (atol): spazi iniziali e cifre seguite da testo si leggono
+  CHECK(serialSet("tx", "9x", e) && cfg.serTx == 9);
+  CHECK(!serialSet(nullptr, nullptr, e));                        // puntatori nulli = testo vuoto: impostazione sconosciuta
+  CHECK(!serialSet("tx", nullptr, e) && cfg.serTx == 9);
   // velocita: solo quelle della lista; la nuova e "in prova" finche non si conferma
   CHECK(!serialSet("baud", "1234", e) && cfg.serBaud == 115200);
   CHECK(serialSet("baud", "9600", e));
@@ -36,7 +40,7 @@ int main() {
   CHECK(serialKeep() && cfg.serBaud == 19200);
   CHECK(serialJson().indexOf("\"trial\":false") >= 0);
   CHECK(!serialKeep());                                           // niente da confermare
-  CHECK(serialText().indexOf("19200") >= 0);
+  CHECK(serialText().find("19200") != std::string::npos);
   // PC che non legge: la prima scrittura in ritardo fa buttare via l'uscita per 2 secondi, senza altre attese
   cfgDefaults();
   unsigned b0 = Serial.calls;

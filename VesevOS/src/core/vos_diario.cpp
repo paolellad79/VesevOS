@@ -7,9 +7,13 @@
 #include "vos_i18n.h"
 #include "vos_util.h"
 #include "vos_sys.h"
+#include "vos_strbuf.h"
 #include "../drivers/vos_drv_fs.h"
 #include <esp_system.h>
+#include <algorithm>
 #include <time.h>
+#include "../drivers/vos_drv_cpu.h"
+#include "../drivers/vos_drv_heap.h"
 
 #ifndef RTC_NOINIT_ATTR
 #define RTC_NOINIT_ATTR
@@ -77,7 +81,7 @@ void diaryNote(const char* line) {
 
 void diaryExtra(uint32_t maxBlock, uint32_t stalls, const char* stuck) {
   SNAP_LOCK();
-  g_snap.maxBlockKb = (uint16_t)min<uint32_t>(maxBlock / 1024, 65535); g_snap.stalls = (uint16_t)min<uint32_t>(stalls, 65535);
+  g_snap.maxBlockKb = (uint16_t)std::min<uint32_t>(maxBlock / 1024, 65535); g_snap.stalls = (uint16_t)std::min<uint32_t>(stalls, 65535);
   strncpy(g_snap.stuck, stuck ? stuck : "", sizeof(g_snap.stuck) - 1); g_snap.stuck[sizeof(g_snap.stuck) - 1] = 0;
   snapSeal();
   SNAP_UNLOCK();
@@ -95,10 +99,10 @@ void diaryTick(uint32_t upSec, uint32_t minHeap, const char* topTask, int topPct
   SNAP_UNLOCK();
 }
 
-static void* bigAlloc(size_t n) { void* p = psramFound() ? ps_malloc(n) : nullptr; return p ? p : malloc(n); }   // PSRAM se c'e: la RAM interna e poca
+static void* bigAlloc(size_t n) { return drvMallocBig(n); }   // PSRAM se c'e: la RAM interna e poca
 
 static int loadAll(BootRec* r) {
-  File f = drvFsOpen(DIARY_FILE, "r");
+  VosFile f = drvFsOpen(DIARY_FILE, "r");
   if (!f) return 0;
   DiaryHdr h;
   if (f.read((uint8_t*)&h, sizeof(h)) != sizeof(h) || h.magic != HDR_MAGIC) { f.close(); return 0; }
@@ -119,7 +123,7 @@ static int loadAll(BootRec* r) {
   return n;
 }
 static void saveAll(const BootRec* r, int n) {
-  File f = drvFsOpen(DIARY_FILE, "w");
+  VosFile f = drvFsOpen(DIARY_FILE, "w");
   if (!f) return;
   DiaryHdr h = { HDR_MAGIC, HDR_VER, (uint16_t)sizeof(BootRec) };
   f.write((const uint8_t*)&h, sizeof(h));
@@ -128,7 +132,7 @@ static void saveAll(const BootRec* r, int n) {
 }
 
 int diaryCount() {
-  File f = drvFsOpen(DIARY_FILE, "r");
+  VosFile f = drvFsOpen(DIARY_FILE, "r");
   if (!f) return 0;
   DiaryHdr h; size_t sz = f.size();
   bool okHdr = sz >= sizeof(DiaryHdr) && f.read((uint8_t*)&h, sizeof(h)) == sizeof(h) && h.magic == HDR_MAGIC && ((h.ver == HDR_VER && h.recSize == sizeof(BootRec)) || (h.ver == 1 && h.recSize == sizeof(BootRecV1)));
@@ -157,47 +161,60 @@ void diaryInit() {
   r[n++] = b;
   saveAll(r, n);
   free(r);
-  vlog("AVVIO n.%lu: motivo %s, RAM libera %u KB, minima %u KB, %u MHz", (unsigned long)b.n, sysResetName(g_reasonNow).c_str(),
-       (unsigned)(ESP.getFreeHeap() / 1024), (unsigned)(ESP.getMinFreeHeap() / 1024), (unsigned)getCpuFrequencyMhz());
+  char rn[64]; sysResetNameTo(g_reasonNow, rn, sizeof rn);
+  vlog("AVVIO n.%lu: motivo %s, RAM libera %u KB, minima %u KB, %u MHz", (unsigned long)b.n, rn,
+       (unsigned)(drvHeapFree() / 1024), (unsigned)(drvHeapMinFree() / 1024), (unsigned)drvCpuMhz());
   if (abnormal(g_reasonNow)) {
-    if (b.hasSnap) vlog("ATTENZIONE: riavvio anomalo (%s). Prima era acceso da %lu s, fase %s, %lu MHz, RAM minima %lu KB, task %s", sysResetName(g_reasonNow).c_str(),
+    if (b.hasSnap) vlog("ATTENZIONE: riavvio anomalo (%s). Prima era acceso da %lu s, fase %s, %lu MHz, RAM minima %lu KB, task %s", rn,
                         (unsigned long)b.prevUp, b.stage[0] ? b.stage : "-", (unsigned long)b.mhz, (unsigned long)(b.minHeap / 1024), b.task[0] ? b.task : "-");
-    else vlog("ATTENZIONE: riavvio anomalo (%s), nessun dettaglio salvato", sysResetName(g_reasonNow).c_str());
+    else vlog("ATTENZIONE: riavvio anomalo (%s), nessun dettaglio salvato", rn);
     if (b.last[0]) vlog("ATTENZIONE: ultima riga grave prima del riavvio: %s", b.last);
   }
 }
 
-String diaryText(int maxN, bool withLast) {
+// Una voce occupa al massimo ~450 byte (riga dell'avvio, "era acceso da...", ritardi, ultima riga grave): 480 con margine.
+#define DIARY_REC_TEXT 480
+
+std::string diaryText(int maxN, bool withLast) {
   BootRec* r = (BootRec*)bigAlloc(sizeof(BootRec) * (DIARY_MAX + 1));
   if (!r) return "";
   int n = loadAll(r);
-  String o;
+  if (maxN > DIARY_MAX) maxN = DIARY_MAX;
+  StrText t(maxN > 0 ? (size_t)maxN * DIARY_REC_TEXT + 64 : 64);
+  StrBuf& o = t.buf();
   for (int i = n - 1, c = 0; i >= 0 && c < maxN; i--, c++) {
     const BootRec& b = r[i];
-    String when;
-    if (b.epoch) { time_t t = (time_t)b.epoch; struct tm tmv; localtime_r(&t, &tmv); char s[24]; strftime(s, sizeof(s), "%d/%m %H:%M:%S", &tmv); when = s; }
-    else when = tr("ora non nota");
-    o += trf("Avvio n.%u - %s - %s", (unsigned)b.n, when.c_str(), sysResetName(b.reason).c_str());
-    if (abnormal(b.reason)) o += " (!)";
-    o += "\n";
+    char when[24];
+    if (b.epoch) { time_t tt = (time_t)b.epoch; struct tm tmv; localtime_r(&tt, &tmv); strftime(when, sizeof(when), "%d/%m %H:%M:%S", &tmv); }
+    else snprintf(when, sizeof(when), "%s", tr("ora non nota"));
+    char rn[64]; sysResetNameTo(b.reason, rn, sizeof rn);
+    o.addf(tr("Avvio n.%u - %s - %s"), (unsigned)b.n, when, rn);
+    if (abnormal(b.reason)) o.add(" (!)");
+    o.add('\n');
     if (b.hasSnap) {
-      o += "    " + trf("era acceso da %s, RAM minima %u KB", uptimeStr(b.prevUp).c_str(), (unsigned)(b.minHeap / 1024));
-      if (b.task[0]) o += "; " + trf("task piu attivo: %s", b.task);
-      if (b.stage[0]) o += "; " + trf("fase di avvio: %s", b.stage);
-      if (b.mhz) o += "; " + trf("%u MHz", (unsigned)b.mhz);
-      o += "\n";
+      char up[64]; uptimeTo(b.prevUp, up, sizeof up);
+      o.add("    ").addf(tr("era acceso da %s, RAM minima %u KB"), up, (unsigned)(b.minHeap / 1024));
+      if (b.task[0]) o.add("; ").addf(tr("task piu attivo: %s"), b.task);
+      if (b.stage[0]) o.add("; ").addf(tr("fase di avvio: %s"), b.stage);
+      if (b.mhz) o.add("; ").addf(tr("%u MHz"), (unsigned)b.mhz);
+      o.add('\n');
       if (b.maxBlockKb || b.stalls || b.stuck[0]) {
-        String x;
-        if (b.maxBlockKb) x += trf("blocco RAM piu grande %u KB", (unsigned)b.maxBlockKb);
-        if (b.stalls) { if (x.length()) x += "; "; x += trf("seriale non letta %u volte", (unsigned)b.stalls); }
-        if (b.stuck[0]) { if (x.length()) x += "; "; x += trf("servizio in ritardo: %s", b.stuck); }
-        o += "    " + x + "\n";
+        const char* sep = "    ";
+        if (b.maxBlockKb) { o.add(sep).addf(tr("blocco RAM piu grande %u KB"), (unsigned)b.maxBlockKb); sep = "; "; }
+        if (b.stalls) { o.add(sep).addf(tr("seriale non letta %u volte"), (unsigned)b.stalls); sep = "; "; }
+        if (b.stuck[0]) o.add(sep).addf(tr("servizio in ritardo: %s"), b.stuck);
+        o.add('\n');
       }
-      if (withLast && b.last[0]) o += "    " + trf("ultima riga grave: %s", b.last) + "\n";
-    } else o += "    " + String(tr("nessun dettaglio prima del riavvio (accensione o prima registrazione)")) + "\n";
+      if (withLast && b.last[0]) o.add("    ").addf(tr("ultima riga grave: %s"), b.last).add('\n');
+    } else o.add("    ").add(tr("nessun dettaglio prima del riavvio (accensione o prima registrazione)")).add('\n');
   }
   free(r);
-  return o;
+  return t.take();
 }
 
 void diaryClear() { drvFsRemove(DIARY_FILE); }
+
+uint32_t diaryFileBytes() {
+  VosFile f = drvFsOpen(DIARY_FILE, "r");
+  return (f && !f.isDirectory()) ? (uint32_t)f.size() : 0;
+}

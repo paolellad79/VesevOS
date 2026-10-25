@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_sys.cpp
+#include <math.h>
+#include "../drivers/vos_drv_task.h"
 #include "vos_hooks.h"
 #include "vos_sys.h"
 #include "vos_diario.h"
@@ -14,13 +16,20 @@
 #include "esp_timer.h"
 #include "esp_heap_caps.h"
 #include "esp_system.h"
-#include "esp_freertos_hooks.h"
+#include <freertos/FreeRTOS.h>
+#include "esp_freertos_hooks.h"      // dopo FreeRTOS.h (altrimenti non compila)
 #include "../drivers/vos_drv_fs.h"
 #include "../drivers/vos_drv_nvs.h"
 #include "vos_wd.h"
 #include "vos_serial.h"
 #include "vos_audit.h"
 #include "vos_fw.h"
+#include "../drivers/vos_drv_time.h"
+#include "../drivers/vos_drv_console.h"
+#include "../core/vos_clamp.h"
+#include "../drivers/vos_drv_cpu.h"
+#include "../drivers/vos_drv_heap.h"
+#include "../drivers/vos_drv_sys.h"
 
 #define HIST 60
 
@@ -31,12 +40,12 @@ static float g_temp = 0;
 static uint8_t g_cpuH[HIST], g_cpuHn = 0;
 static uint8_t g_c0H[HIST], g_c1H[HIST], g_ramH[HIST], g_psH[HIST], g_flH[HIST];   // storie per i grafici della Home (percentuali)
 static uint8_t g_flPct = 0;                // percentuale file in flash, riletta ogni 30 s (la lettura costa)
-static int16_t g_tempH[HIST];            // decimi di grado
+static int16_t g_tempH[HIST];            // gradi interi
 static uint8_t g_tempHn = 0;
 static uint32_t g_boot = 0;
 static uint32_t g_lifeBase = 0;       // secondi di vita accumulati fino all'ultimo salvataggio (contaore, come un contachilometri)
 static uint32_t g_lifeSaved = 0;      // uptime (s) al momento dell'ultimo salvataggio
-static String g_reset;
+static char g_reset[48] = "";
 static char g_topName[16] = "";      // task piu attivo (non IDLE), aggiornato ogni secondo
 static int  g_topPct = 0;
 static bool g_hot = false;      // allarme temperatura
@@ -44,20 +53,22 @@ static bool g_hot = false;      // allarme temperatura
 static bool idle0() { g_idle[0] = g_idle[0] + 1; return false; }
 static bool idle1() { g_idle[1] = g_idle[1] + 1; return false; }
 
-static String resetName(int r) {
+static void resetNameTo(int r, char* out, size_t n) {
+  const char* t = nullptr;
   switch (r) {
-    case 1:  return tr("Accensione");
-    case 3:  return tr("Reset software");
-    case 4:  return tr("Crash (panic)");
-    case 5:  return tr("Interrupt watchdog");
-    case 6:  return tr("Task watchdog");
-    case 7:  return tr("Altro watchdog");
-    case 8:  return tr("Uscita da deep sleep");
-    case 9:  return tr("Brownout (poca tensione)");
-    case 11: return tr("USB (apertura monitor seriale)");
-    case 12: return tr("Reset da JTAG");
-    default: return trf("Sconosciuto (%d)", (int)r);
+    case 1:  t = tr("Accensione"); break;
+    case 3:  t = tr("Reset software"); break;
+    case 4:  t = tr("Crash (panic)"); break;
+    case 5:  t = tr("Interrupt watchdog"); break;
+    case 6:  t = tr("Task watchdog"); break;
+    case 7:  t = tr("Altro watchdog"); break;
+    case 8:  t = tr("Uscita da deep sleep"); break;
+    case 9:  t = tr("Brownout (poca tensione)"); break;
+    case 11: t = tr("USB (apertura monitor seriale)"); break;
+    case 12: t = tr("Reset da JTAG"); break;
+    default: snprintf(out, n, tr("Sconosciuto (%d)"), r); return;
   }
+  snprintf(out, n, "%s", t);
 }
 
 uint32_t sysLifeSec() { return g_lifeBase + (uint32_t)(esp_timer_get_time() / 1000000ULL) - g_lifeSaved; }
@@ -70,9 +81,12 @@ static void lifeSave() {
   DrvNvs p;
   if (p.begin("vos", false)) { p.putUInt("life", g_lifeBase); p.end(); }
 }
+void sysLifeSave() { lifeSave(); }
 
 static void monitorTask(void*);
-static void monitorStart() { xTaskCreatePinnedToCore(monitorTask, "monitor", 4608, NULL, 1, NULL, 0); }
+static void monitorStart() {
+  drvTaskCreate(monitorTask, "monitor", 4608, NULL, 1, NULL, DRV_CORE_ANY);   // core: automatico (prima: core 0 fisso)
+}
 
 // Carico vero per core dal tempo che i task IDLE0/IDLE1 NON hanno girato (stessa fonte del Task manager).
 // La taratura a conteggio sbagliava dopo i cambi di frequenza (mostrava 100% con la scheda quasi ferma).
@@ -106,7 +120,7 @@ static bool idleRunTimeLoad(int& l0, int& l1) {
   if (have && f0 && f1 && tot > pTot) {
     uint32_t dt = tot - pTot;
     int a0 = (int)(100ULL * (i0 - pI0) / dt), a1 = (int)(100ULL * (i1 - pI1) / dt);
-    l0 = constrain(100 - a0, 0, 100); l1 = constrain(100 - a1, 0, 100); ok = true;
+    l0 = vosClamp(100 - a0, 0, 100); l1 = vosClamp(100 - a1, 0, 100); ok = true;
   }
   pTot = tot; pI0 = i0; pI1 = i1; have = f0 && f1;
   return ok;
@@ -116,18 +130,16 @@ static bool idleRunTimeLoad(int& l0, int& l1) {
 }
 static void monitorTask(void*) {
   uint32_t last[2] = {0, 0};
-  int lowCount = 0;
-  bool skip = false;                 // salta la misura subito dopo un cambio di frequenza
-  wdWatch("monitor", 20);
+  wdWatch("monitor", wdLimit("monitor"));          // base 60 s
   for (;;) {
     vTaskDelay(pdMS_TO_TICKS(1000));
     wdBeat("monitor");
     auditTick();
-    uint32_t mhz = getCpuFrequencyMhz();
+    uint32_t mhz = drvCpuMhz();
     uint32_t d0 = g_idle[0] - last[0], d1 = g_idle[1] - last[1];
     last[0] = g_idle[0]; last[1] = g_idle[1];
-    if (!skip) {
-      // conteggi riportati a 240 MHz, cosi la taratura vale per ogni frequenza
+    {
+      // conteggi riportati a 240 MHz. Con il gestore di energia la frequenza cambia anche dentro il secondo: e una stima (la misura buona e quella di FreeRTOS)
       uint32_t n0 = (uint32_t)((uint64_t)d0 * 240 / mhz), n1 = (uint32_t)((uint64_t)d1 * 240 / mhz);
       if (n0 > g_maxIdle[0]) g_maxIdle[0] = n0;
       if (n1 > g_maxIdle[1]) g_maxIdle[1] = n1;
@@ -137,53 +149,42 @@ static void monitorTask(void*) {
       int l0 = 100 - (int)(100ULL * d0 / e0);
       int l1 = 100 - (int)(100ULL * d1 / e1);
       { int m0, m1; if (idleRunTimeLoad(m0, m1)) { l0 = m0; l1 = m1; } }   // se ci sono le statistiche di FreeRTOS, valgono piu della taratura a conteggio
-      g_cpu0 = constrain(l0, 0, 100); g_cpu1 = constrain(l1, 0, 100);
-      g_cpu = constrain((l0 + l1) / 2, 0, 100);
+      g_cpu0 = vosClamp(l0, 0, 100); g_cpu1 = vosClamp(l1, 0, 100);
+      g_cpu = vosClamp((l0 + l1) / 2, 0, 100);
     }
-    skip = false;
-    g_temp = temperatureRead();
+    g_temp = drvTempC();
     { static uint32_t ftick = 0; ftick++;                      // ogni 10 s: la RAM e a pezzi troppo piccoli? (avviso in pagina, spento con un po' di margine)
       if (ftick % 10 == 0 && ftick > 30) {
-        uint32_t big = ESP.getMaxAllocHeap();
+        uint32_t big = drvHeapMaxBlock();
         if (serviceState("ble") == SVC_ON || big > 40000) auditClear("frag");        // con il Bluetooth acceso il pezzo piccolo e normale (se ne va quando si spegne)
         else if (big < 30000) auditEvent(AUD_YELLOW, "frag", tr("Memoria frammentata: il pezzo di RAM libero piu grande e piccolo. Chiudi la pagina web o spegni i servizi che non servono: si libera da sola"));
         hookCall(g_hooks.webTrimIdle);                                      // RAM a pezzi e nessuno usa la pagina: chiude i collegamenti HTTPS fermi
       } }
     { static uint32_t dtick = 0; dtick++;
-      diaryTick(dtick, ESP.getMinFreeHeap(), g_topName, g_topPct, mhz);
-      if (dtick <= 15 || dtick % 10 == 0) { char st[20]; wdStalest(st, sizeof(st)); diaryExtra(ESP.getMaxAllocHeap(), serStallCount(), st); }                       // istantanea per il diario dei riavvii (in RTC ogni 10 s)
+      diaryTick(dtick, drvHeapMinFree(), g_topName, g_topPct, mhz);
+      if (dtick <= 15 || dtick % 10 == 0) { char st[20]; wdStalest(st, sizeof(st)); diaryExtra(drvHeapMaxBlock(), serStallCount(), st); }                       // istantanea per il diario dei riavvii (in RTC ogni 10 s)
       if (dtick % 60 == 0) vlogl(LG_DBG, "TOP: task piu attivo %s %d%%, CPU %d%% (core %d%% e %d%%), %u MHz, %d C, RAM libera %u KB, minima %u KB",
-                                 g_topName[0] ? g_topName : "-", g_topPct, g_cpu, g_cpu0, g_cpu1, (unsigned)mhz, (int)g_temp, (unsigned)(ESP.getFreeHeap() / 1024), (unsigned)(ESP.getMinFreeHeap() / 1024)); }
+                                 g_topName[0] ? g_topName : "-", g_topPct, g_cpu, g_cpu0, g_cpu1, (unsigned)mhz, (int)g_temp, (unsigned)(drvHeapFree() / 1024), (unsigned)(drvHeapMinFree() / 1024)); }
     { static uint32_t lifeTick = 0; if (++lifeTick >= 600) { lifeTick = 0; lifeSave(); } }   // ogni 10 minuti
-    // allarme: sopra 80 C LED rosso lampeggiante, torna normale sotto 75 C
-    if (!g_hot && g_temp > 80.0f) { g_hot = true; hookLedFault(true); vlog("ATTENZIONE: temperatura CPU alta (%.1f C)", g_temp); }
-    else if (g_hot && g_temp < 75.0f) { g_hot = false; hookLedFault(false); vlog("Temperatura CPU tornata normale (%.1f C)", g_temp); }
-    // scalatura automatica: sale subito se serve, scende piano se la CPU e libera
-    {
-      uint32_t target = mhz;
-      bool tls = hookWebHttpsUp();
-      uint32_t floorMhz = tls ? 160 : 80;  // con HTTPS acceso mai sotto 160: a 80 MHz la stretta di mano TLS blocca la CPU oltre 5 s (Task watchdog, analisi del 15/10)
-      { static bool warned = false;        // velocita fissa troppo bassa per HTTPS: avviso giallo in pagina
-        bool low = tls && cfg.cpuMhz != 0 && cfg.cpuMhz < 160;
-        if (low && !warned) { warned = true; vlog("ATTENZIONE: CPU fissa a %u MHz con HTTPS acceso", (unsigned)cfg.cpuMhz); auditEvent(AUD_YELLOW, "cpulow", tr("CPU fissa sotto 160 MHz con HTTPS acceso: la scheda puo bloccarsi e riavviarsi. Usa il modo automatico o almeno 160 MHz")); }
-        else if (!low && warned) { warned = false; auditClear("cpulow"); } }
-      bool settle = millis() < 60000;      // primo minuto: niente cambi di frequenza (Wi-Fi, NTP e HTTPS si assestano; un cambio dopo un reset da USB ha dato un Task watchdog)
-      if (settle && g_temp <= 80.0f) { lowCount = 0; }
-      else if (cfg.cpuMhz != 0) { target = (g_temp > 80.0f) ? 80 : cfg.cpuMhz; lowCount = 0; }   // velocita fissa
-      else if (g_temp > 80.0f) { target = 80; lowCount = 0; }
-      else if (g_cpu >= 60) { target = (mhz <= 80) ? 160 : 240; lowCount = 0; }
-      else if (mhz < floorMhz) { target = floorMhz; lowCount = 0; }   // HTTPS acceso dopo: risale subito
-      else if (g_cpu < 20) { if (++lowCount >= 5) { lowCount = 0; target = (mhz > 160) ? 160 : floorMhz; } }
-      else lowCount = 0;
-      if (target != mhz) { setCpuFrequencyMhz(target); skip = true; }
-    }
-    { static uint32_t ftk = 0;
-      if (ftk++ % 30 == 0) { size_t ft = drvFsTotal(); g_flPct = ft ? (uint8_t)constrain((int)(100ULL * drvFsUsed() / ft), 0, 100) : 0; }
+    // caldo: livelli, riduzione del massimo della CPU e allarme (soglie e regole in vos_cpupm.cpp)
+    g_hot = hookCpuTick(g_temp, g_cpu0 > g_cpu1 ? g_cpu0 : g_cpu1) >= 2;   // governor + caldo (gancio verso vos_cpupm): il solo punto che cambia la frequenza; 2 = THERM_REDUCED o peggio
+    { // Spazio usato della memoria interna. Il calcolo vero scorre tutto il file system: con tante voci dura piu di 5 s (Task watchdog), quindi lo fa
+      // solo qui, di rado (mai nei primi 20 s) e a priorita da idle. Il controllo "monitor" aspetta di piu mentre dura. Gli altri leggono il valore ricordato.
+      uint32_t nowS = drvMillis() / 1000;
+      bool fresh = drvFsUsedDue(nowS);
+      if (fresh) {
+        uint16_t lim = wdLimit("monitor");
+        wdWatch("monitor", lim > WD_FS_REFRESH_SEC ? lim : WD_FS_REFRESH_SEC);   // base 300 s: il calcolo scorre tutto il file system
+        drvFsUsedRefresh(nowS);
+        wdWatch("monitor", wdLimit("monitor"));                                  // riletto: puo essere cambiato nel frattempo
+      }
+      static uint32_t ftk = 0;
+      if (fresh | (ftk++ % 30 == 0)) { size_t ft = drvFsTotal(); g_flPct = ft ? (uint8_t)vosClamp((int)(100ULL * drvFsUsed() / ft), 0, 100) : 0; }
     }
     hookCall(g_hooks.trafficTick);
-    uint32_t ht = ESP.getHeapSize(), pt = ESP.getPsramSize();
-    uint8_t rp = ht ? (uint8_t)constrain((int)(100 - 100ULL * ESP.getFreeHeap() / ht), 0, 100) : 0;
-    uint8_t pp = pt ? (uint8_t)constrain((int)(100 - 100ULL * ESP.getFreePsram() / pt), 0, 100) : 0;
+    uint32_t ht = drvHeapTotal(), pt = drvPsramTotal();
+    uint8_t rp = ht ? (uint8_t)vosClamp((int)(100 - 100ULL * drvHeapFree() / ht), 0, 100) : 0;
+    uint8_t pp = pt ? (uint8_t)vosClamp((int)(100 - 100ULL * drvPsramFree() / pt), 0, 100) : 0;
     if (g_cpuHn >= HIST) {
       memmove(g_cpuH, g_cpuH + 1, HIST - 1); memmove(g_c0H, g_c0H + 1, HIST - 1); memmove(g_c1H, g_c1H + 1, HIST - 1);
       memmove(g_ramH, g_ramH + 1, HIST - 1); memmove(g_psH, g_psH + 1, HIST - 1); memmove(g_flH, g_flH + 1, HIST - 1);
@@ -192,17 +193,15 @@ static void monitorTask(void*) {
     }
     g_cpuH[g_cpuHn] = g_cpu; g_c0H[g_cpuHn] = g_cpu0; g_c1H[g_cpuHn] = g_cpu1;
     g_ramH[g_cpuHn] = rp; g_psH[g_cpuHn] = pp; g_flH[g_cpuHn] = g_flPct;
-    g_tempH[g_cpuHn] = (int16_t)(g_temp * 10);
+    g_tempH[g_cpuHn] = (int16_t)lroundf(g_temp);
     g_cpuHn++; g_tempHn = g_cpuHn;
   }
 }
 
-void sysApplyCpuMode() {
-  if (cfg.cpuMhz != 0) setCpuFrequencyMhz(cfg.cpuMhz);
-}
+void sysApplyCpuMode() { hookCpuApplyMode(); }
 
 void sysInit() {
-  setCpuFrequencyMhz(cfg.cpuMhz ? cfg.cpuMhz : 160);   // se automatico parte da 160 e poi scala da solo
+  // la frequenza non si cambia qui: i primi 15 secondi restano a quella di avvio, poi ci pensa il monitor (cpuPmTick)
   DrvNvs p;
   p.begin("vos", false);
   g_boot = p.getUInt("boots", 0) + 1;
@@ -210,171 +209,85 @@ void sysInit() {
   g_lifeBase = p.getUInt("life", 0);
   g_lifeSaved = 0;
   p.end();
-  g_reset = resetName((int)esp_reset_reason());
+  resetNameTo((int)esp_reset_reason(), g_reset, sizeof(g_reset));
   esp_register_freertos_idle_hook_for_cpu(idle0, 0);
   esp_register_freertos_idle_hook_for_cpu(idle1, 1);
-  g_temp = temperatureRead();
+  g_temp = drvTempC();
   sysTaskRegister("monitor", monitorStart);
   monitorStart();
 }
 
 int sysCpuPercent() { return g_cpu; }
+int sysCpuCorePercent(int core) { return core == 0 ? g_cpu0 : core == 1 ? g_cpu1 : 0; }
 float sysCpuTemp() { return g_temp; }
 uint64_t sysUptimeSec() { return (uint64_t)(esp_timer_get_time() / 1000000ULL); }
 uint32_t sysBootCount() { return g_boot; }
-String sysResetReason() { return g_reset; }
-String sysResetName(int reason) { return resetName(reason); }
+const char* sysResetText() { return g_reset; }
+void sysResetNameTo(int reason, char* out, size_t n) { resetNameTo(reason, out, n); }
 void sysTopTask(char* name, size_t n, int* pct) { strncpy(name, g_topName, n - 1); name[n - 1] = 0; if (pct) *pct = g_topPct; }
 
-static String histJson(const uint8_t* a, int n) {
-  String j = "[";
-  for (int i = 0; i < n; i++) { if (i) j += ","; j += String(a[i]); }
-  return j + "]";
+// Scrive un testo formattato (printf) nel HeapBuf. Ogni pezzo e corto (< 200 byte).
+static bool addFmt(HeapBuf& o, const char* fmt, ...) __attribute__((format(printf, 2, 3)));
+static bool addFmt(HeapBuf& o, const char* fmt, ...) {
+  char t[200];
+  va_list ap; va_start(ap, fmt);
+  int n = vsnprintf(t, sizeof(t), fmt, ap);
+  va_end(ap);
+  if (n < 0) return true;
+  return o.add(t, n < (int)sizeof(t) ? (size_t)n : sizeof(t) - 1);
 }
 
-String sysCpuHistoryJson() { return histJson(g_cpuH, g_cpuHn); }
-
-String sysTempHistoryJson() {
-  String j = "[";
-  for (int i = 0; i < g_tempHn; i++) { if (i) j += ","; j += String(g_tempH[i] / 10.0f, 1); }
-  return j + "]";
+static bool histJson(HeapBuf& j, const uint8_t* a, int n) {
+  bool ok = j.add('[');
+  for (int i = 0; i < n && ok; i++) ok = (i ? j.add(',') : true) && j.addUint(a[i]);
+  return ok && j.add(']');
 }
 
-String sysStatusJson() {
+bool sysCpuHistoryJson(HeapBuf& j) { return histJson(j, g_cpuH, g_cpuHn); }
+
+bool sysTempHistoryJson(HeapBuf& j) {
+  bool ok = j.add('[');
+  for (int i = 0; i < g_tempHn && ok; i++) ok = (i ? j.add(',') : true) && addFmt(j, "%d", (int)g_tempH[i]);
+  return ok && j.add(']');
+}
+
+
+bool sysStatusJson(HeapBuf& j) {
   size_t flashT = drvFsTotal(), flashU = drvFsUsed();
-  String j = "{";
-  j += "\"name\":\"" VOS_NAME "\",\"version\":\"" VOS_VERSION "\",";
-  j += "\"apiVersion\":" + String(VOS_API_VERSION) + ",";
-  j += "\"uptime\":\"" + uptimeStr(sysUptimeSec()) + "\",";
-  j += "\"uptimeSec\":" + String((unsigned long)sysUptimeSec()) + ",";
-  j += "\"boots\":" + String(g_boot) + ",";
-  j += "\"lifeSec\":" + String((unsigned long)sysLifeSec()) + ",";
-  j += "\"chip\":\"" + jsonEscape(String(ESP.getChipModel())) + "\",\"rev\":" + String((int)ESP.getChipRevision()) +
-       ",\"cores\":" + String((int)ESP.getChipCores()) + ",\"flashChip\":" + String((unsigned long)ESP.getFlashChipSize()) +
-       ",\"idf\":\"" + jsonEscape(String(ESP.getSdkVersion())) + "\",";
-  j += "\"reset\":\"" + jsonEscape(g_reset) + "\",";
-  j += "\"cpu\":" + String(g_cpu) + ",\"cpu0\":" + String(g_cpu0) + ",\"cpu1\":" + String(g_cpu1) + ",";
-  j += "\"temp\":" + String(g_temp, 1) + ",";
-  j += "\"tempUnit\":" + String(cfg.tempUnit) + ",";
-  j += "\"hot\":" + String(g_hot ? "true" : "false") + ",";
-  j += "\"cpuMhz\":" + String(getCpuFrequencyMhz()) + ",";
-  j += "\"cpuMode\":" + String(cfg.cpuMhz) + ",";
-  j += "\"heapFree\":" + String(ESP.getFreeHeap()) + ",";
-  j += "\"heapTotal\":" + String(ESP.getHeapSize()) + ",";
-  j += "\"psramFree\":" + String(ESP.getFreePsram()) + ",";
-  j += "\"psramTotal\":" + String(ESP.getPsramSize()) + ",";
-  j += "\"flashUsed\":" + String((unsigned long)flashU) + ",";
-  j += "\"flashTotal\":" + String((unsigned long)flashT) + ",";
-  j += "\"mqtt\":" + String(serviceState("mqtt") == SVC_ON ? 2 : serviceState("mqtt") != SVC_OFF ? 1 : 0) + ",";
-  j += "\"cpuHist\":" + sysCpuHistoryJson() + ",";
-  j += "\"cpu0Hist\":" + histJson(g_c0H, g_cpuHn) + ",\"cpu1Hist\":" + histJson(g_c1H, g_cpuHn) + ",";
-  j += "\"ramHist\":" + histJson(g_ramH, g_cpuHn) + ",\"psHist\":" + histJson(g_psH, g_cpuHn) + ",\"flHist\":" + histJson(g_flH, g_cpuHn) + ",";
-  j += "\"tempHist\":" + sysTempHistoryJson();
-  j += "}";
-  return j;
-}
-
-String sysTasksText() {
-  String r;
-  r += trf("Task attivi: %u", (unsigned)uxTaskGetNumberOfTasks()) + "\n";
-#if (configUSE_TRACE_FACILITY == 1) && (configUSE_STATS_FORMATTING_FUNCTIONS == 1)
-  static char buf[1024];
-  vTaskList(buf);
-  r += "Nome          Stato Prio Stack Num\n";
-  r += cleanAscii(String(buf));
-#else
-  r += String(tr("(dettagli non disponibili in questa build)")) + "\n";
-#endif
-  return r;
-}
-
-// ---- Task per la pagina (JSON) e arresto dei task consentiti ----
-// Tipo: 0 = sistema (protetto), 1 = VesevOS, 2 = app (futuro)
-// Si possono fermare solo i task della lista qui sotto (lista consentita, non lista dei vietati).
-// Lista consentita: i moduli registrano i loro task con sysTaskRegister (nome + funzione che lo avvia).
-struct TaskDef { const char* n; SysTaskStart f; SysTaskStart stop; };
-static TaskDef g_defs[12]; static int g_ndefs = 0;
-
-void sysTaskRegister(const char* name, SysTaskStart start, SysTaskStart stop) {
-  for (int i = 0; i < g_ndefs; i++) if (strcmp(g_defs[i].n, name) == 0) { g_defs[i].f = start; g_defs[i].stop = stop; return; }
-  if (g_ndefs < 12) { g_defs[g_ndefs].n = name; g_defs[g_ndefs].f = start; g_defs[g_ndefs].stop = stop; g_ndefs++; }
-}
-static int defOf(const char* name) {
-  for (int i = 0; i < g_ndefs; i++) if (strcmp(g_defs[i].n, name) == 0) return i;
-  return -1;
-}
-bool sysTaskRunning(const char* name) { return xTaskGetHandle(name) != NULL; }
-
-#if (configUSE_TRACE_FACILITY == 1)          // usati solo qui sotto: fuori da questo blocco darebbero l'avviso "non usata"
-static const char* const OURS[] = {"led", "time", "monitor", "net", "rules", "mqtt", "mesh", "wd"};
-static bool inList(const char* name, const char* const* list, int n) {
-  for (int i = 0; i < n; i++) if (strcmp(name, list[i]) == 0) return true;
-  return false;
-}
-#endif
-
-String sysTasksJson() {
-#if (configUSE_TRACE_FACILITY == 1)
-  UBaseType_t n = uxTaskGetNumberOfTasks();
-  TaskStatus_t* a = (TaskStatus_t*)malloc((n + 2) * sizeof(TaskStatus_t));
-  if (!a) return "{\"ok\":false}";
-  uint32_t total = 0;
-  n = uxTaskGetSystemState(a, n + 2, &total);
-  String j = "{\"ok\":true,\"total\":" + String((unsigned long)total) + ",\"tasks\":[";
-  for (UBaseType_t i = 0; i < n; i++) {
-    const char* nm = a[i].pcTaskName;
-    int type = inList(nm, OURS, 8) ? 1 : 0;
-    bool kill = defOf(nm) >= 0;
-    if (i) j += ",";
-    j += "{\"n\":\"" + jsonEscape(String(nm)) + "\",\"id\":" + String((unsigned)a[i].xTaskNumber) +
-         ",\"s\":" + String((int)a[i].eCurrentState) + ",\"p\":" + String((unsigned)a[i].uxCurrentPriority) +
-         ",\"stk\":" + String((unsigned long)a[i].usStackHighWaterMark) + ",\"rt\":" + String((unsigned long)a[i].ulRunTimeCounter) +
-         ",\"t\":" + String(type) + ",\"k\":" + String(kill ? "true" : "false") + "}";
-  }
-  free(a);
-  // task registrati ma fermati: compaiono con stato 9 (fermato) per poterli riavviare
-  for (int d = 0; d < g_ndefs; d++) {
-    if (xTaskGetHandle(g_defs[d].n)) continue;
-    if (n) j += ",";
-    n++;
-    j += "{\"n\":\"" + String(g_defs[d].n) + "\",\"id\":0,\"s\":9,\"p\":0,\"stk\":0,\"rt\":0,\"t\":1,\"k\":true}";
-  }
-  return j + "]}";
-#else
-  return "{\"ok\":false}";
-#endif
-}
-
-bool sysTaskKill(const String& name, String& err) {
-  if (name.length() == 0 || name.length() > 16) { err = tr("Nome task non valido"); return false; }
-  if (defOf(name.c_str()) < 0) { err = tr("Questo task e protetto: non si puo fermare"); return false; }
-  TaskHandle_t h = xTaskGetHandle(name.c_str());
-  if (!h) { err = tr("Task non trovato"); return false; }
-  vlog("TASK: fermato '%s' su richiesta", name.c_str());
-  int d = defOf(name.c_str());
-  if (d >= 0 && g_defs[d].stop) g_defs[d].stop(); else vTaskDelete(h);
-  return true;
-}
-
-bool sysTaskRestart(const String& name, String& err) {
-  if (name.length() == 0 || name.length() > 16) { err = tr("Nome task non valido"); return false; }
-  int d = defOf(name.c_str());
-  if (d < 0) { err = tr("Questo task non si puo riavviare"); return false; }
-  TaskHandle_t h = xTaskGetHandle(name.c_str());
-  if (h) { if (g_defs[d].stop) g_defs[d].stop(); else vTaskDelete(h); vTaskDelay(pdMS_TO_TICKS(50)); }
-  g_defs[d].f();
-  vlog("TASK: %s '%s' su richiesta", h ? "riavviato" : "avviato", name.c_str());
-  return true;
+  char up[64];
+  uptimeTo(sysUptimeSec(), up, sizeof(up));
+  int mqtt = serviceState("mqtt") == SVC_ON ? 2 : serviceState("mqtt") != SVC_OFF ? 1 : 0;
+  const char* chip = drvChipModel();
+  const char* idf = drvSdkVersion();
+  bool ok = j.add("{\"name\":\"" VOS_NAME "\",\"version\":\"" VOS_VERSION "\",");
+  ok = ok && addFmt(j, "\"apiVersion\":%d,", (int)VOS_API_VERSION);
+  ok = ok && j.add("\"uptime\":\"") && j.addJson(up, strlen(up));
+  ok = ok && addFmt(j, "\",\"uptimeSec\":%lu,\"boots\":%lu,\"lifeSec\":%lu,", (unsigned long)sysUptimeSec(), (unsigned long)g_boot, (unsigned long)sysLifeSec());
+  ok = ok && j.add("\"chip\":\"") && j.addJson(chip, strlen(chip));
+  ok = ok && addFmt(j, "\",\"rev\":%d,\"cores\":%d,\"flashChip\":%lu,", (int)drvChipRevision(), (int)drvChipCores(), (unsigned long)drvFlashSize());
+  ok = ok && j.add("\"idf\":\"") && j.addJson(idf, strlen(idf));
+  ok = ok && j.add("\",\"reset\":\"") && j.addJson(g_reset, strlen(g_reset)) && j.add("\",");
+  ok = ok && addFmt(j, "\"cpu\":%d,\"cpu0\":%d,\"cpu1\":%d,", (int)g_cpu, (int)g_cpu0, (int)g_cpu1);
+  ok = ok && addFmt(j, "\"temp\":%ld,\"tempUnit\":%d,\"hot\":%s,", lroundf(g_temp), (int)cfg.tempUnit, g_hot ? "true" : "false");
+  { char cp[320]; int cn = hookCpuStatus(cp, sizeof cp); ok = ok && cn >= 0 && j.add(cp, (size_t)cn); }   // campi cpuMhz...cpuChanges, scritti da vos_cpupm
+  ok = ok && addFmt(j, "\"heapFree\":%lu,\"heapTotal\":%lu,", (unsigned long)drvHeapFree(), (unsigned long)drvHeapTotal());
+  ok = ok && addFmt(j, "\"psramFree\":%lu,\"psramTotal\":%lu,", (unsigned long)drvPsramFree(), (unsigned long)drvPsramTotal());
+  ok = ok && addFmt(j, "\"flashUsed\":%lu,\"flashTotal\":%lu,\"mqtt\":%d,", (unsigned long)flashU, (unsigned long)flashT, mqtt);
+  ok = ok && j.add("\"cpuHist\":") && sysCpuHistoryJson(j);
+  ok = ok && j.add(",\"cpu0Hist\":") && histJson(j, g_c0H, g_cpuHn) && j.add(",\"cpu1Hist\":") && histJson(j, g_c1H, g_cpuHn);
+  ok = ok && j.add(",\"ramHist\":") && histJson(j, g_ramH, g_cpuHn) && j.add(",\"psHist\":") && histJson(j, g_psH, g_cpuHn);
+  ok = ok && j.add(",\"flHist\":") && histJson(j, g_flH, g_cpuHn) && j.add(",\"tempHist\":") && sysTempHistoryJson(j);
+  return ok && j.add('}');
 }
 
 // Sonno profondo: consuma pochissimo. Nessuna sveglia programmata: si riaccende con il tasto RESET
 // (il tasto BOOT no: tenuto premuto al risveglio porterebbe la scheda in modo programmazione).
 void sysSleep() {
   vlog("SISTEMA: sonno profondo (si riaccende con RESET)");
-  Serial.flush();
+  drvConFlush();
   hookCall(g_hooks.ledShutdown);
   drvWifiShutdown();
-  delay(100);
+  drvDelayMs(100);
   esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
   esp_deep_sleep_start();
 }

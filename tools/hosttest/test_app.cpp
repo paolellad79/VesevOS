@@ -24,15 +24,16 @@ String fsListJson(const String& dir) {
   return String((j + "],\"more\":false}").c_str());
 }
 bool fsMkdir(const String& p, String&) { if (p == "/apps") g_dirOk = true; return true; }
+#include "../../VesevOS/src/core/vos_heapbuf.h"
 // finto motore Berry (qui si prova solo la parte "app": ruoli, avvio, stop, stato)
 static bool g_aRun = false, g_busyOther = false, g_lastApp = false; static String g_aName, g_aUse, g_aCode; static int g_starts = 0;
 bool berryRunning() { return g_aRun || g_busyOther; }
 bool berryAppRunning(String& n) { if (g_aRun) { n = g_aName; return true; } return false; }
-bool berryLastIsApp(const String& n) { return g_lastApp && n == g_aName; }
-String berryAppOutJson() { return "\"out\":\"ciao\",\"err\":\"\",\"ms\":5,\"last\":1"; }
-bool berryStartApp(const String& n, const String& c, const String& u, String& err) { if (g_busyOther || g_aRun) { err = "Berry e occupato"; return false; } g_aRun = true; g_aName = n; g_aUse = u; g_aCode = c; g_lastApp = true; g_starts++; return true; }
+bool berryLastIsApp(const char* n) { return g_lastApp && g_aName == n; }
+bool berryAppOutJson(HeapBuf& o) { return o.add("\"out\":\"ciao\",\"err\":\"\",\"ms\":5,\"last\":1"); }
+bool berryStartApp(const char* n, const char* c, const char* u, String& err) { if (g_busyOther || g_aRun) { err = "Berry e occupato"; return false; } g_aRun = true; g_aName = n; g_aUse = u; g_aCode = c; g_lastApp = true; g_starts++; return true; }
 bool berryStop(String& err) { if (!g_aRun) { err = "Nessuno script in corso"; return false; } g_aRun = false; return true; }
-String berryOutText() { return "uscita\n"; }
+void berryOutText(HeapBuf& o) { o.add("uscita\n"); }
 #include "../../VesevOS/src/packages/vos_app.cpp"
 #include "../../VesevOS/src/packages/vos_app_rt.h"
 

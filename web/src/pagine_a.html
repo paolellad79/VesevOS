@@ -150,6 +150,8 @@
   <div class="sc" id="sc_http"></div>
   <div class="agrid adm"><div><label for="sv_hp">Porta HTTP (80 oppure 1024-65535)</label><input type="number" id="sv_hp" min="80" max="65535"></div></div>
   <button class="btn adm" onclick="svcPort('httpPort','sv_hp','svm_http')">Salva porta</button>
+  <div class="tog adm"><div>Reindirizza da HTTP a HTTPS (chi non e sull'hotspot)</div><button class="sw1" id="sv_rd" onclick="svcTog('redirect',this)" aria-label="Reindirizza da HTTP a HTTPS"></button></div>
+  <div id="sv_rdn" class="law hide"></div>
   <div id="sv_hw" class="law hide"></div><div id="sv_hpend" class="law hide"></div><div id="svm_http" class="msg"></div>
   <p class="fhint">Cambiare porta non e sicurezza vera: la sicurezza resta password, filtro IP e cifratura. Il portale automatico dell'hotspot funziona solo sulla porta 80.</p></div>
 </section>
@@ -213,9 +215,18 @@
 </section>
 <section id="t_led" class="hide">
  <div class="card"><h3>LED</h3>
-  <label for="l_mode">Modo</label><select id="l_mode"><option value="0">Colore = stato del sistema</option><option value="1">Battito (heartbeat) colore scelto</option><option value="2">Colore fisso</option><option value="3">Spento</option></select>
+  <label for="l_mode">Modo</label><select id="l_mode" onchange="ledShow()"><option value="0">Colore = stato del sistema</option><option value="1">Battito (heartbeat) colore scelto</option><option value="2">Colore fisso</option><option value="3">Spento</option><option value="4">Lampi: attivita della flash</option><option value="5">Lampi: pacchetti Wi-Fi</option><option value="6">Colore che cambia con il carico della CPU</option></select>
   <label for="l_col">Colore</label><input type="color" id="l_col">
   <label for="l_br">Luminosita (0-255)</label><input type="number" id="l_br" min="0" max="255">
+  <fieldset id="l_src" class="hide"><legend>Colori del trigger</legend>
+   <label for="l_s0">Flash, lettura</label><input type="color" id="l_s0">
+   <label for="l_s1">Flash, scrittura</label><input type="color" id="l_s1">
+   <label for="l_s2">Wi-Fi, ricevuto</label><input type="color" id="l_s2">
+   <label for="l_s3">Wi-Fi, inviato</label><input type="color" id="l_s3">
+   <label for="l_s4">CPU, carico alto</label><input type="color" id="l_s4">
+   <label for="l_thr">Soglia di carico della CPU (10-95)</label><input type="number" id="l_thr" min="10" max="95">
+   <p class="fhint">I lampi sono al massimo 3 al secondo. Il trigger e i suoi colori li cambia solo l'amministratore. Di fabbrica il modo resta quello di sempre.</p>
+  </fieldset>
   <button class="btn" onclick="saveLed()">Salva</button><div id="lm2" class="msg"></div>
   <p style="color:var(--mut)">Colori di stato: arancio = avvio, blu = AP, giallo = connessione, verde = client collegato, rosso lampeggiante = errore.</p></div>
 </section>
@@ -251,12 +262,6 @@
   <div id="dv_usb"></div>
  </div>
 </section>
-<section id="t_temp" class="hide">
- <div class="card"><h3>Temperatura del chip</h3>
-  <p class="fhint">Sensore interno del chip. Sopra 80 C la velocita scende da sola.</p>
-  <div id="dv_temp"></div>
- </div>
-</section>
 <section id="t_mem" class="hide">
  <div class="card"><h3>Memoria</h3>
   <p class="fhint">RAM interna, PSRAM, flash e file system.</p>
@@ -265,8 +270,12 @@
 </section>
 <section id="t_cpu" class="hide">
  <div class="card"><h3>Processore</h3>
-  <p class="fhint">Core, velocita e carico.</p>
-  <div id="dv_cpu"></div>
+  <p class="fhint">Temperatura, velocita e carico del chip. Sopra 80 C il tetto scende di un gradino (con HTTPS il tetto non scende sotto 160 MHz; a riposo la CPU resta a 80; oltre 90 C scende al minimo).</p>
+  <div id="cpu_st" class="pill dvp v" role="status"></div>
+  <h4 style="margin:14px 0 6px">Temperatura</h4>
+  <div id="cpu_t"></div>
+  <h4 style="margin:14px 0 6px">Processore</h4>
+  <div id="cpu_p"></div>
  </div>
 </section>
 <section id="t_rad" class="hide">
@@ -301,13 +310,26 @@
    <div class="ftb"><label class="btn gray" for="io_mf" tabindex="0" onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();$('io_mf').click()}"><svg class="i" aria-hidden="true"><use href="#i-upl"/></svg><span>Carica scheda modulo</span></label><input type="file" id="io_mf" class="sr" accept=".vdp,.txt" onchange="ioModUp()"></div>
    <div id="io_mm" class="msg" role="status"></div>
   </div>
+  <div class="card hide" id="sd_card"><h3>Scheda microSD</h3>
+   <p class="fhint">Lettore microSD a 3,3 V con la scheda formattata FAT32. Si monta solo quando lo chiedi (l'avvio non la aspetta). I pin e la frequenza sono quelli della periferica microSD che hai aggiunto qui sotto. Prima di toglierla premi Smonta.</p>
+   <div id="sd_rows"></div>
+   <div class="ftb"><button class="btn hide" id="sd_mnt" onclick="sdAct('mount')">Monta</button><button class="btn gray hide" id="sd_umt" onclick="sdAct('unmount')">Smonta</button><button class="btn gray hide" id="sd_tst" onclick="sdAct('test')">Prova scrittura e lettura</button><button class="btn gray hide" id="sd_lsb" onclick="sdLs('/')">Elenca i file</button></div>
+   <div id="sd_ls"></div><div id="sd_m" class="msg" role="status"></div>
+  </div>
   <div class="card" id="io_new"><h3>Aggiungi una periferica a mano</h3>
    <div class="agrid">
-    <div><label for="io_c">Classe</label><select id="io_c"><option value="rele">Rele</option><option value="led">LED</option><option value="pin">Pin (uscita)</option><option value="ingresso">Ingresso</option><option value="analogico">Analogico (pin 1-10)</option></select></div>
+    <div><label for="io_c">Classe</label><select id="io_c" onchange="ioClsChg()"><option value="rele">Rele</option><option value="led">LED</option><option value="pin">Pin (uscita)</option><option value="ingresso">Ingresso</option><option value="analogico">Analogico (pin 1-10)</option><option value="sd">Lettore microSD (4 pin)</option></select></div>
     <div><label for="io_g">Pin (GPIO)</label><input type="number" id="io_g" min="1" inputmode="numeric"></div>
     <div><label for="io_n">Nome (facoltativo)</label><input id="io_n" maxlength="11" autocomplete="off"></div>
     <div><label for="io_o">Modo</label><select id="io_o"><option value="">Normale</option><option value="inv">Attivo basso (acceso = livello 0)</option><option value="up">Ingresso con pull-up</option><option value="down">Ingresso con pull-down</option></select></div>
    </div>
+   <div class="hide" id="io_sdf"><div class="agrid">
+    <div><label for="io_sm">MOSI (dati verso la scheda)</label><input type="number" id="io_sm" min="1" inputmode="numeric"></div>
+    <div><label for="io_sk">SCK (clock)</label><input type="number" id="io_sk" min="1" inputmode="numeric"></div>
+    <div><label for="io_si">MISO (dati dalla scheda)</label><input type="number" id="io_si" min="1" inputmode="numeric"></div>
+    <div><label for="io_sf">Frequenza SPI (kHz)</label><input type="number" id="io_sf" min="400" max="20000" inputmode="numeric"></div>
+    <p class="fhint">Il pin "Pin (GPIO)" qui sopra e CS. Frequenza da 400 a 20000 kHz: di solito 1000; se la scheda non si monta prova 400 con fili corti.</p>
+   </div></div>
    <button class="btn" onclick="ioAdd()">Aggiungi</button><div id="io_am" class="msg"></div>
    <p class="fhint">Il pin viene controllato: non si possono usare USB, tasto BOOT, LED della scheda, pin di avvio o pin gia usati. Massimo 16 periferiche. Un rele collegato alla rete elettrica richiede un modulo a norma e un installatore: VesevOS comanda solo il segnale.</p>
   </div>

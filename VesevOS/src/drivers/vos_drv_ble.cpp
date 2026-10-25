@@ -4,7 +4,7 @@
 #include "vos_drv_ble.h"
 
 #if VOS_WITH_BLE
-#include <NimBLEDevice.h>                 // libreria NimBLE-Arduino 2.x: usa molta meno RAM del Bluetooth di Arduino (misurato: quello costava 74 KB)
+#include <NimBLEDevice.h>                 // esp-nimble-cpp 2.x (h2zero, Apache-2.0, componente ESP-IDF senza Arduino): usa molta meno RAM del Bluetooth di Arduino (misurato: quello costava 74 KB)
 
 #define BLE_RX_MAX 200                    // un testo piu lungo viene scartato
 
@@ -17,9 +17,9 @@ class RxCb : public NimBLECharacteristicCallbacks {
   void onWrite(NimBLECharacteristic* c, NimBLEConnInfo&) override {
     NimBLEAttValue v = c->getValue();
     if (v.length() > BLE_RX_MAX || !g_onRx) return;
-    String t; t.reserve(v.length());
-    const uint8_t* d = v.data();
-    for (size_t i = 0; i < v.length(); i++) t += (char)d[i];
+    char t[BLE_RX_MAX + 1];
+    memcpy(t, v.data(), v.length());
+    t[v.length()] = 0;
     g_onRx(t);
   }
 };
@@ -71,9 +71,9 @@ void drvBleEnd() {
 bool drvBleIsUp() { return g_up; }
 bool drvBleConnected() { return g_link; }
 
-bool drvBleSend(const String& text) {
+bool drvBleSend(const char* text) {
   if (!g_up || !g_tx) return false;
-  g_tx->setValue((const uint8_t*)text.c_str(), (uint16_t)text.length());
+  g_tx->setValue((const uint8_t*)text, (uint16_t)strlen(text));
   g_tx->notify();
   return true;
 }

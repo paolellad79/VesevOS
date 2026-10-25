@@ -7,11 +7,11 @@
 // Chi usa il driver: vos_ble (ciclo di vita) -> vos_ble_cfg (comandi). Pensato per altri servizi sullo stesso driver.
 // Con VOS_WITH_BLE = 0 il driver non c'e.
 #pragma once
-#include <Arduino.h>
+#include "vos_drv_string.h"
 #include "../boards/vos_packages.h"
 
 #if VOS_WITH_BLE
-typedef void (*BleRxCb)(const String& text);      // e arrivato un testo (chiamata dal task Bluetooth: solo mettere da parte, lavoro lungo no)
+typedef void (*BleRxCb)(const char* text);        // e arrivato un testo chiuso con 0, max 200 caratteri (chiamata dal task Bluetooth: solo mettere da parte, lavoro lungo no)
 typedef void (*BleLinkCb)(bool connected);        // un dispositivo si e collegato / scollegato
 
 struct BleDrvConfig {                             // tutte le stringhe devono restare valide finche il driver e acceso (usare stringhe fisse)
@@ -30,7 +30,7 @@ bool drvBleBegin(const BleDrvConfig& c);          // init + sicurezza + servizio
 void drvBleEnd();                                 // spegne e libera tutto
 bool drvBleIsUp();
 bool drvBleConnected();
-bool drvBleSend(const String& text);              // scrive il valore e avvisa il telefono
+bool drvBleSend(const char* text);                // scrive il valore e avvisa il telefono
 void drvBleAdvertise(bool on);                    // riprende o ferma l'annuncio (acceso)
 // futuro: drvBleScan(...) per leggere altri dispositivi BLE (sensori)
 #endif

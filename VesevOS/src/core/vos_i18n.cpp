@@ -6,6 +6,7 @@
 #include "vos_util.h"
 #include "vos_log.h"
 #include "../drivers/vos_drv_fs.h"
+#include "../drivers/vos_drv_heap.h"
 #include "vos_lang_it.h"
 #include <stdarg.h>
 #include <stdio.h>
@@ -14,15 +15,13 @@
 #define LANG_MAX_SIZE 262144        // i file it/en/es/de pesano circa 185 KB (fino alla 1.7.58 il limite era 64 KB: es e de venivano rifiutati); finisce in PSRAM
 
 struct LangEntry { const char* k; const char* v; };
-struct LangDict { char* buf; LangEntry* ent; int n; String code; };
+struct LangDict { char* buf; LangEntry* ent; int n; char code[LANG_CODE_BUF]; };
 static LangDict* g_d = nullptr;      // dizionario in uso (nullptr = solo italiano)
 static LangDict* g_old = nullptr;    // quello appena sostituito: resta valido finche non ne arriva un altro,
                                      // cosi chi sta ancora leggendo un testo non trova memoria liberata
 
 static void* bigAlloc(size_t n) {
-  void* p = psramFound() ? ps_malloc(n) : nullptr;
-  if (!p) p = malloc(n);
-  return p;
+  return drvMallocBig(n);
 }
 
 static void freeDict(LangDict* d) {
@@ -39,10 +38,9 @@ static void swapDict(LangDict* nd) {
   g_old = old;
 }
 
-bool langCodeValid(const String& c) {
-  if (c.length() < 2 || c.length() > 8) return false;
-  for (size_t i = 0; i < c.length(); i++) {
-    char ch = c[i];
+bool langCodeValid(std::string_view c) {
+  if (c.size() < 2 || c.size() > 8) return false;
+  for (char ch : c) {
     if (!((ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9'))) return false;
   }
   return true;
@@ -86,11 +84,12 @@ static char* readStr(char*& p) {
 }
 
 // Carica /lang/<code>.json. Ritorna true se ha almeno una voce.
-static bool loadFile(const String& code, String& err) {
+static bool loadFile(const char* code, ErrBuf& err) {
   char* buf = nullptr; size_t got = 0;
   {                                                  // dalla 1.7.59 anche l'inglese e un file (prima era dentro il firmware: 59 KB)
-    String path = String(LANG_DIR) + "/" + code + ".json";
-    File f = drvFsOpen(path, "r");
+    char path[sizeof(LANG_DIR) + LANG_CODE_BUF + 6];
+    snprintf(path, sizeof path, LANG_DIR "/%s.json", code);
+    VosFile f = drvFsOpen(path, "r");
     if (!f || f.isDirectory()) { err = tr("Lingua non installata"); return false; }
     size_t sz = f.size();
     if (sz < 2 || sz > LANG_MAX_SIZE) { f.close(); err = tr("File di lingua non valido"); return false; }
@@ -128,21 +127,21 @@ static bool loadFile(const String& code, String& err) {
   }
   if (n == 0) { free(buf); free(ent); err = tr("File di lingua non valido"); return false; }
   LangDict* d = new LangDict();
-  d->buf = buf; d->ent = ent; d->n = n; d->code = code;
+  d->buf = buf; d->ent = ent; d->n = n; snprintf(d->code, sizeof d->code, "%s", code);
   swapDict(d);
-  vlog("LANG: %s (%d voci)", code.c_str(), n);
+  vlog("LANG: %s (%d voci)", code, n);
   return true;
 }
 
 void langInit() {
-  if (cfg.lang == "it" || !langCodeValid(cfg.lang)) { swapDict(nullptr); return; }
-  String err;
-  if (!loadFile(cfg.lang, err)) vlog("LANG: %s non caricata, uso l'italiano", cfg.lang.c_str());
+  if (cfg.lang == "it" || !langCodeValid(cfg.lang.view())) { swapDict(nullptr); return; }
+  ErrBuf err;
+  if (!loadFile(cfg.lang.c_str(), err)) vlog("LANG: %s non caricata, uso l'italiano", cfg.lang.c_str());
 }
 
-bool langSet(const String& code, String& err) {
+bool langSet(const char* code, ErrBuf& err) {
   if (!langCodeValid(code)) { err = tr("Lingua non valida"); return false; }
-  if (code == "it") { swapDict(nullptr); cfg.lang = "it"; cfgSave(); return true; }
+  if (strcmp(code, "it") == 0) { swapDict(nullptr); cfg.lang = "it"; cfgSave(); return true; }
   if (!loadFile(code, err)) return false;
   cfg.lang = code; cfgSave();
   return true;
@@ -157,100 +156,123 @@ const char* tr(const char* it) {
   return it;
 }
 
-String trf(const char* it, ...) {
+TrText trf(const char* it, ...) {
   const char* f = tr(it);
-  char buf[256];
+  TrText r;
   va_list ap; va_start(ap, it);
-  int n = vsnprintf(buf, sizeof(buf), f, ap);
+  int n = vsnprintf(r.small_, sizeof(r.small_), f, ap);
   va_end(ap);
-  if (n < 0) return String(f);
-  if (n < (int)sizeof(buf)) return String(buf);
-  char* big = (char*)malloc(n + 1);
-  if (!big) return String(buf);
+  if (n < (int)sizeof(r.small_)) return r;           // entra nel piccolo (o errore di formato: resta il testo troncato)
+  r.big_ = (char*)malloc(n + 1);
+  if (!r.big_) return r;                             // manca la memoria: resta il testo troncato
   va_start(ap, it);
-  vsnprintf(big, n + 1, f, ap);
+  vsnprintf(r.big_, n + 1, f, ap);
   va_end(ap);
-  String r(big); free(big);
   return r;
 }
 
-bool langBuiltin(const String& c) { return c == "it"; }
+// ---------- intestazione dei file di lingua (nome, codice locale, bandiera) ----------
 
+// Testi letti dall'inizio di un file di lingua. Un solo blocco di heap per tutto (la bandiera pesa fino a 1 KB).
+struct LangHead {
+  char raw[2049];
+  char name[LANG_NAME_BUF * 2];
+  char loc[16];
+  char flag[1025];
+};
 
-// Valore di una chiave speciale ("_name", "_locale", "_flag") cercata nell'inizio del testo
-static String headKey(const char* txt, const char* key) {
+// Valore di una chiave speciale ("_name", "_locale", "_flag") cercata nell'inizio del testo; scritto in out (tagliato se non ci sta).
+// Ritorna false se la chiave manca o il valore non ci sta tutto.
+static bool headKey(const char* txt, const char* key, char* out, size_t cap) {
+  out[0] = 0;
   const char* p = strstr(txt, key);
-  if (!p) return "";
+  if (!p) return false;
   p += strlen(key);
   while (*p && *p != ':') p++;
   while (*p && *p != '"') p++;
-  if (*p != '"') return "";
+  if (*p != '"') return false;
   p++;
-  String out;
+  size_t n = 0;
+  bool whole = true;
   while (*p && *p != '"') {
     if (*p == '\\' && p[1]) { p++; if (*p == 'u' && p[1] && p[2] && p[3] && p[4]) { p += 5; continue; } }   // la bandiera non usa caratteri speciali
-    out += *p++;
+    if (n + 1 < cap) out[n++] = *p; else whole = false;
+    p++;
   }
-  return out;
+  out[n] = 0;
+  return whole;
 }
 
-static void fileHead(const String& code, String& name, String& loc, String& flag) {
-  name = code; loc = ""; flag = "";
-  File f = drvFsOpen(String(LANG_DIR) + "/" + code + ".json", "r");
+static void fileHead(const char* code, LangHead& h) {
+  snprintf(h.name, sizeof h.name, "%s", code);
+  h.loc[0] = 0; h.flag[0] = 0;
+  char path[sizeof(LANG_DIR) + LANG_CODE_BUF + 6];
+  snprintf(path, sizeof path, LANG_DIR "/%s.json", code);
+  VosFile f = drvFsOpen(path, "r");
   if (!f) return;
-  char* b = (char*)malloc(2049);
-  if (!b) { f.close(); return; }
-  size_t n = f.read((uint8_t*)b, 2048);
+  size_t n = f.read((uint8_t*)h.raw, sizeof(h.raw) - 1);
   f.close();
-  b[n] = 0;
-  String nm = headKey(b, "\"_name\"");
-  if (nm.length()) name = nm;
-  loc = headKey(b, "\"_locale\"");
-  flag = headKey(b, "\"_flag\"");
-  free(b);
-  if (flag.length() > 1024 || !flag.startsWith("<svg")) flag = "";   // la pagina la mostra come immagine (<img>): niente script
+  h.raw[n] = 0;
+  char nm[sizeof h.name];
+  if (headKey(h.raw, "\"_name\"", nm, sizeof nm) && nm[0]) snprintf(h.name, sizeof h.name, "%s", nm);
+  headKey(h.raw, "\"_locale\"", h.loc, sizeof h.loc);
+  bool whole = headKey(h.raw, "\"_flag\"", h.flag, sizeof h.flag);
+  if (!whole || strncmp(h.flag, "<svg", 4) != 0) h.flag[0] = 0;   // la pagina la mostra come immagine (<img>): niente script
 }
 
-static String item(const String& code, const String& name, const String& loc, const String& flag) {
-  return "{\"code\":\"" + code + "\",\"name\":\"" + jsonEscape(name) + "\",\"loc\":\"" + jsonEscape(loc) + "\",\"flag\":\"" + jsonEscape(flag) + "\"}";
+static bool itemJson(HeapBuf& out, const char* code, const char* name, const char* loc, const char* flag) {
+  return out.add("{\"code\":\"") && out.add(code) && out.add("\",\"name\":\"") && out.addJson(name) &&
+         out.add("\",\"loc\":\"") && out.addJson(loc) && out.add("\",\"flag\":\"") && out.addJson(flag) && out.add("\"}");
 }
 
-String langListJson() {
-  String j = "[" + item("it", "Italiano", "it-IT", LANG_FLAG_IT);
-  File d = drvFsOpen(LANG_DIR);
-  if (d && d.isDirectory()) {
-    for (File e = d.openNextFile(); e; e = d.openNextFile()) {
-      if (e.isDirectory()) continue;
-      String n = e.name();
-      int sl = n.lastIndexOf('/'); if (sl >= 0) n = n.substring(sl + 1);
-      if (!n.endsWith(".json")) continue;
-      String code = n.substring(0, n.length() - 5);
-      if (langBuiltin(code) || !langCodeValid(code)) continue;
-      String nm, loc, fl; fileHead(code, nm, loc, fl);
-      j += "," + item(code, nm, loc, fl);
-    }
-    d.close();
+// Prossimo file /lang/<codice>.json con codice valido e diverso da "it": scrive il codice in code. false = finiti.
+static bool nextLangCode(VosFile& d, char* code) {
+  for (VosFile e = d.openNextFile(); e; e = d.openNextFile()) {
+    if (e.isDirectory()) continue;
+    const char* n = e.name();
+    const char* sl = strrchr(n, '/'); if (sl) n = sl + 1;
+    size_t len = strlen(n);
+    if (len < 6 || strcmp(n + len - 5, ".json") != 0) continue;
+    std::string_view c(n, len - 5);
+    if (c == "it" || !langCodeValid(c)) continue;
+    snprintf(code, LANG_CODE_BUF, "%.*s", (int)c.size(), c.data());
+    return true;
   }
-  j += "]";
-  return j;
+  return false;
 }
 
-int langList(String* codes, String* names, int max) {
+bool langListJson(HeapBuf& out) {
+  bool ok = out.add('[') && itemJson(out, "it", "Italiano", "it-IT", LANG_FLAG_IT);
+  VosFile d = drvFsOpen(LANG_DIR);
+  if (ok && d && d.isDirectory()) {
+    LangHead* h = (LangHead*)malloc(sizeof(LangHead));
+    if (!h) { d.close(); return false; }
+    char code[LANG_CODE_BUF];
+    int n = 1;                                                          // "it" e gia nell'elenco
+    while (ok && n < LANG_LIST_MAX && nextLangCode(d, code)) {
+      n++;
+      fileHead(code, *h);
+      ok = out.add(',') && itemJson(out, code, h->name, h->loc, h->flag);
+    }
+    free(h);
+  }
+  if (d) d.close();
+  return ok && out.add(']');
+}
+
+int langList(char codes[][LANG_CODE_BUF], char names[][LANG_NAME_BUF], int max) {
   int n = 0;
-  if (n < max) { codes[n] = "it"; names[n] = "Italiano"; n++; }
-  File d = drvFsOpen(LANG_DIR);
+  if (n < max) { snprintf(codes[n], LANG_CODE_BUF, "it"); snprintf(names[n], LANG_NAME_BUF, "Italiano"); n++; }
+  VosFile d = drvFsOpen(LANG_DIR);
   if (d && d.isDirectory()) {
-    for (File e = d.openNextFile(); e && n < max; e = d.openNextFile()) {
-      if (e.isDirectory()) continue;
-      String fn = e.name();
-      int sl = fn.lastIndexOf('/'); if (sl >= 0) fn = fn.substring(sl + 1);
-      if (!fn.endsWith(".json")) continue;
-      String code = fn.substring(0, fn.length() - 5);
-      if (langBuiltin(code) || !langCodeValid(code)) continue;
-      String nm, loc, fl; fileHead(code, nm, loc, fl);
-      codes[n] = code; names[n] = nm; n++;
+    LangHead* h = (LangHead*)malloc(sizeof(LangHead));
+    char code[LANG_CODE_BUF];
+    while (h && n < max && nextLangCode(d, code)) {
+      fileHead(code, *h);
+      snprintf(codes[n], LANG_CODE_BUF, "%s", code); snprintf(names[n], LANG_NAME_BUF, "%s", h->name); n++;
     }
-    d.close();
+    free(h);
   }
+  if (d) d.close();
   return n;
 }

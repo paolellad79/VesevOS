@@ -7,7 +7,9 @@
 #include "../net/vos_net.h"
 #include "vos_ble.h"
 #include "../core/vos_i18n.h"
+#include "../core/vos_strbuf.h"
 #include "../drivers/vos_drv_wifi.h"
+#include "../drivers/vos_drv_time.h"
 
 #if VOS_WITH_STATS
 struct Stats {
@@ -23,7 +25,7 @@ static Stats g;
 static uint32_t g_last = 0;
 static bool g_wasOk = false, g_wasBle = false, g_init = false;
 
-static uint32_t upSec() { return millis() / 1000; }
+static uint32_t upSec() { return drvMillis() / 1000; }
 
 void statsReset() { memset(&g, 0, sizeof(g)); g.rssiMin = 0; g.t0 = upSec(); g_wasOk = false; g_wasBle = false; }
 
@@ -42,7 +44,7 @@ void statNote(StatEvent e) {
 void statsTick() {
   if (!g_init) { statsReset(); g_init = true; }
   if (!cfg.statOn) return;
-  uint32_t now = millis();
+  uint32_t now = drvMillis();
   if (now - g_last < 10000) return;
   g_last = now;
   bool ok = netState() == NET_CLIENT_OK;
@@ -58,46 +60,47 @@ void statsTick() {
   bool ble = bleRunning();
   if (ble && !g_wasBle) g.bleStart++;
   g_wasBle = ble;
-  if (cfg.ledMode < 4) g.ledSec[cfg.ledMode] += 10;
+  g.ledSec[cfg.ledMode < 4 ? cfg.ledMode : (int)LED_STATE] += 10;   // flash, wifi e cpu mostrano lo stato: contano come "stato"
 }
 
-static String vals(bool csv) {
-  String s;
+// CSV per il download: 18 righe, al massimo ~430 byte (i contatori sono uint32); 512 bastano, un solo blocco di heap
+std::string statsCsv() {
+  StrText t(512);
+  StrBuf& s = t.buf();
   int avg = g.rssiN ? (int)(g.rssiSum / (int32_t)g.rssiN) : 0;
-  if (csv) {
-    s += "name,value\n";
-    s += "seconds_counting," + String((unsigned long)(upSec() - g.t0)) + "\n";
-    s += "wifi_connects," + String((unsigned long)g.wifiUp) + "\nwifi_drops," + String((unsigned long)g.wifiDown) + "\nwifi_seconds_connected," + String((unsigned long)g.wifiSec) + "\n";
-    s += "rssi_avg_dbm," + String(avg) + "\nrssi_min_dbm," + String((int)g.rssiMin) + "\nhotspot_max_phones," + String((int)g.apMax) + "\n";
-    s += "ble_starts," + String((unsigned long)g.bleStart) + "\nble_connections," + String((unsigned long)g.bleConn) + "\n";
-    s += "boot_short," + String((unsigned long)g.boot[0]) + "\nboot_2s," + String((unsigned long)g.boot[1]) + "\nboot_8s," + String((unsigned long)g.boot[2]) + "\nboot_20s," + String((unsigned long)g.boot[3]) + "\n";
-    s += "led_state_s," + String((unsigned long)g.ledSec[0]) + "\nled_heartbeat_s," + String((unsigned long)g.ledSec[1]) + "\nled_fixed_s," + String((unsigned long)g.ledSec[2]) + "\nled_off_s," + String((unsigned long)g.ledSec[3]) + "\n";
-  }
-  return s;
+  s.add("name,value\n");
+  s.addf("seconds_counting,%lu\n", (unsigned long)(upSec() - g.t0));
+  s.addf("wifi_connects,%lu\nwifi_drops,%lu\nwifi_seconds_connected,%lu\n", (unsigned long)g.wifiUp, (unsigned long)g.wifiDown, (unsigned long)g.wifiSec);
+  s.addf("rssi_avg_dbm,%d\nrssi_min_dbm,%d\nhotspot_max_phones,%d\n", avg, (int)g.rssiMin, (int)g.apMax);
+  s.addf("ble_starts,%lu\nble_connections,%lu\n", (unsigned long)g.bleStart, (unsigned long)g.bleConn);
+  s.addf("boot_short,%lu\nboot_2s,%lu\nboot_8s,%lu\nboot_20s,%lu\n", (unsigned long)g.boot[0], (unsigned long)g.boot[1], (unsigned long)g.boot[2], (unsigned long)g.boot[3]);
+  s.addf("led_state_s,%lu\nled_heartbeat_s,%lu\nled_fixed_s,%lu\nled_off_s,%lu\n", (unsigned long)g.ledSec[0], (unsigned long)g.ledSec[1], (unsigned long)g.ledSec[2], (unsigned long)g.ledSec[3]);
+  return t.take();
 }
 
-String statsCsv() { return vals(true); }
-
-String statsJson() {
+bool statsJson(HeapBuf& j) {
   int avg = g.rssiN ? (int)(g.rssiSum / (int32_t)g.rssiN) : 0;
-  String j = "{\"on\":" + String(cfg.statOn ? "true" : "false") + ",\"sec\":" + String((unsigned long)(upSec() - g.t0));
-  j += ",\"wifiUp\":" + String((unsigned long)g.wifiUp) + ",\"wifiDown\":" + String((unsigned long)g.wifiDown) + ",\"wifiSec\":" + String((unsigned long)g.wifiSec);
-  j += ",\"rssiAvg\":" + String(avg) + ",\"rssiMin\":" + String((int)g.rssiMin) + ",\"apMax\":" + String((int)g.apMax);
-  j += ",\"bleStart\":" + String((unsigned long)g.bleStart) + ",\"bleConn\":" + String((unsigned long)g.bleConn);
-  j += ",\"boot\":[" + String((unsigned long)g.boot[0]) + "," + String((unsigned long)g.boot[1]) + "," + String((unsigned long)g.boot[2]) + "," + String((unsigned long)g.boot[3]) + "],\"bootLast\":" + String((unsigned long)(g.bootLastSec ? upSec() - g.bootLastSec : 0)) + ",\"bootEver\":" + String(g.bootLastSec ? "true" : "false");
-  j += ",\"led\":[" + String((unsigned long)g.ledSec[0]) + "," + String((unsigned long)g.ledSec[1]) + "," + String((unsigned long)g.ledSec[2]) + "," + String((unsigned long)g.ledSec[3]) + "]}";
-  return j;
+  j.addf("{\"on\":%s,\"sec\":%lu", cfg.statOn ? "true" : "false", (unsigned long)(upSec() - g.t0));
+  j.addf(",\"wifiUp\":%lu,\"wifiDown\":%lu,\"wifiSec\":%lu", (unsigned long)g.wifiUp, (unsigned long)g.wifiDown, (unsigned long)g.wifiSec);
+  j.addf(",\"rssiAvg\":%d,\"rssiMin\":%d,\"apMax\":%d", avg, (int)g.rssiMin, (int)g.apMax);
+  j.addf(",\"bleStart\":%lu,\"bleConn\":%lu", (unsigned long)g.bleStart, (unsigned long)g.bleConn);
+  j.addf(",\"boot\":[%lu,%lu,%lu,%lu],\"bootLast\":%lu,\"bootEver\":%s", (unsigned long)g.boot[0], (unsigned long)g.boot[1], (unsigned long)g.boot[2], (unsigned long)g.boot[3],
+         (unsigned long)(g.bootLastSec ? upSec() - g.bootLastSec : 0), g.bootLastSec ? "true" : "false");
+  return j.addf(",\"led\":[%lu,%lu,%lu,%lu]}", (unsigned long)g.ledSec[0], (unsigned long)g.ledSec[1], (unsigned long)g.ledSec[2], (unsigned long)g.ledSec[3]);
 }
 
-String statsText() {
-  if (!cfg.statOn) return String(tr("Statistiche spente (stats on per accenderle)")) + "\n";
+// Testo per la shell: 6 righe tradotte, al massimo ~900 byte; 1024 bastano
+std::string statsText() {
+  StrText t(1024);
+  StrBuf& s = t.buf();
+  if (!cfg.statOn) { s.add(tr("Statistiche spente (stats on per accenderle)")).add('\n'); return t.take(); }
   int avg = g.rssiN ? (int)(g.rssiSum / (int32_t)g.rssiN) : 0;
-  String t = trf("Conteggio da %lu s", (unsigned long)(upSec() - g.t0)) + "\n";
-  t += trf("Wi-Fi: collegamenti %lu, cadute %lu, collegato %lu s, segnale medio %d dBm, minimo %d dBm", (unsigned long)g.wifiUp, (unsigned long)g.wifiDown, (unsigned long)g.wifiSec, avg, (int)g.rssiMin) + "\n";
-  t += trf("Hotspot: al massimo %d telefoni insieme", (int)g.apMax) + "\n";
-  t += trf("Bluetooth: accensioni %lu, collegamenti %lu", (unsigned long)g.bleStart, (unsigned long)g.bleConn) + "\n";
-  t += trf("Tasto BOOT: brevi %lu, 2 s %lu, 8 s %lu, 20 s %lu", (unsigned long)g.boot[0], (unsigned long)g.boot[1], (unsigned long)g.boot[2], (unsigned long)g.boot[3]) + "\n";
-  t += trf("LED (secondi): stato %lu, battito %lu, fisso %lu, spento %lu", (unsigned long)g.ledSec[0], (unsigned long)g.ledSec[1], (unsigned long)g.ledSec[2], (unsigned long)g.ledSec[3]) + "\n";
-  return t;
+  s.addf(tr("Conteggio da %lu s"), (unsigned long)(upSec() - g.t0)).add('\n');
+  s.addf(tr("Wi-Fi: collegamenti %lu, cadute %lu, collegato %lu s, segnale medio %d dBm, minimo %d dBm"), (unsigned long)g.wifiUp, (unsigned long)g.wifiDown, (unsigned long)g.wifiSec, avg, (int)g.rssiMin).add('\n');
+  s.addf(tr("Hotspot: al massimo %d telefoni insieme"), (int)g.apMax).add('\n');
+  s.addf(tr("Bluetooth: accensioni %lu, collegamenti %lu"), (unsigned long)g.bleStart, (unsigned long)g.bleConn).add('\n');
+  s.addf(tr("Tasto BOOT: brevi %lu, 2 s %lu, 8 s %lu, 20 s %lu"), (unsigned long)g.boot[0], (unsigned long)g.boot[1], (unsigned long)g.boot[2], (unsigned long)g.boot[3]).add('\n');
+  s.addf(tr("LED (secondi): stato %lu, battito %lu, fisso %lu, spento %lu"), (unsigned long)g.ledSec[0], (unsigned long)g.ledSec[1], (unsigned long)g.ledSec[2], (unsigned long)g.ledSec[3]).add('\n');
+  return t.take();
 }
 #endif  // VOS_WITH_STATS

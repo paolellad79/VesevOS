@@ -8,6 +8,8 @@ typedef void* TaskHandle_t; typedef void* SemaphoreHandle_t; typedef void* Queue
 #define pdFALSE 0
 #define pdPASS 1
 #define tskNO_AFFINITY 0x7FFFFFFF
+#define tskIDLE_PRIORITY 0
+#define taskYIELD() ((void)0)
 inline void vTaskDelay(TickType_t){} inline BaseType_t xTaskCreatePinnedToCore(void(*)(void*),const char*,uint32_t,void*,UBaseType_t,TaskHandle_t*,BaseType_t){return 1;}
 inline BaseType_t xTaskCreate(void(*)(void*),const char*,uint32_t,void*,UBaseType_t,TaskHandle_t*){return 1;}
 inline SemaphoreHandle_t xSemaphoreCreateMutex(){return (SemaphoreHandle_t)1;} inline int xSemaphoreTake(SemaphoreHandle_t,TickType_t){return 1;} inline int xSemaphoreGive(SemaphoreHandle_t){return 1;} inline SemaphoreHandle_t xSemaphoreCreateRecursiveMutex(){return 0;} inline int xSemaphoreTakeRecursive(SemaphoreHandle_t,TickType_t){return 1;} inline int xSemaphoreGiveRecursive(SemaphoreHandle_t){return 1;}
@@ -20,4 +22,7 @@ typedef int portMUX_TYPE;
 #define portENTER_CRITICAL(m) ((void)(m))
 #define portEXIT_CRITICAL(m) ((void)(m))
 
+inline UBaseType_t uxTaskPriorityGet(TaskHandle_t){return 1;} inline void vTaskPrioritySet(TaskHandle_t,UBaseType_t){}
 inline char* pcTaskGetName(TaskHandle_t){static char n[]="stub";return n;}
+inline SemaphoreHandle_t xSemaphoreCreateBinary(){return (SemaphoreHandle_t)1;} inline void vSemaphoreDelete(SemaphoreHandle_t){}
+typedef struct { int dummy; } StaticSemaphore_t; inline SemaphoreHandle_t xSemaphoreCreateMutexStatic(StaticSemaphore_t*){return (SemaphoreHandle_t)1;}

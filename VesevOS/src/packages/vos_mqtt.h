@@ -9,19 +9,21 @@
 //   <prefisso>/cmd/result    risposta: ok oppure il messaggio di errore
 // Home Assistant: se attivo, la scheda si presenta da sola (homeassistant/sensor/...).
 #pragma once
-#include <Arduino.h>
+#include <string>
+#include "../core/vos_heapbuf.h"
+#include "../drivers/vos_drv_string.h"
 #include "../core/vos_common.h"
 
+#define MQTT_JSON_MAX 3072
 #if VOS_WITH_MQTT
 void   mqttInit();                          // registra il servizio; parte se "avvio automatico" e acceso
 void   mqttStart();                         // avvia (o riavvia) il client
 void   mqttStop();                          // ferma il client e il task
 bool   mqttRunning();                       // task attivo
 bool   mqttConnected();                     // collegato al broker
-bool   mqttPublishRel(const String& sub, const String& payload, bool retain = false);   // <prefisso>/<sub>
-String mqttStatusJson();
-String mqttStatusText();
-String mqttPrefix();
+bool   mqttPublishRel(const char* sub, const char* payload, bool retain = false);   // <prefisso>/<sub>
+bool        mqttStatusJson(HeapBuf& out);   // false = manca la memoria o supera il tetto
+std::string mqttStatusText();               // per la shell
 #else
 // Package spento (VOS_WITH_MQTT = 0): funzioni vuote, il resto del codice non cambia.
 inline void   mqttInit() {}
@@ -29,8 +31,7 @@ inline void   mqttStart() {}
 inline void   mqttStop() {}
 inline bool   mqttRunning() { return false; }
 inline bool   mqttConnected() { return false; }
-inline bool   mqttPublishRel(const String&, const String&, bool = false) { return false; }
-inline String mqttStatusJson() { return "{\"present\":false}"; }
-inline String mqttStatusText() { return "MQTT: non presente in questo firmware"; }
-inline String mqttPrefix() { return ""; }
+inline bool   mqttPublishRel(const char*, const char*, bool = false) { return false; }
+inline bool   mqttStatusJson(HeapBuf& out) { return out.add("{\"present\":false}"); }
+inline std::string mqttStatusText() { return "MQTT: non presente in questo firmware"; }
 #endif

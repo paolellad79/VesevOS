@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <thread>
+#include <atomic>
 #include <chrono>
 #define BERRY_BURST_MS 300UL      // nei test: 300 ms invece di 3 s
 
@@ -30,6 +31,8 @@ bool rulesAction(const String& a, String& err, const char*) {
 // finto file system: script in /scripts (.vsc), un vecchio script di 1.7.48 in /apps (.be), file e cartelle estranei
 #include <map>
 #include <string>
+#include <string_view>
+#include "../../VesevOS/src/core/vos_heapbuf.h"
 static bool g_dirOk = true;                       // esiste /scripts?
 static std::map<std::string, std::string> g_fs;
 static int g_listCalls = 0;
@@ -52,9 +55,8 @@ bool fsReadText(const String& p, String& out, String& err) {
   if (it == g_fs.end()) { err = "File non trovato"; return false; }
   out = it->second.c_str(); return true;
 }
-String fsListJson(const String& dir) {
+static std::string listJsonStr(const std::string& d) {
   g_listCalls++;
-  std::string d = dir.c_str();
   if (d == "/scripts" && !g_dirOk) return "{\"ok\":false}";
   if (d != "/scripts" && d != "/apps") return "{\"ok\":false}";
   std::string j = "{\"ok\":true,\"path\":\"" + d + "\",\"list\":[";
@@ -67,8 +69,10 @@ String fsListJson(const String& dir) {
       j += std::string(first ? "" : ",") + "{\"n\":\"" + sub + "\",\"d\":true,\"s\":10}"; first = false; continue; }
     j += std::string(first ? "" : ",") + "{\"n\":\"" + rest + "\",\"d\":false,\"s\":" + std::to_string(kv.second.size()) + "}"; first = false;
   }
-  return String((j + "],\"more\":false}").c_str());
+  return j + "],\"more\":false}";
 }
+String fsListJson(const String& dir) { return String(listJsonStr(dir.c_str()).c_str()); }
+bool fsListBuild(std::string_view path, HeapBuf& j) { std::string t = listJsonStr(std::string(path)); return j.add(t.c_str(), t.size()); }
 bool fsMkdir(const String& p, String&) { if (p == "/scripts") g_dirOk = true; return true; }
 bool fsRename(const String& from, const String& to, String& err) {
   auto it = g_fs.find(from.c_str());
@@ -77,19 +81,24 @@ bool fsRename(const String& from, const String& to, String& err) {
 }
 // periferiche a classi finte: rele1 (uscita, rifiuta il valore 7) e in1 (ingresso, vale 1)
 static int g_relay = 0; static bool g_relayFail = false;
-bool ioHas(const String& n) { return n == "rele1" || n == "in1"; }
-bool ioGet(const String& n, int& v, String& e) { if (n == "rele1") v = g_relay; else v = 1; return true; }
-bool ioSet(const String& n, int v, int role, String& e) { if (n != "rele1") { e = "non e un'uscita"; return false; } if (g_relayFail) { e = "troppo presto"; return false; } g_relay = v; return true; }
+bool ioHas(const char* n) { return !strcmp(n, "rele1") || !strcmp(n, "in1"); }
+bool ioGet(const char* n, int& v, String& e) { if (!strcmp(n, "rele1")) v = g_relay; else v = 1; return true; }
+bool ioSet(const char* n, int v, int role, String& e) { if (strcmp(n, "rele1")) { e = "non e un'uscita"; return false; } if (g_relayFail) { e = "troppo presto"; return false; } g_relay = v; return true; }
 // tasto BOOT finto: coda di click liberi
 static int g_bq[8], g_bn = 0, g_bi = 0; static bool g_battached = false; static int g_battachCalls = 0;
 void btnScriptAttach(bool on) { g_battached = on; g_battachCalls++; }
 int  btnScriptPop() { return g_bi < g_bn ? g_bq[g_bi++] : 0; }
 static String g_mqttT, g_mqttP; static int g_mqttN = 0; static bool g_mqttUp = true;
-bool mqttPublishRel(const String& sub, const String& payload, bool) { g_mqttN++; g_mqttT = sub; g_mqttP = payload; return g_mqttUp; }
+bool mqttPublishRel(const char* sub, const char* payload, bool) { g_mqttN++; g_mqttT = sub; g_mqttP = payload; return g_mqttUp; }
 #include "../../VesevOS/src/packages/vos_berry.cpp"
 #include "../../VesevOS/src/packages/vos_berry_mem.cpp"       // 1.7.62e: vos_berry.cpp diviso in 3 file
 #include "../../VesevOS/src/packages/vos_berry_scripts.cpp"
 #include "../../VesevOS/src/packages/vos_app_rt.h"
+// aiuti: le funzioni di Berry scrivono in un HeapBuf (heap, con tetto); qui si rileggono come String
+static String BL() { HeapBuf h(BERRY_TEXT_MAX); berryList(h); return String(h.c_str()); }
+static String BO() { HeapBuf h(BERRY_TEXT_MAX); berryOutText(h); return String(h.c_str()); }
+static String BS() { HeapBuf h(BERRY_TEXT_MAX); berryStatusText(h); return String(h.c_str()); }
+static String BJ() { HeapBuf h(BERRY_STATE_MAX); bool ok = berryStateJson(h); return ok ? String(h.c_str()) : String("KO"); }
 
 // esegue uno script come fa berryEval, ma nello stesso thread (il task finto non parte)
 static bool run(const char* code, uint32_t ms = 2000) {
@@ -189,7 +198,7 @@ int main() {
   CHECK(run("print(act('led-bright 10'))") && OUT().indexOf("troppe modifiche") == 0);
   CHECK(run("print(act('gpio 4 0'))") && OUT() == "ok\n");                       // le altre azioni non sono limitate
   CHECK(run("print(act('bad cosa'))") && OUT() == "Azione non ammessa\n");
-  CHECK(run("print(temp())") && OUT().startsWith("41.5"));
+  CHECK(run("print(temp())") && OUT().startsWith("42"));
   CHECK(run("print(time() > 1000000)") && OUT() == "true\n");
   CHECK(run("var a = millis() sleep(60) print(millis() - a >= 50)") && OUT() == "true\n");
   CHECK(!run("sleep(5000)", 150) && ERR().indexOf("timeout_error") >= 0);
@@ -202,7 +211,7 @@ int main() {
   String o, e;
   CHECK(!berryEval("", o, e) && e.length());
   String big; for (int i = 0; i < BERRY_CODE_MAX + 1; i++) big += "a";
-  CHECK(!berryEval(big, o, e) && e.length());
+  CHECK(!berryEval(big.c_str(), o, e) && e.length());
   CHECK(!berryEval("print(1)", o, e, 0) && e == "Lo script non risponde" && g_busy && g_abandoned);   // il task finto non parte
   CHECK(!berryEval("print(2)", o, e) && e == "Berry e occupato con un altro script");
   runTask(NULL);                                                    // il "task" finisce: libera da solo il busy perche abbandonato
@@ -218,17 +227,17 @@ int main() {
   CHECK(g_fs.count("/apps/Bad Name.be") == 1 && g_fs.count("/apps/lampada.vap") == 1);
   CHECK(berryStart("vecchio.be", er) && berryRunning()); runTask(NULL);       // il vecchio nome .be funziona ancora nei comandi
   CHECK(g_runOk && String(g_obuf) == "vecchio\n" && !berryRunning());
-  { int c0 = g_listCalls; g_fs["/apps/ancora.be"] = "print(9)"; berryList(); CHECK(g_fs.count("/apps/ancora.be") == 1 && g_listCalls == c0 + 1); }   // niente seconda migrazione
+  { int c0 = g_listCalls; g_fs["/apps/ancora.be"] = "print(9)"; BL(); CHECK(g_fs.count("/apps/ancora.be") == 1 && g_listCalls == c0 + 1); }   // niente seconda migrazione
   CHECK(!berryStart("big", er) && er.length() && !g_busy);                // oltre BERRY_FILE_MAX
   CHECK(berryStart("DEMO.vsc", er) && berryRunning() && g_bg);            // maiuscole e .vsc accettati
   CHECK(!berryStart("demo", er) && er == "Berry e occupato con un altro script");
-  CHECK(berryList().indexOf("demo  (70 B)  <- in corso") > 0);
+  CHECK(BL().indexOf("demo  (70 B)  <- in corso") > 0);
   runTask(NULL);
   CHECK(!berryRunning() && g_runOk && String(g_obuf) == "hola\nfine\n");
-  CHECK(berryOutText().indexOf("Script: demo") == 0 && berryOutText().indexOf("hola\nfine") > 0);
-  String l = berryList();
+  CHECK(BO().indexOf("Script: demo") == 0 && BO().indexOf("hola\nfine") > 0);
+  String l = BL();
   CHECK(l.indexOf("Script in /scripts: 6") == 0 && l.indexOf("demo  (70 B)") > 0 && l.indexOf("vecchio  (") > 0 && l.indexOf("x.txt") < 0 && l.indexOf("old") < 0 && l.indexOf("sub") < 0 && l.indexOf("in corso") < 0);
-  g_dirOk = false; CHECK(berryList().indexOf("Script in /scripts") == 0 && g_dirOk);       // cartella mancante: creata
+  g_dirOk = false; CHECK(BL().indexOf("Script in /scripts") == 0 && g_dirOk);       // cartella mancante: creata
   // sottofondo: senza pause fermato dopo BERRY_BURST_MS; con sleep puo girare piu a lungo; stop lo ferma
   uint32_t tb = millis();
   CHECK(berryStart("busy", er)); runTask(NULL);
@@ -245,17 +254,38 @@ int main() {
   CHECK(g_runOk && g_otrunc && g_olen <= BERRY_OUT_MAX && String(g_obuf).endsWith("FINE\n") && g_obuf[g_olen] == 0);
   CHECK(run("print('di nuovo comando')") && OUT() == "di nuovo comando\n");   // il modo "comando" torna normale
   // 10c) stato per la pagina (JSON): elenco, in corso, uscita ed errore (con caratteri da proteggere)
-  { String j = berryStateJson();
+  { String j = BJ();
     CHECK(j.startsWith("{\"ok\":true,\"ver\":\"") && j.indexOf("\"busy\":false") > 0 && j.indexOf("{\"n\":\"demo\",\"s\":") > 0 && j.indexOf("\"n\":\"vecchio\"") > 0);
     CHECK(j.indexOf("x.txt") < 0 && j.indexOf("old") < 0 && j.indexOf("\"n\":\"sub\"") < 0 && j.indexOf("\"max\":8192") > 0 && j.endsWith("}"));
     g_fs["/scripts/virg.vsc"] = "print('a\"b\\\\c') print(1/0)";
     CHECK(berryStart("virg", er) && berryRunning()); runTask(NULL);
-    j = berryStateJson();
+    j = BJ();
     CHECK(j.indexOf("\"busy\":false") > 0 && j.indexOf("\"last\":0") > 0 && j.indexOf("\"out\":\"a\\\"b\\\\c\\n\"") > 0 && j.indexOf("divzero_error") > 0 && j.indexOf("\"name\":\"virg\"") > 0);
     g_fs["/scripts/lungo.vsc"] = "print('x') sleep(200) print('y')";
-    CHECK(berryStart("lungo", er)); j = berryStateJson();
+    CHECK(berryStart("lungo", er)); j = BJ();
     CHECK(j.indexOf("\"busy\":true,\"bg\":true") > 0 && j.indexOf("\"name\":\"lungo\"") > 0 && j.indexOf("\"err\":\"\"") > 0);   // mentre gira: nessun errore vecchio
     runTask(NULL); CHECK(!berryRunning()); }
+  // 10c2) 1.7.66a-string7: buffer sull'heap con tetto, stesso escape di jsonEscape(), elenco grande, lettura mentre il task scrive
+  { HeapBuf tiny(60); CHECK(!berryStateJson(tiny));                                  // non entra: false (mai un JSON troncato dato per buono)
+    { std::string all; for (int c = 1; c < 256; c++) all += (char)c;                  // ogni byte tranne lo zero: stesso testo di jsonEscape()
+      HeapBuf h(4096); CHECK(h.addJson(all.data(), all.size()));
+      CHECK(String(h.c_str()) == jsonEscape(String(all.c_str()))); }
+    auto savedFs = g_fs; g_fs.clear(); g_dirOk = true;                              // i file delle altre prove si rimettono alla fine
+    for (int i = 0; i < 200; i++) g_fs[std::string("/scripts/s") + std::to_string(i) + ".vsc"] = "print(1)";
+    String bj = BJ(); CHECK(bj != "KO" && bj.startsWith("{\"ok\":true") && bj.endsWith("}") && bj.indexOf("\"n\":\"s199\"") > 0);   // 200 script: entrano nel tetto
+    String bl = BL(); CHECK(bl.indexOf("Script in /scripts: 200") == 0 && bl.indexOf("  s199  (8 B)") > 0);
+    g_fs = savedFs; g_dirOk = true;
+    g_bg = true; g_toErr = false; g_olen = 0; g_obuf[0] = 0; g_otrunc = false; g_elen = 0; g_ebuf[0] = 0;
+    std::atomic<bool> stopW(false);
+    std::thread w([&] { for (int i = 0; i < 30000 && !stopW; i++) vos_berry_write("abcdefghij\n", 11); });
+    bool allOk = true;
+    for (int i = 0; i < 300 && allOk; i++) {                                         // il task scrive: l'uscita letta ha solo i caratteri scritti
+      String t = BJ(); int a = t.indexOf("\"out\":\""), b = t.indexOf("\",\"err\"");
+      if (t == "KO" || a < 0 || b < a) { allOk = false; break; }
+      for (int k = a + 7; k < b; k++) if (!strchr("abcdefghij\\n", t[k])) allOk = false;
+    }
+    stopW = true; w.join(); CHECK(allOk);
+    g_bg = false; g_olen = 0; g_obuf[0] = 0; g_otrunc = false; }
   // 10d) coda (azione "script <nome>" delle Automazioni): parte subito o va in coda (max 4, senza doppioni); stesso task; stop la svuota
   g_fs["/scripts/qa.vsc"] = "print('A')"; g_fs["/scripts/qb.vsc"] = "print('B')"; g_fs["/scripts/qc.vsc"] = "print('C')";
   g_fs["/scripts/qd.vsc"] = "print('D')"; g_fs["/scripts/qe.vsc"] = "print('E')";
@@ -267,7 +297,7 @@ int main() {
   CHECK(!berryQueue("QB.vsc", er, "regola") && er == "Script gia in coda" && g_qn == 1);   // doppione (nome ripulito)
   CHECK(berryQueue("qc", er, "mqtt") && berryQueue("nonesiste", er, "t") && berryQueue("qd", er, "t") && g_qn == 4);
   CHECK(!berryQueue("qe", er, "t") && er.indexOf("Coda piena") == 0 && g_qn == 4);
-  CHECK(berryStateJson().indexOf("\"q\":4") > 0);
+  CHECK(BJ().indexOf("\"q\":4") > 0);
   runTask(NULL);                                                                // qa, qb, qc, (nonesiste saltato), qd: tutti dallo stesso task
   CHECK(!berryRunning() && g_qn == 0 && g_runs == runs0 + 4 && String(g_name) == "qd" && String(g_obuf) == "D\n" && g_runOk);
   // stop a mano: svuota la coda e lo script in corso si ferma senza passare al prossimo
@@ -373,13 +403,51 @@ int main() {
     { String n; CHECK(berryRunning() && berryAppRunning(n) && n == "t1" && !berryStartApp("t2", "print(1)", "", er) && er == "Berry e occupato con un altro script" && !berryStart("demo", er)); }
     { std::thread th([&] { std::this_thread::sleep_for(std::chrono::milliseconds(200)); String s2; berryStop(s2); }); runTask(NULL); th.join(); }
     CHECK(!berryRunning() && g_runOk);
-    { String o = berryAppOutJson(); CHECK(o.indexOf("\"out\":\"") == 0 && o.indexOf("\"last\":1") > 0); }
+    { HeapBuf h(BERRY_STATE_MAX); CHECK(berryAppOutJson(h)); String o(h.c_str()); CHECK(o.indexOf("\"out\":\"") == 0 && o.indexOf("\"last\":1") > 0); }
     // dopo le app uno script normale funziona ancora e non ha le funzioni delle app
     CHECK(run("print('script ok')") && OUT() == "script ok\n" && !g_app);
     CHECK(g_used == 0 && g_realLive == 0 && g_live == NULL);
     rtFree(); delete A;
   }
+  // 10c) pulizia del nome: cleanNameTo (senza String) uguale al vecchio cleanName + utilNameOk su 20000 testi a caso
+  {
+    auto oldClean = [](const String& in) { String n = in; n.trim(); n.toLowerCase(); if (n.endsWith(SCRIPT_EXT)) n.remove(n.length() - 4); else if (n.endsWith(".be")) n.remove(n.length() - 3); return n; };
+    const char* parts[] = {"a", "B", "z9", "-", "_", ".", ".vsc", ".VSC", ".be", ".BE", " ", "\t", "\r\n", "x", "0", "/", "..", "\xc3\xa8", "vsc", "be"};
+    srand(7); int bad = 0;
+    for (int i = 0; i < 20000; i++) {
+      std::string t; int np = rand() % 14; for (int k = 0; k < np; k++) t += parts[rand() % 20];
+      if (i % 50 == 0) t = std::string(20 + rand() % 40, 'a') + (rand() % 2 ? ".vsc" : "") + (rand() % 2 ? "  " : "");   // lunghi, vicini a 24 e a 40
+      String o = oldClean(t.c_str()); bool ov = utilNameOk(o);
+      char n[NAME_BUF]; bool nv = cleanNameTo(t.c_str(), n);
+      if (nv != ov || (nv && o != n)) { if (bad++ < 3) printf("diverso: [%s]\n", t.c_str()); }
+    }
+    CHECK(bad == 0);
+    char nb[NAME_BUF];
+    CHECK(!cleanNameTo(NULL, nb) && !cleanNameTo("", nb) && !cleanNameTo(".vsc", nb) && !cleanNameTo(".be", nb) && !cleanNameTo(std::string(24, 'a').append("x").c_str(), nb));
+    CHECK(cleanNameTo("  Demo.VSC \n", nb) && String(nb) == "demo" && cleanNameTo(std::string(24, 'a').c_str(), nb) && strlen(nb) == 24);
+    CHECK(!cleanNameTo(std::string(39, 'a').c_str(), nb) && !cleanNameTo(std::string(40, 'a').c_str(), nb) && !cleanNameTo(std::string(200, 'a').c_str(), nb));
+  }
+  // 10d) migrateOld con un elenco strano: al massimo 16 spostati per volta, solo nomi validi .be file, cartelle e nomi lunghi no
+  {
+    fsInit(); g_migDone = false;
+    g_fs.erase("/apps/vecchio.be");
+    for (int i = 0; i < 20; i++) { char nm[40]; snprintf(nm, sizeof nm, "/apps/m%02d.be", i); g_fs[nm] = "print(1)"; }
+    g_fs["/apps/" + std::string(24, 'q') + ".be"] = "print(2)";          // 24 caratteri: valido
+    g_fs["/apps/" + std::string(25, 'q') + ".be"] = "print(3)";          // 25: non valido
+    g_fs["/apps/.be"] = "print(4)";                                      // nome vuoto
+    g_fs["/apps/sotto/k.be"] = "print(5)";                               // dentro una cartella: non conta
+    int mv = migrateOld();
+    int rimasti = 0; for (int i = 0; i < 20; i++) { char nm[40]; snprintf(nm, sizeof nm, "/apps/m%02d.be", i); rimasti += g_fs.count(nm); }
+    CHECK(mv == 16 && g_migDone);
+    CHECK(rimasti == 4 && g_fs.count("/scripts/m00.vsc") == 1 && g_fs.count("/scripts/m15.vsc") == 1 && g_fs.count("/scripts/m16.vsc") == 0);   // vanno in ordine alfabetico: m00..m15
+    CHECK(g_fs.count("/apps/.be") == 1 && g_fs.count("/apps/" + std::string(25, 'q') + ".be") == 1 && g_fs.count("/apps/sotto/k.be") == 1);
+    CHECK(migrateOld() == 0);                                            // una volta per avvio
+    g_migDone = false; CHECK(migrateOld() == 5 && g_fs.count("/scripts/" + std::string(24, 'q') + ".vsc") == 1 && g_fs.count("/scripts/m19.vsc") == 1);   // al giro dopo gli altri 4 e il nome da 24
+    CHECK(g_fs.count("/apps/.be") == 1 && g_fs.count("/apps/" + std::string(25, 'q') + ".be") == 1 && g_fs.count("/apps/sotto/k.be") == 1);   // nomi non validi e cartelle restano
+    g_dirOk = false; g_migDone = false; g_fs.clear(); CHECK(migrateOld() == 0 && g_migDone);   // niente /apps: zero
+    fsInit();
+  }
   // 11) stato
-  CHECK(berryStatusText().indexOf("Berry 1.1.0") == 0 && berryStatusText().indexOf("Esecuzioni:") > 0);
+  CHECK(BS().indexOf("Berry 1.1.0") == 0 && BS().indexOf("Esecuzioni:") > 0);
   return done("test_berry");
 }

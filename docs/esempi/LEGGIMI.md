@@ -13,6 +13,7 @@ Programmi Berry pronti da leggere, copiare e provare. Sono DEMO: servono a capir
 ## Esempi
 - `app/logmqtt.vap` - un pulsante (e un interruttore "ogni ora") che manda le ultime 10 righe del registro al broker MQTT, su `<prefisso>/app/log`. Usa i permessi `logread`, `mqtt`, `time`.
 - `script/torcia.vsc` - un click del tasto BOOT accende il LED bianco, il click dopo lo spegne.
+- `io-sd.cfg` - esempio di riga di `io.cfg` per la microSD (modulo SPI, pin 10-13, 1 MHz): solo da leggere, il modo normale e la pagina Periferiche. Collegamento: `docs/progetto/sd-collegamento.md`.
 
 ## Come si caricano sulla scheda
 1. Dalla pagina: Sistema > File, cartella `/scripts` (script) oppure `/apps` (app), poi carica il file. Poi si avviano dalla pagina (le app compaiono tra le app della scheda; gli script nella sezione degli script).

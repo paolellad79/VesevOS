@@ -4,12 +4,14 @@
 # Per aggiornare senza cancellare usa carica-tutto.sh.
 # Uso:  ./installa.sh PORTA CARTELLA_RECOVERY [FIRMWARE.bin]
 #   PORTA              es. /dev/cu.usbmodem14401
-#   CARTELLA_RECOVERY  cartella con VesevOS_Recovery.ino.bin / .bootloader.bin / .partitions.bin (Esporta binario compilato)
-#   FIRMWARE.bin       (facoltativo) VesevOS.ino.bin esportato dall'IDE (NON il .merged.bin)
+#   CARTELLA_RECOVERY  cartella con VesevOS_Recovery.bin, bootloader.bin e partition-table.bin (dalla compilazione ESP-IDF del recovery;
+#                      bootloader.bin e partition-table.bin possono stare nelle sottocartelle bootloader/ e partition_table/ della build)
+#   FIRMWARE.bin       (facoltativo) VesevOS-X.Y.Z.bin (NON un .merged.bin)
 set -e
 P="$1"; D="$2"; F="$3"
 [ -z "$P" ] || [ -z "$D" ] && { sed -n '2,10p' "$0"; exit 1; }
-B="$D/VesevOS_Recovery.ino.bootloader.bin"; T="$D/VesevOS_Recovery.ino.partitions.bin"; R="$D/VesevOS_Recovery.ino.bin"
+pick() { for c in "$@"; do [ -f "$c" ] && { echo "$c"; return; }; done; echo "$1"; }
+B=$(pick "$D/bootloader.bin" "$D/bootloader/bootloader.bin"); T=$(pick "$D/partition-table.bin" "$D/partition_table/partition-table.bin"); R="$D/VesevOS_Recovery.bin"
 for f in "$B" "$T" "$R"; do [ -f "$f" ] || { echo "Manca il file: $f"; exit 1; }; done
 [ -n "$F" ] && [ ! -f "$F" ] && { echo "Manca il file: $F"; exit 1; }
 . "$(cd "$(dirname "$0")" && pwd)/controlli.sh"

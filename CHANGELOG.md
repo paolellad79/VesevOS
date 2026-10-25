@@ -1,11 +1,102 @@
 # Cronologia delle versioni
 
+## 1.8.0b (rilasciata il 25/10/2026; include la 1.8.0 e la 1.8.0a, e le 1.7.67-1.7.70h) - Shell classica, login seriale, comandi vesevos-*
+- Novita del rilascio: cartella `firmware/` con i file gia compilati (firmware 1.8.0b, Recovery 0.5.1 e 0.5.0), SHA-256 e `indice.json` (campi `publisher` e `channel`: sono scritte non firmate); pagina di prima installazione dal browser in `flash/` (NON PROVATA con una scheda reale); NOTICE, SBOM e registro legale aggiornati (esptool-js, pako, miniz); repo senza lo sketch vecchio del recovery e senza `licenses/LGPL-2.1.txt`.
+- Pagina LED e QR hotspot: l'admin non veniva piu riconosciuto (confronto tra scale di ruoli diverse), corretto.
+- Shell: pwd/cd/ls, prompt, Tab, man/help, time, whoami/id/echo/df/uname, ping, gzip/unzip/tar/zip, cpu e vesevos-* (cpuinfo, services, bugreport, config, network, led_control, cleaner, drive_manager, backup, update).
+- Sicurezza: login seriale con utente/password/MFA, ruoli per sottocomando, password non in cronologia, suspend/poweroff con conferme, /api/sleep e pulsanti sleep solo Admin.
+- LED con trigger flash/wifi/cpu; popup "Carica un file dal computer" sistemato.
+- Recovery 0.5.1 (gettone valido anche per l'avvio).
+- Compilato con ESP-IDF 5.5.5 (2.212.400 byte). L'utente dice che le schede hanno girato 2 giorni senza problemi (non verificato da chi ha preparato il rilascio). Prove automatiche (hosttest, webtest) NON rieseguite per questo rilascio; la lista di controllo sulla scheda e in `consegna/NOTA-PROVA-1.8.0.md` (fuori dal repo).
+- Testi senza nomi di terzi: tolti "Debian", "Linux" e "GNU" da guida, man, messaggi e commenti (solo testi, nessun cambio di comportamento).
+
+## 1.7.70h (inclusa nella 1.8.0b) - Avvisi del compilatore sul nostro codice
+- Tolto `-w` dal componente main: ora il compilatore mostra gli avvisi standard di ESP-IDF (`-Wall -Wextra`, in piu `-Wsign-compare`) sul codice nostro. Berry (`third_party/`) resta senza avvisi; PsychicHttp e ArduinoJson sono componenti a parte. Gli avvisi NON fermano la build (`-Werror=all` di ESP-IDF cambiato in `-Wall`).
+- Corretti 26 avvisi: istruzioni su una riga che sembravano dentro l'`if` (13, divise su due righe), confronto int/unsigned in `vos_imgcheck.h`, `++` su variabile `volatile` (`vos_drv_wifi.cpp`).
+- Tre buffer allargati perche potevano tagliare il testo: `host[80]` -> 96 in `vos_redirect_plan.cpp` (nome 32 + dominio 60: con nomi lunghi il redirect puntava a un nome tagliato), `js[96]` -> 128 in `vos_mod.cpp`, `u[96]` -> 128 in `vos_web_upd.cpp`. Il resto del comportamento non cambia. Nota: `docs/progetto/nota-warning-2026-10-23.md`. NON provato su scheda.
+
+## 1.7.70g (inclusa nella 1.8.0b) - Panic cambiando il nome host (DEF-18)
+- Cambiando il nome host la scheda si riconfigura: la radio Wi-Fi si spegne e si riaccende, e le sue interfacce di rete vengono distrutte e rifatte. mDNS restava acceso e fermato solo dopo, quando teneva ancora i puntatori vecchi: `mdns_free` leggeva un'interfaccia gia liberata e dava `LoadProhibited` nel task `net` (rapporto del 23/10 su VesevOS1, 1.7.70c; frame letti con addr2line: `esp_netif_is_netif_up` <- `join_group` <- `mdns_free` <- `drvMdnsEnd` <- `mdnsApply` <- `netTask`).
+- Ora mDNS si ferma PRIMA di toccare la radio (`mdnsStop()` in `tryClient`, `startAp`, `airEnter`). Nessun cambio di comportamento visibile. Da provare sulla scheda cambiando il nome host.
+
+## 1.7.70f (inclusa nella 1.8.0b) - Tema in alto a destra: solo il simbolo
+- Nella barra in alto il pulsante del tema mostra solo l'icona (Automatico/Chiaro/Scuro), senza scritta. I nomi restano nel menu che si apre. Il pulsante ha `aria-label` e `title` ("Tema: Scuro", voce nuova tradotta it/en/es/de), `aria-haspopup` e `aria-expanded`. Tolta la classe CSS `.ib.wide`. Stessa barra anche con l'accesso. NON provato su browser vero ne su telefono.
+
+## 1.7.70e (inclusa nella 1.8.0b) - Server HTTP minimo per il redirect
+- Con redirect acceso, HTTP e HTTPS accesi e hotspot che non puo accendersi (servizio spento e Wi-Fi di casa configurata), la porta HTTP non usa piu il secondo server Psychic ma un piccolo task con socket lwIP (`drivers/vos_drv_tcpsrv.*`, `interfaces/vos_http_redirect_srv.*`) che risponde solo il redirect: stesse regole di prima in `redirectPlan()` (`vos_redirect_plan.*`), filtro IP, una connessione alla volta, 1 KB e 3 s di limite. Negli altri casi il server HTTP completo resta com'era (portale e hotspot invariati). Risparmio di RAM atteso: STIMA, non misurato.
+- La scelta si fa all'avvio dei server; un cambio dopo vale al riavvio (`pending` in `/api/svc`, campo nuovo `httpMin`, riga nella pagina Rete). HTTPS parte prima di HTTP. Nota: `docs/progetto/nota-redirect-http-https-2026-10-22.md`, registro SIC-016. NON provato su scheda.
+
+## 1.7.70d (inclusa nella 1.8.0b) - Arduino tolto dalle note legali
+- Note legali (NOTICE.txt e comando `license`) per la build ESP-IDF pura: tolti core Arduino-ESP32, obblighi LGPL e il testo `lgpl21` (restano notice, gpl3, apache2, mit, bsd3). Elenco componenti veri: ESP-IDF 5.5.5, Mbed TLS, lwIP, FreeRTOS, NimBLE, esp-nimble-cpp, mdns, esp_littlefs, LittleFS, bundle certificati (licenza da verificare), PsychicHttp (copia modificata), ArduinoJson, Berry, posix_tz_db (da verificare). Il nome ArduinoJson resta.
+- SBOM.spdx.json rifatto (17 componenti, versione 1.7.70d) e lista SBOM della pagina (`tools/mkcommon.py`). COMMERCIAL.md senza kit LGPL. README.md e README.en.md: compilazione con ESP-IDF 5.5.
+- Messaggio "Non e un programma VesevOS valido" (era "...Arduino-ESP32..."); enum `IMG_ARDUINO` diventa `IMG_APPDESC`. Cancellata la vecchia cartella `VesevOS/build` (build di arduino-cli). Valutazione preliminare, non e consulenza legale. NON provato su scheda.
+
+## 1.7.70c (inclusa nella 1.8.0b) - Watchdog piu lunghi e modificabili
+- Valori di base: Task watchdog 5 -> 30 s, watchdog di interruzione 300 -> 1000 ms (solo compilazione, in pagina sola lettura), net 90 -> 180 s, monitor 20 -> 60 s (300 s durante lo spazio file), mesh e mqtt 30 -> 90 s, led 10 -> 30 s. Antiloop e riavvii invariati.
+- Modificabili da pagina (scheda Watchdog), shell (`wd`, `wd set`, `wd defaults`) e API (`/api/wd`), solo Admin: Task watchdog 5-60 s (a caldo, `esp_task_wdt_reconfigure` in un solo punto con mutex) e limiti per servizio con minimo e massimo. Nessun watchdog si puo spegnere. Audit a ogni cambio; config `twdt` e `lim_*` scritte solo se diverse dal predefinito. Nota: `docs/progetto/nota-watchdog-2026-10-23.md`. NON provato su scheda.
+
+## 1.7.70b (inclusa nella 1.8.0b) - Session ticket TLS e CPU a riposo a 80
+- Server HTTPS: session ticket TLS accesi (`session_tickets = true` in `PsychicHttpsServer.cpp`), durata 4 ore (`CONFIG_ESP_TLS_SERVER_SESSION_TICKET_TIMEOUT=14400`). Il browser riprende la sessione senza stretta di mano completa. Chiave dei ticket nuova a ogni avvio del server. Nota: `docs/progetto/nota-session-ticket-tls-2026-10-23.md`. Ripuliti i due gruppi contraddittori di `SESSION_TICKETS` in `sdkconfig.defaults.vesevos`. NON provato su scheda.
+- CPU: confermato che con HTTPS acceso il pavimento di 160 MHz riguarda solo il TETTO; il minimo di `esp_pm` resta 80 (a riposo la CPU scende a 80). Corretti commenti e testi (it/en/es/de) che parlavano di "minimo 160". Regola termica invariata.
+
+## 1.7.70a (inclusa nella 1.8.0b) - Task a core automatico
+- Tutti i task creati da VesevOS (net, wd, monitor, time, rules, tmpclean, server UDP, loopTask, berry, mqtt, mesh, led, selftest) nascono senza core fisso (`DRV_CORE_ANY`): li assegna FreeRTOS. Accanto a ogni creazione c'e il commento col core di prima; per tornare indietro basta riscrivere quel numero. I task di ESP-IDF (Wi-Fi, BLE, lwIP, httpd, esp_timer) non cambiano. Nota: `docs/progetto/nota-task-automatici-2026-10-22.md`. NON provato su scheda.
+- Il monitor chiama il governor della CPU tramite tre ganci (`cpuTick`, `cpuApplyMode`, `cpuStatus` in `core/vos_hooks.h`): chiude il ciclo tra moduli lasciato da `vos_cpupm`.
+
+## 1.7.70 (inclusa nella 1.8.0b) - Governor della CPU
+- Il selettore della velocita diventa: **80 | 160 | 240** (fissi) oppure **ondemand** (predefinito), **conservative**, **schedutil**. I governor scelgono il tetto fra 80, 160 e 240 MHz in base al carico; il lavoro fine lo fa `esp_pm`. Scritti da zero dal comportamento descritto (nessun codice di terzi). Soglie provvisorie, da tarare sulla scheda.
+- Vecchie configurazioni: `cpu=0` (automatico) diventa ondemand; 80, 160 e 240 restano fissi. Nuove chiavi `cpugov`, `cpuup`, `cpudown`, `cpuhold` salvate solo se diverse dal predefinito (il file esportato di chi non le usa non cambia).
+- Parametri (solo Admin; gli altri li leggono): salita 50-95 (80), discesa 5-50 (20, sempre 10 sotto la salita), attesa 2-120 s (10).
+- Il caldo resta sopra ogni governor. Con HTTPS acceso il tetto non scende sotto 160 MHz fino a 90 C (a 80 C solo avviso giallo); a 90 C scende a 80 con allarme rosso.
+- Nei primi 15 secondi dopo l'avvio nessun cambio di frequenza. Un solo punto cambia la frequenza: il monitor (un cambio al massimo ogni 2 s).
+- Prenotazioni `cpuBoost` (scansione Wi-Fi, avvio script Berry) alzano il tetto a 240 per qualche secondo con i governor. TLS e OTA rimandati.
+- Shell: `cpu [80|160|240|ondemand|conservative|schedutil|why]`, `cpu set up|down|hold <n>`. API: `/api/cpu` accetta `gov` (e il vecchio `mode`), `up`, `down`, `hold`; `/api/status` aggiunge `cpuGov`, `cpuWhy`, `cpuUp`, `cpuDown`, `cpuHold`, `cpuChanges`.
+- Pagina: selettore con le 6 voci, parametri, voce Processore con governor, tetto e motivo; testo termico corretto.
+
+## 1.7.69 (inclusa nella 1.8.0b) - Aggiornamento tramite recovery (lato VesevOS)
+- Nuovo menu **Aggiorna tramite recovery** (solo Admin): VesevOS scrive un ordine nella NVS (`vosupd`) e riavvia nel recovery 0.5.0, che esegue. Nessuna password passa al recovery.
+- **Modo 2**: file dal computer senza secondo login (gettone monouso a 16 byte, legato all'IP, 15 minuti); la pagina avvisa che passera per HTTP in rete locale e chiede conferma.
+- **Modo 1**: aggiornamento dalla rete, URL HTTPS e SHA-256 scritti a mano; lista bianca (Release ufficiali su GitHub, piu prefissi in `/updurl.txt`). Nessun controllo automatico.
+- Esito del recovery letto all'avvio (registro, audit, finestra una volta); rotte `/api/updorder`, `/api/updorder/file`, `/api/updorder/net`.
+
+## 1.7.68 (inclusa nella 1.8.0b) - Lingua dalla pagina di accesso
+- Il selettore di lingua compare nella pagina di accesso solo se la scheda ha piu di una lingua; la scelta resta nel browser e non cambia l'impostazione della scheda.
+- Il menu lingue prima del login non chiama piu `/api/region` (che faceva tornare all'accesso); tastiera: Esc chiude, il focus torna al pulsante.
+- Elenco pubblico delle lingue limitato a 12.
+
+## 1.7.67a (inclusa nella 1.8.0b)
+- Redirect 307 al posto di 308 (il 308 e permanente e i browser lo ricordano).
+
+## 1.7.67 (inclusa nella 1.8.0b) - IDF puro e unificazione
+- **ESP-IDF puro**, senza Arduino: nessun simbolo Arduino nel binario.
+- **PSRAM corretta**: SPIRAM_BOOT_INIT attivo, la PSRAM torna visibile (prima psramTotal era 0).
+- **BLE dormiente**: impostazione `ble` spenta di fabbrica; `ble on|off|status` e funzioni Berry.
+- **Voce "Processore"**: temperatura unita al processore (C/F), 3 livelli di avviso.
+- **Redirect HTTP -> HTTPS** (`svc redirect on|off`, spento di fabbrica).
+- **Watchdog**: tolto il rumore `task_wdt: task not found`.
+
+## 1.7.66a (ottobre 2026) - La microSD e un tipo di periferica di io.cfg
+- La **microSD si aggiunge come un rele, un LED o un pulsante**: pagina Periferiche, classe "Lettore microSD (4 pin)", pin CS/MOSI/SCK/MISO a scelta (proposti GPIO 10-13) controllati come gli altri (USB, BOOT, LED, avvio, console, JTAG, I2C, memoria, pin gia usati) e **frequenza SPI da 400 a 20000 kHz** (di fabbrica 1 MHz, non piu fissa a 4 MHz). Salvata in `io.cfg` (riga `sd1 7 CS 0 MOSI SCK MISO kHz`). Una sola microSD. Senza periferica: nessun pin occupato, nessun riquadro, nessuna azione.
+- **Widget nella Home** (campo `sd` di `/api/home`, solo da Operatore in su): montata, non montata, **non presente** (scheda tolta o assente) o formato non supportato; negli stati senza scheda resta visibile con l'**icona sbarrata**, dati grigi e testo alternativo. La scheda tolta mentre era montata si **smonta da sola** (lettura di un settore a ogni richiesta di stato).
+- **Formati**: solo FAT12/16/32 con nomi lunghi (nel core `FF_USE_LFN = 2`, 255 caratteri, UTF-8; prova `tools/fatfs_lfn/prova.sh`). **exFAT rifiutato** con "serve FAT32" (il driver riconosce la firma exFAT nel primo settore); nessuna formattazione automatica. Nuova riga "Formato" nello stato.
+- Percorsi: ora rifiutati i nomi che finiscono con spazio o punto (FatFs li taglia). L'elenco segna con un asterisco i nomi che l'API non sa aprire (accenti o piu di 47 byte).
+- `vos_io.cpp` diviso: il salvataggio di `io.cfg` sta in `vos_io_cfg.cpp` (+ `vos_io_int.h`), per restare sotto 500 righe. I pin proposti stanno nel file di scheda (`VOS_SD_DEF_*`).
+- Prove: `test_sd` (149 prove), `tools/webtest/sd.js` (widget, classe sd, errori), `tools/fatfs_lfn/prova.sh`. Debito di checklayers invariato.
+- Non ancora provata su una scheda vera: vedi `docs/progetto/da-fare-sd.md`. Controllo legale: 🟡 (nessun rosso; da chiudere al rilascio: NOTICE/FatFs, date dei brevetti LFN, SD Association).
+
+## 1.7.66 (ottobre 2026) - Scheda microSD come periferica
+- Nuova periferica **microSD** (modulo SPI a 3,3 V, FAT/FAT32): monta/smonta a richiesta (mai nell'avvio), stato, prova di scrittura e lettura, elenco, leggi/scrivi/cancella file piccoli.
+- Pin SPI nel file di scheda (GPIO10-13, occupati solo da montata); interruttore `VOS_WITH_SD`.
+- API `/api/sd` e `/api/sd/act`, comando `sd` nella shell, riquadro nella scheda Periferiche, riga nell'autodiagnosi.
+- Codice nuovo senza `String` di Arduino (debito di checklayers invariato). Nuova prova sul computer `test_sd` (89 prove) con driver finto; nuova prova della pagina `tools/webtest/sd.js`.
+- Non ancora provata su una scheda vera: vedi `docs/progetto/da-fare-sd.md`.
+
 ## 1.7.65a (ottobre 2026) - Prove con AddressSanitizer e nuovi controlli degli strati
 
 - Prove sul computer (`tools/hosttest/run.sh`, `prova_iocfg.sh`): **AddressSanitizer + UBSan di fabbrica** (`ASAN=0` li spegne; circa 10% piu lente). Trovati e corretti: (1) `vos_bmp280.cpp`: scorrimento a sinistra di valori negativi (comportamento non definito) nel calcolo della pressione, ora moltiplicazioni per 2^n (stesso risultato); (2) `test_recheck.cpp`: scrittura oltre la fine di un'immagine di prova (difetto della prova, non del firmware).
 - Nuova prova `tools/hosttest/test_hooks.cpp` (68 prove): `vosWire()` riempie TUTTI i ganci di `core/vos_hooks.h`, nessun gancio e usato senza controllo di nullo, un gancio vuoto da risposte sicure.
 - `tools/checklayers.py`, tre controlli nuovi con debito di partenza (solo in discesa): `e_idf` (include `esp_*.h`/`driver/*.h` fuori dai driver: 24 in 19 file), `f_rtos` (primitive FreeRTOS fuori da drivers/ e core/: 52 in 14 file), `cicli` (moduli che si includono a vicenda: 6 gruppi; tra cartelle 0). Provati su copia con una violazione per tipo (tutti danno KO).
-- Documentati in `docs/progetto/REGOLE-ARCHITETTURA.md` e `CLAUDE.md`.
+- Documentati in `docs/progetto/REGOLE-ARCHITETTURA.md` e nelle note interne di progetto.
 - Nessun cambio di comportamento sulla scheda. Controllo legale: non applicabile (strumenti di sviluppo e un'equivalenza matematica).
 
 ## 1.7.65 (ottobre 2026) - Nessun include verso l'alto
@@ -37,7 +128,7 @@
 ## Strumenti (15 ottobre 2026) - Ordine dei livelli (nessun cambio al firmware)
 
 - `tools/checklayers.py`: nuova famiglia **ordine**. Ogni cartella puo includere solo livelli piu bassi (boards < drivers < core < security < devices < net < packages < interfaces < vos_wire/.ino). Include verso l'alto = debito per coppia "da->a" in `layers_baseline.json`: oggi 25 (core->devices 8, core->net 7, core->security 2, drivers->core 5, devices->net 1, packages->interfaces 2). Puo solo scendere; una coppia nuova e un errore.
-- Ordine scritto in `docs/progetto/REGOLE-ARCHITETTURA.md` e nella mappa di `CLAUDE.md`.
+- Ordine scritto in `docs/progetto/REGOLE-ARCHITETTURA.md` e nella mappa del codice delle note interne.
 - Controllo legale: non applicabile (solo strumenti di sviluppo).
 
 ## 1.7.63a (ottobre 2026) - CPU e HTTPS, rapporto dei crash piu chiaro
@@ -47,7 +138,7 @@
 - Controllo legale: radio non applicabile (nessun cambio di canali/potenza); cybersecurity: migliora la disponibilita (meno riavvii) senza cambiare accessi o cifratura; privacy, licenze, marchi, export, IA non applicabili; accessibilita: nuovo avviso solo testo, tradotto. Valutazione preliminare, non consulenza legale.
 
 ## 1.7.63 (ottobre 2026) - Strati in ordine: ganci, riavvio unico, NVS nel driver, niente doppioni
-- **Strati**: `core/`, `devices/` e `net/` non includono piu `packages/` o `interfaces/` (erano 21 righe, ora 0). Lo stato di MQTT, ESP-NOW e Bluetooth si legge dal registro dei servizi (`serviceState`); il resto (avvio di pagina/regole/MQTT/ESP-NOW, HTTPS acceso, chiusura dei collegamenti HTTPS fermi, MFA, messaggio MQTT di prova, click WPS del tasto BOOT, radio spente in modo aereo) passa da ganci in `core/vos_hooks.h`. Li riempie `src/vos_wire.cpp` (`vosWire()`, prima riga di `setup()`), l'unico file insieme a `VesevOS.ino` che conosce tutti gli strati.
+- **Strati**: `core/`, `devices/` e `net/` non includono piu `packages/` o `interfaces/` (erano 21 righe, ora 0). Lo stato di MQTT, ESP-NOW e Bluetooth si legge dal registro dei servizi (`serviceState`); il resto (avvio di pagina/regole/MQTT/ESP-NOW, HTTPS acceso, chiusura dei collegamenti HTTPS fermi, MFA, messaggio MQTT di prova, click WPS del tasto BOOT, radio spente in modo aereo) passa da ganci in `core/vos_hooks.h`. Li riempie `src/vos_wire.cpp` (`vosWire()`, prima riga di `setup()`), l'unico file insieme al punto di ingresso che conosce tutti gli strati.
 - **Device Manager**: le periferiche virtuali dei package (MQTT, ESP-NOW, Bluetooth, MFA, statistiche) passano da `devices/vos_dev.cpp` a `packages/vos_dev_pkg.cpp` e si iscrivono con `devSetVirtual()`. Stesso elenco, stesso ordine.
 - **Riavvio unico**: nuovo `sysReboot(motivo, attesa)` in `core/vos_wd` e driver `drivers/vos_drv_sys` (unico `ESP.restart()`). Ci passano pagina (riavvio, recovery, fabbrica), shell (`reboot`, `factory-reset`, `recovery now`), regole (`reboot`), tasto BOOT (20 s e 8 s) e watchdog (`wdReboot`, che in piu conta per l'antiloop). Il motivo va nel diario dei riavvii come ultima riga ("Riavvio: ..."). Novita visibile solo li.
 - **NVS**: `Preferences` solo nel driver `drivers/vos_drv_nvs.h` (`DrvNvs`, stessi nomi, composizione). Toccati vos_wd, vos_boot, vos_sys, vos_config, vos_tls, vos_drv_ota; tolti 2 include inutili (config import/export). Stesse chiavi, stessi namespace.
@@ -246,7 +337,7 @@ Riassunto riunito (le voci singole non furono scritte allora).
 - Nuovo comando `ram audit`: RAM interna con percentuale occupata, stato del TLS in PSRAM e uno **storico** automatico delle ultime 14 misure (avvio finito, Bluetooth acceso/spento, accesso e uscita dalla pagina) con la variazione della RAM libera tra una e l'altra. Cosi si vede quanto costa davvero il Bluetooth e quanto costa una pagina aperta.
 - Corretta la tabella degli stack: il task `wd` e di 6144 byte (era scritto 3072), quindi il margine recuperabile del comando `ram` era sbagliato per quel task.
 - Costo: 14 voci fisse da 28 byte (circa 0,4 KB, senza heap). Nessun cambio di comportamento.
-- Prima parte del passo 4 (RAM sotto il 75%): piano in `claude/funzioni/VesevOS-piano-ram-autonomo.md`.
+- Prima parte del passo 4 (RAM sotto il 75%): piano interno.
 
 ## 1.7.39 (ottobre 2026) - Bluetooth: meno frammentazione della RAM (prova)
 
@@ -414,7 +505,7 @@ Terzo passo del riordino a strati. **Nessuna funzione nuova, comportamento invar
 
 ## 1.7.13 (ottobre 2026) - Strati: i file in cartelle
 Secondo passo del riordino a strati. **Nessuna funzione nuova, nessun cambio di codice: si spostano solo i file.**
-- `VesevOS/` contiene solo `VesevOS.ino` e la cartella `src/` (Arduino IDE compila `src/` e le sue sottocartelle). Dentro `src/`, una cartella per strato:
+- `VesevOS/` conteneva solo uno sketch e la cartella `src/` (Arduino IDE compilava `src/` e le sue sottocartelle). Dentro `src/`, una cartella per strato:
   - `core/` nucleo sempre presente (configurazione, log, testi, ora, watchdog, file, firmware, autotest, dati generati)
   - `security/` accessi, HTTPS, cifratura
   - `net/` rete e contatori di traffico
@@ -471,7 +562,7 @@ Primo passo del riordino a strati (schema nel Progetto: `VesevOS-schema-strati.m
   - **Diario piu utile**: per ogni riavvio salva il pezzo di RAM libero piu grande, quante volte la seriale non e stata letta e il servizio con il battito piu vecchio (es. "web 12s"). Il vecchio diario resta e si completa (nessuna perdita).
   - **Meno RAM per HTTPS**: se il pezzo di RAM libero piu grande scende sotto 60 KB e la pagina e ferma da 20 secondi, la scheda chiude i collegamenti HTTPS rimasti aperti (circa 40 KB l'uno); il browser li riapre da solo.
 - **Seriale: si puo correggere cio che scrivi** (segnalato dalla prova): il tasto Backspace toglieva il carattere dalla riga ma sullo schermo la lettera restava; ora lo schermo la cancella davvero. In piu **Ctrl+U** e **Ctrl+C** svuotano la riga, e i tasti freccia / Canc / Home non mettono piu lettere strane (`[D`, `[3~`) nella riga.
-- **Misura della RAM** (passo R0 del piano RAM, claude/VesevOS-piano-ram.md): nuovo modulo `vos_ram` e comando **`ram`** (stack libero minimo e totale di ogni task e quanto si puo togliere tenendo il 25% libero) piu **`ram mark`** / **`ram diff`** (quanto costa in RAM interna, pezzo piu grande e PSRAM accendere o spegnere un servizio). Nessun cambiamento al comportamento della scheda.
+- **Misura della RAM** (passo R0 del piano RAM): nuovo modulo `vos_ram` e comando **`ram`** (stack libero minimo e totale di ogni task e quanto si puo togliere tenendo il 25% libero) piu **`ram mark`** / **`ram diff`** (quanto costa in RAM interna, pezzo piu grande e PSRAM accendere o spegnere un servizio). Nessun cambiamento al comportamento della scheda.
 - **NTP piu rispettoso (privacy e sicurezza)**:
   - **Tolto Google**: il secondo server NTP non e piu `time.google.com` fisso. Di fabbrica c'e solo `pool.ntp.org`; un secondo server e a scelta (pagina Servizi > NTP, oppure `ntp server2 <nome|off>`; `ntp server <nome>` cambia il primo). Chiave di configurazione `server2`.
   - **Avviso chiaro**: la scheda NTP dice a quali server parla e che ogni richiesta mostra il tuo IP pubblico; anche la riga di log quando NTP si accende da solo nomina i server.
@@ -534,7 +625,7 @@ Primo passo del riordino a strati (schema nel Progetto: `VesevOS-schema-strati.m
 - Solo dati tecnici nel diario (niente IP, MAC, nomi Wi-Fi o utenti); azzerabile da pagina e seriale.
 
 ## 1.7.7 (ottobre 2026) - "AUTOTEST"
-- **Autotest** (Sistema > Autotest, Admin): 16 prove non distruttive (anche CPU e temperatura: media su 2 secondi, avviso oltre 60%, errore oltre 85%; temperatura avviso oltre 70 C, errore oltre 85 C), una per volta, ognuna con esito chiaro (OK / Avviso / Errore / Saltata) e tempo. Alla fine il **report di testo** si scarica o si copia, per mandarlo a mano a Claude.
+- **Autotest** (Sistema > Autotest, Admin): 16 prove non distruttive (anche CPU e temperatura: media su 2 secondi, avviso oltre 60%, errore oltre 85%; temperatura avviso oltre 70 C, errore oltre 85 C), una per volta, ognuna con esito chiaro (OK / Avviso / Errore / Saltata) e tempo. Alla fine il **report di testo** si scarica o si copia, per mandarlo a mano a chi ti assiste.
 - Il report non contiene mai password, chiavi o token. MAC, nome Wi-Fi, IP e registro sono oscurati, salvo la casella "nomi reali". Le prove attive (LED, messaggio MQTT) partono solo se spunti la casella.
 - Comando seriale `selftest [active] [names]`. Nulla esce dalla scheda; il report sta in RAM (circa 2,7 KB) finche non lo chiudi.
 - **Pagina piu leggera**: aggiornamento ogni 3 s (era 2 s), nessuna richiesta nuova finche la precedente non e finita, e nessuna richiesta quando la scheda del browser e nascosta o in secondo piano (prima la CPU della scheda poteva restare al 100% con la pagina lasciata aperta).

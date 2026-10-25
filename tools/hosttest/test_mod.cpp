@@ -22,13 +22,13 @@ bool fsRemove(const String& p, String& e) { if (!g_fs.erase(p.c_str())) { e = "n
 bool fsWriteText(const String& p, const String& t, String&, bool) { g_fs[p.c_str()] = t.c_str(); return true; }
 bool fsReadText(const String& p, String& o, String& e) { auto it = g_fs.find(p.c_str()); if (it == g_fs.end()) { e = "File non trovato"; return false; } o = it->second.c_str(); return true; }
 #include "vos_io.h"
-bool ioParseCls(const String& s, uint8_t& c) { const char* N[] = {"", "rele", "led", "pin", "ingresso", "analogico", "i2c"}; for (uint8_t i = 1; i <= 6; i++) if (s == N[i]) { c = i; return true; } return false; }
+bool ioParseCls(const char* s, uint8_t& c) { const char* N[] = {"", "rele", "led", "pin", "ingresso", "analogico", "i2c"}; for (uint8_t i = 1; i <= 6; i++) if (!strcmp(s, N[i])) { c = i; return true; } return false; }
 int ioSuggest(uint8_t, int n, int* out) { int k = 0; for (; k < n && k < g_free; k++) out[k] = 5 + k; return k; }
 int ioCount() { return g_added - g_removed; }
-bool ioAdd(const String& cls, int gpio, const String& name, const String& opt, String& out, String& err) {
+bool ioAdd(const char* cls, int gpio, const char* name, const char* opt, String& out, String& err) {
   if (g_failAt3 && g_added == 1) { err = "pin occupato"; return false; }
-  g_added++; out = name.length() ? name : String("rele") + String(g_added); return true; }
-bool ioRemove(const String&, String&) { g_removed++; return true; }
+  g_added++; out = name[0] ? String(name) : String("rele") + String(g_added); return true; }
+bool ioRemove(const char*, String&) { g_removed++; return true; }
 static int g_i2cSda = -1, g_i2cScl = -1, g_i2cAddr = -1, g_i2cCalls = 0; static bool g_i2cFast = false; static String g_i2cDrv;
 bool ioAddI2c(const char* drv, int sda, int scl, int addr, bool fast, const char* name, char* out, char* err) {
   (void)err; g_i2cCalls++; g_i2cDrv = drv; g_i2cSda = sda; g_i2cScl = scl; g_i2cAddr = addr; g_i2cFast = fast; strcpy(out, name[0] ? name : "bmp1"); return true; }

@@ -9,6 +9,8 @@ function svcDraw(j){if(!j||j.apOn===undefined)return;SV=j;
  $("sv_hp").value=j.httpPort;$("sv_sp").value=j.httpsPort;
  var pd=!!j.pending;svcSt("http",j.httpOn,pd,!!j.runHttp,j.usersHttp);svcSt("https",j.httpsOn,pd||!!j.httpsOn!=!!AUTH.https,!!AUTH.https,j.usersHttps);
  $("sv_hw").className=j.httpOn&&j.clientOk?"law":"hide";$("sv_hw").textContent=j.httpOn&&j.clientOk?t("Sei collegato alla tua Wi-Fi: puoi spegnere HTTP e usare solo HTTPS (consigliato)."):"";
+ var rd=!!(j.httpOn&&j.httpsOn);$("sv_rd").classList.toggle("on",!!j.redirect);$("sv_rd").disabled=!rd;
+ $("sv_rdn").className=rd?"law":"hide";$("sv_rdn").textContent=rd?t("Con il redirect la porta HTTP serve solo a reindirizzare a HTTPS (nessuna pagina, nessun dato). L'hotspot funziona come prima.")+(j.runHttp?" "+(j.httpMin?t("Ora la porta HTTP e tenuta dal server minimo (solo redirect, meno RAM)."):t("Ora la porta HTTP e tenuta dal server completo (il minimo serve solo con redirect acceso e hotspot spento).")):""):"";
  var nh=!j.httpsOn;$("sv_sw").className=nh?"law":"hide";$("sv_sw").textContent=nh?t("Senza HTTPS il traffico non e cifrato: il login non manda la password (HMAC), ma sessione e dati si leggono sulla rete. Scelta tua: usa una rete di cui ti fidi."):"";
  var pe=j.pending?t("Le modifiche valgono dopo Applica (riavvia la scheda)."):"";
  ["sv_hpend","sv_spend"].forEach(function(id){$(id).className=pe?"law":"hide";$(id).textContent=pe})}

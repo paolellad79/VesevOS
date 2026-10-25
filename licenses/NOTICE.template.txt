@@ -19,24 +19,67 @@ Progetto: {REPO}
    consentiti dalla legge applicabile.
 
 2. COMPONENTI DI TERZI
-   Indicati secondo i rispettivi progetti. Verifica sempre la licenza
-   della versione che usi. Le librerie restano sotto la loro licenza.
-   - Arduino-ESP32 core (Espressif): LGPL-2.1 o successiva.
-     Testo: "license lgpl21"
-   - ESP-IDF (esp_wifi, esp_now, esp-mqtt, esp_http_server,
-     esp_https_server, NVS), Mbed TLS, NimBLE (Bluetooth): Apache-2.0.
+   VesevOS e compilato solo con ESP-IDF 5.5.5, senza framework di terzi
+   e senza codice LGPL. Elenco secondo i rispettivi progetti, controllato nei
+   sorgenti locali; verifica sempre la licenza della versione che usi.
+   Le librerie restano sotto la loro licenza e non fanno parte della
+   licenza commerciale di VesevOS.
+   - ESP-IDF 5.5.5 (Espressif; esp_wifi, esp_now, esp-mqtt, esp_http_server,
+     esp_https_server, esp-tls, NVS, tutti i driver): Apache-2.0.
      Testo: "license apache2"
-   - PsychicHttp (server web e HTTPS), ArduinoJson, FreeRTOS,
-     posix_tz_db (fusi orari POSIX), Berry (script): MIT. Testo: "license mit"
-   - lwIP, LittleFS: BSD-3-Clause. Testo: "license bsd3"
+   - Mbed TLS (in ESP-IDF): Apache-2.0 oppure GPL-2.0-or-later, a scelta di
+     chi usa; qui si sceglie Apache-2.0. Testo: "license apache2"
+   - NimBLE (Apache Mynewt) e esp-nimble-cpp 2.5.0 (h2zero): Apache-2.0.
+     Il file NOTICE di esp-nimble-cpp (Ryan Powell, Neil Kolban) resta con
+     il componente.
+   - espressif/mdns 1.14.0: Apache-2.0.
+   - joltwallet/littlefs (esp_littlefs) 1.22.3: MIT. Testo: "license mit"
+   - LittleFS (littlefs-project, dentro esp_littlefs): BSD-3-Clause.
+     Testo: "license bsd3"
+   - lwIP (in ESP-IDF): BSD-3-Clause. Testo: "license bsd3"
+   - FreeRTOS Kernel (in ESP-IDF): MIT. Testo: "license mit"
+   - Libreria C (newlib 4.3.0, in ESP-IDF): licenze miste di tipo BSD (vedi
+     COPYING.NEWLIB in ESP-IDF 5.5.5, letto il 25/10/{YEAR}). Le due voci LGPL
+     del file (21 e 22) valgono solo per i target "linux" e i386, non per
+     Xtensa/ESP32-S3. Non e stato controllato file per file il codice
+     effettivamente collegato: resta DA VERIFICARE prima della vendita.
+   - miniz (funzioni tinfl/tdefl nella ROM del chip e relativo header in
+     ESP-IDF, usate da gzip/zip/unzip): MIT.
+   - Bundle dei certificati radice (esp_crt_bundle di ESP-IDF; completo nel
+     firmware, ridotto nel recovery 0.5.1): dati dell'elenco CA di Mozilla
+     (certdata.txt, copia del 25/2/2025 distribuita da curl.se). Il file
+     di ESP-IDF cita l'origine ma non porta il testo della licenza;
+     l'elenco di Mozilla e in genere indicato sotto MPL-2.0 (sono dati,
+     non codice). Licenza NON verificata alla fonte: DA VERIFICARE.
+   - PsychicHttp 3.1.2 (Zach Poulter, Rob Smith, Carbou): MIT. Nel progetto
+     c'e una copia modificata: ogni #ifdef ARDUINO diventa PSYCHIC_ARDUINO,
+     nient'altro (vedi NOTICE-PSYCHIC.txt). Testo: "license mit"
+   - ArduinoJson (Benoit Blanchon; copia nel componente aj_json): MIT.
+     Testo: "license mit"
+   - Berry (Guan Wenliang, interprete degli script): MIT.
+   - posix_tz_db (fusi orari in formato POSIX): indicata MIT; il testo della
+     licenza non e nei sorgenti locali (25/10/{YEAR}). DA VERIFICARE.
+   - Pagina di prima installazione (cartella flash/, solo browser, nessun
+     codice nel firmware):
+     esptool-js 0.5.7 (Espressif): Apache-2.0 (testo in
+     flash/vendor/LICENSE-esptool-js-Apache-2.0.txt); dentro il suo bundle
+     c'e pako 2.1.0 (Nodeca): MIT AND Zlib.
+   - Recovery 0.5.1 (programma nostro, cartella recovery/VesevOS_Recovery_IDF):
+     GPL-3.0-or-later OR licenza commerciale; usa solo ESP-IDF 5.5.5 e
+     Mbed TLS (Apache-2.0), senza codice LGPL.
    - Natural Earth (nomi dei paesi): pubblico dominio.
    - IANA tz database (fusi orari, nomi dei paesi): pubblico dominio.
    Chi distribuisce un firmware compilato deve rispettare anche queste
-   licenze (per esempio fornire i testi e, per la LGPL del core Arduino,
-   la possibilita di ricollegare il programma con una versione modificata
-   della libreria: vedi COMMERCIAL.md, "kit LGPL").
+   licenze: per Apache-2.0, MIT e BSD-3-Clause vuol dire conservare gli
+   avvisi di copyright e i testi delle licenze (qui nel comando "license").
+   Nel prodotto non c'e codice LGPL. La
+   traccia del panico (drivers/vos_drv_panic.cpp) e il cambio di frequenza
+   della CPU (drivers/vos_drv_cpu.cpp) sono scritti sopra le API pubbliche
+   di ESP-IDF.
    Elenco completo con versioni: pagina Sistema > Note legali (SBOM) e
    file SBOM.spdx.json nel repository.
+   Questa e una valutazione preliminare, non e consulenza legale; le norme
+   possono essere cambiate.
 
 3. RIFERIMENTI NORMATIVI (informativi, non sono consulenza legale)
    - Diritto d'autore: Legge 22 aprile 1941 n. 633 e successive modifiche;
@@ -64,11 +107,11 @@ Progetto: {REPO}
      quella versione e si dichiarera il periodo di supporto.
    - Sicurezza: segnalazioni a {EMAIL} (vedi SECURITY.md). Nessuna data
      garantita per gli aggiornamenti.
-   - Marchi: "VesevOS" e il nome del progetto. Espressif, Arduino e gli
+   - Marchi: "VesevOS" e il nome del progetto. Espressif, ESP32 e gli
      altri nomi citati sono marchi dei rispettivi titolari; il loro uso qui
      non implica approvazione o collaborazione.
 
 4. CONTRIBUTI
    Chi contribuisce con codice accetta le condizioni di CONTRIBUTING.md.
 
-Elenco dei testi: notice, gpl3, lgpl21, apache2, mit, bsd3
+Elenco dei testi: notice, gpl3, apache2, mit, bsd3

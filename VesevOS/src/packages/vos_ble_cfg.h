@@ -5,10 +5,10 @@
 // Non conosce la radio: riceve un testo e restituisce la risposta. Usa le funzioni del nucleo (configurazione, rete).
 // Comandi: wifi <rete>|<password>, country <XX>, name <nome>, mesh <ruolo> <chiave>, status, done.
 #pragma once
-#include <Arduino.h>
+#include "../core/vos_errbuf.h"
 #include "../core/vos_common.h"
 
 #if VOS_WITH_BLE
-// esegue un comando; ritorna il testo di risposta. stopAfter = true se dopo la risposta il Bluetooth va spento ("done").
-String bleCfgRun(String cmd, bool& stopAfter);
+// esegue un comando e scrive in reply il testo di risposta. stopAfter = true se dopo la risposta il Bluetooth va spento ("done").
+void bleCfgRun(const char* cmd, bool& stopAfter, ErrBuf& reply);
 #endif

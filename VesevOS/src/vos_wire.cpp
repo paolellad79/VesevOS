@@ -3,6 +3,7 @@
 // VesevOS - vos_wire.cpp
 #include "vos_wire.h"
 #include "core/vos_hooks.h"
+#include "core/vos_cpupm.h"
 #include "interfaces/vos_web.h"
 #include "interfaces/vos_shell.h"
 #include "packages/vos_rules.h"
@@ -21,9 +22,10 @@
 static bool mqttPub(const char* sub, const char* msg) { return mqttPublishRel(sub, msg, false); }
 static void radiosOff() { meshStop(); bleStop(); }
 
-static void shellExecW(const char* line, Print& out, int role) { shellExec(line, out, role); }
+static void shellExecW(const char* line, OutSink& out, int role) { shellExec(line, out, role); }
 static bool devIsOnW(const char* id) { const DevOps* d = devFind(id); return d && d->state && d->state(); }
 static NetState netStateW() { return netState(); }
+static int cpuTickW(float tempC, int busyPct) { cpuPmTick(tempC, busyPct); return (int)cpuPmThermal(); }
 
 void vosWire() {
   g_hooks.webInit      = webInit;
@@ -49,5 +51,8 @@ void vosWire() {
   g_hooks.devOff       = devOffId;
   g_hooks.shellExec    = shellExecW;
   g_hooks.webIdleSec   = webIdleSec;
+  g_hooks.cpuTick      = cpuTickW;
+  g_hooks.cpuApplyMode = cpuPmApplyMode;
+  g_hooks.cpuStatus    = cpuPmStatusJson;
   devPkgRegister();
 }

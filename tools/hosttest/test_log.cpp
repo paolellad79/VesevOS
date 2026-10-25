@@ -3,7 +3,7 @@
 #include "vos_log.h"
 #include "mini.h"
 
-static bool has(const String& all, const char* s) { return all.indexOf(s) >= 0; }
+static bool has(const std::string& all, const char* s) { return all.find(s) != std::string::npos; }
 
 int main() {
   logInit(); logSetLevel(LG_DBG); logClear();
@@ -13,7 +13,7 @@ int main() {
   vlog("AUDIT: GIALLO giallo");
   vlog("NET: tutto bene");
   vlogl(LG_DBG, "TOP: dettaglio");
-  String g = logGet(20);
+  std::string g = logGet(20);
   CHECK(has(g, "[E] ERRORE: prova"));
   CHECK(has(g, "[W] ATTENZIONE: prova"));
   CHECK(has(g, "[E] AUDIT: ROSSO"));
@@ -41,5 +41,19 @@ int main() {
   logSetLevel(LG_INFO); logClear();
   vlog("NET: a\x01" "b");
   CHECK(has(logGet(5), "a?b"));
+  // limiti: registro vuoto, richiesta di 0 righe, piu righe del registro, registro pieno (150 righe lunghe)
+  logClear();
+  CHECK(logGet(20).find("registro svuotato") != std::string::npos);   // logClear scrive una riga
+  CHECK(logGet(0).empty());
+  for (int i = 0; i < 400; i++) vlog("NET: riga lunga %d %0100d", i, i);   // oltre la capacita del registro (150 righe)
+  g = logGet(150);
+  int righe = 0; for (char ch : g) if (ch == '\n') righe++;
+  CHECK(righe == 150);
+  CHECK(g.size() <= 150 * 120);                                       // mai piu di LOG_LINES * LOG_LEN
+  CHECK(g.back() == '\n');
+  CHECK(has(g, "riga lunga 399"));                                    // l'ultima riga c'e
+  CHECK(!has(g, "riga lunga 249 "));                                  // le piu vecchie sono state scartate
+  CHECK(logGet(1000).size() == g.size());                             // chiedere troppe righe non cambia
+  CHECK(g.capacity() >= g.size());
   return done("log");
 }

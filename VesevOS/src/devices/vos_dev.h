@@ -5,7 +5,8 @@
 // elenco, stato, acceso/spento, dettagli (JSON) e azioni. Le usano la pagina, la shell (comando "dev") e, in futuro, le app.
 // Due tipi: DEV_VIRT = periferica virtuale (servizio con la sua pila), DEV_HW = hardware vero (Device Manager).
 #pragma once
-#include <Arduino.h>
+#include "../core/vos_errbuf.h"
+#include "../core/vos_heapbuf.h"
 
 enum DevKind : uint8_t { DEV_VIRT = 0, DEV_HW = 1 };
 
@@ -17,18 +18,20 @@ struct DevOps {
   const char* tab;       // scheda della pagina che la configura
   uint8_t jsonRole;      // ruolo minimo per leggere i dettagli
   int  (*state)();                                   // 0 spenta, 1 accesa, 2 accesa ma con problema
-  bool (*set)(bool on, String& err);                 // nullptr = non si accende/spegne da qui
-  String (*json)();                                  // dettagli (JSON)
-  bool (*act)(const String& a, const String& arg, int role, String& out, String& err);   // azioni (nullptr = nessuna)
+  bool (*set)(bool on, ErrBuf& err);                 // nullptr = non si accende/spegne da qui
+  bool (*json)(HeapBuf& out);                        // dettagli (JSON) in out; false = manca la memoria
+  bool (*act)(const char* a, const char* arg, int role, HeapBuf& out, ErrBuf& err);   // azioni (nullptr = nessuna)
 };
 
 void           devSetVirtual(const DevOps* list, int n);   // periferiche virtuali dei package (le iscrive packages/vos_dev_pkg), in testa all'elenco
 int            devCount();
 const DevOps*  devAt(int i);
-const DevOps*  devFind(const String& id);
-String         devListJson();                          // {"dev":[{id,label,cap,kind,tab,state,sw,act}]}
-String         devListText();                          // per la shell
-String         devStatusJson(const String& id, int role);   // dettagli; "" se non esiste o ruolo insufficiente
+const DevOps*  devFind(const char* id);
+// I JSON e i testi si scrivono in un HeapBuf del chiamante (false = manca la memoria o supera il tetto).
+#define DEV_JSON_MAX 16384
+bool           devListJson(HeapBuf& out);              // {"dev":[{id,label,cap,kind,tab,state,sw,act}]}
+bool           devListText(HeapBuf& out);              // per la shell
+bool           devStatusJson(const char* id, int role, HeapBuf& out);   // dettagli; false se non esiste, ruolo insufficiente (out vuoto) o memoria finita (out.oom()/over())
 bool           devOffId(const char* id);                  // spegne la periferica (per il watchdog); false se non c'e o non si spegne
-bool           devSet(const String& id, bool on, String& err);
-bool           devAct(const String& id, const String& a, const String& arg, int role, String& out, String& err);
+bool           devSet(const char* id, bool on, ErrBuf& err);
+bool           devAct(const char* id, const char* a, const char* arg, int role, HeapBuf& out, ErrBuf& err);   // out: JSON della risposta (vuoto = solo ok)

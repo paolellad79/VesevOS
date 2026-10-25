@@ -208,12 +208,16 @@ function start(){$("login").className="hide";$("app").className="";setRole(AUTH.
 function flagImg(l){return l&&l.flag?'<img class="flag" alt="" src="data:image/svg+xml;charset=utf-8,'+encodeURIComponent(l.flag)+'">':""}
 function langOf(c){for(var i=0;i<LANGS.length;i++)if(LANGS[i].code==c)return LANGS[i];return{code:c,name:c}}
 function fillLangSel(){var l=langOf(LANG),h=flagImg(l)+'<span>'+esc(LANG.toUpperCase())+'</span>';
- var bs=document.querySelectorAll(".lbtn");for(var i=0;i<bs.length;i++){bs[i].innerHTML=h;bs[i].title=t("Lingua")+": "+l.name;bs[i].setAttribute("aria-label",bs[i].title)}
+ var bs=document.querySelectorAll(".lbtn");for(var i=0;i<bs.length;i++){bs[i].innerHTML=h;bs[i].title=t("Lingua")+": "+l.name;bs[i].setAttribute("aria-label",bs[i].title);
+  if(bs[i].closest("#login"))bs[i].classList.toggle("hide",LANGS.length<2)}   // al login il selettore c'e solo con piu di una lingua
  var s=$("lc_lang");if(s){var o="";LANGS.forEach(function(x){o+='<option value="'+esc(x.code)+'"'+(x.code==LANG?" selected":"")+'>'+esc(x.name)+'</option>'});s.innerHTML=o}}
-function langPop(e){e.stopPropagation();var m=$("lpop");if(!m.classList.contains("hide")){m.className="pop hide";return}
- var h="";LANGS.forEach(function(x){h+='<button role="menuitem" class="'+(x.code==LANG?"on":"")+'" onclick="$(\'lpop\').className=\'pop hide\';setLang(\''+esc(x.code)+'\')">'+flagImg(x)+'<span><b>'+esc(x.name)+'</b><small>'+esc(x.loc||x.code)+'</small></span><i class="ck">&#10003;</i></button>'});
- h+='<div class="lloc" id="hlocn"></div>';m.innerHTML=h;homeLoc();var r=e.currentTarget.getBoundingClientRect();m.style.top=(r.bottom+6)+"px";m.style.right=Math.max(8,innerWidth-r.right)+"px";m.className="pop";$("thm").className="pop hide";$("um").className="pop hide"}
-document.addEventListener("click",function(e){var m=$("lpop");if(m&&!m.classList.contains("hide")&&!e.target.closest("#lpop"))m.className="pop hide"});
+var LANGB=null;   // pulsante che ha aperto il menu lingue (ci si torna con Esc)
+function langClose(){var m=$("lpop");if(!m||m.classList.contains("hide"))return;m.className="pop hide";if(LANGB){LANGB.setAttribute("aria-expanded","false");if(LANGB.offsetParent)LANGB.focus()}}
+function langPop(e){e.stopPropagation();var m=$("lpop");if(!m.classList.contains("hide")){langClose();return}LANGB=e.currentTarget;LANGB.setAttribute("aria-expanded","true");
+ var h="";LANGS.forEach(function(x){h+='<button role="menuitem" class="'+(x.code==LANG?"on":"")+'" onclick="langClose();setLang(\''+esc(x.code)+'\')">'+flagImg(x)+'<span><b>'+esc(x.name)+'</b><small>'+esc(x.loc||x.code)+'</small></span><i class="ck">&#10003;</i></button>'});
+ h+='<div class="lloc" id="hlocn"></div>';m.innerHTML=h;if(loggedIn())homeLoc();   // prima del login /api/region non e pubblica
+ var r=e.currentTarget.getBoundingClientRect();m.style.top=(r.bottom+6)+"px";m.style.right=Math.max(8,innerWidth-r.right)+"px";m.className="pop";$("thm").className="pop hide";$("um").className="pop hide";var b=m.querySelector("button");if(b)b.focus()}
+document.addEventListener("click",function(e){var m=$("lpop");if(m&&!m.classList.contains("hide")&&!e.target.closest("#lpop")){m.className="pop hide";if(LANGB)LANGB.setAttribute("aria-expanded","false")}});
 
 /* ===== navigazione con ruoli ===== */
 var TMIN={dmgr:1,btn:1,usb:1,temp:1,mem:1,cpu:1,rad:1,selftest:2,stat:1,power:1,cert:1,radio:1,ntp:1,dhcp:1,dns:1,mdns:1,ble:1,ap:1,http:1,wifi:1,wps:2,mqtt:1,mesh:1,pin:1,io:1,led:1,task:1,file:1,ora:1,loc:1,auto:1,boot:1,wd:1,shell:1,audit:1,https:1,users:2,fw:2,script:2,app:1,conf:2};
@@ -223,7 +227,7 @@ function buildNav(){var h='<svg class="i slogo" style="stroke:url(#vg)"><use hre
  GRP.forEach(function(g){if(gTabs(g[0]).length)h+='<button class="nb" id="n_'+g[0]+'" onclick="gGo(\''+g[0]+'\')" aria-label="'+esc(t(g[1]))+'" title="'+esc(t(g[1]))+'"><svg class="i"><use href="#'+GICO[g[0]]+'"/></svg><span class="nl">'+esc(t(g[1]))+'</span></button>'});$("nav").innerHTML=h;
  $("bellb").title=t("Allarmi");$("outb").title=t("Logout, riavvia o sleep");$("tbt").classList.toggle("hide",ROLE<1);themeApply();cpTitles();show(canSee(cur)?cur:"sum")}
 function gGo(g){var L=gTabs(g);show(LASTG[g]&&canSee(LASTG[g])?LASTG[g]:L[0])}
-function show(id){if(!canSee(id))id="sum";cur=id;var g=gOf(id);LASTG[g]=id;
+function show(id){if(id=="temp")id="cpu";if(!canSee(id))id="sum";cur=id;var g=gOf(id);LASTG[g]=id;
  TABS.forEach(function(x){var e=$("t_"+x[0]);if(e)e.className=x[0]==id?"":"hide"});
  GRP.forEach(function(x){var e=$("n_"+x[0]);if(e)e.className="nb"+(x[0]==g?" on":"")});
  var L=gTabs(g),h="";if(L.length>1){L.forEach(function(k,ix){var x=null;TABS.forEach(function(y){if(y[0]==k)x=y});if(!x)return;
@@ -232,7 +236,7 @@ function show(id){if(!canSee(id))id="sum";cur=id;var g=gOf(id);LASTG[g]=id;
   else if(sc===undefined&&sp!==undefined)h+='<span class="gsep"></span>';
   h+='<button class="'+(k==id?"on":"")+'" onclick="show(\''+k+'\')">'+esc(t(x[1]))+'</button>'})}
  $("gsub").innerHTML=h;$("gsub").className="sub gsub"+(h?"":" hide");$("alerts").className="alerts hide";
- if(id=="dmgr")dmLoad();if(id!="wps")clearTimeout(WP.tm);if(id=="wps")wpsLoad();if(id!="io")ioStop();if(id=="io")ioLoad();if(["btn","usb","temp","mem","cpu","rad"].indexOf(id)>=0)dvRows(id);if(id=="btn")btnLoad();if(id=="shell")cpToggle(true);if(id!="auto"){clearInterval(RU.tm)}if(id=="auto")rLoad();if(id=="boot")bLoad();if(id!="script")scTimerStop();if(id!="app")apTimerStop();if(id=="script")scLoad();if(id=="app")apLoad();if(id!="task")clearInterval(TK.tm);if(id=="task")loadTasks();if(id=="pin")loadPins();if(id=="loc")loadLangs();if(id=="log"){lgInit();loadLog();lgAuto()}else clearInterval(LG.tm);if(id=="wifi")fillNet();if(id=="led")fillLed();if(id=="ora")loadTime();if(id=="file")fList(fp);
+ if(id=="dmgr")dmLoad();if(id!="wps")clearTimeout(WP.tm);if(id=="wps")wpsLoad();if(id!="io")ioStop();if(id=="io")ioLoad();if(["btn","usb","mem","rad"].indexOf(id)>=0)dvRows(id);if(id!="cpu")clearInterval(CPU.tm);if(id=="cpu")cpuLoad();if(id=="btn")btnLoad();if(id=="shell")cpToggle(true);if(id!="auto"){clearInterval(RU.tm)}if(id=="auto")rLoad();if(id=="boot")bLoad();if(id!="script")scTimerStop();if(id!="app")apTimerStop();if(id=="script")scLoad();if(id=="app")apLoad();if(id!="task")clearInterval(TK.tm);if(id=="task")loadTasks();if(id=="pin")loadPins();if(id=="loc")loadLangs();if(id=="log"){lgInit();loadLog();lgAuto()}else clearInterval(LG.tm);if(id=="wifi")fillNet();if(id=="led")fillLed();if(id=="ora")loadTime();if(id=="file")fList(fp);
  if(id=="sec")fillSec();if(id=="sum"){homeDraw()}if(id=="mqtt")mqLoad();if(id=="mesh")msLoad();if(id=="loc")lcLoad();if(id=="wd")wdLoad();if(id=="users")usLoad();if(id=="fw")fwLoad();if(id=="https"){tlsLoad();svcLoad()}if(id=="ap"){fillNet();svcLoad()}if(id=="http"||id=="dhcp"||id=="dns"||id=="mdns")svcLoad();if(id=="ntp")loadTime();if(id=="mfa")mfLoad();if(id!="stat")clearInterval(STT);if(id=="stat"){stLoad();clearInterval(STT);STT=setInterval(stLoad,5000)}if(id=="power")pwLoad();if(id=="selftest")stlPoll();if(id=="cert")tlsLoad();if(id=="ble"&&ROLE==2){bleLoad();clearInterval(BLT);BLT=setInterval(function(){if(cur!="ble")clearInterval(BLT);else bleLoad()},3000)}if(id=="radio")lcLoad();if(id=="audit")auLoad();if(id=="legal")lgLoad();
  if(id=="help"&&location.hash!="#aiuto")try{history.replaceState(null,"","#aiuto")}catch(e){}if(id!="help"&&location.hash=="#aiuto")try{history.replaceState(null,"",location.pathname)}catch(e){}}
 window.addEventListener("hashchange",function(){if(location.hash=="#aiuto"&&loggedIn())show("help")});

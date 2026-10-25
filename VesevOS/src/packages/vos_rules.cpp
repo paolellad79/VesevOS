@@ -2,12 +2,14 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_rules.cpp
 #include "vos_rules.h"
+#include "../drivers/vos_drv_task.h"
 #include "vos_mqtt.h"
 #include "vos_berry.h"
 #include "vos_app.h"
 #include "../core/vos_hooks.h"
 #include "../core/vos_i18n.h"
 #include "../core/vos_util.h"
+#include "../core/vos_parse.h"
 #include "../core/vos_log.h"
 #include "../core/vos_wd.h"
 #include "../net/vos_net.h"
@@ -17,11 +19,16 @@
 #include "../drivers/vos_drv_fs.h"
 #include <time.h>
 #include <new>
+#include <string>
+#include <string_view>
+#include <utility>
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include "../drivers/vos_drv_gpio.h"
+#include "../drivers/vos_drv_print.h"
 
 #include "vos_rules_int.h"
+#include "../drivers/vos_drv_time.h"
 
 namespace vosrules { Rule* g_r = nullptr; }           // tabella delle regole: esiste solo se c'e almeno una regola (con 0 regole non occupa RAM)
 static bool  g_taskUp = false;        // il task "rules" parte solo quando serve
@@ -35,18 +42,21 @@ static NetState g_prevNet = NET_BOOT;
 void vosrules::ensureMx() { if (!g_mx) g_mx = xSemaphoreCreateMutex(); }
 static bool pinMine(int g) { return g >= 0 && g < 64 && ((g_mine >> g) & 1); }
 
-// ---------- utilita ----------
-static bool hhmm(const String& s, uint16_t& out) {
-  if (s.length() != 5 || s[2] != ':') return false;
-  if (!isDigit(s[0]) || !isDigit(s[1]) || !isDigit(s[3]) || !isDigit(s[4])) return false;
-  int h = s.substring(0, 2).toInt(), m = s.substring(3, 5).toInt();
+// ---------- utilita (lavorano su viste del testo: non copiano) ----------
+using std::string_view;
+
+static bool hhmm(string_view s, uint16_t& out) {
+  if (s.size() != 5 || s[2] != ':') return false;
+  const int pos[4] = {0, 1, 3, 4};
+  for (int p : pos) if (!isdigit((unsigned char)s[p])) return false;
+  int h = (s[0] - '0') * 10 + (s[1] - '0'), m = (s[3] - '0') * 10 + (s[4] - '0');
   if (h > 23 || m > 59) return false;
   out = h * 60 + m;
   return true;
 }
 
-static bool dmaskParse(const String& s, uint8_t& out) {
-  if (s.length() != 7) return false;
+static bool dmaskParse(string_view s, uint8_t& out) {
+  if (s.size() != 7) return false;
   uint8_t m = 0;
   for (int i = 0; i < 7; i++) {
     if (s[i] == '1') m |= (1 << i);
@@ -56,89 +66,108 @@ static bool dmaskParse(const String& s, uint8_t& out) {
   return true;
 }
 
-static String word(const String& s, int idx) {
-  int i = 0, n = 0;
-  int L = s.length();
-  while (i < L) {
-    while (i < L && s[i] == ' ') i++;
-    if (i >= L) break;
-    int j = i;
-    while (j < L && s[j] != ' ') j++;
-    if (n == idx) return s.substring(i, j);
+// parola numero idx (separate da spazi); vista vuota se non c'e
+static string_view word(string_view s, int idx) {
+  size_t i = 0;
+  int n = 0;
+  while (i < s.size()) {
+    while (i < s.size() && s[i] == ' ') i++;
+    if (i >= s.size()) break;
+    size_t j = i;
+    while (j < s.size() && s[j] != ' ') j++;
+    if (n == idx) return s.substr(i, j - i);
     n++; i = j;
   }
-  return "";
+  return string_view();
 }
 
-static String restOf(const String& s, int idx) {
-  int i = 0, n = 0, L = s.length();
-  while (i < L) {
-    while (i < L && s[i] == ' ') i++;
-    if (i >= L) break;
-    if (n == idx) return s.substring(i);
-    while (i < L && s[i] != ' ') i++;
+// tutto il testo dalla parola numero idx in poi
+static string_view restOf(string_view s, int idx) {
+  size_t i = 0;
+  int n = 0;
+  while (i < s.size()) {
+    while (i < s.size() && s[i] == ' ') i++;
+    if (i >= s.size()) break;
+    if (n == idx) return s.substr(i);
+    while (i < s.size() && s[i] != ' ') i++;
     n++;
   }
-  return "";
+  return string_view();
 }
 
-static String field(const String& line, int idx) {   // campi separati da '|'
-  int p = 0;
-  for (int k = 0; k < idx; k++) { p = line.indexOf('|', p); if (p < 0) return ""; p++; }
-  int e = line.indexOf('|', p);
-  return line.substring(p, e < 0 ? line.length() : e);
+// campo numero idx di una riga (campi separati da '|')
+static string_view field(string_view line, int idx) {
+  size_t p = 0;
+  for (int k = 0; k < idx; k++) {
+    p = line.find('|', p);
+    if (p == string_view::npos) return string_view();
+    p++;
+  }
+  size_t e = line.find('|', p);
+  return line.substr(p, e == string_view::npos ? string_view::npos : e - p);
 }
 
-static int fieldCount(const String& line) {
+static int fieldCount(string_view line) {
   int c = 1;
-  for (int i = 0; i < (int)line.length(); i++) if (line[i] == '|') c++;
+  for (char ch : line) if (ch == '|') c++;
   return c;
 }
 
-static String actAt(const String& acts, int n) {     // n-esima azione (separate da ';')
-  int p = 0;
-  for (int k = 0; k < n; k++) { p = acts.indexOf(';', p); if (p < 0) return ""; p++; }
-  int e = acts.indexOf(';', p);
-  String a = acts.substring(p, e < 0 ? acts.length() : e);
-  a.trim();
-  return a;
+// n-esima azione (separate da ';'), senza spazi ai lati
+static string_view actAt(string_view acts, int n) {
+  size_t p = 0;
+  for (int k = 0; k < n; k++) {
+    p = acts.find(';', p);
+    if (p == string_view::npos) return string_view();
+    p++;
+  }
+  size_t e = acts.find(';', p);
+  return trimView(acts.substr(p, e == string_view::npos ? string_view::npos : e - p));
 }
 
-static int actCount(const String& acts) {
-  if (!acts.length()) return 0;
+static int actCount(string_view acts) {
+  if (acts.empty()) return 0;
   int c = 1;
-  for (int i = 0; i < (int)acts.length(); i++) if (acts[i] == ';') c++;
+  for (char ch : acts) if (ch == ';') c++;
   return c;
 }
 
-static bool hex6ok(const String& s) {
-  if (s.length() != 6) return false;
-  for (int i = 0; i < 6; i++) if (!isHexadecimalDigit(s[i])) return false;
+static bool hex6ok(string_view s) {
+  if (s.size() != 6) return false;
+  for (char ch : s) if (!isxdigit((unsigned char)ch)) return false;
   return true;
 }
 
+// Copia una parola in un buffer con lo zero finale (per le funzioni che vogliono un const char*). Se non ci sta si taglia:
+// i nomi validi sono piu corti, quindi un nome tagliato resta non valido.
+static void wordTo(char* out, size_t cap, string_view w) {
+  size_t n = w.size() < cap - 1 ? w.size() : cap - 1;
+  memcpy(out, w.data(), n);
+  out[n] = 0;
+}
+
 // ---------- controllo di una azione ----------
-static bool actionCheck(const String& a, String& err) {
-  String w = word(a, 0), a1 = word(a, 1), a2 = word(a, 2);
+static bool actionCheck(string_view a, ErrBuf& err) {
+  string_view w = word(a, 0), a1 = word(a, 1), a2 = word(a, 2);
   if (w == "led-color") { if (!hex6ok(a1)) { err = tr("Colore non valido (6 cifre esadecimali)"); return false; } }
   else if (w == "led") { if (!(a1 == "state" || a1 == "heartbeat" || a1 == "fixed" || a1 == "off")) { err = tr("Azione LED non valida"); return false; } }
-  else if (w == "led-bright") { int v = a1.toInt(); if (a1 == "" || v < 0 || v > 255) { err = tr("Luminosita da 0 a 255"); return false; } }
+  else if (w == "led-bright") { long v = viewToLong(a1); if (a1.empty() || v < 0 || v > 255) { err = tr("Luminosita da 0 a 255"); return false; } }
   else if (w == "led2") { }   // LED aggiuntivo tolto nella 1.7.0: azione vecchia accettata e ignorata
   else if (w == "gpio") {
-    int g = a1.toInt();
-    if (a1 == "" || !(a2 == "0" || a2 == "1")) { err = tr("Uso: gpio <pin> 0|1"); return false; }
+    int g = (int)viewToLong(a1);
+    if (a1.empty() || !(a2 == "0" || a2 == "1")) { err = tr("Uso: gpio <pin> 0|1"); return false; }
     if (!pinMine(g)) {
       const char* why = pinTestBlock(g);
-      if (why) { err = String("GPIO") + g + ": " + why; return false; }
+      if (why) { err.setf("GPIO%d: %s", g, why); return false; }
     }
   }
   else if (w == "airplane") { if (!(a1 == "on" || a1 == "off")) { err = tr("Uso: airplane on <come> | airplane off"); return false; } }
-  else if (w == "wait") { int v = a1.toInt(); if (a1 == "" || v < 1 || v > 3600) { err = tr("Attesa da 1 a 3600 secondi"); return false; } }
-  else if (w == "note") { if (restOf(a, 1).length() < 1) { err = tr("Manca il testo della nota"); return false; } }
+  else if (w == "wait") { long v = viewToLong(a1); if (a1.empty() || v < 1 || v > 3600) { err = tr("Attesa da 1 a 3600 secondi"); return false; } }
+  else if (w == "note") { if (restOf(a, 1).empty()) { err = tr("Manca il testo della nota"); return false; } }
   else if (w == "reboot") { }
-  else if (w == "mqtt") { if (a1.length() < 1 || a1.length() > 60) { err = tr("Uso: mqtt <argomento> <testo>"); return false; } }
-  else if (w == "script") { if (!berryNameValid(a1)) { err = tr("Nome script non valido (1-24 caratteri: lettere minuscole, numeri, trattino, sottotrattino)"); return false; } }
-  else if (w == "app") { if (!utilNameOk(a1)) { err = tr("Nome app non valido"); return false; } }
+  else if (w == "mqtt") { if (a1.size() < 1 || a1.size() > 60) { err = tr("Uso: mqtt <argomento> <testo>"); return false; } }
+  else if (w == "script") { char nm[32]; wordTo(nm, sizeof nm, a1); if (!berryNameValid(nm)) { err = tr("Nome script non valido (1-24 caratteri: lettere minuscole, numeri, trattino, sottotrattino)"); return false; } }
+  else if (w == "app") { if (!utilNameOk(a1.data(), a1.size())) { err = tr("Nome app non valido"); return false; } }
   else if (w == "appstop") { }
   else if (w == "ntp") { if (a1 != "sync") { err = tr("Azione non ammessa"); return false; } }
   else { err = tr("Azione non ammessa"); return false; }
@@ -146,40 +175,46 @@ static bool actionCheck(const String& a, String& err) {
 }
 
 // ---------- lettura di una riga ----------
-static bool parseLine(const String& line, Rule& r, String& err) {
+static bool parseLine(string_view line, Rule& r, ErrBuf& err) {
   if (fieldCount(line) != 5) { err = tr("La riga deve avere 5 campi"); return false; }
-  String on = field(line, 0), nm = field(line, 1), tg = field(line, 2), cd = field(line, 3), ac = field(line, 4);
-  on.trim(); nm.trim(); tg.trim(); cd.trim(); ac.trim();
+  string_view on = trimView(field(line, 0)), nm = trimView(field(line, 1)), tg = trimView(field(line, 2));
+  string_view cd = trimView(field(line, 3)), ac = trimView(field(line, 4));
   if (on != "0" && on != "1") { err = tr("Il primo campo e 1 o 0"); return false; }
   r.on = (on == "1");
-  nm = cleanAscii(nm);
-  if (nm.length() < 1 || nm.length() > 24) { err = tr("Nome da 1 a 24 caratteri"); return false; }
-  strncpy(r.name, nm.c_str(), 24); r.name[24] = 0;
-  String t0 = word(tg, 0), t1 = word(tg, 1), t2 = word(tg, 2);
+  size_t nl = 0;                                      // nome pulito (come cleanAscii): niente \r, i caratteri strani diventano '?'
+  for (char ch : nm) {
+    unsigned char c = (unsigned char)ch;
+    if (c == '\r') continue;
+    if (nl < 24) r.name[nl] = (c == '\n' || c == '\t' || (c >= 32 && c < 127)) ? ch : '?';
+    nl++;
+  }
+  if (nl < 1 || nl > 24) { err = tr("Nome da 1 a 24 caratteri"); return false; }
+  r.name[nl] = 0;
+  string_view t0 = word(tg, 0), t1 = word(tg, 1), t2 = word(tg, 2);
   r.a = 0; r.dmask = 0x7F;
   if (t0 == "time") {
     r.tk = TK_TIME;
     if (!hhmm(t1, r.a) || !dmaskParse(t2, r.dmask) || r.dmask == 0) { err = tr("Orario non valido (HH:MM e 7 cifre per i giorni)"); return false; }
   } else if (t0 == "every") {
-    r.tk = TK_EVERY; int v = t1.toInt();
-    if (t1 == "" || v < 5 || v > 86400) { err = tr("Ogni: da 5 a 86400 secondi"); return false; }
+    r.tk = TK_EVERY; long v = viewToLong(t1);
+    if (t1.empty() || v < 5 || v > 86400) { err = tr("Ogni: da 5 a 86400 secondi"); return false; }
     r.a = v;
   } else if (t0 == "after") {
-    r.tk = TK_AFTER; int v = t1.toInt();
-    if (t1 == "" || v < 1 || v > 86400) { err = tr("Dopo: da 1 a 86400 secondi"); return false; }
+    r.tk = TK_AFTER; long v = viewToLong(t1);
+    if (t1.empty() || v < 1 || v > 86400) { err = tr("Dopo: da 1 a 86400 secondi"); return false; }
     r.a = v;
   } else if (t0 == "boot") { r.tk = TK_BOOT; }
   else if (t0 == "wifi") {
     if (t1 == "up") r.tk = TK_WIFIUP; else if (t1 == "down") r.tk = TK_WIFIDOWN;
     else { err = tr("Wi-Fi: up oppure down"); return false; }
   } else if (t0 == "temp") {
-    r.tk = TK_TEMP; int v = t1.toInt();
-    if (t1 == "" || v < 30 || v > 110) { err = tr("Temperatura da 30 a 110"); return false; }
+    r.tk = TK_TEMP; long v = viewToLong(t1);
+    if (t1.empty() || v < 30 || v > 110) { err = tr("Temperatura da 30 a 110"); return false; }
     r.a = v;
   } else { err = tr("Evento non riconosciuto"); return false; }
   r.ck = CK_NONE; r.c1 = r.c2 = 0; r.cmask = 0x7F;
-  if (cd != "-" && cd != "") {
-    String c0 = word(cd, 0);
+  if (cd != "-" && !cd.empty()) {
+    string_view c0 = word(cd, 0);
     if (c0 == "between") {
       if (!hhmm(word(cd, 1), r.c1) || !hhmm(word(cd, 2), r.c2)) { err = tr("Fascia oraria non valida"); return false; }
       r.ck = CK_BETWEEN;
@@ -191,35 +226,40 @@ static bool parseLine(const String& line, Rule& r, String& err) {
   int na = actCount(ac);
   if (na < 1 || na > MAX_ACTS) { err = tr("Da 1 a 8 azioni"); return false; }
   for (int i = 0; i < na; i++) {
-    String a = actAt(ac, i);
-    if (!actionCheck(a, err)) return false;
+    if (!actionCheck(actAt(ac, i), err)) return false;
   }
-  r.acts = ac;
+  r.acts.assign(ac.data(), ac.size());
   return true;
 }
 
 // ---------- caricamento ----------
 static void resetState(Rule& r) {
-  r.lastMs = millis(); r.lastMin = -1; r.done = false; r.armed = false; r.off = false;
+  r.lastMs = drvMillis(); r.lastMin = -1; r.done = false; r.armed = false; r.off = false;
   r.nfire = 0; r.lastEpoch = 0; r.ringN = 0;
 }
 
-static bool parseAll(const String& text, Rule* out, int& n, String& err) {
+static bool parseAll(string_view text, Rule* out, int& n, ErrBuf& err) {
   n = 0;
-  int p = 0, ln = 0;
-  while (p <= (int)text.length()) {
-    int e = text.indexOf('\n', p);
-    if (e < 0) e = text.length();
-    String line = text.substring(p, e);
+  std::string clean;                                  // i \r si tolgono ovunque (anche in mezzo alla riga): copia solo se ce ne sono
+  if (text.find('\r') != string_view::npos) {
+    clean.reserve(text.size());
+    for (char ch : text) if (ch != '\r') clean += ch;
+    text = clean;
+  }
+  size_t p = 0;
+  int ln = 0;
+  while (p <= text.size()) {
+    size_t e = text.find('\n', p);
+    if (e == string_view::npos) e = text.size();
+    string_view line = trimView(text.substr(p, e - p));
     p = e + 1; ln++;
-    line.replace("\r", ""); line.trim();
-    if (!line.length() || line[0] == '#') continue;
-    if (n >= MAX_RULES) { err = trf("Al massimo %d regole", MAX_RULES); return false; }
-    String e2;
-    if (!parseLine(line, out[n], e2)) { err = trf("Riga %d: %s", ln, e2.c_str()); return false; }
+    if (line.empty() || line[0] == '#') continue;
+    if (n >= MAX_RULES) { err.setf(tr("Al massimo %d regole"), MAX_RULES); return false; }
+    ErrBuf e2;
+    if (!parseLine(line, out[n], e2)) { err.setf(tr("Riga %d: %s"), ln, e2.c_str()); return false; }
     resetState(out[n]);
     n++;
-    if (e >= (int)text.length()) break;
+    if (e >= text.size()) break;
   }
   return true;
 }
@@ -227,25 +267,25 @@ static bool parseAll(const String& text, Rule* out, int& n, String& err) {
 static void rulesTask(void*);
 static void ensureTask() {
   if (g_taskUp) return;
-  if (xTaskCreatePinnedToCore(rulesTask, "rules", 6144, NULL, 1, NULL, 0) == pdPASS) g_taskUp = true;
+  // core: automatico (prima: core 0 fisso)
+  if (drvTaskCreate(rulesTask, "rules", 6144, NULL, 1, NULL, DRV_CORE_ANY)) g_taskUp = true;
   else vlog("RULES: task non avviato (memoria)");
 }
 
 static void load(bool boot) {
   ensureMx();
-  String text;
-  File f = drvFsOpen(RULES_FILE, "r");
-  if (f) { text = f.readString(); f.close(); }
+  HeapBuf text(RULES_READ_MAX);
+  bool readOk = rulesText(text);
   Rule* tmp = new (std::nothrow) Rule[MAX_RULES]();       // appoggio temporaneo (>= 256 byte: va in PSRAM), liberato a fine funzione
-  int n = 0; String err;
-  if (!tmp) { vlog("RULES: memoria insufficiente"); }
-  else if (!parseAll(text, tmp, n, err)) { vlog("RULES: file non valido (%s)", err.c_str()); n = 0; }
+  int n = 0; ErrBuf err;
+  if (!tmp || !readOk) { vlog("RULES: memoria insufficiente"); }
+  else if (!parseAll(string_view(text.c_str(), text.length()), tmp, n, err)) { vlog("RULES: file non valido (%s)", err.c_str()); n = 0; }
   xSemaphoreTake(g_mx, portMAX_DELAY);
   for (int i = 0; i < MAX_RUNS; i++) g_run[i].act = false;
   if (n > 0 && !g_r) { g_r = new (std::nothrow) Rule[MAX_RULES](); if (!g_r) { vlog("RULES: memoria insufficiente"); n = 0; } }
   g_n = n;
   for (int i = 0; i < n; i++) {
-    g_r[i] = tmp[i];
+    g_r[i] = std::move(tmp[i]);
     // dopo una modifica le regole "after"/"boot" non devono ripartire da sole
     if (!boot) { if (g_r[i].tk == TK_AFTER || g_r[i].tk == TK_BOOT) g_r[i].done = true; }
     if (g_r[i].tk == TK_TEMP) g_r[i].armed = sysCpuTemp() > g_r[i].a;
@@ -257,18 +297,18 @@ static void load(bool boot) {
   if (n > 0) ensureTask();
 }
 
-bool rulesSave(const String& text, String& err) {
-  if (text.length() > MAX_TEXT) { err = tr("File troppo grande"); return false; }
+bool rulesSave(string_view text, ErrBuf& err) {
+  if (text.size() > MAX_TEXT) { err = tr("File troppo grande"); return false; }
   Rule* tmp = new (std::nothrow) Rule[MAX_RULES]();
   if (!tmp) { err = tr("Memoria insufficiente"); return false; }
   int n;
   bool parsed = parseAll(text, tmp, n, err);
   delete[] tmp;
   if (!parsed) return false;
-  File f = drvFsOpen("/rules.tmp", "w");
+  VosFile f = drvFsOpen("/rules.tmp", "w");
   if (!f) { err = tr("Scrittura non riuscita"); return false; }
-  size_t w = f.print(text); f.close();
-  if (w != text.length()) { drvFsRemove("/rules.tmp"); err = tr("Scrittura non riuscita"); return false; }
+  size_t w = f.write((const uint8_t*)text.data(), text.size()); f.close();
+  if (w != text.size()) { drvFsRemove("/rules.tmp"); err = tr("Scrittura non riuscita"); return false; }
   drvFsRemove(RULES_FILE);
   if (!drvFsRename("/rules.tmp", RULES_FILE)) { err = tr("Scrittura non riuscita"); return false; }
   load(false);
@@ -279,7 +319,7 @@ bool rulesSave(const String& text, String& err) {
 int rulesCount() { return g_n; }
 
 // ---------- esecuzione delle azioni ----------
-class NullPrint : public Print {
+class NullPrint : public OutSink {
  public:
   size_t write(uint8_t) override { return 1; }
   size_t write(const uint8_t*, size_t n) override { return n; }
@@ -296,24 +336,33 @@ static void doGpio(int g, int v, const char* rn) {
 }
 
 // Esegue una azione. Ritorna i millisecondi di attesa richiesti (0 = nessuna).
-static uint32_t doAction(const String& a, const char* rn) {
-  String w = word(a, 0);
-  if (w == "wait") return (uint32_t)word(a, 1).toInt() * 1000UL;
+static uint32_t doAction(string_view a, const char* rn) {
+  string_view w = word(a, 0);
+  if (w == "wait") return (uint32_t)viewToLong(word(a, 1)) * 1000UL;
   if (w == "led2") return 0;   // tolto nella 1.7.0
-  if (w == "note") { vlog("RULES %s: %s", rn, restOf(a, 1).c_str()); return 0; }
-  if (w == "gpio") { doGpio(word(a, 1).toInt(), word(a, 2).toInt(), rn); return 0; }
-  if (w == "mqtt") { if (!mqttPublishRel(word(a, 1), restOf(a, 2))) vlog("RULES %s: MQTT non collegato", rn); return 0; }
-  if (w == "script") { String e; if (!berryQueue(word(a, 1), e, rn)) vlog("RULES %s: script %s non avviato: %s", rn, word(a, 1).c_str(), e.c_str()); return 0; }
-  if (w == "app") { String e; if (!appStart(word(a, 1), e, 2, rn)) vlog("RULES %s: app %s non avviata: %s", rn, word(a, 1).c_str(), e.c_str()); return 0; }
-  if (w == "appstop") { String cur, e; if (berryAppRunning(cur) && !appStop(cur, e, 2)) vlog("RULES %s: app %s non fermata: %s", rn, cur.c_str(), e.c_str()); return 0; }
+  if (w == "note") { string_view t = restOf(a, 1); vlog("RULES %s: %.*s", rn, (int)t.size(), t.data()); return 0; }
+  if (w == "gpio") { doGpio((int)viewToLong(word(a, 1)), (int)viewToLong(word(a, 2)), rn); return 0; }
+  if (w == "mqtt") {
+    char topic[64];                                   // al massimo 60 caratteri (lo controlla actionCheck)
+    wordTo(topic, sizeof topic, word(a, 1));
+    std::string text(restOf(a, 2));
+    if (!mqttPublishRel(topic, text.c_str())) vlog("RULES %s: MQTT non collegato", rn);
+    return 0;
+  }
+  char name[32];
+  wordTo(name, sizeof name, word(a, 1));
+  if (w == "script") { ErrBuf e; if (!berryQueue(name, e, rn)) vlog("RULES %s: script %s non avviato: %s", rn, name, e.c_str()); return 0; }
+  if (w == "app") { ErrBuf e; if (!appStart(name, e, 2, rn)) vlog("RULES %s: app %s non avviata: %s", rn, name, e.c_str()); return 0; }
+  if (w == "appstop") { char cur[32]; ErrBuf e; if (berryAppRunning(cur, sizeof cur) && !appStop(cur, e, 2)) vlog("RULES %s: app %s non fermata: %s", rn, cur, e.c_str()); return 0; }
   if (w == "reboot") {
-    if (millis() < 60000UL) { vlog("RULES %s: riavvio ignorato (meno di 60 s dall'avvio)", rn); return 0; }
+    if (drvMillis() < 60000UL) { vlog("RULES %s: riavvio ignorato (meno di 60 s dall'avvio)", rn); return 0; }
     vlog("RULES %s: riavvio", rn);
     char b[40]; snprintf(b, sizeof(b), "regola %s", rn); sysReboot(b, 300);
     return 0;
   }
   NullPrint np;
-  hookShellExec(a.c_str(), np, true);
+  std::string line(a);                                // la shell vuole un const char* con lo zero finale
+  hookShellExec(line.c_str(), np, true);
   return 0;
 }
 
@@ -321,7 +370,7 @@ static uint32_t doAction(const String& a, const char* rn) {
 static void fire(int i) {            // chiamare con il mutex preso
   Rule& r = g_r[i];
   if (!r.on || r.off) return;
-  uint32_t now = millis();
+  uint32_t now = drvMillis();
   // antiloop: troppe esecuzioni in un minuto -> la regola si ferma
   if (r.ringN >= LOOP_MAX && now - r.ring[r.ringN % LOOP_MAX] < 60000UL) {
     r.off = true;
@@ -346,7 +395,7 @@ static bool condOk(const Rule& r) {
   return (r.c1 <= r.c2) ? (m >= r.c1 && m <= r.c2) : (m >= r.c1 || m <= r.c2);
 }
 
-bool rulesRunNow(int index, String& err) {
+bool rulesRunNow(int index, ErrBuf& err) {
   ensureMx();
   xSemaphoreTake(g_mx, portMAX_DELAY);
   bool ok = (index >= 0 && index < g_n);
@@ -357,7 +406,7 @@ bool rulesRunNow(int index, String& err) {
 }
 
 static void stepRuns() {
-  uint32_t now = millis();
+  uint32_t now = drvMillis();
   for (int k = 0; k < MAX_RUNS; k++) {
     Run& u = g_run[k];
     if (!u.act) continue;
@@ -366,10 +415,10 @@ static void stepRuns() {
     Rule& r = g_r[u.rule];
     int na = actCount(r.acts);
     while (u.step < na) {
-      String a = actAt(r.acts, u.step);
+      string_view a = actAt(r.acts, u.step);
       u.step++;
       uint32_t wt = doAction(a, r.name);
-      if (wt) { u.wake = millis() + wt; if (!u.wake) u.wake = 1; break; }
+      if (wt) { u.wake = drvMillis() + wt; if (!u.wake) u.wake = 1; break; }
     }
     if (u.step >= na && !u.wake) {
       u.act = false;
@@ -379,7 +428,7 @@ static void stepRuns() {
 }
 
 static void evalTriggers() {
-  uint32_t now = millis();
+  uint32_t now = drvMillis();
   bool tv = timeValid();
   int32_t minKey = -1; uint16_t mins = 0; int day = 0;
   if (tv) {
@@ -424,7 +473,7 @@ static void rulesTask(void*) {
   uint32_t lastEval = 0;
   for (;;) {
     xSemaphoreTake(g_mx, portMAX_DELAY);
-    uint32_t now = millis();
+    uint32_t now = drvMillis();
     if (now - lastEval >= 1000UL) { lastEval = now; evalTriggers(); }
     stepRuns();
     xSemaphoreGive(g_mx);
@@ -432,8 +481,8 @@ static void rulesTask(void*) {
   }
 }
 
-bool rulesAction(const String& action, String& err, const char* who) {
-  String a = action; a.trim();
+bool rulesAction(const char* action, ErrBuf& err, const char* who) {
+  string_view a = trimView(action ? action : "");
   if (word(a, 0) == "wait") { err = tr("Azione non ammessa"); return false; }
   if (!actionCheck(a, err)) return false;
   doAction(a, who);
@@ -442,7 +491,7 @@ bool rulesAction(const String& action, String& err, const char* who) {
 
 void rulesInit() {
   ensureMx();
-  g_startMs = millis();
+  g_startMs = drvMillis();
   g_prevNet = netState();
   load(true);            // il task parte da solo se ci sono regole (ensureTask)
 }

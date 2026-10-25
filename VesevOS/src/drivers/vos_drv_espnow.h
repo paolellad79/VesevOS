@@ -5,7 +5,7 @@
 // Sa: accendere/spegnere, mandare un pacchetto a tutti (broadcast), dire il canale e il MAC, avvisare quando arriva un pacchetto.
 // Non conosce il formato dei messaggi, le chiavi, i ruoli: sono del servizio (vos_mesh).
 #pragma once
-#include <Arduino.h>
+#include "vos_drv_string.h"
 #include "../boards/vos_packages.h"
 
 #if VOS_WITH_MESH

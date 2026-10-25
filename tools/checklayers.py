@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-# VesevOS - controllo degli strati: l'hardware si tocca SOLO nei driver (claude/VesevOS-schema-strati.md).
+# VesevOS - controllo degli strati: l'hardware si tocca SOLO nei driver (vedi docs/RELEASE_DEVELOPER.md).
 # Per ogni famiglia di chiamate hardware conta le righe di codice (commenti e testi tra virgolette esclusi) fuori dal driver.
-# Seconda parte: la DIPENDENZA DA ARDUINO (String, Serial, millis/micros/delay, Arduino.h). Oggi e ammessa solo nei driver
-# (vos_drv_*) e in third_party/; il resto e debito in baseline. Quando ci sara un file di compatibilita, si aggiunge qui ad ARDUINO_OK.
+# Seconda parte: la DIPENDENZA DA ARDUINO (String, Serial, millis/micros/delay, Arduino.h). Dalla fase 5 (Arduino tolto come componente)
+# non e ammessa da nessuna parte (solo third_party/); il debito in baseline deve essere vuoto.
 # Il "debito" di oggi sta in tools/layers_baseline.json: puo solo calare. Un file nuovo o un conteggio piu alto = errore.
 # Uso:  python3 tools/checklayers.py            (controlla)
 #       python3 tools/checklayers.py --update   (riscrive il debito dopo aver tolto accessi; mai per aumentarlo)
@@ -15,22 +15,27 @@ RULES = {
   'espnow': (r'\besp_now_\w+',                                 {'vos_drv_espnow.cpp', 'vos_drv_espnow.h'}),
   'mqtt':   (r'\besp_mqtt_client_\w+|\bmqtt_client\.h',        {'vos_drv_mqtt.cpp', 'vos_drv_mqtt.h'}),
   'wifi':   (r'\bWiFi\.|\besp_wifi_\w+',                       {'vos_drv_espnow.cpp', 'vos_drv_wifi.cpp', 'vos_drv_wifi.h', 'vos_drv_wps.cpp'}),     # il driver ESP-NOW legge solo modo e canale
-  'fs':     (r'\bLittleFS\b(?!\.h)',                           {'vos_drv_fs.cpp', 'vos_drv_fs.h', 'vos_license_data.h'}),
+  'fs':     (r'\bLittleFS\b(?!\.h)|\besp_(?:vfs_)?littlefs\w*', {'vos_drv_fs.cpp', 'vos_drv_fs.h', 'vos_license_data.h'}),
   'ota':    (r'\besp_partition_\w+|\besp_ota_\w+',                {'vos_drv_ota.cpp', 'vos_drv_ota.h'}),
   'i2c':    (r'\bWire\.|\bTwoWire\b|\bWire\.h',               {'vos_drv_i2c.cpp', 'vos_drv_i2c.h'}),
   'gpio':   (r'\b(digitalWrite|digitalRead|pinMode|analogRead|ledcWrite|ledcAttach|neopixelWrite)\s*\(', {'vos_drv_gpio.cpp'}),
   'nvs':    (r'\bPreferences\b|\bnvs_(?:open|get|set|commit|erase)\w*',  {'vos_drv_nvs.h', 'vos_drv_nvs.cpp'}),          # NVS: solo DrvNvs
+  'mdns':   (r'\bMDNS\.|\bmdns_\w+',                          {'vos_drv_mdns.cpp', 'vos_drv_mdns.h'}),
+  'udp':    (r'\bAsyncUDP\b|\blwip_(?:socket|bind|recvfrom|sendto)\b', {'vos_drv_udp.cpp', 'vos_drv_udp.h', 'vos_drv_tcpsrv.cpp', 'vos_drv_tcpsrv.h'}),         # socket UDP: solo DrvUdp
+  'tcp':    (r'\blwip_(?:listen|accept|recv|send|shutdown)\b',  {'vos_drv_tcpsrv.cpp', 'vos_drv_tcpsrv.h'}),          # socket TCP: solo DrvTcpMini
+  'rmt':    (r'\brmt_\w+|\brgbLedWrite\b',                    {'vos_drv_led.cpp', 'vos_drv_led.h'}),
+  'adc':    (r'\badc_(?:oneshot|cali)_\w+',                    {'vos_drv_gpio.cpp'}),
   'restart': (r'\bESP\.restart\b|\besp_restart\s*\(',              {'vos_drv_sys.cpp'}),                             # riavvio: solo sysReboot -> driver
 }
 # STRATI: core, devices, net, security, drivers e boards NON includono packages/ o interfaces/ (usano core/vos_hooks.h e il
-# registro dei servizi). Nessun debito ammesso: deve restare 0. Solo VesevOS.ino e src/vos_wire.cpp collegano tutto.
+# registro dei servizi). Nessun debito ammesso: deve restare 0. Solo src/vos_main.cpp e src/vos_wire.cpp collegano tutto.
 LOW = ('core', 'devices', 'net', 'security', 'drivers', 'boards')
 INC_UP = re.compile(r'^\s*#\s*include\s*"(?:\.\./)*(?:packages|interfaces)/')
 # ORDINE dei livelli (docs/progetto/REGOLE-ARCHITETTURA.md): 0 boards, 1 drivers, 2 core, 3 security, 4 devices, 5 net, 6 packages, 7 interfaces.
 # TABELLA delle coppie CONSENTITE "cartella -> cartelle che puo includere" (derivata dalle dipendenze vere di oggi, senza le violazioni).
 # Ogni altra coppia (verso l'alto, ma anche verso il basso se non e in tabella) e debito: coppia "da->a" in baseline, puo solo scendere;
 # una coppia nuova = errore. Per aprire una coppia nuova si cambia la tabella QUI e in REGOLE-ARCHITETTURA.md, di proposito.
-# Fuori scala: third_party/ (lo usano tutti), src/vos_wire.* e VesevOS.ino (livello 8, collegano tutto).
+# Fuori scala: third_party/ (lo usano tutti), src/vos_wire.* e src/vos_main.cpp (livello 8, collegano tutto).
 LEVEL = {'boards': 0, 'drivers': 1, 'core': 2, 'security': 3, 'devices': 4, 'net': 5, 'packages': 6, 'interfaces': 7}
 ALLOWED = {
   'boards':     set(),
@@ -91,7 +96,7 @@ SCHEDA_GEN = {'vos_license_data.h', 'vos_common_data.h', 'vos_lang_data.h'}
 def SCHEDA_OK(f, path):
     return (os.sep + 'boards' + os.sep in path or os.sep + 'third_party' + os.sep in path or f in SCHEDA_GEN or (f.startswith('vos_page') and f.endswith('.h')))
 def ARDUINO_OK(f, path):
-    return f.startswith('vos_drv_') or os.sep + 'third_party' + os.sep in path
+    return os.sep + 'third_party' + os.sep in path      # fase 5: Arduino non c'e piu, nemmeno nei driver (vos_drv_*): tutto deve restare a 0
 SHINT = {'s_pin': 'numero di pin nella chiamata', 's_limit': 'limite dei GPIO', 's_chip': 'nome del chip/scheda', 's_mem': 'flash/PSRAM/partizioni', 's_sys': 'CPU/temperatura/LED'}
 HINT = {'a_string': 'tipo String', 'a_serial': 'Serial', 'a_time': 'millis/micros/delay', 'a_include': 'include di Arduino.h'}
 def code_only(line):

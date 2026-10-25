@@ -7,8 +7,12 @@
 #include "../core/vos_log.h"
 #include "../core/vos_common.h"
 #include <driver/gpio.h>
-#include "../core/vos_util.h"
+#include "../core/vos_parse.h"
+#include <string_view>
 #include "../drivers/vos_drv_gpio.h"
+#include "../drivers/vos_drv_time.h"
+#include "../drivers/vos_drv_heap.h"
+#include "../drivers/vos_drv_sys.h"
 
 #define MAX_PINS 24
 static PinInfo g_pins[MAX_PINS];
@@ -50,17 +54,17 @@ bool pinIsUsed(uint8_t gpio) {
   return false;
 }
 
-String pinsJson() {
-  String j = "[";
+bool pinsJson(HeapBuf& j) {
+  j.add('[');
   for (int i = 0; i < g_n; i++) {
-    if (i) j += ",";
-    j += "{\"gpio\":" + String(g_pins[i].gpio) +
-         ",\"owner\":\"" + jsonEscape(tr(g_pins[i].owner)) +
-         "\",\"note\":\"" + jsonEscape(tr(g_pins[i].note)) +
-         "\",\"fixed\":" + (g_pins[i].fixed ? "true" : "false") + "}";
+    if (i) j.add(',');
+    j.addf("{\"gpio\":%u,\"owner\":\"", (unsigned)g_pins[i].gpio);
+    j.addJson(tr(g_pins[i].owner));
+    j.add("\",\"note\":\"");
+    j.addJson(tr(g_pins[i].note));
+    j.addf("\",\"fixed\":%s}", g_pins[i].fixed ? "true" : "false");
   }
-  j += "]";
-  return j;
+  return j.add(']');
 }
 
 // ===================== Prova dei pin =====================
@@ -90,20 +94,20 @@ const char* pinTestBlock(int g) {
   return nullptr;
 }
 
-bool pinTestRequest(int gpio, const String& action, const String& pull, String& err) {
+bool pinTestRequest(int gpio, const char* action, const char* pull, ErrBuf& err) {
   int a = TA_NONE;
-  if (action == "high") a = TA_HIGH;
-  else if (action == "low") a = TA_LOW;
-  else if (action == "blink") a = TA_BLINK;
-  else if (action == "read") a = TA_READ;
-  else if (action == "off") a = TA_OFF;
+  if (!strcmp(action, "high")) a = TA_HIGH;
+  else if (!strcmp(action, "low")) a = TA_LOW;
+  else if (!strcmp(action, "blink")) a = TA_BLINK;
+  else if (!strcmp(action, "read")) a = TA_READ;
+  else if (!strcmp(action, "off")) a = TA_OFF;
   else { err = tr("Azione non valida"); return false; }
   if (a != TA_OFF) {
     const char* why = pinTestBlock(gpio);
     if (why) { err = why; return false; }
   } else if (gpio != g_tPin) { err = tr("Questo pin non e in prova"); return false; }
   g_rqPin = gpio; g_rqAct = a;
-  g_rqPull = (pull == "up") ? 1 : (pull == "down") ? 2 : 0;
+  g_rqPull = !strcmp(pull, "up") ? 1 : !strcmp(pull, "down") ? 2 : 0;
   g_rqHas = true;
   return true;
 }
@@ -114,7 +118,7 @@ static void testStop() {
 }
 
 void pinTestTick() {
-  uint32_t now = millis();
+  uint32_t now = drvMillis();
   if (g_rqHas) {
     int p = g_rqPin, a = g_rqAct, pl = g_rqPull;
     g_rqHas = false;
@@ -138,72 +142,87 @@ void pinTestTick() {
   }
 }
 
-String pinTestJson() {
-  if (g_tPin < 0) return "{\"gpio\":-1}";
+bool pinTestJson(HeapBuf& j) {
+  if (g_tPin < 0) return j.add("{\"gpio\":-1}");
   const char* an = g_tAct == TA_HIGH ? "high" : g_tAct == TA_LOW ? "low" : g_tAct == TA_BLINK ? "blink" : "read";
-  int32_t left = (int32_t)(g_tEnd - millis()) / 1000;
+  int32_t left = (int32_t)(g_tEnd - drvMillis()) / 1000;
   if (left < 0) left = 0;
-  return "{\"gpio\":" + String(g_tPin) + ",\"action\":\"" + an + "\",\"left\":" + String((int)left) +
-         ",\"level\":" + String(drvGpioRead(g_tPin) ? 1 : 0) + "}";
+  return j.addf("{\"gpio\":%d,\"action\":\"%s\",\"left\":%d,\"level\":%d}", g_tPin, an, (int)left, drvGpioRead(g_tPin) ? 1 : 0);
 }
 
-String pinMapJson() {
-  String j = "[";
+bool pinMapJson(HeapBuf& j) {
+  j.add('[');
   bool first = true;
   for (int g = 0; g <= VOS_GPIO_MAX; g++) {
     if (!pinExists(g)) continue;
-    if (!first) j += ",";
+    if (!first) j.add(',');
     first = false;
     const char* why = pinTestBlock(g);
-    String own = "";
+    const char* own = "";
     for (int i = 0; i < g_n; i++) if (g_pins[i].gpio == g) own = tr(g_pins[i].owner);
-    j += "{\"g\":" + String(g) + ",\"note\":\"" + jsonEscape(cfg.pinNote[g]) + "\",\"ok\":" + (why ? "false" : "true") +
-         ",\"why\":\"" + jsonEscape(why ? why : "") + "\",\"owner\":\"" + jsonEscape(own) + "\"}";
+    j.addf("{\"g\":%d,\"note\":\"", g);
+    j.addJson(cfg.pinNote[g].c_str());
+    j.addf("\",\"ok\":%s,\"why\":\"", why ? "false" : "true");
+    j.addJson(why ? why : "");
+    j.add("\",\"owner\":\"");
+    j.addJson(own);
+    j.add("\"}");
   }
-  j += "]";
-  return j;
+  return j.add(']');
 }
 
 // ---- rilevamento: il chip si interroga, la scheda no (i piedini saldati li conosce solo la tabella) ----
 #ifndef SOC_GPIO_PIN_COUNT
 #define SOC_GPIO_PIN_COUNT VOS_GPIO_COUNT
 #endif
-String pinNotesJson() {
-  String j = "{";
+bool pinNotesJson(HeapBuf& j) {
+  j.add('{');
   bool first = true;
-  for (int g = 0; g < VOS_GPIO_COUNT; g++) if (cfg.pinNote[g].length()) { if (!first) j += ","; first = false; j += "\"" + String(g) + "\":\"" + jsonEscape(cfg.pinNote[g]) + "\""; }
-  return j + "}";
+  for (int g = 0; g < VOS_GPIO_COUNT; g++) {
+    if (!cfg.pinNote[g].length()) continue;
+    if (!first) j.add(',');
+    first = false;
+    j.addf("\"%d\":\"", g);
+    j.addJson(cfg.pinNote[g].c_str());
+    j.add('"');
+  }
+  return j.add('}');
 }
 
-bool pinNoteSet(int g, const String& name, String& err) {
+bool pinNoteSet(int g, std::string_view name, ErrBuf& err) {
   if (!pinExists(g)) { err = tr("Pin inesistente su questa scheda"); return false; }
-  String n = name; n.trim();
-  if (n.length() > 24) { err = tr("Nome troppo lungo (massimo 24 caratteri)"); return false; }
-  for (size_t i = 0; i < n.length(); i++) { unsigned char ch = n[i]; if (ch < 32 || ch > 126 || ch == '"' || ch == '\'' || ch == '\\') { err = tr("Nome: solo lettere, numeri, spazio e simboli semplici (niente apici)"); return false; } }
-  cfg.pinNote[g] = n;
+  std::string_view n = trimView(name);
+  if (n.size() > 24) { err = tr("Nome troppo lungo (massimo 24 caratteri)"); return false; }
+  for (char c : n) {
+    unsigned char ch = (unsigned char)c;
+    if (ch < 32 || ch > 126 || ch == '"' || ch == '\'' || ch == '\\') { err = tr("Nome: solo lettere, numeri, spazio e simboli semplici (niente apici)"); return false; }
+  }
+  char buf[25];
+  memcpy(buf, n.data(), n.size());
+  buf[n.size()] = 0;
+  cfg.pinNote[g] = buf;
   cfgSave();
   return true;
 }
 
-String pinBoardJson() {
+bool pinBoardJson(HeapBuf& j) {
   int valid = 0, out = 0;
   for (int g = 0; g < SOC_GPIO_PIN_COUNT; g++) {
     if (GPIO_IS_VALID_GPIO(g)) valid++;
     if (GPIO_IS_VALID_OUTPUT_GPIO(g)) out++;
   }
-  String j = "{\"chip\":\"" + String(ESP.getChipModel()) + "\",\"rev\":" + String((int)ESP.getChipRevision()) +
-             ",\"cores\":" + String((int)ESP.getChipCores()) + ",\"gpioCount\":" + String(SOC_GPIO_PIN_COUNT) +
-             ",\"gpioValid\":" + String(valid) + ",\"gpioOut\":" + String(out) +
-             ",\"board\":\"" VOS_BOARD "\",\"flash\":" + String((unsigned long)ESP.getFlashChipSize()) +
-             ",\"psram\":" + String((unsigned long)ESP.getPsramSize());
+  j.addf("{\"chip\":\"%s\",\"rev\":%d,\"cores\":%d,\"gpioCount\":%d,\"gpioValid\":%d,\"gpioOut\":%d,\"board\":\"" VOS_BOARD "\",\"flash\":%lu,\"psram\":%lu",
+         drvChipModel(), (int)drvChipRevision(), (int)drvChipCores(), SOC_GPIO_PIN_COUNT, valid, out,
+         (unsigned long)drvFlashSize(), (unsigned long)drvPsramTotal());
   // dal file di scheda: la pagina non scrive piu a mano numeri di pin
-  char b[384]; size_t k = (size_t)snprintf(b, sizeof b,
-    ",\"gmax\":%d,\"led\":%d,\"ledType\":\"" VOS_LED_TYPE "\",\"boot\":%d,\"usb\":[%d,%d],\"adc\":[%d,%d],\"adc2\":[%d,%d],\"jtag\":[%d,%d],\"uart\":[%d,%d],\"psq\":[%d,%d],\"strap\":[",
-    VOS_GPIO_MAX, VOS_PIN_LED_RGB, VOS_PIN_BOOT, VOS_PIN_USB_DM, VOS_PIN_USB_DP, VOS_ADC_FIRST, VOS_ADC_LAST, VOS_ADC2_FIRST, VOS_ADC2_LAST,
-    VOS_JTAG_FIRST, VOS_JTAG_LAST, VOS_PIN_UART_TX, VOS_PIN_UART_RX, VOS_PSRAMQ_FIRST, VOS_PSRAMQ_LAST);
+  j.addf(",\"gmax\":%d,\"led\":%d,\"ledType\":\"" VOS_LED_TYPE "\",\"boot\":%d,\"usb\":[%d,%d],\"adc\":[%d,%d],\"adc2\":[%d,%d],\"jtag\":[%d,%d],\"uart\":[%d,%d],\"psq\":[%d,%d],\"strap\":[",
+         VOS_GPIO_MAX, VOS_PIN_LED_RGB, VOS_PIN_BOOT, VOS_PIN_USB_DM, VOS_PIN_USB_DP, VOS_ADC_FIRST, VOS_ADC_LAST, VOS_ADC2_FIRST, VOS_ADC2_LAST,
+         VOS_JTAG_FIRST, VOS_JTAG_LAST, VOS_PIN_UART_TX, VOS_PIN_UART_RX, VOS_PSRAMQ_FIRST, VOS_PSRAMQ_LAST);
   bool first = true;
-  for (int g = 0; g <= VOS_GPIO_MAX && k < sizeof b - 8; g++)
-    if (VOS_GPIO_EXISTS(g) && (VOS_GPIO_STRAP(g) || g == VOS_PIN_BOOT)) { k += (size_t)snprintf(b + k, sizeof b - k, first ? "%d" : ",%d", g); first = false; }
-  j += b;
-  return j + "],\"lay\":" VOS_BOARD_LAYOUT "}";
+  for (int g = 0; g <= VOS_GPIO_MAX; g++) {
+    if (!VOS_GPIO_EXISTS(g) || !(VOS_GPIO_STRAP(g) || g == VOS_PIN_BOOT)) continue;
+    j.addf(first ? "%d" : ",%d", g);
+    first = false;
+  }
+  return j.add("],\"lay\":" VOS_BOARD_LAYOUT "}");
 }

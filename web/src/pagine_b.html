@@ -61,6 +61,7 @@
   <div class="tog"><div>Proteggi la seriale (cavo USB) con la password</div><button class="sw1" id="sw_ser" onclick="serToggle()" aria-label="Seriale"></button></div>
   <div id="serwarn" class="msg ko" style="margin-top:8px"></div>
   <p style="color:var(--mut)">Pagina web, shell web e API sono sempre protette dalla password. Se spegni questo interruttore, chi collega il cavo USB ottiene subito la shell. Il tasto BOOT tenuto da 8 a 19 secondi azzera le password degli amministratori e riaccende la protezione.</p>
+  <p style="color:var(--mut)">Anche la seriale chiede nome utente, password e codice MFA (se acceso). Gli errori si contano nel blocco degli accessi, insieme a quelli del web (origine seriale).</p>
   <div id="serm" class="msg"></div></div>
  <div class="card adm"><h3><svg class="i hic" aria-hidden="true"><use href="#i-lockx"/></svg>Blocco degli accessi</h3>
   <p class="fhint">Dopo troppe password sbagliate dallo stesso indirizzo, la scheda lo blocca per un po'. Ogni nuovo blocco dura il doppio (massimo 1 ora). Anche troppe richieste senza accesso contano come errore.</p>
@@ -159,7 +160,16 @@
    <div><label for="wd_ud">Riavvio dopo N giorni accesa (0 = mai)</label><input type="number" id="wd_ud" min="0" max="365"></div>
    <div><label for="wd_at">Riavvio programmato (vuoto = spento)</label><input type="time" id="wd_at"></div></div>
   <div id="wd_days" class="ftb"></div>
-  <button class="btn" onclick="wdSave()">Salva</button><div id="wdm" class="msg"></div></div>
+  <h4>Tempi dei watchdog</h4>
+  <p class="fhint">Attenzione: piu il tempo e lungo, piu una scheda bloccata davvero impiega a riavviarsi. Un tempo troppo corto invece puo riavviarla per un'operazione lenta ma sana. Nessun watchdog si puo spegnere: i valori fuori dai limiti vengono rifiutati.</p>
+  <div class="agrid"><div><label for="wd_tw">Task watchdog del chip (secondi)</label><input type="number" id="wd_tw" aria-describedby="wd_tw_h"><small id="wd_tw_h" class="fhint"></small></div>
+   <div><label for="wd_l_net">Servizio rete (secondi)</label><input type="number" id="wd_l_net" aria-describedby="wd_l_net_h"><small id="wd_l_net_h" class="fhint"></small></div>
+   <div><label for="wd_l_monitor">Servizio monitor (secondi)</label><input type="number" id="wd_l_monitor" aria-describedby="wd_l_monitor_h"><small id="wd_l_monitor_h" class="fhint"></small></div>
+   <div><label for="wd_l_mesh">Servizio rete tra schede (secondi)</label><input type="number" id="wd_l_mesh" aria-describedby="wd_l_mesh_h"><small id="wd_l_mesh_h" class="fhint"></small></div>
+   <div><label for="wd_l_mqtt">Servizio MQTT (secondi)</label><input type="number" id="wd_l_mqtt" aria-describedby="wd_l_mqtt_h"><small id="wd_l_mqtt_h" class="fhint"></small></div>
+   <div><label for="wd_l_led">Servizio LED (secondi)</label><input type="number" id="wd_l_led" aria-describedby="wd_l_led_h"><small id="wd_l_led_h" class="fhint"></small></div></div>
+  <p class="fhint" id="wd_int"></p>
+  <button class="btn" onclick="wdSave()">Salva</button><button class="btn gray" onclick="wdDefaults()">Valori di fabbrica dei tempi</button><div id="wdm" class="msg"></div></div>
 </section>
 <section id="t_users" class="hide">
  <div class="card"><h3>Utenti</h3>
@@ -182,11 +192,21 @@
   <div id="pw_w1" class="law hide">Wi-Fi a risparmio massimo: la scheda si sveglia solo a intervalli per ascoltare la rete. Risposte e pagina piu lente; consuma meno di prima ma molto piu del sonno profondo.</div>
   <div id="pw_w2" class="law hide">Sonno profondo: Wi-Fi, pagina, MQTT, rete tra schede e automazioni sono FERMI mentre dorme. Il cavo USB si scollega. La scheda riparte da sola dopo il tempo scelto (il timer e impreciso di qualche percento) oppure subito con il tasto RESET. L'ora si perde: torna con NTP o a mano. Non dorme nei primi 10 minuti dall'accensione, ne mentre usi la pagina, ne se la guida di configurazione non e finita.</div>
   <button class="btn adm" onclick="pwSave()">Salva</button><div id="pwm" class="msg"></div></div>
-  <div class="card"><h3>Dormi adesso</h3>
+  <div class="card adm"><h3>Dormi adesso</h3>
   <div class="agrid"><div><label for="pw_now">Minuti di sonno (da 1 a 10080)</label><input type="number" id="pw_now" min="1" max="10080" value="30"></div></div>
   <button class="btn gray" onclick="pwNow()">Dormi per questo tempo</button><div id="pwm2" class="msg"></div>
   <p class="fhint">Solo con il tasto RESET (senza tempo): menu in alto a destra &gt; Sleep.</p></div>
- <div class="card"><h3>Velocita CPU</h3><select id="cpumode" onchange="setCpu()"><option value="0">Automatica (scala da sola)</option><option value="80">Fissa 80 MHz</option><option value="160">Fissa 160 MHz</option><option value="240">Fissa 240 MHz</option></select><div id="cpum" class="msg"></div></div>
+ <div class="card adm"><h3>Velocita CPU</h3>
+  <label for="cpumode">Governor della CPU</label>
+  <select id="cpumode" onchange="setCpu()"><option value="80">80 MHz (fisso)</option><option value="160">160 MHz (fisso)</option><option value="240">240 MHz (fisso)</option><option value="ondemand">ondemand</option><option value="conservative">conservative</option><option value="schedutil">schedutil</option></select>
+  <p class="fhint" id="cpudesc"></p>
+  <div id="cpupar">
+   <div class="agrid"><div><label for="cpu_up">Soglia di salita (%, da 50 a 95)</label><input type="number" id="cpu_up" min="50" max="95"></div>
+   <div><label for="cpu_down">Soglia di discesa (%, da 5 a 50)</label><input type="number" id="cpu_down" min="5" max="50"></div>
+   <div><label for="cpu_hold">Attesa prima di scendere (secondi, da 2 a 120)</label><input type="number" id="cpu_hold" min="2" max="120"></div></div>
+   <button class="btn gray" onclick="setCpuPar()">Salva i parametri</button>
+  </div>
+  <div id="cpum" class="msg"></div></div>
 </section>
 <section id="t_selftest" class="hide">
  <div class="card adm"><h3>Autotest</h3>

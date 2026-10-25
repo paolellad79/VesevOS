@@ -2,8 +2,11 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_eventbus.cpp
 #include "vos_eventbus.h"
+#include "vos_strbuf.h"
+#include <memory>
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
+#include "../drivers/vos_drv_time.h"
 
 struct SubSlot { char prefix[16]; EventBus::Handler h; };
 static Event     g_ring[EventBus::CAP];
@@ -28,7 +31,7 @@ static void safeCopy(char* dst, size_t n, const char* src) {
 
 void EventBus::publish(const char* topic, const char* arg, int32_t val) {
   if (!topic || !topic[0]) return;
-  Event e; e.ms = millis(); e.val = val;
+  Event e; e.ms = drvMillis(); e.val = val;
   safeCopy(e.topic, sizeof(e.topic), topic); safeCopy(e.arg, sizeof(e.arg), arg);
   lockEb();
   e.seq = ++g_seq; if (e.seq == 0) e.seq = ++g_seq;
@@ -84,24 +87,29 @@ int EventBus::since(uint32_t seq, Event* out, int max, uint32_t* lost) {
   return n;
 }
 
-String EventBus::json(uint32_t seq, int max) {
-  if (max > 40) max = 40;
-  Event ev[40]; uint32_t lost = 0;
-  int n = since(seq, ev, max, &lost);
-  String j; j.reserve(60 + n * 70);
-  j += "{\"last\":"; j += String((unsigned long)lastSeq());
-  j += ",\"lost\":"; j += String((unsigned long)lost);
-  j += ",\"ev\":[";
+// Al massimo CAP eventi (quelli che l'anello conserva), ognuno lungo al piu ~105 caratteri: un solo blocco di heap della misura giusta.
+// Se per qualche motivo non bastasse ritorna "" (mai un JSON tagliato): chi chiama risponde con un errore.
+std::string EventBus::json(uint32_t seq, int max) {
+  if (max > CAP) max = CAP;
+  if (max < 0) max = 0;
+  std::unique_ptr<Event[]> ev(new Event[max]);          // sull'heap: sullo stack del server web non c'e posto (CAP eventi sono circa 1,2 KB)
+  uint32_t lost = 0;
+  int n = since(seq, ev.get(), max, &lost);
+  StrText t(64 + (size_t)n * 110);
+  StrBuf& j = t.buf();
+  j.add("{\"last\":").addu(lastSeq());
+  j.add(",\"lost\":").addu(lost);
+  j.add(",\"ev\":[");
   for (int i = 0; i < n; i++) {
-    if (i) j += ',';
-    j += "{\"n\":"; j += String((unsigned long)ev[i].seq);
-    j += ",\"ms\":"; j += String((unsigned long)ev[i].ms);
-    j += ",\"t\":\""; j += ev[i].topic;
-    j += "\",\"a\":\""; j += ev[i].arg;
-    j += "\",\"v\":"; j += String((long)ev[i].val); j += '}';
+    if (i) j.add(',');
+    j.add("{\"n\":").addu(ev[i].seq);
+    j.add(",\"ms\":").addu(ev[i].ms);
+    j.add(",\"t\":\"").add(ev[i].topic);
+    j.add("\",\"a\":\"").add(ev[i].arg);
+    j.addf("\",\"v\":%ld}", (long)ev[i].val);
   }
-  j += "]}";
-  return j;
+  j.add("]}");
+  return t.truncated() ? std::string() : t.take();
 }
 
 uint32_t EventBus::ramBytes() { return sizeof(g_ring) + sizeof(g_sub) + 16; }

@@ -3,7 +3,7 @@
 // VesevOS - vos_imgcheck.h
 // Controlli puri su un'immagine ESP32-S3 gia tutta in memoria (aggiornamento del recovery dalla pagina).
 // Niente hardware: provati sul computer da tools/hosttest/test_imgcheck.cpp. L'impronta SHA-256 finale la controlla chi chiama.
-// Il marchio del recovery (testo fisso + versione + graffa chiusa, vedi REC_MARK in recovery/VesevOS_Recovery) e salvato "mascherato" (XOR 0x5A):
+// Il marchio del recovery (testo fisso + versione + graffa chiusa, vedi REC_MARK in recovery/VesevOS_Recovery_IDF) e salvato "mascherato" (XOR 0x5A):
 // cosi non compare in chiaro nel firmware e il firmware non puo essere caricato al posto del recovery.
 #pragma once
 #include <stdint.h>
@@ -18,13 +18,13 @@ static inline uint32_t imgLe32(const uint8_t* p) { return (uint32_t)p[0] | ((uin
 
 // Struttura dell'immagine: intestazione ESP32-S3 / Arduino, segmenti, somma di controllo. IMG_OK = va bene, altrimenti il motivo
 // (il testo tradotto lo sceglie chi chiama). hashOff = dove inizia l'impronta SHA-256 aggiunta (0 = nessuna impronta).
-enum { IMG_OK = 0, IMG_SMALL, IMG_MAGIC, IMG_CHIP, IMG_ARDUINO, IMG_BIG, IMG_SEGS, IMG_SHORT, IMG_SUM, IMG_TAIL };
+enum { IMG_OK = 0, IMG_SMALL, IMG_MAGIC, IMG_CHIP, IMG_APPDESC, IMG_BIG, IMG_SEGS, IMG_SHORT, IMG_SUM, IMG_TAIL };
 static inline int imgCheck(const uint8_t* d, uint32_t n, uint32_t maxSize, uint32_t& hashOff) {
   hashOff = 0;
   if (n < IMG_HDR) return IMG_SMALL;
   if (d[0] != 0xE9) return IMG_MAGIC;
   if ((uint16_t)(d[12] | (d[13] << 8)) != 0x0009) return IMG_CHIP;
-  if (imgLe32(d + 32) != 0xABCD5432UL) return IMG_ARDUINO;
+  if (imgLe32(d + 32) != 0xABCD5432UL) return IMG_APPDESC;
   if (n > maxSize) return IMG_BIG;
   uint8_t segs = d[1];
   if (segs == 0 || segs > 16) return IMG_SEGS;
@@ -75,7 +75,7 @@ static inline void imgScanFeed(ImgScan& s, const uint8_t* d, size_t n) {
     uint8_t b = d[i];
     if (s.in) {
       if (b == '}' && s.k) { s.ver[s.k] = 0; s.done = true; }
-      else if (b < 0x21 || b > 0x7E || s.k + 1 >= sizeof(s.ver)) { s.in = false; s.k = 0; s.mi = 0; }
+      else if (b < 0x21 || b > 0x7E || (size_t)s.k + 1 >= sizeof(s.ver)) { s.in = false; s.k = 0; s.mi = 0; }
       else s.ver[s.k++] = (char)b;
       continue;
     }

@@ -8,11 +8,13 @@ pagine_c.html
 js_base.js
 js_regole.js
 js_avvio_home.js
+js_aggiorna.js
 js_file.js
 js_script.js
 js_app.js
 js_pin_accesso.js
 js_periferiche_rete.js
+js_sd.js
 js_servizi.js
 js_wps.js
 js_btn.js

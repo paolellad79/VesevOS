@@ -3,7 +3,7 @@
 // VesevOS - vos_web.h
 // Server web: HTTPS (443) e HTTP (80, portale e hotspot). Pagina e API protette da utenti e ruoli.
 #pragma once
-#include <Arduino.h>
+#include "../drivers/vos_drv_string.h"
 
 void webInit();     // registra i percorsi (non avvia il server)
 void webStart();    // avvia i server (80 e 443): chiamare dopo l'avvio del Wi-Fi

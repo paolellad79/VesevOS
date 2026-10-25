@@ -3,7 +3,7 @@
 Compilano alcune parti del firmware sul PC con finti pezzi della scheda e controllano che facciano quello che devono.
 Non servono la scheda ne l'Arduino IDE. Non vanno mai dentro il firmware.
 
-Uso: `tools/hosttest/run.sh` (serve g++ e il nucleo Arduino-ESP32 in `$CORE`, di fabbrica `/home/claude/w/core/cores/esp32`;
+Uso: `tools/hosttest/run.sh` (serve g++ e il nucleo Arduino-ESP32 in `$CORE` (da impostare, obbligatorio);
 da quel nucleo si copiano solo `WString.cpp`, `Print.cpp`, `Stream.cpp`, che restano sotto LGPL-2.1 e NON sono nel repository).
 
 Cosa provano oggi

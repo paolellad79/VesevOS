@@ -73,7 +73,7 @@ extern "C++" {
 __attribute__((weak)) void vlog(const char*, ...) {}
 void diaryNote(const char*) {}
 void auditRefresh() {}
-__attribute__((weak)) void auditEvent(AuditLevel, const String&, const String&) {}
+__attribute__((weak)) void auditEvent(AuditLevel, const char*, const char*) {}
 __attribute__((weak)) void auditClear(const String&) {}
 void auditFix() {}
 void auditDiff(const String&, const String&, const String&) {}

@@ -2,10 +2,12 @@
 # VesevOS - aggiorna tabella partizioni (0x8000), recovery (0x10000) e firmware (0x110000) SENZA cancellare la flash:
 # impostazioni e configurazione (LittleFS, NVS) restano.
 # Uso:  ./carica-tutto.sh PORTA CARTELLA_RECOVERY FIRMWARE.bin
+#   CARTELLA_RECOVERY: cartella con VesevOS_Recovery.bin e partition-table.bin (build ESP-IDF del recovery)
 set -e
 P="$1"; D="$2"; F="$3"
 [ -z "$P" ] || [ -z "$D" ] || [ -z "$F" ] && { sed -n '2,5p' "$0"; exit 1; }
-R="$D/VesevOS_Recovery.ino.bin"; T="$D/VesevOS_Recovery.ino.partitions.bin"
+pick() { for c in "$@"; do [ -f "$c" ] && { echo "$c"; return; }; done; echo "$1"; }
+R="$D/VesevOS_Recovery.bin"; T=$(pick "$D/partition-table.bin" "$D/partition_table/partition-table.bin")
 for f in "$R" "$T" "$F"; do [ -f "$f" ] || { echo "Manca il file: $f"; exit 1; }; done
 . "$(cd "$(dirname "$0")" && pwd)/controlli.sh"
 vos_chk_rec "$R"; vos_chk_fw "$F"

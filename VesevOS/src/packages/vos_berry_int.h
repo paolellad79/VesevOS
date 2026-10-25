@@ -3,6 +3,7 @@
 // VesevOS - vos_berry_int.h: stato interno di Berry comune a vos_berry.cpp e vos_berry_scripts.cpp (non usare altrove).
 #pragma once
 #include "vos_berry.h"
+#include <freertos/FreeRTOS.h>   // portMUX_TYPE
 
 #define BERRY_QMAX    4      // script in coda (azione "script <nome>" delle Automazioni)
 #define SCRIPT_DIR    "/scripts"
@@ -25,3 +26,5 @@ size_t berryFreeAll();         // in vos_berry_mem.cpp: libera tutto cio che lo 
 int  migrateOld();              // sposta i vecchi script .be di /apps in /scripts (una volta per avvio)
 }
 using namespace vosberry;
+struct bvm;
+void berryBleRegister(bvm* vm);   // in vos_berry_ble.cpp: ble_on(), ble_off(), ble_status()

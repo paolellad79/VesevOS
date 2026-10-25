@@ -4,11 +4,15 @@
 // Risparmio energia: (1) Wi-Fi a risparmio massimo (la scheda resta raggiungibile, piu lenta);
 // (2) sonno profondo a cicli (sveglia X minuti, dorme Y minuti; si sveglia con il timer o con RESET).
 #pragma once
-#include <Arduino.h>
+#include "../core/vos_errbuf.h"
+#include "../core/vos_heapbuf.h"
+#include <stdint.h>
+#include <string>
 
+constexpr size_t POWER_JSON_MAX = 256;
 void   powerBegin();                       // all'avvio: conta i risvegli dal sonno
 void   powerTick();                        // dal ciclo principale
 void   powerSleepNow(uint32_t seconds);    // sonno profondo subito: 0 = fino a RESET
-void   powerSet(int mode, uint32_t awakeMin, uint32_t sleepMin, String& err);   // 0 spento, 1 Wi-Fi, 2 cicli
-String powerJson();
-String powerText();
+void   powerSet(int mode, uint32_t awakeMin, uint32_t sleepMin, ErrBuf& err);   // 0 spento, 1 Wi-Fi, 2 cicli
+bool powerJson(HeapBuf& out);   // stato in JSON (circa 120 byte); false = manca la memoria o supera il tetto
+std::string powerText();

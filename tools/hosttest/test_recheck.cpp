@@ -2,7 +2,7 @@
 #include "mini.h"
 #include <string.h>
 #include <vector>
-#include "../../recovery/VesevOS_Recovery/recovery_check.h"
+#include "../../recovery/VesevOS_Recovery_IDF/recovery_check.h"
 
 static std::vector<uint8_t> goodImage(size_t total, bool mark) {
   std::vector<uint8_t> v(total, 0x11);
@@ -59,7 +59,7 @@ int main() {
   h = goodImage(5000, true); h[12] = 0x05;               // ESP32-C3
   CHECK(strstr(rcHeaderErr(feedAll(h, 100)), "ESP32-S3") != nullptr);
   h = goodImage(5000, true); h[35] = 0x00;
-  CHECK(strstr(rcHeaderErr(feedAll(h, 100)), "Arduino-ESP32") != nullptr);
+  CHECK(strstr(rcHeaderErr(feedAll(h, 100)), "ESP32 valido") != nullptr);
   auto small = goodImage(20, false);
   CHECK(strstr(rcHeaderErr(feedAll(small, 20)), "piccolo") != nullptr);
 

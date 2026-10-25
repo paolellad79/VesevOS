@@ -5,10 +5,16 @@
 //  - porta 443 (HTTPS): pagina e API cifrate, certificato unico della scheda (vos_tls)
 //  - porta 80  (HTTP):  portale automatico e, per chi e collegato all'hotspot (gia cifrato da WPA2), anche la pagina;
 //                       dalla rete di casa porta a https://
+//                       Con il redirect acceso e l'hotspot che non puo accendersi, la porta 80 la tiene un server MINIMO (solo redirect,
+//                       vos_http_redirect_srv.cpp) invece di questo server completo: risparmia RAM. Scelta in startHttp().
 // Ogni API ha un livello: pubblica, Ospite, Operatore, Amministratore (controllo nel firmware, non solo nella pagina).
 // Il filtro IP (vos_fw) chiude la connessione senza risposta a chi non e ammesso.
 #include "vos_web_int.h"
+#include "vos_redirect_plan.h"
+#include "vos_http_redirect_srv.h"
 #include "../core/vos_ram.h"
+#include "../drivers/vos_drv_time.h"
+#include "../drivers/vos_drv_heap.h"
 
 namespace webx {
 PsychicHttpServer* g_http = nullptr;
@@ -16,46 +22,62 @@ PsychicHttpsServer* g_https = nullptr;
 bool g_tlsUp = false;
 volatile bool g_cleanArm = false;   // fine guida con Wi-Fi di casa: al primo accesso dalla rete di casa si spengono hotspot e HTTP (solo in RAM)
 uint16_t g_runHttpPort = 0, g_runHttpsPort = 0;   // porte con cui i server sono partiti (0 = non attivo)
+bool g_httpMini = false;           // la porta HTTP e tenuta dal server minimo (solo redirect)
+bool g_httpMiniWanted = false;     // cosa aveva deciso httpMinimalWanted() all'avvio (se cambia dopo, serve il riavvio)
 uint32_t g_firstPassUntil = 0;     // dopo il reset con BOOT: 10 minuti per scegliere la password anche dalla rete di casa
-File g_upFile;
+VosFile g_upFile;
 bool g_upOk = false;
-String g_upErr, g_upPath;
+ErrBuf g_upErr;
+char g_upPath[160];
 
 
 volatile uint32_t g_lastReq = 0;                       // ultima richiesta dalla pagina (per non dormire mentre la usi)
 
 uint32_t ipOf(Req* r) {
-  IPAddress a = r->client()->remoteIP();
-  return ((uint32_t)a[0] << 24) | ((uint32_t)a[1] << 16) | ((uint32_t)a[2] << 8) | (uint32_t)a[3];
+  return ipNum(r->client()->remoteIP());
 }
 
-String P(Req* r, const char* name) {
+const char* Pc(Req* r, const char* name) {
   PsychicWebParameter* p = r->getParam(name);
-  return p ? p->value() : String("");
+  return p ? p->valueCStr() : "";
 }
+bool Pis(Req* r, const char* name, const char* value) { return strcmp(Pc(r, name), value) == 0; }
+long Pint(Req* r, const char* name) { return atol(Pc(r, name)); }
 bool has(Req* r, const char* name) { return r->hasParam(name); }
 
+std::string_view Pt(Req* r, const char* name) { return trimView(Pc(r, name)); }
+
 // parametro dalla riga dell'indirizzo (?nome=valore), anche nelle richieste di caricamento
-String qparam(Req* r, const char* name) {
-  String q = r->query(), k = String(name) + "=";
-  int p = 0;
-  while (p < (int)q.length()) {
-    int e = q.indexOf('&', p); if (e < 0) e = q.length();
-    String kv = q.substring(p, e);
-    if (kv.startsWith(k)) return urlDecode(kv.substring(k.length()).c_str());
-    p = e + 1;
+bool qparamTo(Req* r, const char* name, char* out, size_t cap) {
+  out[0] = 0;
+  const char* q = r->queryCStr();
+  size_t nl = strlen(name);
+  while (*q) {
+    const char* e = strchr(q, '&');
+    size_t len = e ? (size_t)(e - q) : strlen(q);
+    if (len > nl && strncmp(q, name, nl) == 0 && q[nl] == '=') {
+      std::string raw(q + nl + 1, len - nl - 1);          // urlDecode vuole un testo chiuso con 0
+      auto dec = urlDecode(raw.c_str());
+      snprintf(out, cap, "%s", dec.c_str());
+      return true;
+    }
+    if (!e) break;
+    q = e + 1;
   }
-  return "";
+  return false;
 }
 
-esp_err_t sendText(Res* s, int code, const char* type, const String& body) {
+esp_err_t sendText(Res* s, int code, const char* type, const char* body, size_t len) {
   s->setCode(code);
   s->setContentType(type);
   s->addHeader("Cache-Control", "no-store");
-  s->setContent((const uint8_t*)body.c_str(), body.length());
+  s->setContent((const uint8_t*)body, len);
   return s->send();
 }
-esp_err_t sendJson(Res* s, const String& body, int code) { return sendText(s, code, "application/json", body); }
+esp_err_t sendText(Res* s, int code, const char* type, const char* body) { return sendText(s, code, type, body, strlen(body)); }
+esp_err_t sendJson(Res* s, const char* body, int code) { return sendText(s, code, "application/json", body, strlen(body)); }
+esp_err_t sendJson(Res* s, const HeapBuf& body, int code) { return sendText(s, code, "application/json", body.c_str(), body.length()); }
+esp_err_t sendJsonBuf(Res* s, const std::string& body, int code) { return sendText(s, code, "application/json", body.data(), body.size()); }
 esp_err_t ok(Res* s) { return sendJson(s, "{\"ok\":true}"); }
 // errore: "err" e il testo tradotto per la pagina; "code" e il nome breve STABILE per app e prove (regole API 10).
 // Il codice HTTP segue il "code" (regole API 11); il corpo ha sempre ok:false, quindi la pagina legge come prima.
@@ -69,14 +91,22 @@ static int httpFor(const char* code) {
   if (!strcmp(code, "off")) return 503;
   return 400;                                   // "error": dato mancante o non valido
 }
-esp_err_t ko(Res* s, const String& e, const char* code) { return sendJson(s, "{\"ok\":false,\"err\":\"" + jsonEscape(e) + "\",\"code\":\"" + code + "\"}", httpFor(code)); }
+esp_err_t ko(Res* s, const char* e, const char* code) {
+  HeapBuf j(2048);
+  j.add("{\"ok\":false,\"err\":\""); j.addJson(e, strlen(e)); j.add("\",\"code\":\""); j.add(code); j.add("\"}");
+  if (j.oom() || j.over()) return sendText(s, httpFor(code), "application/json", "{\"ok\":false,\"err\":\"?\",\"code\":\"error\"}", 38);
+  return sendText(s, httpFor(code), "application/json", j.c_str(), j.length());
+}
 esp_err_t notFound(Res* s) { return sendText(s, 404, "text/plain; charset=utf-8", tr("Non trovato")); }
 
-String token(Req* r) { return r->hasHeader("Cookie") ? authCookieFromHeader(r->header("Cookie")) : String(""); }
+void tokenTo(Req* r, char* out, size_t cap) {
+  out[0] = 0;
+  if (r->hasHeader("Cookie")) authCookieFromHeader(r->headerCStr("Cookie"), out, cap);
+}
+int userOf(Req* r) { char tk[AUTH_TOKEN_BUF]; tokenTo(r, tk, sizeof tk); return authSessionUser(tk); }
 
-String who(const Ctx& c) {
-  String n = c.user >= 0 ? cfg.users[c.user].name : String("-");
-  return "web " + n + " " + ipToStr(c.ip);
+void whoTo(const Ctx& c, char* out, size_t n) {
+  snprintf(out, n, "web %s %s", c.user >= 0 ? cfg.users[c.user].name.c_str() : "-", IpText(c.ip).s);
 }
 
 // Registra un percorso con livello di accesso. secure = server HTTPS.
@@ -84,50 +114,62 @@ String who(const Ctx& c) {
 void add(PsychicHttpServer* srv, bool secure, const char* path, int method, uint8_t lvl, Handler h) {
   srv->on(path, method, [h, lvl, secure, method](Req* r, Res* s) -> esp_err_t {
     Ctx c; c.ip = ipOf(r); c.user = -1; c.role = 0; c.secure = secure;
-    g_lastReq = millis();
+    g_lastReq = drvMillis();
     if (!fwAllow(c.ip, false)) { fwNoteRejected(c.ip); return ESP_FAIL; }     // chiude senza rispondere
+    if (!secure && redirectActive(c.ip)) return redirectReply(r, s);         // impostazione redirect: tutto verso HTTPS, niente servito su HTTP
     // dalla rete di casa la pagina e le API passano solo da HTTPS (l'hotspot e gia cifrato da WPA2)
     if (!secure && g_tlsUp && cfg.https && !netOnAp(c.ip)) {
-      if (strcmp(r->pathCStr(), "/") == 0) { String host = r->host(); int col = host.indexOf(':'); if (col > 0) host = host.substring(0, col); return s->redirect(("https://" + host + (cfg.httpsPort != 443 ? ":" + String(cfg.httpsPort) : String("")) + "/").c_str()); }
+      if (strcmp(r->pathCStr(), "/") == 0) {                                 // alla pagina HTTPS, stesso nome ma senza la porta
+        const char* host = r->headerCStr("Host");
+        size_t hl = host ? strcspn(host, ":") : 0;
+        char url[160], port[8] = "";
+        if (cfg.httpsPort != 443) snprintf(port, sizeof port, ":%u", (unsigned)cfg.httpsPort);
+        snprintf(url, sizeof url, "https://%.*s%s/", (int)hl, host ? host : "", port);
+        return s->redirect(url);
+      }
       if (lvl != L_PUB || method == HTTP_POST) return sendJson(s, "{\"ok\":false,\"err\":\"https\",\"code\":\"https_only\"}", 403);   // anche accesso e prima password
     }
     if (lvl > L_PUB) {
-      int u = authSessionUser(token(r));
+      char tk[AUTH_TOKEN_BUF]; tokenTo(r, tk, sizeof tk);
+      int u = authSessionUser(tk);
       if (u < 0) { authNoteDenied(c.ip); return sendJson(s, "{\"ok\":false,\"err\":\"non autorizzato\",\"code\":\"unauthorized\"}", 401); }
       c.user = u; c.role = cfg.users[u].role;
-      authSessionNote(token(r), c.ip, secure, method == HTTP_POST, r->pathCStr());   // per "chi e collegato" (who)
-      if (c.role + 1 < lvl) return sendJson(s, "{\"ok\":false,\"err\":\"" + jsonEscape(tr("Il tuo ruolo non permette questa operazione")) + "\",\"code\":\"forbidden\"}", 403);
+      authSessionNote(tk, c.ip, secure, method == HTTP_POST, r->pathCStr());   // per "chi e collegato" (who)
+      if (c.role + 1 < lvl) return ko(s, tr("Il tuo ruolo non permette questa operazione"), "forbidden");   // HTTP 403
     }
-    if (method == HTTP_POST) cfgSetOrigin(who(c));
+    if (method == HTTP_POST) { char w[96]; whoTo(c, w, sizeof w); cfgSetOrigin(w); }
     return h(r, s, c);
   });
 }
 
-String svcJson() {
+// Testo corto di dimensione nota (< 400 byte): un solo blocco, consegnato come std::string
+std::string svcJson() {
   bool pend = (cfg.httpOn != (g_runHttpPort != 0)) || (cfg.httpOn && g_runHttpPort && cfg.httpPort != g_runHttpPort) ||
-              (cfg.https != g_tlsUp) || (cfg.https && g_runHttpsPort && cfg.httpsPort != g_runHttpsPort);
-  return String("{\"apOn\":") + (cfg.apOn ? "true" : "false") + ",\"captive\":" + (cfg.apCaptive ? "true" : "false") +
-         ",\"dhcpOn\":" + (cfg.dhcpOn ? "true" : "false") + ",\"lease\":" + String(cfg.dhcpLease) + ",\"mdnsOn\":" + (cfg.mdnsOn ? "true" : "false") +
-         ",\"httpOn\":" + (cfg.httpOn ? "true" : "false") + ",\"httpPort\":" + String(cfg.httpPort) +
-         ",\"httpsOn\":" + (cfg.https ? "true" : "false") + ",\"httpsPort\":" + String(cfg.httpsPort) +
-         ",\"runHttp\":" + String(g_runHttpPort) + ",\"runHttps\":" + String(g_runHttpsPort) +
-         ",\"pending\":" + (pend ? "true" : "false") + ",\"sta\":" + (cfg.staEnabled && cfg.staSsid.length() ? "true" : "false") +
-         ",\"clientOk\":" + (netState() == NET_CLIENT_OK ? "true" : "false") +
-         ",\"usersHttp\":" + String(authSessionCount(0)) + ",\"usersHttps\":" + String(authSessionCount(1)) + "}";
+              (cfg.https != g_tlsUp) || (cfg.https && g_runHttpsPort && cfg.httpsPort != g_runHttpsPort) ||
+              (g_runHttpPort && httpMinimalWanted() != g_httpMiniWanted);   // redirect o hotspot cambiati: il server HTTP giusto si sceglie al riavvio
+  auto tf = [](bool v) { return v ? "true" : "false"; };
+  StrText t(512);
+  t.buf().addf("{\"apOn\":%s,\"captive\":%s,\"dhcpOn\":%s,\"lease\":%d,\"mdnsOn\":%s,", tf(cfg.apOn), tf(cfg.apCaptive), tf(cfg.dhcpOn), (int)cfg.dhcpLease, tf(cfg.mdnsOn));
+  t.buf().addf("\"httpOn\":%s,\"httpPort\":%d,\"httpsOn\":%s,\"httpsPort\":%d,", tf(cfg.httpOn), (int)cfg.httpPort, tf(cfg.https), (int)cfg.httpsPort);
+  t.buf().addf("\"runHttp\":%u,\"runHttps\":%u,\"pending\":%s,\"sta\":%s,", (unsigned)g_runHttpPort, (unsigned)g_runHttpsPort, tf(pend), tf(cfg.staEnabled && cfg.staSsid.length()));
+  t.buf().addf("\"clientOk\":%s,\"usersHttp\":%d,\"usersHttps\":%d,\"redirect\":%s,\"httpMin\":%s}", tf(netState() == NET_CLIENT_OK), (int)authSessionCount(0), (int)authSessionCount(1), tf(cfg.httpRedirect), tf(g_httpMini));
+  return t.take();
 }
 
-String settingsJson() {
-  String j = "{";
-  j += "\"hostname\":\"" + jsonEscape(cfg.hostname) + "\",\"domain\":\"" + jsonEscape(cfg.domain) + "\",";
-  j += "\"serialAuth\":" + String(cfg.serialAuth ? "true" : "false") + ",";
-  j += "\"staSsid\":\"" + jsonEscape(cfg.staSsid) + "\",";
-  j += "\"staDhcp\":" + String(cfg.staDhcp ? "true" : "false") + ",";
-  j += "\"ip\":\"" + jsonEscape(cfg.ip) + "\",\"mask\":\"" + jsonEscape(cfg.mask) + "\",";
-  j += "\"gw\":\"" + jsonEscape(cfg.gw) + "\",\"dns1\":\"" + jsonEscape(cfg.dns1) + "\",\"dns2\":\"" + jsonEscape(cfg.dns2) + "\",";
-  j += "\"apSsid\":\"" + jsonEscape(cfg.apSsid) + "\",";
-  j += "\"ledMode\":" + String(cfg.ledMode) + ",\"ledColor\":" + String(cfg.ledColor) + ",\"ledBrightness\":" + String(cfg.ledBrightness);
-  j += "}";
-  return j;
+bool settingsJson(HeapBuf& j) {
+  j.add("{\"hostname\":\""); j.addJson(cfg.hostname.c_str(), cfg.hostname.length());
+  j.add("\"");
+  jsonStr(j, "domain", cfg.domain.c_str());
+  jsonBool(j, "serialAuth", cfg.serialAuth);
+  jsonStr(j, "staSsid", cfg.staSsid.c_str());
+  jsonBool(j, "staDhcp", cfg.staDhcp);
+  jsonStr(j, "ip", cfg.ip.c_str()); jsonStr(j, "mask", cfg.mask.c_str());
+  jsonStr(j, "gw", cfg.gw.c_str()); jsonStr(j, "dns1", cfg.dns1.c_str()); jsonStr(j, "dns2", cfg.dns2.c_str());
+  jsonStr(j, "apSsid", cfg.apSsid.c_str());
+  jsonNum(j, "ledMode", cfg.ledMode); jsonNum(j, "ledColor", cfg.ledColor); jsonNum(j, "ledBrightness", cfg.ledBrightness);
+  for (int i = 0; i < LEDSRC_COUNT; i++) { char key[12]; snprintf(key, sizeof key, "ledSrc%d", i); jsonNum(j, key, cfg.ledSrcColor[i]); }
+  jsonNum(j, "ledCpuThr", cfg.ledCpuThr);
+  return j.add('}');
 }
 
 void delayedRestart(void* why) { vTaskDelay(pdMS_TO_TICKS(800)); sysReboot(why ? (const char*)why : "pagina", 0); }   // why = testo fisso (letterale)
@@ -140,12 +182,12 @@ esp_err_t sendPage(Res* s) {
   return s->send(200, "text/html; charset=utf-8", INDEX_GZ, INDEX_GZ_LEN);
 }
 
-String cookieAttrs(bool secure) { return String("; Path=/; HttpOnly; SameSite=Strict") + (secure ? "; Secure" : ""); }
 
 // dopo password (e codice MFA) giusti: sessione, cookie, pulizia di fine guida
 esp_err_t loginDone(Res* s, Ctx& c, int idx) {
-  String t = authNewSession(idx, c.ip, c.secure);
-  vlog("WEB: accesso di %s da %s", cfg.users[idx].name.c_str(), ipToStr(c.ip).c_str());
+  char t[AUTH_TOKEN_BUF];
+  authNewSession(t, idx, c.ip, c.secure);
+  vlog("WEB: accesso di %s da %s", cfg.users[idx].name.c_str(), IpText(c.ip).s);
   ramNote("login");
   bool cleaned = false;
   if (g_cleanArm && cfg.users[idx].role == ROLE_ADMIN && !netOnAp(c.ip) && netState() == NET_CLIENT_OK && cfg.staEnabled) {
@@ -153,23 +195,31 @@ esp_err_t loginDone(Res* s, Ctx& c, int idx) {
     g_cleanArm = false;
     cfg.apOn = false; cfg.apCaptive = false; cfg.dhcpOn = false;     // il DHCP serve solo all'hotspot: spento con lui (niente secondo DHCP sulla rete di casa)
     if (cfg.https && g_tlsUp) cfg.httpOn = false;       // mai chiusi fuori: HTTP si spegne solo se HTTPS funziona
-    cfgSetOrigin("fine guida " + ipToStr(c.ip)); cfgSave(); cleaned = true;
+    cfgSetOriginf("fine guida %s", IpText(c.ip).s); cfgSave(); cleaned = true;
     vlog("SETUP: raggiunta dalla rete di casa, spenti hotspot, DHCP e HTTP");
   }
   if (cfg.users[idx].mfaOn) cfgSave();                  // il contatore MFA non deve tornare indietro
-  s->addHeader("Set-Cookie", ("vos=" + t + cookieAttrs(c.secure)).c_str());
-  return sendJson(s, "{\"ok\":true,\"user\":\"" + jsonEscape(cfg.users[idx].name) + "\",\"role\":" + String(cfg.users[idx].role) + (cleaned ? ",\"clean\":true" : "") + "}");
+  char ck[160];
+  snprintf(ck, sizeof ck, "vos=%s" COOKIE_ATTRS "%s", t, c.secure ? "; Secure" : "");
+  s->addHeader("Set-Cookie", ck);
+  HeapBuf j(512);
+  j.add("{\"ok\":true,\"user\":\""); j.addJson(cfg.users[idx].name.c_str(), cfg.users[idx].name.length());
+  j.add('"'); jsonNum(j, "role", cfg.users[idx].role);
+  if (cleaned) j.add(",\"clean\":true");
+  j.add('}');
+  if (j.oom() || j.over()) return ko(s, tr("Memoria insufficiente"), "off");
+  return sendJson(s, j);
 }
 
 }  // namespace webx
 
-uint32_t webIdleSec() { return (millis() - g_lastReq) / 1000; }
+uint32_t webIdleSec() { return (drvMillis() - g_lastReq) / 1000; }
 
 // RAM a pezzi e nessuno usa la pagina da 20 s: si chiudono i collegamenti HTTPS rimasti aperti (ognuno tiene circa 40 KB).
 // Il browser li riapre da solo quando serve. Chiamata dal monitor ogni 10 s.
 void webTrimIdle() {
   if (!g_https || !g_tlsUp || !g_https->server) return;
-  if (webIdleSec() < 20 || ESP.getMaxAllocHeap() >= 60000) return;
+  if (webIdleSec() < 20 || drvHeapMaxBlock() >= 60000) return;
   int fds[8]; size_t n = 8;
   if (httpd_get_client_list(g_https->server, &n, fds) != ESP_OK) return;
   for (size_t i = 0; i < n; i++) httpd_sess_trigger_close(g_https->server, fds[i]);
@@ -189,37 +239,57 @@ static void routesCore(PsychicHttpServer* S, bool sec) {
   });
 
   add(S, sec, "/api/auth", HTTP_GET, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
-    int u = authSessionUser(token(r));
-    String j = String("{\"set\":") + (authIsSet() ? "true" : "false") + ",\"setup\":" + (cfg.setupDone ? "true" : "false") +
-               ",\"lang\":\"" + jsonEscape(cfg.lang) + "\",\"secure\":" + (c.secure ? "true" : "false") +
-               ",\"https\":" + (g_tlsUp && cfg.https ? "true" : "false") + ",\"fp\":\"" + (g_tlsUp ? tlsFingerprint() : String("")) + "\"" +
-               ",\"ble\":" + (VOS_WITH_BLE ? "true" : "false") + ",\"pk\":{\"ble\":" + String(VOS_WITH_BLE) + ",\"mqtt\":" + String(VOS_WITH_MQTT) + ",\"mesh\":" + String(VOS_WITH_MESH) + ",\"mfa\":" + String(VOS_WITH_MFA) + ",\"stat\":" + String(VOS_WITH_STATS) + ",\"wps\":" + String(VOS_WITH_WPS) + ",\"script\":" + String(VOS_WITH_BERRY) + ",\"app\":" + String(VOS_WITH_BERRY) + "}" + ",\"hp\":" + String(g_runHttpPort) + ",\"sp\":" + String(g_runHttpsPort) + timePubJson();
-    if (!authIsSet()) { int a = authFirstAdmin(); j += ",\"first\":\"" + jsonEscape(a >= 0 ? cfg.users[a].name : String("admin")) + "\""; }
-    if (u >= 0) j += ",\"user\":\"" + jsonEscape(cfg.users[u].name) + "\",\"role\":" + String(cfg.users[u].role);
-    return sendJson(s, j + "}");
+    int u = userOf(r);
+    HeapBuf j(2048);
+    j.add("{\"set\":"); j.add(authIsSet() ? "true" : "false");
+    jsonBool(j, "setup", cfg.setupDone);
+    jsonStr(j, "lang", cfg.lang.c_str());
+    jsonBool(j, "secure", c.secure);
+    jsonBool(j, "https", g_tlsUp && cfg.https);
+    jsonStr(j, "fp", g_tlsUp ? tlsFingerprint() : "");
+    jsonBool(j, "ble", VOS_WITH_BLE);
+    char pk[160];
+    snprintf(pk, sizeof pk, ",\"pk\":{\"ble\":%d,\"mqtt\":%d,\"mesh\":%d,\"mfa\":%d,\"stat\":%d,\"wps\":%d,\"script\":%d,\"app\":%d},\"hp\":%u,\"sp\":%u",
+             VOS_WITH_BLE, VOS_WITH_MQTT, VOS_WITH_MESH, VOS_WITH_MFA, VOS_WITH_STATS, VOS_WITH_WPS, VOS_WITH_BERRY, VOS_WITH_BERRY, (unsigned)g_runHttpPort, (unsigned)g_runHttpsPort);
+    j.add(pk);
+    timePubJson(j);                                                   // pezzo JSON gia pronto dall'ora (comincia con la virgola)
+    if (!authIsSet()) { int a = authFirstAdmin(); jsonStr(j, "first", a >= 0 ? cfg.users[a].name.c_str() : "admin"); }
+    if (u >= 0) { jsonStr(j, "user", cfg.users[u].name.c_str()); jsonNum(j, "role", cfg.users[u].role); }
+    j.add('}');
+    if (j.oom() || j.over()) return ko(s, tr("Memoria insufficiente"), "off");
+    return sendJson(s, j);
   });
 
   // Licenze e note legali (pubbliche, leggibili anche prima dell'accesso)
   add(S, sec, "/api/license", HTTP_GET, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
-    if (!has(r, "id")) return sendJson(s, licListJson());
-    int li = licFind(P(r, "id"));
+    if (!has(r, "id")) {
+      char lst[LIC_JSON_MAX];
+      licListJson(lst, sizeof(lst));
+      return sendJson(s, lst);
+    }
+    int li = licFind(Pc(r, "id"));
     if (li < 0) return notFound(s);
     if (licZ(li)) { s->addHeader("Content-Encoding", "gzip"); return s->send(200, "text/plain; charset=utf-8", (const uint8_t*)licText(li), licZ(li)); }   // licenze lunghe: compresse, il browser le apre
     return s->send(200, "text/plain; charset=utf-8", (const uint8_t*)licText(li), licSize(li));
   });
 
   // Lingue (pubbliche: servono anche alla schermata di accesso, contengono solo testi)
-  add(S, sec, "/api/langs", HTTP_GET, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, langListJson()); });
+  add(S, sec, "/api/langs", HTTP_GET, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t { HeapBuf j(LANG_JSON_MAX); return langListJson(j) ? sendJson(s, j) : ko(s, tr("Memoria insufficiente")); });
   add(S, sec, "/api/langfile", HTTP_GET, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
-    String code = P(r, "code");
-    String path = "/lang/" + code + ".json";
-    if (code == "it" || !langCodeValid(code) || !drvFsExists(path)) return notFound(s);
-    PsychicFileResponse f(s, drvFsHandle(), path, "application/json; charset=utf-8");
-    return f.send();
+    const char* code = Pc(r, "code");
+    char path[48];                                                      // "/lang/" + codice (max 8 caratteri) + ".json"
+    if (strlen(code) > LANG_CODE_BUF - 1 || strcmp(code, "it") == 0 || !langCodeValid(code)) return notFound(s);
+    snprintf(path, sizeof path, "/lang/%s.json", code);
+    if (!drvFsExists(path)) return notFound(s);
+    return sendFile(s, path, "application/json; charset=utf-8", false);
   });
   add(S, sec, "/api/lang", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
-    String code = P(r, "code"); code.trim(); code.toLowerCase();
-    String e;
+    std::string_view v = Pt(r, "code");
+    char code[LANG_CODE_BUF + 3];                                       // piu lungo di 8 resta non valido anche tagliato
+    size_t n = v.size() < sizeof(code) - 1 ? v.size() : sizeof(code) - 1;
+    for (size_t i = 0; i < n; i++) code[i] = (char)tolower((unsigned char)v[i]);
+    code[n] = 0;
+    ErrBuf e;
     return langSet(code, e) ? ok(s) : ko(s, e);
   });
 
@@ -229,11 +299,15 @@ static void routes(PsychicHttpServer* S, bool sec) {
   routesCore(S, sec);
   routesAuth(S, sec);
   routesDev(S, sec);
+#if VOS_WITH_SD
+  routesSd(S, sec);
+#endif
   routesSys(S, sec);
   routesNet(S, sec);
   routesFiles(S, sec);
   routesScript(S, sec);
   routesApp(S, sec);
+  routesUpd(S, sec);
 }
 
 void webInit() {
@@ -243,43 +317,64 @@ void webInit() {
   DefaultHeaders::Instance().addHeader("Referrer-Policy", "no-referrer");
   DefaultHeaders::Instance().addHeader("Content-Security-Policy",
     "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
-  if (!authIsSet() && cfg.setupDone) g_firstPassUntil = millis() + 600000UL;   // reset con BOOT appena fatto
+  if (!authIsSet() && cfg.setupDone) g_firstPassUntil = drvMillis() + 600000UL;   // reset con BOOT appena fatto
   vlog("WEB: percorsi pronti");
 }
 
-void webAllowFirstPass() { g_firstPassUntil = millis() + 600000UL; if (!g_firstPassUntil) g_firstPassUntil = 1; }
+void webAllowFirstPass() { g_firstPassUntil = drvMillis() + 600000UL; if (!g_firstPassUntil) g_firstPassUntil = 1; }
+
+// Server HTTP COMPLETO (Psychic): pagina, API e portale automatico. Tiene molta RAM (task httpd da 8 KB, tutte le rotte).
+static void startHttpFull(uint16_t port) {
+  g_http = new PsychicHttpServer(port);
+  g_http->config.max_open_sockets = 3;               // basta per hotspot e portale automatico; HTTP e un server in piu, tiene poca RAM
+  g_http->config.lru_purge_enable = true;            // quando i collegamenti sono finiti chiude il piu vecchio invece di rifiutare il nuovo
+  g_http->maxRequestBodySize = 48 * 1024;
+  g_http->maxUploadSize = 4UL * 1024 * 1024;         // oltre questo la libreria risponde in inglese e chiude: i limiti veri li controllano le rotte (messaggi tradotti)
+  routes(g_http, false);
+  g_http->onNotFound(httpNotFound);
+  g_http->start();
+  g_runHttpPort = port;
+  vlog("WEB: server HTTP completo avviato sulla porta %u", (unsigned)port);
+}
+
+// Sceglie chi tiene la porta HTTP: il server MINIMO (solo redirect) se httpMinimalWanted(), altrimenti il completo. Se il minimo non parte
+// (porta occupata o memoria) si ripiega sul completo: la porta HTTP non resta mai senza risposta. La scelta si fa qui, all'avvio dei server:
+// un cambio dopo (redirect, hotspot) vale al riavvio e svcJson() lo segnala come "pending".
+static void startHttp(uint16_t port) {
+  g_httpMiniWanted = httpMinimalWanted();
+  if (g_httpMiniWanted) {
+    if (httpRedirectSrvStart(port)) {
+      g_httpMini = true;
+      g_runHttpPort = port;
+      vlog("WEB: server HTTP minimo (solo redirect a HTTPS) avviato sulla porta %u", (unsigned)port);
+      return;
+    }
+    vlog("WEB: %s", tr("server HTTP minimo non partito (porta occupata o memoria), uso il server completo"));
+  }
+  startHttpFull(port);
+}
 
 // Avvia i server solo quando la rete e gia inizializzata (chiamata dal task di rete)
 void webStart() {
   static bool started = false;
   if (started) return;
   started = true;
-  auto startHttp = [](uint16_t port) {
-    g_http = new PsychicHttpServer(port);
-    g_http->config.max_open_sockets = 3;               // basta per hotspot e portale automatico; HTTP e un server in piu, tiene poca RAM
-    g_http->config.lru_purge_enable = true;            // quando i collegamenti sono finiti chiude il piu vecchio invece di rifiutare il nuovo
-    g_http->maxRequestBodySize = 48 * 1024;
-    g_http->maxUploadSize = 4UL * 1024 * 1024;         // oltre questo la libreria risponde in inglese e chiude: i limiti veri li controllano le rotte (messaggi tradotti)
-    routes(g_http, false);
-    g_http->start();
-    g_runHttpPort = port;
-    vlog("WEB: server HTTP avviato sulla porta %u", (unsigned)port);
-  };
-  if (cfg.httpOn) startHttp(cfg.httpPort);
-  else vlog("WEB: HTTP spento (scelta dell'utente)");
+  // HTTPS per primo: la scelta del server HTTP dipende dal suo esito (g_tlsUp)
   if (cfg.https && tlsEnsure()) {
     g_https = new PsychicHttpsServer(cfg.httpsPort);
     g_https->ssl_config.httpd.max_open_sockets = 2;      // ogni connessione cifrata usa circa 40 KB di RAM
     g_https->ssl_config.httpd.lru_purge_enable = true;   // finiti i collegamenti chiude il piu vecchio invece di rifiutare il nuovo
     g_https->maxRequestBodySize = 48 * 1024;
     g_https->maxUploadSize = 4UL * 1024 * 1024;
-    g_https->setCertificate(tlsCertPem().c_str(), tlsKeyPem().c_str());
+    g_https->setCertificate(tlsCertPem(), tlsKeyPem());
     routes(g_https, true);
     g_tlsUp = g_https->start() == ESP_OK;
-    if (g_tlsUp) { g_runHttpsPort = cfg.httpsPort; vlog("WEB: HTTPS avviato sulla porta %u (impronta %s...)", (unsigned)cfg.httpsPort, tlsFingerprint().substring(0, 23).c_str()); }
+    if (g_tlsUp) { g_runHttpsPort = cfg.httpsPort; vlog("WEB: HTTPS avviato sulla porta %u (impronta %.23s...)", (unsigned)cfg.httpsPort, tlsFingerprint()); }
     else { vlog("WEB: HTTPS non partito, resta solo HTTP"); auditEvent(AUD_YELLOW, "httpsfail", tr("HTTPS non partito (memoria?): la pagina resta senza cifratura")); }
   }
-  if (!g_http && !g_tlsUp) startHttp(cfg.httpPort);      // mai chiusi fuori: se HTTPS non parte e HTTP era spento, parte HTTP
+  if (cfg.httpOn) startHttp(cfg.httpPort);
+  else vlog("WEB: HTTP spento (scelta dell'utente)");
+  if (!g_runHttpPort && !g_tlsUp) startHttp(cfg.httpPort);      // mai chiusi fuori: se HTTPS non parte e HTTP era spento, parte HTTP
 }
 
 bool webHttpsUp() { return g_tlsUp; }

@@ -5,7 +5,7 @@
 <p align="center">
   <img alt="License" src="https://img.shields.io/badge/license-GPL%20v3%20%2B%20commercial-3fa7ff">
   <img alt="Board" src="https://img.shields.io/badge/board-ESP32--S3-37e0b0">
-  <img alt="Arduino" src="https://img.shields.io/badge/Arduino%20IDE-esp32%20core%203.3.x-00979d">
+  <img alt="ESP-IDF" src="https://img.shields.io/badge/ESP--IDF-5.5-e7352c">
   <img alt="Status" src="https://img.shields.io/badge/status-in%20development-orange">
   <img alt="Languages" src="https://img.shields.io/badge/languages-it%20%C2%B7%20en%20%C2%B7%20es%20%C2%B7%20de-blueviolet">
 </p>
@@ -30,7 +30,7 @@ Wi-Fi, clock, files, LEDs, pins, a shell and much more, all protected by a passw
 </p>
 <p align="center"><sub>Screenshots of the control page (with sample data): Home in dark theme, Automations, startup order with the bottom terminal panel, and the phone layout.</sub></p>
 
-> **Status:** in development (version 1.7.45). The project grows in stages: see "Where we are going".
+> **Status:** in development (version 1.8.0b). The project grows in stages: see "Where we are going".
 
 ## Why "VesevOS"?
 
@@ -68,13 +68,18 @@ in radio silence when needed, or communicating in alternative ways.
 | 🌍 | **For everyone** | Italian, English, Spanish and German, and a new language is just one file. |
 | 🔋 | **Reliable and frugal** | Built to survive blackouts and to use little power, even on battery. |
 
-## What's new in 1.7.45
+## What's new in 1.8.0b
 
-- **Updates with no cable and no SD card**: from the user menu choose *Update firmware*, the board restarts into a small **recovery** with its own page, you upload the `.bin` file and VesevOS restarts with the new version. Before activating the file the recovery checks it is really a complete VesevOS firmware (header, marker, size, optional SHA-256): a wrong file does not spoil the one that works.
-- **Step-by-step guide** to prepare the board: [docs/PREPARE-THE-BOARD.md](docs/PREPARE-THE-BOARD.md).
-- **More free memory**: automations use RAM only if you created some (about 15 KB more); new `ram audit` command that tells where memory goes.
-- **API**: 129 routes (new `GET`/`POST /api/recovery`), documented in Italian and English ([docs/API.en.md](docs/API.en.md)).
-- The first install is done over the cable (once only, the guide explains how); after that you update from the page.
+- **Shell with classic commands**: `pwd`, `cd`, `ls`, prompt `user@hostname:folder$`, Tab, `man`, `whoami`, `id`, `df`, `uname`, `ping`, `gzip`/`unzip`/`tar`/`zip`, `cpu` and the `vesevos-*` commands (cpuinfo, services, bugreport, config, network, led_control, cleaner, drive_manager, backup, update).
+- **Serial login** with user, password and MFA code; roles for each subcommand; the password stays out of the history; suspend and power off with confirmation, `/api/sleep` for Admin only.
+- **LED triggers** (flash, wifi, cpu) and colors of your choice. On the LED/QR page the Admin is now recognized (1.8.0b fix).
+- **Minimal HTTP server** for the redirect to HTTPS (less RAM), fix for the panic after changing the host name, wider and editable watchdogs, CPU governor (ondemand/conservative/schedutil).
+- **Recovery 0.5.1**: the one-time token also works for a normal boot, new page, clearer access messages.
+- **[`firmware/`](firmware/LEGGIMI.md) folder**: ready-made firmware and recovery files (1.8.0b, Recovery 0.5.1 and 0.5.0) with SHA-256 and an `indice.json` list (the folder guide is in Italian).
+- **First-install page** in [`flash/`](flash/README.md): writes the board from the browser (Web Serial). **NOT TESTED with a real board**: try it first on a spare board.
+- Built only with ESP-IDF 5.5, no Arduino.
+- **Updates with no cable and no SD card** (since 1.7.45): from the user menu choose *Update via recovery*; the recovery checks the file is really a VesevOS firmware (header, marker, size, SHA-256) before activating it.
+- About origin checks: SHA-256 tells you the file is not corrupted, NOT who made it. There is no digital signature (for now): see [SECURITY.md](SECURITY.md).
 
 ## What it does today
 
@@ -110,34 +115,47 @@ These are ideas and plans, not promises: the order may change.
 - [ ] **Guided first-time setup** (language, password, country, Wi-Fi, time).
 - [ ] **SD card** and **Berry apps** confined to a "cage" on the SD card.
 - [ ] **Plug-and-play accessory catalog**: pick the sensor from a list and VesevOS shows how to wire it and installs what is needed.
-- [ ] **SD card** (1.8.0) and **OTA update from the page** (1.8.1).
+- [ ] **Update from the internet** of your choice (never automatic by default), with the firmware origin clearly shown.
 - [ ] **Radio silence mode** and **power saving** for solar-powered use.
 - [ ] **SSH** server.
 
 ## Requirements
 
 - An **ESP32-S3 SuperMini** board (ESP32-S3FH4R2: 4 MB flash, 2 MB PSRAM).
-- Arduino IDE with **esp32 core 3.3.x** or newer.
-- Libraries (Arduino IDE Library Manager): **PsychicHttp** (3.1.x, MIT), **ArduinoJson** (7.x, MIT) and **NimBLE-Arduino** (2.x, Apache-2.0).
+- **ESP-IDF 5.5** (VesevOS is pure ESP-IDF; 5.5.5 is used), installed in `~/esp/esp-idf`. Python 3 and a network connection the first time (the component manager downloads `mdns`, `esp_littlefs` and `esp-nimble-cpp`).
+- Components in the project (`idf/components` folder): **PsychicHttp** 3.1.2 (MIT, modified copy) and **aj_json** (ArduinoJson 7.x, MIT).
 - For cable-free updates: Python 3 and `esptool` (only for the first install, see the guide).
 - Bluetooth can be left out to save memory: `#define VOS_WITH_BLE 0` in `vos_common.h`.
 
-## Arduino IDE settings
+## Building (ESP-IDF 5.5)
+
+The ESP-IDF project lives in the `idf/` folder, **next to** the repository (not inside it): `main/` builds the sources in `VesevOS/src`
+and `idf/components/` carries PsychicHttp (modified copy) and aj_json. The recovery is a second project, `idf-recovery/`, which builds
+the sources in `recovery/VesevOS_Recovery_IDF/`.
+
+```
+export PATH=/usr/bin:$PATH
+. ~/esp/esp-idf/export.sh
+cd idf
+VOS_CFG=vesevos idf.py -B <build folder> build
+```
 
 | Item | Value |
 |---|---|
-| Board | ESP32S3 Dev Module |
-| PSRAM | QSPI PSRAM |
-| USB CDC On Boot | Enabled |
-| Partition Scheme | Huge APP (3MB No OTA/1MB SPIFFS) (only the compiler needs it: the real table is written by the install script) |
+| Board / chip | ESP32-S3, 4 MB flash, 2 MB PSRAM (QSPI) |
+| Partitions | nvs, otadata, `rec` (recovery, 1 MB, 0x10000), `app0` (VesevOS, 0x110000), `spiffs` (files) |
+| Firmware size limit | app0 = **2,424,832 bytes** (0x250000): the `.bin` must stay below it |
+| Configuration | `idf/sdkconfig.defaults.vesevos` (selected with `VOS_CFG=vesevos`) |
 
 ## Installation
 
-1. Download or clone the repository.
-2. Open the `VesevOS/` folder (it must contain `VesevOS.ino`) with Arduino IDE.
-3. Set the board as in the table.
-4. **Follow the guide [docs/PREPARE-THE-BOARD.md](docs/PREPARE-THE-BOARD.md)**: build the recovery and VesevOS, install them with the scripts in `recovery/` and open the serial monitor at 115200 baud.
-5. After the first install **do not use the IDE's Upload button**: update from the page (*Update firmware*).
+There are three ways (the first is the easiest for a new board):
+
+1. **First-install page** ([`flash/`](flash/README.md), enabled with GitHub Pages): connect the board with a browser that has the serial port (Web Serial), choose "Full installation" and press Write. It checks every file before writing. **NOT TESTED with a real board.**
+2. **Ready-made files in [`firmware/`](firmware/LEGGIMI.md)** with `esptool` (recovery at `0x10000`, firmware at `0x110000`) or, on a board that already runs VesevOS, from the *Update via recovery* menu (file from your computer, or URL + SHA-256 from `indice.json`). Always check the SHA-256.
+3. **Build it yourself**: set up ESP-IDF as above, build VesevOS (`idf/` folder) and the recovery (`idf-recovery/` folder, same command) and follow the guide [docs/PREPARE-THE-BOARD.md](docs/PREPARE-THE-BOARD.md).
+
+After the first install you update from the page (*Update via recovery*), with no cable. Back up before every update. Open the serial monitor at 115200 to see the hotspot name and password.
 
 ## First access
 
@@ -163,12 +181,15 @@ Do not hold it at power-up: the board would enter download mode. Everything is e
 ## Repository layout
 
 ```
-VesevOS/      Arduino sketch (VesevOS.ino + .h/.cpp files)
+VesevOS/      firmware sources (src/ by topic). The ESP-IDF project is in ../idf
 web/          web page in HTML (source of vos_page.h, gzip-compressed)
+firmware/     ready-made firmware and recovery files, with SHA-256 and indice.json (see firmware/LEGGIMI.md)
+flash/        first-install page for the browser (GitHub Pages; NOT TESTED)
+recovery/     recovery 0.5.1 on ESP-IDF (VesevOS_Recovery_IDF) and install scripts
 docs/         manual, known issues (KNOWN_ISSUES) and release guide (RELEASE_DEVELOPER), in Italian and English
 assets/       README banner and screenshots
 lang/         language files (en, es, de) - GENERATED from tools/lang_src.json; only Italian is inside the firmware
-licenses/     license texts (GPL, LGPL, Apache, MIT, BSD) and legal notice template
+licenses/     license texts (GPL, Apache, MIT, BSD) and legal notice template
 tools/        mkpage.py (page), mklang.py (languages), mklicense.py (legal texts), mkcommon.py (country list),
               stub/ (check every file without a board: compila.sh), data/ (country data source)
 NOTICE.txt    legal notes: ownership, licenses, regulatory references

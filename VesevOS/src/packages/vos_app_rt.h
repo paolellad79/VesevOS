@@ -5,7 +5,8 @@
 // (on_set) e i punti dei grafici. Nessun Berry qui: la parlano il task Berry (vos_berry.cpp) e il server web (via vos_app.cpp).
 // Una sola app alla volta. Accesso protetto da un mutex (task Berry e task web).
 #pragma once
-#include <Arduino.h>
+#include "../core/vos_errbuf.h"
+#include "../core/vos_heapbuf.h"
 #include "vos_app.h"
 
 #if VOS_WITH_BERRY
@@ -16,7 +17,7 @@
 void   rtInit(const AppInfo& a);                    // prepara i valori (controlli + [data]) e svuota la coda. Libera i grafici dell'app precedente.
 void   rtFree();                                    // libera i grafici
 bool   rtLoaded();
-String rtName();                                    // nome dell'app caricata
+bool   rtNameIs(const char* name);                  // l'app caricata si chiama cosi?
 
 // dal codice Berry (dev_get / dev_set)
 bool   rtGet(const char* id, bool& isNum, long& iv, char* sv, size_t n);                 // false = id sconosciuto
@@ -24,6 +25,6 @@ bool   rtSetApp(const char* id, bool isNum, long iv, const char* sv, const char*
 bool   rtPop(char* id, bool& isNum, long& iv, char* sv, size_t n);                       // prossimo comando dalla pagina (false = coda vuota)
 
 // dalla pagina
-bool   rtSetWeb(const String& id, const String& v, String& err);                         // valida, aggiorna il valore e mette in coda l'evento
-String rtValuesJson();                                                                   // [{"id":..,"n":..} | {"id":..,"s":".."} | {"id":..,"a":[..]}] dei controlli
+bool   rtSetWeb(const char* id, const char* v, ErrBuf& err);                             // valida, aggiorna il valore e mette in coda l'evento
+bool   rtValuesJson(HeapBuf& out);                                                       // false = manca la memoria o il tetto (out da buttare). [{"id":..,"n":..} | {"id":..,"s":".."} | {"id":..,"a":[..]}] dei controlli
 #endif

@@ -21,7 +21,7 @@ typedef bool boolean; typedef uint8_t byte;
 #include "Stream.h"
 struct EspClass{uint32_t getFreeHeap(){return 0;} uint32_t getHeapSize(){return 0;} uint32_t getMinFreeHeap(){return 0;} uint32_t getMaxAllocHeap(){return 0;} uint32_t getFreePsram(){return 0;} uint32_t getPsramSize(){return 0;} const char*getChipModel(){return "";} uint8_t getChipRevision(){return 0;} uint8_t getChipCores(){return 2;} const char*getSdkVersion(){return "";} const char*getCoreVersion(){return "";} void restart(){} uint32_t getFlashChipSize(){return 0;} uint32_t getCpuFreqMHz(){return 0;} uint64_t getEfuseMac(){return 0;} uint32_t getSketchSize(){return 0;} uint32_t getFreeSketchSpace(){return 0;}};
 extern EspClass ESP;
-unsigned long millis(); unsigned long micros(); void delay(unsigned long); uint32_t getCpuFrequencyMhz(); bool setCpuFrequencyMhz(uint32_t);
+unsigned long millis(); unsigned long micros(); void delay(unsigned long); void delayMicroseconds(uint32_t); uint32_t getCpuFrequencyMhz(); bool setCpuFrequencyMhz(uint32_t);
 void pinMode(uint8_t,uint8_t); void digitalWrite(uint8_t,uint8_t); int digitalRead(uint8_t); int analogRead(uint8_t); void yield();
 void enableLoopWDT(); void disableLoopWDT(); void feedLoopWDT();
 #define HIGH 1

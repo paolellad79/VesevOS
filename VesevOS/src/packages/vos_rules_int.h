@@ -3,6 +3,7 @@
 // VesevOS - vos_rules_int.h: tipi e stato delle Automazioni comuni a vos_rules.cpp e vos_rules_state.cpp (non usare altrove).
 #pragma once
 #include "vos_rules.h"
+#include <string>
 #include <time.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
@@ -26,7 +27,7 @@ struct Rule {
   uint8_t  ck;
   uint16_t c1, c2;       // fascia oraria (minuti)
   uint8_t  cmask;
-  String   acts;
+  std::string acts;      // azioni separate da ";"
   // stato in esecuzione
   uint32_t lastMs;
   int32_t  lastMin;

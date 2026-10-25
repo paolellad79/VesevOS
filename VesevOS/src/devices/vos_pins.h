@@ -3,7 +3,10 @@
 // VesevOS - vos_pins.h
 // Registro dei pin: chi usa quale pin (per la scheda "Pin").
 #pragma once
-#include <Arduino.h>
+#include <stdint.h>
+#include <string_view>
+#include "../core/vos_errbuf.h"
+#include "../core/vos_heapbuf.h"
 
 struct PinInfo {
   uint8_t gpio;
@@ -18,18 +21,18 @@ void   pinRelease(uint8_t gpio);
 int    pinCount();
 const PinInfo* pinAt(int i);
 bool   pinIsUsed(uint8_t gpio);
-String pinsJson();
+// I JSON si scrivono in un HeapBuf del chiamante (tetto PIN_JSON_MAX); false = manca la memoria o supera il tetto.
+#define PIN_JSON_MAX 12288
+bool   pinsJson(HeapBuf& out);
 
 // ---- Prova dei pin (un solo pin alla volta, si spegne da solo) ----
 // Se il pin non si puo provare, restituisce il motivo (gia tradotto); altrimenti nullptr.
 const char* pinTestBlock(int gpio);
 // action: "high" "low" "blink" "read" "off"; pull (solo per read): "up" "down" "none"
-bool   pinTestRequest(int gpio, const String& action, const String& pull, String& err);
+bool   pinTestRequest(int gpio, const char* action, const char* pull, ErrBuf& err);
 void   pinTestTick();          // da chiamare spesso (nel loop)
-String pinTestJson();          // pin in prova, azione, secondi rimasti, livello letto
-String pinMapJson();           // per ogni GPIO: provabile oppure no, e perche
-String pinNotesJson();           // inventario: {"5":"sensore porta",...}
-bool   pinNoteSet(int gpio, const String& name, String& err);   // nome libero ("collegato a"), vuoto = cancella
-String pinNotesJson();           // inventario: {"5":"sensore porta",...}
-bool   pinNoteSet(int gpio, const String& name, String& err);   // nome libero ("collegato a"), vuoto = cancella
-String pinBoardJson();         // chip, numero GPIO del chip, nome scheda (rilevamento automatico)
+bool   pinTestJson(HeapBuf& out);   // pin in prova, azione, secondi rimasti, livello letto
+bool   pinMapJson(HeapBuf& out);    // per ogni GPIO: provabile oppure no, e perche
+bool   pinNotesJson(HeapBuf& out);    // inventario: {"5":"sensore porta",...}
+bool   pinNoteSet(int gpio, std::string_view name, ErrBuf& err);   // nome libero ("collegato a"), vuoto = cancella
+bool   pinBoardJson(HeapBuf& out);  // chip, numero GPIO del chip, nome scheda (rilevamento automatico)

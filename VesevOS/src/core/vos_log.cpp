@@ -7,6 +7,9 @@
 #include "vos_diario.h"
 #include <stdarg.h>
 #include <time.h>
+#include "../drivers/vos_drv_time.h"
+#include "../drivers/vos_drv_heap.h"
+#include "../core/vos_clamp.h"
 
 #define LOG_LINES 150
 #define LOG_LEN   120
@@ -21,14 +24,14 @@ static SemaphoreHandle_t g_mx = NULL;
 void logInit() {
   if (!g_lines) {
     size_t n = (size_t)LOG_LINES * LOG_LEN;
-    void* p = psramFound() ? ps_malloc(n) : nullptr;
+    void* p = drvPsramMalloc(n);
     if (!p) p = malloc(n);
     if (p) { memset(p, 0, n); g_lines = (char (*)[LOG_LEN])p; }
   }
   if (!g_mx) g_mx = xSemaphoreCreateMutex();
 }
 
-void logSetLevel(int lv) { g_level = constrain(lv, 0, 3); }
+void logSetLevel(int lv) { g_level = vosClamp(lv, 0, 3); }
 int  logLevel() { return g_level; }
 
 // il livello si decide dall'INIZIO della riga (e un testo scelto dall'utente, come il nome della scheda, non puo alzarlo)
@@ -49,7 +52,7 @@ static void put(int lv, const char* buf) {
     if (now > 1700000000) {                       // ora valida: data e ora vere
       struct tm tmv; localtime_r(&now, &tmv);
       strftime(stamp, sizeof(stamp), "%d/%m %H:%M:%S ", &tmv);
-    } else snprintf(stamp, sizeof(stamp), "[%lus] ", (unsigned long)(millis() / 1000));
+    } else snprintf(stamp, sizeof(stamp), "[%lus] ", (unsigned long)(drvMillis() / 1000));
     static const char TAG[4] = {'E', 'W', 'I', 'D'};
     snprintf(g_lines[g_head], LOG_LEN, "%s[%c] %s", stamp, TAG[lv & 3], buf);
     g_head = (g_head + 1) % LOG_LINES;
@@ -75,22 +78,27 @@ void vlog(const char* fmt, ...) {
 void vlogl(int lv, const char* fmt, ...) {
   char buf[LOG_LEN - 4];
   va_list ap; va_start(ap, fmt); fmtClean(buf, sizeof(buf), fmt, ap); va_end(ap);
-  put(constrain(lv, 0, 3), buf);
+  put(vosClamp(lv, 0, 3), buf);
 }
 
-String logGet(int maxLines) {
-  String r;
+std::string logGet(int maxLines) {
+  std::string r;
   if (!g_mx || !g_lines) return r;
   if (xSemaphoreTake(g_mx, pdMS_TO_TICKS(100)) != pdTRUE) return r;
   int n = g_count < maxLines ? g_count : maxLines;
   int start = (g_head - n + LOG_LINES * 2) % LOG_LINES;
+  size_t total = 0;                                   // prima si misura, poi si prende la memoria una volta sola
+  for (int i = 0; i < n; i++) total += strlen(g_lines[(start + i) % LOG_LINES]) + 1;
+  r.reserve(total);
   for (int i = 0; i < n; i++) {
-    r += g_lines[(start + i) % LOG_LINES];
-    r += '\n';
+    r.append(g_lines[(start + i) % LOG_LINES]);
+    r.push_back('\n');
   }
   xSemaphoreGive(g_mx);
   return r;
 }
+
+int logCount() { return g_count; }
 
 void logClear() {
   if (!g_mx) return;

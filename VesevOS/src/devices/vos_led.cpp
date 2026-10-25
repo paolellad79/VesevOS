@@ -2,12 +2,17 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_led.cpp
 #include "vos_led.h"
+#include "../drivers/vos_drv_task.h"
 #include "../core/vos_config.h"
 #include "../core/vos_sys.h"
 #include "vos_pins.h"
+#include "vos_led_trigger.h"
 #include "../core/vos_log.h"
 #include "../core/vos_wd.h"
 #include <math.h>
+#include "../drivers/vos_drv_time.h"
+#include "../drivers/vos_drv_led.h"
+#include "../core/vos_clamp.h"
 
 static volatile NetState g_net = NET_BOOT;
 static volatile bool g_fault = false;
@@ -26,7 +31,7 @@ static float beat(uint32_t t, uint32_t period) {
 void ledSetNetState(NetState s) { g_net = s; }
 void ledSetFault(bool on) { g_fault = on; }
 static volatile uint32_t g_identUntil = 0;   // 0 = spento, altrimenti millis() di fine
-void ledIdentify(uint32_t ms) { g_identUntil = millis() + ms; if (!g_identUntil) g_identUntil = 1; }
+void ledIdentify(uint32_t ms) { g_identUntil = drvMillis() + ms; if (!g_identUntil) g_identUntil = 1; }
 void ledApplyConfig() { g_reconf = true; }
 static volatile bool g_setup = false;
 static volatile int g_alarm = 0, g_hold = 0;
@@ -55,7 +60,7 @@ static void put(uint8_t r, uint8_t g, uint8_t b, uint8_t bright) {
   uint16_t R = (uint16_t)r * bright / 255;
   uint16_t G = (uint16_t)g * bright / 255;
   uint16_t B = (uint16_t)b * bright / 255;
-  rgbLedWrite(g_pin, R, G, B);
+  drvLedWrite(g_pin, R, G, B);
 }
 
 static void stateColor(NetState s, uint8_t& r, uint8_t& g, uint8_t& b) {
@@ -68,8 +73,13 @@ static void stateColor(NetState s, uint8_t& r, uint8_t& g, uint8_t& b) {
   }
 }
 
+// I modi che mostrano lo stato di rete come colore di fondo (e quindi anche gli allarmi): stato, flash, wifi, cpu
+static bool stateBased(uint8_t mode) {
+  return mode == LED_STATE || mode == LED_FLASH || mode == LED_WIFI || mode == LED_CPU;
+}
+
 static void ledTask(void*) {
-  wdWatch("led", 10);
+  wdWatch("led", wdLimit("led"));                     // base 30 s
   for (;;) {
     wdBeat("led");
     if (g_reconf) {
@@ -77,7 +87,7 @@ static void ledTask(void*) {
       if (g_pin != cfg.ledPin) { pinRelease(g_pin); g_pin = cfg.ledPin; }
       pinClaim(g_pin, "LED", "LED RGB WS2812", g_pin == VOS_PIN_LED_RGB);
     }
-    uint32_t now = millis();
+    uint32_t now = drvMillis();
     // tasto BOOT tenuto premuto: il colore dice cosa succede se lo lasci ora (ha la precedenza su tutto)
     if (g_hold) {
       static const uint8_t HC[4][3] = {{0, 0, 0}, {0, 160, 255}, {255, 200, 0}, {255, 0, 0}};
@@ -114,11 +124,14 @@ static void ledTask(void*) {
       put(r, g, b, cfg.ledBrightness < 60 ? 60 : cfg.ledBrightness);
       vTaskDelay(pdMS_TO_TICKS(40)); continue;
     }
-    // allarmi della configurazione: lampo breve ogni 4 s (solo nel modo "stato")
-    if (g_alarm && cfg.ledMode == LED_STATE && (now % 4000) < 200) {
+    // allarmi della configurazione: lampo breve ogni 4 s (solo nei modi che mostrano lo stato)
+    if (g_alarm && stateBased(cfg.ledMode) && (now % 4000) < 200) {
       if (g_alarm >= 2) put(255, 0, 0, cfg.ledBrightness); else put(255, 110, 0, cfg.ledBrightness);
       vTaskDelay(pdMS_TO_TICKS(20)); continue;
     }
+    // lampi di attivita (modi flash e wifi): coprono il colore di fondo ma non gli allarmi; al massimo 3 al secondo
+    { uint8_t ar, ag, ab;
+      if (ledTrigOverlay(now, ar, ag, ab)) { put(ar, ag, ab, cfg.ledBrightness); vTaskDelay(pdMS_TO_TICKS(20)); continue; } }
     uint8_t r = 0, g = 0, b = 0;
     switch (cfg.ledMode) {
       case LED_OFF: put(0, 0, 0, 0); vTaskDelay(pdMS_TO_TICKS(20)); continue;
@@ -128,13 +141,14 @@ static void ledTask(void*) {
       case LED_HEARTBEAT:
         r = (cfg.ledColor >> 16) & 255; g = (cfg.ledColor >> 8) & 255; b = cfg.ledColor & 255;
         break;
-      default:
+      default:                                   // stato, flash, wifi, cpu: il fondo e il colore dello stato di rete
         stateColor(g_net, r, g, b);
         break;
     }
+    if (cfg.ledMode == LED_CPU) ledTrigCpuMix(r, g, b);       // carico sopra la soglia: il colore vira verso quello della CPU
     // battito: periodo piu corto se la CPU e piu carica
     int cpu = sysCpuPercent();
-    uint32_t period = 1600 - 11 * constrain(cpu, 0, 100);
+    uint32_t period = 1600 - 11 * vosClamp(cpu, 0, 100);
     float v = beat(now, period);
     uint8_t br = (uint8_t)(cfg.ledBrightness * (0.08f + 0.92f * v));
     put(r, g, b, br);
@@ -142,7 +156,10 @@ static void ledTask(void*) {
   }
 }
 
-static void ledStart() { g_reconf = true; xTaskCreatePinnedToCore(ledTask, "led", 3072, NULL, 1, NULL, 1); }
+static void ledStart() {
+  g_reconf = true;
+  drvTaskCreate(ledTask, "led", 3072, NULL, 1, NULL, DRV_CORE_ANY);   // core: automatico (prima: core 1 fisso)
+}
 
 void ledInit() {
   g_pin = cfg.ledPin;
@@ -154,5 +171,5 @@ void ledInit() {
 void ledShutdown() {
   TaskHandle_t h = xTaskGetHandle("led");
   if (h) vTaskDelete(h);
-  rgbLedWrite(g_pin, 0, 0, 0);
+  drvLedWrite(g_pin, 0, 0, 0);
 }

@@ -3,9 +3,11 @@
 // VesevOS - vos_service.h
 // STRATO SERVIZI: un solo modo di avviare, fermare e leggere lo stato di un servizio (Bluetooth oggi; ESP-NOW, MQTT... dopo).
 // Ogni servizio descrive se stesso con una ServiceOps e si iscrive con serviceRegister(). Pagina, shell e app usano solo queste funzioni.
-// Il servizio NON tocca l'hardware: lo fa un driver (vos_drv_*). Vedi claude/architettura/VesevOS-schema-strati.md.
+// Il servizio NON tocca l'hardware: lo fa un driver (vos_drv_*). Vedi docs/RELEASE_DEVELOPER.md.
 #pragma once
-#include <Arduino.h>
+#include "vos_errbuf.h"
+#include "vos_heapbuf.h"
+#include "../drivers/vos_drv_string.h"
 
 enum ServiceState : int { SVC_OFF = 0, SVC_ON = 1, SVC_ON_PROBLEM = 2, SVC_STARTING = 3, SVC_ERROR = 4 };
 
@@ -17,11 +19,11 @@ struct ServiceOps {
   uint8_t roleRead;        // ruolo minimo per leggere i dettagli
   uint8_t roleWrite;       // ruolo minimo per avviare/fermare
   int      (*state)();                      // ServiceState
-  bool     (*begin)(String& err);           // avvia (se e gia acceso: rinnova)
+  bool     (*begin)(ErrBuf& err);           // avvia (se e gia acceso: rinnova)
   void     (*stop)();                       // ferma
-  bool     (*restart)(String& err);         // nullptr = stop poi begin
-  String   (*json)();                       // dettagli (JSON)
-  bool     (*act)(const String& a, const String& arg, int role, String& out, String& err);   // nullptr = nessuna azione
+  bool     (*restart)(ErrBuf& err);         // nullptr = stop poi begin
+  bool     (*json)(HeapBuf& out);           // dettagli (JSON) in out; false = manca la memoria o supera il tetto
+  bool     (*act)(const char* a, const char* arg, int role, HeapBuf& out, ErrBuf& err);   // nullptr = nessuna azione
   uint32_t (*ramBytes)();                   // RAM usata adesso (stima), nullptr = non nota
 };
 
@@ -30,9 +32,9 @@ struct ServiceOps {
 bool               serviceRegister(const ServiceOps* s);        // false se pieno o id doppio
 int                serviceCount();
 const ServiceOps*  serviceAt(int i);
-const ServiceOps*  serviceFind(const String& id);
-int                serviceState(const String& id);               // SVC_OFF se sconosciuto
-bool               serviceStart(const String& id, String& err);
-bool               serviceStop(const String& id, String& err);   // false solo se sconosciuto
-bool               serviceRestart(const String& id, String& err);
-uint32_t           serviceRam(const String& id);
+const ServiceOps*  serviceFind(const char* id);
+int                serviceState(const char* id);               // SVC_OFF se sconosciuto
+bool               serviceStart(const char* id, ErrBuf& err);
+bool               serviceStop(const char* id, ErrBuf& err);   // false solo se sconosciuto
+bool               serviceRestart(const char* id, ErrBuf& err);
+uint32_t           serviceRam(const char* id);

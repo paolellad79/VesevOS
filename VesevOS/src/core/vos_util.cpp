@@ -2,31 +2,34 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_util.cpp
 #include "vos_util.h"
+#include "../drivers/vos_drv_sys.h"
 #include "vos_i18n.h"
+#include "vos_parse.h"
 #include "mbedtls/sha256.h"
 #include "esp_system.h"
 
-bool ipParse(const String& s, uint32_t& out) {
-  int parts[4]; int n = 0; int start = 0;
-  String t = s; t.trim();
-  if (t.length() < 7 || t.length() > 15) return false;
-  for (int i = 0; i <= (int)t.length(); i++) {
-    if (i == (int)t.length() || t[i] == '.') {
-      if (n >= 4 || i == start) return false;
-      String p = t.substring(start, i);
-      for (size_t k = 0; k < p.length(); k++) if (!isDigit(p[k])) return false;
-      int v = p.toInt();
-      if (v < 0 || v > 255) return false;
-      parts[n++] = v; start = i + 1;
+bool ipParse(std::string_view in, uint32_t& out) {
+  std::string_view t = trimView(in);
+  if (t.size() < 7 || t.size() > 15) return false;
+  uint32_t parts[4]; int n = 0; size_t start = 0;
+  for (size_t i = 0; i <= t.size(); i++) {
+    if (i < t.size() && t[i] != '.') continue;
+    if (n >= 4 || i == start) return false;
+    uint32_t v = 0;
+    for (size_t k = start; k < i; k++) {
+      if (!isdigit((unsigned char)t[k])) return false;
+      v = v * 10 + (uint32_t)(t[k] - '0');
+      if (v > 255) return false;
     }
+    parts[n++] = v; start = i + 1;
   }
   if (n != 4) return false;
-  out = ((uint32_t)parts[0] << 24) | ((uint32_t)parts[1] << 16) | ((uint32_t)parts[2] << 8) | (uint32_t)parts[3];
+  out = (parts[0] << 24) | (parts[1] << 16) | (parts[2] << 8) | parts[3];
   return true;
 }
 
-String ipToStr(uint32_t ip) {
-  return String((ip >> 24) & 255) + "." + String((ip >> 16) & 255) + "." + String((ip >> 8) & 255) + "." + String(ip & 255);
+void ipTo(uint32_t ip, char* out, size_t n) {
+  snprintf(out, n, "%u.%u.%u.%u", (unsigned)((ip >> 24) & 255), (unsigned)((ip >> 16) & 255), (unsigned)((ip >> 8) & 255), (unsigned)(ip & 255));
 }
 
 bool maskValid(uint32_t m) {
@@ -38,7 +41,8 @@ bool maskValid(uint32_t m) {
   return ones >= 8 && ones <= 30;
 }
 
-String uptimeStr(uint64_t s) {
+void uptimeTo(uint64_t s, char* b, size_t n) {
+  if (!b || !n) return;
   // 1 anno = 360 giorni, 1 mese = 30 giorni
   uint64_t y = s / (360ULL * 86400); s %= (360ULL * 86400);
   uint64_t mo = s / (30ULL * 86400); s %= (30ULL * 86400);
@@ -46,15 +50,20 @@ String uptimeStr(uint64_t s) {
   uint64_t h = s / 3600; s %= 3600;
   uint64_t mi = s / 60; s %= 60;
   // si mostrano solo le unita da quella piu grande non zero in poi
-  String r;
+  size_t len = 0;
+  b[0] = 0;
+  auto put = [&](uint64_t v, const char* unit, const char* sep) {
+    if (len >= n) return;
+    int w = snprintf(b + len, n - len, "%lu%s%s", (unsigned long)v, unit, sep);
+    if (w > 0) len += ((size_t)w < n - len) ? (size_t)w : n - len - 1;
+  };
   bool started = false;
-  if (y)               { r += String((unsigned long)y) + tr("a") + " "; started = true; }
-  if (started || mo)   { r += String((unsigned long)mo) + tr("m") + " "; started = true; }
-  if (started || d)    { r += String((unsigned long)d) + tr("g") + " "; started = true; }
-  if (started || h)    { r += String((unsigned long)h) + tr("h") + " "; started = true; }
-  if (started || mi)   { r += String((unsigned long)mi) + tr("min") + " "; }
-  r += String((unsigned long)s) + tr("s");
-  return r;
+  if (y)               { put(y, tr("a"), " "); started = true; }
+  if (started || mo)   { put(mo, tr("m"), " "); started = true; }
+  if (started || d)    { put(d, tr("g"), " "); started = true; }
+  if (started || h)    { put(h, tr("h"), " "); started = true; }
+  if (started || mi)   { put(mi, tr("min"), " "); }
+  put(s, tr("s"), "");
 }
 
 void durStr(uint64_t s, char* b, size_t n) {
@@ -66,87 +75,56 @@ void durStr(uint64_t s, char* b, size_t n) {
   else                snprintf(b, n, "%lu %s %lu %s %lu %s", d, tr("g"), h, tr("h"), m, tr("min"));
 }
 
-String cleanAscii(const String& s) {
-  String o; o.reserve(s.length());
-  for (size_t i = 0; i < s.length(); i++) {
-    unsigned char c = (unsigned char)s[i];
+size_t cleanAscii(std::string_view in, char* out, size_t cap) {
+  if (!out || !cap) return 0;
+  size_t w = 0;
+  for (char ch : in) {
+    unsigned char c = (unsigned char)ch;
     if (c == '\r') continue;                      // a-capo di Windows: si toglie
-    if (c == '\n' || c == '\t' || (c >= 32 && c < 127)) o += (char)c;
-    else o += '?';
+    if (w + 1 >= cap) break;
+    out[w++] = (c == '\n' || c == '\t' || (c >= 32 && c < 127)) ? (char)c : '?';
   }
-  return o;
+  out[w] = 0;
+  return w;
 }
 
-String jsonEscape(const String& s) {
-  String o; o.reserve(s.length() + 8);
-  for (size_t i = 0; i < s.length(); i++) {
-    unsigned char c = (unsigned char)s[i];
-    if (c == '"') o += "\\\"";
-    else if (c == '\\') o += "\\\\";
-    else if (c == '\n') o += "\\n";
-    else if (c == '\r') o += "\\r";
-    else if (c == '\t') o += "\\t";
-    else if (c < 32 || c >= 127) o += '?';
-    else o += (char)c;
-  }
-  return o;
-}
-
-String sha256Hex(const String& s) {
-  unsigned char out[32];
+void sha256HexOf(std::string_view data, char out[65]) {
+  unsigned char h[32];
   mbedtls_sha256_context ctx;
   mbedtls_sha256_init(&ctx);
   mbedtls_sha256_starts(&ctx, 0);
-  mbedtls_sha256_update(&ctx, (const unsigned char*)s.c_str(), s.length());
-  mbedtls_sha256_finish(&ctx, out);
+  mbedtls_sha256_update(&ctx, (const unsigned char*)data.data(), data.size());
+  mbedtls_sha256_finish(&ctx, h);
   mbedtls_sha256_free(&ctx);
-  return hexOf(out, 32);
-}
-
-String hexOf(const uint8_t* b, size_t n) {
   static const char* hx = "0123456789abcdef";
-  String r; r.reserve(n * 2);
-  for (size_t i = 0; i < n; i++) { r += hx[b[i] >> 4]; r += hx[b[i] & 15]; }
-  return r;
+  for (int i = 0; i < 32; i++) { out[i * 2] = hx[h[i] >> 4]; out[i * 2 + 1] = hx[h[i] & 15]; }
+  out[64] = 0;
 }
 
-bool utilNameOk(const String& n) {
-  if (n.length() < 1 || n.length() > 24) return false;
-  for (size_t i = 0; i < n.length(); i++) { char c = n[i]; if (!((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_')) return false; }
+bool utilNameOk(const char* s, size_t n) {
+  if (n < 1 || n > 24) return false;
+  for (size_t i = 0; i < n; i++) { char c = s[i]; if (!((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_')) return false; }
   return true;
 }
 
-bool utilLineErr(String& err, int line, const char* msg) { err = String(trf("Riga %d: ", line)) + msg; return false; }
+bool utilLineErr(ErrBuf& err, int line, const char* msg) { err.setf(tr("Riga %d: "), line); err.append(msg); return false; }
 
-String randomHex(int bytes) {
-  static const char* hx = "0123456789abcdef";
-  String r; r.reserve(bytes * 2);
-  for (int i = 0; i < bytes; i++) {
-    uint8_t b = esp_random() & 0xFF;
-    r += hx[b >> 4]; r += hx[b & 15];
-  }
-  return r;
-}
-
-static bool labelValid(const String& l) {
-  if (l.length() < 1 || l.length() > 32) return false;
-  if (l[0] == '-' || l[l.length() - 1] == '-') return false;
-  for (size_t i = 0; i < l.length(); i++) {
-    char c = l[i];
-    if (!(isAlphaNumeric(c) || c == '-')) return false;
-  }
+static bool labelValid(std::string_view l) {
+  if (l.size() < 1 || l.size() > 32) return false;
+  if (l.front() == '-' || l.back() == '-') return false;
+  for (char c : l) if (!(isalnum((unsigned char)c) || c == '-')) return false;
   return true;
 }
 
-bool hostnameValid(const String& s) { return labelValid(s); }
+bool hostnameValid(std::string_view s) { return labelValid(s); }
 
-bool domainValid(const String& s) {
-  if (s.length() == 0) return true;
-  if (s.length() > 60) return false;
-  int start = 0;
-  for (int i = 0; i <= (int)s.length(); i++) {
-    if (i == (int)s.length() || s[i] == '.') {
-      if (!labelValid(s.substring(start, i))) return false;
+bool domainValid(std::string_view s) {
+  if (s.empty()) return true;
+  if (s.size() > 60) return false;
+  size_t start = 0;
+  for (size_t i = 0; i <= s.size(); i++) {
+    if (i == s.size() || s[i] == '.') {
+      if (!labelValid(s.substr(start, i - start))) return false;
       start = i + 1;
     }
   }
@@ -155,27 +133,30 @@ bool domainValid(const String& s) {
 
 // F1 (1.7.9a): un argomento e una parola, oppure un testo tra virgolette doppie ("Casa mia").
 // Dentro le virgolette \" vale una virgoletta. Se manca la virgoletta finale si prende tutto fino alla fine.
-bool utilTakeArg(const String& s, int& pos, String& out) {
-  out = "";
-  int n = (int)s.length();
+bool utilTakeArg(std::string_view s, int& pos, char* out, size_t cap) {
+  size_t w = 0;
+  auto put = [&](char c) { if (w + 1 < cap) out[w++] = c; };      // oltre la capacita si scarta
+  if (cap) out[0] = 0;
+  int n = (int)s.size();
   while (pos < n && s[pos] == ' ') pos++;
   if (pos >= n) return false;
   if (s[pos] == '"') {
     pos++;
     while (pos < n && s[pos] != '"') {
-      if (s[pos] == '\\' && pos + 1 < n && s[pos + 1] == '"') { out += '"'; pos += 2; continue; }
-      out += s[pos++];
+      if (s[pos] == '\\' && pos + 1 < n && s[pos + 1] == '"') { put('"'); pos += 2; continue; }
+      put(s[pos++]);
     }
     if (pos < n) pos++;                       // salta la virgoletta finale
-    return true;
+  } else {
+    while (pos < n && s[pos] != ' ') put(s[pos++]);
   }
-  while (pos < n && s[pos] != ' ') out += s[pos++];
+  if (cap) out[w] = 0;
   return true;
 }
 
-bool utilHostOk(const String& s) {
-  if (s.length() < 1 || s.length() > 60) return false;
-  for (size_t i = 0; i < s.length(); i++) { char ch = s[i]; if (!((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '.' || ch == '-')) return false; }
+bool utilHostOk(std::string_view s) {
+  if (s.size() < 1 || s.size() > 60) return false;
+  for (char ch : s) { if (!((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '.' || ch == '-')) return false; }
   return true;
 }
 
@@ -195,49 +176,47 @@ uint32_t utilStackSpare(uint32_t total, uint32_t freeMin) {
   return ((freeMin - keep) / 256U) * 256U;
 }
 
-// Riga in digitazione sulla seriale. Il terminale non cancella da solo: serve rimandargli "\b \b" per ogni carattere tolto.
-// Le sequenze ESC (frecce, Canc, Home...) non devono finire nella riga come lettere: ESC [ ... lettera -> scartata.
-bool utilEditKey(String& buf, uint8_t& esc, char ch, String& echo, size_t maxLen) {
-  echo = "";
-  if (esc == 1) { esc = (ch == '[') ? 2 : (ch == 'O') ? 3 : 0; return true; }
-  if (esc == 2) { if ((uint8_t)ch >= 0x40 && (uint8_t)ch <= 0x7E) esc = 0; return true; }
-  if (esc == 3) { esc = 0; return true; }
-  if (ch == 27) { esc = 1; return true; }
-  if (ch == 8 || ch == 127) { if (buf.length()) { buf.remove(buf.length() - 1); echo = "\b \b"; } return true; }
-  if (ch == 21 || ch == 3) { for (size_t i = 0; i < buf.length(); i++) echo += "\b \b"; buf = ""; return true; }
-  if (ch >= 32 && ch < 127) { if (buf.length() < maxLen) { buf += ch; echo = String(ch); } return true; }
-  return false;
-}
-
 // ---------- SVG ammesso: solo forme semplici (icone delle app e delle schede modulo) ----------
-static bool svgTagAllowed(const String& t) {
-  static const char* ok[] = {"svg", "g", "path", "circle", "rect", "ellipse", "line", "polyline", "polygon", "title"};
-  for (const char* o : ok) if (t == o) return true;
+static char lc(char c) { return (c >= 'A' && c <= 'Z') ? (char)(c + 32) : c; }
+static bool lcEq(std::string_view v, const char* lit) {            // uguale a lit, senza badare alle maiuscole
+  size_t n = strlen(lit);
+  if (v.size() != n) return false;
+  for (size_t i = 0; i < n; i++) if (lc(v[i]) != lit[i]) return false;
+  return true;
+}
+static bool lcHas(std::string_view v, const char* lit) {           // contiene lit, senza badare alle maiuscole
+  size_t n = strlen(lit);
+  for (size_t i = 0; i + n <= v.size(); i++) if (lcEq(v.substr(i, n), lit)) return true;
   return false;
 }
-bool utilSvgSafe(const String& svg, size_t maxLen) {
-  if (svg.length() < 10 || svg.length() > maxLen) return false;
-  String l = svg; l.toLowerCase();
-  if (!l.startsWith("<svg") || !l.endsWith("</svg>")) return false;
+static bool svgTagAllowed(std::string_view t) {
+  static const char* ok[] = {"svg", "g", "path", "circle", "rect", "ellipse", "line", "polyline", "polygon", "title"};
+  for (const char* o : ok) if (lcEq(t, o)) return true;
+  return false;
+}
+bool utilSvgSafe(std::string_view l, size_t maxLen) {
+  if (l.size() < 10 || l.size() > maxLen) return false;
+  if (!lcEq(l.substr(0, 4), "<svg") || !lcEq(l.substr(l.size() - 6), "</svg>")) return false;
   static const char* bad[] = {"script", "href", "url(", "data:", "style", "@import", "&", "<!", "<?", "expression", "base64", "xlink"};
-  for (const char* b : bad) if (l.indexOf(b) >= 0) return false;
-  size_t i = 0, n = l.length();
+  for (const char* b : bad) if (lcHas(l, b)) return false;
+  size_t i = 0, n = l.size();
   int tags = 0;
   while (i < n) {
     if (l[i] != '<') { i++; continue; }
     size_t j = i + 1; bool closing = false;
     if (j < n && l[j] == '/') { closing = true; j++; }
-    String name;
-    while (j < n && l[j] != ' ' && l[j] != '/' && l[j] != '>' && l[j] != '\n' && l[j] != '\t' && l[j] != '\r') { name += l[j]; j++; }
-    if (!svgTagAllowed(name) || ++tags > 60) return false;
+    size_t n0 = j;
+    while (j < n && l[j] != ' ' && l[j] != '/' && l[j] != '>' && l[j] != '\n' && l[j] != '\t' && l[j] != '\r') j++;
+    if (!svgTagAllowed(l.substr(n0, j - n0)) || ++tags > 60) return false;
     if (closing) { while (j < n && l[j] != '>') j++; i = j + 1; continue; }
     // attributi: nessun nome che inizi per "on" (onclick, onload...)
     while (j < n && l[j] != '>') {
       while (j < n && (l[j] == ' ' || l[j] == '\n' || l[j] == '\t' || l[j] == '\r' || l[j] == '/')) j++;
       if (j >= n || l[j] == '>') break;
-      String an;
-      while (j < n && l[j] != '=' && l[j] != ' ' && l[j] != '>' && l[j] != '/' && l[j] != '\n' && l[j] != '\t' && l[j] != '\r') { an += l[j]; j++; }
-      if (an.startsWith("on") || an.length() == 0) return false;
+      size_t a0 = j;
+      while (j < n && l[j] != '=' && l[j] != ' ' && l[j] != '>' && l[j] != '/' && l[j] != '\n' && l[j] != '\t' && l[j] != '\r') j++;
+      std::string_view an = l.substr(a0, j - a0);
+      if (an.empty() || (an.size() >= 2 && lc(an[0]) == 'o' && lc(an[1]) == 'n')) return false;
       if (j < n && l[j] == '=') {
         j++;
         if (j < n && (l[j] == '"' || l[j] == '\'')) { char q = l[j++]; while (j < n && l[j] != q) j++; if (j >= n) return false; j++; }

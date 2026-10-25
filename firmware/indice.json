@@ -1,0 +1,50 @@
+{
+ "schema_version": 1,
+ "updated": "2026-10-25",
+ "description": "Elenco dei firmware VesevOS pubblicati. 'official' e 'publisher' sono scritte non firmate: lo SHA-256 dice solo che il file non e rotto.",
+ "items": [
+  {
+   "id": "firmware-1.8.0b",
+   "type": "firmware",
+   "version": "1.8.0b",
+   "channel": "official",
+   "publisher": "Domenico Paolella",
+   "date": "2026-10-25",
+   "size": 2212400,
+   "sha256": "fe92d4faa785b6851958df497ff18c57197e002e594968a54dd22b71518a23d3",
+   "file": "1.8.0b/VesevOS-1.8.0b.bin",
+   "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/1.8.0b/VesevOS-1.8.0b.bin",
+   "board": "ESP32-S3",
+   "min_recovery": "0.5.0",
+   "notes": "Shell, login seriale con ruoli, comandi vesevos-*, LED con trigger. Senza Arduino (ESP-IDF 5.5)."
+  },
+  {
+   "id": "recovery-0.5.1",
+   "type": "recovery",
+   "version": "0.5.1",
+   "channel": "official",
+   "publisher": "Domenico Paolella",
+   "date": "2026-10-23",
+   "size": 873200,
+   "sha256": "2aab7f6650705766ef3c7deec7062410358dde724fbb71f0d5b7ba2dde3d9986",
+   "file": "recovery/0.5.1/VesevOS-Recovery-0.5.1.bin",
+   "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/recovery/0.5.1/VesevOS-Recovery-0.5.1.bin",
+   "board": "ESP32-S3",
+   "notes": "Gettone valido anche per l'avvio, pagina nuova, messaggi di accesso piu chiari."
+  },
+  {
+   "id": "recovery-0.5.0",
+   "type": "recovery",
+   "version": "0.5.0",
+   "channel": "official",
+   "publisher": "Domenico Paolella",
+   "date": "2026-10-22",
+   "size": 872144,
+   "sha256": "e6af0c8244068f4fc4547092ff65c06b6f131eed4382dd592bc019f34306df86",
+   "file": "recovery/0.5.0/VesevOS-Recovery-0.5.0.bin",
+   "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/recovery/0.5.0/VesevOS-Recovery-0.5.0.bin",
+   "board": "ESP32-S3",
+   "notes": "Primo recovery ESP-IDF puro: ordini di aggiornamento modo 1 (URL+SHA) e modo 2 (file dal computer)."
+  }
+ ]
+}

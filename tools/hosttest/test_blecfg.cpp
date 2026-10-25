@@ -11,7 +11,7 @@
 static int g_reconf = 0, g_apply = 0;
 void netReconfigure() { g_reconf++; }
 String netIpString() { return "192.168.1.50"; }
-bool regionValid(const String& c) { return c == "IT" || c == "DE"; }
+bool regionValid(const char* c) { return c && (strcmp(c, "IT") == 0 || strcmp(c, "DE") == 0); }
 void timeApply() { g_apply++; }
 
 int main() {
@@ -46,8 +46,8 @@ int main() {
   r = bleCfgRun("name nome non valido", stop); CHECK(r != "ok" && cfg.hostname == "casa1");
   // mesh
   String k = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
-  r = bleCfgRun("mesh 1 " + k, stop); CHECK(r == "ok" && cfg.meshRole == 1 && cfg.meshKey == k);
-  r = bleCfgRun("mesh 3 " + k, stop); CHECK(r != "ok" && cfg.meshRole == 1);
+  r = bleCfgRun(("mesh 1 " + k).c_str(), stop); CHECK(r == "ok" && cfg.meshRole == 1 && cfg.meshKey == k);
+  r = bleCfgRun(("mesh 3 " + k).c_str(), stop); CHECK(r != "ok" && cfg.meshRole == 1);
   r = bleCfgRun("mesh 2 abc", stop); CHECK(r != "ok" && cfg.meshRole == 1);
   // sconosciuto
   r = bleCfgRun("reboot", stop); CHECK(r.indexOf("sconosciuto") >= 0 && !stop);

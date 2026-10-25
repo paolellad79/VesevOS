@@ -1,4 +1,4 @@
-# VesevOS 1.7.45 - Manuale
+# VesevOS 1.8.0b - Manuale (i capitoli 1-26 descrivono la 1.7.45-1.7.60; le novita successive sono nel capitolo 27 e nel CHANGELOG)
 
 Manuale per chi usa la scheda. Parole semplici, niente programmazione.
 English version: [manual.en.md](manual.en.md). Lo stesso aiuto e nella pagina della scheda (Informazioni > Aiuto, oppure `http://192.168.4.1/#aiuto`).
@@ -31,7 +31,7 @@ Ogni scheda VesevOS, la prima volta che si accende, inventa da sola una password
 7. Il **QR** della Wi-Fi della scheda (e la stampa dell'etichetta) e in **Rete > Punto di accesso**, con nome e password. Stampa l'etichetta e attaccala sotto la scheda.
    Il banner con la password dell'hotspot sulla seriale resta finche la guida non e finita (anche se riapri il monitor).
 
-Senza Arduino IDE va bene qualsiasi programma per porta seriale (PuTTY, screen, app "Serial USB Terminal" con cavo OTG).
+Va bene qualsiasi programma per porta seriale (PuTTY, screen, app "Serial USB Terminal" con cavo OTG).
 Il QR non viene disegnato sulla seriale (nei monitor seriali spesso non si legge): e solo nella pagina Punto di accesso. La configurazione si puo fare anche solo da seriale (capitolo 13).
 
 ### Metodo 2: scheda preparata da un altro
@@ -149,7 +149,7 @@ del paese non si superano; (3) niente password uguali per tutti.
 ## 13. Configurazione solo da seriale
 Senza pagina web: apri il monitor seriale (115200) e scrivi `setup`. Chiede: lingua, paese, nome, antenna, hotspot (mostra la password,
 `n` = nuova), password dell'amministratore (si vede mentre scrivi: fallo in un luogo sicuro), Wi-Fi di casa (elenco numerato), ora.
-Invio = tieni il valore, `skip` = salta, `quit` = esci. Comandi singoli: `lang`, `locale country XX`, `hostname`, `wifi set <rete> [password]` (con spazi: `wifi set "Casa mia" password`),
+Invio = tieni il valore, `skip` = salta, `quit` = esci. Comandi singoli: `lang`, `region country XX` (`locale` resta valido), `hostname`, `wifi set <rete> [password]` (con spazi: `wifi set "Casa mia" password`),
 `wifi off`, `ntp on|off`, `ntp server <nome>`, `ntp server2 <nome|off>`, `date set AAAA-MM-GG HH:MM`, `svc ap|captive|http|https on|off`, `svc http-port N`, `svc https-port N`, `ap new`.
 Dopo la guida valgono le regole di sicurezza (seriale con password, se acceso).
 
@@ -220,7 +220,7 @@ Sulla scheda ci sono due programmi: **VesevOS** e il **recovery** (piccolo, serv
 2. La pagina aspetta che la scheda riparta e **apre da sola** il recovery (di solito in pochi secondi; "Apri ora" per anticipare). Se non ci riesce, ti mostra l'indirizzo, per esempio `http://192.168.1.50:80/`: aprilo in una **finestra privata** e scrivi **http**, non https (il recovery non e cifrato).
    Il recovery prova prima la **rete di casa**; se in 30 secondi non la trova crea la rete Wi-Fi `VesevOS-recovery` (password casuale scritta sulla seriale).
 3. Entra con utente e password di un **Amministratore** di VesevOS (la password non viaggia in chiaro). Con la flash vuota, e senza amministratori, serve il codice a 8 cifre mostrato sulla seriale. Cinque errori = attesa di 60 secondi.
-4. Scegli il file `VesevOS.ino.bin` (non il `.merged.bin`). *SHA-256 atteso* e facoltativo: se lo scrivi, il file deve coincidere.
+4. Scegli il file `.bin` del firmware (non il `.merged.bin`). *SHA-256 atteso* e facoltativo: se lo scrivi, il file deve coincidere.
 5. Scegli il file con il pulsante oppure **trascinalo** sulla pagina (dal telefono solo il pulsante). *Carica e installa*. Prima la pagina e poi la scheda controllano: intestazione per ESP32-S3, **marchio VesevOS**, dimensione, immagine completa. Se il file e sbagliato viene rifiutato e **il vecchio firmware non si tocca**; se l'errore arriva a scrittura iniziata, il recovery resta acceso e basta ricaricare il file buono.
 6. Il **LED** della scheda dice lo stato: arancione lento = attesa del file; azzurro veloce = scrittura in corso; verde fisso = finito; rosso = errore (dopo 10 secondi torna arancione). Dopo circa 10 secondi VesevOS riparte. *Avvia VesevOS senza aggiornare* torna indietro. Dopo 15 minuti senza accessi il recovery torna da solo a VesevOS. Tasto BOOT premuto all'accensione = resta nel recovery.
 - Il controllo del file garantisce che e un firmware VesevOS completo; **non e una firma digitale**. Scarica i file solo da fonti fidate.
@@ -231,7 +231,7 @@ Sulla scheda ci sono due programmi: **VesevOS** e il **recovery** (piccolo, serv
 - **Pin controllati**: la scheda rifiuta USB (19, 20), BOOT (0), LED RGB (48), pin di avvio (3, 45, 46), pin che non esistono o gia usati. L'analogico funziona solo sui pin 1-10. (Numeri della SuperMini: vengono dal file di scheda del firmware, e la pagina li mostra da li.)
 - **Attivo basso**: per i moduli rele che si accendono con livello 0.
 - **Sicurezza**: dopo ogni riavvio, dopo un crash o in modalita ridotta del watchdog tutte le uscite sono **spente**. Il rele lo comanda solo l'Amministratore (operatore e app solo se l'Admin ha dato il permesso) e cambia al massimo una volta al secondo. Un rele collegato alla rete elettrica (230 V) richiede un modulo a norma e un installatore: VesevOS comanda solo il segnale.
-- **Comandi**: pagina; shell `io list`, `io add rele 5 [nome] [inv]`, `io del <nome>`, `io rename <nome> <nuovo>`, `io set <nome> 1`, `io get <nome>`; `dev on|off <nome>` e `dev act <nome> set 1`.
+- **Comandi**: pagina; shell `io list`, `io add relay 5 [nome] [inv]` (`rele` resta valido), `io del <nome>`, `io rename <nome> <nuovo>`, `io set <nome> 1`, `io get <nome>`; `dev on|off <nome>` e `dev act <nome> set 1`.
 - **Nelle app**: scrivi il nome in `use=` (per esempio `use=rele1,in1`); poi `dev_set("rele1", 1)` e `dev_get("in1")` (ingresso: 0/1, analogico: 0-4095). Senza il nome in `use=` l'app si ferma con "permesso mancante".
 - **Elenco dispositivi**: le periferiche create compaiono sotto *Periferiche*.
 
@@ -240,7 +240,7 @@ Sulla scheda ci sono due programmi: **VesevOS** e il **recovery** (piccolo, serv
 - **Scheda modulo (.vdp)**: file di testo con la descrizione di un modulo (classe, segnali, icona, schema SVG). Contiene solo dati. Cartella `/devs`. Nel Progetto/GitHub trovi esempi in `docs/devs` (rele a 1, 2 e 4 canali, LED, pulsante, sensore PIR, LDR).
 - **Come si usa**: Periferiche > *Carica scheda modulo*, poi *Installa*: la scheda mostra lo schema, propone i pin liberi e sicuri, e crea le periferiche (tutto o niente). Il nome si puo scegliere (pompa1, pompa2...).
 - **Schema dei collegamenti (novita 1.7.57)**: lo disegna la pagina dai dati della scheda. A sinistra la scheda con i pin (5V o 3V3, GND, GPIO proposti), a destra il modulo. Fili colorati: **rosso** alimentazione, **nero** massa, **blu** segnale (arancione se analogico), con la **tensione scritta** sul filo e una freccia per la direzione. Resistenze e altri componenti da aggiungere sono disegnati con il valore (es. 330 ohm in serie al LED). Sotto c'e una tabella filo / dalla scheda / al modulo / tensione e note: i colori sono scritti anche a parole. Alimentazioni a 12, 24 o 230 V mostrano un riquadro "Alimentatore": unisci la sua massa a GND della scheda. Se il segnale del modulo e a 5 V su un ingresso compare un avviso rosso: i pin reggono solo 3,3 V.
-- **Per chi scrive schede**: nel file `[module]` si aggiungono `level=3V3|5V` (livello del segnale) e fino a 4 righe `part=serie|gnd|vcc,valore,segnale` (per esempio `part=serie,330 ohm,OUT`). La sezione `[wiring]` non serve piu: se c'e, si vede sotto come "Disegno allegato al file". Formato completo: claude/funzioni/VesevOS-formato-vdp.md nel Progetto.
+- **Per chi scrive schede**: nel file `[module]` si aggiungono `level=3V3|5V` (livello del segnale) e fino a 4 righe `part=serie|gnd|vcc,valore,segnale` (per esempio `part=serie,330 ohm,OUT`). La sezione `[wiring]` non serve piu: se c'e, si vede sotto come "Disegno allegato al file". Formato completo: nella documentazione interna del formato .vdp.
 - **Seriale**: `mod list`, `mod info <nome>`, `mod install <nome> [prefisso]`, `mod del <nome>`.
 - **Attenzione**: controlla sempre i collegamenti sul datasheet del tuo modulo. Uno schema sbagliato puo danneggiare il modulo. Per i 230 V serve un installatore.
 
@@ -264,3 +264,12 @@ Sulla scheda ci sono due programmi: **VesevOS** e il **recovery** (piccolo, serv
 - **Esempio**: `docs/esempi/app/logmqtt.vap` (copialo in /apps): un pulsante e un interruttore "ogni ora" che mandano le ultime 10 righe su `<prefisso>/app/log`.
 - **Esempio torcia**: `docs/esempi/script/torcia.vsc` (copialo in /scripts e avvialo). Un click del tasto BOOT accende il LED bianco, il click dopo lo spegne; si spegne anche da solo dopo 10 minuti (cambi `MINUTI`, 0 = mai). Prima metti **Libero** sul gesto che vuoi usare in *Dispositivi > Tasto BOOT* (di fabbrica sono liberi solo i 3 click). Il LED bianco e forte e scalda.
 - **Privacy**: il registro puo contenere indirizzi IP e nomi. Chi installa l'app (solo Amministratore) decide con `logread` e `mqtt` se puo leggerlo e mandarlo fuori. Se il broker e fuori casa, usa MQTT cifrato (utente e password) e scegli tu chi riceve i dati.
+
+## 27. Novita della 1.8.0 e 1.8.0b (riassunto)
+- **Seriale con accesso**: la shell chiede utente, password e codice MFA; ruoli per ogni sottocomando; la password non resta nella cronologia. Dopo troppi errori scatta lo stesso blocco della pagina web.
+- **Comandi**: `pwd`, `cd`, `ls`, prompt `utente@hostname:cartella$`, Tab, `man <comando>`, `whoami`, `id`, `df`, `uname`, `time`, `ping`, `gzip`/`gunzip`/`zcat`, `zip`/`unzip`, `tar`, `cpu` (governor: 80/160/240/ondemand/conservative/schedutil), e i comandi `vesevos-*` (cpuinfo, services, bugreport, config, network, led_control, cleaner, drive_manager, backup, update).
+- **Sicurezza**: `suspend`, `poweroff` e `/api/sleep` solo per l'Admin, con conferma. `locale country/tx/antenna`, `wifi set/off`, `date set` e `audit ack` sono vietati all'Operatore.
+- **LED**: trigger `none/state/heartbeat/flash/wifi/cpu/default-on`, colori e soglia della CPU.
+- **Rete**: con il redirect HTTP->HTTPS acceso e HTTPS attivo, la porta HTTP e servita da un piccolo server che risponde solo il redirect (meno RAM; vale al riavvio dei server).
+- **Aggiornamenti**: menu *Aggiorna tramite recovery* (solo Admin); file pronti, SHA-256 e `indice.json` nella cartella `firmware/` del repository; prima installazione dal browser con la pagina `flash/` (NON PROVATA con una scheda reale). Non c'e una firma digitale: lo SHA-256 dice che il file non e rotto, non chi lo ha fatto.
+- Questa e una sintesi: i dettagli e le prove ancora da fare sono nel CHANGELOG e in `docs/KNOWN_ISSUES.md`.

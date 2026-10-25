@@ -1,10 +1,21 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_drv_ota.cpp
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 #include "vos_drv_ota.h"
 #include <esp_partition.h>
 #include <esp_ota_ops.h>
+#include <esp_image_format.h>
 #include "vos_drv_nvs.h"
+
+void drvOtaConfirmBoot() {
+  const esp_partition_t* run = esp_ota_get_running_partition();
+  esp_ota_img_states_t state;
+  if (run && esp_ota_get_state_partition(run, &state) == ESP_OK && state == ESP_OTA_IMG_PENDING_VERIFY) {
+    esp_ota_mark_app_valid_cancel_rollback();
+  }
+}
 
 static const esp_partition_t* recPart() {
   return esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
@@ -63,4 +74,48 @@ int drvRecoveryWrite(const uint8_t* d, uint32_t n) {
     if (esp_partition_read(p, o, b, k) != ESP_OK || memcmp(b, d + o, k) != 0) return REC_W_VERIFY;
   }
   return REC_W_OK;
+}
+
+uint32_t drvSketchSize() {
+  const esp_partition_t* run = esp_ota_get_running_partition();
+  if (!run) return 0;
+  esp_partition_pos_t pos = { run->address, run->size };
+  esp_image_metadata_t meta = {};
+  meta.start_addr = pos.offset;
+  esp_image_verify(ESP_IMAGE_VERIFY, &pos, &meta);
+  return meta.image_len;
+}
+
+uint32_t drvFreeSketchSpace() {
+  const esp_partition_t* next = esp_ota_get_next_update_partition(nullptr);
+  return next ? next->size : 0;
+}
+
+// Stato dell'immagine come parola semplice (non tradotta: va nel rapporto per l'assistenza).
+static const char* imgStateName(esp_ota_img_states_t st) {
+  switch (st) {
+    case ESP_OTA_IMG_NEW:            return "new";
+    case ESP_OTA_IMG_PENDING_VERIFY: return "pending-verify";
+    case ESP_OTA_IMG_VALID:          return "valid";
+    case ESP_OTA_IMG_INVALID:        return "invalid";
+    case ESP_OTA_IMG_ABORTED:        return "aborted";
+    default:                         return "undefined";
+  }
+}
+
+void drvOtaRunningTo(char* out, size_t n) {
+  if (!out || !n) return;
+  out[0] = 0;
+  const esp_partition_t* run = esp_ota_get_running_partition();
+  if (!run) return;
+  esp_ota_img_states_t st;
+  const char* name = (esp_ota_get_state_partition(run, &st) == ESP_OK) ? imgStateName(st) : "n/a";   // senza otadata lo stato non c'e
+  snprintf(out, n, "%s @0x%lX, %s", run->label, (unsigned long)run->address, name);
+}
+
+void drvOtaNextTo(char* out, size_t n) {
+  if (!out || !n) return;
+  out[0] = 0;
+  const esp_partition_t* nx = esp_ota_get_next_update_partition(nullptr);
+  if (nx) snprintf(out, n, "%s @0x%lX, %lu KB", nx->label, (unsigned long)nx->address, (unsigned long)(nx->size / 1024));
 }

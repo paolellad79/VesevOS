@@ -24,10 +24,10 @@ BUILTIN = ()                      # dalla 1.7.59 nessuna lingua dentro il firmwa
 
 # ---- chiavi usate dal codice del firmware
 src_text = ''
-for f in sorted(glob.glob(os.path.join(FWD, '**', '*.cpp'), recursive=True) + glob.glob(os.path.join(FWD, '*.ino'))):
+for f in sorted(glob.glob(os.path.join(FWD, '**', '*.cpp'), recursive=True) + glob.glob(os.path.join(FWD, '*.ino')) + glob.glob(os.path.join(FWD, 'src', '**', 'vos_shell_rep.h'), recursive=True)):
     src_text += open(f, encoding='ascii').read() + '\n'
 tr_keys = set()
-for m in re.finditer(r'\btrf?\(\s*"((?:[^"\\]|\\.)*)"', src_text):
+for m in re.finditer(r'\b(?:trf?|TRK)\(\s*"((?:[^"\\]|\\.)*)"', src_text):      # TRK = testo tradotto piu tardi (tabella dei comandi)
     tr_keys.add(m.group(1).encode().decode('unicode_escape'))
 
 # ---- chiavi usate dalla pagina web
@@ -131,7 +131,7 @@ for code, name in langs.items():
         z = gzip.compress(txt.encode('ascii'), 9, mtime=0)      # compresso nel firmware (circa 28 KB invece di 100); si decomprime in PSRAM
         body = '\n'.join('  ' + ','.join('0x%02x' % c for c in z[k:k + 24]) + ',' for k in range(0, len(z), 24))
         def cstr(x): return json.dumps(x, ensure_ascii=True)
-        h = ('// VesevOS - vos_lang_%s.h (GENERATO da tools/mklang.py, non modificare a mano)\n#pragma once\n#include <Arduino.h>\n'
+        h = ('// VesevOS - vos_lang_%s.h (GENERATO da tools/mklang.py, non modificare a mano)\n#pragma once\n#include "../drivers/vos_drv_string.h"\n'
              'static const char LANG_EN_NAME[] = %s;\nstatic const char LANG_EN_LOCALE[] = %s;\nstatic const char LANG_EN_FLAG[] = %s;\n'
              'static const char LANG_FLAG_IT[] = %s;\nstatic const size_t LANG_EN_GZ_LEN = %d;\nstatic const uint8_t LANG_EN_GZ[] PROGMEM = {\n%s\n};\n') % (
             code, cstr(name), cstr(locales[code]), cstr(flags[code]), cstr(flags['it']), len(z), body)

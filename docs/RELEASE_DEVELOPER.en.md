@@ -1,15 +1,16 @@
 # VesevOS - Release Developer (guide for people who develop and release)
 
-Last update: 10 October 2026, version 1.7.45. Also published on GitHub (docs/). The step-by-step procedure is in the release checklist (kept in the Project); this file gives the overall picture for people working on the code.
+Last update: 25 October 2026 (version 1.8.0b; sections 1, 4, 5 and 6 for ESP-IDF; the others not reviewed since 1.7.45). Also published on GitHub (docs/). The step-by-step procedure is in the release checklist (kept in the Project); this file gives the overall picture for people working on the code.
 
 ## 1. Environment
 - Board: ESP32-S3 SuperMini (4 MB flash, 2 MB PSRAM, native USB, WS2812 LED on GPIO48, internal antenna only).
-- Arduino IDE, Arduino-ESP32 core 3.3.x, "Huge APP" partition (compiler only; the real table is in recovery/VesevOS_Recovery/partitions.csv: 1 MB recovery + 2.31 MB app0). A release also publishes recovery/ (sketch, scripts, README).
-- Libraries: PsychicHttp 3.1.2, ArduinoJson 7 (mbedTLS and ESP-IDF come with the core).
-- Licence: GPL-3.0-or-later or commercial licence (COMMERCIAL.md). The Arduino core (LGPL) is not shipped with the repo.
+- Build: pure ESP-IDF with `idf.py` (project `idf/` next to the repository for VesevOS, `idf-recovery/` for the recovery; commands in the README, build section). No Arduino IDE and no arduino-cli.
+- Partition table (4 MB): `idf-recovery/partitions.csv` (the recovery project, next to the repository): 1 MB recovery at 0x10000 + app0 at 0x110000 (2.31 MB) + spiffs at 0x360000. A release also publishes `recovery/` (IDF sources, scripts, README).
+- Libraries in the project (`idf/components`): PsychicHttp 3.1.2 (modified copy) and aj_json (ArduinoJson 7.x). mbedTLS and the rest come from ESP-IDF.
+- Licence: GPL-3.0-or-later or commercial licence (COMMERCIAL.md). The Arduino core (LGPL) is no longer in the product (pure ESP-IDF since phase 5).
 
 ## 2. Layout
-- `VesevOS/` firmware: `VesevOS.ino` + `src/` with one folder per layer: `core/` core, `security/` access and encryption, `net/` network, `devices/` Device Manager and pins/LED, `drivers/` hardware and radio libraries (`vos_drv_*`), `packages/` optional services, `interfaces/` web and shell. Includes are relative to the file. `vos_page.h`, `vos_common_data.h`, `vos_lang_en.h` and `vos_license_data.h` are GENERATED (in `src/interfaces/` and `src/core/`).
+- `VesevOS/` firmware: `src/` with one folder per layer: `core/` core, `security/` access and encryption, `net/` network, `devices/` Device Manager and pins/LED, `drivers/` hardware and radio libraries (`vos_drv_*`), `packages/` optional services, `interfaces/` web and shell. Includes are relative to the file. `vos_page.h`, `vos_common_data.h`, `vos_lang_en.h` and `vos_license_data.h` are GENERATED (in `src/interfaces/` and `src/core/`).
 - `web/index.html` page; `lang/` generated languages.
 - `tools/`: `lang_src.json` (it/en/es/de translations), `mklang.py`, `mkpage.py`, `mklicense.py`, `mkcommon.py`.
 - `tools/stub/`: fake headers to compile on a computer. `tools/webtest/`: fake server + Playwright. `tools/hosttest/`: host tests (`run.sh`).
@@ -25,18 +26,18 @@ Last update: 10 October 2026, version 1.7.45. Also published on GitHub (docs/). 
 
 ## 4. Build and test
 1. `python3 tools/mklicense.py` (if missing), `python3 tools/mklang.py` (must end with "ok"), `python3 tools/mkpage.py`.
-2. Compile ALL files with the stubs (g++ -c) and look for duplicate functions (nm).
-3. `tools/hosttest/run.sh` (needs `$CORE` = the `cores/esp32` folder of the Arduino core). Currently 162 tests. `python3 tools/checklayers.py` must end without KO (it also checks the Arduino dependency: `String`, `Serial`, `millis/micros/delay` and `#include <Arduino.h>` outside `vos_drv_*`; today's debt is in `tools/layers_baseline.json` and can only go down).
+2. Compile ALL files with the stubs (`tools/stub/compila.sh`, g++ -c) and look for duplicate functions (nm). The stubs still imitate old headers: they are tools for computer-side tests only; the real build is `idf.py build`.
+3. `tools/hosttest/run.sh` (needs `$CORE` = the `cores/esp32` folder of the Arduino-ESP32 core, used only as a tool for the computer-side tests: not part of the product and not in the repository; `run.sh` still depends on that core, to be realigned). Currently 162 tests. `python3 tools/checklayers.py` must end without KO (it also checks that Arduino is gone (since phase 5 the baseline must be empty): `String`, `Serial`, `millis/micros/delay` and `#include <Arduino.h>` outside `vos_drv_*`; today's debt is in `tools/layers_baseline.json` and can only go down).
 4. Page: `tools/webtest/server.js` + `smoke172.js` -> "TUTTO OK".
-5. Real build and test on the board: done by the owner.
+5. Real build (`idf.py -B <folder> build`) and test on the board: done by the owner.
 
 ## 5. Versions
 - New features = new number (1.7.11). Bug fixes only = a letter (1.7.9b).
-- The version goes in: `vos_common.h`, `VesevOS.ino`, ZIP name, CHANGELOG, README it/en, SBOM, `mkcommon.py`, LEGGIMI, manuals.
+- The version goes in: `vos_common.h` (VOS_VERSION), ZIP name, CHANGELOG, README it/en, SBOM, `mkcommon.py`, LEGGIMI, manuals.
 - Architecture refactoring: one step = one version, never two layers at once.
 
 ## 6. Release
-- First the legal traffic light and the owner's "ok"; then the two ZIPs: `VesevOS-X.Y.Z.zip` (to build) and `VesevOS-repo.zip` (for GitHub).
+- First the legal traffic light (summary + light in one message, rules in `docs/progetto/REGOLE-LEGALI.md`) and the owner's "ok". Then: legal register, `NOTICE.txt` (generated from `licenses/NOTICE.template.txt` with `python3 tools/mklicense.py`: never edited by hand), SBOM (`SBOM.spdx.json`) and CHANGELOG; then the two ZIPs: `VesevOS-X.Y.Z.zip` (sources, languages, NOTICE and LEGGIMI) and `VesevOS-repo.zip` (for GitHub). The published repo also carries `firmware/` (files built with `idf.py`, SHA-256 and `indice.json`: recompute the SHAs with `shasum -a 256` from the copied files) and `flash/` (first-install page). The `.elf` file is never published.
 - Commit: title `X.Y.Z - ...`, description, line `Controllo legale: green/yellow/red`.
 - The owner does the push. Afterwards: copy to the Project, update STATE and to-do.
 - Documents are published in Italian and English every time.

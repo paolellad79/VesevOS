@@ -49,9 +49,15 @@ int main() {
   // JSON
   EventBus::reset();
   EventBus::publish("svc.state", "ble", 1);
-  String j = EventBus::json(0);
-  CHECK(j == "{\"last\":1,\"lost\":0,\"ev\":[{\"n\":1,\"ms\":" + String((unsigned long)0) + ",\"t\":\"svc.state\",\"a\":\"ble\",\"v\":1}]}" || j.indexOf("\"t\":\"svc.state\",\"a\":\"ble\",\"v\":1}]}") > 0);
+  std::string j = EventBus::json(0);
+  CHECK(j == "{\"last\":1,\"lost\":0,\"ev\":[{\"n\":1,\"ms\":0,\"t\":\"svc.state\",\"a\":\"ble\",\"v\":1}]}" || j.find("\"t\":\"svc.state\",\"a\":\"ble\",\"v\":1}]}") != std::string::npos);
   CHECK(EventBus::json(1) == "{\"last\":1,\"lost\":0,\"ev\":[]}");
+  // tutti gli eventi dell'anello con valori estremi: il JSON entra nel blocco calcolato (mai tagliato), valido e con CAP voci
+  EventBus::reset();
+  for (int i = 0; i < 45; i++) EventBus::publish("svc.state.xxxxx", "abcdefghijklmnopqrs", (i & 1) ? -2147483647 - 1 : 2147483647);
+  { std::string big = EventBus::json(0, 100); CHECK(!big.empty() && big.back() == '}' && big.size() > 2000);
+    size_t cnt = 0, pos = 0; while ((pos = big.find("{\"n\":", pos)) != std::string::npos) { cnt++; pos++; } CHECK(cnt == (size_t)EventBus::CAP); }
+  EventBus::reset();
   // ascoltatori
   EventBus::reset(); got = gotAll = 0;
   CHECK(EventBus::subscribe("svc.", onSvc));

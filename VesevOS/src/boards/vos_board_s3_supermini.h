@@ -6,6 +6,8 @@
 #pragma once
 
 #define VOS_BOARD         "ESP32-S3 SuperMini"   // nome mostrato (tabella dei piedini nella pagina)
+#define VOS_CHIP          "ESP32-S3"             // nome del chip
+#define VOS_ADDR2LINE     "xtensa-esp32s3-elf-addr2line"   // programma che trasforma gli indirizzi di un crash in file e riga
 
 // ---- memoria ----
 #define VOS_FLASH_MB      4
@@ -38,6 +40,19 @@
 #define VOS_I2C_SDA        8            // pin di fabbrica di Wire
 #define VOS_I2C_SCL        9
 
+// ---- microSD (modulo SPI a 3,3 V, 6 pin: VCC GND MISO MOSI SCK CS; prova con il modulo marcato v474) ----
+// La microSD e una periferica di io.cfg (classe "sd"): l'utente sceglie i 4 pin dalla pagina, controllati come per le altre periferiche.
+// Qui ci sono solo i pin PROPOSTI di default: quelli "di fabbrica" del bus SPI2 (FSPI) dell'S3, vicini sul bordo destro (GPIO10-13), e la velocita.
+// Non sono ADC2 critici, ne di avvio (3/45/46), ne USB, ne console, ne JTAG, ne I2C, ne flash/PSRAM.
+#define VOS_STR_(x) #x
+#define VOS_STR(x) VOS_STR_(x)
+#define VOS_HAS_SD        1
+#define VOS_SD_DEF_CS         10
+#define VOS_SD_DEF_MOSI       11
+#define VOS_SD_DEF_SCK        12
+#define VOS_SD_DEF_MISO       13
+#define VOS_SD_DEF_LIST   VOS_STR(VOS_SD_DEF_CS) "," VOS_STR(VOS_SD_DEF_MOSI) "," VOS_STR(VOS_SD_DEF_SCK) "," VOS_STR(VOS_SD_DEF_MISO)   // per la pagina
+
 // ---- avvisi mostrati dalla pagina (solo testo, non bloccano nulla) ----
 #define VOS_ADC2_FIRST    11            // ADC2: con il Wi-Fi acceso la lettura non e affidabile
 #define VOS_ADC2_LAST     18
@@ -66,3 +81,10 @@ static_assert(VOS_GPIO_EXISTS(VOS_I2C_SDA) && VOS_GPIO_EXISTS(VOS_I2C_SCL) && VO
 static_assert(VOS_ADC2_FIRST <= VOS_ADC2_LAST && VOS_JTAG_FIRST <= VOS_JTAG_LAST && VOS_PSRAMQ_FIRST <= VOS_PSRAMQ_LAST, "avvisi: intervalli non validi");
 static_assert(VOS_GPIO_EXISTS(VOS_PIN_UART_TX) && VOS_GPIO_EXISTS(VOS_PIN_UART_RX), "UART: pin non validi");
 static_assert(VOS_ADC_FIRST <= VOS_ADC_LAST && VOS_GPIO_EXISTS(VOS_ADC_FIRST) && VOS_GPIO_EXISTS(VOS_ADC_LAST), "ADC: intervallo non valido");
+// microSD: quattro pin diversi, esistenti, e mai quelli riservati (avvio, USB, console, JTAG, I2C, tasto, LED, flash/PSRAM)
+#define VOS_SD_RESERVED(g) (VOS_GPIO_STRAP(g) || (g) == VOS_PIN_USB_DM || (g) == VOS_PIN_USB_DP || (g) == VOS_PIN_UART_TX || (g) == VOS_PIN_UART_RX || \
+                            (g) == VOS_I2C_SDA || (g) == VOS_I2C_SCL || (g) == VOS_PIN_BOOT || (g) == VOS_PIN_LED_RGB || \
+                            ((g) >= VOS_JTAG_FIRST && (g) <= VOS_JTAG_LAST) || ((g) >= VOS_PSRAMQ_FIRST && (g) <= VOS_PSRAMQ_LAST))
+static_assert(VOS_GPIO_EXISTS(VOS_SD_DEF_CS) && VOS_GPIO_EXISTS(VOS_SD_DEF_MOSI) && VOS_GPIO_EXISTS(VOS_SD_DEF_SCK) && VOS_GPIO_EXISTS(VOS_SD_DEF_MISO), "microSD: pin inesistenti");
+static_assert(VOS_SD_DEF_CS != VOS_SD_DEF_MOSI && VOS_SD_DEF_CS != VOS_SD_DEF_SCK && VOS_SD_DEF_CS != VOS_SD_DEF_MISO && VOS_SD_DEF_MOSI != VOS_SD_DEF_SCK && VOS_SD_DEF_MOSI != VOS_SD_DEF_MISO && VOS_SD_DEF_SCK != VOS_SD_DEF_MISO, "microSD: i quattro pin devono essere diversi");
+static_assert(!VOS_SD_RESERVED(VOS_SD_DEF_CS) && !VOS_SD_RESERVED(VOS_SD_DEF_MOSI) && !VOS_SD_RESERVED(VOS_SD_DEF_SCK) && !VOS_SD_RESERVED(VOS_SD_DEF_MISO), "microSD: pin riservati dal sistema");

@@ -8,15 +8,19 @@
 
 void routesScript(PsychicHttpServer* S, bool sec) {
   // elenco degli script, stato (in corso?) e ultima uscita: un solo pezzo, la pagina lo rilegge ogni ~1,5 s mentre e aperta
-  add(S, sec, "/api/script", HTTP_GET, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, berryStateJson()); });
+  add(S, sec, "/api/script", HTTP_GET, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    HeapBuf j(BERRY_STATE_MAX);                                     // el JSON si scrive qui (heap) e si invia senza copiarlo in una String
+    if (!berryStateJson(j)) return ko(s, tr("Memoria insufficiente"));
+    return sendText(s, 200, "application/json", j.c_str(), j.length());
+  });
   add(S, sec, "/api/script/run", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
     if (berryRunning()) return ko(s, tr("Berry e occupato con un altro script"), "state");
-    String e;
-    if (!berryStart(P(r, "name"), e)) return ko(s, e);
+    ErrBuf e;
+    if (!berryStart(Pc(r, "name"), e)) return ko(s, e);
     return ok(s);
   });
   add(S, sec, "/api/script/stop", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
-    String e;
+    ErrBuf e;
     if (!berryRunning()) return ko(s, tr("Nessuno script in corso"), "state");
     return berryStop(e) ? ok(s) : ko(s, e, "state");
   });

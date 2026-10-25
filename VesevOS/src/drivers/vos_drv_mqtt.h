@@ -5,7 +5,7 @@
 // Sa: aprire/chiudere il collegamento a un broker, pubblicare, iscriversi a un argomento, avvisare di collegato/scollegato/dati/errore.
 // Non conosce argomenti, comandi, Home Assistant: sono del servizio (vos_mqtt). Le stringhe passate devono restare vive finche il client esiste.
 #pragma once
-#include <Arduino.h>
+#include "vos_drv_string.h"
 #include "../boards/vos_packages.h"
 
 #if VOS_WITH_MQTT

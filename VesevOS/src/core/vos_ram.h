@@ -4,13 +4,14 @@
 // Misura della RAM (passo R0 del piano RAM): riepilogo, stack di ogni task con il margine che si puo togliere,
 // e confronto prima/dopo (`ram mark` ... `ram diff`) per sapere quanto costa accendere un servizio.
 #pragma once
-#include <Arduino.h>
+#include <string>
+#include "../drivers/vos_drv_string.h"
 
-String ramReport();     // RAM interna e PSRAM, poi i task con stack libero minimo, totale e margine recuperabile
-void   ramMark();       // ricorda la RAM di adesso
-String ramDiff();       // cosa e cambiato dall'ultimo ramMark ("" se non c'e un segno)
-void   ramNote(const char* label);   // annota la RAM di adesso con un nome corto (avviato, ble on, login...): ultime 14 voci, costa pochi byte
-String ramAudit();      // `ram audit`: RAM e percentuale, storico delle annotazioni con le variazioni, TLS in PSRAM, poi ramReport()
+std::string ramReport();   // RAM interna e PSRAM, poi i task con stack libero minimo, totale e margine recuperabile
+void        ramMark();     // ricorda la RAM di adesso
+std::string ramDiff();     // cosa e cambiato dall'ultimo ramMark ("" se non c'e un segno)
+void        ramNote(const char* label);   // annota la RAM di adesso con un nome corto (avviato, ble on, login...): ultime 14 voci, costa pochi byte
+std::string ramAudit();    // `ram audit`: RAM e percentuale, storico delle annotazioni con le variazioni, TLS in PSRAM, poi ramReport()
 
 bool   ramTlsToPsram();  // i blocchi grandi della libreria TLS (HTTPS) vanno in PSRAM; true = riuscito
 int    ramTlsState();    // 0 = non provato, 1 = attivo, -1 = non disponibile in questo core

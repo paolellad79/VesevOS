@@ -1,0 +1,90 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md) -->
+<!-- Copyright (C) 2026 Domenico Paolella -->
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<title>VesevOS - Prima installazione</title>
+<link rel="stylesheet" href="stile.css">
+</head>
+<body>
+<a class="salta" href="#principale" data-t="salta">Vai al contenuto</a>
+<header>
+  <div class="barra">
+    <h1 id="titolo" data-t="titolo">VesevOS - Prima installazione</h1>
+    <div class="lingua">
+      <label for="lingua" data-t="lingua">Lingua</label>
+      <select id="lingua"></select>
+    </div>
+  </div>
+  <p id="sottotitolo" data-t="sottotitolo"></p>
+</header>
+
+<main id="principale">
+  <section id="incompatibile" class="riquadro errore" hidden>
+    <p><strong data-t="incompatibile">Browser non compatibile</strong></p>
+  </section>
+
+  <div id="contenuto">
+    <section class="riquadro info" aria-labelledby="h-nota">
+      <h2 id="h-nota" data-t="nota_agg_t"></h2>
+      <p data-t="nota_agg"></p>
+      <p data-t="prova_nota"></p>
+    </section>
+
+    <section class="riquadro avviso" aria-labelledby="h-avvisi">
+      <h2 id="h-avvisi" data-t="avvisi_t"></h2>
+      <ul>
+        <li data-t="avviso1"></li>
+        <li data-t="avviso2"></li>
+        <li data-t="avviso3"></li>
+        <li data-t="avviso4"></li>
+      </ul>
+    </section>
+
+    <section class="riquadro" aria-labelledby="h-scelta">
+      <h2 id="h-scelta" data-t="scelta_t"></h2>
+      <label for="pacchetto" data-t="pacchetto"></label>
+      <select id="pacchetto"></select>
+    </section>
+
+    <section class="riquadro" aria-labelledby="h-controlli">
+      <h2 id="h-controlli" data-t="controlli_t"></h2>
+      <p data-t="controlli_intro"></p>
+      <div class="tabella" tabindex="0" role="region" aria-labelledby="h-controlli">
+        <table id="tab-controlli"></table>
+      </div>
+      <p id="esito" class="esito" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="riquadro" aria-labelledby="h-scrivi">
+      <h2 id="h-scrivi" data-t="conferma_t"></h2>
+      <p data-t="info_collega"></p>
+      <p class="casella">
+        <input type="checkbox" id="conferma">
+        <label for="conferma" data-t="conferma"></label>
+      </p>
+      <button type="button" id="scrivi" disabled data-t="scrivi"></button>
+
+      <h3 id="h-avanz" data-t="avanzamento"></h3>
+      <progress id="barra" max="100" value="0" aria-labelledby="h-avanz"></progress>
+      <p id="stato" role="status" aria-live="polite"></p>
+
+      <h3 id="h-reg" data-t="registro"></h3>
+      <ol id="registro" class="registro" tabindex="0" aria-labelledby="h-reg"></ol>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <p data-t="footer_lic"></p>
+  <p data-t="footer_lib"></p>
+  <p data-t="privacy"></p>
+</footer>
+<script type="module" src="app.js"></script>
+</body>
+</html>

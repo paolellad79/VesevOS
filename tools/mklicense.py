@@ -24,9 +24,8 @@ open(os.path.join(ROOT, 'NOTICE.txt'), 'w', newline='\n').write(notice)
 DOCS = [  # id, titolo, testo
     ('notice', 'Note legali e licenza di VesevOS', notice),
     ('gpl3',   'GNU General Public License v3.0', rd('licenses/GPL-3.0.txt')),
-    ('lgpl21', 'GNU Lesser General Public License v2.1', rd('licenses/LGPL-2.1.txt')),
     ('apache2', 'Apache License 2.0', rd('licenses/Apache-2.0.txt')),
-    ('mit',    'MIT License (PsychicHttp, ArduinoJson, FreeRTOS, posix_tz_db, Berry)', rd('licenses/MIT.txt')),
+    ('mit',    'MIT License (PsychicHttp, ArduinoJson, FreeRTOS, esp_littlefs, posix_tz_db, Berry)', rd('licenses/MIT.txt')),
     ('bsd3',   'BSD 3-Clause License (lwIP, LittleFS)', rd('licenses/BSD-3-Clause.txt')),
 ]
 def cstr(t, step=7000):
@@ -39,7 +38,7 @@ def cstr(t, step=7000):
             j = k + 1 if k > i else j
         out.append('R"VOSLIC(%s)VOSLIC"' % t[i:j]); i = j
     return '\n'.join(out)
-h = ['// VesevOS - vos_license_data.h (GENERATO da tools/mklicense.py, solo ASCII)', '#pragma once', '#include <Arduino.h>', '']
+h = ['// VesevOS - vos_license_data.h (GENERATO da tools/mklicense.py, solo ASCII)', '#pragma once', '#include "../drivers/vos_drv_string.h"', '']
 # note legali: testo semplice (si legge anche dalla seriale). Le licenze lunghe: gzip (la pagina le riceve compresse, circa 50 KB di flash in meno).
 ZS = {}
 for i, (id_, title, text) in enumerate(DOCS):

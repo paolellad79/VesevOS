@@ -26,7 +26,7 @@ API version: **1** (`apiVersion` field in `/api/status` and `/api/common`). It c
 - **File upload** (`multipart/form-data`, admin only, not in the table): `POST /api/fs/up?dir=` (file in internal memory); `POST /api/recovery/up?sha=` (new recovery: all of it goes to PSRAM, it is checked and only then written; answers `{"ok":true,"from":"0.4.3","to":"0.4.4"}`; `sha` optional).
 - The **Parameters** and **Errors** columns are read from the code (indicative: the errors listed are those the route gives explicitly, besides the general ones above).
 
-## Routes (153)
+## Routes (158)
 
 | Method | Path | Level | What it does | Parameters | Errors |
 |---|---|---|---|---|---|
@@ -34,21 +34,21 @@ API version: **1** (`apiVersion` field in `/api/status` and `/api/common`). It c
 | POST | `/api/airplane` | operator | Airplane mode: radio off or on (on, exit) | `exit`, `on`, `param` | `error` |
 | GET | `/api/ap` | guest | Hotspot: name, state, clients | - | - |
 | POST | `/api/ap` | admin | Change hotspot name/password/QR (new = new random password) | `new`, `pass`, `qr`, `ssid` | `error` |
-| GET | `/api/app` | operator | App: details and check of a file /apps/<name>.vap (permissions u, controls ctl, icon, bytes). Operator only if who=oper | `name` | - |
+| GET | `/api/app` | operator | App: details and check of a file /apps/<name>.vap (permissions u, controls ctl, icon, bytes). Operator only if who=oper | `name` | `error` |
 | POST | `/api/app/set` | operator | App: command from a page control (name, id, v): reaches the app as on_set(id, value); values are checked | `id`, `name`, `v` | `error` |
 | POST | `/api/app/start` | operator | App: start an app (name). One at a time, excludes scripts. Operator only if who=oper | `name` | `error` |
-| GET | `/api/app/state` | operator | App: app state (name) - run running, busy engine busy, vals control values (n number, s text, a chart points), out and err last output | `name` | - |
+| GET | `/api/app/state` | operator | App: app state (name) - run running, busy engine busy, vals control values (n number, s text, a chart points), out and err last output | `name` | `error` |
 | POST | `/api/app/stop` | operator | App: stop the running app (name). Operator only if who=oper | `name` | `state` |
-| GET | `/api/apps` | operator | Apps: list of /apps/*.vap with format check (n, ok, t title, v version, a author, w who may use, u permissions, c controls, icon, e error). The operator sees only valid apps with who=oper | - | - |
-| GET | `/api/audit` | guest | Configuration alarms and history | - | - |
+| GET | `/api/apps` | operator | Apps: list of /apps/*.vap with format check (n, ok, t title, v version, a author, w who may use, u permissions, c controls, icon, e error). The operator sees only valid apps with who=oper | - | `error` |
+| GET | `/api/audit` | guest | Configuration alarms and history | - | `off` |
 | POST | `/api/audit/ack` | operator | Mark an alarm as read | `n` | - |
-| GET | `/api/auth` | public | Login state: user, role, packages present, certificate fingerprint | - | - |
+| GET | `/api/auth` | public | Login state: user, role, packages present, certificate fingerprint | - | `off` |
 | GET | `/api/ban` | admin | Blocked IPs and ban rules | - | - |
 | POST | `/api/ban/set` | admin | Set failed attempts and ban seconds | `fails`, `secs` | `error` |
 | POST | `/api/ban/unban` | admin | Unblock an IP | `ip` | `notfound` |
 | GET | `/api/ble` | admin | Bluetooth state | - | - |
 | POST | `/api/ble` | admin | Bluetooth command (a = start, restart, stop; min = optional time limit in minutes, 0 or missing = none) | `a`, `min` | `error` |
-| GET | `/api/boot` | operator | Service start order | - | - |
+| GET | `/api/boot` | operator | Service start order | - | `error` |
 | POST | `/api/boot` | admin | Save the start order | `order` | `error` |
 | POST | `/api/boot/reset` | admin | Default start order | - | - |
 | GET | `/api/boots` | operator | Reboot diary | - | - |
@@ -56,39 +56,39 @@ API version: **1** (`apiVersion` field in `/api/status` and `/api/common`). It c
 | GET | `/api/btn` | operator | BOOT button: act (action of 1, 2 and 3 clicks: 0 free (for scripts), 1 leave airplane mode, 2 WPS, 3 find the board), opt (possible actions with name), wpsClicks (clicks that start WPS, 0 = none), wpsOn (WPS allowed), free (per gesture: free for scripts), script (a script is reading the clicks), test (test seconds left, 0 = off), down, heldMs, seq, last (last gesture understood in test) | - | - |
 | POST | `/api/btn` | admin | 0 (prova di 60 s: il tasto non fa niente); ritorna lo stato / BOOT button (Admin only): c1, c2, c3 = action (0-3) for 1, 2, 3 clicks; test=1/0 (60 s test: the button does nothing); returns the state | `test` | `error` |
 | GET | `/api/common` | public | Common data (countries, radio rules, libraries, apiVersion), cached 24 h | - | - |
-| GET | `/api/config/download` | admin | Download the prepared configuration | - | - |
+| GET | `/api/config/download` | admin | Download the prepared configuration | - | `error` |
 | POST | `/api/config/export` | admin | Prepare the configuration to download (acc, pw) | `acc`, `pw` | `error` |
 | POST | `/api/config/restore` | admin | Restore configuration from a file (t = text, pw = passphrase) | `pw`, `t` | `error`, `toobig` |
-| POST | `/api/cpu` | admin | CPU mode (auto or fixed) | `mode` | `error` |
+| POST | `/api/cpu` | admin | CPU mode (auto or fixed) | `down`, `gov`, `hold`, `mode`, `up` | `error` |
 | GET | `/api/crash` | operator | Reports of the last crashes (reason, task, PC, backtrace), text | - | - |
 | GET | `/api/dev` | operator | Device Manager list, or one device (id) | `id` | - |
 | POST | `/api/dev/act` | operator | Device action (a, arg) | `a`, `arg`, `id` | `error` |
 | POST | `/api/dev/set` | admin | Turn a device on or off | `id`, `on` | `error` |
-| GET | `/api/events` | operator | Latest system events (Event Bus; topics: svc.state, net.state, mqtt.link, ble.link, mesh.node, time.sync, sec.ban, sec.unban, audit.new, audit.clear): since = last number seen, n = how many (1-40, default 20); lost = missed | `n`, `since` | - |
+| GET | `/api/events` | operator | Latest system events (Event Bus; topics: svc.state, net.state, mqtt.link, ble.link, mesh.node, time.sync, sec.ban, sec.unban, audit.new, audit.clear): since = last number seen, n = how many (1-40, default 20); lost = missed | `n`, `since` | `off` |
 | POST | `/api/factory` | admin | Factory reset and reboot (the word AZZERA is checked by the page only) | - | - |
 | POST | `/api/firstpass` | public | Create the first administrator password | `p` | `error`, `forbidden`, `state` |
 | POST | `/api/fs/copy` | admin | Copy a file | `from`, `to` | `error` |
 | POST | `/api/fs/del` | admin | Delete a file or folder | `path` | `error` |
-| GET | `/api/fs/dirs` | operator | Folders only | `dir` | `error` |
+| GET | `/api/fs/dirs` | operator | Folders only | - | `error` |
 | GET | `/api/fs/get` | operator | Download a file | `path` | - |
-| GET | `/api/fs/list` | operator | Folder list (max 200 items, more:true if cut) | `path` | - |
+| GET | `/api/fs/list` | operator | Folder list (max 200 items, more:true if cut) | `path` | `error` |
 | POST | `/api/fs/mkdir` | admin | Create a folder | `path` | `error` |
 | POST | `/api/fs/ren` | admin | Rename or move | `from`, `to` | `error` |
 | POST | `/api/fs/save` | admin | Save a text file (new = new file) | `new`, `path`, `text` | `error` |
 | GET | `/api/fs/text` | operator | Read a text file | `path` | - |
-| GET | `/api/fw` | admin | Firewall (IP filter) rules | - | - |
+| GET | `/api/fw` | admin | Firewall (IP filter) rules | - | `error` |
 | POST | `/api/fw` | admin | Save the IP filter | `mode`, `ntp`, `rules` | `error` |
 | POST | `/api/fw/confirm` | admin | Confirm the IP filter after the test | - | - |
-| GET | `/api/home` | guest | Home widget data (single request) | - | - |
+| GET | `/api/home` | guest | Home widget data (single request) | - | `off` |
 | POST | `/api/identify` | operator | Blink the LED to identify the board | - | - |
-| GET | `/api/io` | operator | Device classes (relay, led, pin, input, analog): max, io[] with n name, c class, g GPIO, f options (1 active low, 2 pull-up, 4 pull-down), v value, out output | - | - |
-| POST | `/api/io/add` | admin | Creates a device (cls class, gpio pin, name optional, opt inv/up/down). The pin is checked; replies with the name | `cls`, `gpio`, `name`, `opt` | `error` |
+| GET | `/api/io` | operator | Device classes (relay, led, pin, input, analog, i2c, sd): max, sdp[] suggested microSD pins, io[] with n name, c class, g GPIO (microSD: CS; g2 MOSI, g3 SCK, g4 MISO, k kHz), f options (1 active low, 2 pull-up, 4 pull-down), v value, out output | - | `error` |
+| POST | `/api/io/add` | admin | Creates a device (cls class, gpio pin, name optional, opt inv/up/down; for the microSD cls=sd, gpio=CS and opt "mosi=N sck=N miso=N khz=N", khz 400 to 20000). The pin is checked; replies with the name | `cls`, `gpio`, `name`, `opt` | `error` |
 | POST | `/api/io/del` | admin | Removes a device (n name): the output is switched off and the pin is freed | `n` | `error` |
 | POST | `/api/io/rename` | admin | Renames a device (n name, to new name) | `n`, `to` | `error` |
-| POST | `/api/lang` | admin | Board language | `code` | `error` |
+| POST | `/api/lang` | admin | Board language | - | `error` |
 | GET | `/api/langfile` | public | Language file download | `code` | - |
-| GET | `/api/langs` | public | Available languages | - | - |
-| POST | `/api/led` | operator | LED colour, mode, brightness | `br`, `color`, `mode` | `error` |
+| GET | `/api/langs` | public | Available languages | - | `error` |
+| POST | `/api/led` | operator | LED colour, mode, brightness | `br`, `color`, `mode`, `thr` | `error` |
 | GET | `/api/license` | public | Licence text (id) or list | `id` | - |
 | GET | `/api/log` | guest | Log (text) | - | - |
 | POST | `/api/log/clear` | admin | Clear the log | - | - |
@@ -109,13 +109,13 @@ API version: **1** (`apiVersion` field in `/api/status` and `/api/common`). It c
 | POST | `/api/mfa/off` | guest | Turn MFA off | `i` | `forbidden` |
 | POST | `/api/mfa/recovery` | guest | New recovery codes | - | `forbidden`, `state` |
 | POST | `/api/mfa/set` | admin | MFA settings (admin) | `nt`, `pow` | `error` |
-| GET | `/api/mod` | operator | gnd/vcc, v valore, s segnale), eventuale svg allegato (wiring) e pin liberi proposti (sug); la pagina disegna lo schema da questi dati / One module card (name): details, signal level (lv: 3V3 or 5V), components to add (parts: k serie/gnd/vcc, v value, s signal), optional attached svg (wiring) and suggested free pins (sug); the page draws the diagram from these data | `name` | - |
+| GET | `/api/mod` | operator | gnd/vcc, v valore, s segnale), eventuale svg allegato (wiring) e pin liberi proposti (sug); la pagina disegna lo schema da questi dati / One module card (name): details, signal level (lv: 3V3 or 5V), components to add (parts: k serie/gnd/vcc, v value, s signal), optional attached svg (wiring) and suggested free pins (sug); the page draws the diagram from these data | `name` | `error` |
 | POST | `/api/mod/del` | admin | Deletes a module card (name); devices already created stay | `name` | `error` |
 | POST | `/api/mod/install` | admin | Installs a module card (name, optional prefix): creates the devices on the suggested pins, all or nothing | `name`, `prefix` | `error` |
 | POST | `/api/mod/save` | admin | Checks and saves a module card /devs/<name>.vdp (name, text); an invalid file is rejected | `name`, `text` | `error` |
-| GET | `/api/mods` | operator | Module cards .vdp in /devs: list (n name, ok, t title, c class, p power, ns signals, v version, a author, l license, w warning, sig signals, icon svg, e error) | - | - |
+| GET | `/api/mods` | operator | Module cards .vdp in /devs: list (n name, ok, t title, c class, p power, ns signals, v version, a author, l license, w warning, sig signals, icon svg, e error) | - | `error` |
 | GET | `/api/mqtt` | operator | MQTT state | - | - |
-| POST | `/api/mqtt` | admin | MQTT settings | `auto`, `clearpass`, `every`, `ha`, `host`, `pass`, `port`, `prefix`, `tls`, `user` | `error`, `toobig` |
+| POST | `/api/mqtt` | admin | MQTT settings | `auto`, `clearpass`, `every`, `ha`, `pass`, `port`, `tls` | `error`, `toobig` |
 | POST | `/api/mqtt/ca` | admin | Upload the broker CA certificate | `pem` | `error` |
 | POST | `/api/mqtt/run` | operator | Start, stop, restart (a) | `a` | `error`, `state` |
 | POST | `/api/passwd` | guest | Change own password | `n`, `o` | `bad_login`, `error` |
@@ -126,58 +126,63 @@ API version: **1** (`apiVersion` field in `/api/status` and `/api/common`). It c
 | GET | `/api/pins/info` | guest | Pin info | - | - |
 | GET | `/api/pintest` | guest | Pin test state | - | - |
 | POST | `/api/pintest` | operator | Test a pin | `action`, `gpio`, `pull` | `error` |
-| GET | `/api/power` | operator | Power saving: mode and times | - | - |
+| GET | `/api/power` | operator | Power saving: mode and times | - | `error` |
 | POST | `/api/power` | admin | Change mode and times | `awake`, `mode`, `sleep` | `error` |
 | POST | `/api/reboot` | operator | Reboot the board | - | - |
 | GET | `/api/recovery` | admin | Tells whether the recovery is present and its version (present 0/1, kb, ver) | - | - |
-| POST | `/api/recovery` | admin | Reboots into the recovery to upload a new firmware (answers with ip) | `sha` | `error`, `state` |
-| GET | `/api/region` | guest | Country, time zone, language, radio | - | - |
+| POST | `/api/recovery` | admin | Reboots into the recovery to upload a new firmware (answers with ip) | - | `error`, `state` |
+| GET | `/api/region` | guest | Country, time zone, language, radio | - | `error` |
 | POST | `/api/region` | admin | Change country, zone, formats, antenna, power | `antenna`, `country`, `datefmt`, `decsep`, `gain`, `ntp`, `tempunit`, `timefmt`, `txpower`, `tz`, `tzname`, `weekstart` | `error` |
-| GET | `/api/rules` | operator | Automation text | - | - |
+| GET | `/api/rules` | operator | Automation text | - | `off` |
 | POST | `/api/rules` | operator | Save automations | `text` | `error` |
 | POST | `/api/rules/run` | operator | Run a rule (i) | `i` | `error` |
-| GET | `/api/script` | admin | Scripts: list of /scripts (n, s = bytes), running (busy, name), last output (out, err), limit max | - | - |
+| GET | `/api/script` | admin | Scripts: list of /scripts (n, s = bytes), running (busy, name), last output (out, err), limit max | - | `error` |
 | POST | `/api/script/run` | admin | Start a script from /scripts in the background (name) | `name` | `error`, `state` |
 | POST | `/api/script/stop` | admin | Stop the running script | - | `state` |
-| GET | `/api/selftest` | admin | Selftest state | - | - |
+| GET | `/api/sd` | operator | View of the microSD device (class sd of io.cfg): rows[] label/value, cfg (1 = configured; without it the box is hidden), s state (1 mounted, 2 not mounted, 3 not present, 4 unsupported format), up, type, fs (FAT12/16/32), cap/total/used in KB | - | `error` |
+| POST | `/api/sd/act` | operator | Actions on the microSD (a state, mount, unmount, test, ls, read, write, append, rm, mkdir; arg path or path,text). State and list: Operator; the rest Admin only. FAT/FAT32 only: exFAT is refused with "FAT32 is required", never formats | `a`, `arg` | `error` |
+| GET | `/api/selftest` | admin | Selftest state | - | `off` |
 | POST | `/api/selftest` | admin | Start selftest, clear | `active`, `clear`, `names` | `error` |
-| GET | `/api/selftest/report` | admin | Selftest report | - | `notfound` |
-| GET | `/api/serial` | admin | Serial settings | - | - |
+| GET | `/api/selftest/report` | admin | Selftest report | - | `notfound`, `off` |
+| GET | `/api/serial` | admin | Serial settings | - | `error` |
 | POST | `/api/serial` | admin | Change a setting (k, v) | `k`, `v` | `error` |
 | POST | `/api/serialauth` | admin | Serial password on/off | `on` | - |
-| GET | `/api/settings` | guest | General settings (for the page) | - | - |
+| GET | `/api/settings` | guest | General settings (for the page) | - | `off` |
 | POST | `/api/setup/done` | admin | Finish the guide (ntp) | `ntp` | - |
-| POST | `/api/shell` | operator | Run a shell command (c) | `c` | - |
-| POST | `/api/sleep` | operator | Put the board to sleep for min minutes | `min` | `error` |
+| POST | `/api/shell` | operator | Run a shell command (c) | `c`, `pw`, `tab` | `error` |
+| POST | `/api/sleep` | admin | Put the board to sleep for min minutes | `min` | `error` |
 | GET | `/api/stats` | operator | Usage statistics (JSON) | - | - |
 | POST | `/api/stats` | admin | Turn on/off, reset | `on`, `reset` | - |
 | GET | `/api/stats.csv` | operator | Statistics as CSV | - | - |
-| GET | `/api/status` | guest | Full status (version, apiVersion, RAM, network, CPU) | - | - |
+| GET | `/api/status` | guest | Full status (version, apiVersion, RAM, network, CPU) | - | `off` |
 | GET | `/api/svc` | guest | Network services | - | - |
-| POST | `/api/svc` | admin | Change network services | `apOn`, `captive`, `dhcpOn`, `httpOn`, `httpPort`, `httpsOn`, `httpsPort`, `lease`, `mdnsOn` | `error`, `state` |
-| POST | `/api/system` | admin | Board name (hostname) and domain | `domain`, `hostname` | `error` |
+| POST | `/api/svc` | admin | Change network services | `apOn`, `captive`, `dhcpOn`, `httpOn`, `httpPort`, `httpsOn`, `httpsPort`, `lease`, `mdnsOn`, `redirect` | `error`, `state` |
+| POST | `/api/system` | admin | Board name (hostname) and domain | - | `error` |
 | POST | `/api/taskkill` | admin | Stop a task (name) | `name` | `error` |
 | GET | `/api/tasklist` | operator | Tasks as JSON | - | - |
 | POST | `/api/taskrestart` | admin | Restart a task (name) | `name` | `error` |
-| GET | `/api/tasks` | operator | Tasks as text | - | - |
-| GET | `/api/time` | guest | Time and NTP settings | - | - |
-| POST | `/api/time` | admin | NTP settings | `every`, `ntp`, `serve`, `server`, `server2` | `error` |
+| GET | `/api/tasks` | operator | Tasks as text | - | `off` |
+| GET | `/api/time` | guest | Time and NTP settings | - | `error` |
+| POST | `/api/time` | admin | NTP settings | `every`, `ntp`, `serve`, `server2` | `error` |
 | POST | `/api/time/set` | admin | Set the time by hand | `epoch`, `local` | `error` |
 | POST | `/api/time/sync` | operator | Sync time with NTP | - | `state` |
 | GET | `/api/tls` | guest | HTTPS and certificate state | - | - |
 | POST | `/api/tls` | admin | HTTPS: on, certificate, key, regenerate | `cert`, `key`, `on`, `regen` | `error` |
 | GET | `/api/tls/cert` | guest | Download the certificate | - | `state` |
+| GET | `/api/updorder` | admin | Update through recovery (Admin only): last result written by the recovery (res, text, msg, ver, fresh), recovery present, host name and allowed GitHub prefix. Reading it marks the result as seen | - | `off` |
+| POST | `/api/updorder/file` | admin | Mode 2 (Admin only, confirm=1): writes the order with a one-time token bound to the IP, answers with url and urlIp (http://.../#g=token, the token appears ONLY here) and reboots into the recovery | - | `bad_request`, `state` |
+| POST | `/api/updorder/net` | admin | Mode 1 (Admin only, confirm=1): allowed https url (white list: official GitHub Releases + /updurl.txt), 64-digit sha, optional ver and size; writes the order and reboots into the recovery, which downloads and checks | `size` | `bad_request`, `error`, `toobig` |
 | GET | `/api/users` | admin | Users | - | - |
 | POST | `/api/users/add` | admin | Add a user | `name`, `pass`, `role` | `error` |
 | POST | `/api/users/del` | admin | Delete a user (i) | `i` | `error` |
 | POST | `/api/users/pass` | admin | Change a user's password | `i`, `pass` | `error` |
 | POST | `/api/users/set` | admin | Change role or active | `i`, `on`, `role` | `error` |
-| GET | `/api/wd` | operator | Watchdog rules and state | - | - |
-| POST | `/api/wd` | admin | Save watchdog rules | `at`, `days`, `net`, `netmin`, `ram`, `ramkb`, `task`, `updays` | - |
-| GET | `/api/who` | admin | Who is connected from the web and what they are doing (user, role, ip, via http/https, since when, last action) | - | - |
+| GET | `/api/wd` | operator | Watchdog rules and state | - | `error` |
+| POST | `/api/wd` | admin | Save watchdog rules | `at`, `days`, `defaults`, `net`, `netmin`, `ram`, `ramkb`, `task`, `twdt`, `updays` | `error` |
+| GET | `/api/who` | admin | Who is connected from the web and what they are doing (user, role, ip, via http/https, since when, last action) | - | `off` |
 | POST | `/api/wifi/ap` | admin | Hotspot only (home Wi-Fi off) | - | - |
 | POST | `/api/wifi/save` | admin | Save the home Wi-Fi | `cleanup`, `d1`, `d2`, `dhcp`, `gw`, `ip`, `mask`, `pass`, `ssid` | `error` |
-| GET | `/api/wifi/scan` | operator | Scan result (max 40, more:true if cut) | - | - |
+| GET | `/api/wifi/scan` | operator | Scan result (max 40, more:true if cut) | - | `off` |
 | POST | `/api/wifi/scan` | operator | Start a scan | - | - |
 | GET | `/api/wifi/test` | admin | Last connection test result | - | - |
 | POST | `/api/wifi/test` | admin | Test a connection without saving | `pass`, `ssid` | `error` |

@@ -22,23 +22,36 @@ licenza commerciale. Vedi `CONTRIBUTING.md`.
 
 ## Librerie di terzi
 
-VesevOS usa librerie con licenze proprie (elenco completo in `NOTICE.txt` e `SBOM.spdx.json`):
-PsychicHttp e ArduinoJson (MIT), ESP-IDF, Mbed TLS e NimBLE (Apache-2.0), FreeRTOS (MIT), lwIP e LittleFS
-(BSD-3-Clause), core Arduino-ESP32 (LGPL-2.1 o successiva). Restano sotto la loro licenza e non fanno parte
-della licenza commerciale di VesevOS. Chi distribuisce un firmware compilato deve rispettarle.
+VesevOS e compilato con ESP-IDF 5.5.5 e usa componenti con licenze proprie (elenco completo con versioni in
+`NOTICE.txt` e `SBOM.spdx.json`):
 
-## Kit LGPL (per chi vende prodotti chiusi con la licenza commerciale)
+- Apache-2.0: ESP-IDF, Mbed TLS (scelta Apache-2.0 tra le due licenze offerte), NimBLE, esp-nimble-cpp, espressif/mdns.
+- MIT: PsychicHttp (copia modificata), ArduinoJson, FreeRTOS, esp_littlefs, Berry, posix_tz_db (da verificare).
+- BSD-3-Clause: lwIP, LittleFS. Libreria C (newlib): licenze miste di tipo BSD (da verificare).
+- Dati: elenco dei certificati radice di Mozilla (di solito MPL-2.0, da verificare), Natural Earth e IANA tz (pubblico dominio).
 
-Il core Arduino-ESP32 e LGPL-2.1: chi riceve il prodotto deve poter ricollegare il programma con una versione
-modificata del core. Con la licenza commerciale si consegna, a richiesta del cliente:
+Restano sotto la loro licenza e non fanno parte della licenza commerciale di VesevOS. Chi distribuisce un firmware
+compilato deve conservare gli avvisi di copyright e i testi delle licenze (nel firmware: comando `license`).
 
-1. i file oggetto (`.o`) o l'archivio (`.a`) del programma VesevOS compilato, **senza** il codice sorgente di VesevOS;
-2. il codice sorgente del core Arduino-ESP32 usato (versione esatta) e le istruzioni per compilarlo;
-3. le istruzioni per ricollegare (link) e caricare il firmware sulla scheda (Arduino IDE o `arduino-cli`);
-4. i testi delle licenze (`license lgpl21` e gli altri in `licenses/`).
+## Il prodotto non include codice LGPL
 
-Il kit si prepara con la stessa versione di Arduino IDE e del core usata per il prodotto; va conservato
-per tutto il periodo in cui il prodotto e in vendita. Non e consulenza legale: verifica con un esperto.
+Il firmware non usa piu il core Arduino-ESP32 (LGPL-2.1) e non contiene altro codice LGPL. Per questo non serve piu
+il "kit di ricollegamento" (file oggetto, istruzioni di link) che serviva per la LGPL. Con la licenza commerciale
+restano da rispettare: la licenza commerciale stessa (o la GPL-3.0-or-later per chi sceglie la GPL) e gli avvisi
+dei componenti Apache-2.0, MIT, BSD-3-Clause e MPL-2.0 elencati sopra. Se in futuro si aggiunge un componente
+LGPL o GPL, questo punto va riesaminato prima del rilascio.
+
+## Da far verificare a un professionista
+
+Questa e una valutazione preliminare, non e consulenza legale; le norme possono essere cambiate. Prima di vendere
+con la licenza commerciale conviene far controllare da un legale:
+
+1. la compatibilita tra GPL-3.0-or-later / licenza commerciale e i componenti Apache-2.0 (Apache-2.0 con GPL-3.0 e
+   in genere compatibile, ma la doppia licenza va confermata);
+2. la licenza dei dati del bundle dei certificati radice (Mozilla, MPL-2.0?) e di `posix_tz_db` (MIT?), non confermate
+   nei sorgenti locali;
+3. le licenze miste della libreria C (newlib);
+4. marchi, marcatura CE (radio, EN 18031), Cyber Resilience Act, esportazione e privacy per il prodotto finito.
 
 ## Titolare e contatto
 Titolare dei diritti: Domenico Paolella - paolellad79@gmail.com

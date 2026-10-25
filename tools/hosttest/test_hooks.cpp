@@ -15,6 +15,9 @@ namespace fs = std::filesystem;
 static std::string slurp(const fs::path& p) { std::ifstream f(p); std::stringstream s; s << f.rdbuf(); return s.str(); }
 static std::string noComments(std::string s) { s = std::regex_replace(s, std::regex("/\\*[\\s\\S]*?\\*/"), ""); return std::regex_replace(s, std::regex("//[^\n]*"), ""); }
 
+// uscita che butta via tutto (il gancio vuoto non deve scrivere nulla)
+struct NullSink : OutSink { size_t write(uint8_t) override { return 1; } };
+
 int main() {
   const char* repo = getenv("VOS_REPO"); CHECK(repo != nullptr); if (!repo) return done("hooks");
   fs::path src = fs::path(repo) / "VesevOS" / "src";
@@ -57,7 +60,8 @@ int main() {
   hookLedAlarm(2); hookLedFault(true); hookLedFault(false);
   CHECK(!hookDevIsOn("x") && !hookDevOff("x") && !hookDevIsOn(nullptr));
   CHECK(hookBtnWpsClicks() == 0);
-  hookShellExec("info", Serial, 0);
+  { NullSink ns; hookShellExec("info", ns, 0); }
+  { char b[8] = "x"; CHECK(hookCpuTick(50.0f, 10) == 0 && hookCpuStatus(b, sizeof b) == 0 && b[0] == 0); hookCpuApplyMode(); }   // CPU: senza gancio = stato normale, nessun testo
   CHECK(hookWebIdleSec() == 0xFFFFFFFFUL);                          // senza pagina: nessuno la usa da sempre
   return done("hooks");
 }

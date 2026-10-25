@@ -63,7 +63,34 @@ function send(f,sh){$("pg").hidden=false;msg("um","Carico "+Math.floor(f.size/10
 function boot(){post("/api/boot",{}).then(function(j){msg("um",j.ok?"VesevOS riparte (circa 10 secondi).":(j.err||"Errore"),!!j.ok)})}
 </script></body></html>'''.replace('__CRYPTO__', crypto)
 out = os.path.join(R, 'recovery/VesevOS_Recovery/recovery_page.h')
+if os.path.isdir(os.path.dirname(out)):   # lo sketch vecchio non e piu nel pacchetto pubblicato
+    with open(out, 'w', encoding='utf-8') as f:
+        f.write('// Generato da tools/mkrecpage.py - NON modificare a mano.\n#pragma once\n#include <Arduino.h>\n')
+        f.write('static const char REC_PAGE[] PROGMEM = R"VOSREC(' + html + ')VOSREC";\n')
+    print('ok recovery_page.h:', len(html), 'byte')
+
+# Recovery 0.5.1: il gettone vale anche per l'avvio normale (/api/boot); errori in italiano e distinti (scaduto, usato, mancante).
+# Recovery 0.5.0: la pagina accetta anche il permesso di VesevOS (#g=<gettone> nell'indirizzo, modo 2 dell'ordine): nessun login, il gettone va in X-G.
+idf_html = html.replace('Recovery 0.4.3.', 'Recovery 0.5.1.')
+# Solo per il recovery IDF: la frase non nomina piu Arduino-ESP32 (il controllo e lo stesso: parola ABCD5432 dell'intestazione dell'app).
+idf_html = idf_html.replace('Non e un firmware Arduino-ESP32 valido', 'Non e un firmware ESP32 valido')
+for a, b in [
+    ('headers:TOK?{"X-T":TOK}:{}', 'headers:TOK?{"X-T":TOK}:GR?{"X-G":GR}:{}'),
+    ('var TOK="",CODE=false;', 'var TOK="",CODE=false,GR=(location.hash.match(/^#g=([0-9a-f]{32})$/)||[])[1]||"";if(GR)history.replaceState(null,"",location.pathname);'),
+    ('x.setRequestHeader("X-T",TOK);', 'if(TOK)x.setRequestHeader("X-T",TOK);else if(GR)x.setRequestHeader("X-G",GR);'),
+    ('$("info").textContent="Firmware attuale: "', '$("info").textContent=(GR&&!TOK?"Permesso di VesevOS attivo. ":"")+"Firmware attuale: "'),
+    ('MAX=j.max||0;', 'MAX=j.max||0;'),
+    ('function info(){post("/api/info",{}).then(function(j){if(j.ok){', 'function info(){post("/api/info",{}).then(function(j){if(!j.ok&&GR&&!TOK){GR="";$("a").hidden=false;$("b").hidden=true;msg("lm",j.err||"Il link di VesevOS non e valido: entra con la password",false)}if(j.ok){'),
+    ('fetch("/api/ver").then(', 'if(GR){$("a").hidden=true;$("b").hidden=false;info()}\nfetch("/api/ver").then('),
+    ('function boot(){post("/api/boot",{}).then(function(j){msg("um",j.ok?"VesevOS riparte (circa 10 secondi).":(j.err||"Errore"),!!j.ok)})}',
+     'function boot(){post("/api/boot",{}).then(function(j){msg("um",j.ok?"VesevOS riparte (circa 10 secondi).":(j.err||"Non riesco ad avviare VesevOS"),!!j.ok)}).catch(function(){msg("um","Collegamento interrotto: riprova",false)})}'),
+]:
+    assert a in idf_html, a
+    idf_html = idf_html.replace(a, b)
+
+# Recovery 0.5.0 (ESP-IDF puro): stessa pagina, versione nuova, senza Arduino.h/PROGMEM.
+out = os.path.join(R, 'recovery/VesevOS_Recovery_IDF/recovery_page.h')
 with open(out, 'w', encoding='utf-8') as f:
-    f.write('// Generato da tools/mkrecpage.py - NON modificare a mano.\n#pragma once\n#include <Arduino.h>\n')
-    f.write('static const char REC_PAGE[] PROGMEM = R"VOSREC(' + html + ')VOSREC";\n')
-print('ok recovery_page.h:', len(html), 'byte')
+    f.write('// Generato da tools/mkrecpage.py - NON modificare a mano.\n#pragma once\n')
+    f.write('static const char REC_PAGE[] = R"VOSREC(' + idf_html + ')VOSREC";\n')
+print('ok recovery IDF recovery_page.h')

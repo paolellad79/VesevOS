@@ -7,12 +7,15 @@
 #include "vos_boot.h"
 #include "vos_diario.h"
 #include "vos_util.h"
+#include "vos_parse.h"
+#include "vos_strbuf.h"
 #include "vos_log.h"
 #include "vos_sys.h"
 #include "vos_time.h"
 #include "vos_hooks.h"
 #include "vos_wd.h"
 #include "../drivers/vos_drv_nvs.h"
+#include "../drivers/vos_drv_time.h"
 
 #define NSVC 9
 
@@ -52,21 +55,20 @@ static uint32_t g_at[NSVC], g_ms[NSVC];
 static bool  g_custom = false, g_fell = false, g_stable = false;
 static uint8_t g_try = 0;
 
-static int svcIndex(const String& id) {
+static int svcIndex(std::string_view id) {
   for (int i = 0; i < NSVC; i++) if (id == SV[i].id) return i;
   return -1;
 }
 
 // csv -> ordine finale (indici). Nomi sconosciuti o doppi si scartano, i mancanti si aggiungono.
-static void sortOrder(const String& csv, int* out) {
+static void sortOrder(std::string_view csv, int* out) {
   int list[NSVC], n = 0;
   uint16_t seen = 0;
-  int p = 0;
-  while (p <= (int)csv.length() && n < NSVC) {
-    int e = csv.indexOf(',', p);
-    if (e < 0) e = csv.length();
-    String id = csv.substring(p, e); id.trim();
-    int k = svcIndex(id);
+  size_t p = 0;
+  while (p <= csv.size() && n < NSVC) {
+    size_t e = csv.find(',', p);
+    if (e == std::string_view::npos) e = csv.size();
+    int k = svcIndex(trimView(csv.substr(p, e - p)));
     if (k >= 0 && !(seen & (1 << k))) { list[n++] = k; seen |= (1 << k); }
     p = e + 1;
   }
@@ -87,22 +89,24 @@ static void sortOrder(const String& csv, int* out) {
   }
 }
 
-static String orderCsv(const int* o) {
-  String s;
-  for (int i = 0; i < NSVC; i++) { if (i) s += ","; s += SV[o[i]].id; }
-  return s;
+#define ORDER_BUF 96   // "sys,led,net,time,web,rules,mqtt,mesh,wd" sono 40 caratteri: l'ordine intero ci sta largo
+
+static void orderCsv(const int* o, char* out, size_t cap) {
+  StrBuf s(out, cap);
+  for (int i = 0; i < NSVC; i++) { if (i) s.add(','); s.add(SV[o[i]].id); }
 }
 
 void bootRun() {
   DrvNvs p;
   p.begin("vos", false);
-  String saved = p.getString("border", "");
+  char saved[ORDER_BUF] = "";
+  p.getString("border", saved, sizeof saved);                   // se manca o non ci sta: resta vuoto
   g_try = p.getUChar("btry", 0);
-  if (saved.length() && saved != DEF_ORDER) {
+  if (saved[0] && strcmp(saved, DEF_ORDER) != 0) {
     if (g_try >= 2) {
       vlog("BOOT: l'ordine scelto non ha funzionato, torno a quello predefinito");
       p.remove("border"); p.putUChar("btry", 0);
-      saved = ""; g_try = 0; g_fell = true;
+      saved[0] = 0; g_try = 0; g_fell = true;
     } else {
       g_custom = true;
       p.putUChar("btry", g_try + 1);
@@ -110,20 +114,21 @@ void bootRun() {
   }
   p.end();
   sortOrder(saved, g_ord);
-  uint32_t t00 = millis();
+  uint32_t t00 = drvMillis();
   for (int i = 0; i < NSVC; i++) {
     int k = g_ord[i];
-    g_at[k] = millis() - t00;
-    uint32_t t0 = millis();
+    g_at[k] = drvMillis() - t00;
+    uint32_t t0 = drvMillis();
     diaryStage(SV[k].id);
     SV[k].start();
-    g_ms[k] = millis() - t0;
+    g_ms[k] = drvMillis() - t0;
   }
-  vlog("BOOT: servizi avviati in %lu ms (%s)", (unsigned long)(millis() - t00), orderCsv(g_ord).c_str());
+  char ord[ORDER_BUF]; orderCsv(g_ord, ord, sizeof ord);
+  vlog("BOOT: servizi avviati in %lu ms (%s)", (unsigned long)(drvMillis() - t00), ord);
 }
 
 void bootStable() {
-  if (g_stable || millis() < 60000UL) return;
+  if (g_stable || drvMillis() < 60000UL) return;
   g_stable = true;
   if (g_custom || g_try) {
     DrvNvs p; p.begin("vos", false); p.putUChar("btry", 0); p.end();
@@ -131,16 +136,17 @@ void bootStable() {
   }
 }
 
-bool bootSetOrder(const String& csv, String& result, String& err) {
-  if (csv.length() > 80) { err = "Ordine non valido"; return false; }
+bool bootSetOrder(const char* csv, char* result, size_t resultLen, ErrBuf& err) {
+  if (strlen(csv) > 80) { err = "Ordine non valido"; return false; }
   int o[NSVC];
   sortOrder(csv, o);
-  result = orderCsv(o);
+  char order[ORDER_BUF]; orderCsv(o, order, sizeof order);
+  snprintf(result, resultLen, "%s", order);
   DrvNvs p; p.begin("vos", false);
-  if (result == DEF_ORDER) p.remove("border"); else p.putString("border", result);
+  if (strcmp(order, DEF_ORDER) == 0) p.remove("border"); else p.putString("border", order);
   p.putUChar("btry", 0);
   p.end();
-  vlog("BOOT: nuovo ordine di avvio %s", result.c_str());
+  vlog("BOOT: nuovo ordine di avvio %s", order);
   return true;
 }
 
@@ -149,21 +155,20 @@ void bootResetOrder() {
   vlog("BOOT: ordine di avvio predefinito");
 }
 
-String bootJson() {
-  String j = "{\"order\":[";
-  for (int i = 0; i < NSVC; i++) { if (i) j += ","; j += "\"" + String(SV[g_ord[i]].id) + "\""; }
-  j += "],\"custom\":" + String(g_custom ? "true" : "false");
-  j += ",\"fell\":" + String(g_fell ? "true" : "false");
-  j += ",\"stable\":" + String(g_stable ? "true" : "false");
-  j += ",\"svc\":[";
-  for (int i = 0; i < NSVC; i++) {
-    if (i) j += ",";
-    j += "{\"id\":\"" + String(SV[i].id) + "\",\"req\":[";
-    bool f = true;
-    for (int b = 0; b < NSVC; b++) if (SV[i].req & (1 << b)) { if (!f) j += ","; f = false; j += "\"" + String(SV[b].id) + "\""; }
-    j += "],\"parent\":" + (SV[i].parent == 255 ? String("null") : "\"" + String(SV[SV[i].parent].id) + "\"");
-    j += ",\"at\":" + String((unsigned long)g_at[i]) + ",\"ms\":" + String((unsigned long)g_ms[i]) + "}";
+bool bootJson(HeapBuf& j) {
+  bool ok = j.add("{\"order\":[");
+  for (int i = 0; ok && i < NSVC; i++) ok = (!i || j.add(',')) && j.addf("\"%s\"", SV[g_ord[i]].id);
+  ok = ok && j.addf("],\"custom\":%s,\"fell\":%s,\"stable\":%s,\"svc\":[", g_custom ? "true" : "false", g_fell ? "true" : "false", g_stable ? "true" : "false");
+  for (int i = 0; ok && i < NSVC; i++) {
+    ok = (!i || j.add(',')) && j.addf("{\"id\":\"%s\",\"req\":[", SV[i].id);
+    bool first = true;
+    for (int b = 0; ok && b < NSVC; b++) {
+      if (!(SV[i].req & (1 << b))) continue;
+      ok = (first || j.add(',')) && j.addf("\"%s\"", SV[b].id);
+      first = false;
+    }
+    ok = ok && j.add("],\"parent\":") && (SV[i].parent == 255 ? j.add("null") : j.addf("\"%s\"", SV[SV[i].parent].id)) &&
+         j.addf(",\"at\":%lu,\"ms\":%lu}", (unsigned long)g_at[i], (unsigned long)g_ms[i]);
   }
-  j += "]}";
-  return j;
+  return ok && j.add("]}");
 }

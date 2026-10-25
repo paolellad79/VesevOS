@@ -5,7 +5,8 @@
 // Anello fisso in RAM (nessun heap): CAP eventi, i piu vecchi vengono sovrascritti. Nessuna dipendenza dall'hardware (si prova sul computer).
 // Regole: il gestore (Handler) deve essere BREVE, non blocca e non pubblica a sua volta. Nessun segreto negli argomenti.
 #pragma once
-#include <Arduino.h>
+#include <stdint.h>
+#include <string>
 
 struct Event {
   uint32_t seq;       // numero progressivo (parte da 1, mai 0)
@@ -26,7 +27,7 @@ class EventBus {
   static bool     unsubscribe(Handler h);                      // toglie tutte le iscrizioni di h
   static uint32_t lastSeq();                                   // numero dell'ultimo evento (0 = nessuno)
   static int      since(uint32_t seq, Event* out, int max, uint32_t* lost = nullptr);   // eventi con numero > seq, dal piu vecchio; lost = quanti persi (sovrascritti)
-  static String   json(uint32_t seq, int max = 20);            // {"last":N,"lost":k,"ev":[{"n":..,"ms":..,"t":"..","a":"..","v":..}]}
+  static std::string json(uint32_t seq, int max = 20);            // {"last":N,"lost":k,"ev":[{"n":..,"ms":..,"t":"..","a":"..","v":..}]}
   static uint32_t ramBytes();                                  // RAM fissa usata
   static void     reset();                                     // solo per le prove
 };

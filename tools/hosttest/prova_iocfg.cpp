@@ -5,6 +5,7 @@
 // Non si prova qui: la corsa tra task (serve la scheda) e il taglio vero della corrente (littlefs lo gestisce da solo).
 #include <Arduino.h>
 #include "vos_io.h"
+#include "vos_io_int.h"
 #include "vos_pins.h"
 #include "vos_dev.h"
 #include "vos_drv_gpio.h"
@@ -30,29 +31,30 @@ const char* pinTestBlock(int g) {
 }
 bool pinClaim(uint8_t g, const char* o, const char*, bool) { if (claimed[g] && owner[g] && strcmp(owner[g], o)) return false; claimed[g] = 1; owner[g] = o; return true; }
 void pinRelease(uint8_t g) { claimed[g] = 0; owner[g] = nullptr; }
-const DevOps* devFind(const String& id) { static DevOps d; return (id == "mqtt" || id == "boot") ? &d : nullptr; }
+const DevOps* devFind(const char* id) { static DevOps d; return (!strcmp(id, "mqtt") || !strcmp(id, "boot")) ? &d : nullptr; }
 
 // allarmi (audit) registrati dalla prova
 static int audN = 0, audClr = 0; static std::string audKey;
-void auditEvent(AuditLevel, const String& key, const String&) { audN++; audKey = key.c_str(); }
+void auditEvent(AuditLevel, const char* key, const char*) { audN++; audKey = key; }
 void auditClear(const String& key) { if (key == "iocfg") audClr++; }
 
 static bool has(const char* p) { return fs::g_fakeFiles.count(p) > 0; }
 static std::string txt(const char* p) { auto it = fs::g_fakeFiles.find(p); return it == fs::g_fakeFiles.end() ? std::string("<manca>") : it->second->data; }
 static size_t sz(const char* p) { auto it = fs::g_fakeFiles.find(p); return it == fs::g_fakeFiles.end() ? (size_t)-1 : it->second->data.size(); }
 static void put(const char* p, const char* d) { fs::g_fakeFiles[p] = std::make_shared<fs::FakeNode>(); fs::g_fakeFiles[p]->data = d; }
+static void putS(const char* p, const std::string& d) { fs::g_fakeFiles[p] = std::make_shared<fs::FakeNode>(); fs::g_fakeFiles[p]->data = d; }
 static bool inCfg(const char* w) { return txt("/io.cfg").find(w) != std::string::npos; }
 static bool listed(const char* n) { for (int i = 0; i < ioCount(); i++) if (ioNameAt(i) == n) return true; return false; }
 static void reboot() { memset(claimed, 0, sizeof claimed); memset(owner, 0, sizeof owner); fakeI2cReset(); ioInit(); }
 static void wipe() {
   g_ff = FakeFsFaults();
-  while (ioCount()) { String e; if (!ioRemove(ioNameAt(0), e)) break; }
+  while (ioCount()) { String e; if (!ioRemove(ioNameAt(0).c_str(), e)) break; }
   fs::g_fakeFiles.clear(); memset(claimed, 0, sizeof claimed); memset(owner, 0, sizeof owner);
   ioInit(); ioTick(); audN = 0; audClr = 0; audKey.clear();
 }
 
 int main() {
-  String err, nm; char o[16], eb[IO_ERR_MAX];
+  String err, nm; char o[16], eb[IO_ERR_MAX]; int v_dummy = 0;
   wipe();
 
   // A) giro completo: formato nuovo a 6 numeri (i2c) e vecchio a 3 numeri, salva e ricarica; niente file temporaneo che resta
@@ -68,7 +70,7 @@ int main() {
   printf("A) 3 periferiche scritte e rilette, copia .bak = versione precedente, nessun .tmp~\n");
 
   // B) togliere l'ULTIMA periferica = il file si TOGLIE (mai 0 byte) e la copia con lui; dopo il riavvio nessun errore
-  while (ioCount() > 1) { String e; CHECK(ioRemove(ioNameAt(ioCount() - 1), e)); }
+  while (ioCount() > 1) { String e; CHECK(ioRemove(ioNameAt(ioCount() - 1).c_str(), e)); }
   CHECK(sz("/io.cfg") > 0 && has("/io.cfg.bak"));
   CHECK(ioRemove("bmp1", err));
   CHECK(ioCount() == 0 && !has("/io.cfg") && !has("/io.cfg.bak") && !has("/io.cfg.tmp~"));
@@ -97,10 +99,10 @@ int main() {
   // C2) poco spazio libero (margine di 8 KB come fsWriteText): errore senza nemmeno provare a scrivere
   CHECK(ioAdd("rele", 5, "", "", nm, err));
   int op = g_ff.opensW;
-  g_ff.used = 640 * 1024 - 4096;
+  g_ff.used = 640 * 1024 - 4096; drvFsUsedRefresh(1000);      // lo spazio usato e in cache (fscap): qui si ricalcola come fa il monitor
   CHECK(!ioAdd("led", 7, "", "", nm, err) && err == "Spazio esaurito" && g_ff.opensW == op);
   CHECK(ioCount() == 1);
-  g_ff.used = 0;
+  g_ff.used = 0; drvFsUsedRefresh(2000);
   wipe();
 
   // C3) togliere con disco pieno: errore e la periferica resta; togliere l'ultima non ha bisogno di spazio
@@ -251,6 +253,43 @@ int main() {
   int w0 = g_ff.opensW;
   reboot();
   CHECK(g_ff.opensW == w0 && !has("/io.cfg"));
+  wipe();
+
+  // K) righe di io.cfg: CRLF, spazi e tab ai lati, riga vuota, riga senza \n finale, riga troppo lunga (oltre 191 caratteri: scartata INTERA, la coda non diventa una riga nuova),
+  //    riga che inizia con uno zero (non carica niente) e riga con uno zero in mezzo (vale la parte prima dello zero, come prima)
+  { std::string f = "  rele1 1 5 0  \r\n\tled1 2 7 0\t\r\n\r\n";
+    f += std::string(191, ' ') + "pin9 3 13 0\n";
+    f += std::string("\0junk 3 14 0\n", sizeof("\0junk 3 14 0\n") - 1);
+    f += std::string("pin3 3 15 0\0xyz\n", sizeof("pin3 3 15 0\0xyz\n") - 1);
+    f += "adc1 5 4 0";                                          // ultima riga senza \n
+    putS("/io.cfg", f);
+    ioInit();
+    CHECK(ioCount() == 4 && listed("rele1") && listed("led1") && listed("pin3") && listed("adc1"));
+    CHECK(!listed("pin9") && !listed("junk") && claimed[13] == 0 && claimed[14] == 0 && claimed[5] == 1 && claimed[7] == 1 && claimed[15] == 1 && claimed[4] == 1);
+    printf("K) righe di io.cfg: CRLF, spazi, riga lunga scartata intera, zeri, ultima riga senza a capo: %d periferiche\n", ioCount()); }
+  wipe();
+  wipe();
+
+  // L) nomi: pulizia (spazi e maiuscole), lunghezza controllata prima di copiare, puntatori dentro la tabella (rimozione e rinomina)
+  CHECK(ioAdd("pin", 10, "  LuCe9  ", "", nm, err) && nm == "luce9");
+  CHECK(!ioAdd("pin", 11, "abcdefghijkl", "", nm, err) && err.indexOf("da 2 a 11") >= 0);                       // 12 caratteri
+  CHECK(!ioAdd("pin", 11, "   abcdefghijklmnopqrstuvwxyz   ", "", nm, err) && err.indexOf("da 2 a 11") >= 0);   // molto lungo: stesso errore, nessun overflow
+  CHECK(!ioAdd("pin", 11, "lu ce", "", nm, err) && err.indexOf("solo lettere") >= 0);
+  CHECK(!ioAdd("pin", 11, "1luce", "", nm, err) && !ioAdd("pin", 11, "x", "", nm, err) && !ioAdd("pin", 11, "mqtt", "", nm, err));
+  CHECK(ioAdd("pin", 11, "abcdefghijk", "", nm, err) && nm == "abcdefghijk" && ioHas("abcdefghijk"));            // 11 caratteri: il massimo
+  CHECK(ioAdd("rele", 12, "", "", nm, err) && nm == "rele1" && ioAdd("rele", 13, "", "", nm, err) && nm == "rele2");
+  CHECK(!ioHas("abcdefghijklmnop") && !ioHas("abcdefghijklmnopqrst.p") && !ioHas("pin1.p") && !strcmp(ioClassName("zzz"), ""));
+  CHECK(!ioGet("luce9.p", v_dummy, err) && !ioRemove("abcdefghijklm", err) && err.indexOf("sconosciuta") >= 0);
+  CHECK(!ioRename("abcdefghijklm", "zeta", err) && !ioRename("luce9", "abcdefghijkl", err) && err.indexOf("da 2 a 11") >= 0);
+  CHECK(ioRename("luce9", "LUCE9", err));                                                                        // stesso nome (dopo la pulizia): niente da fare
+  CHECK(!ioRename("luce9", "rele1", err) && err.indexOf("gia usato") >= 0);
+  CHECK(ioRename("luce9", " NUOVO ", err) && ioHas("nuovo") && !ioHas("luce9"));
+  { int n0 = ioCount();
+    CHECK(!ioRename(ioDevAt(0)->name, ioDevAt(1)->name, err) && err.indexOf("gia usato") >= 0 && ioCount() == n0);   // from e to dentro la tabella
+    char first[16]; strcpy(first, ioDevAt(0)->name);
+    CHECK(ioRemove(ioDevAt(0)->name, err) && !ioHas(first) && ioCount() == n0 - 1);                                  // il nome punta dentro la tabella che si sposta
+    CHECK(ioRename(ioDevAt(0)->name, "zeta", err) && ioHas("zeta") && ioCount() == n0 - 1); }
+  printf("L) nomi: pulizia, 11 caratteri al massimo, puntatori dentro la tabella\n");
   wipe();
 
   return done("prova_iocfg");

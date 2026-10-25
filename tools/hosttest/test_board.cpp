@@ -21,7 +21,7 @@ void drvGpioMode(int, DrvGpioMode) {}
 void drvGpioWrite(int, bool) {}
 bool drvGpioRead(int) { return false; }
 int  drvGpioAnalog(int) { return 0; }
-const DevOps* devFind(const String&) { return nullptr; }
+const DevOps* devFind(const char*) { return nullptr; }
 
 static const int8_t OLD_C[]  = {1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 21, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 47};
 static const int8_t OLD_CI[] = {8, 9, 4, 5, 6, 7, 1, 2, 10, 11, 12, 13, 14, 15, 16, 17, 18, 21, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 47};

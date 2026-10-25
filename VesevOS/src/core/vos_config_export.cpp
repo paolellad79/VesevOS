@@ -2,158 +2,203 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_config_export.cpp
 #include "vos_config.h"
-#include "vos_i18n.h"
-#include "vos_util.h"
-#include "vos_log.h"
-#include "vos_audit.h"
-#include "../drivers/vos_drv_fs.h"
+#include <stdio.h>
 #include "vos_config_int.h"
 
-static String q(const String& v) {            // 'valore' con escape OpenWrt
-  String o = "'";
-  for (size_t i = 0; i < v.length(); i++) {
-    if (v[i] == '\'') o += "'\\''"; else o += v[i];
+// Scrive le righe "\toption chiave 'valore'" in un HeapBuf. Se manca la memoria o si supera il tetto l'HeapBuf lo ricorda
+// (oom()/over()): cfgExport lo controlla una volta sola alla fine.
+class Out {
+ public:
+  explicit Out(HeapBuf& b) : b_(b) {}
+  void raw(const char* t) { b_.add(t); }
+  void section(const char* type, const char* name) { b_.addf("\nconfig %s '%s'\n", type, name); }
+  void opt(const char* k, const char* v) {                // 'valore' con escape OpenWrt
+    b_.addf("\toption %s '", k);
+    for (const char* p = v; *p; p++) {
+      if (*p == '\'') b_.add("'\\''"); else b_.add(*p);
+    }
+    b_.add("'\n");
   }
-  return o + "'";
+  void flag(const char* k, bool v) { opt(k, v ? "1" : "0"); }
+  void num(const char* k, long v) { char t[16]; snprintf(t, sizeof t, "%ld", v); opt(k, t); }
+  void unum(const char* k, unsigned long v) { char t[16]; snprintf(t, sizeof t, "%lu", v); opt(k, t); }
+ private:
+  HeapBuf& b_;
+};
+
+// "1.2.3.4" (ordine umano: primo numero nel byte alto); a-b se l'intervallo ha due indirizzi
+static void ipText(uint32_t ip, char out[16]) {
+  snprintf(out, 16, "%u.%u.%u.%u", (unsigned)(ip >> 24), (unsigned)((ip >> 16) & 255), (unsigned)((ip >> 8) & 255), (unsigned)(ip & 255));
+}
+static void fwRuleText(const FwRule& r, char* out, size_t cap) {
+  char a[16], b[16];
+  ipText(r.a, a); ipText(r.b, b);
+  if (r.a == r.b) snprintf(out, cap, "%s|%c|%s", a, r.on ? '1' : '0', r.name);
+  else            snprintf(out, cap, "%s-%s|%c|%s", a, b, r.on ? '1' : '0', r.name);
 }
 
-static void opt(String& s, const char* k, const String& v) {
-  s += "\toption "; s += k; s += " "; s += q(v); s += "\n";
-}
-
-// "1.2.3.4" <-> numero (ordine umano: primo numero nel byte alto)
-static String fwRange(const FwRule& r) { return r.a == r.b ? ipToStr(r.a) : ipToStr(r.a) + "-" + ipToStr(r.b); }
-
-String cfgExport(bool withSecrets) {
-  String s;
-  s += "# VesevOS config\n";
-  s += "config system 'system'\n";
-  opt(s, "hostname", cfg.hostname);
-  opt(s, "domain", cfg.domain);
-  opt(s, "cpu", String(cfg.cpuMhz));
-  opt(s, "stat", cfg.statOn ? "1" : "0");
-  opt(s, "loglv", String((int)cfg.logLevel));
-  opt(s, "btn1", String((int)cfg.btnAct[0]));
-  opt(s, "btn2", String((int)cfg.btnAct[1]));
-  opt(s, "btn3", String((int)cfg.btnAct[2]));
-  opt(s, "serbaud", String((unsigned long)cfg.serBaud));
-  opt(s, "sereol", String((int)cfg.serEol));
-  opt(s, "sertx", String((int)cfg.serTx));
-  opt(s, "serecho", cfg.serEcho ? "1" : "0");
-  opt(s, "serin", cfg.serIn ? "1" : "0");
-  opt(s, "serlog", cfg.serLogOut ? "1" : "0");
-  opt(s, "serban", cfg.serBanner ? "1" : "0");
-  opt(s, "pwmode", String(cfg.pwMode));
-  opt(s, "pwawake", String(cfg.pwAwake));
-  opt(s, "pwsleep", String(cfg.pwSleep));
-  opt(s, "lang", cfg.lang);
-  opt(s, "setup", cfg.setupDone ? "1" : "0");
-  opt(s, "https", cfg.https ? "1" : "0");
-  s += "\nconfig svc 'svc'\n";
-  opt(s, "apon", cfg.apOn ? "1" : "0");
-  opt(s, "captive", cfg.apCaptive ? "1" : "0");
-  opt(s, "dhcp", cfg.dhcpOn ? "1" : "0");
-  opt(s, "lease", String(cfg.dhcpLease));
-  opt(s, "mdns", cfg.mdnsOn ? "1" : "0");
-  opt(s, "wps", cfg.wpsOn ? "1" : "0");
-  opt(s, "wpspin", cfg.wpsPin ? "1" : "0");
-  opt(s, "httpon", cfg.httpOn ? "1" : "0");
-  opt(s, "httpport", String(cfg.httpPort));
-  opt(s, "httpsport", String(cfg.httpsPort));
-  s += "\nconfig region 'region'\n";
-  opt(s, "country", cfg.country);
-  opt(s, "antenna", String(cfg.antExt));
-  opt(s, "gain", String(cfg.antGain));
-  opt(s, "txpower", String(cfg.txDbm));
-  opt(s, "weekstart", String(cfg.weekStart));
-  opt(s, "decsep", String(cfg.decSep));
-  s += "\nconfig ap 'ap'\n";
-  opt(s, "ssid", cfg.apSsid);
-  opt(s, "pass", withSecrets ? cfg.apPass : String(""));
-  s += "\nconfig client 'sta'\n";
-  opt(s, "enabled", cfg.staEnabled ? "1" : "0");
-  opt(s, "ssid", cfg.staSsid);
-  opt(s, "pass", withSecrets ? cfg.staPass : String(""));
-  opt(s, "dhcp", cfg.staDhcp ? "1" : "0");
-  opt(s, "ip", cfg.ip); opt(s, "mask", cfg.mask); opt(s, "gw", cfg.gw);
-  opt(s, "dns1", cfg.dns1); opt(s, "dns2", cfg.dns2);
-  s += "\nconfig auth 'auth'\n";
-  opt(s, "serial", cfg.serialAuth ? "1" : "0");
-  opt(s, "apqr", cfg.apQr ? "1" : "0");
-  opt(s, "banfails", String(cfg.banFails));
-  opt(s, "bansecs", String((unsigned long)cfg.banSecs));
-  opt(s, "powbits", String(cfg.powBits));
-  opt(s, "mfanotime", String(cfg.mfaNoTime));
+bool cfgExport(HeapBuf& out, bool withSecrets) {
+  Out s(out);
+  auto secret = [&](const char* v) { return withSecrets ? v : ""; };    // senza segreti il valore resta vuoto
+  s.raw("# VesevOS config\n");
+  s.raw("config system 'system'\n");
+  s.opt("hostname", cfg.hostname.c_str());
+  s.opt("domain", cfg.domain.c_str());
+  s.num("cpu", cfg.cpuMhz);
+  // governor e parametri solo se diversi dal predefinito: chi non li usa ottiene lo stesso file di prima
+  if (cfg.cpuGov != 0) s.num("cpugov", cfg.cpuGov);
+  if (cfg.cpuUp != 80) s.num("cpuup", cfg.cpuUp);
+  if (cfg.cpuDown != 20) s.num("cpudown", cfg.cpuDown);
+  if (cfg.cpuHold != 10) s.num("cpuhold", cfg.cpuHold);
+  s.flag("stat", cfg.statOn);
+  s.num("loglv", cfg.logLevel);
+  s.num("btn1", cfg.btnAct[0]);
+  s.num("btn2", cfg.btnAct[1]);
+  s.num("btn3", cfg.btnAct[2]);
+  s.unum("serbaud", cfg.serBaud);
+  s.num("sereol", cfg.serEol);
+  s.num("sertx", cfg.serTx);
+  s.flag("serecho", cfg.serEcho);
+  s.flag("serin", cfg.serIn);
+  s.flag("serlog", cfg.serLogOut);
+  s.flag("serban", cfg.serBanner);
+  s.num("pwmode", cfg.pwMode);
+  s.num("pwawake", cfg.pwAwake);
+  s.num("pwsleep", cfg.pwSleep);
+  s.opt("lang", cfg.lang.c_str());
+  s.flag("setup", cfg.setupDone);
+  s.flag("https", cfg.https);
+  s.section("svc", "svc");
+  s.flag("apon", cfg.apOn);
+  s.flag("captive", cfg.apCaptive);
+  s.flag("dhcp", cfg.dhcpOn);
+  s.num("lease", cfg.dhcpLease);
+  s.flag("mdns", cfg.mdnsOn);
+  s.flag("wps", cfg.wpsOn);
+  s.flag("wpspin", cfg.wpsPin);
+  s.flag("httpon", cfg.httpOn);
+  s.flag("redirect", cfg.httpRedirect);
+  s.num("httpport", cfg.httpPort);
+  s.num("httpsport", cfg.httpsPort);
+  s.section("region", "region");
+  s.opt("country", cfg.country.c_str());
+  s.num("antenna", cfg.antExt);
+  s.num("gain", cfg.antGain);
+  s.num("txpower", cfg.txDbm);
+  s.num("weekstart", cfg.weekStart);
+  s.num("decsep", cfg.decSep);
+  s.section("ap", "ap");
+  s.opt("ssid", cfg.apSsid.c_str());
+  s.opt("pass", secret(cfg.apPass.c_str()));
+  s.section("client", "sta");
+  s.flag("enabled", cfg.staEnabled);
+  s.opt("ssid", cfg.staSsid.c_str());
+  s.opt("pass", secret(cfg.staPass.c_str()));
+  s.flag("dhcp", cfg.staDhcp);
+  s.opt("ip", cfg.ip.c_str()); s.opt("mask", cfg.mask.c_str()); s.opt("gw", cfg.gw.c_str());
+  s.opt("dns1", cfg.dns1.c_str()); s.opt("dns2", cfg.dns2.c_str());
+  s.section("auth", "auth");
+  s.flag("serial", cfg.serialAuth);
+  s.flag("apqr", cfg.apQr);
+  s.num("banfails", cfg.banFails);
+  s.unum("bansecs", cfg.banSecs);
+  s.num("powbits", cfg.powBits);
+  s.num("mfanotime", cfg.mfaNoTime);
+  if (cfg.serialIdleMin != 0) s.num("serialidle", cfg.serialIdleMin);   // scritta solo se diversa dal predefinito (0)
   for (int i = 0; i < VOS_MAX_USERS; i++) {
     const VosUser& u = cfg.users[i];
-    if (!u.name.length()) continue;
-    s += "\nconfig user 'user" + String(i) + "'\n";
-    opt(s, "name", u.name);
-    opt(s, "role", String(u.role));
-    opt(s, "on", u.on ? "1" : "0");
-    opt(s, "salt", withSecrets ? u.salt : String(""));
-    opt(s, "hash", withSecrets ? u.hash : String(""));
-    opt(s, "mfaon", u.mfaOn ? "1" : "0");
-    opt(s, "mfa", withSecrets ? u.mfa : String(""));
-    opt(s, "mfalast", String((unsigned long)u.mfaLast));
-    opt(s, "rec", withSecrets ? u.rec : String(""));
+    if (u.name.empty()) continue;
+    char id[12];
+    snprintf(id, sizeof id, "user%d", i);
+    s.section("user", id);
+    s.opt("name", u.name.c_str());
+    s.num("role", u.role);
+    s.flag("on", u.on);
+    s.opt("salt", secret(u.salt.c_str()));
+    s.opt("hash", secret(u.hash.c_str()));
+    s.flag("mfaon", u.mfaOn);
+    s.opt("mfa", secret(u.mfa.c_str()));
+    s.unum("mfalast", u.mfaLast);
+    s.opt("rec", secret(u.rec.c_str()));
   }
-  s += "\nconfig firewall 'firewall'\n";
-  opt(s, "mode", String(cfg.fwMode));
-  opt(s, "ntp", cfg.fwNtp ? "1" : "0");
-  for (int i = 0; i < cfg.fwN && i < VOS_FW_MAX; i++)
-    opt(s, ("rule" + String(i)).c_str(), fwRange(cfg.fw[i]) + "|" + (cfg.fw[i].on ? "1" : "0") + "|" + cfg.fw[i].name);
-  s += "\nconfig led 'led'\n";
-  opt(s, "mode", String(cfg.ledMode));
-  opt(s, "color", String(cfg.ledColor));
-  opt(s, "brightness", String(cfg.ledBrightness));
-  opt(s, "pin", String(cfg.ledPin));
-  s += "\nconfig mqtt 'mqtt'\n";
-  opt(s, "auto", cfg.mqttAuto ? "1" : "0");
-  opt(s, "host", cfg.mqttHost);
-  opt(s, "port", String(cfg.mqttPort));
-  opt(s, "tls", cfg.mqttTls ? "1" : "0");
-  opt(s, "user", cfg.mqttUser);
-  opt(s, "pass", withSecrets ? cfg.mqttPass : String(""));
-  opt(s, "prefix", cfg.mqttPrefix);
-  opt(s, "every", String(cfg.mqttEvery));
-  opt(s, "ha", cfg.mqttHa ? "1" : "0");
-  s += "\nconfig mesh 'mesh'\n";
-  opt(s, "auto", cfg.meshAuto ? "1" : "0");
-  opt(s, "role", String(cfg.meshRole));
-  opt(s, "channel", String(cfg.meshCh));
-  opt(s, "key", withSecrets ? cfg.meshKey : String(""));
-  s += "\nconfig airplane 'airplane'\n";
-  opt(s, "on", String(cfg.airOn));
-  opt(s, "exit", String(cfg.airExit));
-  opt(s, "until", String((unsigned long)cfg.airUntil));
-  opt(s, "at", String(cfg.airAt));
-  s += "\nconfig time 'time'\n";
-  opt(s, "ntp", cfg.ntpOn ? "1" : "0");
-  opt(s, "ntpauto", cfg.ntpAutoOff ? "1" : "0");
-  opt(s, "server", cfg.ntpServer);
-  opt(s, "server2", cfg.ntpServer2);
-  opt(s, "serve", cfg.ntpServe ? "1" : "0");
-  opt(s, "every", String((unsigned long)cfg.ntpEvery));
-  opt(s, "tz", cfg.tz);
-  opt(s, "tzname", cfg.tzName);
-  opt(s, "datefmt", String(cfg.dateFmt));
-  opt(s, "timefmt", String(cfg.timeFmt));
-  opt(s, "tempunit", String(cfg.tempUnit));
-  s += "\nconfig watchdog 'watchdog'\n";
-  opt(s, "task", cfg.wdTask ? "1" : "0");
-  opt(s, "net", cfg.wdNet ? "1" : "0");
-  opt(s, "ram", cfg.wdRam ? "1" : "0");
-  opt(s, "netmin", String(cfg.wdNetMin));
-  opt(s, "ramkb", String(cfg.wdRamKb));
-  opt(s, "updays", String(cfg.wdUpDays));
-  opt(s, "at", String(cfg.wdAt));
-  opt(s, "days", String(cfg.wdDays));
-  s += "\nconfig pins 'pins'\n";
-  for (int i = 0; i < VOS_GPIO_COUNT; i++) if (cfg.pinNote[i].length()) opt(s, ("n" + String(i)).c_str(), cfg.pinNote[i]);
-  s += "\nconfig sd 'sd'\n";
-  opt(s, "enabled", cfg.sdEnabled ? "1" : "0");
-  opt(s, "cs", String(cfg.sdCs)); opt(s, "sck", String(cfg.sdSck));
-  opt(s, "miso", String(cfg.sdMiso)); opt(s, "mosi", String(cfg.sdMosi));
-  return s;
+  s.section("firewall", "firewall");
+  s.num("mode", cfg.fwMode);
+  s.flag("ntp", cfg.fwNtp);
+  for (int i = 0; i < cfg.fwN && i < VOS_FW_MAX; i++) {
+    char key[12], rule[16 + 16 + 4 + FW_NAME_MAX + 4];
+    snprintf(key, sizeof key, "rule%d", i);
+    fwRuleText(cfg.fw[i], rule, sizeof rule);
+    s.opt(key, rule);
+  }
+  s.section("led", "led");
+  s.num("mode", cfg.ledMode);
+  s.unum("color", cfg.ledColor);
+  s.num("brightness", cfg.ledBrightness);
+  s.num("pin", cfg.ledPin);
+  // colori per sorgente e soglia della CPU solo se diversi dal predefinito: chi non li cambia ottiene lo stesso file di prima
+  for (int i = 0; i < LEDSRC_COUNT; i++)
+    if (cfg.ledSrcColor[i] != kLedSrcDefault[i]) s.unum(kLedSrcKey[i], cfg.ledSrcColor[i]);
+  if (cfg.ledCpuThr != LED_CPU_THR_DEFAULT) s.num("cputhr", cfg.ledCpuThr);
+  s.section("mqtt", "mqtt");
+  s.flag("auto", cfg.mqttAuto);
+  s.opt("host", cfg.mqttHost.c_str());
+  s.num("port", cfg.mqttPort);
+  s.flag("tls", cfg.mqttTls);
+  s.opt("user", cfg.mqttUser.c_str());
+  s.opt("pass", secret(cfg.mqttPass.c_str()));
+  s.opt("prefix", cfg.mqttPrefix.c_str());
+  s.num("every", cfg.mqttEvery);
+  s.flag("ha", cfg.mqttHa);
+  s.section("mesh", "mesh");
+  s.flag("auto", cfg.meshAuto);
+  s.num("role", cfg.meshRole);
+  s.num("channel", cfg.meshCh);
+  s.opt("key", secret(cfg.meshKey.c_str()));
+  s.section("ble", "ble");
+  s.flag("on", cfg.bleOn);
+  s.section("airplane", "airplane");
+  s.num("on", cfg.airOn);
+  s.num("exit", cfg.airExit);
+  s.unum("until", cfg.airUntil);
+  s.num("at", cfg.airAt);
+  s.section("time", "time");
+  s.flag("ntp", cfg.ntpOn);
+  s.flag("ntpauto", cfg.ntpAutoOff);
+  s.opt("server", cfg.ntpServer.c_str());
+  s.opt("server2", cfg.ntpServer2.c_str());
+  s.flag("serve", cfg.ntpServe);
+  s.unum("every", cfg.ntpEvery);
+  s.opt("tz", cfg.tz.c_str());
+  s.opt("tzname", cfg.tzName.c_str());
+  s.num("datefmt", cfg.dateFmt);
+  s.num("timefmt", cfg.timeFmt);
+  s.num("tempunit", cfg.tempUnit);
+  s.section("watchdog", "watchdog");
+  s.flag("task", cfg.wdTask);
+  s.flag("net", cfg.wdNet);
+  s.flag("ram", cfg.wdRam);
+  s.num("netmin", cfg.wdNetMin);
+  s.num("ramkb", cfg.wdRamKb);
+  s.num("updays", cfg.wdUpDays);
+  s.num("at", cfg.wdAt);
+  s.num("days", cfg.wdDays);
+  // tempi dei watchdog solo se diversi dal predefinito: chi non li cambia ottiene lo stesso file di prima
+  if (cfg.wdTwdt != WD_TWDT_DEF) s.num("twdt", cfg.wdTwdt);
+  for (int i = 0; i < WD_LIM_N; i++) {
+    if (cfg.wdLim[i] == WD_LIMITS[i].def) continue;
+    char key[16]; snprintf(key, sizeof key, "lim_%s", WD_LIMITS[i].name);
+    s.num(key, cfg.wdLim[i]);
+  }
+  s.section("pins", "pins");
+  for (int i = 0; i < VOS_GPIO_COUNT; i++) {
+    if (cfg.pinNote[i].empty()) continue;
+    char key[8];
+    snprintf(key, sizeof key, "n%d", i);
+    s.opt(key, cfg.pinNote[i].c_str());
+  }
+  s.section("sd", "sd");
+  s.flag("enabled", cfg.sdEnabled);
+  s.num("cs", cfg.sdCs); s.num("sck", cfg.sdSck);
+  s.num("miso", cfg.sdMiso); s.num("mosi", cfg.sdMosi);
+  return !out.oom() && !out.over();
 }

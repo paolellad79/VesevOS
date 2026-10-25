@@ -60,19 +60,23 @@ LANG = {'IT': 'it', 'SM': 'it', 'VA': 'it', 'CH': 'it', 'ES': 'es', 'MX': 'es', 
 
 # ---------- elenco del software usato (SBOM semplice) ----------
 SBOM = [
-    ['VesevOS', '1.7.53', 'GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial', 'https://github.com/paolellad79/VesevOS'],
-    ['Arduino-ESP32 core', '3.3.x', 'LGPL-2.1-or-later', 'https://github.com/espressif/arduino-esp32'],
-    ['ESP-IDF (esp_wifi, esp_now, esp-mqtt, esp_http_server, esp_https_server, NVS)', '5.5', 'Apache-2.0', 'https://github.com/espressif/esp-idf'],
-    ['Mbed TLS', '3.6', 'Apache-2.0', 'https://github.com/Mbed-TLS/mbedtls'],
-    ['FreeRTOS', 'ESP-IDF 5.5', 'MIT', 'https://www.freertos.org'],
-    ['lwIP', 'ESP-IDF 5.5', 'BSD-3-Clause', 'https://savannah.nongnu.org/projects/lwip'],
-    ['LittleFS', 'core 3.3', 'BSD-3-Clause', 'https://github.com/littlefs-project/littlefs'],
-    ['NimBLE (Apache Mynewt)', 'core 3.3', 'Apache-2.0', 'https://github.com/apache/mynewt-nimble'],
-    ['PsychicHttp', '3.1.2', 'MIT', 'https://github.com/hoeken/PsychicHttp'],
-    ['ArduinoJson', '7.x', 'MIT', 'https://github.com/bblanchon/ArduinoJson'],
+    ['VesevOS', '1.8.0b', 'GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial', 'https://github.com/paolellad79/VesevOS'],
+    ['ESP-IDF (esp_wifi, esp_now, esp-mqtt, esp_http_server, esp_https_server, esp-tls, NVS)', '5.5.5', 'Apache-2.0', 'https://github.com/espressif/esp-idf'],
+    ['Mbed TLS (in ESP-IDF; Apache-2.0 OR GPL-2.0-or-later, scelta Apache-2.0)', 'ESP-IDF 5.5.5', 'Apache-2.0', 'https://github.com/Mbed-TLS/mbedtls'],
+    ['FreeRTOS Kernel', 'ESP-IDF 5.5.5', 'MIT', 'https://www.freertos.org'],
+    ['lwIP', 'ESP-IDF 5.5.5', 'BSD-3-Clause', 'https://savannah.nongnu.org/projects/lwip'],
+    ['esp_littlefs (joltwallet/littlefs)', '1.22.3', 'MIT', 'https://github.com/joltwallet/esp_littlefs'],
+    ['LittleFS', '2.x (in esp_littlefs)', 'BSD-3-Clause', 'https://github.com/littlefs-project/littlefs'],
+    ['espressif/mdns', '1.14.0', 'Apache-2.0', 'https://github.com/espressif/esp-protocols'],
+    ['esp-nimble-cpp (h2zero)', '2.5.0', 'Apache-2.0', 'https://github.com/h2zero/esp-nimble-cpp'],
+    ['NimBLE (Apache Mynewt)', 'ESP-IDF 5.5.5', 'Apache-2.0', 'https://github.com/apache/mynewt-nimble'],
+    ['Certificate bundle di ESP-IDF (dati CA Mozilla; licenza da verificare)', 'ESP-IDF 5.5.5', 'MPL-2.0', 'https://curl.se/docs/caextract.html'],
+    ['PsychicHttp (copia modificata)', '3.1.2', 'MIT', 'https://github.com/hoeken/PsychicHttp'],
+    ['ArduinoJson (componente aj_json)', '7.4.3', 'MIT', 'https://github.com/bblanchon/ArduinoJson'],
+    ['Berry (interprete di script)', '1.1.0', 'MIT', 'https://github.com/berry-lang/berry'],
     ['Natural Earth (nomi dei paesi)', '5.1', 'Public Domain', 'https://www.naturalearthdata.com'],
     ['IANA tz database (fusi orari)', '2025+', 'Public Domain', 'https://www.iana.org/time-zones'],
-    ['posix_tz_db (fusi in formato POSIX)', '2025', 'MIT', 'https://github.com/nayarsystems/posix_tz_db'],
+    ['posix_tz_db (fusi in formato POSIX; licenza da verificare)', '2025', 'MIT', 'https://github.com/nayarsystems/posix_tz_db'],
 ]
 
 # territori senza punto di etichetta: longitudine, latitudine approssimate (dati geografici)
@@ -170,7 +174,7 @@ def build():
         lines.append(','.join('0x%02x' % b for b in gz[i:i + 24]))
     h = ['// VesevOS - vos_common_data.h (GENERATO da tools/mkcommon.py, non modificare a mano)',
          '// Dati: Natural Earth (pubblico dominio), IANA tz (pubblico dominio), posix_tz_db (MIT).',
-         '#pragma once', '#include <Arduino.h>', '',
+         '#pragma once', '#include "../drivers/vos_drv_string.h"', '',
          'struct VosCountryRadio { char cc[3]; uint8_t ch; uint8_t dbm; };',
          'static const VosCountryRadio VOS_COUNTRIES[] = {']
     h.append(',\n'.join('  {"%s", %d, %d}' % t for t in table))

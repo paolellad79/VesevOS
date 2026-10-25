@@ -8,23 +8,35 @@
 #include "../packages/vos_app.h"
 
 void routesApp(PsychicHttpServer* S, bool sec) {
-  add(S, sec, "/api/apps", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, appListJson(c.role)); });
-  add(S, sec, "/api/app", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, appInfoJson(P(r, "name"), c.role)); });
+  add(S, sec, "/api/apps", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    HeapBuf j(APP_LIST_MAX);                                        // il JSON si scrive qui (heap) e si invia senza copiarlo in una String
+    if (!appListJson(j, c.role)) return ko(s, tr("Memoria insufficiente"));
+    return sendText(s, 200, "application/json", j.c_str(), j.length());
+  });
+  add(S, sec, "/api/app", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    HeapBuf j(APP_INFO_MAX);
+    if (!appInfoJson(Pc(r, "name"), j, c.role)) return ko(s, tr("Memoria insufficiente"));
+    return sendText(s, 200, "application/json", j.c_str(), j.length());
+  });
   // valori dei controlli, uscita ed errore: la pagina lo rilegge ogni ~1 s mentre l'app e aperta
-  add(S, sec, "/api/app/state", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJson(s, appStateJson(P(r, "name"), c.role)); });
+  add(S, sec, "/api/app/state", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    HeapBuf j(APP_STATE_MAX);
+    if (!appStateJson(Pc(r, "name"), j, c.role)) return ko(s, tr("Memoria insufficiente"));
+    return sendText(s, 200, "application/json", j.c_str(), j.length());
+  });
   add(S, sec, "/api/app/start", HTTP_POST, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
-    String e;
-    if (!appStart(P(r, "name"), e, c.role, "pagina")) return ko(s, e);
+    ErrBuf e;
+    if (!appStart(Pc(r, "name"), e, c.role, "pagina")) return ko(s, e);
     return ok(s);
   });
   add(S, sec, "/api/app/stop", HTTP_POST, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
-    String e;
-    if (!appStop(P(r, "name"), e, c.role)) return ko(s, e, "state");
+    ErrBuf e;
+    if (!appStop(Pc(r, "name"), e, c.role)) return ko(s, e, "state");
     return ok(s);
   });
   add(S, sec, "/api/app/set", HTTP_POST, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
-    String e;
-    if (!appSet(P(r, "name"), P(r, "id"), P(r, "v"), e, c.role)) return ko(s, e);
+    ErrBuf e;
+    if (!appSet(Pc(r, "name"), Pc(r, "id"), Pc(r, "v"), e, c.role)) return ko(s, e);
     return ok(s);
   });
 }

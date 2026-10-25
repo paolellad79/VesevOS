@@ -1,4 +1,4 @@
-# VesevOS 1.7.45 - Manual
+# VesevOS 1.8.0b - Manual (chapters 1-26 describe 1.7.45-1.7.60; later changes are in chapter 27 and in the CHANGELOG)
 
 Manual for people who use the board. Plain words, no programming.
 Versione italiana: [manuale.md](manuale.md). The same help is in the board's page (Information > Help, or `http://192.168.4.1/#aiuto`).
@@ -31,7 +31,7 @@ The first time it starts, every VesevOS board makes up its own Wi-Fi password, d
 7. The **QR code** to connect your phone (and to print) is in **Network > Access point**, with name and password. Print the label and stick it under the board. The hotspot-password banner on the
    serial stays until the guide is finished (even if you reopen the monitor).
 
-Any serial program works without Arduino IDE (PuTTY, screen, the "Serial USB Terminal" app with an OTG cable).
+Any serial program works (PuTTY, screen, the "Serial USB Terminal" app with an OTG cable).
 The QR code is not drawn on the serial (serial monitors often cannot show it): it is only in the Access point page. Setup can also be done from the serial line alone (chapter 13).
 
 ### Method 2: board prepared by someone else
@@ -149,7 +149,7 @@ rules cannot be exceeded; (3) no identical passwords.
 ## 13. Setup from the serial line only
 Without the web page: open the serial monitor (115200) and type `setup`. It asks: language, country, name, antenna, hotspot (shows the
 password, `n` = new), administrator password (visible while typing: do it somewhere safe), home Wi-Fi (numbered list), time.
-Enter = keep the value, `skip` = skip, `quit` = exit. Single commands: `lang`, `locale country XX`, `hostname`, `wifi set <network> [password]` (with spaces: `wifi set "My home" password`),
+Enter = keep the value, `skip` = skip, `quit` = exit. Single commands: `lang`, `region country XX` (`locale` stays valid), `hostname`, `wifi set <network> [password]` (with spaces: `wifi set "My home" password`),
 `wifi off`, `ntp on|off`, `ntp server <name>`, `ntp server2 <name|off>`, `date set YYYY-MM-DD HH:MM`, `svc ap|captive|http|https on|off`, `svc http-port N`, `svc https-port N`, `ap new`.
 After the guide the security rules apply (serial password, if on).
 
@@ -219,7 +219,7 @@ The board holds two programs: **VesevOS** and the **recovery** (small, used only
 2. The page waits for the board to restart and **opens the recovery by itself** (usually within seconds; "Open now" to skip the wait). If it cannot, it shows the address, for example `http://192.168.1.50:80/`: open it in a **private window** and type **http**, not https (the recovery is not encrypted).
    The recovery tries your **home network** first; if it cannot find it within 30 seconds it creates the Wi-Fi network `VesevOS-recovery` (random password written on the serial port).
 3. Sign in with the user and password of a VesevOS **Administrator** (the password never travels in clear). With an empty flash and no administrators you need the 8-digit code shown on the serial port. Five mistakes = a 60-second wait.
-4. Choose the `VesevOS.ino.bin` file (not `.merged.bin`). *Expected SHA-256* is optional: if you fill it in, the file must match.
+4. Choose the firmware `.bin` file (not `.merged.bin`). *Expected SHA-256* is optional: if you fill it in, the file must match.
 5. Pick the file with the button or **drag it** onto the page (on a phone, button only). *Upload and install*. First the page and then the board check: ESP32-S3 header, **VesevOS marker**, size, complete image. A wrong file is refused and **the old firmware is left untouched**; if the error comes after writing has started, the recovery stays on and you just upload the good file.
 6. The board **LED** shows the state: slow orange = waiting for the file; fast cyan = writing; solid green = done; red = error (back to orange after 10 seconds). After about 10 seconds VesevOS restarts. *Start VesevOS without updating* goes back. After 15 minutes without access the recovery goes back to VesevOS by itself. BOOT held at power-up = stay in the recovery.
 - The file check guarantees it is a complete VesevOS firmware; it is **not a digital signature**. Download files only from trusted sources.
@@ -230,7 +230,7 @@ The board holds two programs: **VesevOS** and the **recovery** (small, used only
 - **Checked pins**: the board refuses USB (19, 20), BOOT (0), RGB LED (48), boot pins (3, 45, 46), pins that do not exist or are already in use. Analog works only on pins 1-10. (SuperMini numbers: they come from the firmware board file, and the page reads them from there.)
 - **Active low**: for relay modules that switch on with level 0.
 - **Safety**: after every restart, after a crash or in the watchdog reduced mode all outputs are **off**. The relay is switched only by the Administrator (operator and apps only if the Admin granted the permission) and changes at most once per second. A relay connected to mains power (230 V) needs a certified module and an installer: VesevOS only drives the signal.
-- **Commands**: page; shell `io list`, `io add rele 5 [name] [inv]`, `io del <name>`, `io rename <name> <new>`, `io set <name> 1`, `io get <name>`; `dev on|off <name>` and `dev act <name> set 1`.
+- **Commands**: page; shell `io list`, `io add relay 5 [name] [inv]` (`rele` stays valid), `io del <name>`, `io rename <name> <new>`, `io set <name> 1`, `io get <name>`; `dev on|off <name>` and `dev act <name> set 1`.
 - **In apps**: write the name in `use=` (for example `use=rele1,in1`); then `dev_set("rele1", 1)` and `dev_get("in1")` (input: 0/1, analog: 0-4095). Without the name in `use=` the app stops with "permission missing".
 - **Device list**: the devices you create appear under *Periferiche*.
 
@@ -239,7 +239,7 @@ The board holds two programs: **VesevOS** and the **recovery** (small, used only
 - **Module card (.vdp)**: a text file describing a module (class, signals, icon, SVG diagram). Data only. Folder `/devs`. Examples are in `docs/devs` (1-, 2- and 4-channel relay, LED, button, PIR sensor, LDR).
 - **How to use**: Periferiche > *Upload module card*, then *Install*: the board shows the diagram, suggests free and safe pins, and creates the devices (all or nothing). You can choose the name (pompa1, pompa2...).
 - **Wiring diagram (new in 1.7.57)**: the page draws it from the card data. The board with its pins (5V or 3V3, GND, suggested GPIOs) on the left, the module on the right. Coloured wires: **red** supply, **black** ground, **blue** signal (orange if analog), with the **voltage written** on the wire and an arrow for the direction. Resistors and other parts to add are drawn with their value (e.g. 330 ohm in series with the LED). Below is a table wire / from the board / to the module / voltage and notes: colours are also written in words. 12, 24 or 230 V supplies show a "Power supply" box: join its ground to the board GND. If the module signal is 5 V on an input a red warning appears: the pins only tolerate 3.3 V.
-- **For card authors**: add `level=3V3|5V` (signal level) and up to 4 lines `part=serie|gnd|vcc,value,signal` (for example `part=serie,330 ohm,OUT`) to `[module]`. The `[wiring]` section is no longer needed: if present it shows below as "Drawing attached to the file". Full format: claude/funzioni/VesevOS-formato-vdp.md in the Project.
+- **For card authors**: add `level=3V3|5V` (signal level) and up to 4 lines `part=serie|gnd|vcc,value,signal` (for example `part=serie,330 ohm,OUT`) to `[module]`. The `[wiring]` section is no longer needed: if present it shows below as "Drawing attached to the file". Full format: in the internal documentation of the .vdp format.
 - **Serial**: `mod list`, `mod info <name>`, `mod install <name> [prefix]`, `mod del <name>`.
 - **Warning**: always check the connections on your module's datasheet. A wrong diagram can damage the module. For 230 V you need an installer.
 
@@ -263,3 +263,12 @@ The board holds two programs: **VesevOS** and the **recovery** (small, used only
 - **Example**: `docs/esempi/app/logmqtt.vap` (copy it to /apps): a button and an "every hour" switch that send the last 10 log lines to `<prefix>/app/log`.
 - **Flashlight example**: `docs/esempi/script/torcia.vsc` (copy it to /scripts and start it). One click of the BOOT button turns the white LED on, the next click turns it off; it also turns off by itself after 10 minutes (change `MINUTI`, 0 = never). First set **Free** on the gesture you want in *Devices > BOOT button* (by default only 3 clicks are free). The white LED is bright and gets warm.
 - **Privacy**: the log can contain IP addresses and names. Whoever installs the app (Administrator only) decides with `logread` and `mqtt` whether it may read it and send it out. If the broker is outside your home, use encrypted MQTT (user and password) and choose who receives the data.
+
+## 27. What is new in 1.8.0 and 1.8.0b (summary)
+- **Serial login**: the shell asks for user, password and MFA code; roles for each subcommand; the password stays out of the history. After too many errors the same lock as on the web page applies.
+- **Commands**: `pwd`, `cd`, `ls`, prompt `user@hostname:folder$`, Tab, `man <command>`, `whoami`, `id`, `df`, `uname`, `time`, `ping`, `gzip`/`gunzip`/`zcat`, `zip`/`unzip`, `tar`, `cpu` (governor: 80/160/240/ondemand/conservative/schedutil), and the `vesevos-*` commands (cpuinfo, services, bugreport, config, network, led_control, cleaner, drive_manager, backup, update).
+- **Security**: `suspend`, `poweroff` and `/api/sleep` for Admin only, with confirmation. `locale country/tx/antenna`, `wifi set/off`, `date set` and `audit ack` are forbidden to the Operator.
+- **LED**: triggers `none/state/heartbeat/flash/wifi/cpu/default-on`, colors and CPU threshold.
+- **Network**: with the HTTP->HTTPS redirect on and HTTPS active, the HTTP port is served by a small server that only answers the redirect (less RAM; takes effect when the servers restart).
+- **Updates**: *Update via recovery* menu (Admin only); ready files, SHA-256 and `indice.json` in the repository's `firmware/` folder; first install from the browser with the `flash/` page (NOT TESTED with a real board). There is no digital signature: SHA-256 tells you the file is not corrupted, not who made it.
+- This is a summary: details and the tests still to be done are in the CHANGELOG and in `docs/KNOWN_ISSUES.en.md`.

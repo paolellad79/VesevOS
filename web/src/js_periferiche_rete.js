@@ -2,7 +2,7 @@
 var DV=[],DVT={btn:"boot"};
 function dvList(){return api("/api/dev").then(function(r){return r.json()}).then(function(j){DV=j.dev||[]})}
 function dmLoad(){dvList().then(function(){dvDraw("dm_list","dm_m")}).catch(function(){})}
-function dvDraw(box,mm){var L=DV.filter(function(d){return canSee(d.tab)}),caps=[],h="";
+function dvDraw(box,mm){var L=DV.filter(function(d){return d.id!="temp"&&canSee(d.tab)}),caps=[],h="";
  L.forEach(function(d){if(caps.indexOf(d.cap)<0)caps.push(d.cap)});
  if(L.length)h+='<table class="dvt"><colgroup><col class="c1"><col class="c2"><col class="c3"></colgroup>';
  caps.forEach(function(c){h+='<tr class="dvh"><th scope="colgroup" colspan="3">'+esc(c)+'</th></tr>';
@@ -19,21 +19,29 @@ function dvRows(tab){var id=DVT[tab]||tab;api("/api/dev?id="+id).then(function(r
  R.forEach(function(x){h+='<tr><td>'+esc(x[0])+'</td><td style="text-align:right"><b>'+esc(x[1])+'</b></td></tr>'});
  $("dv_"+tab).innerHTML=h+'</table>'}).catch(function(){})}
 
+/* --- voce unica Processore (include la temperatura): righe 0-1 = temperatura, le altre = processore; "lv" = stato termico --- */
+var CPU={tm:0,lv:-1};
+function cpuTab(R){var h="<table>";R.forEach(function(x){h+='<tr><td>'+esc(x[0])+'</td><td style="text-align:right"><b>'+esc(x[1])+'</b></td></tr>'});return h+"</table>"}
+function cpuLoad(){clearInterval(CPU.tm);CPU.lv=-1;cpuDraw();CPU.tm=setInterval(function(){if(cur!="cpu"){clearInterval(CPU.tm);return}cpuDraw()},5000)}
+function cpuDraw(){api("/api/dev?id=cpu").then(function(r){return r.json()}).then(function(j){var R=(j.data&&j.data.rows)||[],lv=(j.data&&j.data.lv)||0,e=$("cpu_st");
+ $("cpu_t").innerHTML=cpuTab(R.slice(0,1));$("cpu_p").innerHTML=cpuTab(R.slice(2));
+ if(lv!=CPU.lv){CPU.lv=lv;e.className="pill dvp "+(lv?"w":"v");e.textContent=lv==2?t("Temperatura alta: velocita ridotta"):lv==1?t("Temperatura calda"):t("Temperatura normale")}}).catch(function(){})}
+
 /* ===== periferiche a classi (rele, led, pin, ingresso, analogico): API /api/io, schede modulo /api/mods ===== */
-var IOCN={rele:"Rele",led:"LED",pin:"Pin (uscita)",ingresso:"Ingresso",analogico:"Analogico (pin 1-10)"},IOS={sel:"",tm:0,list:[]};
+var IOCN={rele:"Rele",led:"LED",pin:"Pin (uscita)",ingresso:"Ingresso",analogico:"Analogico (pin 1-10)",sd:"Lettore microSD"},IOS={sel:"",tm:0,list:[],sdp:[]};
 function ioCn(c){return c=="i2c"?t("Sensore I2C (BMP280)"):t(IOCN[c]||c)}
 function ioStop(){if(IOS.tm){clearInterval(IOS.tm);IOS.tm=0}}
 function ioIco(svg){if(!svg)return'<svg class="i" aria-hidden="true"><use href="#i-chipn"/></svg>';if(svg.indexOf("xmlns")<0)svg=svg.replace("<svg",'<svg xmlns="http://www.w3.org/2000/svg"');return'<img class="api" alt="" width="24" height="24" src="data:image/svg+xml;charset=utf-8,'+enc(svg)+'">'}
 function ioFind(n){for(var i=0;i<IOS.list.length;i++)if(IOS.list[i].n==n)return IOS.list[i];return null}
 function ioNum(x,dg){return x.toLocaleString(undefined,{minimumFractionDigits:dg,maximumFractionDigits:dg})}
 function ioI2cVal(d){return d.ok?ioNum(d.v/100,1)+" °C · "+ioNum(d.p/100,1)+" hPa":t("non risponde")}
-function ioPins(d){return d.c=="i2c"?"SDA "+d.g+" · SCL "+d.g2:String(d.g)}
+function ioPins(d){return d.c=="i2c"?"SDA "+d.g+" · SCL "+d.g2:d.c=="sd"?"CS "+d.g+" · MOSI "+d.g2+" · SCK "+d.g3+" · MISO "+d.g4:String(d.g)}
 function ioCanSw(d){return d.out&&(ROLE>=2||(ROLE>=1&&d.c!="rele"))}
 function ioLoad(){var sel=IOS.sel;$("io_new").className=ROLE>=2?"card":"card hide";$("io_mods").className=ROLE>=2?"card":"card hide";
- api("/api/io").then(function(r){return r.json()}).then(function(j){IOS.list=j.io||[];
+ api("/api/io").then(function(r){return r.json()}).then(function(j){IOS.list=j.io||[];IOS.sdp=j.sdp||[];
   if(sel&&!ioFind(sel)){ioClose();return}
   if(sel){ioDetDraw();return}
-  $("io_main").className="";$("io_det").className="card hide";ioStop();ioListDraw();if(ROLE>=2)ioModLoad()}).catch(function(){})}
+  $("io_main").className="";$("io_det").className="card hide";ioStop();ioListDraw();if(ROLE>=2)ioModLoad();sdLoad()}).catch(function(){})}
 function ioListDraw(){var L=IOS.list,h="";
  if(!L.length){$("io_tab").innerHTML='<tr><td class="fhint">'+esc(t("Nessuna voce"))+'</td></tr>';return}
  h='<tr><th>'+esc(t("Nome"))+'</th><th>'+esc(t("Classe"))+'</th><th>GPIO</th><th>'+esc(t("Valore"))+'</th><th></th></tr>';
@@ -41,6 +49,7 @@ function ioListDraw(){var L=IOS.list,h="";
   if(ioCanSw(d))v='<button class="sw1'+(d.v?" on":"")+'" role="switch" aria-checked="'+(d.v?"true":"false")+'" aria-label="'+esc(d.n)+'" onclick="ioSw(\''+d.n+'\','+(d.v?0:1)+')"></button>';
   else if(d.c=="analogico")v='<b>'+d.v+'</b>';
   else if(d.c=="i2c")v='<b>'+esc(ioI2cVal(d))+'</b>';
+  else if(d.c=="sd")v='<span class="pill dvp '+(d.v?"v":"")+'">'+esc(d.v?t("Scheda montata"):t("Scheda non montata"))+'</span>';
   else v='<span class="pill dvp '+(d.v?"v":"")+'">'+esc(d.v?t("acceso"):t("spento"))+'</span>';
   h+='<tr><td><b>'+esc(d.n)+'</b></td><td>'+esc(ioCn(d.c))+((d.f&1)?' <span class="fhint">('+esc(t("attivo basso"))+')</span>':"")+'</td><td>'+esc(ioPins(d))+'</td><td>'+v+'</td><td><button class="btn gray" onclick="ioOpen(\''+d.n+'\')">'+esc(t("Gestisci"))+'</button></td></tr>'});
  $("io_tab").innerHTML=h}
@@ -52,6 +61,7 @@ function ioDetDraw(){var d=ioFind(IOS.sel);if(!d){ioClose();return}var adm=ROLE>
  h+='<div class="aphd"><h3 style="margin:0">'+esc(d.n)+'</h3><button class="btn gray" onclick="ioClose()">'+esc(t("Indietro"))+'</button></div>';
  h+='<table class="ftab" style="margin-top:8px"><tr><td>'+esc(t("Classe"))+'</td><td><b>'+esc(ioCn(d.c))+'</b></td></tr><tr><td>GPIO</td><td><b>'+esc(ioPins(d))+'</b></td></tr>';
  if(d.c=="i2c")h+='<tr><td>'+esc(t("Indirizzo"))+'</td><td><b>0x'+d.a.toString(16)+'</b> · '+esc(d.d)+((d.f&8)?' · 400 kHz':' · 100 kHz')+'</td></tr>';
+ if(d.c=="sd")h+='<tr><td>'+esc(t("Frequenza del bus SPI"))+'</td><td><b>'+d.k+' kHz</b></td></tr>';
  if(d.out||d.c=="ingresso")h+='<tr><td>'+esc(t("Livello"))+'</td><td><b>'+esc((d.f&1)?t("attivo basso"):t("attivo alto"))+'</b></td></tr>';
  if(d.c=="ingresso")h+='<tr><td>'+esc(t("Resistenza"))+'</td><td><b>'+esc((d.f&2)?"pull-up":(d.f&4)?"pull-down":t("nessuna"))+'</b></td></tr>';
  h+='<tr><td>'+esc(t("Valore"))+'</td><td id="iod_v"></td></tr></table>';
@@ -63,14 +73,16 @@ function ioDetDraw(){var d=ioFind(IOS.sel);if(!d){ioClose();return}var adm=ROLE>
   else h+='<span class="fhint">'+esc(t("Il rele lo prova solo l'Amministratore."))+'</span>';
   h+='</div><p class="fhint">'+esc(d.c=="rele"?t("Il rele si riaccende al massimo una volta al secondo e non lampeggia: si consuma. Spegnere si puo sempre."):t("L'impulso e il lampeggio si spengono da soli."))+'</p>'}
  else if(d.c=="i2c")h+='<p class="fhint">'+esc(t("Temperatura e pressione si aggiornano da sole ogni due secondi. Se il sensore non risponde, controlla i fili, l'indirizzo (0x76 o 0x77) e l'alimentazione."))+'</p>';
+ else if(d.c=="sd")h+='<p class="fhint">'+esc(t("La scheda si monta e si smonta dal riquadro Scheda microSD, sopra nella pagina Periferiche. Se non la trova, controlla i fili, che sia FAT32 e prova una frequenza piu bassa (400 kHz)."))+'</p>';
  else if(d.c=="ingresso")h+='<p class="fhint">'+esc(t("Premi il pulsante o attiva il sensore: il valore qui sotto cambia da solo."))+'</p>';
  else h+='<p class="fhint">'+esc(t("Il valore va da 0 a 4095 e si aggiorna da solo."))+'</p>';
  h+='<div id="iod_m" class="msg" role="status"></div>';
  if(adm)h+='<div class="ftb" style="margin-top:14px"><button class="btn gray" onclick="ioRen(\''+d.n+'\')">'+esc(t("Rinomina"))+'</button><button class="btn red" onclick="ioDel(\''+d.n+'\')">'+esc(t("Togli"))+'</button></div>';
- h+='<p class="fhint">'+esc(d.c=="i2c"?tf("Nelle app: use={0} e poi dev_get(\"{0}\") per la temperatura (centesimi di grado) e dev_get(\"{0}.p\") per la pressione (pascal).",d.n):tf("Nelle app: use={0} e poi dev_set(\"{0}\", 1) o dev_get(\"{0}\").",d.n))+'</p>';
+ if(d.c!="sd")h+='<p class="fhint">'+esc(d.c=="i2c"?tf("Nelle app: use={0} e poi dev_get(\"{0}\") per la temperatura (centesimi di grado) e dev_get(\"{0}.p\") per la pressione (pascal).",d.n):tf("Nelle app: use={0} e poi dev_set(\"{0}\", 1) o dev_get(\"{0}\").",d.n))+'</p>';
  $("io_det").innerHTML=h;ioDetLive()}
 function ioDetLive(){var d=ioFind(IOS.sel),e=$("iod_v");if(!d||!e)return;
  if(d.c=="i2c")e.innerHTML='<b>'+esc(ioI2cVal(d))+'</b>';
+ else if(d.c=="sd")e.innerHTML='<span class="pill dvp '+(d.v?"v":"")+'">'+esc(d.v?t("Scheda montata"):t("Scheda non montata"))+'</span>';
  else if(d.c=="analogico")e.innerHTML='<b>'+d.v+'</b> <span class="fhint">/ 4095</span><div class="bar" style="margin-top:4px"><i style="width:'+Math.round(d.v*100/4095)+'%"></i></div>';
  else e.innerHTML='<span class="pill dvp '+(d.v?"v":"")+'">'+esc(d.v?t("acceso"):t("spento"))+'</span>'}
 function ioAct(a,v){post("/api/dev/act",{id:IOS.sel,a:a,arg:v}).then(function(r){return r.json()}).then(function(j){if(j.ok===false)msg("iod_m",j.err,false);else msg("iod_m",t("Fatto"),true);ioPoll()}).catch(function(){})}
@@ -101,7 +113,9 @@ function ioModUp(){var f=$("io_mf").files[0];if(!f)return;$("io_mf").value="";va
 function ioModDel(n){dlg({title:t("Eliminare?"),body:'<p style="margin:0">'+esc(tf("La scheda modulo {0} verra eliminata. Le periferiche gia create restano.",n))+'</p>',ok:t("Elimina"),danger:true,
  onOk:function(){return post("/api/mod/del",{n:n,name:n}).then(function(r){return r.json()}).then(function(j){if(j.ok){ioModLoad();return""}return j.err})}})}
 function ioSw(n,v){post("/api/dev/act",{id:n,a:"set",arg:v}).then(function(r){return r.json()}).then(function(j){if(j.ok===false)msg("io_m",j.err,false);ioLoad()}).catch(function(){})}
-function ioAdd(){var g=$("io_g").value;post("/api/io/add",{cls:$("io_c").value,gpio:g,name:$("io_n").value,opt:$("io_o").value}).then(function(r){return r.json()}).then(function(j){
+function ioClsChg(){var s=$("io_c").value=="sd";$("io_sdf").className=s?"":"hide";$("io_o").parentNode.className=s?"hide":"";
+ if(s){var D=IOS.sdp,F=["io_g","io_sm","io_sk","io_si"];F.forEach(function(i,k){if(!$(i).value&&D[k]!=null)$(i).value=D[k]});if(!$("io_sf").value)$("io_sf").value=1000}}
+function ioAdd(){var g=$("io_g").value,sd=$("io_c").value=="sd",o=sd?"mosi="+$("io_sm").value+" sck="+$("io_sk").value+" miso="+$("io_si").value+" khz="+$("io_sf").value:$("io_o").value;post("/api/io/add",{cls:$("io_c").value,gpio:g,name:$("io_n").value,opt:o}).then(function(r){return r.json()}).then(function(j){
  msg("io_am",j.ok?t("Fatto")+": "+j.n:j.err,!!j.ok);if(j.ok){$("io_n").value="";$("io_g").value="";ioLoad()}}).catch(function(){})}
 function ioDel(n){dlg({title:t("Togliere la periferica?"),body:'<p style="margin:0">'+esc(n)+'</p>',ok:t("Togli"),danger:true,onOk:function(){return post("/api/io/del",{n:n}).then(function(r){return r.json()}).then(function(j){if(j.ok){ioLoad();return""}return j.err})}})}
 function ioRen(n){dlg({title:t("Rinomina"),body:'<label for="dn">'+esc(t("Nuovo nome"))+'</label><input id="dn" autocomplete="off" maxlength="11" value="'+esc(n)+'">',ok:t("Rinomina"),
@@ -257,9 +271,16 @@ function wdLoad(){api("/api/wd").then(function(r){return r.json()}).then(functio
  w.watch.forEach(function(x){h+='<tr><td>'+esc(x.n)+'</td><td>'+esc(durText(x.ago))+'</td><td>'+esc(durText(x.to))+'</td><td>'+x.r+'</td></tr>'});$("wdst").innerHTML=h+'</tbody></table>';
  $("wd_task").classList.toggle("on",w.task);$("wd_net").classList.toggle("on",w.net);$("wd_ram").classList.toggle("on",w.ram);$("wd_nm").value=w.netMin;$("wd_rk").value=w.ramKb;$("wd_ud").value=w.upDays;
  $("wd_at").value=w.at>=0?("0"+Math.floor(w.at/60)).slice(-2)+":"+("0"+w.at%60).slice(-2):"";
+ wdTimes(w);
  var b="";WDD.forEach(function(d,i){b+='<button type="button" class="btn '+((w.days>>i)&1?"":"gray")+'" data-on="'+((w.days>>i)&1)+'" onclick="this.dataset.on=this.dataset.on==1?0:1;this.className=\'btn \'+(this.dataset.on==1?\'\':\'gray\')">'+esc(t(d))+'</button>'});$("wd_days").innerHTML=b}).catch(function(){})}
+function wdTimes(w){
+ function fill(id,o){var e=$(id);e.value=o.v;e.min=o.min;e.max=o.max;$(id+"_h").textContent=tf("Ora {0} s, da {1} a {2}, di base {3}",o.v,o.min,o.max,o.def)}
+ fill("wd_tw",w.twdt);w.lim.forEach(function(o){fill("wd_l_"+o.n,o)});
+ $("wd_int").textContent=tf("Watchdog di interruzione: {0} ms. Si cambia solo compilando il firmware: qui e in sola lettura.",w.intMs)}
+function wdDefaults(){post("/api/wd",{defaults:1})
+ .then(function(r){return r.json()}).then(function(j){msg("wdm",j.ok?t("Salvato"):j.err,j.ok);if(j.ok)wdLoad()})}
 function wdSave(){var at=$("wd_at").value,days=0;[].forEach.call($("wd_days").children,function(b,i){if(b.dataset.on==1)days|=1<<i});
- post("/api/wd",{task:$("wd_task").classList.contains("on")?1:0,net:$("wd_net").classList.contains("on")?1:0,ram:$("wd_ram").classList.contains("on")?1:0,netmin:$("wd_nm").value,ramkb:$("wd_rk").value,updays:$("wd_ud").value,at:at?+at.slice(0,2)*60+ +at.slice(3,5):-1,days:days})
+ post("/api/wd",{task:$("wd_task").classList.contains("on")?1:0,net:$("wd_net").classList.contains("on")?1:0,ram:$("wd_ram").classList.contains("on")?1:0,netmin:$("wd_nm").value,ramkb:$("wd_rk").value,updays:$("wd_ud").value,at:at?+at.slice(0,2)*60+ +at.slice(3,5):-1,days:days,twdt:$("wd_tw").value,lim_net:$("wd_l_net").value,lim_monitor:$("wd_l_monitor").value,lim_mesh:$("wd_l_mesh").value,lim_mqtt:$("wd_l_mqtt").value,lim_led:$("wd_l_led").value})
  .then(function(r){return r.json()}).then(function(j){msg("wdm",j.ok?t("Salvato"):j.err,j.ok);if(j.ok)wdLoad()})}
 
 /* ===== Utenti ===== */

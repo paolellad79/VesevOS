@@ -4,6 +4,13 @@
 // INTERNO alla shell: include, aiuti e i tre gruppi di comandi (vos_shell_sys/net/admin.cpp). L'interfaccia pubblica e vos_shell.h.
 #pragma once
 #include "vos_shell.h"
+#include "vos_shell_line.h"
+#include "vos_shell_sess.h"
+#include "vos_shell_path.h"
+#include "vos_shell_roles.h"
+#include "vos_shell_cmdtab.h"
+#include "vos_shell_secret.h"
+#include "vos_shell_apply.h"
 #include "../packages/vos_rules.h"
 #include "../core/vos_boot.h"
 #include "../core/vos_common.h"
@@ -39,8 +46,9 @@
 #include "../packages/vos_berry.h"
 #include "../packages/vos_app.h"
 #include "../packages/vos_selftest.h"
+#include "../packages/vos_benchsha.h"
 #include "../core/vos_diario.h"
-extern bool g_extmem;                 // definita in VesevOS.ino: i blocchi grandi vanno in PSRAM?
+extern bool g_extmem;                 // definita in vos_main.cpp: i blocchi grandi vanno in PSRAM?
 #include "../drivers/vos_drv_fs.h"
 #include "../drivers/vos_drv_wifi.h"
 #include "../drivers/vos_drv_ota.h"
@@ -49,16 +57,44 @@ extern bool g_extmem;                 // definita in VesevOS.ino: i blocchi gran
 
 
 namespace shx {
-String argAt(const String& s, int idx);          // parola numero idx della riga (0 = comando)
-String restFrom(const String& s, int idx);       // il resto della riga dalla parola idx
-void   cmdHelp(Print& o);
-int    roleArg(const String& r);
-String hex6(uint32_t c);                         // colore in 6 cifre esadecimali
-void   wzStart(Print& o);                        // configurazione guidata da seriale
+int    roleArg(const Word& r);
+void   wzStart(OutSink& o);                        // configurazione guidata da seriale (vos_shell_wiz.cpp)
+void   wzLine(OutSink& o, char* line);             // una risposta della guida (la riga viene modificata)
+bool   wzActive();                               // la guida e in corso?
+void   wzAbort();                                // la guida si lascia (logout della seriale)
+bool   scanRunning();                            // la scansione Wi-Fi sta ancora lavorando?
+// Le funzioni "...Apply" (cosa fare quando la password c e) sono in vos_shell_apply.h
+uint32_t shellClientIp();                                                               // vos_shell.cpp: IP del computer che usa la shell della pagina (0 = seriale o sconosciuto)
 }  // namespace shx
 using namespace shx;
 
 // Gruppi di comandi: ognuno ritorna true se ha riconosciuto e gestito il comando (stesso ordine della vecchia catena if/else).
-bool shCmdSys(String c, String a1, const String& line, Print& o, int role);     // vos_shell_sys.cpp  : help ... cpu (stato, file, ora)
-bool shCmdNet(String c, String a1, const String& line, Print& o, int role);     // vos_shell_net.cpp  : wifi ... pins (rete, LED, pin, periferiche)
-bool shCmdAdmin(String c, String a1, const String& line, Print& o, int role);   // vos_shell_admin.cpp: config ... reboot (utenti, sicurezza, servizi)
+bool shCmdFiles(const Word& c, const Word& a1, const char* line, OutSink& o, int role, ShellSess& ss);  // vos_shell_files.cpp: pwd cd ls cat mkdir rm mv cp write (cartella corrente della sessione)
+void shLs(const char* line, OutSink& o, const ShellSess& ss);                                       // vos_shell_ls.cpp   : comando "ls" (stile shell classica)
+void shPing(const char* line, OutSink& o, uint32_t sess);                          // vos_shell_ping.cpp : comando "ping" (solo Admin; il tetto di durata dipende dalla sessione)
+bool shCmdArchive(const Word& c, const char* line, OutSink& o, const ShellSess& ss, uint32_t sess);   // vos_shell_arch.cpp: gzip gunzip zcat unzip zip tar (compressione e archivi, solo Admin)
+void shGzip(const char* cmd, const char* line, OutSink& o, const ShellSess& ss, uint32_t sess);       // vos_shell_gzip.cpp : gzip, gunzip, zcat
+void shUnzip(const char* line, OutSink& o, const ShellSess& ss, uint32_t sess);                       // vos_shell_zip.cpp  : unzip (elenco ed estrazione)
+void shZip(const char* line, OutSink& o, const ShellSess& ss, uint32_t sess);                         // vos_shell_zipc.cpp : zip (crea archivi .zip)
+void shTar(const char* line, OutSink& o, const ShellSess& ss, uint32_t sess);                         // vos_shell_tar.cpp  : tar -t, -x (e -c con vos_shell_tarc.cpp)
+bool shCmdBasic(const Word& c, const Word& a1, const char* line, OutSink& o, int role, uint32_t sess);   // vos_shell_basic.cpp: help man whoami id echo df uname exit time
+bool shCmdSys(const Word& c, const Word& a1, const char* line, OutSink& o, int role);     // vos_shell_sys.cpp  : help ... ntp (stato, memoria, ora)
+bool shCmdCpu(const Word& c, const Word& a1, const char* line, OutSink& o, int role);     // vos_shell_cpu.cpp : cpu, lscpu, vesevos-cpuinfo
+bool shServicesActive(HeapBuf& out);                                              // vos_shell_services.cpp: nomi dei servizi non fermi, separati da virgola
+void shBugreport(const char* line, OutSink& o, int role);                         // vos_shell_bugreport.cpp: vesevos-bugreport
+namespace shx {
+void shConfig(const char* line, OutSink& o, int role, uint32_t sess);             // vos_shell_cfg.cpp    : vesevos-config (riepilogo, inoltro dei comandi che ci sono gia)
+bool shCfgArea(const char* area, OutSink& o, int role);                           // vos_shell_cfgarea.cpp: dettagli di un'area (false = area sconosciuta)
+void shNetwork(const char* line, OutSink& o, int role, uint32_t sess);            // vos_shell_network.cpp: vesevos-network (riepilogo, scan, ping)
+void shNetworkSummary(OutSink& o, bool full);                                     // vos_shell_network.cpp: il riepilogo di rete (full = MAC intero)
+void shNetBrief(HeapBuf& h);                                                      // vos_shell_network.cpp: righe Modo, Rete Wi-Fi, IP
+void shCleaner(const char* line, OutSink& o, int role);                           // vos_shell_cleaner.cpp: vesevos-cleaner (pulizia sicura, prova a secco, solo Admin)
+void shDriveManager(const char* line, OutSink& o, int role, uint32_t sess);       // vos_shell_drive.cpp  : vesevos-drive_manager (volumi; mount/unmount/test inoltrati a "sd")
+void shBackup(const char* line, OutSink& o, int role);                            // vos_shell_backup.cpp : vesevos-backup (backup cifrato della configurazione in /backup, solo Admin)
+void shUpdate(const char* line, OutSink& o, int role);                            // vos_shell_update.cpp : vesevos-update (stato e ordini di aggiornamento tramite recovery, solo Admin)
+}  // namespace shx
+bool shCmdVesevos(const Word& c, const Word& a1, const char* line, OutSink& o, int role, uint32_t sess); // vos_shell_services.cpp: dispatch dei vesevos-* (services, bugreport, config, network)
+bool shCmdLed(const Word& c, const Word& a1, const char* line, OutSink& o, int role);     // vos_shell_led.cpp  : led, led-color, led-bright (modo, trigger, colori)
+bool shCmdNet(const Word& c, const Word& a1, const char* line, OutSink& o, int role);     // vos_shell_net.cpp  : wifi ... pins (rete, LED, pin, periferiche)
+void shSd(const char* line, OutSink& o, int role);                                 // vos_shell_sd.cpp   : comando "sd" (microSD), senza String
+bool shCmdAdmin(const Word& c, const Word& a1, const char* line, OutSink& o, int role);   // vos_shell_admin.cpp: config ... reboot (utenti, sicurezza, servizi)

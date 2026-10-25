@@ -10,45 +10,67 @@
 #include "../core/vos_i18n.h"
 #include "../core/vos_util.h"
 #include "../core/vos_time.h"
+#include "../core/vos_parse.h"
 
-String bleCfgRun(String c, bool& stopAfter) {
+// Il comando si legge con viste sul testo ricevuto (nessuna copia). La risposta va in reply (buffer fisso, max 160 caratteri).
+// La configurazione tiene ancora testi Arduino: si convertono solo i valori che ci finiscono dentro.
+
+void bleCfgRun(const char* cmd, bool& stopAfter, ErrBuf& reply) {
   stopAfter = false;
-  c.trim();
-  String w = c, rest; int sp = c.indexOf(' ');
-  if (sp > 0) { w = c.substring(0, sp); rest = c.substring(sp + 1); rest.trim(); }
+  std::string_view c = trimView(cmd ? cmd : "");
+  size_t sp = c.find(' ');
+  std::string_view w = c, rest;
+  if (sp != std::string_view::npos && sp > 0) { w = c.substr(0, sp); rest = trimView(c.substr(sp + 1)); }
   cfgSetOrigin("bluetooth");
-  if (w == "status") return cfg.hostname + " " + netIpString() + " " + (cfg.country.length() ? cfg.country : String("--"));
-  if (w == "done") { stopAfter = true; return "ok"; }
+  if (w == "status") {
+    char ip[16]; netIpTo(ip, sizeof ip);
+    reply.setf("%s %s %s", cfg.hostname.c_str(), ip, cfg.country.length() ? cfg.country.c_str() : "--");
+    return;
+  }
+  if (w == "done") { stopAfter = true; reply = "ok"; return; }
   if (w == "wifi") {
-    int p = rest.indexOf('|');
-    String ssid = p >= 0 ? rest.substring(0, p) : rest, pass = p >= 0 ? rest.substring(p + 1) : String("");
-    if (!ssid.length() || ssid.length() > 32 || (pass.length() && (pass.length() < 8 || pass.length() > 63))) return tr("rete o password non valide");
+    size_t p = rest.find('|');
+    std::string_view ssid = p != std::string_view::npos ? rest.substr(0, p) : rest;
+    std::string_view pass = p != std::string_view::npos ? rest.substr(p + 1) : std::string_view();
+    if (ssid.empty() || ssid.size() > 32 || (!pass.empty() && (pass.size() < 8 || pass.size() > 63))) { reply = tr("rete o password non valide"); return; }
     cfg.staSsid = ssid; cfg.staPass = pass; cfg.staEnabled = true; cfg.staDhcp = true;
     bool ntpBack = cfgNtpAfterWifi();
     cfgSave(); netReconfigure(); if (ntpBack) timeApply();
-    return "ok";
+    reply = "ok";
+    return;
   }
   if (w == "country") {
-    rest.toUpperCase();
-    if (!regionValid(rest)) return tr("paese sconosciuto");
-    cfg.country = rest; cfgSave(); netReconfigure();
-    return "ok";
+    char cc[8];                                   // il codice paese ha 2 lettere: oltre la capacita non puo essere valido
+    size_t n = rest.size() < sizeof(cc) - 1 ? rest.size() : sizeof(cc) - 1;
+    for (size_t i = 0; i < n; i++) cc[i] = (char)toupper((unsigned char)rest[i]);
+    cc[n] = 0;
+    if (n != rest.size() || !regionValid(cc)) { reply = tr("paese sconosciuto"); return; }
+    cfg.country = cc; cfgSave(); netReconfigure();
+    reply = "ok";
+    return;
   }
   if (w == "name") {
-    rest.toLowerCase();
-    if (!hostnameValid(rest)) return tr("nome non valido");
-    cfg.hostname = rest; cfgSave(); netReconfigure();
-    return "ok";
+    char nm[40];                                  // hostnameValid accetta al massimo 32 caratteri
+    size_t n = rest.size() < sizeof(nm) - 1 ? rest.size() : sizeof(nm) - 1;
+    for (size_t i = 0; i < n; i++) nm[i] = (char)tolower((unsigned char)rest[i]);
+    nm[n] = 0;
+    if (n != rest.size() || !hostnameValid(std::string_view(nm, n))) { reply = tr("nome non valido"); return; }
+    cfg.hostname = nm; cfgSave(); netReconfigure();
+    reply = "ok";
+    return;
   }
   if (w == "mesh") {
-    int p = rest.indexOf(' ');
-    int role = p > 0 ? rest.substring(0, p).toInt() : -1;
-    String key = p > 0 ? rest.substring(p + 1) : String("");
-    key.toLowerCase();
-    if (role < 0 || role > 2 || key.length() != 64) return tr("uso: mesh <0|1|2> <chiave di 64 cifre>");
-    cfg.meshRole = role; cfg.meshKey = key; cfgSave();
-    return "ok";
+    size_t p = rest.find(' ');
+    long role = p != std::string_view::npos && p > 0 ? viewToLong(rest.substr(0, p)) : -1;
+    std::string_view key = p != std::string_view::npos && p > 0 ? rest.substr(p + 1) : std::string_view();
+    if (role < 0 || role > 2 || key.size() != 64) { reply = tr("uso: mesh <0|1|2> <chiave di 64 cifre>"); return; }
+    char k[65];
+    for (size_t i = 0; i < 64; i++) k[i] = (char)tolower((unsigned char)key[i]);
+    k[64] = 0;
+    cfg.meshRole = role; cfg.meshKey = k; cfgSave();
+    reply = "ok";
+    return;
   }
-  return tr("comando sconosciuto (wifi, country, name, mesh, status, done)");
+  reply = tr("comando sconosciuto (wifi, country, name, mesh, status, done)");
 }
 #endif

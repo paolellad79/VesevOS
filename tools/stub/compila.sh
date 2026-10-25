@@ -7,7 +7,7 @@
 # Uso: tools/stub/compila.sh     (dalla cartella del repo). Package spenti: VOS_EXTRA="-DVOS_WITH_BERRY=0 -DVOS_WITH_BLE=0" tools/stub/compila.sh
 R=$(cd "$(dirname "$0")/../.." && pwd); L=$(dirname "$R")
 cd "$R/VesevOS"; O=$(mktemp -d); fail=0
-for f in $(find . -name "*.cpp" | sed "s|^\./||") VesevOS.ino; do
+for f in $(find . -name "*.cpp" | sed "s|^\./||"); do   # il punto di ingresso e src/vos_main.cpp
   out=$(g++ -std=gnu++17 -x c++ -c -w -DARDUINO=10800 -DESP32 $VOS_EXTRA -I"$R/tools/stub" -I"$L/psychic/src" -I"$L/aj/src" -I"$L/mbed/include" "$f" -o "$O/$(basename "$f").o" 2>&1 | grep -E "error|fatal" | head -6)
   if [ -n "$out" ]; then echo "== $f"; echo "$out"; fail=1; fi
 done

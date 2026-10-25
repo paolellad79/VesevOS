@@ -53,7 +53,7 @@ int main() {
   { auto v = g; v.resize(40); CHECK(chk(v) == IMG_SMALL); }
   { auto v = g; v[0] = 0xE8; CHECK(chk(v) == IMG_MAGIC); }
   { auto v = g; v[12] = 0x00; CHECK(chk(v) == IMG_CHIP); }             // 0 = ESP32 classico
-  { auto v = g; v[32] = 0; CHECK(chk(v) == IMG_ARDUINO); }
+  { auto v = g; v[32] = 0; CHECK(chk(v) == IMG_APPDESC); }
   CHECK(chk(g, (uint32_t)g.size() - 1) == IMG_BIG);
   CHECK(chk(g, (uint32_t)g.size()) == IMG_OK);
   { auto v = g; v[1] = 0; CHECK(chk(v) == IMG_SEGS); }

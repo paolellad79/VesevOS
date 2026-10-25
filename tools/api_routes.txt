@@ -107,6 +107,8 @@ POST  /api/rules/run  operatore
 GET   /api/script  admin
 POST  /api/script/run  admin
 POST  /api/script/stop  admin
+GET   /api/sd  operatore
+POST  /api/sd/act  operatore
 GET   /api/selftest  admin
 POST  /api/selftest  admin
 GET   /api/selftest/report  admin
@@ -116,7 +118,7 @@ POST  /api/serialauth  admin
 GET   /api/settings  ospite
 POST  /api/setup/done  admin
 POST  /api/shell  operatore
-POST  /api/sleep  operatore
+POST  /api/sleep  admin
 GET   /api/stats  operatore
 POST  /api/stats  admin
 GET   /api/stats.csv  operatore
@@ -135,6 +137,9 @@ POST  /api/time/sync  operatore
 GET   /api/tls  ospite
 POST  /api/tls  admin
 GET   /api/tls/cert  ospite
+GET   /api/updorder  admin
+POST  /api/updorder/file  admin
+POST  /api/updorder/net  admin
 GET   /api/users  admin
 POST  /api/users/add  admin
 POST  /api/users/del  admin

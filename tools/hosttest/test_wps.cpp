@@ -26,15 +26,16 @@ DrvWpsEvent drvWpsPoll() { DrvWpsEvent e = g_ev; g_ev = DWE_NONE; return e; }
 String drvWpsPin() { return g_pinVal; }
 bool drvWpsCredentials(String& s, String& p) { s = g_cs; p = g_cp; return s.length() > 0; }
 static int g_led = 0; void ledSetWps(int s) { g_led = s; }
-static int g_aud = 0; void auditEvent(AuditLevel, const String&, const String&) { g_aud++; }
+static int g_aud = 0; void auditEvent(AuditLevel, const char*, const char*) { g_aud++; }
 #include "../../VesevOS/src/net/vos_wps.cpp"
+static String wpsJ() { HeapBuf j(WPS_JSON_MAX); wpsJson(j); return String(j.c_str()); }   // la prova confronta con indexOf: serve una String
 static int clicks2() { return 2; }    // il tasto BOOT arriva dal gancio (core/vos_hooks.h), come sulla scheda
 
 static void tick() { wpsTick(); }
 
 int main() {
   g_hooks.btnWpsClicks = clicks2;
-  String err;
+  ErrBuf err;
   // permessi
   cfg.setupDone = false; cfg.wpsOn = false; cfg.wpsPin = false;
   CHECK(wpsAllowed());                       // prima configurazione: tutto consentito
@@ -51,19 +52,19 @@ int main() {
   CHECK(!wpsStart(false, "altro", err));                           // gia in corso
   tick();
   CHECK(g_wpsOn && !g_pinReq && g_mode == DW_AP_STA && g_led == 1);
-  CHECK(wpsJson().indexOf("\"state\":1") > 0 && wpsJson().indexOf("\"pin\":\"") < 0);
+  CHECK(wpsJ().indexOf("\"state\":1") > 0 && wpsJ().indexOf("\"pin\":\"") < 0);
   g_now += 30000; tick(); CHECK(wpsState() == WPS_WAIT);
   g_cs = "CasaMia"; g_cp = "segretissima"; g_ev = DWE_OK; cfg.staDhcp = false; cfg.staEnabled = false; g_reconf = 0; g_aud = 0;
   tick();
   CHECK(wpsState() == WPS_OK && !g_wpsOn && cfg.staSsid == "CasaMia" && cfg.staPass == "segretissima" && cfg.staEnabled && cfg.staDhcp);
   CHECK(g_reconf == 1 && g_aud == 1 && g_led == 2 && !wpsActive());
-  CHECK(wpsJson().indexOf("CasaMia") > 0 && wpsJson().indexOf("segretissima") < 0);   // la password non esce mai
+  CHECK(wpsJ().indexOf("CasaMia") > 0 && wpsJ().indexOf("segretissima") < 0);   // la password non esce mai
   g_now += 3500; tick(); CHECK(g_led == 0);
 
   // tempo scaduto (evento del chip) e tempo scaduto da soli: torna solo hotspot
   CHECK(wpsStart(false, "tasto BOOT", err)); tick(); g_mode = DW_AP_STA;
   g_ev = DWE_TIMEOUT; tick();
-  CHECK(wpsState() == WPS_FAIL && g_mode == DW_AP && g_led == 3 && !g_wpsOn && wpsJson().indexOf("err") > 0);
+  CHECK(wpsState() == WPS_FAIL && g_mode == DW_AP && g_led == 3 && !g_wpsOn && wpsJ().indexOf("err") > 0);
   g_now += 4000; tick(); CHECK(g_led == 0);
   CHECK(wpsStart(false, "web", err)); tick(); g_now += 126000; tick();
   CHECK(wpsState() == WPS_FAIL && !g_wpsOn);
@@ -84,9 +85,9 @@ int main() {
 
   // PIN: solo se consentito; il PIN esce solo mentre aspetta e non finisce mai nel registro
   cfg.wpsPin = true; g_pinVal = "";
-  CHECK(wpsStart(true, "web", err)); tick(); CHECK(g_wpsOn && g_pinReq && wpsJson().indexOf("\"pin\":\"") < 0);
-  g_pinVal = "12345670"; tick(); CHECK(wpsJson().indexOf("\"pin\":\"12345670\"") > 0 && wpsText().indexOf("12345670") >= 0);
-  g_ev = DWE_TIMEOUT; tick(); CHECK(wpsJson().indexOf("12345670") < 0 && wpsText().indexOf("12345670") < 0);
+  CHECK(wpsStart(true, "web", err)); tick(); CHECK(g_wpsOn && g_pinReq && wpsJ().indexOf("\"pin\":\"") < 0);
+  g_pinVal = "12345670"; tick(); CHECK(wpsJ().indexOf("\"pin\":\"12345670\"") > 0 && wpsText().indexOf("12345670") >= 0);
+  g_ev = DWE_TIMEOUT; tick(); CHECK(wpsJ().indexOf("12345670") < 0 && wpsText().indexOf("12345670") < 0);
 
   // dalla rete di casa: scollega, prova, e se fallisce rimette la rete di prima
   g_ns = NET_CLIENT_OK; g_mode = DW_STA; g_disc = 0; g_reconf = 0;

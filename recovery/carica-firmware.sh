@@ -1,7 +1,7 @@
 #!/bin/bash
 # VesevOS - carica SOLO il firmware nello slot app0 (indirizzo 0x110000), senza toccare recovery e impostazioni.
-# Uso:  ./carica-firmware.sh PORTA VesevOS.ino.bin
-# ATTENZIONE: NON usare il pulsante Carica dell'IDE Arduino per VesevOS: scrive a 0x10000 e cancella il recovery.
+# Uso:  ./carica-firmware.sh PORTA VesevOS-<versione>.bin   (file del firmware ESP-IDF, per esempio consegna/VesevOS-1.7.70g.bin)
+# ATTENZIONE: NON usare il pulsante "Carica" di un IDE (ne idf.py flash) per VesevOS: scrive a 0x10000 e cancella il recovery.
 set -e
 P="$1"; F="$2"
 [ -z "$P" ] || [ -z "$F" ] && { sed -n '2,5p' "$0"; exit 1; }

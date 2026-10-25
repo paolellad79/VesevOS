@@ -68,16 +68,16 @@ function uSleep(){dlg({title:t("Mettere la scheda in sleep?"),body:'<p style="ma
 function row(a,b){return '<div class="row"><span>'+a+'</span><span>'+b+'</span></div>'}
 function macRow(lab,m){if(!m)return"";return row(esc(lab),'<code class="mac">'+esc(m)+'</code>')}
 function bar(p){return '<div class="bar"><i style="width:'+p+'%"></i></div>'}
-function tmp(c,u){return u?(c*9/5+32).toFixed(1)+" &deg;F":c.toFixed(1)+" &deg;C"}
+function tmp(c,u){return u?Math.round(c*9/5+32)+" &deg;F":Math.round(c)+" &deg;C"}
 function kb(n){return Math.round(n/1024)+" KB"}
 var PBUSY=0;document.addEventListener("visibilitychange",function(){if(!document.hidden&&typeof loggedIn=="function"&&loggedIn())poll()});
 var RF=3;try{var q=parseInt(localStorage.getItem("vosRf"));if([0,1,3,5,10,30].indexOf(q)>=0)RF=q}catch(e){}
 function rfApply(){clearInterval(timer);timer=null;if($("rf"))$("rf").value=String(RF);if(RF>0)timer=setInterval(poll,RF*1000)}
 function rfSet(v){RF=parseInt(v);try{localStorage.setItem("vosRf",String(RF))}catch(e){}rfApply();if(RF>0)poll()}
 function poll(){if(PBUSY&&Date.now()-PBUSY<8000)return;if(document.hidden)return;PBUSY=Date.now();api("/api/status").then(function(r){return r.json()}).then(function(s){S=s;if($("fver"))$("fver").textContent="VesevOS "+s.version+" \u00b7 (C) 2026 Domenico Paolella";
- hdTick();hwFetch();$("bchip").textContent=s.net.host+" · "+boardId(s);
+ hdTick();hwFetch();updCheckNew();$("bchip").textContent=s.net.host+" · "+boardId(s);
  var hp=Math.round(100-100*s.heapFree/s.heapTotal),pp=s.psramTotal?Math.round(100-100*s.psramFree/s.psramTotal):0,fp=s.flashTotal?Math.round(100*s.flashUsed/s.flashTotal):0;
- if($("cpumode")&&document.activeElement!=$("cpumode"))$("cpumode").value=s.cpuMode;
+ cpuUi(s);
  alertsCalc(s,hp,pp,fp);if(cur=="sum"){homeDraw()}PBUSY=0}).catch(function(){PBUSY=0})}
 function boardId(s){var m=(s.net.mac||"").split(":");return m.length==6?(m[4]+m[5]).toUpperCase():"----"}
 function hcol(p,w,k){return p>=k?"var(--ko)":p>=w?"var(--wa)":"var(--ok)"}
@@ -146,6 +146,7 @@ function homeWid(s,n){hwFetch();if(!SV.httpPort)svcLoad();
  if(n.dhcpRun)c.push(wid("DHCP",pill(1,t("Attivo"),""),esc(t("Dispositivi collegati"))+": "+(n.clients||0),"dhcp","i-net"));
  if(n.st==1)c.push(wid(t("Punto di accesso (AP)"),(n.clients||0)+"",esc(t("Dispositivi collegati")),"ap","i-ant"));
  if(W.pw)c.push(wid(t("Risparmio energia"),esc(W.pw==1?t("Risparmio Wi-Fi"):t("Sonno a cicli")),"","power","i-leaf"));
+ if(W.sd)c.push(widSd(W.sd));
  if(W.stat)c.push(wid(t("Statistiche"),pill(1,t("Attivo"),""),"","stat","i-chart"));
  return c.length?'<div class="wg">'+c.join("")+'</div>':""}
 function identify(){post("/api/identify",{}).then(function(r){return r.json()}).then(function(j){msg("idm",j.ok?t("Guarda il LED: lampeggia a colori per 10 secondi"):j.err,j.ok);setTimeout(function(){var e=$("idm");if(e)e.className="msg"},5000)}).catch(function(){})}
@@ -196,6 +197,10 @@ function saveTime(on){if(on===undefined)on=!!(SVS.ntp&&SVS.ntp.on);return post("
  .then(function(r){return r.json()}).then(function(j){msg("om",j.ok?t("Salvato"):j.err,j.ok);if(j.ok)setTimeout(loadTime,1500)})}
 function syncNow(){post("/api/time/sync",{}).then(function(r){return r.json()}).then(function(j){msg("om2",j.ok?t("Sincronizzazione richiesta: controllo l'ora tra pochi secondi"):j.err,j.ok);if(j.ok){setTimeout(loadTime,3000);setTimeout(loadTime,8000)}})}
 function setFromBrowser(){post("/api/time/set",{epoch:Math.floor(Date.now()/1000)}).then(function(r){return r.json()}).then(function(j){msg("om2",j.ok?t("Ora impostata"):j.err,j.ok);if(j.ok)loadTime()})}
-function setCpu(){post("/api/cpu",{mode:$("cpumode").value}).then(function(r){return r.json()}).then(function(j){msg("cpum",j.ok?t("Salvato"):j.err,j.ok)})}
+function cpuDesc(g){return g=="ondemand"?t("ondemand: sale subito al massimo quando il carico supera la soglia di salita, scende dopo l'attesa."):g=="conservative"?t("conservative: sale e scende un gradino alla volta (80, 160, 240 MHz)."):g=="schedutil"?t("schedutil: segue il lavoro svolto, con un quarto di margine."):t("Velocita fissa: la CPU non cambia da sola (solo il caldo puo abbassarla).")}
+function cpuUi(s){var m=$("cpumode");if(!m)return;if(document.activeElement!=m){m.value=s.cpuGov;$("cpudesc").textContent=cpuDesc(s.cpuGov);$("cpupar").className=isNaN(+s.cpuGov)?"":"hide"}
+ [["cpu_up",s.cpuUp],["cpu_down",s.cpuDown],["cpu_hold",s.cpuHold]].forEach(function(x){if($(x[0])&&document.activeElement!=$(x[0]))$(x[0]).value=x[1]})}
+function setCpu(){post("/api/cpu",{gov:$("cpumode").value}).then(function(r){return r.json()}).then(function(j){msg("cpum",j.ok?t("Salvato"):j.err,j.ok);if(j.ok){$("cpudesc").textContent=cpuDesc($("cpumode").value);$("cpupar").className=isNaN(+$("cpumode").value)?"":"hide"}})}
+function setCpuPar(){post("/api/cpu",{up:$("cpu_up").value,down:$("cpu_down").value,hold:$("cpu_hold").value}).then(function(r){return r.json()}).then(function(j){msg("cpum",j.ok?t("Salvato"):j.err,j.ok)})}
 function enc(s){return encodeURIComponent(s)}
 function join(a,b){return a=="/"?"/"+b:a+"/"+b}

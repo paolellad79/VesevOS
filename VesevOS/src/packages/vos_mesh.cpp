@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_mesh.cpp
+#include <math.h>
+#include "../drivers/vos_drv_task.h"
 #include "vos_mesh.h"
+#include "vos_mesh_msg.h"
 #include "../core/vos_eventbus.h"
 #include "../core/vos_config.h"
 #include "../core/vos_region.h"
@@ -10,6 +13,7 @@
 #include "../core/vos_log.h"
 #include "../core/vos_i18n.h"
 #include "../core/vos_util.h"
+#include "../core/vos_lock.h"
 #include "vos_rules.h"
 #include "vos_mqtt.h"
 #include "../core/vos_audit.h"
@@ -17,13 +21,16 @@
 #include "../core/vos_time.h"
 #include "../drivers/vos_drv_wifi.h"
 #include "../drivers/vos_drv_espnow.h"
+#include "../drivers/vos_drv_heap.h"
 #include "../core/vos_service.h"
 #include "mbedtls/md.h"
+#include "../drivers/vos_drv_time.h"
+#include "../drivers/vos_drv_sys.h"
 
 #if VOS_WITH_MESH
 #define M_VER     1
 #define M_TTL     3
-#define M_MAXPAY  180
+#define M_MAXPAY  MESH_MAXPAY
 #define M_MACLEN  16
 #define NODES_MAX 16
 #define MSGS_MAX  10
@@ -41,12 +48,21 @@ struct __attribute__((packed)) MeshHdr {
   uint8_t  len;
 };
 
-struct Node { uint8_t mac[6]; char name[33]; uint8_t role, hops; int8_t rssi; uint32_t last; uint16_t boot; uint32_t seq; String state; bool ccx; bool used; };
-struct Msg { String from, text; String when; };
 struct RxItem { uint8_t len; int8_t rssi; uint8_t data[sizeof(MeshHdr) + M_MAXPAY + M_MACLEN]; };
 
-static Node g_nodes[NODES_MAX];
-static Msg  g_msgs[MSGS_MAX]; static int g_msgN = 0;
+// Nodi e messaggi stanno in UN blocco fisso, creato alla prima accensione del servizio (spento di fabbrica: prima non costa nulla)
+// e mai liberato: il web server puo leggerlo anche mentre il servizio si ferma. Va in PSRAM se c'e. I campi di lavoro (pay, out, json)
+// li usa solo il task mesh, cosi non servono buffer grandi sullo stack.
+struct Tables {
+  MeshNode nodes[NODES_MAX];
+  MeshMsg  msgs[MSGS_MAX]; int msgN;
+  char     pay[M_MAXPAY + 1];   // testo del messaggio in arrivo, chiuso con zero
+  char     out[200];            // testo da mandare, nome del tema MQTT
+  char     json[640];           // stato di un nodo per MQTT
+};
+
+static Tables* g_t = nullptr;
+static VosMutex g_mx;             // protegge nodes e msgs tra il task mesh e chi legge (web, shell)
 static uint32_t g_seen[SEEN_MAX]; static int g_seenI = 0;
 static QueueHandle_t g_q = nullptr;
 static volatile bool g_run = false, g_stopReq = false;
@@ -61,15 +77,13 @@ static const uint8_t BCAST[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 static bool meshReady() { return g_run; }
 bool meshRunning() { return sysTaskRunning("mesh"); }
 
-String meshNewKey() { return randomHex(32); }
-
-static bool keyLoad() {
-  if (cfg.meshKey.length() != 64) return false;
-  for (int i = 0; i < 32; i++) g_key[i] = (uint8_t)strtoul(cfg.meshKey.substring(i * 2, i * 2 + 2).c_str(), NULL, 16);
-  return true;
+void meshNewKey(char (&k)[MESH_KEY_CHARS + 1]) {
+  static const char* hx = "0123456789abcdef";
+  for (int i = 0; i < 32; i++) { uint8_t b = drvRandom32() & 0xFF; k[i * 2] = hx[b >> 4]; k[i * 2 + 1] = hx[b & 15]; }
+  k[MESH_KEY_CHARS] = 0;
 }
 
-static String macStr(const uint8_t* m) { char b[18]; snprintf(b, sizeof(b), "%02X:%02X:%02X:%02X:%02X:%02X", m[0], m[1], m[2], m[3], m[4], m[5]); return String(b); }
+static bool keyLoad() { return meshKeyParse(std::string_view(cfg.meshKey.c_str(), cfg.meshKey.length()), g_key); }
 
 static void sign(const uint8_t* buf, size_t len, uint8_t* out) {
   // ttl e hops cambiano a ogni salto: si firmano a zero
@@ -87,20 +101,22 @@ static void rawSend(uint8_t* buf, size_t len) {
   if (drvEspNowSend(buf, len)) g_sent++;
 }
 
-static bool send(uint8_t type, const uint8_t* dst, const String& payload) {
+// Manda un messaggio di len byte (al massimo M_MAXPAY: il resto si taglia).
+static bool send(uint8_t type, const uint8_t* dst, const char* data, size_t len) {
   if (!meshReady()) return false;
   uint8_t buf[sizeof(MeshHdr) + M_MAXPAY + M_MACLEN];
   MeshHdr* h = (MeshHdr*)buf;
-  size_t pl = payload.length() > M_MAXPAY ? M_MAXPAY : payload.length();
+  size_t pl = len > M_MAXPAY ? M_MAXPAY : len;
   h->m0 = 'V'; h->m1 = 'M'; h->ver = M_VER; h->type = type; h->ttl = M_TTL; h->hops = 0; h->role = cfg.meshRole;
   h->cc[0] = cfg.country.length() == 2 ? cfg.country[0] : '0'; h->cc[1] = cfg.country.length() == 2 ? cfg.country[1] : '1';
   memcpy(h->src, g_me, 6); memcpy(h->dst, dst, 6);
   h->boot = g_boot; h->seq = ++g_seq; h->len = pl;
-  memcpy(buf + sizeof(MeshHdr), payload.c_str(), pl);
+  memcpy(buf + sizeof(MeshHdr), data, pl);
   sign(buf, sizeof(MeshHdr) + pl, buf + sizeof(MeshHdr) + pl);
   rawSend(buf, sizeof(MeshHdr) + pl + M_MACLEN);
   return true;
 }
+static bool sendStr(uint8_t type, const uint8_t* dst, const char* s) { return send(type, dst, s, strlen(s)); }
 
 // callback del Wi-Fi: solo copia in coda (si lavora nel task)
 static void onRecv(const uint8_t* data, int len, int8_t rssi) {
@@ -118,41 +134,55 @@ static bool seen(const MeshHdr* h) {
   return false;
 }
 
-static Node* nodeOf(const uint8_t* mac, bool create) {
-  Node* old = &g_nodes[0];
+// Il blocco g_mx deve essere preso dal chiamante. created = e una scheda nuova (o ricomparsa): l'evento si manda fuori dal blocco.
+static MeshNode* nodeOf(const uint8_t* mac, bool create, bool& created) {
+  Tables& T = *g_t;
+  MeshNode* old = &T.nodes[0];
+  created = false;
   for (int i = 0; i < NODES_MAX; i++) {
-    if (g_nodes[i].used && memcmp(g_nodes[i].mac, mac, 6) == 0) return &g_nodes[i];
-    if (!g_nodes[i].used) { if (old->used) old = &g_nodes[i]; }
-    else if (old->used && g_nodes[i].last < old->last) old = &g_nodes[i];
+    if (T.nodes[i].used && memcmp(T.nodes[i].mac, mac, 6) == 0) return &T.nodes[i];
+    if (!T.nodes[i].used) { if (old->used) old = &T.nodes[i]; }
+    else if (old->used && T.nodes[i].last < old->last) old = &T.nodes[i];
   }
   if (!create) return nullptr;
-  Node* n = old; n->state = ""; n->name[0] = 0; n->seq = 0; n->boot = 0; n->ccx = false;
+  MeshNode* n = old; n->state[0] = 0; n->name[0] = 0; n->seq = 0; n->boot = 0; n->ccx = false;
   memcpy(n->mac, mac, 6); n->used = true;
-  EventBus::publish("mesh.node", "", 1);              // una scheda vicina nuova (o ricomparsa)
+  created = true;
   return n;
 }
 
-static Node* nodeByName(const String& s) {
-  for (int i = 0; i < NODES_MAX; i++) if (g_nodes[i].used && (s == g_nodes[i].name || s == macStr(g_nodes[i].mac))) return &g_nodes[i];
-  return nullptr;
+// Cerca una scheda per nome o per MAC e ne copia il MAC.
+static bool nodeMacByName(const char* s, uint8_t* mac) {
+  if (!g_t) return false;
+  VosLock L(g_mx);
+  for (int i = 0; i < NODES_MAX; i++) {
+    const MeshNode& n = g_t->nodes[i];
+    if (!n.used) continue;
+    char ms[18]; meshMacStr(n.mac, ms);
+    if (strcmp(s, n.name) == 0 || strcmp(s, ms) == 0) { memcpy(mac, n.mac, 6); return true; }
+  }
+  return false;
 }
 
-static void addMsg(const String& from, const String& text) {
-  Msg m; m.from = from; m.text = text; m.when = timeNowStr();
-  if (g_msgN < MSGS_MAX) g_msgs[g_msgN++] = m;
-  else { for (int i = 1; i < MSGS_MAX; i++) g_msgs[i - 1] = g_msgs[i]; g_msgs[MSGS_MAX - 1] = m; }
+static void addMsg(const char* from, const char* text) {
+  if (!g_t) return;
+  VosLock L(g_mx);
+  Tables& T = *g_t;
+  MeshMsg* m;
+  if (T.msgN < MSGS_MAX) m = &T.msgs[T.msgN++];
+  else { memmove(&T.msgs[0], &T.msgs[1], (MSGS_MAX - 1) * sizeof(MeshMsg)); m = &T.msgs[MSGS_MAX - 1]; }
+  meshCopy(m->from, sizeof m->from, from);
+  meshCopy(m->text, sizeof m->text, text);
+  timeNowFmt(m->when, sizeof m->when);
 }
 
-// azioni ammesse da un'altra scheda: solo quelle delle Automazioni, niente riavvii a raffica
-static bool cmdAllowed(const String& c) {
-  String w = c; int sp = w.indexOf(' '); if (sp > 0) w = w.substring(0, sp);
-  return w == "led" || w == "led-color" || w == "led-bright" || w == "gpio" || w == "note" || w == "reboot" || w == "ntp";
-}
-
-static String stateLine() {
-  // nome|ip|segnale|acceso da (s)|temperatura|cpu|versione
-  return cfg.hostname + "|" + netIpString() + "|" + String((int)drvWifiRssi()) + "|" + String((unsigned long)sysUptimeSec()) + "|" +
-         String(sysCpuTemp(), 1) + "|" + String(sysCpuPercent()) + "|" VOS_VERSION;
+// nome|ip|segnale|acceso da (s)|temperatura|cpu|versione
+static size_t stateLine(char* out, size_t cap) {
+  StrBuf sb(out, cap);
+  char ip[16]; netIpTo(ip, sizeof ip);
+  sb.addf("%s|%s|%d|%lu|%ld|%d|%s", cfg.hostname.c_str(), ip, (int)drvWifiRssi(), (unsigned long)sysUptimeSec(),
+          (long)lroundf(sysCpuTemp()), sysCpuPercent(), VOS_VERSION);
+  return sb.length();
 }
 
 static void handle(RxItem& it) {
@@ -166,41 +196,59 @@ static void handle(RxItem& it) {
   if (d) { g_bad++; return; }                                      // firma sbagliata: chiave diversa o messaggio falso
   if (seen(h)) return;
   g_recv++;
-  Node* n = nodeOf(h->src, true);
-  // contro la ripetizione di vecchi messaggi: (avvio, sequenza) deve crescere
-  if (n->boot && (h->boot < n->boot || (h->boot == n->boot && h->seq <= n->seq))) { if (h->boot + 100 > n->boot) return; }
-  n->boot = h->boot; n->seq = h->seq; n->last = millis(); n->role = h->role; n->hops = h->hops; n->rssi = h->hops ? 0 : it.rssi;
-  bool ccx = cfg.country.length() == 2 && (h->cc[0] != cfg.country[0] || h->cc[1] != cfg.country[1]);
-  if (ccx && !n->ccx) auditEvent(AUD_YELLOW, "meshcc", tr("Rete schede: una scheda ha un paese diverso. Imposta lo stesso paese su tutte"));
-  n->ccx = ccx;
+  Tables& T = *g_t;
+  // dopo il testo nel pacchetto c'e la firma, non uno zero: si copia in un buffer chiuso con zero (la vista non lo richiede, le funzioni C si)
+  memcpy(T.pay, it.data + sizeof(MeshHdr), h->len); T.pay[h->len] = 0;
+  const std::string_view pay(T.pay);
   bool forMe = memcmp(h->dst, g_me, 6) == 0, toAll = memcmp(h->dst, BCAST, 6) == 0;
-  String pay = String((const char*)(it.data + sizeof(MeshHdr)), h->len);
+  bool created = false, replay = false, ccNew = false;
+  char nm[MESH_NAME_CAP];
+  {
+    VosLock L(g_mx);
+    MeshNode* n = nodeOf(h->src, true, created);
+    // contro la ripetizione di vecchi messaggi: (avvio, sequenza) deve crescere
+    if (n->boot && (h->boot < n->boot || (h->boot == n->boot && h->seq <= n->seq))) { if (h->boot + 100 > n->boot) replay = true; }
+    if (!replay) {
+      n->boot = h->boot; n->seq = h->seq; n->last = drvMillis(); n->role = h->role; n->hops = h->hops; n->rssi = h->hops ? 0 : it.rssi;
+      bool ccx = cfg.country.length() == 2 && (h->cc[0] != cfg.country[0] || h->cc[1] != cfg.country[1]);
+      ccNew = ccx && !n->ccx;
+      n->ccx = ccx;
+      if (forMe || toAll) {
+        if (h->type == T_BEACON) meshCopy(n->name, sizeof n->name, meshBeaconName(pay));
+        else if (h->type == T_STATE) { meshCopy(n->state, sizeof n->state, pay); meshCopy(n->name, sizeof n->name, meshStateName(pay)); }
+      }
+      meshCopy(nm, sizeof nm, n->name);
+    }
+  }
+  if (created) EventBus::publish("mesh.node", "", 1);              // una scheda vicina nuova (o ricomparsa)
+  if (replay) return;
+  if (ccNew) auditEvent(AUD_YELLOW, "meshcc", tr("Rete schede: una scheda ha un paese diverso. Imposta lo stesso paese su tutte"));
   if (forMe || toAll) {
     switch (h->type) {
-      case T_BEACON: { int p = pay.indexOf('|'); String nm = p >= 0 ? pay.substring(p + 1) : pay; strncpy(n->name, nm.c_str(), 32); n->name[32] = 0; g_lastBeacon = millis(); break; }
-      case T_STATE: {
-        n->state = pay; int p = pay.indexOf('|'); String nm = p > 0 ? pay.substring(0, p) : pay; strncpy(n->name, nm.c_str(), 32); n->name[32] = 0;
+      case T_BEACON: g_lastBeacon = drvMillis(); break;
+      case T_STATE:
         if (cfg.meshRole == 1 && mqttConnected()) {
-          String f[7]; int k = 0, s = 0;
-          for (int i = 0; i <= (int)pay.length() && k < 7; i++) if (i == (int)pay.length() || pay[i] == '|') { f[k++] = pay.substring(s, i); s = i + 1; }
-          mqttPublishRel("mesh/" + f[0] + "/state", "{\"ip\":\"" + jsonEscape(f[1]) + "\",\"rssi\":" + (f[2].length() ? f[2] : String("0")) + ",\"uptime\":" + (f[3].length() ? f[3] : String("0")) +
-                         ",\"temp\":" + (f[4].length() ? f[4] : String("0")) + ",\"cpu\":" + (f[5].length() ? f[5] : String("0")) + ",\"ver\":\"" + jsonEscape(f[6]) + "\",\"hops\":" + String(h->hops) + "}", true);
+          std::string_view f[MESH_FIELDS]; meshSplitState(pay, f);
+          StrBuf jb(T.json, sizeof T.json); meshStateJson(jb, f, h->hops);
+          StrBuf sub(T.out, sizeof T.out); sub.add("mesh/"); sub.addn(f[0].data(), f[0].size()); sub.add("/state");
+          if (!jb.truncated() && !sub.truncated()) mqttPublishRel(T.out, T.json, true);   // JSON troncato: non si pubblica
         }
         break;
-      }
       case T_CMD: {
         if (!forMe) break;
-        String err, res;
-        if (!cmdAllowed(pay)) res = tr("azione non ammessa da un'altra scheda");
-        else if (rulesAction(pay, err, "rete schede")) res = "ok";
-        else res = err;
-        vlog("MESH: comando da %s: %s -> %s", n->name, pay.c_str(), res.c_str());
-        send(T_RESULT, h->src, pay + " -> " + res);
+        ErrBuf err;
+        const char* res;
+        if (!meshCmdAllowed(pay)) res = tr("azione non ammessa da un'altra scheda");
+        else if (rulesAction(T.pay, err, "rete schede")) res = "ok";
+        else res = err.c_str();
+        vlog("MESH: comando da %s: %s -> %s", nm, T.pay, res);
+        StrBuf out(T.out, sizeof T.out); out.add(T.pay); out.add(" -> "); out.add(res);
+        send(T_RESULT, h->src, T.out, out.length());
         break;
       }
-      case T_RESULT: if (forMe) { addMsg(n->name, pay); vlog("MESH: risposta da %s: %s", n->name, pay.c_str()); } break;
-      case T_TEXT: addMsg(n->name, pay); vlog("MESH: messaggio da %s: %s", n->name, pay.c_str());
-        if (cfg.meshRole == 1 && mqttConnected()) mqttPublishRel("mesh/" + String(n->name) + "/text", pay);
+      case T_RESULT: if (forMe) { addMsg(nm, T.pay); vlog("MESH: risposta da %s: %s", nm, T.pay); } break;
+      case T_TEXT: addMsg(nm, T.pay); vlog("MESH: messaggio da %s: %s", nm, T.pay);
+        if (cfg.meshRole == 1 && mqttConnected()) { snprintf(T.out, sizeof T.out, "mesh/%s/text", nm); mqttPublishRel(T.out, T.pay); }
         break;
     }
   }
@@ -214,17 +262,20 @@ static void handle(RxItem& it) {
 
 static void meshTask(void*) {
   g_run = true;
-  wdWatch("mesh", 30);
+  wdWatch("mesh", wdLimit("mesh"));                   // base 90 s
   uint32_t lastSt = 0;
+  Tables& T = *g_t;
   while (!g_stopReq) {
     wdBeat("mesh");
     RxItem it;
     if (xQueueReceive(g_q, &it, pdMS_TO_TICKS(200)) == pdTRUE) handle(it);
-    uint32_t now = millis();
+    uint32_t now = drvMillis();
     if (cfg.meshRole == 1 && now - g_lastBeacon > 5000) {           // il gateway annuncia canale e nome
-      g_lastBeacon = now; send(T_BEACON, BCAST, String(meshChannel()) + "|" + cfg.hostname);
+      g_lastBeacon = now;
+      snprintf(T.out, sizeof T.out, "%d|%s", meshChannel(), cfg.hostname.c_str());
+      sendStr(T_BEACON, BCAST, T.out);
     }
-    if (now - lastSt > 30000UL || !lastSt) { lastSt = now ? now : 1; send(T_STATE, BCAST, stateLine()); }
+    if (now - lastSt > 30000UL || !lastSt) { lastSt = now ? now : 1; size_t n = stateLine(T.out, sizeof T.out); send(T_STATE, BCAST, T.out, n); }
     // nessun gateway sentito da 30 s, niente Wi-Fi di casa e nessuno collegato all'hotspot: prova il canale dopo
     if (cfg.meshRole != 1 && netState() == NET_AP && drvWifiApClients() == 0 && now - g_lastBeacon > 30000UL && now - g_lastHop > 30000UL) {
       g_lastHop = now;
@@ -239,14 +290,19 @@ static void meshTask(void*) {
   vTaskDelete(NULL);
 }
 
-static void startTask() { xTaskCreatePinnedToCore(meshTask, "mesh", 6144, NULL, 2, NULL, 1); }
+static void startTask() {
+  drvTaskCreate(meshTask, "mesh", 6144, NULL, 2, NULL, DRV_CORE_ANY);   // core: automatico (prima: core 1 fisso)
+}
 
-bool meshStart(String& err) {
+bool meshStart(ErrBuf& err) {
   if (meshRunning()) meshStop();
   if (cfg.airOn) { err = tr("Modalita aereo attiva: radio spenta"); return false; }
   if (!drvEspNowRadioUp()) { err = tr("Il Wi-Fi non e acceso"); return false; }
   if (!keyLoad()) { err = tr("Manca la chiave comune (64 cifre esadecimali)"); return false; }
   if (!regionChannelOk(meshChannel())) { err = tr("Il canale in uso non e ammesso nel paese scelto"); return false; }
+  g_mx.init();
+  if (!g_t) g_t = (Tables*)drvCallocBig(sizeof(Tables));
+  if (!g_t) { err = tr("Memoria esaurita"); return false; }
   if (!g_q) g_q = xQueueCreate(QLEN, sizeof(RxItem));
   drvEspNowMac(g_me);
   g_boot = (uint16_t)sysBootCount();
@@ -258,7 +314,7 @@ bool meshStart(String& err) {
 }
 
 static void startFromBoot() {
-  String err;
+  ErrBuf err;
   if (!meshStart(err)) vlog("MESH: non avviata (%s)", err.c_str());
 }
 
@@ -272,82 +328,87 @@ static void stopFn() { meshStop(); }
 
 // ---- contratto dei servizi (vos_service) ----
 static int      svcState() { return meshRunning() ? SVC_ON : SVC_OFF; }
-static uint32_t svcRam() { return meshRunning() ? 6144u + QLEN * (uint32_t)sizeof(RxItem) + NODES_MAX * (uint32_t)sizeof(Node) : 0u; }   // pila del task + coda + nodi
+static uint32_t svcRam() { return meshRunning() ? 6144u + QLEN * (uint32_t)sizeof(RxItem) : 0u; }   // pila del task + coda (nodi e messaggi stanno in PSRAM, se c'e)
 static const ServiceOps MESH_OPS = { "mesh", "ESP-NOW", "Radio", "mesh", ROLE_GUEST, ROLE_ADMIN,
                                      svcState, meshStart, meshStop, nullptr, meshJson, nullptr, svcRam };
 
 void meshInit() {
+  g_mx.init();
   serviceRegister(&MESH_OPS);
   sysTaskRegister("mesh", startFromBoot, stopFn);
   if (cfg.meshAuto && cfg.meshKey.length() == 64 && !cfg.airOn) {
     // si aspetta che il Wi-Fi sia acceso (lo avvia il task di rete)
-    xTaskCreatePinnedToCore([](void*) {
+    drvTaskCreate([](void*) {
       for (int i = 0; i < 60 && !drvEspNowRadioUp(); i++) vTaskDelay(pdMS_TO_TICKS(500));
       vTaskDelay(pdMS_TO_TICKS(3000));
       startFromBoot();
       vTaskDelete(NULL);
-    }, "meshst", 4096, NULL, 1, NULL, 1);
+    }, "meshst", 4096, NULL, 1, NULL, DRV_CORE_ANY);   // core: automatico (prima: core 1 fisso)
   }
 }
 
-static bool target(const String& to, uint8_t* mac, String& err) {
-  if (to == "*" || to == "tutti" || to == "all") { memcpy(mac, BCAST, 6); return true; }
-  Node* n = nodeByName(to);
-  if (!n) { err = tr("Scheda non trovata nella rete"); return false; }
-  memcpy(mac, n->mac, 6);
+static bool target(const char* to, uint8_t* mac, ErrBuf& err) {
+  if (!strcmp(to, "*") || !strcmp(to, "tutti") || !strcmp(to, "all")) { memcpy(mac, BCAST, 6); return true; }
+  if (!nodeMacByName(to, mac)) { err = tr("Scheda non trovata nella rete"); return false; }
   return true;
 }
 
-bool meshSendCmd(const String& to, const String& cmd, String& err) {
+bool meshSendCmd(const char* to, const char* cmd, ErrBuf& err) {
   if (!meshReady()) { err = tr("Rete schede spenta"); return false; }
-  if (!cmdAllowed(cmd)) { err = tr("Azione non ammessa (solo led, led-color, led-bright, gpio, note, reboot, ntp sync)"); return false; }
+  if (!meshCmdAllowed(cmd)) { err = tr("Azione non ammessa (solo led, led-color, led-bright, gpio, note, reboot, ntp sync)"); return false; }
   uint8_t mac[6];
-  if (to == "*" || !target(to, mac, err)) { if (!err.length()) err = tr("Indica una scheda (i comandi vanno a una sola scheda)"); return false; }
-  return send(T_CMD, mac, cmd);
+  if (!strcmp(to, "*") || !target(to, mac, err)) { if (err.empty()) err = tr("Indica una scheda (i comandi vanno a una sola scheda)"); return false; }
+  return send(T_CMD, mac, cmd, strlen(cmd));
 }
 
-bool meshSendText(const String& to, const String& text, String& err) {
+bool meshSendText(const char* to, const char* text, ErrBuf& err) {
   if (!meshReady()) { err = tr("Rete schede spenta"); return false; }
   uint8_t mac[6];
   if (!target(to, mac, err)) return false;
-  String t = cleanAscii(text); t.replace("\n", " ");
-  if (!t.length() || t.length() > 150) { err = tr("Messaggio vuoto o troppo lungo (max 150)"); return false; }
-  addMsg(cfg.hostname + " -> " + to, t);
-  return send(T_TEXT, mac, t);
+  std::string t; t.reserve(152);
+  size_t n = meshCleanText(text, t, 151);
+  if (n == 0 || n > 150) { err = tr("Messaggio vuoto o troppo lungo (max 150)"); return false; }
+  char from[MESH_FROM_CAP]; snprintf(from, sizeof from, "%s -> %s", cfg.hostname.c_str(), to);
+  addMsg(from, t.c_str());
+  return send(T_TEXT, mac, t.data(), t.size());
 }
 
-int meshNodeCount() { int n = 0; for (int i = 0; i < NODES_MAX; i++) if (g_nodes[i].used) n++; return n; }
-
-String meshJson() {
-  String j = "{\"run\":" + String(meshReady() ? "true" : "false") + ",\"auto\":" + String(cfg.meshAuto ? "true" : "false") +
-             ",\"role\":" + String(cfg.meshRole) + ",\"hasKey\":" + String(cfg.meshKey.length() == 64 ? "true" : "false") +
-             ",\"ch\":" + String(meshChannel()) + ",\"chMax\":" + String(regionChannels()) + ",\"me\":\"" + netMac(drvEspNowIsAp()) +
-             "\",\"sent\":" + String((unsigned long)g_sent) + ",\"recv\":" + String((unsigned long)g_recv) + ",\"bad\":" + String((unsigned long)g_bad) + ",\"nodes\":[";
-  bool first = true;
-  for (int i = 0; i < NODES_MAX; i++) {
-    Node& n = g_nodes[i];
-    if (!n.used) continue;
-    if (!first) j += ","; first = false;
-    j += "{\"mac\":\"" + macStr(n.mac) + "\",\"name\":\"" + jsonEscape(String(n.name)) + "\",\"role\":" + String(n.role) + ",\"hops\":" + String(n.hops) +
-         ",\"rssi\":" + String(n.rssi) + ",\"ago\":" + String((unsigned long)((millis() - n.last) / 1000)) + ",\"ccx\":" + String(n.ccx ? "true" : "false") +
-         ",\"state\":\"" + jsonEscape(n.state) + "\"}";
-  }
-  j += "],\"msgs\":[";
-  for (int i = g_msgN - 1; i >= 0; i--) {
-    j += "{\"from\":\"" + jsonEscape(g_msgs[i].from) + "\",\"text\":\"" + jsonEscape(g_msgs[i].text) + "\",\"when\":\"" + jsonEscape(g_msgs[i].when) + "\"}";
-    if (i) j += ",";
-  }
-  return j + "]}";
+int meshNodeCount() {
+  int n = 0;
+  if (g_t) for (int i = 0; i < NODES_MAX; i++) if (g_t->nodes[i].used) n++;
+  return n;
 }
 
-String meshText() {
-  String t = trf("Rete schede: %s, canale %d, ruolo %s", meshReady() ? tr("accesa") : tr("spenta"), meshChannel(),
-                 cfg.meshRole == 1 ? "gateway" : cfg.meshRole == 2 ? tr("sensore") : tr("nodo")) + "\n";
-  for (int i = 0; i < NODES_MAX; i++) {
-    Node& n = g_nodes[i];
-    if (!n.used) continue;
-    t += String("  ") + n.name + "  " + macStr(n.mac) + trf("  %d salti  %lu s fa", n.hops, (unsigned long)((millis() - n.last) / 1000)) + (n.ccx ? String("  ") + tr("(paese diverso!)") : String("")) + "\n";
-  }
-  return t;
+std::string meshJsonStd() {
+  char me[20]; netMacTo(drvEspNowIsAp(), me, sizeof me);
+  std::string j = meshBuild([&](StrBuf& sb) {
+    VosLock L(g_mx);
+    MeshJsonIn in = { meshReady(), cfg.meshAuto, cfg.meshKey.length() == 64, cfg.meshRole, meshChannel(), regionChannels(), me,
+                      g_sent, g_recv, g_bad, (uint32_t)drvMillis(), g_t ? g_t->nodes : nullptr, g_t ? NODES_MAX : 0, g_t ? g_t->msgs : nullptr, g_t ? g_t->msgN : 0 };
+    meshJsonBuild(sb, in);
+  });
+  return j.empty() ? std::string("{\"error\":\"busy\"}") : j;   // non entrava nel buffer (i dati cambiavano): mai JSON a meta
+}
+
+bool meshJson(HeapBuf& out) { std::string j = meshJsonStd(); return out.add(j.data(), j.size()); }
+
+std::string meshText() {
+  return meshBuild([&](StrBuf& sb) {
+    sb.addf(tr("Rete schede: %s, canale %d, ruolo %s"), meshReady() ? tr("accesa") : tr("spenta"), meshChannel(),
+            cfg.meshRole == 1 ? "gateway" : cfg.meshRole == 2 ? tr("sensore") : tr("nodo"));
+    sb.add('\n');
+    if (!g_t) return;
+    VosLock L(g_mx);
+    uint32_t now = drvMillis();
+    for (int i = 0; i < NODES_MAX; i++) {
+      const MeshNode& n = g_t->nodes[i];
+      if (!n.used) continue;
+      char mac[18]; meshMacStr(n.mac, mac);
+      sb.add("  "); sb.add(n.name); sb.add("  "); sb.add(mac);
+      sb.addf(tr("  %d salti  %lu s fa"), (int)n.hops, (unsigned long)((now - n.last) / 1000));
+      if (n.ccx) { sb.add("  "); sb.add(tr("(paese diverso!)")); }
+      sb.add('\n');
+    }
+  });
 }
 #endif  // VOS_WITH_MESH

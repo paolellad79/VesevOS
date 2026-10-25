@@ -21,11 +21,12 @@ int main() {
   CHECK(!maskValid(0));
   CHECK(!maskValid(0xFF00FF00u));         // non continua
   // tempo acceso
-  CHECK(uptimeStr(0) == "0s");
-  CHECK(uptimeStr(59) == "59s");
-  CHECK(uptimeStr(61) == "1min 1s");
-  CHECK(uptimeStr(3600) == "1h 0min 0s");
-  CHECK(uptimeStr(86400 + 3661) == "1g 1h 1min 1s");
+  auto U = [](uint64_t s) { char b[64]; uptimeTo(s, b, sizeof b); return std::string(b); };
+  CHECK(U(0) == "0s");
+  CHECK(U(59) == "59s");
+  CHECK(U(61) == "1min 1s");
+  CHECK(U(3600) == "1h 0min 0s");
+  CHECK(U(86400 + 3661) == "1g 1h 1min 1s");
   // durata con i giorni
   auto D = [](uint64_t s) { char b[48]; durStr(s, b, sizeof b); return std::string(b); };
   CHECK(D(0) == "0 s");
@@ -94,22 +95,6 @@ int main() {
   CHECK(utilStackSpare(4096, 1500) == 256);          // 476 sopra la scorta -> 256
   CHECK(utilStackSpare(6144, 4000) == 2304);         // 4000-1536=2464 -> 2304
   CHECK(utilStackSpare(3072, 100) == 0);             // stack quasi pieno: niente
-  // riga sulla seriale: Backspace cancella davvero (anche sullo schermo), Ctrl+U svuota, le frecce non sporcano la riga
-  { String b, e; uint8_t esc = 0;
-    CHECK(utilEditKey(b, esc, 'a', e, 10) && b == "a" && e == "a");
-    CHECK(utilEditKey(b, esc, 'b', e, 10) && b == "ab");
-    CHECK(utilEditKey(b, esc, 127, e, 10) && b == "a" && e == "\b \b");          // Backspace (127 di PuTTY)
-    CHECK(utilEditKey(b, esc, 8, e, 10) && b == "" && e == "\b \b");             // Backspace (8)
-    CHECK(utilEditKey(b, esc, 127, e, 10) && b == "" && e == "");                // riga vuota: niente da cancellare
-    for (char c : String("hello")) utilEditKey(b, esc, c, e, 10);
-    CHECK(utilEditKey(b, esc, 21, e, 10) && b == "" && e == "\b \b\b \b\b \b\b \b\b \b");   // Ctrl+U: 5 cancellazioni
-    for (char c : String("abc")) utilEditKey(b, esc, c, e, 10);
-    CHECK(utilEditKey(b, esc, 27, e, 10) && utilEditKey(b, esc, '[', e, 10) && utilEditKey(b, esc, 'D', e, 10) && b == "abc" && esc == 0 && e == "");   // freccia sinistra: scartata
-    CHECK(utilEditKey(b, esc, 27, e, 10) && utilEditKey(b, esc, '[', e, 10) && utilEditKey(b, esc, '3', e, 10) && esc == 2 && utilEditKey(b, esc, '~', e, 10) && esc == 0 && b == "abc");   // Canc
-    CHECK(utilEditKey(b, esc, 27, e, 10) && utilEditKey(b, esc, 'O', e, 10) && utilEditKey(b, esc, 'H', e, 10) && b == "abc" && esc == 0);   // Home (ESC O H)
-    String full = "1234567890";
-    CHECK(utilEditKey(full, esc, 'x', e, 10) && full == "1234567890" && e == "");  // riga piena: non si aggiunge
-    CHECK(!utilEditKey(b, esc, '\t', e, 10) && b == "abc");                      // altri caratteri: li gestisce chi chiama
-  }
+  // (la prova della riga sulla seriale, utilEditKey, si rifara su editKey di vos_shell_line quando si riprendono le prove)
   return done("util");
 }

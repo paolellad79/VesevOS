@@ -1,207 +1,150 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_shell.cpp
+// Shell: esecuzione di una riga, schermata di benvenuto e riga in digitazione sulla seriale. Scritta senza String sulla riga:
+// le parole sono Word (vos_shell_line.h), il resto della riga un puntatore. La guida da seriale e in vos_shell_wiz.cpp.
 #include "vos_shell.h"
 #include "vos_shell_int.h"
-static String g_serCmd;                 // ultimo comando dalla seriale (solo la prima parola: niente password nel who)
+#include "vos_shell_ask.h"
+#include "vos_shell_login.h"
+#include "vos_shell_sess.h"
+#include "vos_shell_prompt.h"
+#include "vos_shell_complete.h"
+#include "../core/vos_heapbuf.h"
+#include "../core/vos_strbuf.h"
+#include "../drivers/vos_drv_time.h"
+#include "../drivers/vos_drv_console.h"
+#include <ctype.h>
+
+#define SHELL_LINE_MAX 1024                 // riga di comando piu lunga che si esegue (la pagina ne manda al massimo 200)
+#define SER_LINE_MAX   200                  // riga in digitazione sulla seriale
+static char g_serCmd[24] = "";              // ultimo comando dalla seriale (solo la prima parola: niente password nel who)
 static uint32_t g_serCmdT = 0;
-String shx::argAt(const String& s, int idx) {
-  int n = 0, i = 0;
-  while (i < (int)s.length()) {
-    while (i < (int)s.length() && s[i] == ' ') i++;
-    int st = i;
-    while (i < (int)s.length() && s[i] != ' ') i++;
-    if (i > st) { if (n == idx) return s.substring(st, i); n++; }
-  }
-  return "";
+
+bool shx::scanRunning() {
+  return netScanRunning();
 }
 
-String shx::restFrom(const String& s, int idx) {
-  int n = 0, i = 0;
-  while (i < (int)s.length()) {
-    while (i < (int)s.length() && s[i] == ' ') i++;
-    if (i >= (int)s.length()) break;
-    if (n == idx) return s.substring(i);
-    while (i < (int)s.length() && s[i] != ' ') i++;
-    n++;
-  }
-  return "";
-}
+int shx::roleArg(const Word& r) { return r == "admin" ? ROLE_ADMIN : r == "oper" ? ROLE_OPER : r == "guest" ? ROLE_GUEST : -1; }
 
-void shx::cmdHelp(Print& o) {
-  o.println(tr("Comandi:"));
-  o.println(tr("  help            questo elenco"));
-  o.println(tr("  uname           versione sistema"));
-  o.println(tr("  about           chi siamo e indirizzo GitHub"));
-  o.println(tr("  serial-auth [on|off]  password sulla seriale: mostra o cambia"));
-  o.println(tr("  serial [baud <n>|eol crlf|lf|cr|echo|input|log|banner on|off|tx <ms>|keep]  impostazioni della seriale"));
-  o.println(tr("  uptime          da quanto e acceso (+ motivo reset, avvii)"));
-  o.println(tr("  free [detail]   memoria RAM/PSRAM (detail: blocchi e frammentazione)"));
-  o.println(tr("  ram [mark|diff|audit] stack dei task e costo dei servizi (audit: storico)"));
-  o.println(tr("  events [n]      ultimi eventi del sistema (Event Bus): cambi di stato dei servizi"));
-  o.println(tr("  df              spazio su flash"));
-  o.println(tr("  temp            temperatura CPU"));
-  o.println(tr("  top             CPU, RAM, temperatura"));
-  o.println(tr("  ps              elenco task"));
-  o.println(tr("  kill <nome>     ferma un task (solo quelli consentiti, vedi ps)"));
-  o.println(tr("  start <nome>    avvia o riavvia un task fermato (restart = uguale)"));
-  o.println(tr("  rules [run <n>] automazioni: elenco, oppure esegui la regola n"));
-  o.println(tr("  boot-order [lista|reset]  ordine di avvio dei servizi"));
-  o.println(tr("  ls [cartella]   elenco file (flash)"));
-  o.println(tr("  cat <file>      mostra un file"));
-  o.println(tr("  mkdir <nome>    crea cartella"));
-  o.println(tr("  rm <nome>       elimina file o cartella"));
-  o.println(tr("  mv <da> <a>     sposta o rinomina"));
-  o.println(tr("  cp <da> <a>     copia un file"));
-  o.println(tr("  write <file> <testo>   scrive un file di testo"));
-  o.println(tr("  date [set AAAA-MM-GG HH:MM]  data e ora (mostra o imposta)"));
-  o.println(tr("  ntp [on|off|sync|every <min>]  stato NTP / accendi, spegni / risincronizza / frequenza"));
-  o.println(tr("  cpu [auto|80|160|240]  velocita CPU"));
-  o.println(tr("  wps [on|off|pin on|off|start [pin]|stop]  collegamento alla Wi-Fi di casa con il WPS (solo Admin)"));
-  o.println(tr("  btn [1|2|3 niente|aereo|wps|trova]  azioni dei click del tasto BOOT (cambiare: solo Admin)"));
-  o.println(tr("  hostname [nome] mostra o cambia il nome host"));
-  o.println(tr("  domain [nome|-] mostra, cambia o toglie il dominio"));
-  o.println(tr("  info            riassunto: versione, chip, memoria, rete, MAC"));
-  o.println(tr("  net             rete: IP, MAC client e AP, segnale"));
-  o.println(tr("  ip              rete e indirizzo"));
-  o.println(tr("  wifi            stato wi-fi"));
-  o.println(tr("  wifi-scan       cerca reti"));
-  o.println(tr("  wifi set <rete> [password] | wifi off   collega la Wi-Fi di casa (nome con spazi tra virgolette) o la scollega"));
-  o.println(tr("  setup           configurazione guidata da seriale (lingua, paese, nome, antenna, hotspot, utente, Wi-Fi, ora)"));
-  o.println(tr("  setup done      segna la guida come finita (scheda gia in uso)"));
-  o.println(tr("  diag            diagnosi: guida, salvataggio, rete, servizi, RAM, flash"));
-  o.println(tr("  svc [ap|captive|http|https|dhcp|mdns on|off] [http-port|https-port <n>]  servizi di rete e porte (web e porte dal riavvio, DHCP e mDNS subito)"));
-  o.println(tr("  mqtt [start|stop|restart|pub]  servizio MQTT"));
-  o.println(tr("  airplane [on <come>|off]  modalita aereo (come: boot, 30s, 10m, 2h, 07:30, fisso)"));
-  o.println(tr("  led <modo>      state|heartbeat|fixed|off"));
-  o.println(tr("  led-color <RRGGBB>   colore (esadecimale)"));
-  o.println(tr("  led-bright <0-255>   luminosita"));
-  o.println(tr("  lang [codice]   mostra o cambia la lingua (it, en, ...)"));
-  o.println(tr("  license [id]    note legali e licenze (notice, gpl3, lgpl21, apache2, mit, bsd3)"));
-  o.println(tr("  dev [status <nome>|on <nome>|off <nome>|act <nome> <azione> [arg]]  periferiche (MQTT, Bluetooth, pin, LED, memoria...)"));
-  o.println(tr("  io [list|add <classe> <pin> [nome]|del|rename|set|get]  periferiche a classi (rele, led, pin, ingresso, analogico, i2c)"));
-  o.println(tr("  mod [list|info|install|del]  schede modulo .vdp (rele, sensori...) da installare sui pin"));
-  o.println(tr("  pins            pin usati"));
-  o.println(tr("  pin <n> [high|low|blink|read [up|down]|off]  prova un pin (si spegne da solo)"));
-  o.println(tr("  config          mostra configurazione (senza password)"));
-  o.println(tr("  passwd <utente> <nuova>  cambia la password di un utente (min 6 caratteri)"));
-  o.println(tr("  user [add <nome> <admin|oper|guest> <password>|del <nome>|role <nome> <ruolo>|on <nome>|off <nome>]  utenti"));
-  o.println(tr("  ap [show|new]   hotspot: mostra la password o creane una nuova"));
-  o.println(tr("  locale [country XX|tx <dBm>|antenna int|ext <dBi>]  paese, potenza, antenna"));
-  o.println(tr("  firewall [off|confirm|mode <0-3>|add <ip|a-b|rete/nn> [nome]|del <n>|test <ip>]  filtro IP"));
-  o.println(tr("  audit [ack [n]] allarmi della configurazione e registro modifiche"));
-  o.println(tr("  watchdog        stato del watchdog"));
-  o.println(tr("  mesh [start|stop|send <scheda|*> <testo>|cmd <scheda> <azione>|key new|role <0|1|2>]  rete tra schede"));
-  o.println(tr("  ble [on [min]|off]  Bluetooth per telefoni e app (senza limite di tempo, o per min minuti)"));
-  o.println(tr("  cert [new]      certificato HTTPS: impronta o nuovo certificato"));
-  o.println(tr("  legal           note legali: licenze, dati salvati, sicurezza"));
-  o.println(tr("  welcome         schermata di benvenuto"));
-  o.println(tr("  ban             indirizzi bloccati o sospetti"));
-  o.println(tr("  unban <ip|all>  sblocca un indirizzo (o tutti)"));
-  o.println(tr("  logout          esce (solo seriale)"));
-  o.println(tr("  log [n|clear|level [0-3]]   ultime righe del registro, svuota, o livello (0 errori ... 3 dettagli)"));
-  o.println(tr("  reboots [clear]   diario degli ultimi 20 riavvii (motivo, durata, RAM minima) o azzera"));
-  o.println(tr("  factory-reset   azzera tutto (poi riavvia)"));
-  o.println(tr("  reboot          riavvia"));
-  o.println(tr("  berry [codice]  prova al volo codice Berry (print, led, act, time, millis, temp, log, sleep); senza argomenti: stato"));
-  o.println(tr("  script [list|run <nome>|stop|out]  script salvati in /scripts (.vsc), in sottofondo"));
-  o.println(tr("  app [list|info|start|stop|set|out]  app salvate in /apps (.vap): elenco, controllo, avvio (una alla volta), valori"));
-  o.println(tr("  who             chi e collegato (web e seriale) e cosa sta facendo"));
-  o.println(tr("  crash [clear|test]  rapporti degli ultimi crash (motivo, task, backtrace); test = crash di prova"));
-  o.println(tr("  recovery [now|update <file>]  recovery: stato, 'now' = riavvia nel recovery, 'update' = aggiorna il recovery da un file"));
-  o.println(tr("  sleep [minuti]  sonno profondo (con i minuti la scheda riparte da sola; senza, solo con RESET)"));
-  o.println(tr("  stats [on|off|reset]  statistiche locali (spente di fabbrica)"));
-  o.println(tr("  selftest [active] [names]  autodiagnosi con report (prove attive: LED e MQTT; names: nomi reali)"));
-  o.println(tr("  power [off|wifi|cycle <sveglia> <sonno>]  risparmio energia (minuti)"));
-}
+void shellExec(const char* lineIn, OutSink& o, int role) { shellExecSess(lineIn, o, role, SESS_NONE); }
 
-String shx::hex6(uint32_t c) {
-  char b[8]; snprintf(b, sizeof(b), "%06lX", (unsigned long)(c & 0xFFFFFF)); return String(b);
-}
-
-// comandi permessi all'Operatore (uso della scheda, niente rete, sicurezza, utenti, file di sistema)
-static bool operOk(const String& c, const String& a1) {
-  static const char* const OK[] = {"help", "?", "uname", "about", "uptime", "free", "df", "temp", "top", "ps", "info", "net", "ip", "wifi",
-                                   "date", "led", "led-color", "led-bright", "pin", "pins", "rules", "audit", "watchdog", "legal", "license", "licenza", "locale", "dev", "events"};
-  for (size_t i = 0; i < sizeof(OK) / sizeof(OK[0]); i++) if (c == OK[i]) return true;
-  if (c == "ntp") return a1 == "" || a1 == "sync";
-  if (c == "log") return a1 != "clear" && a1 != "level";
-  if (c == "reboots") return a1 != "clear";
-  if (c == "mqtt") return a1 == "" || a1 == "status" || a1 == "pub";
-  if (c == "mesh") return a1 == "" || a1 == "status" || a1 == "send" || a1 == "cmd";
-  if (c == "airplane" || c == "aereo" || c == "reboot" || c == "sleep") return true;
-  return false;
-}
-
-int shx::roleArg(const String& r) { return r == "admin" ? ROLE_ADMIN : r == "oper" ? ROLE_OPER : r == "guest" ? ROLE_GUEST : -1; }
-
-void shellExec(const String& lineIn, Print& o, int role) {
-  String line = lineIn; line.trim();
-  if (line.length() == 0) return;
-  String c = argAt(line, 0);
-  c.toLowerCase();
-  String a1 = argAt(line, 1);
+void shellExecSess(const char* lineIn, OutSink& o, int role, uint32_t sess) {
+  if (!lineIn) return;
+  while (isspace((unsigned char)*lineIn)) lineIn++;
+  size_t n = strlen(lineIn);
+  while (n && isspace((unsigned char)lineIn[n - 1])) n--;
+  if (n == 0) return;
+  HeapBuf copy(SHELL_LINE_MAX);             // la riga senza spazi in coda: una copia sull'heap solo se serve
+  const char* line = lineIn;
+  if (lineIn[n] != 0) {
+    if (!copy.add(lineIn, n)) { o.println(copy.oom() ? tr("Memoria insufficiente") : tr("Comando troppo lungo")); return; }
+    line = copy.c_str();
+  } else if (n > SHELL_LINE_MAX) { o.println(tr("Comando troppo lungo")); return; }
+  Word c = argAt(line, 0);
+  c.lower();
+  canonicalName(c);                                      // aereo, licenza, users, watchdog, locale, restart, logout, ?: i vecchi nomi diventano quelli ufficiali (vos_shell_cmdtab.cpp)
+  Word a1 = argAt(line, 1);
+  if (c.cut() || a1.cut()) { o.println(tr("Comando troppo lungo")); return; }
 
   if (role < 0 && authIsSet()) { o.println(tr("Non autorizzato. Fai login.")); return; }
   if (role < 0) role = ROLE_ADMIN;                       // nessuna password ancora: primo avvio
-  if (role < ROLE_ADMIN && (role < ROLE_OPER || !operOk(c, a1))) { o.println(tr("Il tuo ruolo non permette questo comando")); return; }
+  if (!roleAllows(role, c, a1)) { o.println(tr("Il tuo ruolo non permette questo comando")); return; }   // tabella unica: vos_shell_roles.cpp
 
-  if (shCmdSys(c, a1, line, o, role)) return;
-  if (shCmdNet(c, a1, line, o, role)) return;
-  if (shCmdAdmin(c, a1, line, o, role)) return;
-  o.println(tr("Comando sconosciuto. Scrivi 'help'."));
+  ShellSess ss, before;                                  // cartella corrente di questa sessione: copia, poi si risalva se e cambiata
+  shellSessLoad(sess, ss);
+  before = ss;
+  bool done = shCmdBasic(c, a1, line, o, role, sess) || shCmdFiles(c, a1, line, o, role, ss) || shCmdArchive(c, line, o, ss, sess) || shCmdSys(c, a1, line, o, role) || shCmdLed(c, a1, line, o, role) || shCmdNet(c, a1, line, o, role) || shCmdAdmin(c, a1, line, o, role)
+              || shCmdCpu(c, a1, line, o, role) || shCmdVesevos(c, a1, line, o, role, sess);
+  if (strcmp(ss.cwd, before.cwd) != 0 || strcmp(ss.prev, before.prev) != 0) shellSessStore(sess, ss);
+  if (!done) o.println(tr("Comando sconosciuto. Scrivi 'help'."));
+}
+
+static uint32_t g_webIp = 0;                              // vale solo dentro shellExecWeb (le richieste della pagina arrivano una alla volta)
+
+uint32_t shx::shellClientIp() { return g_webIp; }
+
+void shellExecWeb(const char* line, const char* secret, OutSink& o, int role, uint32_t sess, char* ask, size_t askCap, uint32_t clientIp) {
+  askWebBegin(secret);
+  g_webIp = clientIp;
+  shellExecSess(line, o, role, sess);
+  g_webIp = 0;
+  askWebEnd(ask, askCap);
 }
 
 // ---------- schermata di benvenuto (solo ASCII, 68 colonne) ----------
 #define WW 68
-static void wBar(Print& o) { String b = "+"; for (int i = 0; i < WW - 2; i++) b += '-'; o.println(b + "+"); }
-static void wLine(Print& o, const String& t) {
-  String x = t; if (x.length() > WW - 4) x = x.substring(0, WW - 4);
-  String l = "|  " + x; while (l.length() < WW - 1) l += ' ';
-  o.println(l + "|");
+// una riga del riquadro: s e la parte a sinistra (con il bordo sinistro), si riempie di spazi e si chiude con '|'
+static void padBox(OutSink& o, const char* s) {
+  char l[WW + 1];
+  size_t n = strlen(s);
+  if (n > WW - 1) n = WW - 1;
+  memcpy(l, s, n);
+  while (n < WW - 1) l[n++] = ' ';
+  l[n++] = '|'; l[n] = 0;
+  o.println(l);
 }
+static void wBar(OutSink& o) {
+  char b[WW + 1];
+  b[0] = '+'; memset(b + 1, '-', WW - 2); b[WW - 1] = '+'; b[WW] = 0;
+  o.println(b);
+}
+// testo di n caratteri, tagliato alla larghezza del riquadro
+static void wLine(OutSink& o, const char* t, size_t n) {
+  char l[WW + 1];
+  if (n > WW - 4) n = WW - 4;
+  memcpy(l, "|  ", 3); memcpy(l + 3, t, n); l[3 + n] = 0;
+  padBox(o, l);
+}
+static void wLine(OutSink& o, const char* t) { wLine(o, t, strlen(t)); }
 // testo lungo: a capo sulle parole
-static void wPara(Print& o, const String& t) {
-  String rest = t;
-  while (rest.length()) {
-    if ((int)rest.length() <= WW - 4) { wLine(o, rest); break; }
-    int cut = rest.lastIndexOf(' ', WW - 4); if (cut <= 0) cut = WW - 4;
-    wLine(o, rest.substring(0, cut)); rest = rest.substring(cut + 1);
+static void wPara(OutSink& o, const char* t) {
+  size_t n = strlen(t);
+  while (n) {
+    if (n <= WW - 4) { wLine(o, t, n); break; }
+    int cut = -1;                                      // ultimo spazio entro la larghezza
+    for (int i = WW - 4; i >= 0; i--) if (t[i] == ' ') { cut = i; break; }
+    if (cut <= 0) cut = WW - 4;
+    wLine(o, t, (size_t)cut);
+    t += cut + 1; n -= (size_t)cut + 1;
   }
 }
 
-static String g_lcodes[9], g_lnames[9];
+static char g_lcodes[9][LANG_CODE_BUF], g_lnames[9][LANG_NAME_BUF];
 static int g_ln = 0;
 
-static void langMenu(Print& o) {
+static void langMenu(OutSink& o) {
   g_ln = langList(g_lcodes, g_lnames, 9);
-  String l = String(tr("Lingua:")) + " ";
-  for (int i = 0; i < g_ln; i++) l += " [" + String(i + 1) + "] " + g_lnames[i] + (g_lcodes[i] == cfg.lang ? " *" : "") + " ";
-  l += String(" ") + tr("(premi il numero)");
-  wPara(o, l);
+  char buf[320];
+  StrBuf l(buf, sizeof buf);
+  l.add(tr("Lingua:")).add(' ');
+  for (int i = 0; i < g_ln; i++) l.addf(" [%d] %s%s ", i + 1, g_lnames[i], cfg.lang == g_lcodes[i] ? " *" : "");
+  l.add(' ').add(tr("(premi il numero)"));
+  wPara(o, l.c_str());
 }
 
-void shellWelcome(Print& o, bool full) {
+void shellWelcome(OutSink& o, bool full) {
+  char buf[200];
   o.println();
   wBar(o);
-  { String l = "|   /\\      " + String(VOS_NAME) + " " + VOS_VERSION; while (l.length() < WW - 1) l += ' '; o.println(l + "|"); }
+  snprintf(buf, sizeof buf, "|   /\\      %s %s", VOS_NAME, VOS_VERSION); padBox(o, buf);
 #define VOS_STR_(x) #x
 #define VOS_STR(x) VOS_STR_(x)
 #if VOS_HAS_PSRAM
-  { String l = "|  /  \\     " VOS_BOARD " - " VOS_STR(VOS_FLASH_MB) " MB flash, " VOS_STR(VOS_PSRAM_MB) " MB PSRAM"; while (l.length() < WW - 1) l += ' '; o.println(l + "|"); }
+  padBox(o, "|  /  \\     " VOS_BOARD " - " VOS_STR(VOS_FLASH_MB) " MB flash, " VOS_STR(VOS_PSRAM_MB) " MB PSRAM");
 #else
-  { String l = "|  /  \\     " VOS_BOARD " - " VOS_STR(VOS_FLASH_MB) " MB flash"; while (l.length() < WW - 1) l += ' '; o.println(l + "|"); }
+  padBox(o, "|  /  \\     " VOS_BOARD " - " VOS_STR(VOS_FLASH_MB) " MB flash");
 #endif
-  { String l = "| /____\\    github.com/paolellad79/VesevOS"; while (l.length() < WW - 1) l += ' '; o.println(l + "|"); }
+  padBox(o, "| /____\\    github.com/paolellad79/VesevOS");
   wBar(o);
   if (full) {
     wLine(o, tr("BENVENUTO! Questa scheda non e ancora configurata."));
     wLine(o, "");
     wLine(o, tr("1. Collegati alla rete Wi-Fi:"));
-    wLine(o, String("     ") + tr("Nome:") + "      " + cfg.apSsid);
-    wLine(o, String("     ") + tr("Password:") + "  " + cfg.apPass);
-    wLine(o, String(tr("2. Apri:")) + "      http://192.168.4.1");
-    wLine(o, String("   ") + tr("(di solito la pagina si apre da sola)"));
+    snprintf(buf, sizeof buf, "     %s      %s", tr("Nome:"), cfg.apSsid.c_str()); wLine(o, buf);
+    snprintf(buf, sizeof buf, "     %s  %s", tr("Password:"), cfg.apPass.c_str()); wLine(o, buf);
+    snprintf(buf, sizeof buf, "%s      http://192.168.4.1", tr("2. Apri:")); wLine(o, buf);
+    snprintf(buf, sizeof buf, "   %s", tr("(di solito la pagina si apre da sola)")); wLine(o, buf);
     wLine(o, tr("3. Segui la configurazione guidata."));
     wLine(o, "");
     wLine(o, tr("Il QR per il telefono e nella pagina Home."));
@@ -212,15 +155,18 @@ void shellWelcome(Print& o, bool full) {
     wLine(o, tr("Da capo?         Tieni premuto BOOT 20 s -> fabbrica"));
     wLine(o, tr("Aiuto: http://192.168.4.1/#aiuto   Comandi: scrivi  help"));
   } else {
-    wLine(o, String(VOS_NAME) + " " + VOS_VERSION + "  -  " + cfg.hostname + " (" + cfg.hostname + ".local)");
-    if (netState() == NET_CLIENT_OK) wLine(o, trf("Wi-Fi casa: %s  %s  %d dBm", drvWifiSsid().c_str(), netIpString().c_str(), (int)drvWifiRssi()));
-    else wLine(o, trf("Hotspot: %s  %s", cfg.apSsid.c_str(), netIpString().c_str()));
-    wLine(o, trf("Paese: %s   Ora: %s", cfg.country.length() ? cfg.country.c_str() : "--", timeNowStr().c_str()));
+    snprintf(buf, sizeof buf, "%s %s  -  %s (%s.local)", VOS_NAME, VOS_VERSION, cfg.hostname.c_str(), cfg.hostname.c_str()); wLine(o, buf);
+    char ip[16]; netIpTo(ip, sizeof ip);
+    if (netState() == NET_CLIENT_OK) wLine(o, trf("Wi-Fi casa: %s  %s  %d dBm", drvWifiSsid().s, ip, (int)drvWifiRssi()).c_str());
+    else wLine(o, trf("Hotspot: %s  %s", cfg.apSsid.c_str(), ip).c_str());
+    char now[32]; timeNowFmt(now, sizeof now);
+    wLine(o, trf("Paese: %s   Ora: %s", cfg.country.length() ? cfg.country.c_str() : "--", now).c_str());
     int red = auditCount(AUD_RED), yel = auditCount(AUD_YELLOW);
-    wLine(o, (red || yel) ? trf("Allarmi: %d rossi, %d gialli -> scrivi audit", red, yel) : String(tr("Allarmi: nessuno")));
-    wLine(o, trf("Avvio: %s (n. %lu)", sysResetReason().c_str(), (unsigned long)sysBootCount()));
-    if (cfg.https && tlsFingerprint().length()) wPara(o, String(tr("Impronta HTTPS:")) + " " + tlsFingerprint().substring(0, 47) + "...");
-    wLine(o, trf("Pagina: https://%s   Comandi: help", netIpString().c_str()));
+    wLine(o, (red || yel) ? trf("Allarmi: %d rossi, %d gialli -> scrivi audit", red, yel).c_str() : tr("Allarmi: nessuno"));
+    wLine(o, trf("Avvio: %s (n. %lu)", sysResetText(), (unsigned long)sysBootCount()).c_str());
+    const char* fp = tlsFingerprint();
+    if (cfg.https && *fp) { snprintf(buf, sizeof buf, "%s %.47s...", tr("Impronta HTTPS:"), fp); wPara(o, buf); }
+    wLine(o, trf("Pagina: https://%s   Comandi: help", ip).c_str());
   }
   wBar(o);
   langMenu(o);
@@ -228,150 +174,96 @@ void shellWelcome(Print& o, bool full) {
 }
 
 // ---------- shell seriale ----------
-static String g_buf;
+static char g_buf[SER_LINE_MAX + 1];       // riga in digitazione
+static size_t g_bufLen = 0;
 static uint8_t g_esc = 0;                          // dentro una sequenza ESC (tasti freccia...)
 static bool g_fullWelcome = false;
+static bool g_tabPrev = false;                     // l'ultimo tasto era un Tab (il secondo Tab di fila elenca i candidati)
+static ShellCompletion g_tab;                      // risultato del completamento (la seriale e una sola: un oggetto fisso, niente heap)
 
-// La seriale chiede la password solo se: password impostata, interruttore acceso, non ancora autenticata
-static bool serialLocked() { return authIsSet() && cfg.serialAuth && !serialAuthed(); }
+static uint32_t g_lastAct = 0;                     // ultimo tasto (per l'uscita automatica)
 
-static void prompt() { serOut().print(serialLocked() ? "password: " : "vesevos> "); }
+// La seriale chiede il login solo se: c'e un amministratore con password, l'interruttore e acceso, e nessuno e ancora entrato
+static bool serialLocked() { return serialLoginRequired() && !serialAuthed(); }
 
-String shellSerialWho() {
-  if (!cfg.serIn) return String(tr("seriale: comandi spenti")) + "\n";
-  String st = serialLocked() ? String(tr("bloccata (serve la password)")) : String(tr("sbloccata"));
-  if (!g_serCmd.length()) return trf("seriale (USB): %s", st.c_str()) + "\n";
-  return trf("seriale (USB): %s, ultimo comando '%s' %lu s fa", st.c_str(), g_serCmd.c_str(), (unsigned long)((millis() - g_serCmdT) / 1000UL)) + "\n";
+// Il ruolo con cui girano i comandi della seriale: quello di chi e entrato (amministratore se il login non serve)
+static int serRole() { int r = serialRole(); return r < 0 ? ROLE_GUEST : r; }
+
+// Origine delle modifiche di configurazione: "seriale" e, se c'e un login, il nome di chi e entrato
+static void setOrigin() {
+  char user[24];
+  serialUserName(user, sizeof user);
+  if (user[0]) cfgSetOriginf("seriale %s", user); else cfgSetOrigin("seriale");
+}
+
+// Il prompt della seriale: "host login: " (o il passo del login) finche e chiusa, poi utente@hostname:cartella$ (utente e ruolo veri)
+static void prompt() {
+  if (serialLocked()) { loginPrompt(serOut()); return; }
+  char user[24], p[SHELL_PROMPT_MAX];
+  serialUserName(user, sizeof user);
+  shellPrompt(SESS_SERIAL, user, serRole(), p, sizeof p);
+  serOut().print(p);
+}
+
+// Fine della sessione (logout, exit, Ctrl+D, inattivita): niente resta in memoria di chi c'era. Poi si torna a "host login:".
+static void endSession(const char* why) {
+  char user[24];
+  serialUserName(user, sizeof user);
+  if (user[0]) auditEvent(AUD_INFO, "serlogin", trf("Seriale: uscita di %s", user).c_str());
+  serialClose();
+  shellSessDrop(SESS_SERIAL);            // cartella corrente e precedente
+  askClear();                            // domanda in sospeso (conferma o password)
+  wzAbort();                             // guida di configurazione a meta
+  loginReset();
+  g_serCmd[0] = 0;
+  g_bufLen = 0; wipeBytes(g_buf, sizeof g_buf);
+  serOut().println(why);
+}
+
+static bool isLogoutWord(const char* l) {
+  Word w = argAt(l, 0);
+  return w == "logout" || w == "exit";
+}
+
+// Tab sulla riga in digitazione, come in bash: scrive i caratteri mancanti; al secondo Tab di fila, se restano piu candidati, li elenca
+// e ristampa prompt e riga. Su riga vuota non fa niente. L'eco dei caratteri aggiunti segue serial echo.
+static void serialTab(bool second) {
+  if (!shellComplete(SESS_SERIAL, serRole(), g_buf, (size_t)SER_LINE_MAX - g_bufLen, false, g_tab)) return;
+  size_t add = strlen(g_tab.add);
+  if (add) {
+    memcpy(g_buf + g_bufLen, g_tab.add, add + 1);
+    g_bufLen += add;
+    if (cfg.serEcho) serOut().print(g_tab.add);
+  } else if (second && g_tab.n > 1) {
+    serOut().println();
+    shellCompletePrintList(serOut(), g_tab);
+    prompt();
+    if (cfg.serEcho) serOut().print(g_buf);
+  }
+}
+
+void shellSerialWho(OutSink& o) {
+  if (!cfg.serIn) { o.print(tr("seriale: comandi spenti")); o.print("\n"); return; }
+  char user[24];
+  serialUserName(user, sizeof user);
+  char opened[112];
+  snprintf(opened, sizeof opened, "%s", user[0] ? trf("sbloccata da %s", user).c_str() : tr("sbloccata"));   // copiato subito: il testo di trf vive solo fino a fine istruzione
+  const char* st = serialLocked() ? tr("bloccata (serve il login)") : opened;
+  if (!g_serCmd[0]) o.print(trf("seriale (USB): %s", st));
+  else o.print(trf("seriale (USB): %s, ultimo comando '%s' %lu s fa", st, g_serCmd, (unsigned long)((drvMillis() - g_serCmdT) / 1000UL)));
+  o.print("\n");
 }
 
 void shellSerialShowPass() { g_fullWelcome = true; }   // tasto BOOT 8 s: rimostra la password dell'hotspot
 
-// ---- configurazione guidata da seriale (stessi passi della pagina web) ----
-enum { WZ_OFF = -1, WZ_LANG = 0, WZ_COUNTRY, WZ_NAME, WZ_ANT, WZ_ANTG, WZ_AP, WZ_PASS, WZ_WIFI, WZ_SCAN, WZ_WPASS, WZ_TIME };
-static int g_wz = WZ_OFF;
-static String g_wzNets[8];
-static int g_wzN = 0;
-static String g_wzSsid, g_wzPass;
-static bool g_wzWifi = false;
-
-static void wzAsk(Print& o) {
-  switch (g_wz) {
-    case WZ_LANG: o.println(trf("1/8 Lingua [%s] (it, en, ...):", cfg.lang.c_str())); break;
-    case WZ_COUNTRY: o.println(trf("2/8 Paese, codice di 2 lettere (es. IT) [%s]:", cfg.country.length() ? cfg.country.c_str() : "-")); break;
-    case WZ_NAME: o.println(trf("3/8 Nome della scheda [%s]:", cfg.hostname.c_str())); break;
-    case WZ_ANT: o.println(tr("4/8 Antenna: i = interna, e = esterna [i]:")); break;
-    case WZ_ANTG: o.println(tr("Guadagno dell'antenna esterna in dBi (0-15) [0]:")); break;
-    case WZ_AP: o.println(trf("5/8 Hotspot: %s  password: %s", cfg.apSsid.c_str(), cfg.apPass.c_str())); o.println(tr("Invio = tieni, n = nuova password casuale:")); break;
-    case WZ_PASS:
-      if (authIsSet()) o.println(tr("6/8 Amministratore gia impostato. Invio = tieni, oppure scrivi la nuova password:"));
-      else o.println(trf("6/8 Scegli la password dell'amministratore '%s' (almeno 6 caratteri; si vede mentre scrivi: fallo in un luogo sicuro):", cfg.users[authFirstAdmin() < 0 ? 0 : authFirstAdmin()].name.c_str()));
-      break;
-    case WZ_WIFI: o.println(tr("7/8 Collegare la Wi-Fi di casa? s = si, Invio = no (hotspot e HTTP restano accesi):")); break;
-    case WZ_SCAN: o.println(tr("Numero della rete, oppure scrivi il nome:")); break;
-    case WZ_WPASS: o.println(tr("Password della Wi-Fi (Invio = rete aperta):")); break;
-    case WZ_TIME: o.println(tr("8/8 Ora a mano, AAAA-MM-GG HH:MM (Invio = salta):")); break;
-  }
-}
-
-static void wzNext(Print& o);
-static void wzFinish(Print& o) {
-  g_wz = WZ_OFF;
-  cfg.ntpOn = g_wzWifi; cfg.ntpAutoOff = !g_wzWifi;   // senza Wi-Fi di casa il server dell'ora non serve (si riaccende se arriva il Wi-Fi)
-  if (g_wzWifi) { cfg.staEnabled = true; cfg.staSsid = g_wzSsid; cfg.staPass = g_wzPass; cfg.staDhcp = true; }
-  cfg.setupDone = true; ledSetSetup(false);
-  cfgSetOrigin("seriale setup"); cfgSave(); timeApply();
-  o.println(tr("Configurazione finita."));
-  o.println(trf("Nome: %s.local   Paese: %s   Lingua: %s", cfg.hostname.c_str(), cfg.country.c_str(), cfg.lang.c_str()));
-  if (g_wzWifi) { o.println(trf("Mi collego a %s: se non riesce l'hotspot torna da solo.", g_wzSsid.c_str())); netReconfigure(); }
-  else o.println(tr("Senza Wi-Fi di casa: hotspot e HTTP restano accesi, il server dell'ora e spento."));
-  o.println(tr("Per i servizi di rete e le porte: svc. Per tutto il resto: help."));
-}
-
-static void wzNext(Print& o) {
-  switch (g_wz) {
-    case WZ_LANG: g_wz = WZ_COUNTRY; break;
-    case WZ_COUNTRY: g_wz = WZ_NAME; break;
-    case WZ_NAME: g_wz = WZ_ANT; break;
-    case WZ_ANT: g_wz = WZ_AP; break;
-    case WZ_ANTG: g_wz = WZ_AP; break;
-    case WZ_AP: g_wz = WZ_PASS; break;
-    case WZ_PASS: g_wz = WZ_WIFI; break;
-    case WZ_WIFI: g_wz = g_wzWifi ? WZ_SCAN : WZ_TIME; break;
-    case WZ_SCAN: g_wz = WZ_WPASS; break;
-    case WZ_WPASS: g_wz = WZ_TIME; break;
-    case WZ_TIME: wzFinish(o); return;
-  }
-  if (g_wz == WZ_SCAN) {                      // elenco reti
-    netScanStart(); delay(300);
-    for (int i = 0; i < 30 && netScanJson().indexOf("\"running\":true") >= 0; i++) delay(300);
-    String j = netScanJson(); g_wzN = 0;
-    int p = 0;
-    while (g_wzN < 8) {
-      int a = j.indexOf("\"ssid\":\"", p); if (a < 0) break;
-      a += 8; int b = j.indexOf("\",\"rssi\"", a); if (b < 0) break;
-      String sd = j.substring(a, b); p = b;
-      if (sd.length() && sd.indexOf('\\') < 0) { bool dup = false; for (int k = 0; k < g_wzN; k++) if (g_wzNets[k] == sd) dup = true; if (!dup) g_wzNets[g_wzN++] = sd; }
-    }
-    for (int i = 0; i < g_wzN; i++) o.println(String(i + 1) + ") " + g_wzNets[i]);
-    if (!g_wzN) o.println(tr("Nessuna rete trovata: scrivi il nome a mano."));
-  }
-  wzAsk(o);
-}
-
-void shx::wzStart(Print& o) {
-  if (!serIsOut(o)) { o.println(tr("La configurazione guidata si fa solo dalla seriale (USB).")); return; }
-  g_wz = WZ_LANG; g_wzWifi = false; g_wzSsid = ""; g_wzPass = "";
-  o.println(tr("Configurazione guidata da seriale. Invio = tieni il valore proposto, skip = salta il passo, quit = esci."));
-  wzAsk(o);
-}
-
-static void wzLine(Print& o, String l) {
-  l.trim();
-  if (l == "quit") { g_wz = WZ_OFF; o.println(tr("Configurazione interrotta: la guida resta da finire (scrivi setup per riprendere).")); return; }
-  String err;
-  bool skip = (l == "skip" || l.length() == 0);
-  switch (g_wz) {
-    case WZ_LANG: if (!skip) { l.toLowerCase(); if (!langSet(l, err)) { o.println(err); wzAsk(o); return; } } break;
-    case WZ_COUNTRY: if (!skip) { l.toUpperCase(); if (!regionValid(l)) { o.println(tr("Paese sconosciuto")); wzAsk(o); return; } cfg.country = l; cfgSave(); regionApplyRadio(); } break;
-    case WZ_NAME: if (!skip) { l.toLowerCase(); if (!hostnameValid(l)) { o.println(tr("Nome non valido (1-32: lettere, numeri, trattino)")); wzAsk(o); return; } cfg.hostname = l; cfgSave(); } break;
-    case WZ_ANT:
-      if (l == "e") { cfg.antExt = 1; g_wz = WZ_ANTG; wzAsk(o); return; }
-      if (!skip && l != "i") { o.println(tr("Scrivi i oppure e")); wzAsk(o); return; }
-      cfg.antExt = 0; cfg.antGain = 0; cfgSave(); regionApplyRadio(); break;
-    case WZ_ANTG: { int g = skip ? 0 : l.toInt(); if (g < 0 || g > 15) { o.println(tr("Guadagno dell'antenna: da 0 a 15 dBi")); wzAsk(o); return; } cfg.antGain = g; cfgSave(); regionApplyRadio(); } break;
-    case WZ_AP: if (l == "n") { cfg.apPass = cfgNewApPass(); cfgSave(); o.println(trf("Nuova password hotspot: %s", cfg.apPass.c_str())); } break;
-    case WZ_PASS:
-      if (!skip) {
-        int a = authFirstAdmin();
-        if (a < 0 || !userSetPassword(a, l, err)) { o.println(err.length() ? err : String(tr("Errore"))); wzAsk(o); return; }
-        cfg.users[a].on = true; cfg.users[a].role = ROLE_ADMIN; cfgSave();
-      } else if (!authIsSet()) { o.println(tr("Serve una password per l'amministratore.")); wzAsk(o); return; }
-      break;
-    case WZ_WIFI: g_wzWifi = (l == "s" || l == "S" || l == "si"); break;
-    case WZ_SCAN: {
-      if (skip) { g_wzWifi = false; g_wz = WZ_TIME; wzAsk(o); return; }
-      int n = l.toInt();
-      g_wzSsid = (n >= 1 && n <= g_wzN && String(n) == l) ? g_wzNets[n - 1] : l;
-      if (g_wzSsid.length() > 32) { o.println(tr("Nome rete non valido")); wzAsk(o); return; }
-    } break;
-    case WZ_WPASS:
-      if (l.length() && (l.length() < 8 || l.length() > 63)) { o.println(tr("Password Wi-Fi: da 8 a 63 caratteri")); wzAsk(o); return; }
-      g_wzPass = l; break;
-    case WZ_TIME:
-      if (!skip) { if (!timeSetLocal(l, err)) { o.println(err); wzAsk(o); return; } o.println(timeNowStr()); }
-      break;
-  }
-  wzNext(o);
-}
-
-bool shellWizardActive() { return g_wz != WZ_OFF; }
+bool shellWizardActive() { return wzActive(); }
 
 void shellSerialPoll() {
   static bool first = true, wasOpen = false;
   static uint32_t lastBanner = 0, lastKey = 0, closedAt = 0;
   static bool closedLong = true;
-  uint32_t now = millis();
-  bool open = (bool)Serial;                       // true quando il monitor seriale e aperto sul PC
+  uint32_t now = drvMillis();
+  bool open = drvConIsOpen();                      // true quando il monitor seriale e aperto sul PC
   // anti-ripetizione: il segnale "aperto" sull'USB puo cadere e risalire piu volte in pochi decimi di secondo
   // (monitor che si riapre, velocita diversa): conta come nuova apertura solo dopo 2 secondi di chiusura vera
   if (!open) { if (!closedAt) closedAt = now ? now : 1; else if (now - closedAt >= 2000UL) closedLong = true; }
@@ -393,39 +285,77 @@ void shellSerialPoll() {
     if (!cfg.setupDone) { serOut().println(tr("Configurazione non finita: questo messaggio resta finche la guida non e completata (pagina web oppure seriale).")); serOut().println(tr("Per configurare da questa seriale scrivi: setup")); }
     prompt();
   }
-  while (Serial.available()) {
-    char ch = Serial.read();
+  bool passChecked = false;
+  if (askExpired(now)) { askCancel(serOut(), true); prompt(); }   // una domanda (conferma o password) rimasta senza risposta
+  if (serialLocked() && loginTick(serOut(), now)) { g_bufLen = 0; wipeBytes(g_buf, sizeof g_buf); }   // fine dell'attesa dopo un errore, o passo scaduto
+  if (cfg.serialIdleMin && serialAuthed() && now - g_lastAct >= (uint32_t)cfg.serialIdleMin * 60000UL) {
+    serOut().println();
+    endSession(tr("Sessione chiusa per inattivita."));     // come TMOUT di bash
+    prompt();
+  }
+  while (drvConAvailable()) {
+    char ch = (char)drvConRead();
     if (!cfg.serIn) continue;                      // seriale impostata "senza comandi": si butta quello che arriva
-    lastKey = now;
-    if (g_esc || ch == 27) { String e; utilEditKey(g_buf, g_esc, ch, e, 200); continue; }   // frecce e simili: scartate, non finiscono nella riga
-    // tasto numerico a riga vuota: cambia lingua (solo con la seriale sbloccata)
-    if (!g_buf.length() && ch >= '1' && ch <= '9' && !serialLocked() && g_wz == WZ_OFF) {
+    if (serialLocked() && loginBusy()) continue;   // attesa dopo un errore di login: i tasti si buttano
+    lastKey = now; g_lastAct = now;
+    bool wasTab = g_tabPrev;
+    g_tabPrev = false;                             // qualunque altro tasto azzera il "secondo Tab"
+    int erase; char typed;
+    if (ch == '\t' && !g_esc) {
+      if (!serialLocked() && !wzActive() && !askActive()) { serialTab(wasTab); g_tabPrev = true; }   // con la password, la guida o una domanda il Tab non fa niente
+      continue;
+    }
+    if (ch == 3 && askActive()) { g_bufLen = 0; g_buf[0] = 0; askCancel(serOut(), false); prompt(); continue; }   // Ctrl+C lascia perdere la domanda
+    if (g_esc || ch == 27) { editKey(g_buf, g_bufLen, SER_LINE_MAX, g_esc, ch, erase, typed); continue; }   // frecce e simili: scartate, non finiscono nella riga
+    if (ch == 4 && !g_bufLen && !serialLocked() && !wzActive() && !askActive()) {   // Ctrl+D a riga vuota = exit, come la shell classica
+      serOut().println();
+      endSession(tr("Uscito."));
+      prompt();
+      continue;
+    }
+    // tasto numerico a riga vuota: cambia lingua (solo con la seriale sbloccata, mai durante il login)
+    if (!g_bufLen && ch >= '1' && ch <= '9' && !serialLocked() && !wzActive() && !askActive()) {   // (con una domanda in sospeso il numero e parte della risposta)
       int i = ch - '1';
       if (!g_ln) g_ln = langList(g_lcodes, g_lnames, 9);
       if (i < g_ln) {
-        String err;
-        if (langSet(g_lcodes[i], err)) { serOut().println(); serOut().println(trf("Lingua impostata: %s", g_lnames[i].c_str())); shellWelcome(serOut(), !cfg.setupDone); }
-        else serOut().println(err);
+        ErrBuf err;
+        if (langSet(g_lcodes[i], err)) { serOut().println(); serOut().println(trf("Lingua impostata: %s", g_lnames[i])); shellWelcome(serOut(), !cfg.setupDone); }
+        else serOut().println(err.c_str());
         prompt();
         continue;
       }
     }
     if (ch == '\r' || ch == '\n') {
-      String l = g_buf; g_buf = "";
-      if (l.length() == 0 && ch == '\n') continue;
+      char l[SER_LINE_MAX + 1];
+      memcpy(l, g_buf, g_bufLen + 1); size_t ll = g_bufLen; g_bufLen = 0; g_buf[0] = 0;
+      if (ll == 0 && ch == '\n') continue;
       serOut().println();
-      if (g_wz != WZ_OFF && !serialLocked()) { cfgSetOrigin("seriale"); wzLine(serOut(), l); prompt(); continue; }   // risposta alla guida
-      if (l.length() == 0 && !cfg.setupDone) { g_fullWelcome = true; continue; }   // Invio a vuoto: rimostra il benvenuto
-      if (serialLocked()) {
-        if (authLocked()) serOut().println(tr("Bloccato per troppi errori, riprova tra un minuto."));
-        else if (authCheck(l)) { serialAuthSet(true); serOut().println(tr("Accesso eseguito.")); }
-        else serOut().println(tr("Password errata."));
-      } else if (l == "logout") { serialAuthSet(false); serOut().println(tr("Uscito.")); }
-      else { g_serCmd = argAt(l, 0); g_serCmdT = millis(); cfgSetOrigin("seriale"); shellExec(l, serOut(), ROLE_ADMIN); }
-      prompt();
+      if (askActive() && !serialLocked()) {   // risposta a una conferma o a una richiesta di password: non e un comando
+        for (size_t k = 0; k < ll; k++) g_buf[k] = 0;       // la password non resta nel buffer di digitazione
+        setOrigin();
+        askLine(serOut(), l, shellExecSess);
+        if (!askActive()) prompt();
+        continue;
+      }
+      if (wzActive() && !serialLocked()) { setOrigin(); wzLine(serOut(), l); prompt(); continue; }   // risposta alla guida
+      if (ll == 0 && !cfg.setupDone) { g_fullWelcome = true; continue; }   // Invio a vuoto: rimostra il benvenuto
+      if (serialLocked()) {                                                     // login: utente, password, codice MFA (vos_shell_login.cpp)
+        bool entered = loginLine(serOut(), l);                                  // la riga viene cancellata dopo l'uso
+        wipeBytes(g_buf, sizeof g_buf);
+        if (entered) { g_lastAct = drvMillis(); prompt(); }                     // se non e entrato, loginLine ha gia scritto la richiesta del passo dopo
+        passChecked = true;
+      } else if (isLogoutWord(l)) endSession(tr("Uscito."));                   // poi il prompt: "host login:" se serve il login
+      else { strncpy(g_serCmd, argAt(l, 0).c_str(), sizeof g_serCmd - 1); g_serCmdT = drvMillis(); setOrigin(); shellExecSess(l, serOut(), serRole() < 0 ? ROLE_GUEST : serRole(), SESS_SERIAL); }
+      if (!askActive() && !passChecked) prompt();            // se il comando ha fatto una domanda, il prompt e la domanda
+      wipeBytes(l, sizeof l);
+      if (passChecked) break;   // un solo controllo password (circa 1 s) per giro di loop: le altre righe restano nel buffer della seriale e il watchdog non scatta
     } else {
-      String e; utilEditKey(g_buf, g_esc, ch, e, 200);          // Backspace, Ctrl+U, Ctrl+C e lettere
-      if (e.length() && !serialLocked() && cfg.serEcho) serOut().print(e);   // niente eco della password; "\b \b" cancella anche sullo schermo
+      editKey(g_buf, g_bufLen, SER_LINE_MAX, g_esc, ch, erase, typed);          // Backspace, Ctrl+U, Ctrl+C e lettere
+      bool echo = serialLocked() ? loginEchoes() : !askIsSecret();              // niente eco di password e codice MFA (ne di quelle chiesta da passwd, user add, wifi set); "\b \b" cancella anche sullo schermo
+      if (echo && cfg.serEcho) {
+        for (int k = 0; k < erase; k++) serOut().print("\b \b");
+        if (typed) serOut().print(typed);
+      }
     }
   }
 }

@@ -10,12 +10,17 @@
 //   azioni : separate da ";" -> led-color RRGGBB | led state|heartbeat|fixed|off | led-bright N
 //            | gpio N 0|1 | wait N | note testo | reboot | ntp sync | airplane on|off ... | mqtt <argomento> <testo>
 #pragma once
-#include <Arduino.h>
+#include "../core/vos_errbuf.h"
+#include "../core/vos_heapbuf.h"
+#include "../drivers/vos_drv_string.h"
+#include <string>
+#include <string_view>
 
 void   rulesInit();                                  // carica /rules.txt e avvia il task "rules"
-String rulesText();                                  // contenuto del file
-bool   rulesSave(const String& text, String& err);   // controlla, salva e ricarica
-String rulesStatusJson();                            // stato di ogni regola (ultima esecuzione, conteggio, antiloop)
-bool   rulesRunNow(int index, String& err);          // "prova ora"
+#define RULES_READ_MAX 32768                          // tetto del testo letto dal file (l'editor dei file arriva a 32 KB)
+bool   rulesText(HeapBuf& out);                       // contenuto del file in out (vuoto se il file non c'e); false = manca la memoria o supera il tetto
+bool   rulesSave(std::string_view text, ErrBuf& err);   // controlla, salva e ricarica
+std::string rulesStatusJson();                       // stato di ogni regola (ultima esecuzione, conteggio, antiloop)
+bool   rulesRunNow(int index, ErrBuf& err);          // "prova ora"
 int    rulesCount();
-bool   rulesAction(const String& action, String& err, const char* who = "MQTT");   // esegue subito UNA azione (controllata; "wait" non ammessa) - MQTT, rete schede
+bool   rulesAction(const char* action, ErrBuf& err, const char* who = "MQTT");   // esegue subito UNA azione (controllata; "wait" non ammessa) - MQTT, rete schede

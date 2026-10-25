@@ -6,7 +6,9 @@
 // Sempre ammessi: la rete dell'hotspot (192.168.4.x) e la seriale USB (porta di emergenza).
 // Fuori lista: la connessione si chiude senza risposta (la scheda resta "invisibile").
 #pragma once
-#include <Arduino.h>
+#include <string>
+#include <stdint.h>
+#include "vos_heapbuf.h"
 
 bool   fwAllow(uint32_t ip, bool ntp);          // ip in ordine umano (primo numero nel byte alto)
 bool   fwTryStart(uint32_t keepIp);             // modo prova: la regola nuova vale 2 minuti, poi torna la vecchia se non confermata
@@ -15,6 +17,7 @@ bool   fwTrying();                              // c'e una regola in prova?
 uint32_t fwTryLeft();                           // secondi rimasti della prova
 void   fwTick();                                // ogni secondo (task di rete): scadenza della prova
 void   fwOff(const char* why);                  // uscita di emergenza (seriale, tasto BOOT 2-7 s)
-String fwJson(uint32_t yourIp);                 // stato per la pagina
-String fwText();
+#define FW_JSON_MAX 4096
+bool   fwJson(HeapBuf& out, uint32_t yourIp);   // stato per la pagina (JSON aggiunto in coda)
+std::string fwText();
 void   fwNoteRejected(uint32_t ip);             // contatore dei rifiutati

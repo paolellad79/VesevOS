@@ -1,6 +1,6 @@
 #pragma once
 #include "esp_partition.h"
-typedef struct { char project_name[32]; char version[32]; } esp_app_desc_t;
+#include "esp_app_desc.h"
 typedef uint32_t esp_ota_handle_t;
 #define OTA_SIZE_UNKNOWN 0xffffffffUL
 esp_err_t esp_ota_get_partition_description(const esp_partition_t*, esp_app_desc_t*);
@@ -15,3 +15,5 @@ const esp_partition_t* esp_ota_get_running_partition();
 const esp_partition_t* esp_ota_get_boot_partition();
 const esp_partition_t* esp_ota_get_last_invalid_partition();
 esp_err_t esp_ota_get_state_partition(const esp_partition_t*, esp_ota_img_states_t*);
+const esp_partition_t* esp_ota_get_next_update_partition(const esp_partition_t*);
+esp_err_t esp_ota_mark_app_valid_cancel_rollback(void);

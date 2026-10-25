@@ -5,9 +5,9 @@
 
 static int st = SVC_OFF, begins = 0, stops = 0, restarts = 0; static bool fail = false;
 static int  f_state() { return st; }
-static bool f_begin(String& err) { begins++; if (fail) { err = "no"; st = SVC_ERROR; return false; } st = SVC_ON; return true; }
+static bool f_begin(ErrBuf& err) { begins++; if (fail) { err = "no"; st = SVC_ERROR; return false; } st = SVC_ON; return true; }
 static void f_stop() { stops++; st = SVC_OFF; }
-static bool f_restart(String& err) { restarts++; st = SVC_ON; return true; }
+static bool f_restart(ErrBuf& err) { restarts++; st = SVC_ON; return true; }
 static uint32_t f_ram() { return st == SVC_ON ? 1234 : 0; }
 static const ServiceOps A = { "a", "Servizio A", "Prova", "a", 2, 2, f_state, f_begin, f_stop, nullptr, nullptr, nullptr, f_ram };
 static const ServiceOps B = { "b", "Servizio B", "Prova", "b", 0, 1, f_state, f_begin, f_stop, f_restart, nullptr, nullptr, nullptr };
@@ -15,7 +15,7 @@ static const ServiceOps BAD = { "x", "Rotto", "Prova", "x", 0, 0, nullptr, f_beg
 static const ServiceOps DUP = { "a", "Doppio", "Prova", "a", 0, 0, f_state, f_begin, f_stop, nullptr, nullptr, nullptr, nullptr };
 
 int main() {
-  String err;
+  ErrBuf err;
   CHECK(serviceCount() == 0);
   CHECK(!serviceRegister(nullptr));
   CHECK(!serviceRegister(&BAD));                    // manca state
@@ -25,6 +25,7 @@ int main() {
   CHECK(serviceCount() == 2);
   CHECK(serviceAt(0) == &A && serviceAt(1) == &B && serviceAt(2) == nullptr && serviceAt(-1) == nullptr);
   CHECK(serviceFind("b") == &B && serviceFind("zz") == nullptr);
+  CHECK(serviceFind(nullptr) == nullptr && serviceFind("") == nullptr && serviceState(nullptr) == SVC_OFF && serviceRam(nullptr) == 0);
   CHECK(serviceState("a") == SVC_OFF && serviceState("zz") == SVC_OFF);
   CHECK(serviceStart("a", err) && serviceState("a") == SVC_ON && begins == 1);
   CHECK(serviceRam("a") == 1234 && serviceRam("zz") == 0);
@@ -38,7 +39,7 @@ int main() {
   CHECK(serviceRestart("b", err) && restarts == 1);
   // avvio che fallisce: errore e stato "errore"
   fail = true; err = "";
-  CHECK(!serviceStart("a", err) && err == "no" && serviceState("a") == SVC_ERROR);
+  CHECK(!serviceStart("a", err) && !strcmp(err.c_str(), "no") && serviceState("a") == SVC_ERROR);
   fail = false;
   // il registro ha un limite
   static ServiceOps many[VOS_MAX_SERVICES]; static char ids[VOS_MAX_SERVICES][8]; int added = 0;

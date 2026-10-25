@@ -9,6 +9,9 @@
 #include "mini.h"
 #include "fake_i2c.h"
 #include <unistd.h>
+// ioListJson/ioText scrivono in un HeapBuf: qui si rileggono come String per usare indexOf
+static String ioJ() { HeapBuf h(IO_JSON_MAX); CHECK(ioListJson(h)); return String(h.c_str()); }
+static String ioT() { HeapBuf h(IO_JSON_MAX); CHECK(ioText(h)); return String(h.c_str()); }
 
 // file system finto in memoria (iocfg/FS.h): run.sh compila questo test con quello
 FakeFsFaults g_ff;
@@ -27,7 +30,7 @@ const char* pinTestBlock(int g) {
 }
 bool pinClaim(uint8_t g, const char* o, const char*, bool) { if (claimed[g] && owner[g] && strcmp(owner[g], o)) return false; claimed[g] = 1; owner[g] = o; return true; }
 void pinRelease(uint8_t g) { claimed[g] = 0; owner[g] = nullptr; }
-const DevOps* devFind(const String& id) { static DevOps d; return (id == "mqtt" || id == "boot") ? &d : nullptr; }
+const DevOps* devFind(const char* id) { static DevOps d; return (!strcmp(id, "mqtt") || !strcmp(id, "boot")) ? &d : nullptr; }
 
 int main() {
   String err, nm;
@@ -103,7 +106,7 @@ int main() {
   // sensore assente: un tentativo, poi attesa (il loop non si blocca e non insiste)
   ioTick(); CHECK(g_fk.begins == 1 && g_fk.bus && g_fk.sda == 11 && g_fk.scl == 12 && g_fk.hz == 100000);
   int r0 = g_fk.reads; for (int k = 0; k < 20; k++) ioTick(); CHECK(g_fk.reads == r0 && g_fk.begins == 1);
-  CHECK(ioState("bmp1") == 0 && ioText().indexOf("non risponde") >= 0 && ioListJson().indexOf("\"ok\":0") > 0);
+  CHECK(ioState("bmp1") == 0 && ioT().indexOf("non risponde") >= 0 && ioJ().indexOf("\"ok\":0") > 0);
   CHECK(!ioGet("bmp1.p", v, err));
   CHECK(ioRemove("bmp1", err) && !claimed[11] && !claimed[12] && ioCount() == 5);
   ioTick(); CHECK(!g_fk.bus && g_fk.ends == 1);                                       // senza sensore il bus si ferma
@@ -116,8 +119,8 @@ int main() {
   CHECK(ioGet("mioclima", v, err) && v == 2508);                                      // centesimi di grado
   CHECK(ioGet("mioclima.p", v, err) && v >= 100650 && v <= 100656);                   // pascal
   CHECK(ioState("mioclima") == 1);
-  String lj = ioListJson(); CHECK(lj.indexOf("\"c\":\"i2c\"") > 0 && lj.indexOf("\"g2\":12") > 0 && lj.indexOf("\"a\":118") > 0 && lj.indexOf("\"d\":\"bmp280\"") > 0 && lj.indexOf("\"ok\":1") > 0);
-  CHECK(ioText().indexOf("25.1 C") >= 0 && ioText().indexOf("1006.5 hPa") >= 0);
+  String lj = ioJ(); CHECK(lj.indexOf("\"c\":\"i2c\"") > 0 && lj.indexOf("\"g2\":12") > 0 && lj.indexOf("\"a\":118") > 0 && lj.indexOf("\"d\":\"bmp280\"") > 0 && lj.indexOf("\"ok\":1") > 0);
+  CHECK(ioT().indexOf("25.1 C") >= 0 && ioT().indexOf("1006.5 hPa") >= 0);
   int rd = g_fk.reads; for (int k = 0; k < 20; k++) ioTick(); CHECK(g_fk.reads == rd);   // prossima lettura tra 2 s: i tick di mezzo non toccano il bus
   // errore a meta: il valore vecchio resta, poi si riprova con calma
   g_fk.failReads = true; usleep(100000);
@@ -130,8 +133,8 @@ int main() {
   for (int g = 33; g <= 44 && ioCount() < IO_MAX; g++) if (ioAdd("pin", g, "", "", nm, err)) added++;
   CHECK(ioCount() == IO_MAX && !ioAdd("pin", 47, "", "", nm, err));
   // elenco
-  String j = ioListJson();
+  String j = ioJ();
   CHECK(j.indexOf("\"n\":\"boiler\"") > 0 && j.indexOf("\"c\":\"rele\"") > 0 && j.indexOf("\"max\":16") > 0);
-  CHECK(ioText().indexOf("boiler") >= 0);
+  CHECK(ioT().indexOf("boiler") >= 0);
   return done("io");
 }

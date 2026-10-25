@@ -12,4 +12,4 @@ Come si usano
 IMPORTANTE: controlla sempre i collegamenti sul datasheet del TUO modulo (tensione, livello attivo, resistenze). Uno schema sbagliato puo
 danneggiare il modulo o la scheda. I rele collegati alla rete elettrica (230 V) richiedono un installatore.
 
-Formato: vedi claude/funzioni/VesevOS-formato-vdp.md nel Progetto. Le schede di questa cartella si rigenerano con: python3 tools/mkdevs.py
+Formato: vedi il manuale (sezione schede modulo). Le schede di questa cartella si rigenerano con: python3 tools/mkdevs.py

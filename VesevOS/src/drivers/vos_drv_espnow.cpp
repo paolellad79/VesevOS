@@ -3,7 +3,7 @@
 // VesevOS - vos_drv_espnow.cpp
 #include "vos_drv_espnow.h"
 #if VOS_WITH_MESH
-#include <WiFi.h>
+#include "vos_drv_wifi.h"
 #include <esp_wifi.h>
 #include <esp_now.h>
 #include <esp_mac.h>
@@ -12,8 +12,8 @@ static EspNowRxFn s_rx = nullptr;
 static wifi_interface_t s_if = (wifi_interface_t)99;
 static const uint8_t ALL[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
-bool drvEspNowRadioUp() { return WiFi.getMode() != WIFI_MODE_NULL; }
-bool drvEspNowIsAp() { return WiFi.getMode() == WIFI_MODE_AP; }
+bool drvEspNowRadioUp() { return drvWifiMode() != DW_OFF; }
+bool drvEspNowIsAp() { return drvWifiMode() == DW_AP; }
 int  drvEspNowChannel() { uint8_t ch = 0; wifi_second_chan_t s; if (esp_wifi_get_channel(&ch, &s) != ESP_OK) return 0; return ch; }
 void drvEspNowMac(uint8_t out[6]) { esp_read_mac(out, drvEspNowIsAp() ? ESP_MAC_WIFI_SOFTAP : ESP_MAC_WIFI_STA); }
 

@@ -38,7 +38,7 @@ def scan():
                 body = t[m.start(): ms[k + 1].start() if k + 1 < len(ms) else len(t)]
                 mm = RX.match(body)
                 if not mm: continue
-                params = sorted(set(re.findall(r'\b(?:P|has|qparam)\(\s*r\s*,\s*"(\w+)"', body)))
+                params = sorted(set(re.findall(r'\b(?:P|Pc|Pis|Pint|has|qparam)\(\s*r\s*,\s*"(\w+)"', body)))
                 codes = set()
                 for km in re.finditer(r'\bko\(', body):
                     p = args(balanced(body, km.end() - 1))

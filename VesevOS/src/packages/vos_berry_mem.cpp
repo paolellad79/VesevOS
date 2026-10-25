@@ -74,7 +74,10 @@ size_t vosberry::berryFreeAll() {
 }
 
 // ---------- uscita (print) ----------
+// Il lettore (pagina web, shell) copia i buffer sotto g_mux: qui si scrive sotto lo stesso blocco (solo memcpy/memmove, nessuna chiamata
+// che possa saltare con longjmp).
 extern "C" void vos_berry_write(const char* b, size_t n) {
+  portENTER_CRITICAL(&g_mux);
   if (g_toErr) {
     size_t room = sizeof(g_ebuf) - 1 - g_elen; if (n > room) n = room;
     memcpy(g_ebuf + g_elen, b, n); g_elen += n; g_ebuf[g_elen] = 0;
@@ -86,5 +89,6 @@ extern "C" void vos_berry_write(const char* b, size_t n) {
     } else if (n > room) { n = room; g_otrunc = true; }
     memcpy(g_obuf + g_olen, b, n); g_olen += n; g_obuf[g_olen] = 0;
   }
+  portEXIT_CRITICAL(&g_mux);
 }
 #endif

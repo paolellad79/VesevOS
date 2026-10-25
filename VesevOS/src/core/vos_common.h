@@ -3,7 +3,7 @@
 // VesevOS - vos_common.h
 // Definizioni comuni a tutti i moduli. Solo caratteri ASCII.
 #pragma once
-#include <Arduino.h>
+#include "../drivers/vos_drv_string.h"
 #include "../boards/vos_board.h"   // numeri della scheda (pin, memoria, funzioni presenti)
 
 #define VOS_NAME     "VesevOS"
@@ -11,7 +11,7 @@
 #ifndef VOS_PSRAM_MALLOC
 #define VOS_PSRAM_MALLOC 1
 #endif
-#define VOS_VERSION "1.7.65a"
+#define VOS_VERSION "1.8.0b"
 #define VOS_API_VERSION 1                       // cambia solo per rotture dell'API (regole API 15)
 #define VOS_GITHUB   "https://github.com/paolellad79/VesevOS"
 
@@ -34,6 +34,20 @@ enum NetState : uint8_t {
 enum LedMode : uint8_t {
   LED_STATE = 0,   // colore = stato del sistema
   LED_HEARTBEAT,   // battito legato al carico CPU
-  LED_FIXED,       // colore fisso
-  LED_OFF
+  LED_FIXED,       // colore fisso (trigger "default-on")
+  LED_OFF,         // spento (trigger "none")
+  LED_FLASH,       // come "stato", con un lampo a ogni accesso alla flash (LittleFS, microSD)
+  LED_WIFI,        // come "stato", con un lampo a ogni pacchetto Wi-Fi ricevuto o inviato
+  LED_CPU,         // come "stato", ma il colore vira verso il colore CPU quando il carico supera la soglia
+  LED_MODE_COUNT   // numero dei modi (i valori validi sono 0 .. LED_MODE_COUNT - 1)
+};
+
+// Sorgenti con un colore proprio per il LED (vedi devices/vos_led_trigger.h)
+enum LedSrc : uint8_t {
+  LEDSRC_FLASH_R = 0,   // lettura della flash o della microSD
+  LEDSRC_FLASH_W,       // scrittura
+  LEDSRC_WIFI_RX,       // pacchetti ricevuti
+  LEDSRC_WIFI_TX,       // pacchetti inviati
+  LEDSRC_CPU,           // carico alto
+  LEDSRC_COUNT
 };
