@@ -29,7 +29,7 @@ Dalla 1.8.0: accesso alla seriale con utente, password e codice MFA, ruoli per o
 
 ## Aggiornamenti: cosa protegge e cosa no (onesto)
 - I file in `firmware/` hanno uno **SHA-256**: dice che il file non e rotto. **Non c'e una firma digitale** (per ora non si fa).
-- L'elenco `firmware/indice.json` porta `publisher` e `channel` ("official"): sono SOLO scritte non firmate. Chi controlla il sito, o ne copia uno, potrebbe scrivere la stessa cosa su un altro file. Quindi: autenticita dell'origine NON garantita, integrita si.
+- L'elenco `firmware/indice.json` porta `publisher` e `channel` ("official").
 - Non c'e aggiornamento automatico. L'aggiornamento online e sempre manuale (dai tu l'indirizzo e lo SHA-256) o, in futuro, solo se lo accendi tu. Scarica solo da questo repository.
 - La pagina di prima installazione (`flash/`) e il recovery 0.5.1 non sono firmati; il recovery usa solo HTTP (nessun TLS) e va usato su una rete di cui ti fidi. Secure Boot non e attivo.
 - Valutazione preliminare, non consulenza legale; le norme (CRA, RED/EN 18031, PSTI) potrebbero essere cambiate. Per chi vende un prodotto con VesevOS servono firma, procedura di segnalazione e periodo di supporto dichiarati.
