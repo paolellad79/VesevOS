@@ -21,6 +21,7 @@ struct FakeSd {
   int writes;
   int reads;
   int proves;
+  int formats;
   int cs;
   int mosi;
   int sck;

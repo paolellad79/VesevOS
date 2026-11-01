@@ -52,6 +52,7 @@ body.cpo .cp{display:flex}body.cpo main{padding-bottom:calc(var(--ph,280px) + 24
 .hl .card{margin:0}.hl h3{text-transform:uppercase;letter-spacing:.04em;font-size:12.5px;color:var(--mut)}
 .big{font-size:20px;font-weight:700}.subt{color:var(--mut);font-size:13px}
 .pb{margin:10px 0}.pb .t{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px}.pb .t span:first-child{color:var(--mut)}.pb .tr{height:9px;border-radius:5px;background:var(--trk);overflow:hidden}.pb i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--ac),var(--ac2))}
+.stk{display:flex;height:12px;border-radius:6px;background:var(--trk);overflow:hidden;margin:8px 0 4px}.stk i{display:block;height:100%}.mhd{margin-top:12px}.msub span:first-child{padding-left:14px}
 .pb.w i{background:var(--wa)}.pb.k i{background:var(--ko)}
 .sw1{width:42px;height:24px;border-radius:12px;background:var(--trk);position:relative;flex:none;cursor:pointer;border:0;padding:0;margin:0}.sw1::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s}.sw1.on{background:linear-gradient(90deg,var(--ac),var(--ac2))}.sw1.on::after{left:21px}
 .tog{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0}
@@ -173,6 +174,7 @@ body[data-role="0"] .op,body[data-role="0"] .adm,body[data-role="1"] .adm{displa
 .pw{font:600 20px ui-monospace,Consolas,monospace;letter-spacing:1px}
 .chk{display:flex;gap:10px;align-items:flex-start;margin:10px 0 0;min-height:40px;font-size:14px;color:var(--tx);cursor:pointer}.chk input{flex:none;width:24px;height:24px;margin:0;padding:0;cursor:pointer}.chk span{flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
 .law{border-left:4px solid var(--ac);background:var(--vbg);padding:8px 12px;border-radius:8px;font-size:13.5px;margin:10px 0;color:var(--tx)}
+.law.wy{border-left-color:var(--wa)}
 .alv{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--bd)}.alv:last-child{border:0}.alv .dot{margin-top:6px}
 .fp{font:12px ui-monospace,Consolas,monospace;word-break:break-all}
 .hlp h4{margin:14px 0 4px}.hlp p{margin:4px 0}
@@ -189,8 +191,10 @@ body.cx>*:not(#conn){filter:grayscale(1) blur(3px);opacity:.55;pointer-events:no
 .suadd{margin-top:14px}.suadd input[type=file]{margin:6px 0}
 .wid.wcol .wbig{font-size:34px;line-height:1.1}.wid.wcol:not([role=button]){cursor:default}.wid.wcol .ws svg{width:14px;height:14px;vertical-align:-2px;margin-right:4px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .wid.wcol.warn{border-color:var(--ko);box-shadow:inset 0 0 0 1px var(--ko);background:var(--kobg)}.wid.wcol.warn .wt,.wid.wcol.warn .ws{color:var(--kot)}.wid.wcol.warn .ws{font-weight:600}
-.wid.wsd.off{opacity:.7}.wid.wsd.off .wv,.wid.wsd.off .ws{color:var(--mut)}.wid.wsd.off .wt svg{color:var(--ko)}
+.wid.wdrv.off{opacity:.7}.wid.wdrv.off .wv,.wid.wdrv.off .ws{color:var(--mut)}
+.wic{display:inline-block;position:relative;vertical-align:-3px;margin-right:5px}.wic .api{width:16px;height:16px}.wic.x::after{content:"";position:absolute;inset:0;background:linear-gradient(to top right,transparent calc(50% - 1px),var(--ko) calc(50% - 1px),var(--ko) calc(50% + 1px),transparent calc(50% + 1px))}
 fieldset{border:1px solid var(--bd);border-radius:8px;margin:10px 0;padding:4px 12px 10px}fieldset legend{padding:0 6px;color:var(--mut)}
+.row span.pill{color:var(--tx)}.row span.pill.v{color:var(--act)}.row span.pill.k{color:var(--kot)}.row span.pill.a{color:var(--okt)}
 </style></head>
 <body>
 <a href="#main" class="skip" onclick="var m=document.querySelector('main');m.setAttribute('tabindex','-1');m.focus();return false">Vai al contenuto</a>
@@ -231,8 +235,7 @@ fieldset{border:1px solid var(--bd);border-radius:8px;margin:10px 0;padding:4px 
 <symbol id="i-a11y" viewBox="0 0 24 24"><circle cx="12" cy="4.8" r="1.8"/><path d="M5 8.5c2.3.7 4.6 1 7 1s4.7-.3 7-1"/><path d="M12 9.5v4.5l-3 6.5M12 14l3 6.5"/></symbol>
 <symbol id="i-temp" viewBox="0 0 24 24"><path d="M10 14.5V5a2 2 0 0 1 4 0v9.5a4 4 0 1 1-4 0z"/><circle cx="12" cy="17.5" r="1.6"/><path d="M16.5 6h2M16.5 9h2M16.5 12h2"/></symbol>
 <symbol id="i-mem" viewBox="0 0 24 24"><rect x="2.5" y="6.5" width="19" height="9.5" rx="1.5"/><path d="M6 9.5h2.5V13H6zM10.75 9.5h2.5V13h-2.5zM15.5 9.5H18V13h-2.5z"/><path d="M5.5 16v2.5M8.5 16v2.5M11 16v2.5M13 16v2.5M15.5 16v2.5M18.5 16v2.5"/></symbol>
-<symbol id="i-sdx" viewBox="0 0 24 24"><path d="M7 3h8.5L19 6.5V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M9.5 3v4M12 3v4M14.5 3v4"/><path d="M9 16.5h6"/><path d="M9.5 13.5h5"/><path d="M3 3l18 18" stroke-width="2.4"/></symbol><symbol id="i-disk" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7.5" ry="2.5"/><path d="M4.5 6v12c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5V6"/><path d="M4.5 12c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5"/></symbol>
-<symbol id="i-sd" viewBox="0 0 24 24"><path d="M7 3h8.5L19 6.5V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M9.5 3v4M12 3v4M14.5 3v4"/><path d="M9 16.5h6"/><path d="M9.5 13.5h5"/></symbol>
+<symbol id="i-disk" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7.5" ry="2.5"/><path d="M4.5 6v12c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5V6"/><path d="M4.5 12c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5"/></symbol>
 <symbol id="i-fvsc" viewBox="0 0 24 24"><path d="M6.5 3h7.5l4.5 4.5v12a1.5 1.5 0 0 1-1.5 1.5h-10.5a1.5 1.5 0 0 1-1.5-1.5v-15a1.5 1.5 0 0 1 1.5-1.5z"/><path d="M14 3v4.5h4.5"/><path d="M7.8 19l1.8-4.6 1.5 2 1.8-3.8h1.5l2.5 6.4z"/><path d="M12.3 10.6c.6-.7-.5-1.1 0-1.8"/></symbol>
 <symbol id="i-fvap" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><path d="M6.8 18l2.2-4.8 1.7 2.4 2.1-4h1.7l2.8 6.4z"/><path d="M14.2 9.2c-.7-.8.6-1.3 0-2.3"/></symbol>
 <symbol id="i-fcode" viewBox="0 0 24 24"><path d="M6.5 3h7.5l4.5 4.5v12a1.5 1.5 0 0 1-1.5 1.5h-10.5a1.5 1.5 0 0 1-1.5-1.5v-15a1.5 1.5 0 0 1 1.5-1.5z"/><path d="M14 3v4.5h4.5"/><path d="M10 12.5 7.8 15l2.2 2.5M14 12.5l2.2 2.5-2.2 2.5"/></symbol>
@@ -413,12 +416,6 @@ fieldset{border:1px solid var(--bd);border-radius:8px;margin:10px 0;padding:4px 
   <p class="fhint">Chi ha la scheda in mano potrebbe collegarla alla sua rete: tieni il WPS spento (o togli l'azione dal tasto) se la scheda non e al sicuro. Lo stesso gesto ferma anche una prova in corso. Il LED lo dice: blu che respira = in attesa, verde = riuscito, rosso = errore.</p>
   <div id="wps_om" class="msg"></div></div>
 </section>
-<section id="t_ble" class="hide">
- <div class="card adm" id="blecard"><h3>Bluetooth per telefono e applicazioni</h3>
-  <p class="fhint">Resta spento finche non lo accende la pagina, la shell o un'applicazione, e resta acceso finche non lo si spegne (l'applicazione puo anche dare un tempo). Serve circa 70 KB di memoria: se la scheda rifiuta, chiudi le altre pagine web e riprova. Il telefono si accoppia con il codice mostrato qui e scrive i comandi: wifi rete|password, country IT, name cucina, mesh 0 chiave, status, done.</p>
-  <div id="blest"></div>
-  <div class="sc" id="sc_ble"></div><div id="blem" class="msg"></div></div>
-</section>
 <section id="t_radio" class="hide">
  <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-wifi"/></svg>Radio</h3>
   <div class="fhint" style="font-weight:600">Impostazioni (le scegli tu)</div>
@@ -470,8 +467,17 @@ fieldset{border:1px solid var(--bd);border-radius:8px;margin:10px 0;padding:4px 
   <div id="bl"></div>
   <button class="btn" onclick="bSave()">Salva ordine</button><button class="btn gray" onclick="bReset()">Ripristina predefinito</button><button class="btn gray" onclick="bReboot()">Riavvia ora</button>
   <div id="bm" class="msg"></div></div>
+ <div class="card"><h3>Programmi con avvio automatico</h3>
+  <p style="color:var(--mut)">Partono da soli dopo i servizi, nell'ordine di questo elenco. Di fabbrica non parte nessun programma. Berry esegue un programma alla volta: se ne scegli piu d'uno, quelli dopo il primo partono solo se il precedente finisce entro 10 secondi.</p>
+  <div id="bpl"></div>
+  <div class="frow adm"><select id="bpsel" aria-label="Programma da aggiungere"></select><button class="btn gray" onclick="bpAdd()">Aggiungi</button><button class="btn" onclick="bpSave()">Salva elenco</button></div>
+  <div id="bpm" class="msg"></div></div>
 </section>
 <section id="t_task" class="hide">
+ <div class="card"><h3>Sottosistemi</h3>
+  <div id="tksub"></div></div>
+ <div class="card"><h3>Programmi</h3>
+  <div id="tkprog"></div></div>
  <div class="card"><h3>Task in esecuzione</h3>
   <div id="tkinfo" style="color:var(--mut);margin-bottom:8px"></div>
   <div style="overflow-x:auto"><table id="tktab" class="sortable"></table></div>
@@ -520,7 +526,7 @@ fieldset{border:1px solid var(--bd);border-radius:8px;margin:10px 0;padding:4px 
 </section>
 <section id="t_dmgr" class="hide">
  <div class="card"><h3>Device Manager</h3>
-  <p class="fhint">Tutte le periferiche della scheda: servizi (MQTT, ESP-NOW, Bluetooth, statistiche) e hardware (pin, LED, tasto, USB, sensori, memoria, processore, radio). Rispondono tutte allo stesso modo all'API /api/dev e al comando shell dev. I servizi si accendono e si spengono da qui o con dev on|off nome: di fabbrica sono spenti e, spenti, non occupano memoria.</p>
+  <p class="fhint">Tutte le periferiche della scheda: servizi (MQTT, ESP-NOW, statistiche) e hardware (pin, LED, tasto, USB, sensori, memoria, processore, radio). Rispondono tutte allo stesso modo all'API /api/dev e al comando shell dev. I servizi si accendono e si spengono da qui o con dev on|off nome: di fabbrica sono spenti e, spenti, non occupano memoria.</p>
   <div id="dm_list"></div><div id="dm_m" class="msg"></div>
  </div>
 </section>
@@ -574,10 +580,10 @@ fieldset{border:1px solid var(--bd);border-radius:8px;margin:10px 0;padding:4px 
 </section>
 <section id="t_pin" class="hide">
  <div class="card"><h3>Pin e prove</h3>
-  <p style="color:var(--mut);margin-top:0">Tocca un pin verde per provarlo. Blu = pin in uso (la linea porta a chi lo usa), grigio = vietato.</p>
+  <p style="color:var(--mut);margin-top:0">Tocca un pin verde per provarlo. Blu = pin in uso (la linea porta a chi lo usa), grigio = vietato. Ogni periferica ha il suo blocco con l'icona e i segnali: toccalo per aprire la sua pagina.</p>
   <div id="pinchip" class="fhint"></div>
   <div class="sub" id="pinview"></div>
-  <svg id="pinsvg" viewBox="0 0 400 480" style="width:100%;max-width:520px" role="img" aria-label="Schema della scheda con i pin"></svg>
+  <div style="overflow-x:auto"><svg id="pinsvg" viewBox="0 0 400 480" style="width:100%;max-width:520px" role="img" aria-label="Schema della scheda con i pin e delle periferiche collegate"></svg></div>
   <div class="ftb"><button class="btn gray" onclick="pinSvgDl()"><svg class="i" aria-hidden="true"><use href="#i-dl"/></svg><span>Scarica SVG</span></button></div>
   <p class="fhint">Disegno della scheda con la presa USB in alto. Fronte: i pin sul bordo. Retro: le piazzole da saldare e i pad della batteria. Confronta i numeri con la scritta stampata sulla tua scheda: alcune serie hanno un ordine diverso.</p>
   <div id="pinpanel" style="margin-top:8px"></div></div>
@@ -592,22 +598,10 @@ fieldset{border:1px solid var(--bd);border-radius:8px;margin:10px 0;padding:4px 
    <p class="fhint">Rele, LED, pin e ingressi con un nome (rele1, led1...). Tocca una periferica per gestirla e provarla. Le app li usano scrivendo il nome in use= e poi dev_set("rele1", 1) o dev_get("in1"). Dopo ogni riavvio le uscite sono spente.</p>
    <div style="overflow-x:auto"><table id="io_tab" class="ftab"></table></div><div id="io_m" class="msg" role="status"></div>
   </div>
-  <div class="card" id="io_mods"><h3>Schede modulo</h3>
-   <p class="fhint">Una scheda modulo (.vdp) descrive un modulo gia pronto, con icona e schema dei collegamenti. Scegline una: la scheda propone i pin liberi e crea le periferiche. Sono solo dati, senza codice.</p>
-   <div id="io_ml"></div>
-   <div class="ftb"><label class="btn gray" for="io_mf" tabindex="0" onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();$('io_mf').click()}"><svg class="i" aria-hidden="true"><use href="#i-upl"/></svg><span>Carica scheda modulo</span></label><input type="file" id="io_mf" class="sr" accept=".vdp,.txt" onchange="ioModUp()"></div>
-   <div id="io_mm" class="msg" role="status"></div>
-  </div>
-  <div class="card hide" id="sd_card"><h3>Scheda microSD</h3>
-   <p class="fhint">Lettore microSD a 3,3 V con la scheda formattata FAT32. Si monta solo quando lo chiedi (l'avvio non la aspetta). I pin e la frequenza sono quelli della periferica microSD che hai aggiunto qui sotto. Prima di toglierla premi Smonta.</p>
-   <div id="sd_rows"></div>
-   <div class="ftb"><button class="btn hide" id="sd_mnt" onclick="sdAct('mount')">Monta</button><button class="btn gray hide" id="sd_umt" onclick="sdAct('unmount')">Smonta</button><button class="btn gray hide" id="sd_tst" onclick="sdAct('test')">Prova scrittura e lettura</button><button class="btn gray hide" id="sd_lsb" onclick="sdLs('/')">Elenca i file</button></div>
-   <div id="sd_ls"></div><div id="sd_m" class="msg" role="status"></div>
-  </div>
   <div class="card" id="io_new"><h3>Aggiungi una periferica a mano</h3>
    <div class="agrid">
     <div><label for="io_c">Classe</label><select id="io_c" onchange="ioClsChg()"><option value="rele">Rele</option><option value="led">LED</option><option value="pin">Pin (uscita)</option><option value="ingresso">Ingresso</option><option value="analogico">Analogico (pin 1-10)</option><option value="sd">Lettore microSD (4 pin)</option></select></div>
-    <div><label for="io_g">Pin (GPIO)</label><input type="number" id="io_g" min="1" inputmode="numeric"></div>
+    <div><label for="io_g">Pin (GPIO)</label><input type="number" id="io_g" min="1" inputmode="numeric" oninput="ioPinFn()"><div class="fhint" id="io_fn" role="status"></div></div>
     <div><label for="io_n">Nome (facoltativo)</label><input id="io_n" maxlength="11" autocomplete="off"></div>
     <div><label for="io_o">Modo</label><select id="io_o"><option value="">Normale</option><option value="inv">Attivo basso (acceso = livello 0)</option><option value="up">Ingresso con pull-up</option><option value="down">Ingresso con pull-down</option></select></div>
    </div>
@@ -869,7 +863,7 @@ fieldset{border:1px solid var(--bd);border-radius:8px;margin:10px 0;padding:4px 
 </section>
 <section id="t_mfa" class="hide">
  <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-shield"/></svg>Verifica in due passi (MFA)</h3>
-  <p class="fhint">Oltre alla password, all'accesso serve un codice a 6 cifre che cambia ogni 30 secondi e che crei con un'app sul telefono (Google Authenticator, Microsoft Authenticator, Aegis, FreeOTP). Facoltativa, consigliata per gli amministratori.</p>
+  <p class="fhint">Oltre alla password, all'accesso serve un codice a 6 cifre che cambia ogni 30 secondi e che crei con un'app di autenticazione sul telefono (qualsiasi app compatibile con i codici TOTP). Facoltativa, consigliata per gli amministratori.</p>
   <div id="mfst" class="msg" style="margin-bottom:8px"></div>
   <div class="sc" id="sc_mfa"></div><button class="btn gray hide" id="mf_rec" onclick="mfRec()">Nuovi codici di recupero</button>
   <div id="mfact" class="hide" style="margin-top:12px">
@@ -965,7 +959,7 @@ fieldset{border:1px solid var(--bd);border-radius:8px;margin:10px 0;padding:4px 
   <h4>Avviso del browser su HTTPS</h4>
   <p>La scheda usa un certificato fatto da lei: il browser avvisa la prima volta. Confronta l'impronta (Servizi > HTTPS) e prosegui.</p>
   <h4>Servizi</h4>
-  <p>MQTT, rete tra schede e Bluetooth sono spenti di fabbrica: li accendi tu dalla categoria Servizi quando servono.</p>
+  <p>MQTT e rete tra schede sono spenti di fabbrica: li accendi tu dalla categoria Servizi quando servono. Il Bluetooth e spento e non ha comandi ne interruttori: lo accende solo un programma VesevOS con il permesso ble.</p>
   <h4>Hotspot, HTTP e porte</h4>
   <p>Servizi > Punto di accesso, HTTP e HTTPS: ogni servizio si accende e si spegne. Almeno un protocollo web resta acceso. Le porte (HTTP 80, HTTPS 443, oppure da 1024 a 65535) valgono dal riavvio. Tasto BOOT 8 secondi: hotspot, HTTP, HTTPS e porte tornano di fabbrica.</p>
   <h4>Configurare solo dalla seriale</h4>
@@ -973,8 +967,8 @@ fieldset{border:1px solid var(--bd);border-radius:8px;margin:10px 0;padding:4px 
   <h4>Terminale</h4>
   <p>Scrivi help per l'elenco dei comandi. Sulla seriale premi 1 o 2 per cambiare lingua.</p>
   <p>Dalla seriale si entra come in una shell classica: nome utente, password e, se l'hai attivato, il codice MFA. Gli errori contano nel blocco degli accessi insieme a quelli del web. Scrivi exit (o premi Ctrl+D) per uscire. Se l'ora della scheda non e sincronizzata, con l'MFA vale solo un codice di recupero.</p>
-  <p>Cartella corrente e percorsi: pwd mostra la cartella corrente, cd la cambia (cd .. sale, cd - torna indietro, cd da solo va alla radice), ls elenca come in una shell classica (ls -l, ls -a, ls -h, ls /scripts). Anche cat, mkdir, rm, mv, cp e write accettano percorsi relativi alla cartella corrente. La cartella corrente e per utente (sulla seriale e unica) e torna alla radice dopo 30 minuti senza comandi.</p>
-  <p>Il prompt e come in una shell classica: utente@hostname:cartella$ . L'utente e quello con cui sei entrato, l'hostname e il nome della scheda (se lo cambi, il prompt cambia al comando dopo). ~ e la radice /, la cartella di casa; fuori dalla radice si vede il percorso (per esempio /scripts). Il simbolo # indica l'amministratore, $ gli altri utenti. Prima di entrare si vede solo hostname>.</p>
+  <p>Cartella corrente e percorsi: pwd mostra la cartella corrente, cd la cambia (cd .. sale, cd - torna indietro, cd da solo va alla radice), ls elenca come in una shell classica (ls -l, ls -a, ls -h, ls /sbin). Anche cat, mkdir, rm, mv, cp e write accettano percorsi relativi alla cartella corrente. La cartella corrente e per utente (sulla seriale e unica) e torna alla radice dopo 30 minuti senza comandi.</p>
+  <p>Il prompt e come in una shell classica: utente@hostname:cartella$ . L'utente e quello con cui sei entrato, l'hostname e il nome della scheda (se lo cambi, il prompt cambia al comando dopo). ~ e la radice /, la cartella di casa; fuori dalla radice si vede il percorso (per esempio /sbin). Il simbolo # indica l'amministratore, $ gli altri utenti. Prima di entrare si vede solo hostname>.</p>
   <p>Il tasto Tab completa come in una shell classica: premi Tab per comandi, sottocomandi, opzioni e percorsi (cd /scr, ls -, cpu ). Se c'e un solo candidato lo completa; se ce ne sono piu scrive la parte comune; un secondo Tab di seguito elenca le possibilita (al massimo 64). Vede solo cio che il tuo ruolo puo usare. I nomi con spazi non si completano. Su riga vuota il Tab non fa niente. Sulla seriale vale lo stesso.</p>
   <p>Il comando cpu: scrivi cpu per il riepilogo (governor, frequenza, tetto, motivo, temperatura e carico dei due core), cpu info per chip e frequenze (lscpu fa lo stesso), cpu governor e cpu freq per vedere o cambiare la scelta (cambiare e solo per l'Admin), cpu why per il motivo del tetto. fixed vuol dire frequenza fissa (cpu governor fixed 160 oppure cpu freq 160). Le forme vecchie cpu 80, cpu 160, cpu 240, cpu ondemand, cpu conservative, cpu schedutil e cpu auto funzionano ancora. vesevos-cpuinfo mostra riepilogo e informazioni insieme.</p>
   <p>vesevos-services elenca i servizi con stato, porta e RAM; vesevos-services mqtt status ne mostra uno solo. start, stop e restart (per esempio vesevos-services mqtt restart) sono solo per l'Admin; fermare http, https o ap chiede conferma e vale dal riavvio. I comandi svc, start e kill restano come prima.</p>
@@ -982,8 +976,8 @@ fieldset{border:1px solid var(--bd);border-radius:8px;margin:10px 0;padding:4px 
   <p>vesevos-config (per aree) e il fronte unico di configurazione: senza argomenti scrive un riepilogo (sistema, rete, paese e radio, ora, servizi, utenti, LED, CPU, sicurezza), con vesevos-config region mostra i valori di un'area e i comandi che li cambiano. Aree: system, network, region, time, services, users, security, led, cpu. Per cambiare (solo Admin) scrivi il comando dopo l'area, per esempio vesevos-config region country IT: la riga passa dal percorso normale della shell, con gli stessi ruoli, limiti della radio, conferme e domande di password; non c'e nessun altro modo di cambiare le impostazioni. vesevos-config setup avvia la guida. L'Operatore vede solo il riepilogo e le aree in lettura; users e security sono solo per l'Admin. Non mostra mai password, hash o chiavi.</p>
   <p>vesevos-network scrive un riepilogo di rete in testo: modo (client, hotspot, aereo), nome host e mDNS, IP, maschera, gateway, DNS, canale, segnale, rete Wi-Fi, MAC, DHCP, NTP, traffico, hotspot (nome e client collegati) e servizi di rete aperti con le porte. Non mostra mai le password; il MAC e mascherato, con -f (solo Admin) e intero. vesevos-network scan e vesevos-network ping &lt;indirizzo&gt; sono come wifi scan e ping (solo Admin). I comandi ip, net e wifi restano come prima.</p>
   <p>vesevos-cleaner (solo Admin) fa una pulizia SICURA. Senza argomenti e una prova a secco: elenca le categorie (tmp = residui .tmp~ di salvataggi interrotti con il file completo accanto, crash = rapporti dei crash, log = registro in RAM, reboots = diario dei riavvii, cache = file di prova dell'autodiagnosi) con le voci e lo spazio che si libera, senza cancellare niente. vesevos-cleaner -y [categoria ...] pulisce dopo conferma (finestra della pagina o y/n dalla seriale) e dice i byte liberati. Non tocca mai configurazione, periferiche, utenti, certificati, script, app, lingue e il registro di audit (quello si svuota solo con audit). Rapporti e registri possono contenere dati identificativi: cancellarli e un tuo diritto.</p>
-  <p>vesevos-drive_manager elenca i volumi: memoria interna (LittleFS) e microSD, con stato (montata, non montata, non presente, formato non supportato), formato, dimensione, usato, libero e frequenza SPI. vesevos-drive_manager mount, unmount e test (solo Admin) sono sd mount, sd unmount e sd test, con gli stessi controlli; unmount chiede conferma se la scheda e in uso. Non c'e format: VesevOS non formatta mai la microSD (formattala in FAT32 sul computer, exFAT non e supportato). vesevos-led_control e un alias di led (stesso comando, stessi ruoli).</p>
-  <p>vesevos-backup (solo Admin) salva e ripristina la configurazione in /backup, sempre cifrata con una frase che scegli tu. Senza argomenti mostra i backup e lo spazio libero. vesevos-backup create [nome] crea il file .vbk (la frase si chiede due volte, senza mostrarla; al massimo 5 backup), restore nome chiede la frase, dice quante righe cambierebbero (mai i valori) e chiede conferma prima di applicare, delete nome cancella dopo conferma. La frase non si scrive mai nella riga e non resta nella cronologia. Il formato e quello del backup con i segreti della pagina Sistema: un file si ripristina anche dall'altra parte. Il backup contiene password e dati identificativi: se perdi la frase non si recupera e decidi tu dove tenerlo.</p>
+  <p>vesevos-drive_manager elenca i volumi: memoria interna (LittleFS) e microSD, con stato (montata, non montata, non presente, formato non supportato), formato, dimensione, usato, libero e frequenza SPI. vesevos-drive_manager mount, unmount e test (solo Admin) sono sd mount, sd unmount e sd test, con gli stessi controlli; unmount chiede conferma se la scheda e in uso. vesevos-drive_manager format microsd FORMATTA (solo Admin) la formatta in FAT32 e CANCELLA TUTTO (anche dal pannello della microSD); funziona anche con una scheda che non si monta; la memoria interna non si formatta. vesevos-led_control e un alias di led (stesso comando, stessi ruoli).</p>
+  <p>vesevos-backup (solo Admin) salva e ripristina la configurazione in /var/backup, sempre cifrata con una frase che scegli tu. Senza argomenti mostra i backup e lo spazio libero. vesevos-backup create [nome] crea il file .vbk (la frase si chiede due volte, senza mostrarla; al massimo 5 backup), restore nome chiede la frase, dice quante righe cambierebbero (mai i valori) e chiede conferma prima di applicare, delete nome cancella dopo conferma. La frase non si scrive mai nella riga e non resta nella cronologia. Il formato e quello del backup con i segreti della pagina Sistema: un file si ripristina anche dall'altra parte. Il backup contiene password e dati identificativi: se perdi la frase non si recupera e decidi tu dove tenerlo.</p>
   <p>vesevos-update (solo Admin) mostra la versione del firmware e del recovery, le partizioni e l'esito dell'ultimo ordine. vesevos-update file riavvia nel recovery e stampa UNA volta l'indirizzo con un codice monouso (15 minuti, legato al tuo computer: non condividerlo) per caricare un file; dalla seriale scrivi l'IP del computer. vesevos-update net indirizzo-https sha256 fa scaricare il file dal recovery da un indirizzo consentito e ne controlla lo SHA-256 (sovrascrive il firmware prima di verificarlo tutto). Chiede sempre conferma; il recovery lavora in HTTP sulla rete locale. Sono gli stessi ordini della pagina Aggiornamento e non cerca niente in rete da solo.</p>
   <p>Aiuto sui comandi: help elenca i comandi che il tuo ruolo puo usare; help df oppure man df spiegano un comando (uso, opzioni, alias, ruolo minimo, esempi). Dopo help, man e time il Tab completa i nomi dei comandi. I nomi ufficiali sono in inglese; i vecchi nomi italiani (aereo, licenza, locale, niente, trova e gli altri) restano validi come alias nascosti.</p>
   <p>Comandi di base come in una shell classica: whoami scrive il tuo utente; id scrive uid, gid e gruppo (numeri simulati: uid = 1000 + posto dell'utente, il gruppo e il ruolo); echo [-n] testo scrive il testo senza variabili; df [-h] mostra lo spazio della memoria interna e della microSD se e montata; uname [-a|-s|-n|-r|-v|-m] scrive nome, host, versione, ESP-IDF e chip; exit chiude la sessione sulla seriale.</p>
@@ -995,9 +989,10 @@ fieldset{border:1px solid var(--bd);border-radius:8px;margin:10px 0;padding:4px 
 </section>
 <section id="t_app" class="hide">
   <div class="card"><h3>App</h3>
-   <p style="color:var(--mut)">Programmi con una pagina propria, salvati come file .vap nella cartella /apps. Un file solo contiene manifest, icona, pagina, codice e dati. Si apre un'app, si avvia e si comanda dai suoi controlli. Una sola app alla volta (e nessuno script mentre gira).</p>
+   <p style="color:var(--mut)">Le app stanno nella cartella /bin. Si avviano, si fermano e si eliminano da qui. Le app con una pagina propria si aprono dal nome e si comandano dai loro controlli. Un'app con pagina gira da sola: mentre gira non parte nessuno script.</p>
    <div class="ftb adm">
     <button class="btn" onclick="apNew()"><svg class="i" aria-hidden="true"><use href="#i-fvap"/></svg><span>Nuova app</span></button>
+    <input type="file" id="apup" accept=".vab,.vae,.vap,.vel" aria-label="App da caricare"><button class="btn gray" onclick="apUp()"><svg class="i" aria-hidden="true"><use href="#i-dl"/></svg><span>Carica</span></button>
    </div>
    <table id="aptab" class="ftab"></table>
    <div id="appm" class="msg" role="status"></div></div>
@@ -1007,19 +1002,20 @@ fieldset{border:1px solid var(--bd);border-radius:8px;margin:10px 0;padding:4px 
    <pre id="apout" class="lgv hide" tabindex="0" aria-label="Uscita dell'app" aria-live="polite"></pre></div>
   <div class="card adm"><h3>Come e fatto un file app</h3>
    <ul class="scfn">
-    <li><code>[manifest]</code> <span>name (uguale al nome del file), title, version, author, use (permessi: led, time, temp, log, logread, act, btn, mqtt, gpio:N), who (admin oppure oper)</span></li>
+    <li><code>[manifest]</code> <span>name (uguale al nome del file), title, version, author, use (permessi: led, time, temp, log, logread, act, btn, mqtt, ble, files, gpio:N), who (admin oppure oper)</span></li>
     <li><code>[icon]</code> <span>un solo disegno svg con forme semplici, massimo 2 KB</span></li>
     <li><code>[page]</code> <span>un controllo per riga: switch, slider, color, text, button, chart, con id e label</span></li>
-    <li><code>[code]</code> <span>codice Berry, massimo 8 KB. Funzioni: on_set(id, valore) quando tocchi un controllo, on_tick() ogni secondo, dev_get(id), dev_set(id, valore); e led, act, log, time, temp, btn, logtail, mqtt se il manifest le permette (use)</span></li>
+    <li><code>[code]</code> <span>codice VesevOS, massimo 8 KB. Funzioni: on_set(id, valore) quando tocchi un controllo, on_tick() ogni secondo, dev_get(id), dev_set(id, valore); e led, act, log, time, temp, btn, logtail, mqtt se il manifest le permette (use)</span></li>
     <li><code>[data]</code> <span>valori iniziali: chiave=valore (se la chiave e un controllo ne e il valore di partenza)</span></li>
    </ul></div>
  </section>
 <section id="t_script" class="hide">
  <div class="card"><h3>Script</h3>
-  <p style="color:var(--mut)">Programmi in linguaggio Berry, salvati come file .vsc nella cartella /scripts. Girano in sottofondo, uno alla volta. Un ciclo deve fare pause con sleep(): senza pause per piu di 3 secondi lo script viene fermato.</p>
+  <p style="color:var(--mut)">Programmi VesevOS, salvati come file .vsb nella cartella /sbin. Girano in sottofondo, uno alla volta. Un ciclo deve fare pause con sleep(): senza pause per piu di 3 secondi lo script viene fermato.</p>
   <div id="scst" class="fhint" role="status"></div>
   <div class="ftb">
    <button class="btn" onclick="scNew()"><svg class="i" aria-hidden="true"><use href="#i-fvsc"/></svg><span>Nuovo script</span></button>
+   <span class="adm"><input type="file" id="scup" accept=".vsb,.vsc" aria-label="Script da caricare"><button class="btn gray" onclick="scUp()"><svg class="i" aria-hidden="true"><use href="#i-dl"/></svg><span>Carica</span></button></span>
    <button class="btn gray" id="scstop" onclick="scStopRun()"><svg class="i" aria-hidden="true"><use href="#i-stop"/></svg><span>Ferma</span></button>
   </div>
   <table id="sctab" class="ftab"></table>
@@ -1039,8 +1035,22 @@ fieldset{border:1px solid var(--bd);border-radius:8px;margin:10px 0;padding:4px 
    <li><code>btn()</code> <span>click liberi del tasto BOOT: 1, 2 o 3, oppure 0 se non ce ne sono (non aspetta). Vedi Dispositivi &gt; Tasto BOOT</span></li>
    <li><code>logtail(n)</code> <span>ultime n righe del registro (1-20, massimo 2000 caratteri). Nelle app serve logread in use=: il registro puo contenere indirizzi e nomi</span></li>
    <li><code>mqtt("nome", "testo")</code> <span>invia un testo al broker MQTT su &lt;prefisso&gt;/app/&lt;nome&gt; (vero = inviato, falso = non inviato; massimo 20 al minuto). Nelle app serve mqtt in use=</span></li>
+   <li><code>ble_on(min)</code> <span>ble_on(minuti), ble_off(), ble_status(), ble_name(nome), ble_adv(vero), ble_service(...), ble_set(uuid, dati), ble_notify(uuid, dati), ble_disconnect(): Bluetooth, solo nelle app con ble in use=. Spento di fabbrica, abbinamento con codice obbligatorio. Negli script (lanciati dall'Admin): ble_status(), ble_off(), ble_passkey()</span></li>
    <li><code>sleep(ms)</code> <span>pausa</span></li>
   </ul></div>
+</section>
+<section id="t_drv" class="hide">
+ <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-prog"/></svg>Driver</h3>
+  <p class="fhint">Un driver descrive una periferica: icona, collegamenti, pagina e comandi. Carica il file, poi installalo: ti propone i pin liberi e puoi cambiarli. Il sistema controlla che siano ammessi e non gia usati.</p>
+  <div id="drvlist"></div>
+  <div class="ftb adm"><label class="btn gray" for="drvup" tabindex="0" onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();$('drvup').click()}"><svg class="i" aria-hidden="true"><use href="#i-upl"/></svg><span>Carica</span></label><input type="file" id="drvup" class="sr" accept=".vdb,.vdp,.vde,.txt" onchange="drvUp()" aria-label="Driver da caricare"></div>
+  <div id="drvm" class="msg" role="status"></div></div>
+</section>
+<section id="t_func" class="hide">
+ <div class="card"><h3>Funzionalita</h3>
+  <p class="fhint">Cio che i programmi possono usare. Se ne togli una nessun programma la usa piu e quelli che la stanno usando si fermano. Ogni programma chiede solo cio che gli serve: qui puoi solo togliere.</p>
+  <div id="funclist"></div>
+  <div id="funcm" class="msg"></div></div>
 </section>
 <div class="foot"><a href="#" onclick="show('legal');return false">Note legali e licenze</a> &middot; <a href="#aiuto">Aiuto</a> &middot; <a href="https://github.com/paolellad79/VesevOS" target="_blank" rel="noopener">GitHub</a><div id="fver" style="margin-top:4px"></div></div>
 </main></div>
@@ -1097,11 +1107,17 @@ fieldset{border:1px solid var(--bd);border-radius:8px;margin:10px 0;padding:4px 
  function nx(){while(act<2&&q.length)run(q.shift())}
  window.fetch=function(u,o){return new Promise(function(res,rej){q.push({u:u,o:o,res:res,rej:rej});nx()})}})();
 var GRP=[["home","Home"],["dev","Dispositivi"],["rete","Rete"],["prog","Programmi"],["sys","Sistema"],["sec","Sicurezza"],["adm","Admin"],["info","Informazioni"]];
-var GMAP={home:["sum"],dev:["dmgr","stat","mem","cpu","led","pin","io","btn","usb","ble","rad"],rete:["wifi","wps","ap","radio","dhcp","dns","http","https","mdns","mqtt","mesh"],prog:["auto","script","app"],sys:["ora","ntp","loc","power","file","task","wd","log","shell"],sec:["sec","mfa","users","fw","cert","audit"],adm:["conf","boot","selftest"],info:["help","acc","legal"]};
+var GMAP={home:["sum"],dev:["dmgr","stat","mem","cpu","led","pin","io","btn","usb","rad"],rete:["wifi","wps","ap","radio","dhcp","dns","http","https","mdns","mqtt","mesh"],prog:["auto","script","app","drv"],sys:["ora","ntp","loc","power","func","file","task","wd","log","shell"],sec:["sec","mfa","users","fw","cert","audit"],adm:["conf","boot","selftest"],info:["help","acc","legal"]};
 var GICO={home:"i-home",dev:"i-usb",rete:"i-wifi",prog:"i-prog",sys:"i-gear",sec:"i-shield",adm:"i-adm",info:"i-info"};
-var TABS=[["sum","Panoramica"],["wifi","Wi-Fi"],["wps","WPS"],["mqtt","MQTT"],["mesh","Rete tra schede"],["pin","Pin"],["io","Periferiche"],["led","LED"],["task","Task"],["file","File"],["ora","Ora"],["loc","Localizzazione"],["auto","Automazioni"],["script","Script"],["app","App"],["boot","Avvio"],["wd","Watchdog"],["log","Log"],["shell","Terminale"],["conf","Configurazione"],["legal","Note legali"],["help","Aiuto"],["sec","Password"],["users","Utenti"],["fw","Filtro IP"],["https","HTTPS"],["audit","Stato conformita"],["mfa","MFA"],["cert","Certificato"],["stat","Statistiche"],["selftest","Autotest"],["power","Risparmio energia"],["acc","Accessibilita"],["ap","Punto di accesso"],["http","HTTP"],["radio","Radio"],["ntp","NTP"],["dhcp","DHCP"],["dns","DNS"],["mdns","mDNS"],["ble","Bluetooth"],["dmgr","Elenco dispositivi"],["btn","Tasto BOOT"],["usb","USB"],["mem","Memoria"],["cpu","Processore"],["rad","Radio 2,4 GHz"]];
+var TABS=[["sum","Panoramica"],["wifi","Wi-Fi"],["wps","WPS"],["mqtt","MQTT"],["mesh","Rete tra schede"],["pin","Pin"],["io","Periferiche"],["led","LED"],["task","Task"],["file","File"],["ora","Ora"],["loc","Localizzazione"],["auto","Automazioni"],["script","Script"],["app","App"],["drv","Driver"],["func","Funzionalita"],["boot","Avvio"],["wd","Watchdog"],["log","Log"],["shell","Terminale"],["conf","Configurazione"],["legal","Note legali"],["help","Aiuto"],["sec","Password"],["users","Utenti"],["fw","Filtro IP"],["https","HTTPS"],["audit","Stato conformita"],["mfa","MFA"],["cert","Certificato"],["stat","Statistiche"],["selftest","Autotest"],["power","Risparmio energia"],["acc","Accessibilita"],["ap","Punto di accesso"],["http","HTTP"],["radio","Radio"],["ntp","NTP"],["dhcp","DHCP"],["dns","DNS"],["mdns","mDNS"],["dmgr","Elenco dispositivi"],["btn","Tasto BOOT"],["usb","USB"],["mem","Memoria"],["cpu","Processore"],["rad","Radio 2,4 GHz"]];
+/* UN solo punto per le estensioni dei file (come core/vos_ext.h): schema v + tipo (s script, a app, d driver) + linguaggio (b Berry, e ELF). Oggi script .vsb, app Berry .vab, app ELF .vae, driver .vdb e .vde. I vecchi nomi (.vsc, .vap, .vel) si leggono ancora e non si scrivono piu */
+var EXT={s:".vsb",b:".vab",e:".vae",db:".vdb",de:".vde"},EXTOLD={s:".vsc",b:".vap",e:".vel"};
+/* Un file di programma: prima il nome nuovo, se non c'e il vecchio. fn(percorso) torna una promessa con {ok,...} */
+function progTry(dir,n,k,fn){return fn(dir+n+EXT[k]).then(function(o){return o.ok?o:fn(dir+n+EXTOLD[k]).then(function(o2){return o2.ok?o2:o})})}
+/* Il file finisce per l'estensione nuova o per la vecchia di quel tipo? */
+function extOk(name,k){var l=name.toLowerCase();return l.slice(-EXT[k].length)==EXT[k]||l.slice(-EXTOLD[k].length)==EXTOLD[k]}
 var SECN=["Stato","Comandi","Radio","Diagnostica"];
-var TSEC={stat:0,mem:0,cpu:0,led:1,pin:1,io:1,btn:1,usb:1,ble:2,rad:2,task:3,wd:3,log:3,shell:3};
+var TSEC={stat:0,mem:0,cpu:0,led:1,pin:1,io:1,btn:1,usb:1,rad:2,task:3,wd:3,log:3,shell:3};
 var LASTG={};
 function gOf(id){for(var g in GMAP)if(GMAP[g].indexOf(id)>=0)return g;return"home"}
 var A11Y={fs:0,hc:"auto",cb:0,rm:"auto"};try{var _a=JSON.parse(localStorage.getItem("va11y")||"{}");for(var _k in A11Y)if(_a[_k]!==undefined)A11Y[_k]=_a[_k]}catch(e){}
@@ -1128,7 +1144,8 @@ var THEME="auto";try{THEME=localStorage.getItem("vth")||"auto"}catch(e){}
 function themeApply(){var m=THEME;if(m=="auto")m=(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches)?"light":"dark";document.documentElement.setAttribute("data-theme",m);
  var nm=THEME=="auto"?t("Automatico"):THEME=="light"?t("Chiaro"):t("Scuro");
  var u=$("thu");if(u)u.setAttribute("href",THEME=="auto"?"#i-auto":THEME=="light"?"#i-sun":"#i-moon");var b=$("thb");if(b){var nt=tf("Tema: {0}",nm);b.title=nt;b.setAttribute("aria-label",nt)}
- ["auto","light","dark"].forEach(function(k){var e=$("tm_"+k);if(e)e.className=k==THEME?"on":""})}
+ ["auto","light","dark"].forEach(function(k){var e=$("tm_"+k);if(e)e.className=k==THEME?"on":""});
+ if(typeof cur!="undefined"&&cur=="pin"&&typeof PM!="undefined"&&PM.length)drawPins()}
 function thOpen(on){var m=$("thm");if(m)m.className=on?"pop":"pop hide";var b=$("thb");if(b)b.setAttribute("aria-expanded",on?"true":"false")}
 function themeSet(m){THEME=m;try{localStorage.setItem("vth",THEME)}catch(e){}themeApply();thOpen(false)}
 function thMenu(e){e.stopPropagation();thOpen($("thm").classList.contains("hide"))}
@@ -1327,7 +1344,7 @@ var BT={d:null,roots:[],ch:{}};
 var BN=[["sys","Sistema e monitor"],["led","LED"],["net","Rete"],["time","Ora"],["web","Pagina web e API"],["rules","Automazioni"],["mqtt","MQTT"],["mesh","Rete tra schede"],["wd","Watchdog"]];
 var BFIX=[["log","Registro (log)"],["pin","Pin e risorse"],["fs","File e configurazione"],["lang","Lingua"]];
 function bn(id){return lk(BN,id)}
-function bLoad(){api("/api/boot").then(function(r){return r.json()}).then(function(d){BT.d=d;var pos={};d.order.forEach(function(x,i){pos[x]=i});
+function bLoad(){bpLoad();api("/api/boot").then(function(r){return r.json()}).then(function(d){BT.d=d;var pos={};d.order.forEach(function(x,i){pos[x]=i});
   BT.roots=[];BT.ch={};d.svc.forEach(function(x){if(!x.parent)BT.roots.push(x.id);else{(BT.ch[x.parent]=BT.ch[x.parent]||[]).push(x.id)}});
   BT.roots.sort(function(a,b){return pos[a]-pos[b]});for(var k in BT.ch)BT.ch[k].sort(function(a,b){return pos[a]-pos[b]});bDraw()}).catch(function(){})}
 function bSvc(id){return BT.d.svc.filter(function(x){return x.id==id})[0]}
@@ -1364,7 +1381,7 @@ function uReboot(){dlg({title:t("Riavviare la scheda?"),body:'<p style="margin:0
 function uFw(){api("/api/recovery").then(function(r){return r.json()}).then(function(j){
  if(!j.present){dlg({title:t("Aggiornare il firmware?"),body:'<p style="margin:0">'+esc(t("Il recovery non e presente su questa scheda: il firmware si aggiorna solo con il cavo USB."))+'</p>',buttons:[["ok",t("Chiudi"),""]]});return}
  dlg({title:t("Aggiornare il firmware?"),body:'<p style="margin:0">'+esc(t("La scheda si riavvia nel recovery, una pagina separata dove carichi il file .bin di VesevOS. Servono utente e password di un amministratore."))+'</p>',ok:t("Riavvia nel recovery"),
- onOk:function(){return post("/api/recovery",{}).then(function(r){return r.json()}).then(function(j){if(j.ok)setTimeout(function(){uRecGo("http://"+(j.ip||"")+":80/")},50);return j.ok?"":j.err})}})}).catch(function(){})}
+ onOk:function(){return post("/api/recovery",{}).then(function(r){return r.json()}).then(function(j){if(j.ok)setTimeout(function(){uRecGo("http://"+(j.ip||"")+":80/",uRecName(j.host))},50);return j.ok?"":j.err})}})}).catch(function(){})}
 function uRecUp(){api("/api/recovery").then(function(r){return r.json()}).then(function(j){
  if(!j.present){dlg({title:t("Aggiornare il recovery?"),body:'<p style="margin:0">'+esc(t("Il recovery non e presente su questa scheda: si installa solo con il cavo USB."))+'</p>',buttons:[["ok",t("Chiudi"),""]]});return}
  dlg({title:t("Aggiornare il recovery?"),body:'<p style="margin:0">'+esc(tf("Recovery installato: {0}",j.ver||t("versione sconosciuta")))+'</p><p style="margin:8px 0">'+esc(tf("Scegli il file .bin del recovery (al massimo {0} KB). La scheda lo controlla tutto prima di scriverlo: se e sbagliato il recovery attuale resta com'e.",j.kb))+'</p>'
@@ -1379,13 +1396,15 @@ function uRecUp(){api("/api/recovery").then(function(r){return r.json()}).then(f
     return k.ok?"":(k.err||t("Errore"))},function(){return t("Caricamento non riuscito")})}})}).catch(function(){})}
 function uRecPrb(x,ok,ko){var c=new AbortController(),m=setTimeout(function(){c.abort()},1500);fetch(x,{mode:"no-cors",cache:"no-store",signal:c.signal}).then(function(){clearTimeout(m);ok()},function(){clearTimeout(m);ko()})}
 function uRecOpen(u){location.href=u}
-function uRecGo(u){var st=0,t0=Date.now(),t1=0,stop=false,sec=location.protocol==="https:";
- var go=function(){stop=true;uRecOpen(u)};
+function uRecName(h){var l=location.hostname;if(!h||/^[0-9.]+$/.test(l)||l.indexOf(":")>=0)return"";return"http://"+(h.indexOf(".")>=0?h:h+".local")+"/"}
+function uRecGo(u,nm){var st=0,t0=Date.now(),t1=0,stop=false,sec=location.protocol==="https:";
+ var go=function(){stop=true;uRecOpen(sec&&nm?nm:u)};   // da HTTPS non si puo sondare un http://: se si e arrivati col nome si apre quello (il nome gia si risolve per il browser), altrimenti l'IP
  dlg({title:t("Scheda nel recovery"),body:'<p style="margin:0" role="status">'+esc(t("Aspetto che la scheda riparta nel recovery: la pagina si apre da sola."))+'</p>',buttons:[["ok",t("Apri ora"),""]],onOk:function(){go();return""}});
  (function tick(){if(stop)return;
   if(Date.now()-t0>60000){stop=true;dlg({title:t("Scheda nel recovery"),body:'<p style="margin:0">'+esc(t("Non riesco ad aprirla da sola."))+'</p><p style="margin:8px 0 0">'+esc(tf("Apri {0} in una finestra privata del browser (scrivi http, non https). Se in 30 secondi non trova la rete di casa, la scheda crea la rete Wi-Fi VesevOS-recovery: la password e sulla seriale.",u))+'</p><p style="margin:8px 0 0">'+esc(t("Dopo l'aggiornamento VesevOS riparte da solo."))+'</p>',buttons:[["ok",t("Apri il recovery"),""]],onOk:function(){uRecOpen(u);return""}});return}
   if(st===0)uRecPrb(location.origin+"/",function(){setTimeout(tick,1000)},function(){st=1;t1=Date.now();setTimeout(tick,1000)});
   else if(sec){if(Date.now()-t1>8000)go();else setTimeout(tick,1000)}
+  else if(nm&&Date.now()-t1<6000)uRecPrb(nm,function(){stop=true;uRecOpen(nm)},function(){setTimeout(tick,1000)});
   else uRecPrb(u,go,function(){setTimeout(tick,1000)})})()}
 function uSleep(){dlg({title:t("Mettere la scheda in sleep?"),body:'<p style="margin:0">'+esc(t("La scheda entra in sonno profondo: Wi-Fi e LED spenti, consuma pochissimo."))+'</p><p style="margin:8px 0 0"><b>'+esc(t("Per riaccenderla premi il tasto RESET sulla scheda (o togli e ridai corrente)."))+'</b></p>',ok:t("Sleep"),danger:true,
  onOk:function(){return post("/api/sleep",{}).then(function(r){return r.json()}).then(function(j){if(j.ok)setTimeout(function(){dlg({title:t("Scheda in sleep"),body:'<p style="margin:0">'+esc(t("Premi RESET sulla scheda, poi ricarica questa pagina."))+'</p>',buttons:[["ok",t("Ricarica"),""]],onOk:function(){location.reload();return""}})},50);return j.ok?"":j.err})}})}
@@ -1431,6 +1450,18 @@ function hlines(L,mn,mx,px){var w=600,h=100,g="";for(var i=1;i<4;i++)g+='<line x
 function hleg(L){return'<div class="leg">'+L.map(function(q){return'<span><i style="background:'+q[1]+'"></i>'+esc(q[0])+' '+q[2]+'</span>'}).join("")+'</div>'}
 function bps(v){return v>=1024?(v/1024).toFixed(1)+' KB/s':v+' B/s'}
 function memTx(u,t0){return kb(u)+' / '+kb(t0)+'<br>'+kb(t0-u)+' '+esc(t("liberi"))}
+function mkb(v){return typeof v=="number"?kb(v):t("non misurato")}
+function memCard(s){var m=s.mem;if(!m||!m.sram)return"";
+ var pc=function(v){return Math.max(0,Math.min(100,100*(v||0)/m.sram)).toFixed(1)},hf=s.heapFree,hu=m.heapUsed,
+ sub=function(l,v){return'<div class="row msub"><span>'+esc(l)+'</span><span>'+mkb(v)+'</span></div>'},
+ head=function(l){return'<div class="subt mhd"><b>'+esc(l)+'</b></div>'};
+ var bar='<div class="stk" role="img" aria-label="'+esc(tf("RAM {0}: parte fissa {1}, heap usato {2}, heap libero {3}",mkb(m.sram),mkb(m.fixed),mkb(hu),mkb(hf)))+'"><i style="width:'+pc(m.fixed)+'%;background:var(--mut)"></i><i style="width:'+pc(hu)+'%;background:var(--ac)"></i><i style="width:'+pc(hf)+'%;background:var(--ok)"></i></div>';
+ return'<section class="card hid"><h3>'+esc(t("Memoria RAM"))+'</h3>'+bar+
+  hleg([[t("Parte fissa di sistema"),"var(--mut)",mkb(m.fixed)],[t("Usato"),"var(--ac)",mkb(hu)],[t("Libero"),"var(--ok)",mkb(hf)]])+
+  head(t("Totale (SRAM del chip)"))+row(t("Totale"),mkb(m.sram))+
+  head(t("Parte fissa di sistema"))+row(t("Totale"),mkb(m.fixed))+sub(t("Codice in IRAM"),m.iram)+sub(t("Dati statici"),m.data)+sub(t("Dati azzerati"),m.bss)+sub(t("Resto (cache e ROM)"),m.rest)+
+  head(t("Parte variabile (heap)"))+row(t("Totale"),mkb(s.heapTotal))+row(t("Usato"),mkb(hu))+row(t("Libero"),mkb(hf))+row(t("Minimo storico"),mkb(m.heapMin))+row(t("Blocco piu grande"),mkb(m.heapMaxBlock))+
+  '</section>'}
 function homeDraw(){var s=S;if(!s||!$("home"))return;var n=s.net,hp=Math.round(100-100*s.heapFree/s.heapTotal),pp=s.psramTotal?Math.round(100-100*s.psramFree/s.psramTotal):0,fp=s.flashTotal?Math.round(100*s.flashUsed/s.flashTotal):0;
  var wp=n.st==3?2*(n.rssi+100):100,wt=n.st==3?n.rssi+" dBm":(n.st==1?""+(n.clients||0):n.st==4?t("Aereo"):"..."),wc=n.st==3?(n.rssi>-67?"var(--ok)":n.rssi>-75?"var(--wa)":"var(--ko)"):"var(--ac)",
  ws=esc(n.mode)+(n.st==1?" · "+esc(tf("{0} client",n.clients||0)):"")+(n.ip?"<br>"+esc(n.ip):"");
@@ -1440,6 +1471,7 @@ function homeDraw(){var s=S;if(!s||!$("home"))return;var n=s.net,hp=Math.round(1
  var ih=s.inHist||[],oh=s.outHist||[],mx=Math.max(1024,Math.max.apply(null,ih.concat(oh,[0]))),wx=hlines([[ih,"#3fa7ff"],[oh,"#ff9f43"]],0,mx,34)+hleg([["In","#3fa7ff",bps(ih.length?ih[ih.length-1]:0)],["Out","#ff9f43",bps(oh.length?oh[oh.length-1]:0)]]);
  var h='<section class="rings">'+hring("CPU",s.cpu+"%",s.cpu,hcol(s.cpu,60,85),"i-chipn","task",mhz+" MHz",cx)+hring("RAM",hp+"%",hp,hcol(hp,80,92),"i-mem","task",memTx(s.heapTotal-s.heapFree,s.heapTotal),hlines([[s.ramHist,"#3fa7ff"]],0,100,34))+hring("PSRAM",pp+"%",pp,hcol(pp,80,92),"i-mem","task",memTx(s.psramTotal-s.psramFree,s.psramTotal),hlines([[s.psHist,"#2ecc71"]],0,100,34))+hring(t("File"),fp+"%",fp,hcol(fp,75,90),"i-disk","file",memTx(s.flashUsed,s.flashTotal),hlines([[s.flHist,"#ffb020"]],0,100,34))+hring(t("Wi-Fi"),wt,wp,wc,"i-wifi","wifi",ws,wx)+'</section>';
  h+=homeWid(s,n);
+ h+=memCard(s);
  h+='<section class="card hid"><h3>'+esc(t("Sistema"))+'</h3><div class="big">'+esc(n.host)+'</div><div class="subt">'+esc(s.chip)+" · ID "+boardId(s)+'</div><div style="height:8px"></div>'+
   row(t("Chip"),esc(s.chip)+" rev "+revs)+row(t("Processore"),tf("{0} core a {1} MHz",s.cores,mhz))+row(t("Memoria"),tf("{0} MB flash · {1} MB PSRAM",Math.round(s.flashChip/1048576),Math.round(s.psramTotal/1048576)))+
   row(t("Acceso da"),esc(s.uptime))+row(t("Ore di vita"),fmtDur(s.lifeSec))+row(t("Avvii totali"),s.boots)+row(t("Ultimo reset"),esc(s.reset))+row(t("Versione"),esc(s.name+" "+s.version))+
@@ -1465,12 +1497,11 @@ function homeWid(s,n){hwFetch();if(!SV.httpPort)svcLoad();
  if(s.mqtt&&canSee("mqtt"))c.push(wid("MQTT",pill(s.mqtt==2,t("collegato"),t("non collegato")),"","mqtt","i-mqtt"));
  if(W.mesh&&canSee("mesh"))c.push(wid("ESP-NOW",esc(t(MROLE[W.role]||"Nodo")),esc(t("Schede vicine"))+": "+W.nodes,"mesh","i-mesh"));
  if(n.mdnsRun)c.push(wid("mDNS",esc(n.fqdn),"","mdns","i-tag"));
- if(W.ble)c.push(W.bleLim?wid("Bluetooth",esc(durText(W.bleLeft)),bar(Math.min(100,Math.round(100*W.bleLeft/(W.bleTot||600)))),"ble","i-link"):wid("Bluetooth",esc(t("Acceso")),"","ble","i-link"));
  if(W.ntp)c.push(wid("NTP",W.last?esc(tf("{0} fa",durText(Math.max(1,now-W.last)))):esc(t("Nessuna sincronizzazione ancora")),"","ntp","i-clock"));
  if(n.dhcpRun)c.push(wid("DHCP",pill(1,t("Attivo"),""),esc(t("Dispositivi collegati"))+": "+(n.clients||0),"dhcp","i-net"));
  if(n.st==1)c.push(wid(t("Punto di accesso (AP)"),(n.clients||0)+"",esc(t("Dispositivi collegati")),"ap","i-ant"));
  if(W.pw)c.push(wid(t("Risparmio energia"),esc(W.pw==1?t("Risparmio Wi-Fi"):t("Sonno a cicli")),"","power","i-leaf"));
- if(W.sd)c.push(widSd(W.sd));
+ if(W.w)W.w.forEach(function(x){c.push(widDrv(x))});
  if(W.stat)c.push(wid(t("Statistiche"),pill(1,t("Attivo"),""),"","stat","i-chart"));
  return c.length?'<div class="wg">'+c.join("")+'</div>':""}
 function identify(){post("/api/identify",{}).then(function(r){return r.json()}).then(function(j){msg("idm",j.ok?t("Guarda il LED: lampeggia a colori per 10 secondi"):j.err,j.ok);setTimeout(function(){var e=$("idm");if(e)e.className="msg"},5000)}).catch(function(){})}
@@ -1528,6 +1559,29 @@ function setCpu(){post("/api/cpu",{gov:$("cpumode").value}).then(function(r){ret
 function setCpuPar(){post("/api/cpu",{up:$("cpu_up").value,down:$("cpu_down").value,hold:$("cpu_hold").value}).then(function(r){return r.json()}).then(function(j){msg("cpum",j.ok?t("Salvato"):j.err,j.ok)})}
 function enc(s){return encodeURIComponent(s)}
 function join(a,b){return a=="/"?"/"+b:a+"/"+b}
+/* ===== Avvio: programmi con avvio automatico (script, app Berry, app ELF). Elenco e ordine; solo l'Admin cambia ===== */
+var BP={list:[],cand:[],max:8};
+function bpLoad(){var cs=[];
+ var a=api("/api/progboot").then(function(r){return r.json()}).then(function(j){BP.list=j.list||[];BP.max=j.max||8}).catch(function(){});
+ var s=ROLE==2?api("/api/script").then(function(r){return r.json()}).then(function(j){(j.list||[]).forEach(function(x){cs.push({k:"s",n:x.n})})}).catch(function(){}):Promise.resolve();
+ var b=ROLE==2?api("/api/apps").then(function(r){return r.json()}).then(function(j){(j.list||[]).forEach(function(x){if(x.ok&&x.as!="never")cs.push({k:"b",n:x.n})})}).catch(function(){}):Promise.resolve();
+ var e=ROLE==2&&AUTH&&AUTH.elf?api("/api/elf").then(function(r){return r.json()}).then(function(j){(j.mods||[]).forEach(function(x){if(x.ok)cs.push({k:"e",n:x.n})})}).catch(function(){}):Promise.resolve();
+ Promise.all([a,s,b,e]).then(function(){BP.cand=cs;bpDraw()})}
+function bpHas(k,n){return BP.list.some(function(x){return x.k==k&&x.n==n})}
+function bpDraw(){var h="",adm=ROLE==2;
+ if(!BP.list.length)h='<p class="fhint">'+esc(t("Nessun programma parte da solo."))+'</p>';
+ BP.list.forEach(function(x,i){var oq=i;
+  h+='<div class="row"><span><b>'+esc(x.n)+'</b> <span class="pill">'+esc(progExt(x.k).slice(1))+'</span>'+(x.f?' <span class="pill a">'+esc(t("obbligatorio"))+'</span>':"")+(x.ok===false?' <span class="pill k">'+esc(t("manca il file"))+'</span>':"")+'</span>'+
+   (adm&&!x.f?'<span class="svi">'+bpArrow(i,-1,"&#9650;",tf("Sposta su {0}",x.n),i==0)+bpArrow(i,1,"&#9660;",tf("Sposta giu {0}",x.n),i==BP.list.length-1)+sibB("sm","i-del",tf("Togli {0}",x.n),false,false,"bpDel("+oq+")")+'</span>':"")+'</div>'});
+ $("bpl").innerHTML=h;
+ var o='';BP.cand.forEach(function(x,i){if(!bpHas(x.k,x.n))o+='<option value="'+i+'">'+esc(x.n+progExt(x.k))+'</option>'});
+ $("bpsel").innerHTML=o||'<option value="">'+esc(t("Nessun altro programma"))+'</option>'}
+function bpArrow(i,d,sym,lab,dis){return'<button type="button" class="btn gray" aria-label="'+esc(lab)+'" title="'+esc(lab)+'"'+(dis?" disabled":"")+' onclick="bpMove('+i+','+d+')">'+sym+'</button>'}
+function bpMove(i,d){var j=i+d;if(j<0||j>=BP.list.length||BP.list[i].f||BP.list[j].f)return;var x=BP.list[i];BP.list[i]=BP.list[j];BP.list[j]=x;bpDraw()}
+function bpDel(i){BP.list.splice(i,1);bpDraw()}
+function bpAdd(){var v=$("bpsel").value;if(v==="")return;var x=BP.cand[+v];if(!x||BP.list.length>=BP.max)return;BP.list.push({k:x.k,n:x.n,f:false});bpDraw()}
+function bpSave(){var csv=BP.list.filter(function(x){return !x.f}).map(function(x){return x.k+":"+x.n}).join(",");
+ post("/api/progboot",{list:csv}).then(function(r){return r.json()}).then(function(j){if(j.ok===false){msg("bpm",j.err,false);return}BP.list=j.list||[];bpDraw();msg("bpm",t("Salvato"),true)}).catch(function(){})}
 /* Aggiornamento tramite recovery (solo Amministratore): due strade, file dal computer o rete (GitHub), e l'esito dell'ultimo aggiornamento.
    La scheda scrive un ordine, si riavvia nel recovery e il recovery esegue. Nessuna password passa al recovery. */
 var UPD_CHK=0;
@@ -1581,9 +1635,9 @@ function updWaitBack(){var t0=Date.now(),down=false;
    if(a&&a.pk){if(down)location.reload();else setTimeout(tick,2000)}else{down=true;setTimeout(tick,2000)}},function(){clearTimeout(m);down=true;setTimeout(tick,2000)})})()}
 /* ===== File: elenco, menu azioni, finestre, editor ===== */
 var FS={list:[],used:0,total:0,max:32768,menu:null,lp:null};
-var FTXT=/\.(txt|md|log|csv|html?|css|js|conf|cfg|ini|xml|ya?ml|h|c|cpp|ino|py|sh|svg|rules|vsc|vap)$/i,FIMG=/\.(png|jpe?g|gif|svg|ico|bmp|webp)$/i;
-var FCODE=/\.(html?|css|js|h|c|cpp|ino|py|sh|xml|vsc|vap)$/i;
-function fIco(f){return f.d?"i-folder":/\.json$/i.test(f.n)?"i-fjson":FIMG.test(f.n)?"i-fimg":/\.vsc$/i.test(f.n)?"i-fvsc":/\.vap$/i.test(f.n)?"i-fvap":FCODE.test(f.n)?"i-fcode":(FTXT.test(f.n)||f.n.indexOf(".")<0)?"i-ftxt":"i-fbin"}
+var FTXT=/\.(txt|md|log|csv|html?|css|js|conf|cfg|ini|xml|ya?ml|h|c|cpp|ino|py|sh|svg|rules|vsb|vsc|vab|vap)$/i,FIMG=/\.(png|jpe?g|gif|svg|ico|bmp|webp)$/i;
+var FCODE=/\.(html?|css|js|h|c|cpp|ino|py|sh|xml|vsb|vsc|vab|vap)$/i;
+function fIco(f){return f.d?"i-folder":/\.json$/i.test(f.n)?"i-fjson":FIMG.test(f.n)?"i-fimg":/\.vs[bc]$/i.test(f.n)?"i-fvsc":/\.va[bp]$/i.test(f.n)?"i-fvap":FCODE.test(f.n)?"i-fcode":(FTXT.test(f.n)||f.n.indexOf(".")<0)?"i-ftxt":"i-fbin"}
 function fEditable(n){return /\.json$/i.test(n)||FTXT.test(n)||n.indexOf(".")<0}
 function fSize(n){return n<1024?n+" B":n<1048576?(n/1024).toFixed(n<10240?1:0)+" KB":(n/1048576).toFixed(1)+" MB"}
 function fDir(p){var i=p.lastIndexOf("/");return i<=0?"/":p.substring(0,i)}
@@ -1593,8 +1647,8 @@ function fName(n){n=(n||"").trim();if(!n)return t("Scrivi un nome");if(n.length>
  if(/\.tmp~$/.test(n)||n=="vesevos.conf")return t("Nome riservato al sistema");return""}
 function fSys(p){return p=="/rules.txt"||p.indexOf("/lang/")==0}
 function fList(p){fp=p;fMenuClose();api("/api/fs/list?path="+enc(p)).then(function(r){return r.json()}).then(function(j){
- if(!j.ok){msg("fm",j.err,false);if(p!="/")fList("/");return}fp=j.path;FS.list=j.list;if(j.more)msg("fm",tf("Elenco parziale: mostrate le prime {0} voci",j.list.length),true);FS.used=j.used;FS.total=j.total;if(j.max)FS.max=j.max;
- var parts=j.path.split("/").filter(Boolean),acc="",c='<button class="crb" onclick="fList(\'/\')">'+esc(t("Memoria interna"))+'</button>';
+ if(!j.ok){msg("fm",j.err,false);if(p!="/")fList("/");return}fp=j.path;FS.list=j.list;if(j.more)msg("fm",tf("Elenco parziale: mostrate le prime {0} voci",j.list.length),true);var u=j.u||1;j.used*=u;j.total*=u;FS.used=j.used;FS.total=j.total;if(j.max)FS.max=j.max;
+ var sd=j.path=="/media/sd"||j.path.indexOf("/media/sd/")==0,base=sd?"/media/sd":"",parts=j.path.slice(base.length).split("/").filter(Boolean),acc=base,c='<button class="crb" onclick="fList(\'/\')">'+esc(t("Memoria interna"))+'</button><button class="crb" onclick="fList(\'/media/sd\')">'+esc(t("microSD"))+'</button>';
  parts.forEach(function(x){acc+="/"+x;c+='<span aria-hidden="true">›</span><button class="crb" onclick="fList(this.dataset.p)" data-p="'+esc(acc)+'">'+esc(x)+'</button>'});
  $("fpath").innerHTML=c;$("fupb").disabled=j.path=="/";
  j.list.sort(function(a,b){return (b.d-a.d)||a.n.localeCompare(b.n)});
@@ -1689,9 +1743,9 @@ function fEdit(p){api("/api/fs/text?path="+enc(p)).then(function(r){return r.tex
 function fEdOpen(p,x,isNew){FE.p=p;FE.isNew=isNew;FE.orig=isNew?null:x;FE.back=document.activeElement;var e=$("fedx");e.value=x;e.scrollTop=0;e.scrollLeft=0;
  $("fed").className="fed";document.body.classList.add("fedo");fEdTitle();$("fedw").className=fSys(p)?"fedw":"fedw hide";$("fedrun").hidden=!fIsScript(p);
  $("fedpaste").hidden=!(navigator.clipboard&&navigator.clipboard.readText&&window.isSecureContext);fEdUpd();setTimeout(function(){e.focus();e.setSelectionRange(0,0)},30)}
-function fIsScript(p){return /^\/scripts\/[a-z0-9_-]{1,24}\.vsc$/.test(p)}
-function fEdRun(){var n=FE.p.replace(/^.*\//,"").replace(/\.vsc$/,"");fEdSave().then(function(ok){if(!ok)return;fEdClose(true);show("script");scRun(n)})}
-function fMax(){return /\.vsc$/i.test(FE.p)?8192:/\.vap$/i.test(FE.p)?16384:FS.max}
+function fIsScript(p){return /^\/sbin\/[a-z0-9_-]{1,24}\.vs[bc]$/.test(p)}
+function fEdRun(){var n=FE.p.replace(/^.*\//,"").replace(/\.vs[bc]$/,"");fEdSave().then(function(ok){if(!ok)return;fEdClose(true);show("script");scRun(n)})}
+function fMax(){return /\.vs[bc]$/i.test(FE.p)?8192:/\.va[bp]$/i.test(FE.p)?16384:FS.max}
 function fEdDirty(){return FE.isNew||$("fedx").value!==FE.orig}
 function fEdTitle(){var d=fEdDirty();$("fedt").textContent=fBase(FE.p);$("fedp").textContent=fDir(FE.p);$("feds").textContent=FE.isNew?t("Nuovo, non ancora salvato"):d?t("Modificato"):t("Salvato");$("feds").className="feds"+(d?" mod":"")}
 function fEdUpd(){var e=$("fedx"),v=e.value,ln=v.split("\n").length,h="";for(var i=1;i<=ln;i++)h+=i+"\n";if($("fedn").textContent!=h)$("fedn").textContent=h;$("fedn").scrollTop=e.scrollTop;
@@ -1709,7 +1763,7 @@ function fEdSave(asNew,path,force){var v=$("fedx").value,p=path||FE.p,b=new Text
   if(!j.ok&&(FE.isNew||asNew)&&j.err==t("Esiste gia")){dlg({title:t("Sostituire il file?"),body:'<p style="margin:0">'+esc(tf("{0} esiste gia.",p))+'</p>',ok:t("Sostituisci"),danger:true,onOk:function(){FE.isNew=false;return post("/api/fs/save",{path:p,text:v,"new":"0"}).then(function(r){return r.json()}).then(function(j){if(j.ok)fEdSaved(p,v);return j.ok?"":j.err})}});return false}
   if(!j.ok){msg("fedm",j.err,false);return false}fEdSaved(p,v);return true})}
 function fEdSaved(p,v){FE.p=p;FE.isNew=false;FE.orig=v;msg("fedm",t("Salvato"),true);var lv=$("live");if(lv)lv.textContent=t("Salvato");fEdUpd();
- api("/api/fs/list?path="+enc(fp)).then(function(r){return r.json()}).then(function(j){if(j.ok){FS.used=j.used;FS.total=j.total;fEdUpd()}}).catch(function(){})}
+ api("/api/fs/list?path="+enc(fp)).then(function(r){return r.json()}).then(function(j){if(j.ok){var u=j.u||1;FS.used=j.used*u;FS.total=j.total*u;fEdUpd()}}).catch(function(){})}
 function fEdSaveAs(){dlg({title:t("Salva come"),body:'<label for="dn">'+esc(t("Nome del file"))+'</label><input id="dn" autocomplete="off" maxlength="60" value="'+esc(fBase(FE.p))+'"><label for="dd">'+esc(t("Cartella"))+'</label><select id="dd"><option value="'+esc(fDir(FE.p))+'">'+esc(fDir(FE.p))+'</option></select>',ok:t("Salva"),
  onOk:function(){var n=dlgV("dn"),d=$("dd").value,e=fName(n);if(e)return e;fEdSave(true,join(d,n));return""}});fDirsSel("dd",fDir(FE.p))}
 function fEdPaste(){navigator.clipboard.readText().then(function(x){var e=$("fedx");e.focus();e.setRangeText(x,e.selectionStart,e.selectionEnd,"end");fEdUpd()}).catch(function(){msg("fedm",t("Il browser non permette di leggere gli appunti: usa Ctrl+V"),false)})}
@@ -1830,7 +1884,7 @@ function tkPoll(){if(document.hidden)return;api("/api/tasklist").then(function(r
  if(!j.ok){$("tkinfo").textContent=t("(dettagli non disponibili in questa build)");$("tktab").innerHTML="";return}
  var dt=TK.prev?j.total-TK.prev.total:0,hasRt=j.total>0;
  j.tasks.forEach(function(x){x.cpu=-1;if(hasRt&&TK.prev&&dt>0&&TK.prev.m[x.id]!==undefined){x.cpu=Math.min(100,Math.max(0,100*(x.rt-TK.prev.m[x.id])/dt))}});
- var m={};j.tasks.forEach(function(x){m[x.id]=x.rt});TK.prev={total:j.total,m:m};TK.hasCpu=hasRt;TK.d=j.tasks;TK.total=j.total;tkDraw()}).catch(function(){})}
+ var m={};j.tasks.forEach(function(x){m[x.id]=x.rt});TK.prev={total:j.total,m:m};TK.hasCpu=hasRt;TK.d=j.tasks;TK.total=j.total;tkDraw();if(typeof tkProgs=="function")tkProgs(j)}).catch(function(){})}
 function tkSort(c){if(TK.col==c)TK.asc=!TK.asc;else{TK.col=c;TK.asc=(c=="n"||c=="t"||c=="s")}tkDraw()}
 function tkState(s){return s==9?t("Fermato"):[t("In esecuzione"),t("Pronto"),t("In attesa"),t("Sospeso"),t("Eliminato"),"?"][s]||"?"}
 function tkType(x){return x.t==2?t("App"):x.t==1?t("VesevOS"):t("Sistema")}
@@ -1864,21 +1918,21 @@ function brdLay(k){return PBI&&PBI.lay&&PBI.lay[k]?PBI.lay[k].map(String):[]}
 function brdIn(k,g){var r=PBI&&PBI[k];return !!r&&g>=r[0]&&g<=r[1]}
 function brdMax(){return PBI&&PBI.gmax!=null?PBI.gmax:""}
 function brdLoad(){return api("/api/pins/info").then(function(r){return r.json()}).then(function(b){PBI=b;var e=$("io_g");if(e)e.max=brdMax();return b}).catch(function(){})}
-/* ===== Script (Berry): elenco, avvio/stop, uscita in diretta. Il testo si modifica con l'editor dei file ===== */
+/* ===== Script: elenco, avvio/stop, uscita in diretta. Il testo si modifica con l'editor dei file ===== */
 var SC={tm:0,list:[],busy:false,bg:false,name:"",out:null,fsOk:false};
 function scLoad(){scTimerStop();scPoll();SC.tm=setInterval(function(){if(cur!="script"||document.hidden){if(cur!="script")scTimerStop();return}scPoll()},1500)}
 function scTimerStop(){if(SC.tm){clearInterval(SC.tm);SC.tm=0}}
 function scPoll(){api("/api/script").then(function(r){return r.json()}).then(function(j){if(!j.ok){msg("scm",j.err,false);return}scDraw(j)}).catch(function(){})}
-function scFsInfo(){if(SC.fsOk)return;api("/api/fs/list?path=/scripts").then(function(r){return r.json()}).then(function(j){if(j.ok){FS.used=j.used;FS.total=j.total;SC.fsOk=true}}).catch(function(){})}
+function scFsInfo(){if(SC.fsOk)return;api("/api/fs/list?path=/sbin").then(function(r){return r.json()}).then(function(j){if(j.ok){FS.used=j.used;FS.total=j.total;SC.fsOk=true}}).catch(function(){})}
 function scDraw(j){SC.list=j.list;SC.busy=j.busy;SC.bg=j.bg;SC.name=j.name;scFsInfo();
  var run=j.busy&&j.bg,st;
- if(run)st=tf("In corso: {0}",j.name);else if(j.busy)st=t("Berry sta eseguendo un comando");else if(j.last==1)st=tf("Fermo. Ultima esecuzione finita senza errori ({0} ms).",j.ms);else if(j.last==0)st=t("Fermo. L'ultima esecuzione e finita con un errore (vedi l'uscita).");else st=t("Fermo. Nessuno script eseguito dall'accensione.");
+ if(run)st=tf("In corso: {0}",j.name);else if(j.busy)st=t("Lo script sta eseguendo un comando");else if(j.last==1)st=tf("Fermo. Ultima esecuzione finita senza errori ({0} ms).",j.ms);else if(j.last==0)st=t("Fermo. L'ultima esecuzione e finita con un errore (vedi l'uscita).");else st=t("Fermo. Nessuno script eseguito dall'accensione.");
  var se=$("scst");if(se.textContent!=st)se.textContent=st;
  $("scstop").disabled=!j.busy;
  var h="";
  if(!j.list.length)h='<tbody><tr><td colspan="3" class="fhint">'+esc(t("Nessuno script. Premi Nuovo script per crearne uno."))+'</td></tr></tbody>';
  else{h="<tbody>";j.list.forEach(function(x){var on=run&&j.name==x.n,q=esc(x.n),oq="'"+x.n+"'";
-  h+='<tr class="'+(on?"lp":"")+'"><td><span class="scn"><svg class="i" aria-hidden="true"><use href="#i-fvsc"/></svg><b>'+q+'</b>'+(on?'<span class="pill">'+esc(t("in corso"))+'</span>':"")+'</span></td><td class="fsz">'+fSize(x.s)+'</td>'+
+  h+='<tr class="'+(on?"lp":"")+'"><td><span class="scn"><svg class="i" aria-hidden="true"><use href="#i-fvsc"/></svg><b>'+q+'</b><span class="pill">'+esc(EXT.s.slice(1))+'</span>'+(on?'<span class="pill">'+esc(t("in corso"))+'</span>':"")+'</span></td><td class="fsz">'+fSize(x.s)+'</td>'+
    '<td class="fac tkb"><span class="svi">'+sibB("sm go","i-sgo",tf("Esegui {0}",x.n),on,j.busy,j.busy?"":"scRun("+oq+")")+sibB("sm st","i-sst",tf("Ferma {0}",x.n),false,!on,on?"scStopRun()":"")+
    sibB("sm","i-edit",tf("Modifica {0}",x.n),false,false,"scEdit("+oq+")")+sibB("sm","i-del",tf("Elimina {0}",x.n),false,on,on?"":"scDel("+oq+")")+'</span></td></tr>'});h+="</tbody>"}
  if(SC._h!==h){SC._h=h;$("sctab").innerHTML=h}
@@ -1887,40 +1941,79 @@ function scDraw(j){SC.list=j.list;SC.busy=j.busy;SC.bg=j.bg;SC.name=j.name;scFsI
  $("scinfo").textContent=tf("Esecuzioni dall'accensione: {0}. Limiti: {1} di testo, memoria 64 KB, un solo script alla volta.",j.runs,fSize(j.max))}
 function scRun(n){post("/api/script/run",{name:n}).then(function(r){return r.json()}).then(function(j){msg("scm",j.ok?tf("Avviato: {0}",n):j.err,j.ok);scPoll()}).catch(function(){})}
 function scStopRun(){post("/api/script/stop",{}).then(function(r){return r.json()}).then(function(j){msg("scm",j.ok?t("Script fermato"):j.err,j.ok);scPoll()}).catch(function(){})}
-function scPath(n){return"/scripts/"+n+".vsc"}
-function scEdit(n){api("/api/fs/text?path="+enc(scPath(n))).then(function(r){return r.text().then(function(x){return{ok:r.ok,x:x}})}).then(function(o){if(!o.ok){msg("scm",o.x,false);return}fEdOpen(scPath(n),o.x,false)}).catch(function(){})}
+function scPath(n){return"/sbin/"+n+EXT.s}
+function scEdit(n){progTry("/sbin/",n,"s",function(p){return api("/api/fs/text?path="+enc(p)).then(function(r){return r.text().then(function(x){return{ok:r.ok,x:x,p:p}})})}).then(function(o){if(!o.ok){msg("scm",o.x,false);return}fEdOpen(o.p,o.x,false)}).catch(function(){})}
 function scNew(){dlg({title:t("Nuovo script"),body:'<label for="dn">'+esc(t("Nome dello script"))+'</label><input id="dn" autocomplete="off" maxlength="24" spellcheck="false" autocapitalize="off" placeholder="lampeggio"><p class="fhint" style="margin:0">'+esc(t("Da 1 a 24 caratteri: lettere minuscole, numeri, trattino e sottotrattino."))+'</p>',ok:t("Crea"),
- onOk:function(){var n=dlgV("dn").toLowerCase().replace(/\.vsc$/,"");if(!/^[a-z0-9_-]{1,24}$/.test(n))return t("Nome non valido");if(SC.list.some(function(x){return x.n==n}))return t("Esiste gia");
+ onOk:function(){var n=dlgV("dn").toLowerCase().replace(/\.vs[bc]$/,"");if(!/^[a-z0-9_-]{1,24}$/.test(n))return t("Nome non valido");if(SC.list.some(function(x){return x.n==n}))return t("Esiste gia");
   fEdOpen(scPath(n),"# "+n+"\nprint('ciao')\n",true);return""}})}
 function scDel(n){dlg({title:t("Eliminare?"),body:'<p style="margin:0">'+esc(tf("Lo script {0} verra eliminato.",n))+'</p><p style="margin:8px 0 0;color:var(--mut)">'+esc(t("Non si puo annullare."))+'</p>',ok:t("Elimina"),danger:true,
- onOk:function(){return post("/api/fs/del",{path:scPath(n)}).then(function(r){return r.json()}).then(function(j){scPoll();return j.ok?"":j.err})}})}
-/* ===== App (.vap): elenco, pagina generica con i controlli dichiarati, avvio e stop. Il testo si modifica con l'editor dei file ===== */
-var AP={list:[],sel:"",info:null,tm:0,run:false,busy:false,key:"",tmr:0};
-function apLoad(){apTimerStop();api("/api/apps").then(function(r){return r.json()}).then(function(j){if(!j.ok){msg("appm",j.err,false);return}AP.list=j.list;apDraw(j);if(AP.sel)apPoll();
- AP.tm=setInterval(function(){if(cur!="app"||document.hidden){if(cur!="app")apTimerStop();return}if(AP.sel)apPoll()},1200)}).catch(function(){})}
+ onOk:function(){return progTry("/sbin/",n,"s",function(p){return post("/api/fs/del",{path:p}).then(function(r){return r.json()})}).then(function(j){scPoll();return j.ok?"":j.err})}})}
+/* Carica: un solo pulsante, il tipo si riconosce dall'estensione (qui .vsb) */
+function scUp(){var f=$("scup").files[0];if(!f)return;
+ if(!extOk(f.name,"s")){msg("scm",tf("Il file deve finire per {0}",EXT.s),false);return}
+ var fd=new FormData();fd.append("file",f);
+ api("/api/fs/up?dir=/sbin",{method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){msg("scm",j.ok?t("Caricato"):j.err,j.ok);$("scup").value="";scPoll()}).catch(function(){})}
+/* ===== App (.vab): elenco, pagina generica con i controlli dichiarati, avvio e stop. Il testo si modifica con l'editor dei file ===== */
+var AP={list:[],elf:[],prg:{},dat:{sd:false,on:{}},sel:"",info:null,tm:0,run:false,busy:false,key:"",tmr:0};
+function apLoad(){apTimerStop();apLists().then(function(){if(AP.sel)apPoll();apRunPoll();
+ AP.tm=setInterval(function(){if(cur!="app"||document.hidden){if(cur!="app")apTimerStop();return}if(AP.sel)apPoll();apRunPoll()},1500)})}
 function apTimerStop(){if(AP.tm){clearInterval(AP.tm);AP.tm=0}}
+/* elenchi: app Berry (/api/apps), app ELF installate (/api/elf, se il firmware le ha) e cio che gira (/api/progs) */
+function apLists(){
+ var a=api("/api/apps").then(function(r){return r.json()}).then(function(j){if(!j.ok){msg("appm",j.err,false);return}AP.list=j.list}).catch(function(){}),
+  e=AUTH&&AUTH.elf?api("/api/elf").then(function(r){return r.json()}).then(function(j){AP.elf=j.mods||[]}).catch(function(){}):Promise.resolve(),
+  d=api("/api/progdata").then(function(r){return r.json()}).then(function(j){var m={};(j.list||[]).forEach(function(x){m[x.k+":"+x.n]=1});AP.dat={sd:!!j.sd,on:m}}).catch(function(){});
+ return Promise.all([a,e,d,apRunPoll()]).then(function(){AP._h="";apDraw()})}
+function apRunPoll(){return api("/api/progs").then(function(r){return r.json()}).then(function(j){var m={};(j.progs||[]).forEach(function(p){if(p.a)m[p.k+":"+p.n]=p});AP.prg=m;apDraw()}).catch(function(){})}
 function apIco(x){
  if(x.ok&&x.icon){var sv=x.icon;if(sv.indexOf("xmlns")<0)sv=sv.replace("<svg",'<svg xmlns="http://www.w3.org/2000/svg"');return'<img class="api" alt="" width="24" height="24" src="data:image/svg+xml;charset=utf-8,'+enc(sv)+'">'}
  return'<svg class="i" aria-hidden="true"><use href="#i-fvap"/></svg>'}
-function apDraw(j){var h="";
- if(!j.list.length)h='<tbody><tr><td colspan="3" class="fhint">'+esc(ROLE==2?t("Nessuna app. Premi Nuova app per crearne una."):t("Nessuna app disponibile per il tuo ruolo."))+'</td></tr></tbody>';
- else{h="<tbody>";j.list.forEach(function(x){var q=esc(x.n),oq="'"+x.n+"'",nm=/^[a-z0-9_-]{1,24}$/.test(x.n);
-  h+='<tr><td><span class="scn">'+apIco(x)+'<b>'+(x.ok?esc(x.t):q)+'</b>'+(ROLE==2?'<span class="pill'+(x.ok?" v":" k")+'">'+esc(x.ok?t("valida"):t("errore"))+'</span>':'')+'</span>';
-  if(x.ok)h+='<div class="fhint">'+esc(x.n+" · "+tf("Versione {0}",x.v)+(x.a?" · "+x.a:"")+" · "+tf("Controlli: {0}",x.c)+" · "+tf("Permessi: {0}",x.u||"-"))+'</div>';
-  else h+='<div class="fhint bad">'+esc(x.e)+'</div>';
-  h+='</td><td class="fsz">'+(x.ok&&ROLE==2?fSize(x.s):"")+'</td><td class="fac tkb"><span class="svi">'+(x.ok&&nm?sibB("sm go","i-sgo",tf("Apri {0}",x.n),AP.sel==x.n,false,"apOpen("+oq+")"):"")+(ROLE==2&&nm?sibB("sm","i-edit",tf("Modifica {0}",x.n),false,false,"apEdit("+oq+")")+sibB("sm","i-del",tf("Elimina {0}",x.n),false,false,"apDel("+oq+")"):"")+'</span></td></tr>'});h+="</tbody>"}
- if(AP._h!==h){AP._h=h;$("aptab").innerHTML=h}}
-function apPath(n){return"/apps/"+n+".vap"}
-function apEdit(n){api("/api/fs/text?path="+enc(apPath(n))).then(function(r){return r.text().then(function(x){return{ok:r.ok,x:x}})}).then(function(o){if(!o.ok){msg("appm",o.x,false);return}fEdOpen(apPath(n),o.x,false)}).catch(function(){})}
+/* una riga per programma, uguale per tutti: nome, tag dell'estensione, stato, permessi che chiede e gli stessi pulsanti (Avvia, Ferma, Elimina) */
+function apRow(k,x){var n=x.n,q=esc(n),oq="'"+k+"','"+n+"'",run=AP.prg&&AP.prg[k+":"+n],valid=x.ok!==false,adm=ROLE==2,ext=progExt(k).slice(1),nm=/^[a-z0-9_-]{1,24}$/.test(n),
+ name='<b>'+(k=="b"&&valid?esc(x.t||n):q)+'</b>',
+ use=k=="b"?(x.u||""):(x.u||"").replace(/ /g,","),
+ st=!valid?'<span class="pill k">'+esc(t("errore"))+'</span>':x.q?'<span class="pill k">'+esc(t("in quarantena"))+'</span>':run?'<span class="pill a">'+esc(t("in corso"))+'<span data-ps="'+k+':'+n+'"></span></span>':'<span class="pill">'+esc(t("pronto"))+'</span>',
+ h='<tr><td><span class="scn">'+(k=="b"?apIco(x):'<svg class="i" aria-hidden="true"><use href="#i-fvap"/></svg>')+name+'<span class="pill">'+esc(ext)+'</span>'+st+'</span>';
+ if(!valid)h+='<div class="fhint bad">'+esc(x.e)+'</div>';
+ else{var parts=[];if(k=="b")parts.push(n,tf("Versione {0}",x.v));if(k=="b"&&x.a)parts.push(x.a);if(k=="b")parts.push(tf("Controlli: {0}",x.c));parts.push(tf("Permessi: {0}",use?use.replace(/,/g,", "):"-"));
+  h+='<div class="fhint">'+esc(parts.join(" · "))+'</div>';if(x.d)h+=apDataSel(k,n,run);if(x.m)h+='<div class="fhint bad">'+esc(tf("Chiede {0}, che e spenta (Sistema > Funzionalita)",x.m))+'</div>'}
+ var can=valid&&!x.q&&(k=="e"?adm:true);
+ h+='</td><td class="fsz">'+(valid&&adm?fSize(k=="b"?x.s:x.b):"")+'</td><td class="fac tkb"><span class="svi">'+
+  (k=="b"&&valid&&nm?sibB("sm go","i-fvap",tf("Apri {0}",n),AP.sel==n,false,"apOpen('"+n+"')"):"")+
+  (valid?sibB("sm go","i-sgo",tf("Avvia {0}",n),!!run,!can||!!run,can&&!run?"apGo("+oq+")":"")+sibB("sm st","i-sst",tf("Ferma {0}",n),false,!run||!adm,run&&adm?"apStopN('"+n+"')":""):"")+
+  (adm&&k=="e"&&x.q?sibB("sm","i-lockx",tf("Togli {0} dalla quarantena",n),false,false,"apUnq('"+n+"')"):"")+
+  (adm&&k=="b"&&nm?sibB("sm","i-edit",tf("Modifica {0}",n),false,false,"apEdit('"+n+"')"):"")+(adm?sibB("sm","i-del",tf("Elimina {0}",n),false,!!run,run?"":"apDel("+oq+")"):"")+'</span></td></tr>';
+ return h}
+/* dove l'app salva i dati (solo se dichiara di salvarne): lo sceglie l'utente; senza microSD montata resta solo la flash */
+function apDataSel(k,n,run){var sd=AP.dat.sd,on=!!AP.dat.on[k+":"+n],id="pd_"+k+"_"+n,dis=ROLE!=2||!!run?" disabled":"";
+ return'<div class="fhint"><label for="'+id+'">'+esc(t("Salva su"))+'</label> <select id="'+id+'"'+dis+' onchange="apData(\''+k+'\',\''+n+'\',this.value)"><option value="flash"'+(on?"":" selected")+'>'+esc(t("Flash"))+'</option>'+(sd||on?'<option value="sd"'+(on?" selected":"")+'>'+esc(on&&!sd?t("microSD (non montata)"):t("microSD"))+'</option>':"")+'</select></div>'}
+function apData(k,n,v){post("/api/progdata",{k:k,name:n,where:v}).then(function(r){return r.json()}).then(function(j){msg("appm",j.ok===false?j.err:t("Fatto"),j.ok!==false);apLists()}).catch(function(){apLists()})}
+function apDraw(){var h="",bn=AP.list||[],el=AP.elf||[];
+ if(!bn.length&&!el.length)h='<tbody><tr><td colspan="3" class="fhint">'+esc(ROLE==2?t("Nessuna app. Premi Nuova app per crearne una, oppure Carica."):t("Nessuna app disponibile per il tuo ruolo."))+'</td></tr></tbody>';
+ else{h="<tbody>";bn.forEach(function(x){h+=apRow("b",x)});el.forEach(function(x){h+=apRow("e",x)});h+="</tbody>"}
+ if(AP._h!==h){AP._h=h;$("aptab").innerHTML=h}
+ Object.keys(AP.prg||{}).forEach(function(key){var e=document.querySelector('[data-ps="'+key+'"]');if(e)e.textContent=" \u00b7 "+AP.prg[key].s+" s"})}   /* i secondi si aggiornano senza ridisegnare la riga (i pulsanti tengono il fuoco) */
+function apGo(k,n){if(k=="b"){post("/api/app/start",{name:n}).then(function(r){return r.json()}).then(function(j){msg("appm",j.ok?t("App avviata"):j.err,j.ok);apRunPoll();if(AP.sel==n)apPoll()}).catch(function(){})}
+ else post("/api/progs",{act:"start",k:k,name:n}).then(function(r){return r.json()}).then(function(j){msg("appm",j.ok?t("App avviata"):j.err,j.ok);apRunPoll()}).catch(function(){})}
+function apStopN(n){post("/api/progs",{act:"stop",name:n}).then(function(r){return r.json()}).then(function(j){msg("appm",j.ok?t("App fermata"):j.err,j.ok);apRunPoll();if(AP.sel==n)apPoll()}).catch(function(){})}
+function apUnq(n){post("/api/elf",{act:"unq",name:n}).then(function(r){return r.json()}).then(function(j){msg("appm",j.ok===false?j.err:t("Fatto"),j.ok!==false);apLists()}).catch(function(){})}
+/* Carica: un solo pulsante, il tipo si riconosce dall'estensione */
+function apUp(){var f=$("apup").files[0];if(!f)return;
+ var ok=extOk(f.name,"b")||(AUTH&&AUTH.elf&&extOk(f.name,"e"));
+ if(!ok){msg("appm",tf("Il file deve finire per {0}",AUTH&&AUTH.elf?EXT.b+" "+t("oppure")+" "+EXT.e:EXT.b),false);return}
+ var fd=new FormData();fd.append("file",f);
+ api("/api/fs/up?dir=/bin",{method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){msg("appm",j.ok?t("Caricato"):j.err,j.ok);$("apup").value="";apLists()}).catch(function(){})}
+function apPath(n){return"/bin/"+n+EXT.b}
+function apEdit(n){progTry("/bin/",n,"b",function(p){return api("/api/fs/text?path="+enc(p)).then(function(r){return r.text().then(function(x){return{ok:r.ok,x:x,p:p}})})}).then(function(o){if(!o.ok){msg("appm",o.x,false);return}fEdOpen(o.p,o.x,false)}).catch(function(){})}
 function apTpl(n){return"[manifest]\nname="+n+"\ntitle="+n.charAt(0).toUpperCase()+n.slice(1)+"\nversion=1\nuse=led\nwho=admin\n\n[icon]\n<svg viewBox=\"0 0 24 24\"><path d=\"M5 19l4-9 3 4 3-6 4 11z\" fill=\"none\" stroke=\"#c0392b\" stroke-width=\"2\"/></svg>\n\n[page]\nswitch id=power label=\"Accesa\"\nslider id=lum label=\"Luminosita\" min=0 max=255\ntext id=info label=\"Stato\"\n\n[code]\ndef on_set(id, v)\n  if id == 'power'\n    if v == 1\n      led('ffffff')\n    else\n      led('auto')\n    end\n  end\n  if id == 'lum'\n    dev_set('info', 'Luminosita ' + str(v))\n  end\nend\n\n[data]\npower=0\n"}
 function apNew(){dlg({title:t("Nuova app"),body:'<label for="dn">'+esc(t("Nome dell'app"))+'</label><input id="dn" autocomplete="off" maxlength="24" spellcheck="false" autocapitalize="off" placeholder="lampada"><p class="fhint" style="margin:0">'+esc(t("Da 1 a 24 caratteri: lettere minuscole, numeri, trattino e sottotrattino."))+'</p>',ok:t("Crea"),
- onOk:function(){var n=dlgV("dn").toLowerCase().replace(/\.vap$/,"");if(!/^[a-z0-9_-]{1,24}$/.test(n))return t("Nome non valido");if(AP.list.some(function(x){return x.n==n}))return t("Esiste gia");
+ onOk:function(){var n=dlgV("dn").toLowerCase().replace(/\.va[bp]$/,"");if(!/^[a-z0-9_-]{1,24}$/.test(n))return t("Nome non valido");if(AP.list.some(function(x){return x.n==n}))return t("Esiste gia");
   fEdOpen(apPath(n),apTpl(n),true);return""}})}
-function apDel(n){dlg({title:t("Eliminare?"),body:'<p style="margin:0">'+esc(tf("L'app {0} verra eliminata.",n))+'</p><p style="margin:8px 0 0;color:var(--mut)">'+esc(t("Non si puo annullare."))+'</p>',ok:t("Elimina"),danger:true,
- onOk:function(){if(AP.sel==n)apClose();return post("/api/fs/del",{path:apPath(n)}).then(function(r){return r.json()}).then(function(j){apLoad();return j.ok?"":j.err})}})}
+function apDel(k,n){if(n===undefined){n=k;k="b"}dlg({title:t("Eliminare?"),body:'<p style="margin:0">'+esc(tf("L'app {0} verra eliminata.",n))+'</p><p style="margin:8px 0 0;color:var(--mut)">'+esc(t("Non si puo annullare."))+'</p>',ok:t("Elimina"),danger:true,
+ onOk:function(){if(AP.sel==n)apClose();return progTry("/bin/",n,k,function(p){return post("/api/fs/del",{path:p}).then(function(r){return r.json()})}).then(function(j){apLists();return j.ok?"":j.err})}})}
 /* ---- la pagina generica dell'app: UN solo disegno nel firmware, legge i controlli dichiarati nel manifest (niente HTML dell'utente) ---- */
 function apOpen(n){api("/api/app?name="+enc(n)).then(function(r){return r.json()}).then(function(j){if(!j.ok){msg("appm",j.err,false);return}
- AP.sel=n;AP.info=j;AP.key="";AP.run=false;apBuild();apPoll();if(AP._h){AP._h="";apLoad()}else apDraw({list:AP.list});$("apcard").scrollIntoView({block:"nearest"})}).catch(function(){})}
+ AP.sel=n;AP.info=j;AP.key="";AP.run=false;apBuild();apPoll();AP._h="";apDraw();$("apcard").scrollIntoView({block:"nearest"})}).catch(function(){})}
 function apClose(){AP.sel="";AP.info=null;AP.key="";$("apcard").className="card hide";AP._h="";apDraw({list:AP.list})}
 function apCtl(c){var id=esc(c.id),l=esc(c.l),dis=AP.run?"":" disabled",x='<div class="apc" id="apw_'+id+'">';
  if(c.k=="switch")x+='<span class="apl" id="apt_'+id+'">'+l+'</span><button type="button" class="sw1" id="apc_'+id+'" role="switch" aria-checked="false" aria-labelledby="apt_'+id+'"'+dis+' onclick="apTog(\''+c.id+'\')"></button>';
@@ -1964,7 +2057,7 @@ function loadPins(){brdLoad().then(function(b){if(!b)return;$("pinchip").textCon
  $("pintab").innerHTML=h;if(PM.length)drawPins()});
  api("/api/pinmap").then(function(r){return r.json()}).then(function(m){PM=m;drawPins();pinPanel();pinInv()});
  api("/api/pinnotes").then(function(r){return r.json()}).then(function(n){PNOTE=n;drawPins();pinInv()});
- pinViewBtns();
+ pinViewBtns();pinDevLoad();
  clearInterval(PTM);PTM=setInterval(pinPoll,1000);pinPoll()}
 function pinViewBtns(){$("pinview").innerHTML='<button class="'+(PV=="f"?"on":"")+'" onclick="pinV(\'f\')">'+esc(t("Fronte"))+'</button><button class="'+(PV=="b"?"on":"")+'" onclick="pinV(\'b\')">'+esc(t("Retro"))+'</button>'}
 function pinV(v){PV=v;pinViewBtns();drawPins()}
@@ -1973,49 +2066,50 @@ var PUSE=[];
 function pinOwner(g){for(var i=0;i<PUSE.length;i++)if(PUSE[i].gpio==g)return PUSE[i];return null}
 function drawPins(){var e=$("pinsvg");if(!PBI||!PBI.lay){e.innerHTML="";return}
  var FL=brdLay("fl"),FR=brdLay("fr"),BL=brdLay("bl").map(Number),BR=brdLay("br").map(Number),LED=PBI.led,UA=PBI.uart||[];
- var W=400,bx=140,bw=120,top=56,st=30,bh=Math.max(FL.length,FR.length,BL.length,BR.length,1)*st+50,s="",ink="#8b98a8";
- var fr=PV=="f",L=fr?FL:FR,R=fr?FR:FL;
+ var W=400,bw=120,top=64,st=30,bh=Math.max(FL.length,FR.length,BL.length,BR.length,1)*st+50,s="",ink=pinInk();
+ var fr=PV=="f",L=fr?FL:FR,R=fr?FR:FL,plan=fr?pinSchemaPlan(L,R,top,st,bw):null,bx=plan?plan.bx:140;
  s+='<rect x="'+bx+'" y="'+top+'" width="'+bw+'" height="'+bh+'" rx="12" fill="'+(fr?"#1f2a37":"#243246")+'" stroke="#3a4a5e"/>';
- s+='<rect x="'+(bx+bw/2-22)+'" y="'+(top-14)+'" width="44" height="22" rx="6" fill="#9aa5b1" stroke="#5c6670"/><text x="'+(bx+bw/2)+'" y="'+(top+2)+'" font-size="8" text-anchor="middle" fill="#1f2a37">USB-C</text>';
- s+='<text x="'+(bx+bw/2)+'" y="'+(top-22)+'" font-size="10" font-weight="700" text-anchor="middle" fill="'+ink+'">'+esc(fr?t("FRONTE"):t("RETRO (vista da sotto)"))+'</text>';
+ s+='<rect x="'+(bx+bw/2-24)+'" y="'+(top-18)+'" width="48" height="28" rx="6" fill="#aab4bf" stroke="#5c6670"/><rect x="'+(bx+bw/2-17)+'" y="'+(top-8)+'" width="34" height="9" rx="4.5" fill="#1f2a37"/><text x="'+(bx+bw/2)+'" y="'+(top-10.5)+'" font-size="6.5" text-anchor="middle" fill="#1f2a37">USB-C</text>';
+ s+='<text x="'+(bx+bw/2)+'" y="'+(top-24)+'" font-size="10" font-weight="700" text-anchor="middle" fill="'+ink+'">'+esc(fr?t("FRONTE"):t("RETRO (vista da sotto)"))+'</text>';
  if(fr){
   s+='<rect x="'+(bx+16)+'" y="'+(top+14)+'" width="30" height="14" rx="3" fill="#46566a"/><text x="'+(bx+31)+'" y="'+(top+24)+'" font-size="7" text-anchor="middle" fill="#fff">BOOT</text>';
   s+='<rect x="'+(bx+bw-46)+'" y="'+(top+14)+'" width="30" height="14" rx="3" fill="#46566a"/><text x="'+(bx+bw-31)+'" y="'+(top+24)+'" font-size="7" text-anchor="middle" fill="#fff">RESET</text>';
-  if(LED!=null){var iL=pinInfo(LED),cL=LED==PT.gpio?"#e0a020":(iL&&iL.owner)?"#3fa7ff":"#3a4352";
-  s+='<g style="cursor:pointer" onclick="pinSel('+LED+')" role="button" aria-label="GPIO '+LED+' LED RGB"><circle cx="'+(bx+bw/2)+'" cy="'+(top+44)+'" r="6" fill="'+cL+'" stroke="'+(PSEL==LED?"#fff":"#0b0f14")+'"/><title>GPIO'+LED+' - LED RGB</title></g><text x="'+(bx+bw/2)+'" y="'+(top+62)+'" font-size="7" text-anchor="middle" fill="'+ink+'">LED RGB '+LED+'</text>'}
-  s+='<circle cx="'+(bx+bw/2+28)+'" cy="'+(top+44)+'" r="3" fill="#c0392b"/><text x="'+(bx+bw/2+28)+'" y="'+(top+62)+'" font-size="6" text-anchor="middle" fill="'+ink+'">'+esc(t("LED batteria"))+'</text>';
-  s+='<rect x="'+(bx+30)+'" y="'+(top+110)+'" width="60" height="60" rx="4" fill="#2b3644" stroke="#46566a"/><text x="'+(bx+60)+'" y="'+(top+143)+'" font-size="9" text-anchor="middle" fill="'+ink+'">'+esc((PBI&&PBI.chip)||"ESP32-S3")+'</text>';
-  s+='<rect x="'+(bx+14)+'" y="'+(top+bh-34)+'" width="92" height="24" rx="5" fill="#e58fb3"/><text x="'+(bx+60)+'" y="'+(top+bh-18)+'" font-size="8" text-anchor="middle" fill="#5a1b35">'+esc(t("ANTENNA"))+'</text>'}
+  if(LED!=null){var iL=pinInfo(LED),cL=LED==PT.gpio?"#e0a020":(iL&&iL.owner)?"#3fa7ff":"#3a4352",lx=bx+bw/2,ly0=top+44;
+  s+='<g style="cursor:pointer" onclick="pinSel('+LED+')" role="button" tabindex="0" onkeydown="pinKey(event,'+LED+')" aria-label="GPIO '+LED+' LED RGB"><rect x="'+(lx-7)+'" y="'+(ly0-7)+'" width="14" height="14" rx="3" fill="#e8ecf0" stroke="'+(PSEL==LED?"#fff":cL)+'" stroke-width="'+(PSEL==LED?2.5:1.5)+'"/><circle cx="'+(lx-3)+'" cy="'+(ly0-2.5)+'" r="1.6" fill="#d64545"/><circle cx="'+(lx+3)+'" cy="'+(ly0-2.5)+'" r="1.6" fill="#2e9e5b"/><circle cx="'+(lx)+'" cy="'+(ly0+3)+'" r="1.6" fill="#3a7bd5"/><title>GPIO'+LED+' - LED RGB</title></g><text x="'+(lx)+'" y="'+(ly0+17)+'" font-size="7" text-anchor="middle" fill="'+ink+'">'+LED+'</text>'}
+  s+='<circle cx="'+(bx+bw/2+26)+'" cy="'+(top+44)+'" r="3" fill="#c0392b"/><text x="'+(bx+bw/2+26)+'" y="'+(top+61)+'" font-size="6" text-anchor="middle" fill="'+ink+'">BAT</text>';
+  s+='<rect x="'+(bx+30)+'" y="'+(top+110)+'" width="60" height="60" rx="4" fill="#2b3644" stroke="#46566a"/><path d="M'+(bx+60)+' '+(top+118)+'L'+(bx+82)+' '+(top+140)+'L'+(bx+60)+' '+(top+162)+'L'+(bx+38)+' '+(top+140)+'Z" fill="#3a4658" stroke="#5c6670"/><text x="'+(bx+60)+'" y="'+(top+143)+'" font-size="8" text-anchor="middle" fill="'+ink+'">'+esc((PBI&&PBI.chip)||"ESP32-S3")+'</text>';
+  s+='<rect x="'+(bx+14)+'" y="'+(top+bh-34)+'" width="92" height="24" rx="5" fill="#e58fb3"/><path d="M'+(bx+22)+' '+(top+bh-16)+'h8v-10h8v10h8v-10h8v10h8v-10h8v10h8v-10h8" fill="none" stroke="#a24a6f" stroke-width="1.4"/><text x="'+(bx+60)+'" y="'+(top+bh-38)+'" font-size="7" text-anchor="middle" fill="'+ink+'">'+esc(t("ANTENNA"))+'</text>'}
  else{
-  ["B+","B-","BOOST"].forEach(function(l,k){var x=bx+22+k*34;s+='<rect x="'+x+'" y="'+(top+bh-30)+'" width="28" height="16" rx="3" fill="'+(l=="B+"?"#d64545":l=="B-"?"#222":"#7a6a2a")+'" stroke="#555"/><text x="'+(x+14)+'" y="'+(top+bh-19)+'" font-size="7" text-anchor="middle" fill="#fff">'+l+'</text>'});
-  s+='<text x="'+(bx+bw/2)+'" y="'+(top+bh-36)+'" font-size="6.5" text-anchor="middle" fill="'+ink+'">'+esc(t("BOOST: solo con batteria oltre 500 mAh"))+'</text>'}
+  ["B+","B-","BOOST"].forEach(function(l,k){var x=bx+16+k*32;s+='<rect x="'+x+'" y="'+(top+10)+'" width="28" height="14" rx="3" fill="'+(l=="B+"?"#d64545":l=="B-"?"#222":"#7a6a2a")+'" stroke="#555"/><text x="'+(x+14)+'" y="'+(top+20)+'" font-size="7" text-anchor="middle" fill="#fff">'+l+'</text>'})}
  function col(g,x2,u){var nt=PNOTE[g];return g==PT.gpio?"#e0a020":x2.ok?(nt?"#9b6bd6":"#2e9e5b"):(x2.owner||u)?"#3fa7ff":nt?"#9b6bd6":"#3a4352"}
- function tip(g,x2,u){return"GPIO"+g+" - "+(PFN[g]||"")+(x2.why?" - "+x2.why:"")+(u?" - "+u.owner:"")+(PNOTE[g]?" - "+PNOTE[g]:"")+(pinWarnTxt(g)?" - "+pinWarnTxt(g):"")}
+ function tip(g,x2,u){return"GPIO"+g+" - "+(PFN[g]||"")+(x2.why?" - "+x2.why:"")+(u?" - "+u.owner+(u.sig?" ("+u.sig+")":""):"")+(PNOTE[g]?" - "+PNOTE[g]:"")+(pinWarnTxt(g)?" - "+pinWarnTxt(g):"")}
  function one(lab,x,y,side){var g=+lab,pw=PWR[lab];if(pw){s+='<circle cx="'+x+'" cy="'+y+'" r="11" fill="'+pw+'" stroke="#555"/><text x="'+x+'" y="'+(y+3)+'" font-size="7.5" text-anchor="middle" fill="#fff">'+lab+'</text>';return}
   var x2=pinInfo(g)||{g:g,ok:false},u=pinOwner(g),c=col(g,x2,u),nm=g==UA[0]?"TX":g==UA[1]?"RX":"";
-  s+='<g style="cursor:pointer" onclick="pinSel('+g+')" role="button" aria-label="GPIO '+g+'"><circle cx="'+x+'" cy="'+y+'" r="11" fill="'+c+'" stroke="'+(g==PSEL?"#fff":"#0b0f14")+'" stroke-width="'+(g==PSEL?2.5:1)+'"/><text x="'+x+'" y="'+(y+3)+'" font-size="8.5" font-weight="700" text-anchor="middle" fill="#fff">'+g+'</text><title>'+esc(tip(g,x2,u))+'</title></g>';
+  s+='<g style="cursor:pointer" onclick="pinSel('+g+')" role="button" tabindex="0" onkeydown="pinKey(event,'+g+')" aria-label="'+esc(tip(g,x2,u))+'"><circle cx="'+x+'" cy="'+y+'" r="11" fill="'+c+'" stroke="'+(g==PSEL?"#fff":"#0b0f14")+'" stroke-width="'+(g==PSEL?2.5:1)+'"/><text x="'+x+'" y="'+(y+3)+'" font-size="8.5" font-weight="700" text-anchor="middle" fill="#fff">'+g+'</text><title>'+esc(tip(g,x2,u))+'</title></g>';
   if(nm)s+='<text x="'+(x+(side<0?16:-16))+'" y="'+(y+3)+'" font-size="7" text-anchor="'+(side<0?"start":"end")+'" fill="'+ink+'">'+nm+'</text>';
-  var lab2=PNOTE[g]||(u?u.owner+(u.note?": "+u.note:""):(g==PT.gpio?t("in prova"):""));
-  if(lab2){s+='<path d="M'+(x+side*12)+' '+y+'H'+(x+side*24)+'" stroke="'+c+'" stroke-width="2"/><text x="'+(x+side*28)+'" y="'+(y+3)+'" font-size="8.5" text-anchor="'+(side<0?"end":"start")+'" fill="'+c+'">'+esc(lab2.length>18?lab2.slice(0,17)+"…":lab2)+'</text>'}}
+  if(plan&&plan.pinBlk[g]){var sg=plan.pinSig[g];if(sg)s+='<text x="'+(x+side*14)+'" y="'+(y-3)+'" font-size="7" text-anchor="'+(side<0?"end":"start")+'" fill="'+c+'">'+esc(sg)+'</text>'}}
  L.forEach(function(l,i){one(l,bx,top+40+i*st,-1)});R.forEach(function(l,i){one(l,bx+bw,top+40+i*st,1)});
  if(!fr){[[BL,bx+30],[BR,bx+bw-30]].forEach(function(cl){cl[0].forEach(function(g,i){var y=top+36+i*st*0.9,x2=pinInfo(g)||{g:g,ok:false},u=pinOwner(g),c=col(g,x2,u);
-  s+='<g style="cursor:pointer" onclick="pinSel('+g+')" role="button" aria-label="GPIO '+g+'"><rect x="'+(cl[1]-12)+'" y="'+(y-9)+'" width="24" height="18" rx="4" fill="'+c+'" stroke="'+(g==PSEL?"#fff":"#0b0f14")+'" stroke-width="'+(g==PSEL?2.5:1)+'"/><text x="'+cl[1]+'" y="'+(y+3)+'" font-size="8" font-weight="700" text-anchor="middle" fill="#fff">'+g+'</text><title>'+esc(tip(g,x2,u))+'</title></g>'})})}
- var ly=top+bh+26;[["#2e9e5b",t("provabile")],["#3fa7ff",t("in uso")],["#9b6bd6",t("collegato (tuo nome)")],["#3a4352",t("vietato")],["#e0a020",t("in prova")]].forEach(function(l,i){var lx=14+i*78;s+='<circle cx="'+lx+'" cy="'+ly+'" r="5" fill="'+l[0]+'"/><text x="'+(lx+9)+'" y="'+(ly+3)+'" font-size="8" fill="'+ink+'">'+esc(l[1])+'</text>'});
- if(fr)s+='<text x="'+(W/2)+'" y="'+(ly+20)+'" font-size="8" text-anchor="middle" fill="'+ink+'">'+esc(t("Gli altri pin (piazzole) sono sul retro: premi Retro."))+'</text>';
- e.setAttribute("viewBox","0 0 "+W+" "+(ly+30));e.innerHTML=s}
+  s+='<g style="cursor:pointer" onclick="pinSel('+g+')" role="button" tabindex="0" onkeydown="pinKey(event,'+g+')" aria-label="'+esc(tip(g,x2,u))+'"><rect x="'+(cl[1]-12)+'" y="'+(y-9)+'" width="24" height="18" rx="4" fill="'+c+'" stroke="'+(g==PSEL?"#fff":"#0b0f14")+'" stroke-width="'+(g==PSEL?2.5:1)+'"/><text x="'+cl[1]+'" y="'+(y+3)+'" font-size="8" font-weight="700" text-anchor="middle" fill="#fff">'+g+'</text><title>'+esc(tip(g,x2,u))+'</title></g>'})})}
+ if(plan)s+=pinSchemaSvg(plan);
+ var x0=plan?plan.xMin:0,Wd=plan?plan.w:W,ly=Math.max(top+bh,plan?plan.bottom:0)+26;[["#2e9e5b",t("provabile")],["#3fa7ff",t("in uso")],["#9b6bd6",t("collegato (tuo nome)")],["#3a4352",t("vietato")],["#e0a020",t("in prova")]].reduce(function(lx,l){s+='<circle cx="'+lx+'" cy="'+ly+'" r="5" fill="'+l[0]+'"/><text x="'+(lx+9)+'" y="'+(ly+3)+'" font-size="8" fill="'+ink+'">'+esc(l[1])+'</text>';return lx+23+l[1].length*4.4},x0+14);
+ if(!fr){var bt=t("Ponticello BOOST: la corrente di carica passa da 100 a 300 mA. Solo con una batteria oltre 500 mAh."),bk=bt.indexOf(". ")+1,bw2=bk>0?[bt.slice(0,bk),bt.slice(bk)]:[bt];bw2.forEach(function(r,i){s+='<text x="'+(x0+Wd/2)+'" y="'+(ly+20+i*11)+'" font-size="8" text-anchor="middle" fill="#d9a521">'+esc(r.trim())+'</text>'})}
+ if(plan)s+='<text x="'+(x0+Wd/2)+'" y="'+(ly+34)+'" font-size="8" text-anchor="middle" fill="'+ink+'">'+esc(t("Filo tratteggiato: dato mancante, da verificare."))+'</text>';
+ e.style.maxWidth=plan?"780px":"520px";e.style.minWidth=plan?"640px":"";
+ e.setAttribute("viewBox",x0+" 0 "+Wd+" "+(ly+(plan?44:fr?30:42)));e.innerHTML=s}
 function pinInv(){var h="<tr><th>GPIO</th><th>"+esc(t("Posizione"))+"</th><th>"+esc(t("Funzioni"))+"</th><th>"+esc(t("Stato"))+"</th><th>"+esc(t("Collegato a"))+"</th></tr>",gs=PM.map(function(x){return x.g}).sort(function(a,b){return a-b});
  gs.forEach(function(g){var x=pinInfo(g),u=pinOwner(g),st=u?u.owner:(x.ok?t("libero"):(x.why||t("vietato"))),w=pinWarnTxt(g);
   h+="<tr><td><b>"+g+"</b></td><td>"+esc(pinPos(g))+"</td><td>"+esc(PFN[g]||"")+(w?'<div class="fhint">'+esc(w)+'</div>':"")+"</td><td>"+esc(st)+"</td><td>"+(ROLE>=2?'<input maxlength="24" value="'+esc(PNOTE[g]||"")+'" aria-label="GPIO '+g+'" onchange="pinNote('+g+',this)" style="min-width:120px">':esc(PNOTE[g]||""))+"</td></tr>"});
  $("pininv").innerHTML=h}
 function pinNote(g,e){post("/api/pinnotes",{g:g,name:e.value}).then(function(r){return r.json()}).then(function(j){if(j.ok===false){msg("pinvm",j.err,false);return}PNOTE[g]=e.value.trim();if(!PNOTE[g])delete PNOTE[g];msg("pinvm",t("Salvato"),true);drawPins()}).catch(function(){})}
-function pinSvgDl(){var x='<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+$("pinsvg").getAttribute("viewBox")+'" font-family="Arial,sans-serif"><rect width="100%" height="100%" fill="#10151c"/>'+$("pinsvg").innerHTML+'</svg>';
+function pinSvgDl(){var x='<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+$("pinsvg").getAttribute("viewBox")+'" font-family="Arial,sans-serif"><rect x="-1000" y="-1000" width="4000" height="4000" fill="'+(pinInk()=="#566676"?"#ffffff":"#10151c")+'"/>'+$("pinsvg").innerHTML+'</svg>';
  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([x],{type:"image/svg+xml"}));a.download="vesevos-pin.svg";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)}
 function pinSel(g){PSEL=g;drawPins();pinPanel()}
 function pinPanel(){var e=$("pinpanel"),h="";
  h+='<label for="pn_g">'+esc(t("Altro GPIO"))+'</label><input type="number" id="pn_g" min="0" max="'+brdMax()+'" value="'+(PSEL<0?"":PSEL)+'" style="width:90px" onchange="pinSel(parseInt(this.value))"> ';
  var x=pinInfo(PSEL);
  if(PSEL<0){e.innerHTML=h;return}
- h+='<h3 style="margin-top:10px">GPIO'+PSEL+'</h3>';if(PFN[PSEL])h+='<div class="fhint">'+esc(PFN[PSEL])+(pinWarnTxt(PSEL)?" - "+esc(pinWarnTxt(PSEL)):"")+'</div>';
+ h+='<h3 style="margin-top:10px">GPIO'+PSEL+'</h3>'+pinWho(PSEL);if(PFN[PSEL])h+='<div class="fhint">'+esc(PFN[PSEL])+(pinWarnTxt(PSEL)?" - "+esc(pinWarnTxt(PSEL)):"")+'</div>';
  if(PNOTE[PSEL])h+='<div class="law">'+esc(tf("Segnato come collegato a: {0}. Una prova puo disturbare il circuito.",PNOTE[PSEL]))+'</div>';
  if(!x){h+='<div class="msg ko">'+esc(t("Pin inesistente su questa scheda"))+'</div>'}
  else if(!x.ok&&PSEL!=PT.gpio){h+='<div class="msg ko">'+esc(t("Non provabile:"))+" "+esc(x.why)+'</div>'}
@@ -2175,7 +2269,7 @@ function langPop(e){e.stopPropagation();var m=$("lpop");if(!m.classList.contains
 document.addEventListener("click",function(e){var m=$("lpop");if(m&&!m.classList.contains("hide")&&!e.target.closest("#lpop")){m.className="pop hide";if(LANGB)LANGB.setAttribute("aria-expanded","false")}});
 
 /* ===== navigazione con ruoli ===== */
-var TMIN={dmgr:1,btn:1,usb:1,temp:1,mem:1,cpu:1,rad:1,selftest:2,stat:1,power:1,cert:1,radio:1,ntp:1,dhcp:1,dns:1,mdns:1,ble:1,ap:1,http:1,wifi:1,wps:2,mqtt:1,mesh:1,pin:1,io:1,led:1,task:1,file:1,ora:1,loc:1,auto:1,boot:1,wd:1,shell:1,audit:1,https:1,users:2,fw:2,script:2,app:1,conf:2};
+var TMIN={dmgr:1,btn:1,usb:1,temp:1,mem:1,cpu:1,rad:1,selftest:2,stat:1,power:1,cert:1,radio:1,ntp:1,dhcp:1,dns:1,mdns:1,ap:1,http:1,wifi:1,wps:2,mqtt:1,mesh:1,pin:1,io:1,led:1,task:1,file:1,ora:1,loc:1,auto:1,boot:1,wd:1,shell:1,audit:1,https:1,users:2,fw:2,script:2,app:1,drv:2,func:1,conf:2};
 function canSee(id){if(AUTH&&AUTH.pk&&AUTH.pk[id]===0)return false;return ROLE>=(TMIN[id]||0)}
 function gTabs(g){return GMAP[g].filter(canSee)}
 function buildNav(){var h='<svg class="i slogo" style="stroke:url(#vg)"><use href="#i-chipn"/></svg>';
@@ -2192,11 +2286,127 @@ function show(id){if(id=="temp")id="cpu";if(!canSee(id))id="sum";cur=id;var g=gO
   h+='<button class="'+(k==id?"on":"")+'" onclick="show(\''+k+'\')">'+esc(t(x[1]))+'</button>'})}
  $("gsub").innerHTML=h;$("gsub").className="sub gsub"+(h?"":" hide");$("alerts").className="alerts hide";
  if(id=="dmgr")dmLoad();if(id!="wps")clearTimeout(WP.tm);if(id=="wps")wpsLoad();if(id!="io")ioStop();if(id=="io")ioLoad();if(["btn","usb","mem","rad"].indexOf(id)>=0)dvRows(id);if(id!="cpu")clearInterval(CPU.tm);if(id=="cpu")cpuLoad();if(id=="btn")btnLoad();if(id=="shell")cpToggle(true);if(id!="auto"){clearInterval(RU.tm)}if(id=="auto")rLoad();if(id=="boot")bLoad();if(id!="script")scTimerStop();if(id!="app")apTimerStop();if(id=="script")scLoad();if(id=="app")apLoad();if(id!="task")clearInterval(TK.tm);if(id=="task")loadTasks();if(id=="pin")loadPins();if(id=="loc")loadLangs();if(id=="log"){lgInit();loadLog();lgAuto()}else clearInterval(LG.tm);if(id=="wifi")fillNet();if(id=="led")fillLed();if(id=="ora")loadTime();if(id=="file")fList(fp);
- if(id=="sec")fillSec();if(id=="sum"){homeDraw()}if(id=="mqtt")mqLoad();if(id=="mesh")msLoad();if(id=="loc")lcLoad();if(id=="wd")wdLoad();if(id=="users")usLoad();if(id=="fw")fwLoad();if(id=="https"){tlsLoad();svcLoad()}if(id=="ap"){fillNet();svcLoad()}if(id=="http"||id=="dhcp"||id=="dns"||id=="mdns")svcLoad();if(id=="ntp")loadTime();if(id=="mfa")mfLoad();if(id!="stat")clearInterval(STT);if(id=="stat"){stLoad();clearInterval(STT);STT=setInterval(stLoad,5000)}if(id=="power")pwLoad();if(id=="selftest")stlPoll();if(id=="cert")tlsLoad();if(id=="ble"&&ROLE==2){bleLoad();clearInterval(BLT);BLT=setInterval(function(){if(cur!="ble")clearInterval(BLT);else bleLoad()},3000)}if(id=="radio")lcLoad();if(id=="audit")auLoad();if(id=="legal")lgLoad();
+ if(id=="drv")drvLoad();if(id=="func")fnLoad();if(id=="sec")fillSec();if(id=="sum"){homeDraw()}if(id=="mqtt")mqLoad();if(id=="mesh")msLoad();if(id=="loc")lcLoad();if(id=="wd")wdLoad();if(id=="users")usLoad();if(id=="fw")fwLoad();if(id=="https"){tlsLoad();svcLoad()}if(id=="ap"){fillNet();svcLoad()}if(id=="http"||id=="dhcp"||id=="dns"||id=="mdns")svcLoad();if(id=="ntp")loadTime();if(id=="mfa")mfLoad();if(id!="stat")clearInterval(STT);if(id=="stat"){stLoad();clearInterval(STT);STT=setInterval(stLoad,5000)}if(id=="power")pwLoad();if(id=="selftest")stlPoll();if(id=="cert")tlsLoad();if(id=="radio")lcLoad();if(id=="audit")auLoad();if(id=="legal")lgLoad();
  if(id=="help"&&location.hash!="#aiuto")try{history.replaceState(null,"","#aiuto")}catch(e){}if(id!="help"&&location.hash=="#aiuto")try{history.replaceState(null,"",location.pathname)}catch(e){}}
 window.addEventListener("hashchange",function(){if(location.hash=="#aiuto"&&loggedIn())show("help")});
 
 
+/* Pannello Pin come schema elettrico (1.8.14). Sul fronte, a lato della scheda, un blocco per ogni periferica con
+   icona, nome, segnali e alimentazione; fili colorati dai pin della scheda ai pin del blocco. I dati: /api/pins (chi usa il
+   pin e con quale segnale), /api/io, /api/mods e /api/vde (titolo, icona, alimentazione). Dove un dato manca il filo
+   e tratteggiato ("da verificare"): niente viene inventato. */
+var PDEV={io:{io:[]},mods:{list:[]},vde:{list:[]}},PBLK=[];
+var PCOL=["#3fa7ff","#2ec4b6","#f4a261","#c77dff","#ff6b9d","#9ad65b"];
+var PWCOL={"3V3":"#e08a2c","5V":"#d64545","GND":"#8b98a8"};
+var PBW=186,PZONE=104,PROW=17,PHEAD=44;   // larghezza del blocco, spazio dei fili, altezza di una riga e dell'intestazione
+var PGEN={rele:'<rect x="3" y="7" width="18" height="10" rx="2"/><path d="M7 12h3l2-3 2 6 2-3h1"/>',led:'<circle cx="12" cy="10" r="5"/><path d="M9 17h6M10 20h4"/>',
+ pin:'<circle cx="12" cy="12" r="3"/><path d="M12 3v6M12 15v6"/>',ingresso:'<path d="M3 12h10M9 8l4 4-4 4"/><rect x="15" y="6" width="6" height="12"/>',
+ analogico:'<path d="M3 16c3-8 5-8 8 0s5 8 10-4"/>',i2c:'<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3"/>',
+ sd:'<path d="M7 3h8l3 3v15H7z"/><path d="M10 3v4M13 3v4"/>',altro:'<path d="M5 6h14M5 12h14M5 18h9"/>'};
+function pinInk(){return document.documentElement.getAttribute("data-theme")=="light"?"#566676":"#8b98a8"}
+function pinClsName(c){return c=="rele"?t("Rele"):c=="led"?t("LED"):c=="pin"?t("Uscita"):c=="ingresso"?t("Ingresso"):c=="analogico"?t("Ingresso analogico"):c=="i2c"?t("Sensore I2C"):c=="sd"?t("Lettore microSD"):c}
+function pinDevLoad(){if(ROLE<1)return;
+ var get=function(u,k,v){return api(u).then(function(r){return r.json()}).then(function(j){if(j&&!j.err)PDEV[k]=j}).catch(function(){PDEV[k]=v})};
+ var p=[get("/api/io","io",{io:[]}),get("/api/mods","mods",{list:[]})];
+ if(AUTH&&AUTH.elf)p.push(get("/api/vde","vde",{list:[]}));
+ Promise.all(p).then(function(){if(cur=="pin")drawPins()})}
+function pinFind(a,k,v){for(var i=0;i<a.length;i++)if(a[i][k]==v)return a[i];return null}
+function pinPwrKey(p){return p=="3V3"||p=="5V"?p:""}
+/* titolo, icona e alimentazione del blocco: prima il driver ELF installato, poi la scheda modulo della stessa classe */
+function pinBlockInfo(b){
+ var v=pinFind(PDEV.vde.list||[],"n",b.name),d=pinFind(PDEV.io.io||[],"n",b.name);
+ if(v&&v.i){b.kind="vde";b.title=v.t;b.icon=v.ic;b.power=v.pw;b.warn=v.w;b.tab="drv";b.sigs=v.s||[];
+  b.pins.forEach(function(k){var i=(v.p||[]).indexOf(k.g);if(i>=0&&v.s&&v.s[i])k.sig=v.s[i]});return}
+ if(d){b.kind="io";b.cls=d.c;b.tab="io";
+  var m=null,ms=(PDEV.mods.list||[]).filter(function(x){return x.ok&&x.c==d.c});
+  if(d.c=="sd"){m=pinFind(PDEV.vde.list||[],"b","sd");if(m&&!m.i)m=null;if(m){b.title=m.t;b.icon=m.ic;b.power=m.pw;b.warn=m.w;return}}
+  // il legame periferica-scheda non e salvato: si usa solo quando e certo (driver I2C uguale, o un'unica scheda microSD)
+  m=d.c=="i2c"&&d.d?pinFind(ms,"drv",d.d):d.c=="sd"&&ms.length==1?ms[0]:null;
+  b.title=m?m.t:pinClsName(d.c);b.icon=m?m.icon:"";b.power=m?m.p:"";b.warn=m?m.w:"";return}
+ b.kind="altro";b.title=b.note;b.tab=b.name=="Automazioni"?"auto":""}
+function pinBlocks(){
+ var by={},ord=[];
+ PUSE.forEach(function(u){if(u.fixed||!u.owner||u.owner=="TEST")return;
+  if(!by[u.owner]){by[u.owner]={name:u.owner,note:u.note,pins:[]};ord.push(u.owner)}
+  by[u.owner].pins.push({g:u.gpio,sig:u.sig||""})});
+ return ord.map(function(n,i){var b=by[n];pinBlockInfo(b);b.col=PCOL[i%PCOL.length];return b})}
+/* icona del blocco come immagine (nessuno script): quella del driver, o una generica per classe */
+function pinIconUri(b){var s=b.icon;
+ if(!s){s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#2c6fbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+(PGEN[b.cls]||PGEN.altro)+'</svg>'}
+ else if(s.indexOf("xmlns")<0)s=s.replace("<svg",'<svg xmlns="http://www.w3.org/2000/svg"');
+ return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(s)}
+/* Dove stanno i blocchi e i fili. L e R sono i pin del fronte (sinistra e destra), top e st la riga del primo pin e il passo. */
+function pinSchemaPlan(L,R,top,st,bw){
+ var side=function(l){return L.indexOf(l)>=0?-1:R.indexOf(l)>=0?1:0},
+  yOf=function(l){var i=L.indexOf(l);if(i<0)i=R.indexOf(l);return i<0?null:top+40+i*st},P={blocks:[],pinBlk:{},pinSig:{}},hasL=false,hasR=false;
+ pinBlocks().forEach(function(b){
+  var rows=[],cnt=[0,0];
+  b.pins.forEach(function(k){var l=String(k.g),sd=side(l);if(!sd)return;
+   rows.push({sig:k.sig,g:k.g,ps:sd,py:yOf(l),color:b.col});cnt[sd<0?0:1]++});
+  if(!rows.length)return;
+  var pk=pinPwrKey(b.power);
+  if(pk){[[pk,"VCC",pk],["GND","GND","GND"]].forEach(function(w){var sd=side(w[0]);if(sd)rows.push({sig:w[1],ps:sd,py:yOf(w[0]),color:PWCOL[w[2]],pwr:w[2]})})}
+  rows.sort(function(a,c){return a.py-c.py});
+  var un=(b.sigs||[]).slice(b.pins.length);   // segnali del driver senza pin
+  b.note=pk?"":(b.power&&b.power!="-"?tf("Alimentazione {0}: esterna",b.power):t("Alimentazione: da verificare"));
+  b.rows=rows;b.un=un;b.h=PHEAD+(rows.length+un.length+(b.note?1:0))*PROW+8;
+  b.side=cnt[0]>cnt[1]?-1:1;
+  b.my=rows.reduce(function(a,r){return a+r.py},0)/rows.length;
+  if(b.side<0)hasL=true;else hasR=true;
+  b.pins.forEach(function(k){P.pinBlk[k.g]=b;P.pinSig[k.g]=k.sig});P.blocks.push(b)});
+ if(!P.blocks.length)return null;
+ var bx=hasL?4+PBW+PZONE+11:66,rx=bx+bw+11+PZONE;
+ [-1,1].forEach(function(sd){var y=8;
+  P.blocks.filter(function(b){return b.side==sd}).sort(function(a,c){return a.my-c.my}).forEach(function(b){
+   b.x=sd<0?4:rx;b.y=Math.max(y,b.my-b.h/2);y=b.y+b.h+10;P.bottom=Math.max(P.bottom||0,b.y+b.h)})});
+ P.bx=bx;P.xMin=0;P.w=Math.max(hasR?rx+PBW+4:bx+bw+130,440);
+ pinWires(P,bx,bw);return P}
+/* fili: un tratto che esce dal pin, sale o scende lungo una corsia propria fino alla riga del blocco. Le corsie si
+   assegnano in modo che i fili non si incrocino; se il blocco sta dall'altra parte della scheda il filo passa sopra. */
+function pinWires(P,bx,bw){var W=[],yc=0;
+ P.blocks.forEach(function(b){var nb=0;b.rows.forEach(function(r,i){
+  r.ry=b.y+PHEAD+i*PROW+PROW/2;r.b=b;r.px=r.ps<0?bx:bx+bw;r.cross=r.ps!=b.side;
+  r.ex=b.side<0?b.x+PBW:b.x;
+  if(r.cross){r.yc=8+(yc++)*6;r.dx=r.ex-b.side*(10+(nb++)*6)}
+  W.push(r)})});
+ [-1,1].forEach(function(sd){var S=W.filter(function(r){return r.ps==sd&&(r.cross||Math.abs(r.ry-r.py)>=2)}),
+  dn=S.filter(function(r){return !r.cross&&r.ry>r.py}).sort(function(a,c){return c.py-a.py}),
+  up=S.filter(function(r){return r.cross||r.ry<r.py}).sort(function(a,c){return a.py-c.py}),n=0;
+  dn.concat(up).forEach(function(r){r.lx=r.px+sd*(21+(n++)*7)})});
+ W.forEach(function(r){var x0=r.px+r.ps*11,d;
+  if(r.cross)d="M"+x0+" "+r.py+"H"+r.lx+"V"+r.yc+"H"+r.dx+"V"+r.ry+"H"+r.ex;
+  else if(r.lx==null)d="M"+x0+" "+r.py+"L"+r.ex+" "+r.ry;
+  else d="M"+x0+" "+r.py+"H"+r.lx+"V"+r.ry+"H"+r.ex;
+  r.d=d});
+ P.wires=W}
+function pinSchemaSvg(P){var s="",ink=pinInk();PBLK=P.blocks;
+ P.wires.forEach(function(r){s+='<path d="'+r.d+'" fill="none" stroke="'+r.color+'" stroke-width="1.8"/>'});
+ P.blocks.forEach(function(b,bi){var rs=[],x=b.x,y=b.y;
+  b.rows.forEach(function(r){rs.push(r.sig+(r.pwr?"":" GPIO"+r.g))});
+  var lab=tf("Periferica {0}: {1}. Pin: {2}. Premi per aprire la pagina.",b.name,b.title||"",rs.join(", "));
+  s+='<g class="pblk" tabindex="0" role="link" aria-label="'+esc(lab)+'" style="cursor:pointer" onclick="pinGoBlk('+bi+')" onkeydown="if(event.key==\'Enter\'||event.key==\' \'){event.preventDefault();pinGoBlk('+bi+')}">';
+  s+='<title>'+esc(lab)+'</title><rect x="'+x+'" y="'+y+'" width="'+PBW+'" height="'+b.h+'" rx="9" fill="#1f2a37" stroke="'+b.col+'" stroke-width="1.6"/>';
+  s+='<rect x="'+(x+8)+'" y="'+(y+7)+'" width="30" height="30" rx="7" fill="#e9eef3"/><image href="'+pinIconUri(b)+'" x="'+(x+10)+'" y="'+(y+9)+'" width="26" height="26"/>';
+  s+='<text x="'+(x+46)+'" y="'+(y+21)+'" font-size="11" font-weight="700" fill="#e6edf3">'+esc(b.name)+'</text>';
+  s+='<text x="'+(x+46)+'" y="'+(y+34)+'" font-size="8.5" fill="#aab6c4">'+esc((b.title||"").length>27?b.title.slice(0,26)+"…":b.title||"")+'</text>';
+  b.rows.forEach(function(r){var left=b.side<0,ex=left?x+PBW:x,tx=left?x+PBW-12:x+12;
+   s+='<circle cx="'+ex+'" cy="'+r.ry+'" r="3.5" fill="'+r.color+'"/>';
+   s+='<text x="'+tx+'" y="'+(r.ry+3)+'" font-size="9" font-weight="700" text-anchor="'+(left?"end":"start")+'" fill="#e6edf3">'+esc(r.sig)+'</text>';
+   s+='<text x="'+(left?x+12:x+PBW-12)+'" y="'+(r.ry+3)+'" font-size="8" text-anchor="'+(left?"start":"end")+'" fill="#aab6c4">'+(r.pwr?esc(r.pwr=="GND"?"GND":b.power):"GPIO"+r.g)+'</text>'});
+  var k=b.rows.length;
+  b.un.forEach(function(sg){var ry=y+PHEAD+k*PROW+PROW/2,left=b.side<0,ex=left?x+PBW:x;k++;
+   s+='<path d="M'+ex+' '+ry+'h'+(left?-14:14)+'" stroke="'+b.col+'" stroke-dasharray="3 2" fill="none"/><text x="'+(left?x+PBW-20:x+20)+'" y="'+(ry+3)+'" font-size="9" text-anchor="'+(left?"end":"start")+'" fill="#e6edf3">'+esc(sg)+'</text><text x="'+(left?x+12:x+PBW-12)+'" y="'+(ry+3)+'" font-size="8" text-anchor="'+(left?"start":"end")+'" fill="#aab6c4">'+esc(t("non assegnato"))+'</text>'});
+  if(b.note){var ry=y+PHEAD+k*PROW+PROW/2;
+   s+='<path d="M'+x+' '+ry+'h12" stroke="'+PWCOL["3V3"]+'" stroke-dasharray="3 2" fill="none"/><text x="'+(x+18)+'" y="'+(ry+3)+'" font-size="8.5" fill="#f0c27a">'+esc(b.note)+'</text>'}
+  s+='</g>'});
+ return s}
+function pinGoBlk(i){var b=PBLK[i];if(b&&b.tab&&canSee(b.tab))show(b.tab)}
+function pinKey(e,g){if(e.key=="Enter"||e.key==" "){e.preventDefault();pinSel(g)}}
+/* nel pannello del pin: chi lo usa e con quale segnale */
+function pinWho(g){var u=pinOwner(g);if(!u||u.fixed)return"";
+ var h='<div class="fhint">'+esc(tf("Usato da: {0}{1}",u.owner,u.sig?" ("+u.sig+")":""))+'</div>';
+ for(var i=0;i<PBLK.length;i++)if(PBLK[i].name==u.owner&&PBLK[i].tab&&canSee(PBLK[i].tab))h+='<button class="btn gray" onclick="pinGoBlk('+i+')">'+esc(t("Apri la periferica"))+'</button>';
+ return h}
 /* ===== periferiche e Device Manager (API /api/dev) ===== */
 var DV=[],DVT={btn:"boot"};
 function dvList(){return api("/api/dev").then(function(r){return r.json()}).then(function(j){DV=j.dev||[]})}
@@ -2236,11 +2446,11 @@ function ioNum(x,dg){return x.toLocaleString(undefined,{minimumFractionDigits:dg
 function ioI2cVal(d){return d.ok?ioNum(d.v/100,1)+" °C · "+ioNum(d.p/100,1)+" hPa":t("non risponde")}
 function ioPins(d){return d.c=="i2c"?"SDA "+d.g+" · SCL "+d.g2:d.c=="sd"?"CS "+d.g+" · MOSI "+d.g2+" · SCK "+d.g3+" · MISO "+d.g4:String(d.g)}
 function ioCanSw(d){return d.out&&(ROLE>=2||(ROLE>=1&&d.c!="rele"))}
-function ioLoad(){var sel=IOS.sel;$("io_new").className=ROLE>=2?"card":"card hide";$("io_mods").className=ROLE>=2?"card":"card hide";
+function ioLoad(){var sel=IOS.sel;$("io_new").className=ROLE>=2?"card":"card hide";
  api("/api/io").then(function(r){return r.json()}).then(function(j){IOS.list=j.io||[];IOS.sdp=j.sdp||[];
   if(sel&&!ioFind(sel)){ioClose();return}
   if(sel){ioDetDraw();return}
-  $("io_main").className="";$("io_det").className="card hide";ioStop();ioListDraw();if(ROLE>=2)ioModLoad();sdLoad()}).catch(function(){})}
+  $("io_main").className="";$("io_det").className="card hide";ioStop();ioListDraw();}).catch(function(){})}
 function ioListDraw(){var L=IOS.list,h="";
  if(!L.length){$("io_tab").innerHTML='<tr><td class="fhint">'+esc(t("Nessuna voce"))+'</td></tr>';return}
  h='<tr><th>'+esc(t("Nome"))+'</th><th>'+esc(t("Classe"))+'</th><th>GPIO</th><th>'+esc(t("Valore"))+'</th><th></th></tr>';
@@ -2285,33 +2495,31 @@ function ioDetLive(){var d=ioFind(IOS.sel),e=$("iod_v");if(!d||!e)return;
  else if(d.c=="analogico")e.innerHTML='<b>'+d.v+'</b> <span class="fhint">/ 4095</span><div class="bar" style="margin-top:4px"><i style="width:'+Math.round(d.v*100/4095)+'%"></i></div>';
  else e.innerHTML='<span class="pill dvp '+(d.v?"v":"")+'">'+esc(d.v?t("acceso"):t("spento"))+'</span>'}
 function ioAct(a,v){post("/api/dev/act",{id:IOS.sel,a:a,arg:v}).then(function(r){return r.json()}).then(function(j){if(j.ok===false)msg("iod_m",j.err,false);else msg("iod_m",t("Fatto"),true);ioPoll()}).catch(function(){})}
-/* --- schede modulo (.vdp) --- */
-function ioModLoad(){api("/api/mods").then(function(r){return r.json()}).then(function(j){var L=j.list||[],h="";
- if(!L.length){$("io_ml").innerHTML='<p class="fhint">'+esc(t("Nessuna scheda modulo. Caricane una con il pulsante qui sotto."))+'</p>';return}
- h='<table class="ftab">';
- L.forEach(function(x){h+='<tr><td><span class="scn">'+ioIco(x.ok?x.icon:"")+'<b>'+esc(x.ok?x.t:x.n)+'</b></span>';
-  if(x.ok){h+='<div class="fhint">'+esc(ioCn(x.c))+' x'+x.ns+' · '+esc(x.p=="-"?t("senza alimentazione"):x.p)+(x.l?' · '+esc(x.l):"")+'</div>';if(x.w)h+='<div class="fhint">'+esc(x.w)+'</div>'}
-  else h+='<div class="fhint" style="color:var(--kot)">'+esc(x.e||"")+'</div>';
-  h+='</td><td style="text-align:right;white-space:nowrap">'+(x.ok?'<button class="btn" onclick="ioModOpen(\''+x.n+'\')">'+esc(t("Installa"))+'</button> ':"")+'<button class="btn gray" onclick="ioModDel(\''+x.n+'\')">'+esc(t("Elimina"))+'</button></td></tr>'});
- $("io_ml").innerHTML=h+'</table>'}).catch(function(){})}
-function ioModOpen(n){api("/api/mod?name="+enc(n)).then(function(r){return r.json()}).then(function(j){if(!j.ok){msg("io_mm",j.err,false);return}
+/* --- driver vdb: l'elenco e il caricamento stanno nella pagina Driver (js_driver.js); qui il dialogo di installazione e l'eliminazione --- */
+function ioModOpen(n){api("/api/mod?name="+enc(n)).then(function(r){return r.json()}).then(function(j){if(!j.ok){msg("drvm",j.err,false);return}
   var b='';
   b+=modSchema(j);
   if(j.wiring){var sv=j.wiring;if(sv.indexOf("xmlns")<0)sv=sv.replace("<svg",'<svg xmlns="http://www.w3.org/2000/svg"');b+='<details style="margin-top:8px"><summary>'+esc(t("Disegno allegato al file"))+'</summary><img alt="'+esc(tf("Schema del modulo {0}",j.t))+'" style="width:100%;max-width:420px;background:#fff;border-radius:8px" src="data:image/svg+xml;charset=utf-8,'+enc(sv)+'"></details>'}
   if(j.p=="230V")b+='<p class="fhint" style="color:var(--kot)"><b>'+esc(t("Rete elettrica 230 V: serve un modulo a norma e un installatore. VesevOS comanda solo il segnale."))+'</b></p>';
   if(j.w)b+='<p class="fhint"><b>'+esc(j.w)+'</b></p>';
   if(!j.free)b+='<p class="fhint" style="color:var(--kot)">'+esc(t("Non ci sono abbastanza pin liberi per questo modulo"))+'</p>';
+  if(j.app)b+='<p class="fhint">'+esc(tf("Questo driver porta una app con pagina e codice. Permessi dell'app: {0}. La usa solo l'Admin.",j.u||"-"))+'</p>';
+  b+='<p class="fhint" style="margin-bottom:2px"><b>'+esc(t("Pin"))+'</b> '+esc(t("La scheda propone questi pin liberi. Puoi cambiarli: il sistema controlla che siano ammessi e non gia usati."))+'</p>';
+  j.sig.forEach(function(s,i){b+='<label for="io_pn'+i+'">'+esc(s)+'</label><input id="io_pn'+i+'" inputmode="numeric" maxlength="2" autocomplete="off" style="width:5em" value="'+(j.sug[i]!=null?j.sug[i]:"")+'">'});
   b+='<label for="io_pf">'+esc(t("Nome (facoltativo)"))+'</label><input id="io_pf" maxlength="9" autocomplete="off" spellcheck="false" autocapitalize="off">';
-  dlg({title:j.t,body:b,ok:t("Installa"),onOk:function(){if(!j.free)return t("Non ci sono abbastanza pin liberi per questo modulo");
-   return post("/api/mod/install",{name:n,prefix:dlgV("io_pf")}).then(function(r){return r.json()}).then(function(k){if(!k.ok)return k.err;
+  dlg({title:j.t,body:b,ok:t("Installa"),onOk:function(){var pn=j.sig.map(function(s,i){return dlgV("io_pn"+i)});
+   if(!pn.every(function(x){return /^[0-9]{1,2}$/.test(x)}))return t("Indica un pin per ogni segnale");
+   return post("/api/mod/install",{name:n,prefix:dlgV("io_pf"),pins:pn.join(",")}).then(function(r){return r.json()}).then(function(k){if(!k.ok)return k.err;
     var dv=k.devs||[],same=dv.length>1&&dv[0].n==dv[1].n;
-    msg("io_mm",t("Fatto")+": "+(same?dv[0].n+" ("+dv.map(function(d){return d.s+" = GPIO"+d.g}).join(", ")+")":dv.map(function(d){return d.n+" = GPIO"+d.g}).join(", ")),true);ioLoad();return""})}})}).catch(function(){})}
-function ioModUp(){var f=$("io_mf").files[0];if(!f)return;$("io_mf").value="";var n=f.name.replace(/\.(vdp|txt)$/i,"").toLowerCase();
- if(f.size>8192){msg("io_mm",t("File troppo grande (massimo 8 KB)"),false);return}
- f.text().then(function(x){return post("/api/mod/save",{name:n,text:x})}).then(function(r){return r.json()}).then(function(j){msg("io_mm",j.ok?t("Scheda caricata"):j.err,!!j.ok);if(j.ok)ioModLoad()}).catch(function(){})}
-function ioModDel(n){dlg({title:t("Eliminare?"),body:'<p style="margin:0">'+esc(tf("La scheda modulo {0} verra eliminata. Le periferiche gia create restano.",n))+'</p>',ok:t("Elimina"),danger:true,
- onOk:function(){return post("/api/mod/del",{n:n,name:n}).then(function(r){return r.json()}).then(function(j){if(j.ok){ioModLoad();return""}return j.err})}})}
+    msg("drvm",t("Fatto")+": "+(same?dv[0].n+" ("+dv.map(function(d){return d.s+" = GPIO"+d.g}).join(", ")+")":dv.map(function(d){return d.n+" = GPIO"+d.g}).join(", ")),true);ioLoad();return""})}})}).catch(function(){})}
+function ioModDel(n){dlg({title:t("Eliminare?"),body:'<p style="margin:0">'+esc(tf("Il driver {0} verra eliminato. Le periferiche gia create restano.",n))+'</p>',ok:t("Elimina"),danger:true,
+ onOk:function(){return post("/api/mod/del",{n:n,name:n}).then(function(r){return r.json()}).then(function(j){if(j.ok){drvLoad();return""}return j.err})}})}
 function ioSw(n,v){post("/api/dev/act",{id:n,a:"set",arg:v}).then(function(r){return r.json()}).then(function(j){if(j.ok===false)msg("io_m",j.err,false);ioLoad()}).catch(function(){})}
+/* funzioni possibili del pin scritto: la classe Analogico vale solo sui pin 1-10 (ADC1); le altre classi vanno su ogni pin ammesso.
+   Il controllo vero dei pin (vietati, usati, doppi) resta del firmware: qui si toglie solo cio che il pin non sa fare. */
+function ioPinFn(){var g=parseInt($("io_g").value),f=$("io_fn"),an=$("io_c").querySelector('option[value="analogico"]'),ok=!(g>0)||(g>=1&&g<=10);
+ an.disabled=!ok;if(!ok&&$("io_c").value=="analogico"){$("io_c").value="ingresso";ioClsChg()}
+ f.textContent=g>0&&typeof PFN!="undefined"&&PFN[g]?tf("Funzioni possibili: {0}",PFN[g].replace(/ /g,", ")):""}
 function ioClsChg(){var s=$("io_c").value=="sd";$("io_sdf").className=s?"":"hide";$("io_o").parentNode.className=s?"hide":"";
  if(s){var D=IOS.sdp,F=["io_g","io_sm","io_sk","io_si"];F.forEach(function(i,k){if(!$(i).value&&D[k]!=null)$(i).value=D[k]});if(!$("io_sf").value)$("io_sf").value=1000}}
 function ioAdd(){var g=$("io_g").value,sd=$("io_c").value=="sd",o=sd?"mosi="+$("io_sm").value+" sck="+$("io_sk").value+" miso="+$("io_si").value+" khz="+$("io_sf").value:$("io_o").value;post("/api/io/add",{cls:$("io_c").value,gpio:g,name:$("io_n").value,opt:o}).then(function(r){return r.json()}).then(function(j){
@@ -2431,11 +2639,6 @@ function msSave(){var k=$("ms_key").value.trim(),d={role:$("ms_role").value,auto
  post("/api/mesh",d).then(function(r){return r.json()}).then(function(j){msg("msm2",j.ok?t("Salvato"):j.err,j.ok);if(j.ok){MS.key=j.key;msPoll()}})}
 function msSend(c){var d={to:$("ms_to").value};if(c){d.cmd=$("ms_cmd").value.trim();if(!d.cmd){msg("msm3",t("Scrivi l'azione"),false);return}}else{d.text=$("ms_tx").value.trim();if(!d.text){msg("msm3",t("Scrivi il messaggio"),false);return}}
  post("/api/mesh/send",d).then(function(r){return r.json()}).then(function(j){msg("msm3",j.ok?t("Inviato"):j.err,j.ok);if(j.ok){$("ms_tx").value="";setTimeout(msPoll,1500)}})}
-var BLT=0;
-function bleLoad(){api("/api/ble").then(function(r){return r.json()}).then(bleDraw).catch(function(){})}
-function bleDraw(b){if(b.have)svcSt("ble",b.on);if(!b.have){$("blecard").innerHTML='<h3>'+esc(t("Bluetooth"))+'</h3><p class="fhint">'+esc(t("Bluetooth non incluso in questo firmware"))+'</p>';return}
- $("blest").innerHTML=b.on?'<div class="law">'+esc(b.lim?tf("Acceso per altri {0}. Nome: {2}. Codice di accoppiamento: {1}",durText(b.left),b.pin,b.name):tf("Acceso, senza limite di tempo. Nome: {1}. Codice di accoppiamento: {0}",b.pin,b.name))+(b.conn?" · "+esc(t("telefono collegato")):"")+'</div>':'<p class="fhint">'+esc(t("Spento"))+(b.last?" · "+esc(b.last):"")+'</p>'}
-function bleRun(a){return post("/api/ble",{a:a}).then(function(r){return r.json()}).then(function(j){if(j.ok===false){msg("blem",j.err,false);return}bleDraw(j);msg("blem",t("Fatto"),true)})}
 
 /* ===== Localizzazione ===== */
 var LOC={cc:"",r:null,mini:null};
@@ -2519,41 +2722,13 @@ function tlsRegen(){dlg({title:t("Creare un certificato nuovo?"),body:'<p style=
  onOk:function(){return post("/api/tls",{regen:1}).then(function(r){return r.json()}).then(function(j){if(j.ok!==false)tlsDraw(j);return j.ok===false?j.err:""})}})}
 function tlsUp(){post("/api/tls",{cert:$("tls_c").value.trim(),key:$("tls_k").value.trim()}).then(function(r){return r.json()}).then(function(j){if(j.ok===false){msg("tlsm2",j.err,false);return}$("tls_k").value="";tlsDraw(j);msg("tlsm2",t("Salvato: vale dal prossimo riavvio"),true)})}
 
-/* ===== scheda microSD (API /api/sd e /api/sd/act): riquadro nella scheda Periferiche ===== */
-function sdKb(k){return k>=1048576?(k/1048576).toFixed(1)+" GB":k>=1024?Math.round(k/1024)+" MB":k+" KB"}
-/* widget della Home: c'e solo se la periferica "sd" e in io.cfg. Scheda tolta o assente: resta, con l'icona sbarrata e i dati grigi */
-function widSd(d){var ok=d.s==1,on=ok?"":" off",nm=t("Scheda microSD"),
- st=ok?t("Scheda montata"):d.s==3?t("Scheda non presente"):d.s==4?t("Formato non supportato: serve FAT32"):t("Scheda non montata"),
- ic=ok?'<svg class="i" aria-hidden="true"><use href="#i-sd"/></svg>':'<svg class="i" role="img" aria-label="'+esc(t("Scheda microSD non presente"))+'"><title>'+esc(t("Scheda microSD non presente"))+'</title><use href="#i-sdx"/></svg>',
- sub=ok?esc(d.fs)+" · "+esc(tf("{0} liberi su {1}",sdKb(d.free),sdKb(d.cap)))+" · "+d.khz+" kHz":"-- · "+esc(tf("{0} liberi su {1}","0 KB","0 KB"))+" · "+d.khz+" kHz";
- return'<div class="wid wsd'+on+'" role="button" tabindex="0" onclick="show(\'io\')" onkeydown="if(event.key==\'Enter\')show(\'io\')" aria-label="'+esc(nm+": "+st)+'"><div class="wt">'+ic+esc(nm)+'</div><div class="wv">'+esc(st)+'</div><div class="ws">'+sub+'</div></div>'}
-function sdLoad(){var c=$("sd_card");if(!c)return;if(ROLE<1){c.className="card hide";return}
- api("/api/sd").then(function(r){if(r.status!=200){c.className="card hide";throw 0}return r.json()}).then(function(d){
-  if(!d.cfg){c.className="card hide";return}   /* nessuna periferica "sd" in io.cfg: il riquadro non si vede */
-  var R=d.rows||[],h='<table>',up=d.up==1,adm=ROLE>=2;
-  R.forEach(function(x){h+='<tr><td>'+esc(x[0])+'</td><td style="text-align:right"><b>'+esc(x[1])+'</b></td></tr>'});
-  $("sd_rows").innerHTML=h+'</table>';c.className="card";
-  $("sd_mnt").className=adm&&!up?"btn":"btn hide";$("sd_umt").className=adm&&up?"btn gray":"btn gray hide";
-  $("sd_tst").className=adm&&up?"btn gray":"btn gray hide";$("sd_lsb").className=up?"btn gray":"btn gray hide";
-  if(!up)$("sd_ls").innerHTML=""}).catch(function(){})}
-function sdAct(a,arg){var b=["sd_mnt","sd_umt","sd_tst","sd_lsb"];b.forEach(function(i){$(i).disabled=true});
- post("/api/sd/act",{a:a,arg:arg||""}).then(function(r){return r.json()}).then(function(j){
-  b.forEach(function(i){$(i).disabled=false});
-  if(j.ok===false){msg("sd_m",j.err,false);sdLoad();return}
-  if(a=="test")msg("sd_m",t("Prova riuscita")+": "+j.bytes+" B, "+t("scrittura")+" "+j.wms+" ms, "+t("lettura")+" "+j.rms+" ms",true);
-  else msg("sd_m",t("Fatto"),true);
-  sdLoad()}).catch(function(){b.forEach(function(i){$(i).disabled=false})})}
-function sdLs(p){post("/api/sd/act",{a:"ls",arg:p}).then(function(r){return r.json()}).then(function(j){
-  if(j.ok===false){msg("sd_m",j.err,false);return}
-  var L=j.list||[],h='<table class="ftab">';
-  if(j.dir!="/")h+='<tr><td><button class="btn gray" onclick="sdLs(\''+esc(j.dir.replace(/\/[^\/]*$/,"")||"/")+'\')">..</button></td><td></td></tr>';
-  L.forEach(function(x){var full=(j.dir=="/"?"":j.dir)+"/"+x.n;
-   if(x.x){h+='<tr><td><span class="fhint" title="'+esc(t("Nome non gestibile da qui (accenti, simboli o troppo lungo)"))+'">'+esc(x.n)+(x.d?"/":"")+' *</span></td><td style="text-align:right">'+(x.d?"":esc(sdKb(Math.ceil(x.s/1024))))+'</td></tr>';return}
-   h+='<tr><td>'+(x.d?'<button class="btn gray" onclick="sdLs(this.dataset.p)" data-p="'+esc(full)+'">'+esc(x.n)+'/</button>':esc(x.n))+'</td><td style="text-align:right">'+(x.d?"":esc(sdKb(Math.ceil(x.s/1024))))+'</td></tr>'});
-  if(!L.length)h+='<tr><td class="fhint">'+esc(t("Nessuna voce"))+'</td></tr>';
-  if(L.some(function(x){return x.x}))h+='<tr><td class="fhint" colspan="2">* '+esc(t("Nome non gestibile da qui (accenti, simboli o troppo lungo)"))+'</td></tr>';
-  if(j.more)h+='<tr><td class="fhint" colspan="2">'+esc(t("Ci sono altri file: l'elenco mostra solo i primi 32"))+'</td></tr>';
-  $("sd_ls").innerHTML='<p class="fhint">'+esc(j.dir)+'</p>'+h+'</table>'}).catch(function(){})}
+/* ===== widget della Home definiti dai DRIVER (la microSD e nel suo driver, non nella pagina) =====
+   Il firmware manda soli DATI: d = driver, t = titolo, a = testo alternativo, i = icona svg (gia controllata), st = ok|off, v = riga principale, s = riga secondaria.
+   Qui si disegna con esc(): i testi del driver non diventano mai codice. L'icona e un'immagine (nessuno script puo girare). */
+function widDrv(x){var ok=x.st=="ok",alt=x.a||x.t,
+ ic='<span class="wic'+(ok?"":" x")+'"'+(ok?' aria-hidden="true"':' role="img" aria-label="'+esc(alt)+'"')+'>'+apIco({ok:true,icon:x.i})+'</span>',
+ sub=x.s?'<div class="ws">'+esc(x.s)+'</div>':"";
+ return'<div class="wid wdrv'+(ok?"":" off")+'" role="button" tabindex="0" onclick="show(\'io\')" onkeydown="if(event.key==\'Enter\')show(\'io\')" aria-label="'+esc(x.t+": "+(x.v||""))+'"><div class="wt">'+ic+esc(x.t)+'</div><div class="wv">'+esc(x.v)+'</div>'+sub+'</div>'}
 /* ===== Servizi di rete: hotspot, HTTP, HTTPS, porte ===== */
 var SV={};
 function svcLoad(){return api("/api/svc").then(function(r){return r.json()}).then(svcDraw).catch(function(){})}
@@ -2580,7 +2755,6 @@ var SVT={ap:{set:svcSet("apOn","svm_ap")},dhcp:{set:svcSet("dhcpOn","svm_dhcp")}
  mesh:{set:function(v){return msRun(v?"start":"stop")},rs:function(){return msRun("restart")}},
  stat:{set:function(v){return stSet(v)}},
  ntp:{set:function(v){return saveTime(v)}},
- ble:{set:function(v){return bleRun(v?"start":"stop")},rs:function(){return bleRun("stop").then(function(){return bleRun("start")})}},
  power:{set:function(v){return pwSave(v)}},
  mfa:{set:function(v){return v?mfBegin():mfOff(-1)},cls:""}},SVS={};
 function svcSt(id,on,pend,run,n){SVS[id]={on:!!on,pend:!!pend,run:run===undefined?!!on:!!run,busy:"",n:n};svcCtl(id)}
@@ -2675,7 +2849,76 @@ function lgLoad(){loadLic();commonLoad().then(function(c){var h='<thead><tr><th>
  c.sbom.forEach(function(x){h+='<tr><td><a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(x.name)+'</a></td><td>'+esc(x.ver)+'</td><td>'+esc(x.lic)+'</td></tr>'});$("sbom").innerHTML=h+'</tbody>'});
  api("/api/region").then(function(r){return r.json()}).then(function(r){commonLoad().then(function(){var c=COMMON.by[r.country],g=regRule(c);
   $("lgradio").innerHTML='<p>'+esc(c?tf("Paese: {0}. Canali 1-{1}, potenza massima {2} dBm EIRP.",cName(c),r.ch,r.limit):t("Paese non scelto: la radio usa le regole piu prudenti (canali 1-11)"))+'</p>'+(g?'<p>'+esc(tf("Regole: {0}",g.rule))+'</p>':"")+'<p class="fhint">'+esc(t("Il firmware rispetta i limiti del paese scelto. La conformita del prodotto finito (marchi CE, UKCA, FCC...) e responsabilita di chi lo mette in commercio. Non e consulenza legale."))+'</p>'})}).catch(function(){})}
-
+/* ===== Programmi in corso e sottosistemi (pagina Task) + Funzionalita (Sistema) ===== */
+/* Sottosistemi: vdb (script, app e comandi dei driver) e vde (app e driver in codice nativo). L'interruttore ferma tutti i loro programmi. */
+var PRG={subs:[],progs:[],_k:""};
+function subHint(id){return id=="vdb"?t("Script, app e comandi dei driver."):t("App e driver in codice nativo.")}
+SVT.vdb={set:function(v){return subSet("vdb",v)}};
+SVT.vde={set:function(v){return subSet("vde",v)}};
+function subSet(id,v){return post("/api/sub",{id:id,on:v?1:0}).then(function(r){return r.json()}).then(function(j){if(j.ok===false)msg("tkm",j.err,false);else if(typeof tkPoll=="function")tkPoll()})}
+function progExt(k){return k=="s"?EXT.s:k=="e"?EXT.e:EXT.b}
+function progHow(p){return p.a?t("in corso"):p.h==1?t("fermato"):p.h==2?t("scaduto"):tf("finito, valore {0}",p.rc)}
+/* chiamata da tkPoll con la risposta di /api/tasklist: righe dei sottosistemi e dei programmi */
+function tkProgs(j){PRG.subs=j.subs||[];PRG.progs=j.progs||[];
+ var key=JSON.stringify([PRG.subs,PRG.progs,ROLE]),box=$("tksub"),pg=$("tkprog");if(!box||!pg)return;
+ if(PRG._k===key)return;PRG._k=key;
+ var h="";PRG.subs.forEach(function(s){h+='<div class="row"><span><b>'+esc(s.id=="vdb"?t("Sottosistema vdb"):t("Sottosistema vde"))+'</b><br><span class="fhint">'+esc(subHint(s.id)+" "+tf("In corso: {0}, memoria {1}.",s.n,fSize(s.m)))+'</span></span><span class="sc" id="sc_'+s.id+'"></span></div>'});
+ box.innerHTML=h;PRG.subs.forEach(function(s){svcSt(s.id,s.on,false,s.on)});
+ var p="";
+ if(!PRG.progs.length)p='<p class="fhint">'+esc(t("Nessun programma in esecuzione."))+'</p>';
+ else{p='<table class="ftab"><thead><tr><th>'+esc(t("Nome"))+'</th><th>'+esc(t("Stato"))+'</th><th>'+esc(t("Secondi"))+'</th><th>'+esc(t("Memoria"))+'</th><th></th></tr></thead><tbody>';
+  PRG.progs.forEach(function(x){var oq="'"+x.k+"','"+x.n+"'";
+   p+='<tr><td><b>'+esc(x.n)+'</b> <span class="pill">'+esc(progExt(x.k).slice(1))+'</span>'+(x.u?'<div class="fhint">'+esc(tf("Permessi: {0}",x.u.replace(/ /g,", ")))+'</div>':"")+'</td><td>'+esc(progHow(x))+'</td><td>'+x.s+'</td><td>'+esc(fSize(x.m))+'</td><td class="fac tkb">'+
+    (ROLE==2?'<span class="svi">'+sibB("sm st","i-sst",tf("Ferma {0}",x.n),false,!x.a,x.a?"progAct('stop',"+oq+")":"")+sibB("sm rs","i-srs",tf("Riavvia {0}",x.n),false,false,"progAct('restart',"+oq+")")+'</span>':"")+'</td></tr>'});
+  p+='</tbody></table>'}
+ pg.innerHTML=p}
+function progAct(a,k,n){post("/api/progs",{act:a,k:k,name:n}).then(function(r){return r.json()}).then(function(j){msg("tkm",j.ok===false?j.err:(a=="stop"?tf("Programma '{0}' fermato",n):tf("Programma '{0}' avviato",n)),j.ok!==false);PRG._k="";setTimeout(function(){if(typeof tkPoll=="function")tkPoll()},400)}).catch(function(){})}
+/* ===== Funzionalita: i gruppi di funzioni che l'utente puo togliere a tutti i programmi ===== */
+var FN={list:[]};
+function fnRole(r){return r>=2?t("Admin"):r==1?t("Operatore"):t("Tutti")}
+function fnLoad(){api("/api/func").then(function(r){return r.json()}).then(function(j){FN.list=j.list||[];fnDraw()}).catch(function(){})}
+function fnDraw(){var h="";
+ FN.list.forEach(function(f){var lab=esc(f.id),dis=ROLE==2?"":" disabled";
+  h+='<div class="row"><span><b>'+lab+'</b><br><span class="fhint">'+esc(f.d)+'</span><br><span class="fhint">'+esc(tf("Lettura: {0}. Scrittura e comandi: {1}. In uso ora: {2}.",fnRole(f.rr),fnRole(f.rw),f.u))+'</span></span>'+
+   '<button type="button" class="sw1'+(f.on?" on":"")+'" role="switch" aria-checked="'+(f.on?"true":"false")+'" aria-label="'+esc(tf("Funzionalita {0}",f.id))+'"'+dis+' onclick="fnSet(\''+f.id+'\','+(f.on?0:1)+')"></button></div>'});
+ $("funclist").innerHTML=h}
+function fnSet(id,on){post("/api/func",{id:id,on:on}).then(function(r){return r.json()}).then(function(j){if(j.ok===false){msg("funcm",j.err,false);return}FN.list=j.list||FN.list;fnDraw();msg("funcm",on?tf("Funzionalita {0} concessa",id):tf("Funzionalita {0} tolta",id),true)}).catch(function(){})}
+/* ===== Driver delle periferiche: UN solo elenco, UN solo Carica, le stesse azioni per i driver vdb e vde (tag piccolo). Solo Admin. ===== */
+/* I pin li scegli tu (propone quelli liberi, li puoi cambiare); il sistema controlla vietati, gia usati e doppi. */
+function drvTag(x){return' <span class="pill">'+esc(x.slice(1))+'</span>'}
+function drvLoad(){var L=[],f=[api("/api/mods").then(function(r){return r.json()}).then(function(j){(j.list||[]).forEach(function(x){L.push({k:"b",n:x.n,x:x})})}).catch(function(){})];
+ if(AUTH&&AUTH.elf)f.push(api("/api/vde").then(function(r){return r.json()}).then(function(j){(j.list||[]).forEach(function(x){L.push({k:"e",n:x.n,x:x})})}).catch(function(){}));
+ Promise.all(f).then(function(){L.sort(function(a,b){return a.n<b.n?-1:a.n>b.n?1:0});drvDraw(L)})}
+function drvDraw(L){var el=$("drvlist");if(!el)return;
+ if(!L.length){el.innerHTML='<p class="fhint">'+esc(t("Nessun driver installato. Caricane uno con il pulsante qui sotto."))+'</p>';return}
+ var h='<table class="ftab">';
+ L.forEach(function(r){var x=r.x,adm=ROLE>=2,btn="",st="",tit,ico="";
+  if(r.k=="b"){tit=x.ok?x.t:x.n;ico=ioIco(x.ok?x.icon:"");
+   st=x.ok?ioCn(x.c)+" x"+x.ns+" · "+(x.p=="-"?t("senza alimentazione"):x.p)+(x.l?" · "+x.l:"")+(x.app?" · "+t("con app"):""):(x.e||"");
+   if(adm){if(x.ok)btn+='<button class="btn" onclick="ioModOpen(\''+x.n+'\')">'+esc(t("Installa"))+'</button> ';btn+='<button class="btn gray" onclick="ioModDel(\''+x.n+'\')">'+esc(t("Elimina"))+'</button>'}}
+  else{tit=x.ok?x.t:x.n;ico=ioIco(x.ok&&x.i?x.ic:"");
+   st=!x.ok?(x.e||""):x.i?(x.p.length?tf("Pin dati: {0}",x.p.join(", ")):t("Installato")):t("Senza pin");
+   if(adm){if(x.ok)btn+='<button class="btn" onclick="drvVdeOpen(\''+x.n+'\')">'+esc(x.i?t("Cambia pin"):t("Installa"))+'</button> ';btn+='<button class="btn gray" onclick="drvVdeDel(\''+x.n+'\')">'+esc(t("Elimina"))+'</button>'}}
+  h+='<tr><td><span class="scn">'+ico+'<b>'+esc(tit)+'</b>'+drvTag(r.k=="b"?EXT.db:EXT.de)+'</span><div class="fhint"'+(!x.ok?' style="color:var(--kot)"':"")+'>'+esc(st)+'</div>'+(x.ok&&x.w?'<div class="fhint">'+esc(x.w)+'</div>':"")+'</td><td style="text-align:right;white-space:nowrap">'+btn+'</td></tr>'});
+ el.innerHTML=h+'</table>'}
+/* Dialogo dei pin per un driver vde: stessi campi del vdb (un pin per segnale, quelli proposti gia scritti). */
+function drvVdeOpen(n){api("/api/vde").then(function(r){return r.json()}).then(function(j){var d=(j.list||[]).filter(function(x){return x.n==n})[0];if(!d||!d.ok){msg("drvm",d?d.e:t("File non trovato"),false);return}
+  var b='<p class="fhint" style="margin-bottom:2px"><b>'+esc(t("Pin"))+'</b> '+esc(t("La scheda propone questi pin liberi. Puoi cambiarli: il sistema controlla che siano ammessi e non gia usati."))+'</p>';
+  if(d.w)b+='<p class="fhint"><b>'+esc(d.w)+'</b></p>';
+  d.s.forEach(function(s,i){var v=d.i&&d.p[i]!=null?d.p[i]:(d.sug&&d.sug[i]!=null?d.sug[i]:"");b+='<label for="drv_pn'+i+'">'+esc(s)+'</label><input id="drv_pn'+i+'" inputmode="numeric" maxlength="2" autocomplete="off" style="width:5em" value="'+v+'">'});
+  dlg({title:d.t,body:b,ok:d.i?t("Cambia pin"):t("Installa"),onOk:function(){var pn=d.s.map(function(s,i){return dlgV("drv_pn"+i)});
+   if(!pn.every(function(x){return /^[0-9]{1,2}$/.test(x)}))return t("Indica un pin per ogni segnale");
+   return post("/api/vde",{act:d.i?"pins":"install",name:n,pins:pn.join(",")}).then(function(r){return r.json()}).then(function(k){if(k.ok===false)return k.err;msg("drvm",t("Fatto"),true);drvLoad();return""})}})}).catch(function(){})}
+function drvVdeDel(n){dlg({title:t("Eliminare?"),body:'<p style="margin:0">'+esc(tf("Il driver {0} verra eliminato e i suoi pin torneranno liberi.",n))+'</p>',ok:t("Elimina"),danger:true,
+ onOk:function(){return post("/api/vde",{act:"del",name:n}).then(function(r){return r.json()}).then(function(j){if(j.ok===false)return j.err;drvLoad();return""})}})}
+/* Carica: il tipo si capisce dall'estensione. */
+function drvUp(){var f=$("drvup").files[0];if(!f)return;$("drvup").value="";var low=f.name.toLowerCase(),e=low.slice(low.lastIndexOf("."));
+ if(e==EXT.de){var fd=new FormData();fd.append("file",f);
+  api("/api/fs/up?dir=/devs",{method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){msg("drvm",j.ok?t("Caricato"):j.err,!!j.ok);drvLoad()}).catch(function(){});return}
+ if(e!=EXT.db&&e!=".vdp"&&e!=".txt"){msg("drvm",tf("Il file deve finire per {0} o {1}",EXT.db,EXT.de),false);return}
+ if(f.size>16384){msg("drvm",t("File troppo grande (massimo 16 KB)"),false);return}
+ var n=low.replace(/\.(vdb|vdp|txt)$/,"");
+ f.text().then(function(x){return post("/api/mod/save",{name:n,text:x})}).then(function(r){return r.json()}).then(function(j){msg("drvm",j.ok?t("Driver caricato"):j.err,!!j.ok);if(j.ok)drvLoad()}).catch(function(){})}
 /* ===== WPS: collegamento con il router (tasto o PIN) ===== */
 var WP={tm:null,seq:0,j:null};
 SVT.wps={set:function(v){return wpsSetOn(v)}};
@@ -2731,7 +2974,7 @@ function modSchema(j){
  R.push({l:"GND",r:"GND",c:"#222222",cn:t("nero"),v:ext?t("0 V (massa dell'alimentatore unita a GND della scheda)"):t("0 V (massa)"),k:"gnd"});
  j.sig.forEach(function(s,i){var p=parts.filter(function(x){return x.s==s}),d=[];
   p.forEach(function(x){d.push(x.v+" "+(x.k=="serie"?t("in serie"):x.k=="gnd"?t("verso GND"):t("verso l'alimentazione")))});
-  var nt=[tf("segnale a {0}",lv),out?t("scheda → modulo"):t("modulo → scheda")];
+  var nt=[tf("segnale a {0}",lv),j.c=="sd"?t("bus SPI"):out?t("scheda → modulo"):t("modulo → scheda")];
   if(j.pull=="u")nt.push(t("pull-up interno acceso"));if(j.pull=="d")nt.push(t("pull-down interno acceso"));
   if(j.low)nt.push(t("attivo basso (0 = acceso)"));
   R.push({l:j.sug[i]!=null?"GPIO"+j.sug[i]:"GPIO ?",r:s,sg:s,c:j.c=="analogico"?"#d4730a":"#2d6cdf",cn:j.c=="analogico"?t("arancione"):t("blu"),v:nt.concat(d).join(" · "),k:"sig",p:p,out:out})});
@@ -2791,7 +3034,7 @@ function setupDraw(){var i=SU.i,d=SU.d,h='<div class="sw"><div class="hero"><svg
  else if(i==5&&!d.ssid){var tzl=(COMMON.by[d.cc]||{tz:[]}).tz.slice(),to="",nw=new Date(),pz=function(n){return("0"+n).slice(-2)};if(!tzl.some(function(z){return z[1]==d.tz}))tzl.push([d.tzn,d.tz]);tzl.forEach(function(z,k){to+='<option value="'+k+'"'+(z[1]==d.tz?" selected":"")+'>'+esc(z[0])+'</option>'});SU.tzl=tzl;
   h+='<h3>'+esc(t("Imposta l'ora"))+'</h3><p class="fhint">'+esc(t("Senza Internet la scheda non sa che ora e. Controlla data, ora e fuso orario: sono quelli di questo dispositivo."))+'</p><label for="su_z">'+esc(t("Fuso orario"))+'</label><select id="su_z" onchange="suTz(this.value)">'+to+'</select><div class="agrid"><div><label for="su_d">'+esc(t("Data"))+'</label><input type="date" id="su_d" value="'+nw.getFullYear()+"-"+pz(nw.getMonth()+1)+"-"+pz(nw.getDate())+'" oninput="suTm()"></div><div><label for="su_t">'+esc(t("Ora"))+'</label><input type="time" id="su_t" step="1" value="'+pz(nw.getHours())+":"+pz(nw.getMinutes())+":"+pz(nw.getSeconds())+'" oninput="suTm()"></div></div>'}
  else{var c2=COMMON.by[d.cc];h+='<h3>'+esc(t("Tutto pronto"))+'</h3>'+row(esc(t("Paese")),esc(c2?cName(c2):"-"))+row(esc(t("Nome")),esc(d.host))+row(esc(t("Fuso orario")),esc(d.tzn)+" ("+esc(t("si cambia in Sistema > Localizzazione"))+")")+row(esc(t("Antenna")),esc(d.ant?tf("esterna, {0} dBi",d.gain):t("interna")))+row(esc(t("Rete di casa")),esc(d.ssid||t("nessuna (solo hotspot)")))+
-  '<div class="law">'+esc(t("MQTT, rete tra schede, Bluetooth, server dell'ora e filtro IP restano spenti: li accendi tu quando servono (categoria Servizi e Sicurezza)."))+'</div>'+
+  '<div class="law">'+esc(t("MQTT, rete tra schede, server dell'ora e filtro IP restano spenti: li accendi tu quando servono (categoria Servizi e Sicurezza). Il Bluetooth resta spento finche un programma VesevOS con il permesso ble non lo accende."))+'</div>'+
   (d.ssid?'<div class="law">'+esc(tf("Dopo il salvataggio la scheda si collega a {0}: collega il telefono o il PC a quella rete e apri l'indirizzo che ti mostro. Al primo accesso da quella rete hotspot, portale automatico e HTTP si spengono e restano spenti: li riaccendi tu quando vuoi (Servizi). Se il collegamento non riesce, l'hotspot torna da solo.",d.ssid))+'</div>':'<div class="law">'+esc(t("Senza Wi-Fi di casa l'hotspot e HTTP restano accesi: sono l'unico modo di entrare. La scheda non ha batteria per l'orologio: se la spegni l'ora va rimessa (Sistema > Ora)."))+'</div>')}
  h+='<div id="sumsg" class="msg"></div><div class="sbt">'+(i?'<button class="btn gray" type="button" onclick="suGo(-1)">'+esc(t("Indietro"))+'</button>':"")+'<button class="btn gray" type="button" onclick="setupClose()">'+esc(t("Piu tardi"))+'</button><button class="btn gray" type="button" onclick="suAlready()">'+esc(t("La scheda e gia configurata"))+'</button><span class="sp"></span>'+(i==4?'<button class="btn gray" type="button" onclick="SU.d.ssid=\'\';SU.d.pass=\'\';SU.d.wok=false;SU.i=5;setupDraw()">'+esc(t("Salta"))+'</button>':"")+'<button class="btn" type="button" onclick="suGo(1)">'+esc(i==suSteps().length-1?t("Salva e finisci"):t("Avanti"))+'</button></div></div></div>';
  $("setup").innerHTML=h;

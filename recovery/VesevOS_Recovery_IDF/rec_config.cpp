@@ -1,4 +1,4 @@
-// VesevOS Recovery - lettura di /vesevos.conf (vedi rec_config.h). Formato: righe "config <tipo> '<nome>'" e "option <chiave> '<valore>'".
+// VesevOS Recovery - lettura di /etc/vesevos.conf, o di /vesevos.conf se manca (vedi rec_config.h). Formato: righe "config <tipo> '<nome>'" e "option <chiave> '<valore>'".
 #include "rec_config.h"
 #include "rec_util.h"
 #include <stdio.h>
@@ -94,9 +94,10 @@ void loadConfig() {
   c.read_only = true;
   esp_err_t e = esp_vfs_littlefs_register(&c);
   if (e != ESP_OK) { printf("[recovery] LittleFS non montato (%s): nessuna configurazione\n", esp_err_to_name(e)); return; }
-  FILE* f = fopen("/littlefs/vesevos.conf", "r");
+  FILE* f = fopen("/littlefs/etc/vesevos.conf", "r");            // VesevOS 1.8.1 e successive
+  if (!f) f = fopen("/littlefs/vesevos.conf", "r");              // posto vecchio (VesevOS fino alla 1.8.0)
   if (!f) {
-    printf("[recovery] /vesevos.conf non trovato: nessuna configurazione\n");
+    printf("[recovery] vesevos.conf non trovato (ne in /etc ne alla radice): nessuna configurazione\n");
     esp_vfs_littlefs_unregister("spiffs");
     return;
   }

@@ -14,8 +14,6 @@ GET   /api/auth  pubblico
 GET   /api/ban  admin
 POST  /api/ban/set  admin
 POST  /api/ban/unban  admin
-GET   /api/ble  admin
-POST  /api/ble  admin
 GET   /api/boot  operatore
 POST  /api/boot  admin
 POST  /api/boot/reset  admin
@@ -32,6 +30,8 @@ GET   /api/crash  operatore
 GET   /api/dev  operatore
 POST  /api/dev/act  operatore
 POST  /api/dev/set  admin
+GET   /api/elf  operatore
+POST  /api/elf  admin
 GET   /api/events  operatore
 POST  /api/factory  admin
 POST  /api/firstpass  pubblico
@@ -44,6 +44,8 @@ POST  /api/fs/mkdir  admin
 POST  /api/fs/ren  admin
 POST  /api/fs/save  admin
 GET   /api/fs/text  operatore
+GET   /api/func  operatore
+POST  /api/func  admin
 GET   /api/fw  admin
 POST  /api/fw  admin
 POST  /api/fw/confirm  admin
@@ -96,6 +98,12 @@ GET   /api/pintest  ospite
 POST  /api/pintest  operatore
 GET   /api/power  operatore
 POST  /api/power  admin
+GET   /api/progboot  operatore
+POST  /api/progboot  admin
+GET   /api/progdata  operatore
+POST  /api/progdata  admin
+GET   /api/progs  operatore
+POST  /api/progs  admin
 POST  /api/reboot  operatore
 GET   /api/recovery  admin
 POST  /api/recovery  admin
@@ -107,8 +115,6 @@ POST  /api/rules/run  operatore
 GET   /api/script  admin
 POST  /api/script/run  admin
 POST  /api/script/stop  admin
-GET   /api/sd  operatore
-POST  /api/sd/act  operatore
 GET   /api/selftest  admin
 POST  /api/selftest  admin
 GET   /api/selftest/report  admin
@@ -123,6 +129,7 @@ GET   /api/stats  operatore
 POST  /api/stats  admin
 GET   /api/stats.csv  operatore
 GET   /api/status  ospite
+POST  /api/sub  admin
 GET   /api/svc  ospite
 POST  /api/svc  admin
 POST  /api/system  admin
@@ -145,6 +152,8 @@ POST  /api/users/add  admin
 POST  /api/users/del  admin
 POST  /api/users/pass  admin
 POST  /api/users/set  admin
+GET   /api/vde  operatore
+POST  /api/vde  admin
 GET   /api/wd  operatore
 POST  /api/wd  admin
 GET   /api/who  admin

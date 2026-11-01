@@ -33,6 +33,12 @@ Progetto: https://github.com/paolellad79/VesevOS
      Il file NOTICE di esp-nimble-cpp (Ryan Powell, Neil Kolban) resta con
      il componente.
    - espressif/mdns 1.14.0: Apache-2.0.
+   - elf_loader 2.0.0 (Espressif Systems, componente del registro dei componenti): Apache-2.0.
+     Copia nostra in VesevOS/src/third_party/elf_loader/ con due modifiche
+     nostre dichiarate in quella cartella (NOTICE-VESEVOS.txt e patch/). Testo
+     della licenza: VesevOS/src/third_party/elf_loader/license.txt. Compilata
+     di serie nel firmware per ESP32-S3 (VOS_WITH_ELF = 1); il sottosistema
+     si puo spegnere dai Task.
    - joltwallet/littlefs (esp_littlefs) 1.22.3: MIT. Testo: "license mit"
    - LittleFS (littlefs-project, dentro esp_littlefs): BSD-3-Clause.
      Testo: "license bsd3"
@@ -46,7 +52,7 @@ Progetto: https://github.com/paolellad79/VesevOS
    - miniz (funzioni tinfl/tdefl nella ROM del chip e relativo header in
      ESP-IDF, usate da gzip/zip/unzip): MIT.
    - Bundle dei certificati radice (esp_crt_bundle di ESP-IDF; completo nel
-     firmware, ridotto nel recovery 0.5.1): dati dell'elenco CA di Mozilla
+     firmware, ridotto nel recovery 0.5.2): dati dell'elenco CA di Mozilla
      (certdata.txt, copia del 25/2/2025 distribuita da curl.se). Il file
      di ESP-IDF cita l'origine ma non porta il testo della licenza;
      l'elenco di Mozilla e in genere indicato sotto MPL-2.0 (sono dati,
@@ -64,7 +70,7 @@ Progetto: https://github.com/paolellad79/VesevOS
      esptool-js 0.5.7 (Espressif): Apache-2.0 (testo in
      flash/vendor/LICENSE-esptool-js-Apache-2.0.txt); dentro il suo bundle
      c'e pako 2.1.0 (Nodeca): MIT AND Zlib.
-   - Recovery 0.5.1 (programma nostro, cartella recovery/VesevOS_Recovery_IDF):
+   - Recovery 0.5.2 (programma nostro, cartella recovery/VesevOS_Recovery_IDF):
      GPL-3.0-or-later OR licenza commerciale; usa solo ESP-IDF 5.5.5 e
      Mbed TLS (Apache-2.0), senza codice LGPL.
    - Natural Earth (nomi dei paesi): pubblico dominio.

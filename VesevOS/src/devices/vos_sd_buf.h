@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_sd_buf.h
 // Aiuti per scrivere testo in un buffer di char con lunghezza (niente String di Arduino).
-// Usati da vos_sd.cpp e vos_sd_act.cpp. Non scrive mai oltre la fine: "ov" dice se qualcosa non c'e stato.
+// Usati da vos_sd.cpp e vos_sd_path.cpp. Non scrive mai oltre la fine: "ov" dice se qualcosa non c'e stato.
 #pragma once
 #include <stdio.h>
 #include <string.h>
@@ -79,18 +79,4 @@ inline void sdSetErr(char* err, size_t en, const char* msg) {
   if (err && en) {
     snprintf(err, en, "%s", msg);
   }
-}
-
-// Una riga ["etichetta","valore"] dell'elenco "rows".
-inline void sdRow(Buf& j, bool& first, const char* label, const char* value) {
-  if (!first) {
-    j.ch(',');
-  }
-
-  first = false;
-  j.put("[\"");
-  j.esc(label);
-  j.put("\",\"");
-  j.esc(value);
-  j.put("\"]");
 }

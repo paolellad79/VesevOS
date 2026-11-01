@@ -203,7 +203,7 @@ void sysApplyCpuMode() { hookCpuApplyMode(); }
 void sysInit() {
   // la frequenza non si cambia qui: i primi 15 secondi restano a quella di avvio, poi ci pensa il monitor (cpuPmTick)
   DrvNvs p;
-  p.begin("vos", false);
+  if (!p.begin("vos", false)) vlog("ATTENZIONE: NVS: non si apre lo spazio \"vos\", contatori riavvii e vita non salvati");
   g_boot = p.getUInt("boots", 0) + 1;
   p.putUInt("boots", g_boot);
   g_lifeBase = p.getUInt("life", 0);
@@ -272,6 +272,11 @@ bool sysStatusJson(HeapBuf& j) {
   { char cp[320]; int cn = hookCpuStatus(cp, sizeof cp); ok = ok && cn >= 0 && j.add(cp, (size_t)cn); }   // campi cpuMhz...cpuChanges, scritti da vos_cpupm
   ok = ok && addFmt(j, "\"heapFree\":%lu,\"heapTotal\":%lu,", (unsigned long)drvHeapFree(), (unsigned long)drvHeapTotal());
   ok = ok && addFmt(j, "\"psramFree\":%lu,\"psramTotal\":%lu,", (unsigned long)drvPsramFree(), (unsigned long)drvPsramTotal());
+  { DrvMemMap m; drvMemMap(m);                                    // mappa della RAM (-1 = non misurato -> null)
+    auto nul = [](int32_t v, char* o, size_t n) { if (v < 0) snprintf(o, n, "null"); else snprintf(o, n, "%ld", (long)v); };
+    char a[16], d[16], b[16], r[16]; nul(m.fixedIram, a, sizeof a); nul(m.fixedData, d, sizeof d); nul(m.fixedBss, b, sizeof b); nul(m.fixedRest, r, sizeof r);
+    ok = ok && addFmt(j, "\"mem\":{\"sram\":%lu,\"fixed\":%lu,\"iram\":%s,\"data\":%s,\"bss\":%s,\"rest\":%s,\"heapUsed\":%lu,\"heapMin\":%lu,\"heapMaxBlock\":%lu,\"flash\":%lu},",
+                      (unsigned long)m.sramNominal, (unsigned long)m.fixedTotal, a, d, b, r, (unsigned long)m.heapUsed, (unsigned long)m.heapMin, (unsigned long)m.heapMaxBlock, (unsigned long)m.flashSize); }
   ok = ok && addFmt(j, "\"flashUsed\":%lu,\"flashTotal\":%lu,\"mqtt\":%d,", (unsigned long)flashU, (unsigned long)flashT, mqtt);
   ok = ok && j.add("\"cpuHist\":") && sysCpuHistoryJson(j);
   ok = ok && j.add(",\"cpu0Hist\":") && histJson(j, g_c0H, g_cpuHn) && j.add(",\"cpu1Hist\":") && histJson(j, g_c1H, g_cpuHn);

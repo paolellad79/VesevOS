@@ -12,6 +12,9 @@
 //   -F accettata e ignorata: le cartelle hanno SEMPRE la barra finale
 // Ordine: alfabetico senza guardare maiuscole e minuscole (poi, a pari nome, per codice del carattere).
 #include "vos_shell_int.h"
+#include "vos_shell_sdgate.h"
+#include "../core/vos_paths.h"
+#include "../devices/vos_sd.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -131,10 +134,21 @@ void printList(OutSink& o, EntList& l, const LsOpt& opt) {
   if (l.more()) o.println(tr("... elenco troncato: la cartella ha troppe voci"));
 }
 
+// "/media" e una cartella virtuale: non esiste sulla memoria interna. Contiene "sd" solo se la microSD e montata.
+bool mediaRootJson(HeapBuf& j) {
+  j.add("{\"ok\":true,\"path\":\"/media\",\"list\":[");
+#if VOS_WITH_SD
+  if (sdUp()) j.add("{\"n\":\"sd\",\"d\":true,\"s\":0}");
+#endif
+  j.add("],\"more\":false}");
+  return !j.oom() && !j.over();
+}
+
 // Il percorso e una cartella? Se si la elenca. Ritorna 1 = fatto, 0 = non e una cartella, -1 = errore gia scritto (memoria).
 int lsAsDir(OutSink& o, const char* arg, const char* path, const LsOpt& opt, bool header, bool& first) {
   HeapBuf j(FS_JSON_MAX);                                  // l'elenco si scrive qui (heap), non sullo stack
-  if (!fsListBuild(path, j)) { o.println(tr("Memoria insufficiente")); return -1; }
+  bool built = pathIsMediaRoot(path) ? mediaRootJson(j) : fsListBuild(path, j);
+  if (!built) { o.println(tr("Memoria insufficiente")); return -1; }
   EntList l;
   if (!l.ok()) { o.println(tr("Memoria insufficiente")); return -1; }
   if (!l.parse(const_cast<char*>(j.c_str()))) return 0;    // il JSON e nostro e si puo ripulire sul posto
@@ -172,6 +186,9 @@ void lsAsFile(OutSink& o, const char* arg, const char* path, const LsOpt& opt, b
 
 // Un percorso gia risolto. arg e il testo digitato (per intestazioni e messaggi).
 void lsPath(OutSink& o, const char* arg, const char* path, const LsOpt& opt, bool header, bool& first) {
+  if (pathIsMedia(path) && !pathIsMediaRoot(path) && !pathSdRel(path)) { o.println(trf("ls: %s: Non esiste", arg)); return; }
+  SdHold hold;                                             // sulla microSD: montata e libera, e l'operazione conta come in corso
+  if (!shellSdReady(path, arg, o, &hold)) return;
   if (fsProtected(path)) { o.println(trf("ls: %s: Permesso negato", arg)); return; }
   int r = lsAsDir(o, arg, path, opt, header, first);
   if (r == 0) lsAsFile(o, arg, path, opt, first);

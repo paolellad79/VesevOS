@@ -5,6 +5,7 @@
 // Le impostazioni sono quelle che usava Arduino-ESP32 3.3: stessi buffer, stesse regole di riconnessione,
 // stessa configurazione di client e hotspot. Qui la riconnessione ha in piu una pausa che cresce a ogni errore.
 #include "vos_drv_wifi.h"
+#include "vos_drv_dhcp.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -84,7 +85,7 @@ static void onEvent(void*, esp_event_base_t base, int32_t id, void* data) {
     }
   } else if (base == IP_EVENT) {
     if (id == IP_EVENT_STA_GOT_IP) { s_status = DWS_CONNECTED; s_tries = 0; }
-    else if (id == IP_EVENT_STA_LOST_IP) s_status = DWS_IDLE;
+    else if (id == IP_EVENT_STA_LOST_IP) { s_status = DWS_IDLE; drvDhcpDomainClear(); }   // senza indirizzo il dominio del router non vale piu
   }
 }
 
@@ -178,6 +179,7 @@ static void setDns(uint32_t d1, uint32_t d2) {
 void drvWifiStaConfigStatic(uint32_t ip, uint32_t gw, uint32_t mask, uint32_t dns1, uint32_t dns2) {
   if (!s_staIf) return;
   esp_netif_dhcpc_stop(s_staIf);               // "gia fermo" non e un errore
+  drvDhcpDomainClear();                        // con l'indirizzo fisso il router non da nessun dominio
   esp_netif_ip_info_t info; memset(&info, 0, sizeof info);
   info.ip.addr = toEsp(ip); info.gw.addr = toEsp(gw); info.netmask.addr = toEsp(mask);
   esp_netif_set_ip_info(s_staIf, &info);
@@ -188,6 +190,7 @@ void drvWifiStaConfigStatic(uint32_t ip, uint32_t gw, uint32_t mask, uint32_t dn
 void drvWifiStaConfigDhcp() {
   if (!s_staIf) return;
   esp_netif_dhcpc_stop(s_staIf);
+  drvDhcpDomainClear();                        // il dominio si riprende dal prossimo contratto
   esp_netif_ip_info_t info; memset(&info, 0, sizeof info);
   esp_netif_set_ip_info(s_staIf, &info);
   setDns(0, 0);
@@ -197,6 +200,7 @@ void drvWifiStaConfigDhcp() {
 
 void drvWifiStaBegin(const char* hostname, const char* ssid, const char* pass) {
   if (hostname) drvWifiSetHostname(hostname);
+  drvDhcpDomainClear();                        // nuova rete: il dominio della vecchia non vale
   DrvWifiMode m = drvWifiMode();
   if (m == DW_OFF) drvWifiSetMode(DW_STA);
   else if (m == DW_AP) drvWifiSetMode(DW_AP_STA);

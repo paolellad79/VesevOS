@@ -13,3 +13,4 @@ bool drvI2cBegin(int sda, int scl, uint32_t hz);                                
 void drvI2cEnd();                                                                        // ferma il bus e libera i pin
 uint8_t drvI2cReadReg(uint8_t addr, uint8_t reg, uint8_t* buf, size_t n);                // DI_OK oppure il codice dell'errore
 uint8_t drvI2cWriteReg(uint8_t addr, uint8_t reg, const uint8_t* buf, size_t n);
+bool drvI2cProbe(uint8_t addr);                                                          // true = qualcuno risponde a questo indirizzo (solo l'indirizzo, nessun dato)

@@ -4,6 +4,7 @@
 // Comandi della shell: configurazione, utenti, sicurezza, rete schede, servizi, energia, riavvio. Aiuti e include: vos_shell_int.h.
 #include "vos_shell_int.h"
 #include "vos_shell_ask.h"
+#include "../packages/vos_prog_kind.h"
 #include "../drivers/vos_drv_time.h"
 #include "../core/vos_clamp.h"
 #include "../core/vos_wdset.h"
@@ -128,13 +129,6 @@ bool shCmdAdmin(const Word& c, const Word& a1, const char* line, OutSink& o, int
     else if (a1 != "" && a1 != "status") { o.println(tr("Uso: mesh [start|stop|send <scheda|*> <testo>|cmd <scheda> <azione>|key new|role <0|1|2>]")); return true; }
     o.print(meshText().c_str());
   }
-  else if (c == "ble") {
-    ErrBuf err;
-    if (a1 == "on") { if (!bleUserOn((uint32_t)argAt(line, 2).toInt(), err)) { o.println(err.c_str()); return true; } }
-    else if (a1 == "off") bleUserOff();
-    else if (a1 != "" && a1 != "status") { o.println(tr("Uso: ble [on [minuti]|off|status]")); return true; }
-    o.print(bleText().c_str());
-  }
   else if (c == "cert") {
     if (a1 == "new") { tlsRegenerate(); o.println(tr("Nuovo certificato pronto: vale dal prossimo riavvio (reboot)")); return true; }
     o.println(trf("HTTPS: %s", cfg.https ? (webHttpsUp() ? tr("attivo") : tr("non partito")) : tr("spento")));
@@ -247,9 +241,9 @@ bool shCmdAdmin(const Word& c, const Word& a1, const char* line, OutSink& o, int
     o.print(powerText().c_str());
   }
   else if (c == "reboot") { o.println(tr("Riavvio...")); sysReboot("comando reboot", 300); }
-  else if (c == "script" || c == "berry") {
-    // script: elenco, avvio, stop, uscita degli script salvati in /scripts (.vsc).  berry <codice>: prova al volo.
-    // (berry list|run|stop|out funzionano ancora come scorciatoie dei comandi script)
+  else if (c == "script" || c == "vsh" || c == "berry") {
+    // script: elenco, avvio, stop, uscita degli script salvati in /sbin (.vsb).  vsh <codice>: prova al volo ("berry" resta come nome nascosto).
+    // (vsh list|run|stop|out funzionano ancora come scorciatoie dei comandi script)
     const char* code = restFrom(line, 1);
     ErrBuf err;
     bool scr = (c == "script");
@@ -264,29 +258,29 @@ bool shCmdAdmin(const Word& c, const Word& a1, const char* line, OutSink& o, int
     if (a1 == "stop" && !strcmp(code, "stop")) { if (berryStop(err)) o.println(tr("Script fermato")); else o.println(err.c_str()); return true; }
     if (a1 == "run") {
       Word nm = argAt(line, 2);
-      if (nm.empty()) { o.println(tr("Uso: script run <nome>  (file /scripts/<nome>.vsc)")); return true; }
-      if (!berryStart(nm.c_str(), err)) { o.println(err.c_str()); return true; }
-      o.println(trf("Script avviato: %s (script out = uscita, script stop = ferma)", nm.c_str()));
+      if (nm.empty()) { o.println(tr("Uso: script run <nome>  (file /sbin/<nome>.vsb)")); return true; }
+      shStartScript(nm.c_str(), o);
       return true;
     }
     if (scr) { o.println(tr("Uso: script list | script run <nome> | script stop | script out")); return true; }
     HeapBuf out(BERRY_OUT_MAX + 16);                                   // uscita dello script (con "..." finale se tagliata)
     bool ok = berryEval(code, out, err);
-    vlog("BERRY: script eseguito dalla shell (%u caratteri, %s)", (unsigned)strlen(code), ok ? "ok" : "errore");
+    vlog("SCRIPT: script eseguito dalla shell (%u caratteri, %s)", (unsigned)strlen(code), ok ? "ok" : "errore");
     if (out.length()) { o.print(out.c_str()); if (out.c_str()[out.length() - 1] != '\n') o.println(); }
     if (!ok) { if (err.length()) o.println(err.c_str()); else o.println(tr("Errore")); }
   }
   else if (c == "app") {
-    // app: elenco, controllo, avvio, stop, valori e uscita dei file /apps/*.vap (una sola app alla volta, nel motore Berry)
+    // app: elenco, controllo, avvio, stop, valori e uscita dei file /bin/*.vab (una sola app alla volta, nel motore Berry)
     Word nm = argAt(line, 2);
     ErrBuf err;
     if (a1 == "list") { HeapBuf t(APP_TEXT_MAX); appListText(t); o.print(t.c_str()); }
     else if ((a1 == "info" || a1 == "check") && !nm.empty()) { HeapBuf t(APP_TEXT_MAX); appInfoText(nm.c_str(), t); o.print(t.c_str()); }
-    else if (a1 == "start" && !nm.empty()) { if (appStart(nm.c_str(), err, 2, "shell")) o.println(trf("App avviata: %s (app out = uscita, app stop %s = ferma)", nm.c_str(), nm.c_str())); else o.println(err.c_str()); }
+    else if (a1 == "start" && !nm.empty()) shStartApp(nm.c_str(), o, 2);
     else if (a1 == "stop" && !nm.empty()) { if (appStop(nm.c_str(), err, 2)) o.println(tr("App fermata")); else o.println(err.c_str()); }
     else if (a1 == "set" && !nm.empty() && !argAt(line, 3).empty()) { if (appSet(nm.c_str(), argAt(line, 3).c_str(), restFrom(line, 4), err, 2)) o.println(tr("Fatto")); else o.println(err.c_str()); }
+    else if (a1 == "data" && !nm.empty()) shProgData(PK_APP_B, nm.c_str(), argAt(line, 3).c_str(), o);
     else if (a1 == "out") { HeapBuf t(BERRY_TEXT_MAX); appRunText(t); o.print(t.c_str()); }
-    else o.println(tr("Uso: app list | app info <nome> | app start <nome> | app stop <nome> | app set <nome> <id> <valore> | app out"));
+    else o.println(tr("Uso: app list | app info <nome> | app start <nome> | app stop <nome> | app set <nome> <id> <valore> | app data <nome> [flash|sd] | app out"));
   }
   else if (c == "crash") {
     if (a1 == "clear") o.println(crashClear() ? tr("Rapporti dei crash cancellati") : tr("Errore"));

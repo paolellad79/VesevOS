@@ -4,6 +4,8 @@
 // Il file system interno: esp_littlefs (montaggio, formato, spazio) + POSIX/VFS (file e cartelle).
 #include "vos_drv_fs.h"
 #include "vos_drv_fs_cache.h"
+#include "vos_drv_sd.h"
+#include "../boards/vos_packages.h"
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -21,8 +23,22 @@ static const size_t FS_FULL_MAX = 192;         // "/littlefs" + percorso pulito 
 
 static FsUsedCache g_used;   // spazio usato ricordato: vedi vos_drv_fs_cache.h
 
+// Il percorso e la microSD ("/media/sd" o sotto)? Quel file system ha il suo punto di montaggio (VOS_SD_MOUNT_POINT): non sta sotto LittleFS.
+static bool isSdPath(const char* path) {
+  const size_t n = sizeof(VOS_SD_MOUNT_POINT) - 1;
+  return strncmp(path, VOS_SD_MOUNT_POINT, n) == 0 && (path[n] == 0 || path[n] == '/');
+}
+
 bool drvFsVfsPath(const char* path, char* out, size_t outSize) {
   if (!path || path[0] != '/') return false;
+  if (isSdPath(path)) {
+#if VOS_WITH_SD
+    int m = drvSdUp() ? snprintf(out, outSize, "%s", path) : 0;     // scheda non montata (o in formattazione): niente da aprire
+    return m > 0 && (size_t)m < outSize;
+#else
+    return false;
+#endif
+  }
   int n = snprintf(out, outSize, "%s%s", FS_MOUNT, path);
   return n > 0 && (size_t)n < outSize;
 }
@@ -43,7 +59,7 @@ VosFile drvFsOpen(const char* path, const char* mode) {
   char full[FS_FULL_MAX];
   if (!mode) mode = "r";
   if (!drvFsVfsPath(path, full, sizeof full)) return VosFile();
-  if (mode[0] != 'r') g_used.touch();
+  if (mode[0] != 'r' && !isSdPath(path)) g_used.touch();
   return VosFile::openPath(full, path, mode);
 }
 
@@ -55,13 +71,13 @@ bool drvFsExists(const char* path) {
 
 bool drvFsRemove(const char* path) {
   char full[FS_FULL_MAX];
-  g_used.touch();
+  if (!isSdPath(path)) g_used.touch();
   return drvFsVfsPath(path, full, sizeof full) && unlink(full) == 0;
 }
 
 bool drvFsRename(const char* from, const char* to) {
   char a[FS_FULL_MAX], b[FS_FULL_MAX];
-  g_used.touch();
+  if (!isSdPath(from)) g_used.touch();
   return drvFsVfsPath(from, a, sizeof a) && drvFsVfsPath(to, b, sizeof b) && rename(a, b) == 0;
 }
 
@@ -69,7 +85,7 @@ bool drvFsRename(const char* from, const char* to) {
 bool drvFsMkdir(const char* path) {
   char full[FS_FULL_MAX];
   struct stat st;
-  g_used.touch();
+  if (!isSdPath(path)) g_used.touch();
   if (!drvFsVfsPath(path, full, sizeof full)) return false;
   if (stat(full, &st) == 0) return S_ISDIR(st.st_mode);
   return mkdir(full, 0777) == 0;
@@ -77,7 +93,7 @@ bool drvFsMkdir(const char* path) {
 
 bool drvFsRmdir(const char* path) {
   char full[FS_FULL_MAX];
-  g_used.touch();
+  if (!isSdPath(path)) g_used.touch();
   return drvFsVfsPath(path, full, sizeof full) && rmdir(full) == 0;
 }
 

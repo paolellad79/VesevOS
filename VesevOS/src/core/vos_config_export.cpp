@@ -4,6 +4,7 @@
 #include "vos_config.h"
 #include <stdio.h>
 #include "vos_config_int.h"
+#include "vos_func_ids.h"
 
 // Scrive le righe "\toption chiave 'valore'" in un HeapBuf. Se manca la memoria o si supera il tetto l'HeapBuf lo ricorda
 // (oom()/over()): cfgExport lo controlla una volta sola alla fine.
@@ -154,8 +155,6 @@ bool cfgExport(HeapBuf& out, bool withSecrets) {
   s.num("role", cfg.meshRole);
   s.num("channel", cfg.meshCh);
   s.opt("key", secret(cfg.meshKey.c_str()));
-  s.section("ble", "ble");
-  s.flag("on", cfg.bleOn);
   s.section("airplane", "airplane");
   s.num("on", cfg.airOn);
   s.num("exit", cfg.airExit);
@@ -195,6 +194,30 @@ bool cfgExport(HeapBuf& out, bool withSecrets) {
     char key[8];
     snprintf(key, sizeof key, "n%d", i);
     s.opt(key, cfg.pinNote[i].c_str());
+  }
+#if VOS_WITH_ELF
+  s.section("elf", "elf");
+  s.flag("enabled", cfg.elfOn);
+#endif
+  s.section("vdb", "vdb");
+  s.flag("enabled", cfg.berryOn);
+  s.section("func", "func");
+  { char off[64] = ""; size_t n = 0;                              // Funzionalita tolte: "sd,gpio"
+    for (int i = 0; i < kFuncN; i++) if (cfg.funcOff & (1u << i)) n += snprintf(off + n, sizeof off - n, "%s%s", n ? "," : "", kFuncId[i]);
+    s.opt("off", off); }
+  s.section("progboot", "progboot");                               // programmi con avvio automatico: p1=s:nome (s script, b app Berry, e app ELF)
+  for (int i = 0; i < cfg.bootN; i++) {
+    char key[8], val[40];
+    snprintf(key, sizeof key, "p%d", i + 1);
+    snprintf(val, sizeof val, "%c:%s", cfg.boot[i].kind == 0 ? 's' : cfg.boot[i].kind == 1 ? 'b' : 'e', cfg.boot[i].name);
+    s.opt(key, val);
+  }
+  s.section("progdata", "progdata");                               // app che salvano i dati sulla microSD: s1=b:nome (b app Berry, e app ELF); le altre usano la flash
+  for (int i = 0; i < cfg.dataSdN; i++) {
+    char key[8], val[40];
+    snprintf(key, sizeof key, "s%d", i + 1);
+    snprintf(val, sizeof val, "%c:%s", cfg.dataSd[i].kind == 1 ? 'b' : 'e', cfg.dataSd[i].name);
+    s.opt(key, val);
   }
   s.section("sd", "sd");
   s.flag("enabled", cfg.sdEnabled);

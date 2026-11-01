@@ -1,8 +1,8 @@
 /* ===== File: elenco, menu azioni, finestre, editor ===== */
 var FS={list:[],used:0,total:0,max:32768,menu:null,lp:null};
-var FTXT=/\.(txt|md|log|csv|html?|css|js|conf|cfg|ini|xml|ya?ml|h|c|cpp|ino|py|sh|svg|rules|vsc|vap)$/i,FIMG=/\.(png|jpe?g|gif|svg|ico|bmp|webp)$/i;
-var FCODE=/\.(html?|css|js|h|c|cpp|ino|py|sh|xml|vsc|vap)$/i;
-function fIco(f){return f.d?"i-folder":/\.json$/i.test(f.n)?"i-fjson":FIMG.test(f.n)?"i-fimg":/\.vsc$/i.test(f.n)?"i-fvsc":/\.vap$/i.test(f.n)?"i-fvap":FCODE.test(f.n)?"i-fcode":(FTXT.test(f.n)||f.n.indexOf(".")<0)?"i-ftxt":"i-fbin"}
+var FTXT=/\.(txt|md|log|csv|html?|css|js|conf|cfg|ini|xml|ya?ml|h|c|cpp|ino|py|sh|svg|rules|vsb|vsc|vab|vap)$/i,FIMG=/\.(png|jpe?g|gif|svg|ico|bmp|webp)$/i;
+var FCODE=/\.(html?|css|js|h|c|cpp|ino|py|sh|xml|vsb|vsc|vab|vap)$/i;
+function fIco(f){return f.d?"i-folder":/\.json$/i.test(f.n)?"i-fjson":FIMG.test(f.n)?"i-fimg":/\.vs[bc]$/i.test(f.n)?"i-fvsc":/\.va[bp]$/i.test(f.n)?"i-fvap":FCODE.test(f.n)?"i-fcode":(FTXT.test(f.n)||f.n.indexOf(".")<0)?"i-ftxt":"i-fbin"}
 function fEditable(n){return /\.json$/i.test(n)||FTXT.test(n)||n.indexOf(".")<0}
 function fSize(n){return n<1024?n+" B":n<1048576?(n/1024).toFixed(n<10240?1:0)+" KB":(n/1048576).toFixed(1)+" MB"}
 function fDir(p){var i=p.lastIndexOf("/");return i<=0?"/":p.substring(0,i)}
@@ -12,8 +12,8 @@ function fName(n){n=(n||"").trim();if(!n)return t("Scrivi un nome");if(n.length>
  if(/\.tmp~$/.test(n)||n=="vesevos.conf")return t("Nome riservato al sistema");return""}
 function fSys(p){return p=="/rules.txt"||p.indexOf("/lang/")==0}
 function fList(p){fp=p;fMenuClose();api("/api/fs/list?path="+enc(p)).then(function(r){return r.json()}).then(function(j){
- if(!j.ok){msg("fm",j.err,false);if(p!="/")fList("/");return}fp=j.path;FS.list=j.list;if(j.more)msg("fm",tf("Elenco parziale: mostrate le prime {0} voci",j.list.length),true);FS.used=j.used;FS.total=j.total;if(j.max)FS.max=j.max;
- var parts=j.path.split("/").filter(Boolean),acc="",c='<button class="crb" onclick="fList(\'/\')">'+esc(t("Memoria interna"))+'</button>';
+ if(!j.ok){msg("fm",j.err,false);if(p!="/")fList("/");return}fp=j.path;FS.list=j.list;if(j.more)msg("fm",tf("Elenco parziale: mostrate le prime {0} voci",j.list.length),true);var u=j.u||1;j.used*=u;j.total*=u;FS.used=j.used;FS.total=j.total;if(j.max)FS.max=j.max;
+ var sd=j.path=="/media/sd"||j.path.indexOf("/media/sd/")==0,base=sd?"/media/sd":"",parts=j.path.slice(base.length).split("/").filter(Boolean),acc=base,c='<button class="crb" onclick="fList(\'/\')">'+esc(t("Memoria interna"))+'</button><button class="crb" onclick="fList(\'/media/sd\')">'+esc(t("microSD"))+'</button>';
  parts.forEach(function(x){acc+="/"+x;c+='<span aria-hidden="true">›</span><button class="crb" onclick="fList(this.dataset.p)" data-p="'+esc(acc)+'">'+esc(x)+'</button>'});
  $("fpath").innerHTML=c;$("fupb").disabled=j.path=="/";
  j.list.sort(function(a,b){return (b.d-a.d)||a.n.localeCompare(b.n)});
@@ -108,9 +108,9 @@ function fEdit(p){api("/api/fs/text?path="+enc(p)).then(function(r){return r.tex
 function fEdOpen(p,x,isNew){FE.p=p;FE.isNew=isNew;FE.orig=isNew?null:x;FE.back=document.activeElement;var e=$("fedx");e.value=x;e.scrollTop=0;e.scrollLeft=0;
  $("fed").className="fed";document.body.classList.add("fedo");fEdTitle();$("fedw").className=fSys(p)?"fedw":"fedw hide";$("fedrun").hidden=!fIsScript(p);
  $("fedpaste").hidden=!(navigator.clipboard&&navigator.clipboard.readText&&window.isSecureContext);fEdUpd();setTimeout(function(){e.focus();e.setSelectionRange(0,0)},30)}
-function fIsScript(p){return /^\/scripts\/[a-z0-9_-]{1,24}\.vsc$/.test(p)}
-function fEdRun(){var n=FE.p.replace(/^.*\//,"").replace(/\.vsc$/,"");fEdSave().then(function(ok){if(!ok)return;fEdClose(true);show("script");scRun(n)})}
-function fMax(){return /\.vsc$/i.test(FE.p)?8192:/\.vap$/i.test(FE.p)?16384:FS.max}
+function fIsScript(p){return /^\/sbin\/[a-z0-9_-]{1,24}\.vs[bc]$/.test(p)}
+function fEdRun(){var n=FE.p.replace(/^.*\//,"").replace(/\.vs[bc]$/,"");fEdSave().then(function(ok){if(!ok)return;fEdClose(true);show("script");scRun(n)})}
+function fMax(){return /\.vs[bc]$/i.test(FE.p)?8192:/\.va[bp]$/i.test(FE.p)?16384:FS.max}
 function fEdDirty(){return FE.isNew||$("fedx").value!==FE.orig}
 function fEdTitle(){var d=fEdDirty();$("fedt").textContent=fBase(FE.p);$("fedp").textContent=fDir(FE.p);$("feds").textContent=FE.isNew?t("Nuovo, non ancora salvato"):d?t("Modificato"):t("Salvato");$("feds").className="feds"+(d?" mod":"")}
 function fEdUpd(){var e=$("fedx"),v=e.value,ln=v.split("\n").length,h="";for(var i=1;i<=ln;i++)h+=i+"\n";if($("fedn").textContent!=h)$("fedn").textContent=h;$("fedn").scrollTop=e.scrollTop;
@@ -128,7 +128,7 @@ function fEdSave(asNew,path,force){var v=$("fedx").value,p=path||FE.p,b=new Text
   if(!j.ok&&(FE.isNew||asNew)&&j.err==t("Esiste gia")){dlg({title:t("Sostituire il file?"),body:'<p style="margin:0">'+esc(tf("{0} esiste gia.",p))+'</p>',ok:t("Sostituisci"),danger:true,onOk:function(){FE.isNew=false;return post("/api/fs/save",{path:p,text:v,"new":"0"}).then(function(r){return r.json()}).then(function(j){if(j.ok)fEdSaved(p,v);return j.ok?"":j.err})}});return false}
   if(!j.ok){msg("fedm",j.err,false);return false}fEdSaved(p,v);return true})}
 function fEdSaved(p,v){FE.p=p;FE.isNew=false;FE.orig=v;msg("fedm",t("Salvato"),true);var lv=$("live");if(lv)lv.textContent=t("Salvato");fEdUpd();
- api("/api/fs/list?path="+enc(fp)).then(function(r){return r.json()}).then(function(j){if(j.ok){FS.used=j.used;FS.total=j.total;fEdUpd()}}).catch(function(){})}
+ api("/api/fs/list?path="+enc(fp)).then(function(r){return r.json()}).then(function(j){if(j.ok){var u=j.u||1;FS.used=j.used*u;FS.total=j.total*u;fEdUpd()}}).catch(function(){})}
 function fEdSaveAs(){dlg({title:t("Salva come"),body:'<label for="dn">'+esc(t("Nome del file"))+'</label><input id="dn" autocomplete="off" maxlength="60" value="'+esc(fBase(FE.p))+'"><label for="dd">'+esc(t("Cartella"))+'</label><select id="dd"><option value="'+esc(fDir(FE.p))+'">'+esc(fDir(FE.p))+'</option></select>',ok:t("Salva"),
  onOk:function(){var n=dlgV("dn"),d=$("dd").value,e=fName(n);if(e)return e;fEdSave(true,join(d,n));return""}});fDirsSel("dd",fDir(FE.p))}
 function fEdPaste(){navigator.clipboard.readText().then(function(x){var e=$("fedx");e.focus();e.setRangeText(x,e.selectionStart,e.selectionEnd,"end");fEdUpd()}).catch(function(){msg("fedm",t("Il browser non permette di leggere gli appunti: usa Ctrl+V"),false)})}
@@ -249,7 +249,7 @@ function tkPoll(){if(document.hidden)return;api("/api/tasklist").then(function(r
  if(!j.ok){$("tkinfo").textContent=t("(dettagli non disponibili in questa build)");$("tktab").innerHTML="";return}
  var dt=TK.prev?j.total-TK.prev.total:0,hasRt=j.total>0;
  j.tasks.forEach(function(x){x.cpu=-1;if(hasRt&&TK.prev&&dt>0&&TK.prev.m[x.id]!==undefined){x.cpu=Math.min(100,Math.max(0,100*(x.rt-TK.prev.m[x.id])/dt))}});
- var m={};j.tasks.forEach(function(x){m[x.id]=x.rt});TK.prev={total:j.total,m:m};TK.hasCpu=hasRt;TK.d=j.tasks;TK.total=j.total;tkDraw()}).catch(function(){})}
+ var m={};j.tasks.forEach(function(x){m[x.id]=x.rt});TK.prev={total:j.total,m:m};TK.hasCpu=hasRt;TK.d=j.tasks;TK.total=j.total;tkDraw();if(typeof tkProgs=="function")tkProgs(j)}).catch(function(){})}
 function tkSort(c){if(TK.col==c)TK.asc=!TK.asc;else{TK.col=c;TK.asc=(c=="n"||c=="t"||c=="s")}tkDraw()}
 function tkState(s){return s==9?t("Fermato"):[t("In esecuzione"),t("Pronto"),t("In attesa"),t("Sospeso"),t("Eliminato"),"?"][s]||"?"}
 function tkType(x){return x.t==2?t("App"):x.t==1?t("VesevOS"):t("Sistema")}

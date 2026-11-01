@@ -11,13 +11,6 @@ static esp_err_t keyJson(Res* s, bool withOk = true) {
   return sendJson(s, j);
 }
 
-// stato del Bluetooth per la pagina
-static esp_err_t bleReply(Res* s) {
-  HeapBuf j(BLE_JSON_MAX);
-  if (!bleJson(j)) return ko(s, tr("Memoria insufficiente"), "off");
-  return sendJson(s, j);
-}
-
 void routesFiles(PsychicHttpServer* S, bool sec) {
   // ---- rete tra schede (ESP-NOW) ----
   add(S, sec, "/api/mesh", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJsonBuf(s, meshJsonStd()); });
@@ -55,17 +48,6 @@ void routesFiles(PsychicHttpServer* S, bool sec) {
     return okk ? ok(s) : ko(s, e);
   });
 
-  // ---- Bluetooth (resta acceso finche non si spegne; "min" = limite di tempo facoltativo) ----
-  add(S, sec, "/api/ble", HTTP_GET, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return bleReply(s); });
-  add(S, sec, "/api/ble", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
-    ErrBuf e;
-    uint32_t min = has(r, "min") ? (uint32_t)std::max(0L, Pint(r, "min")) : 0;
-    if (Pis(r, "a", "start")) { if (!bleUserOn(min, e)) return ko(s, e); }
-    else if (Pis(r, "a", "restart")) { bleSetLimit(min); if (!serviceRestart("ble", e)) return ko(s, e); }
-    else bleUserOff();
-    return bleReply(s);
-  });
-
   // ---- file (memoria interna) ----
   add(S, sec, "/api/fs/list", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
     HeapBuf j(FS_JSON_MAX);                     // il JSON si scrive qui e si invia senza copiarlo in una String
@@ -73,7 +55,7 @@ void routesFiles(PsychicHttpServer* S, bool sec) {
     return sendText(s, 200, "application/json", j.c_str(), j.length());
   });
   add(S, sec, "/api/fs/get", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
-    char p[FS_PATH_MAX];
+    char p[FS_PATH_MAX + 1];                    // fsCleanTo vuole almeno FS_PATH_MAX + 1 byte, altrimenti rifiuta sempre
     if (!fsCleanTo(Pc(r, "path"), p, sizeof p) || fsProtected(p) || !drvFsExists(p)) return notFound(s);
     return sendFile(s, p, "application/octet-stream", true);
   });
@@ -98,12 +80,13 @@ void routesFiles(PsychicHttpServer* S, bool sec) {
   up->onUpload([sec](Req* r, const auto& filename, uint64_t index, uint8_t* data, size_t len, bool final) -> esp_err_t {
     uint32_t ip = ipOf(r);
     if (!fwAllow(ip, false)) return ESP_FAIL;
+    if (csrfBlocked(r)) return ESP_FAIL;                                       // caricamento partito da un altro sito
     int u = userOf(r);
     if (u < 0 || cfg.users[u].role < ROLE_ADMIN) return ESP_FAIL;
     if (!sec && g_tlsUp && cfg.https && !netOnAp(ip)) return ESP_FAIL;
     if (index == 0) {
       g_upOk = false; g_upErr.clear();
-      char dir[FS_PATH_MAX], raw[2 * FS_PATH_MAX], p[FS_PATH_MAX];
+      char dir[FS_PATH_MAX + 1], raw[2 * FS_PATH_MAX + 2], p[FS_PATH_MAX + 1];   // p: fsCleanTo vuole almeno FS_PATH_MAX + 1 byte, altrimenti rifiuta sempre
       qparamTo(r, "dir", dir, sizeof dir);
       if (!dir[0]) snprintf(dir, sizeof dir, "/");
       const char* name = textOf(filename);

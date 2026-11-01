@@ -1,30 +1,64 @@
-/* ===== App (.vap): elenco, pagina generica con i controlli dichiarati, avvio e stop. Il testo si modifica con l'editor dei file ===== */
-var AP={list:[],sel:"",info:null,tm:0,run:false,busy:false,key:"",tmr:0};
-function apLoad(){apTimerStop();api("/api/apps").then(function(r){return r.json()}).then(function(j){if(!j.ok){msg("appm",j.err,false);return}AP.list=j.list;apDraw(j);if(AP.sel)apPoll();
- AP.tm=setInterval(function(){if(cur!="app"||document.hidden){if(cur!="app")apTimerStop();return}if(AP.sel)apPoll()},1200)}).catch(function(){})}
+/* ===== App (.vab): elenco, pagina generica con i controlli dichiarati, avvio e stop. Il testo si modifica con l'editor dei file ===== */
+var AP={list:[],elf:[],prg:{},dat:{sd:false,on:{}},sel:"",info:null,tm:0,run:false,busy:false,key:"",tmr:0};
+function apLoad(){apTimerStop();apLists().then(function(){if(AP.sel)apPoll();apRunPoll();
+ AP.tm=setInterval(function(){if(cur!="app"||document.hidden){if(cur!="app")apTimerStop();return}if(AP.sel)apPoll();apRunPoll()},1500)})}
 function apTimerStop(){if(AP.tm){clearInterval(AP.tm);AP.tm=0}}
+/* elenchi: app Berry (/api/apps), app ELF installate (/api/elf, se il firmware le ha) e cio che gira (/api/progs) */
+function apLists(){
+ var a=api("/api/apps").then(function(r){return r.json()}).then(function(j){if(!j.ok){msg("appm",j.err,false);return}AP.list=j.list}).catch(function(){}),
+  e=AUTH&&AUTH.elf?api("/api/elf").then(function(r){return r.json()}).then(function(j){AP.elf=j.mods||[]}).catch(function(){}):Promise.resolve(),
+  d=api("/api/progdata").then(function(r){return r.json()}).then(function(j){var m={};(j.list||[]).forEach(function(x){m[x.k+":"+x.n]=1});AP.dat={sd:!!j.sd,on:m}}).catch(function(){});
+ return Promise.all([a,e,d,apRunPoll()]).then(function(){AP._h="";apDraw()})}
+function apRunPoll(){return api("/api/progs").then(function(r){return r.json()}).then(function(j){var m={};(j.progs||[]).forEach(function(p){if(p.a)m[p.k+":"+p.n]=p});AP.prg=m;apDraw()}).catch(function(){})}
 function apIco(x){
  if(x.ok&&x.icon){var sv=x.icon;if(sv.indexOf("xmlns")<0)sv=sv.replace("<svg",'<svg xmlns="http://www.w3.org/2000/svg"');return'<img class="api" alt="" width="24" height="24" src="data:image/svg+xml;charset=utf-8,'+enc(sv)+'">'}
  return'<svg class="i" aria-hidden="true"><use href="#i-fvap"/></svg>'}
-function apDraw(j){var h="";
- if(!j.list.length)h='<tbody><tr><td colspan="3" class="fhint">'+esc(ROLE==2?t("Nessuna app. Premi Nuova app per crearne una."):t("Nessuna app disponibile per il tuo ruolo."))+'</td></tr></tbody>';
- else{h="<tbody>";j.list.forEach(function(x){var q=esc(x.n),oq="'"+x.n+"'",nm=/^[a-z0-9_-]{1,24}$/.test(x.n);
-  h+='<tr><td><span class="scn">'+apIco(x)+'<b>'+(x.ok?esc(x.t):q)+'</b>'+(ROLE==2?'<span class="pill'+(x.ok?" v":" k")+'">'+esc(x.ok?t("valida"):t("errore"))+'</span>':'')+'</span>';
-  if(x.ok)h+='<div class="fhint">'+esc(x.n+" · "+tf("Versione {0}",x.v)+(x.a?" · "+x.a:"")+" · "+tf("Controlli: {0}",x.c)+" · "+tf("Permessi: {0}",x.u||"-"))+'</div>';
-  else h+='<div class="fhint bad">'+esc(x.e)+'</div>';
-  h+='</td><td class="fsz">'+(x.ok&&ROLE==2?fSize(x.s):"")+'</td><td class="fac tkb"><span class="svi">'+(x.ok&&nm?sibB("sm go","i-sgo",tf("Apri {0}",x.n),AP.sel==x.n,false,"apOpen("+oq+")"):"")+(ROLE==2&&nm?sibB("sm","i-edit",tf("Modifica {0}",x.n),false,false,"apEdit("+oq+")")+sibB("sm","i-del",tf("Elimina {0}",x.n),false,false,"apDel("+oq+")"):"")+'</span></td></tr>'});h+="</tbody>"}
- if(AP._h!==h){AP._h=h;$("aptab").innerHTML=h}}
-function apPath(n){return"/apps/"+n+".vap"}
-function apEdit(n){api("/api/fs/text?path="+enc(apPath(n))).then(function(r){return r.text().then(function(x){return{ok:r.ok,x:x}})}).then(function(o){if(!o.ok){msg("appm",o.x,false);return}fEdOpen(apPath(n),o.x,false)}).catch(function(){})}
+/* una riga per programma, uguale per tutti: nome, tag dell'estensione, stato, permessi che chiede e gli stessi pulsanti (Avvia, Ferma, Elimina) */
+function apRow(k,x){var n=x.n,q=esc(n),oq="'"+k+"','"+n+"'",run=AP.prg&&AP.prg[k+":"+n],valid=x.ok!==false,adm=ROLE==2,ext=progExt(k).slice(1),nm=/^[a-z0-9_-]{1,24}$/.test(n),
+ name='<b>'+(k=="b"&&valid?esc(x.t||n):q)+'</b>',
+ use=k=="b"?(x.u||""):(x.u||"").replace(/ /g,","),
+ st=!valid?'<span class="pill k">'+esc(t("errore"))+'</span>':x.q?'<span class="pill k">'+esc(t("in quarantena"))+'</span>':run?'<span class="pill a">'+esc(t("in corso"))+'<span data-ps="'+k+':'+n+'"></span></span>':'<span class="pill">'+esc(t("pronto"))+'</span>',
+ h='<tr><td><span class="scn">'+(k=="b"?apIco(x):'<svg class="i" aria-hidden="true"><use href="#i-fvap"/></svg>')+name+'<span class="pill">'+esc(ext)+'</span>'+st+'</span>';
+ if(!valid)h+='<div class="fhint bad">'+esc(x.e)+'</div>';
+ else{var parts=[];if(k=="b")parts.push(n,tf("Versione {0}",x.v));if(k=="b"&&x.a)parts.push(x.a);if(k=="b")parts.push(tf("Controlli: {0}",x.c));parts.push(tf("Permessi: {0}",use?use.replace(/,/g,", "):"-"));
+  h+='<div class="fhint">'+esc(parts.join(" · "))+'</div>';if(x.d)h+=apDataSel(k,n,run);if(x.m)h+='<div class="fhint bad">'+esc(tf("Chiede {0}, che e spenta (Sistema > Funzionalita)",x.m))+'</div>'}
+ var can=valid&&!x.q&&(k=="e"?adm:true);
+ h+='</td><td class="fsz">'+(valid&&adm?fSize(k=="b"?x.s:x.b):"")+'</td><td class="fac tkb"><span class="svi">'+
+  (k=="b"&&valid&&nm?sibB("sm go","i-fvap",tf("Apri {0}",n),AP.sel==n,false,"apOpen('"+n+"')"):"")+
+  (valid?sibB("sm go","i-sgo",tf("Avvia {0}",n),!!run,!can||!!run,can&&!run?"apGo("+oq+")":"")+sibB("sm st","i-sst",tf("Ferma {0}",n),false,!run||!adm,run&&adm?"apStopN('"+n+"')":""):"")+
+  (adm&&k=="e"&&x.q?sibB("sm","i-lockx",tf("Togli {0} dalla quarantena",n),false,false,"apUnq('"+n+"')"):"")+
+  (adm&&k=="b"&&nm?sibB("sm","i-edit",tf("Modifica {0}",n),false,false,"apEdit('"+n+"')"):"")+(adm?sibB("sm","i-del",tf("Elimina {0}",n),false,!!run,run?"":"apDel("+oq+")"):"")+'</span></td></tr>';
+ return h}
+/* dove l'app salva i dati (solo se dichiara di salvarne): lo sceglie l'utente; senza microSD montata resta solo la flash */
+function apDataSel(k,n,run){var sd=AP.dat.sd,on=!!AP.dat.on[k+":"+n],id="pd_"+k+"_"+n,dis=ROLE!=2||!!run?" disabled":"";
+ return'<div class="fhint"><label for="'+id+'">'+esc(t("Salva su"))+'</label> <select id="'+id+'"'+dis+' onchange="apData(\''+k+'\',\''+n+'\',this.value)"><option value="flash"'+(on?"":" selected")+'>'+esc(t("Flash"))+'</option>'+(sd||on?'<option value="sd"'+(on?" selected":"")+'>'+esc(on&&!sd?t("microSD (non montata)"):t("microSD"))+'</option>':"")+'</select></div>'}
+function apData(k,n,v){post("/api/progdata",{k:k,name:n,where:v}).then(function(r){return r.json()}).then(function(j){msg("appm",j.ok===false?j.err:t("Fatto"),j.ok!==false);apLists()}).catch(function(){apLists()})}
+function apDraw(){var h="",bn=AP.list||[],el=AP.elf||[];
+ if(!bn.length&&!el.length)h='<tbody><tr><td colspan="3" class="fhint">'+esc(ROLE==2?t("Nessuna app. Premi Nuova app per crearne una, oppure Carica."):t("Nessuna app disponibile per il tuo ruolo."))+'</td></tr></tbody>';
+ else{h="<tbody>";bn.forEach(function(x){h+=apRow("b",x)});el.forEach(function(x){h+=apRow("e",x)});h+="</tbody>"}
+ if(AP._h!==h){AP._h=h;$("aptab").innerHTML=h}
+ Object.keys(AP.prg||{}).forEach(function(key){var e=document.querySelector('[data-ps="'+key+'"]');if(e)e.textContent=" \u00b7 "+AP.prg[key].s+" s"})}   /* i secondi si aggiornano senza ridisegnare la riga (i pulsanti tengono il fuoco) */
+function apGo(k,n){if(k=="b"){post("/api/app/start",{name:n}).then(function(r){return r.json()}).then(function(j){msg("appm",j.ok?t("App avviata"):j.err,j.ok);apRunPoll();if(AP.sel==n)apPoll()}).catch(function(){})}
+ else post("/api/progs",{act:"start",k:k,name:n}).then(function(r){return r.json()}).then(function(j){msg("appm",j.ok?t("App avviata"):j.err,j.ok);apRunPoll()}).catch(function(){})}
+function apStopN(n){post("/api/progs",{act:"stop",name:n}).then(function(r){return r.json()}).then(function(j){msg("appm",j.ok?t("App fermata"):j.err,j.ok);apRunPoll();if(AP.sel==n)apPoll()}).catch(function(){})}
+function apUnq(n){post("/api/elf",{act:"unq",name:n}).then(function(r){return r.json()}).then(function(j){msg("appm",j.ok===false?j.err:t("Fatto"),j.ok!==false);apLists()}).catch(function(){})}
+/* Carica: un solo pulsante, il tipo si riconosce dall'estensione */
+function apUp(){var f=$("apup").files[0];if(!f)return;
+ var ok=extOk(f.name,"b")||(AUTH&&AUTH.elf&&extOk(f.name,"e"));
+ if(!ok){msg("appm",tf("Il file deve finire per {0}",AUTH&&AUTH.elf?EXT.b+" "+t("oppure")+" "+EXT.e:EXT.b),false);return}
+ var fd=new FormData();fd.append("file",f);
+ api("/api/fs/up?dir=/bin",{method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){msg("appm",j.ok?t("Caricato"):j.err,j.ok);$("apup").value="";apLists()}).catch(function(){})}
+function apPath(n){return"/bin/"+n+EXT.b}
+function apEdit(n){progTry("/bin/",n,"b",function(p){return api("/api/fs/text?path="+enc(p)).then(function(r){return r.text().then(function(x){return{ok:r.ok,x:x,p:p}})})}).then(function(o){if(!o.ok){msg("appm",o.x,false);return}fEdOpen(o.p,o.x,false)}).catch(function(){})}
 function apTpl(n){return"[manifest]\nname="+n+"\ntitle="+n.charAt(0).toUpperCase()+n.slice(1)+"\nversion=1\nuse=led\nwho=admin\n\n[icon]\n<svg viewBox=\"0 0 24 24\"><path d=\"M5 19l4-9 3 4 3-6 4 11z\" fill=\"none\" stroke=\"#c0392b\" stroke-width=\"2\"/></svg>\n\n[page]\nswitch id=power label=\"Accesa\"\nslider id=lum label=\"Luminosita\" min=0 max=255\ntext id=info label=\"Stato\"\n\n[code]\ndef on_set(id, v)\n  if id == 'power'\n    if v == 1\n      led('ffffff')\n    else\n      led('auto')\n    end\n  end\n  if id == 'lum'\n    dev_set('info', 'Luminosita ' + str(v))\n  end\nend\n\n[data]\npower=0\n"}
 function apNew(){dlg({title:t("Nuova app"),body:'<label for="dn">'+esc(t("Nome dell'app"))+'</label><input id="dn" autocomplete="off" maxlength="24" spellcheck="false" autocapitalize="off" placeholder="lampada"><p class="fhint" style="margin:0">'+esc(t("Da 1 a 24 caratteri: lettere minuscole, numeri, trattino e sottotrattino."))+'</p>',ok:t("Crea"),
- onOk:function(){var n=dlgV("dn").toLowerCase().replace(/\.vap$/,"");if(!/^[a-z0-9_-]{1,24}$/.test(n))return t("Nome non valido");if(AP.list.some(function(x){return x.n==n}))return t("Esiste gia");
+ onOk:function(){var n=dlgV("dn").toLowerCase().replace(/\.va[bp]$/,"");if(!/^[a-z0-9_-]{1,24}$/.test(n))return t("Nome non valido");if(AP.list.some(function(x){return x.n==n}))return t("Esiste gia");
   fEdOpen(apPath(n),apTpl(n),true);return""}})}
-function apDel(n){dlg({title:t("Eliminare?"),body:'<p style="margin:0">'+esc(tf("L'app {0} verra eliminata.",n))+'</p><p style="margin:8px 0 0;color:var(--mut)">'+esc(t("Non si puo annullare."))+'</p>',ok:t("Elimina"),danger:true,
- onOk:function(){if(AP.sel==n)apClose();return post("/api/fs/del",{path:apPath(n)}).then(function(r){return r.json()}).then(function(j){apLoad();return j.ok?"":j.err})}})}
+function apDel(k,n){if(n===undefined){n=k;k="b"}dlg({title:t("Eliminare?"),body:'<p style="margin:0">'+esc(tf("L'app {0} verra eliminata.",n))+'</p><p style="margin:8px 0 0;color:var(--mut)">'+esc(t("Non si puo annullare."))+'</p>',ok:t("Elimina"),danger:true,
+ onOk:function(){if(AP.sel==n)apClose();return progTry("/bin/",n,k,function(p){return post("/api/fs/del",{path:p}).then(function(r){return r.json()})}).then(function(j){apLists();return j.ok?"":j.err})}})}
 /* ---- la pagina generica dell'app: UN solo disegno nel firmware, legge i controlli dichiarati nel manifest (niente HTML dell'utente) ---- */
 function apOpen(n){api("/api/app?name="+enc(n)).then(function(r){return r.json()}).then(function(j){if(!j.ok){msg("appm",j.err,false);return}
- AP.sel=n;AP.info=j;AP.key="";AP.run=false;apBuild();apPoll();if(AP._h){AP._h="";apLoad()}else apDraw({list:AP.list});$("apcard").scrollIntoView({block:"nearest"})}).catch(function(){})}
+ AP.sel=n;AP.info=j;AP.key="";AP.run=false;apBuild();apPoll();AP._h="";apDraw();$("apcard").scrollIntoView({block:"nearest"})}).catch(function(){})}
 function apClose(){AP.sel="";AP.info=null;AP.key="";$("apcard").className="card hide";AP._h="";apDraw({list:AP.list})}
 function apCtl(c){var id=esc(c.id),l=esc(c.l),dis=AP.run?"":" disabled",x='<div class="apc" id="apw_'+id+'">';
  if(c.k=="switch")x+='<span class="apl" id="apt_'+id+'">'+l+'</span><button type="button" class="sw1" id="apc_'+id+'" role="switch" aria-checked="false" aria-labelledby="apt_'+id+'"'+dis+' onclick="apTog(\''+c.id+'\')"></button>';

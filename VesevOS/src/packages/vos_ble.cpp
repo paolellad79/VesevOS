@@ -1,198 +1,192 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_ble.cpp
-#include "vos_ble.h"
+// STRATO 6 (packages): ciclo di vita e politica del Bluetooth. La radio sta in vos_drv_ble; le funzioni dei programmi in vos_ble_app.cpp.
+// Il Bluetooth non parte mai da solo: lo chiede un programma VesevOS con il permesso ble (bleAppOn) e lo avvia bleTick (ciclo principale),
+// cosi la radio non viene inizializzata dal task del programma.
+#include "vos_ble_int.h"
 #include "../core/vos_eventbus.h"
-#include "../core/vos_common.h"
 #include "../core/vos_config.h"
-#include "../net/vos_net.h"
 #include "../core/vos_log.h"
 #include "../core/vos_i18n.h"
-#include "../core/vos_util.h"
-#include "../core/vos_heapbuf.h"
-#include "../core/vos_strbuf.h"
+#include "../core/vos_audit.h"
 #include "../core/vos_ram.h"
 #include "../core/vos_service.h"
-#include "../drivers/vos_drv_ble.h"
-#include "vos_ble_cfg.h"
-#include "vos_stats.h"
-#include "../core/vos_time.h"
-#include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
 #include "../drivers/vos_drv_time.h"
 #include "../drivers/vos_drv_heap.h"
 #include "../drivers/vos_drv_sys.h"
-#include <algorithm>
+#include "vos_stats.h"
 
 #if VOS_WITH_BLE
-// STRATO 4/2: ciclo di vita del Bluetooth (limiti di memoria, tempo facoltativo, pausa tra due accensioni, codice di accoppiamento,
-// stato per pagina e shell). La radio sta in vos_drv_ble; i comandi dal telefono in vos_ble_cfg.
-
-#define BLE_SVC  "5b0a0001-7665-7365-766f-730000000001"
-#define BLE_CMD  "5b0a0002-7665-7365-766f-730000000001"
-#define BLE_RESP "5b0a0003-7665-7365-766f-730000000001"
 #define BLE_PAUSE_MS  5000UL                         // pausa tra due accensioni
-#define BLE_MIN_BLOCK 35000u                         // blocco libero piu grande minimo per accendere (misurato: acceso senza problemi anche con 47 e 59 KB)
+#define BLE_MIN_FREE  85000u                         // RAM libera minima per accendere
+#define BLE_MIN_BLOCK 35000u                         // blocco libero piu grande minimo (misurato con altro programma: acceso anche con 47 e 59 KB)
+#define BLE_ADV_MS    500                            // intervallo dell'annuncio
 
-static bool g_on = false;
-static uint32_t g_until = 0, g_pin = 0;
-static bool g_lim = false;                           // true = si spegne da solo allo scadere di g_until; false = resta acceso finche non lo si spegne (pagina, shell, app)
-static bool g_renamePend = false;                    // il nome della scheda e cambiato: spento e riacceso da solo (appena nessun telefono e collegato)
-static uint32_t g_renameMin = 0;                     // limite da rimettere dopo il riavvio per cambio nome (0 = nessuno)
-static uint32_t g_totSec = 0;                        // durata del limite in corso (per la barra della Home)
-static uint32_t g_limMin = 0;                        // minuti scelti per la PROSSIMA accensione (0 = senza limite)
-static volatile bool g_hasCmd = false;
-static char g_cmd[201];                              // comando in arrivo dal telefono (max 200 caratteri, come nel driver)
-static ErrBuf g_last;                                // ultima risposta al telefono
-static char g_hello[96];                             // primo valore annunciato: versione e nome
-static char g_name[40];                              // nome Bluetooth = nome della scheda in rete (hostname) al momento dell'accensione
-static bool g_conn = false;
-static volatile int g_req = 0;                       // richiesta di un driver Berry: 0 nessuna, 1 accendi, 2 spegni (la esegue bleTick)
-static bool g_bootPend = false;                      // impostazione "ble" accesa: parte al primo giro del ciclo principale
-static uint32_t g_stopAt = 0;                        // quando e stato spento l'ultima volta
-// pagina web, rete (modo aereo) e ciclo principale chiamano queste funzioni da task diversi: un solo alla volta
-static SemaphoreHandle_t bleMx() { static SemaphoreHandle_t m = xSemaphoreCreateRecursiveMutex(); return m; }
-struct BleLock { BleLock() { xSemaphoreTakeRecursive(bleMx(), portMAX_DELAY); } ~BleLock() { xSemaphoreGiveRecursive(bleMx()); } };
+namespace vosble {
+bool g_conn = false;                                  // un telefono e collegato
+VosMutex g_mx;
+Phase    g_phase = IDLE;
+char     g_owner[BLE_OWNER_MAX + 1] = "";
+char     g_name[BLE_NAME_MAX + 1] = "VesevOS";
+BleServiceDef g_def;
+bool     g_adv = false;
+uint32_t g_limMin = 0;
+bool     g_endReq = false;
+char     g_err[12] = "";
+uint32_t g_stopAt = 0;
+}
+using namespace vosble;
 
-// dal driver (task Bluetooth): si mette da parte il comando, si esegue nel ciclo principale
-static void onRx(const char* t) { if (g_hasCmd) return; snprintf(g_cmd, sizeof(g_cmd), "%s", t); g_hasCmd = true; }
-static void onLink(bool up) {
+static uint32_t g_until = 0, g_pin = 0, g_wantAt = 0;
+static bool     g_lim = false;
+static bool   (*g_alive)(const char*) = nullptr;     // il programma proprietario gira ancora?
+
+void bleSetOwnerCheck(bool (*alive)(const char*)) { g_alive = alive; }
+
+void vosble::resetConfig() {
+  snprintf(g_name, sizeof g_name, "VesevOS");
+  memset(&g_def, 0, sizeof g_def);
+  g_adv = false; g_limMin = 0; g_lim = false;
+}
+
+bool vosble::claim(const char* owner, ErrBuf& err) {
+  if (!owner || !owner[0]) { err = tr("Bluetooth: solo un'app con il permesso ble puo usarlo"); return false; }
+  if (g_owner[0] && strcmp(g_owner, owner) != 0) { err.setf(tr("Bluetooth gia in uso dal programma %s"), g_owner); return false; }
+  if (!g_owner[0]) { snprintf(g_owner, sizeof g_owner, "%s", owner); resetConfig(); g_endReq = false; g_err[0] = 0; }
+  return true;
+}
+
+// ---- collegamento (task Bluetooth) ----
+void vosble::onLinkEvent(bool up) {
   g_conn = up;
-  EventBus::publish("ble.link", "", up ? 1 : 0);     // telefono collegato / scollegato
-  if (up) { statNote(ST_BLE_CONN); vlog("BLE: telefono collegato"); } else vlog("BLE: telefono scollegato");
+  EventBus::publish("ble.link", "", up ? 1 : 0);
+  if (up) statNote(ST_BLE_CONN);
+  vlog(up ? "BLE: telefono collegato" : "BLE: telefono scollegato");
 }
 
-static const char* bleWantedName() { return cfg.hostname.length() ? cfg.hostname.c_str() : "VesevOS"; }   // il nome Bluetooth SEGUE il nome della scheda
-bool bleRunning() { return g_on; }
-uint32_t bleLeftSec() { return (g_on && g_lim) ? (uint32_t)((g_until - drvMillis()) / 1000) : 0; }
-bool bleLimited() { return g_on && g_lim; }
-void bleSetLimit(uint32_t minutes) { g_limMin = minutes > 1440 ? 1440 : minutes; }
-uint32_t bleTotalSec() { return g_lim ? g_totSec : 0; }
-static void armTimer() { g_lim = g_limMin > 0; g_totSec = g_limMin * 60UL; g_until = drvMillis() + g_limMin * 60000UL; }
+// ---- accensione e spegnimento ----
+static void releaseAll(const char* why, const char* errCode) {
+  bool wasUp = (g_phase == UP);
+  char who[BLE_OWNER_MAX + 1]; snprintf(who, sizeof who, "%s", g_owner);
+  if (wasUp) drvBleEnd();
+  queueClear();
+  g_phase = IDLE; g_conn = false; g_endReq = false; g_lim = false; g_pin = 0;
+  g_owner[0] = 0;
+  resetConfig();
+  snprintf(g_err, sizeof g_err, "%s", errCode ? errCode : "");
+  if (wasUp) {
+    g_stopAt = drvMillis(); if (!g_stopAt) g_stopAt = 1;
+    ramNote("ble off");
+    vlog("BLE: spento (%s), RAM libera %u KB, blocco piu grande %u KB", why, (unsigned)(drvHeapFree() / 1024), (unsigned)(drvHeapMaxBlock() / 1024));
+    auditEvent(AUD_INFO, "ble", trf("Bluetooth spento (programma %s)", who).c_str());
+  }
+}
 
-bool bleStart(ErrBuf& err) {
-  BleLock lk;
-  if (g_on) { armTimer(); return true; }
+void bleStop() {
+  VosLock lk(g_mx);
+  if (g_phase != IDLE) releaseAll("forzato", "");
+}
+
+// Controlli prima di accendere: gli stessi per la richiesta (errore subito al programma) e per l'avvio.
+static bool precheck(ErrBuf& err) {
   if (cfg.airOn) { err = tr("Modalita aereo attiva: radio spenta"); return false; }
-  if (drvHeapFree() < 85000) { err = tr("Memoria insufficiente per il Bluetooth: chiudi la pagina web e riprova"); return false; }
+  if (drvHeapFree() < BLE_MIN_FREE) { err = tr("Memoria insufficiente per il Bluetooth: chiudi la pagina web e riprova"); return false; }
   if (g_stopAt && drvMillis() - g_stopAt < BLE_PAUSE_MS) { err.setf(tr("Bluetooth appena spento: attendi %d secondi e riprova"), (int)((BLE_PAUSE_MS - (drvMillis() - g_stopAt)) / 1000 + 1)); return false; }
-  uint32_t big = drvHeapMaxBlock();
-  vlog("BLE: prima di accendere, RAM libera %u KB, blocco piu grande %u KB", (unsigned)(drvHeapFree() / 1024), (unsigned)(big / 1024));
-  if (big < BLE_MIN_BLOCK) { err = tr("Memoria troppo frammentata per il Bluetooth: chiudi la pagina web, attendi qualche secondo e riprova"); vlog("ATTENZIONE: BLE non acceso, memoria frammentata (blocco piu grande %u KB)", (unsigned)(big / 1024)); return false; }
-  g_pin = 100000 + drvRandom32() % 900000;
-  snprintf(g_hello, sizeof(g_hello), "VesevOS %s - %s", VOS_VERSION, cfg.hostname.c_str());
-  snprintf(g_name, sizeof(g_name), "%s", bleWantedName());
-  BleDrvConfig dc = { g_name, BLE_SVC, BLE_CMD, BLE_RESP, g_pin, g_hello, onRx, onLink };
-  if (!drvBleBegin(dc)) { err = tr("Memoria insufficiente per il Bluetooth: chiudi la pagina web e riprova"); return false; }
-  g_on = true; armTimer(); ramNote("ble on");
-  if (g_lim) vlog("BLE: acceso per %u minuti (il codice di accoppiamento si vede solo in pagina o nella shell)", (unsigned)g_limMin);
-  else vlog("BLE: acceso, senza limite di tempo (il codice di accoppiamento si vede solo in pagina o nella shell)");   // il registro lo legge anche un ospite: niente codice qui
+  if (drvHeapMaxBlock() < BLE_MIN_BLOCK) { err = tr("Memoria troppo frammentata per il Bluetooth: chiudi la pagina web, attendi qualche secondo e riprova"); return false; }
   return true;
 }
 
-static void stopImpl() {
-  BleLock lk;
-  if (!g_on) return;
-  g_on = false; g_conn = false; g_lim = false;
-  drvBleEnd();
-  g_stopAt = drvMillis(); if (!g_stopAt) g_stopAt = 1; ramNote("ble off");
-  vlog("BLE: spento, RAM libera %u KB, blocco piu grande %u KB", (unsigned)(drvHeapFree() / 1024), (unsigned)(drvHeapMaxBlock() / 1024));
-}
-
-bool bleEnabled() { return cfg.bleOn; }
-const char* bleStateName() { return !g_on ? "off" : g_conn ? "connected" : "on"; }
-void bleRequest(bool on) { g_req = on ? 1 : 2; }
-
-bool bleUserOn(uint32_t minutes, ErrBuf& err) {
-  bleSetLimit(minutes);
-  if (!bleStart(err)) return false;
-  if (minutes == 0 && !cfg.bleOn) { cfg.bleOn = true; cfgSave(); }          // senza limite: si ricorda
+bool bleAppOn(const char* owner, uint32_t minutes, ErrBuf& err) {
+  VosLock lk(g_mx);
+  if (minutes > BLE_MINUTES_MAX) { err.setf(tr("Bluetooth: massimo %d minuti"), BLE_MINUTES_MAX); return false; }
+  if (!claim(owner, err)) return false;
+  if (g_phase != IDLE) { g_limMin = minutes; if (g_phase == UP) { g_lim = minutes > 0; g_until = drvMillis() + minutes * 60000UL; } return true; }   // gia acceso: rinnova il tempo
+  if (!precheck(err)) { g_owner[0] = 0; resetConfig(); return false; }
+  g_limMin = minutes;
+  g_phase = WANT; g_wantAt = drvMillis();                          // lo avvia bleTick
   return true;
 }
-void bleUserOff() {
-  bleStop();
-  if (cfg.bleOn) { cfg.bleOn = false; cfgSave(); }
+
+bool bleAppOff(const char* owner, ErrBuf& err) {
+  VosLock lk(g_mx);
+  if (!owner || strcmp(g_owner, owner) != 0) { if (!g_owner[0]) return true; err.setf(tr("Bluetooth gia in uso dal programma %s"), g_owner); return false; }
+  releaseAll("richiesto dal programma", "");
+  return true;
 }
 
-void bleStop() { g_renamePend = false; stopImpl(); }       // spegnimento voluto (pagina, shell, app, scadenza): annulla anche un riavvio in attesa
+void bleAppEnded(const char* owner) {
+  VosLock lk(g_mx);
+  if (owner && g_owner[0] && strcmp(g_owner, owner) == 0) g_endReq = true;
+}
 
-static void runCmd(const char* c) {
-  bool stop = false;
-  bleCfgRun(c, stop, g_last);
-  drvBleSend(g_last.c_str());
-  if (stop) bleStop();
+static void startNow() {
+  ErrBuf e;
+  if (!precheck(e)) {
+    if (cfg.airOn || drvHeapFree() < BLE_MIN_FREE) { vlog("BLE: accensione non riuscita: %s", e.c_str()); releaseAll("accensione non riuscita", "ram"); }
+    if (drvMillis() - g_wantAt > 30000UL) { vlog("BLE: accensione non riuscita: %s", e.c_str()); releaseAll("accensione non riuscita", "ram"); }   // dopo 30 s si rinuncia
+    return;                                                        // pausa o memoria frammentata: si riprova al prossimo giro
+  }
+  g_pin = 100000 + drvRandom32() % 900000;                          // casuale a ogni accensione, mai fisso
+  BleDrvConfig dc;
+  memset(&dc, 0, sizeof dc);
+  snprintf(dc.name, sizeof dc.name, "%s", g_name);
+  dc.passkey = g_pin; dc.advertise = g_adv; dc.advIntervalMs = BLE_ADV_MS;
+  dc.svc = g_def; dc.ev = *driverEvents();
+  BleDrvErr r = drvBleBegin(dc);
+  memset(&dc, 0, sizeof dc);                                        // niente copie del codice nello stack
+  if (r != BLE_OK) { vlog("BLE: accensione non riuscita (errore %d)", (int)r); releaseAll("accensione non riuscita", r == BLE_ERR_RAM ? "ram" : "start"); return; }
+  g_phase = UP; g_conn = false;
+  g_lim = g_limMin > 0; g_until = drvMillis() + g_limMin * 60000UL;
+  statNote(ST_BLE_START);
+  ramNote("ble on");
+  vlog("BLE: acceso dal programma %s%s", g_owner, g_lim ? " (con limite di tempo)" : "");   // il codice di abbinamento non va mai nel registro
+  auditEvent(AUD_INFO, "ble", trf("Bluetooth acceso dal programma %s", g_owner).c_str());
 }
 
 void bleTick() {
-  BleLock lk;
-  if (g_bootPend) {                                                                                // accensione all'avvio (impostazione dell'utente)
-    g_bootPend = false; bleSetLimit(0);
-    ErrBuf e; if (!bleStart(e)) vlog("BLE: accensione all'avvio non riuscita: %s", e.c_str());
-    g_limMin = 0;
-  }
-  if (g_req) {                                                                                     // richiesta di un driver (non ricordata)
-    int rq = g_req; g_req = 0;
-    if (rq == 1) { bleSetLimit(0); ErrBuf e; if (!bleStart(e)) vlog("BLE: accensione chiesta da un driver non riuscita: %s", e.c_str()); g_limMin = 0; }
-    else bleStop();
-  }
-  if (g_renamePend && !g_on && g_stopAt && drvMillis() - g_stopAt >= BLE_PAUSE_MS + 300) {      // riaccensione dopo il cambio nome
-    g_renamePend = false; bleSetLimit(g_renameMin);
-    ErrBuf e; if (!bleStart(e)) vlog("BLE: riaccensione dopo il cambio nome non riuscita: %s", e.c_str());
-    g_limMin = 0;
-  }
-  if (!g_on) return;
-  if (!g_conn && !g_renamePend && strcmp(g_name, bleWantedName()) != 0) {                                // nome scheda cambiato: il Bluetooth lo annuncia nuovo
-    g_renameMin = g_lim ? (uint32_t)std::max(1L, (long)((g_until - drvMillis()) / 60000UL)) : 0;
-    vlog("BLE: il nome della scheda e cambiato, il Bluetooth si riaccende col nome nuovo");
-    g_renamePend = true; stopImpl(); return;
-  }
-  if (g_hasCmd) { char c[sizeof(g_cmd)]; memcpy(c, g_cmd, sizeof(c)); g_hasCmd = false; vlog("BLE: comando ricevuto"); runCmd(c); }
-  if (g_lim && (int32_t)(g_until - drvMillis()) <= 0) { vlog("BLE: tempo scaduto"); bleStop(); }
+  VosLock lk(g_mx);
+  if (g_phase == IDLE) return;
+  if (g_endReq || (g_alive && !g_alive(g_owner))) { releaseAll("il programma e finito", ""); return; }   // anche se il programma e stato fermato di forza
+  if (g_phase == WANT) { startNow(); return; }
+  drvBleTick();
+  if (drvBleLocked()) { vlog("BLE: troppi collegamenti senza abbinamento, spento"); releaseAll("troppi tentativi", "locked"); return; }
+  if (!drvBleIsUp()) { releaseAll("radio ferma", "start"); return; }
+  if (g_lim && (int32_t)(g_until - drvMillis()) <= 0) { releaseAll("tempo scaduto", "timeout"); return; }
 }
 
-bool bleJson(HeapBuf& j) {
-  j.addf("{\"have\":true,\"on\":%s,\"pin\":\"", g_on ? "true" : "false");
-  if (g_on) j.addUint(g_pin);
-  j.add("\",\"name\":\"");
-  if (g_on) j.addJson(g_name);
-  j.addf("\",\"conn\":%s,\"lim\":%s,\"left\":%lu,\"last\":\"", g_conn ? "true" : "false", bleLimited() ? "true" : "false", (unsigned long)bleLeftSec());
-  j.addJson(g_last.c_str(), g_last.length());
-  return j.add("\"}");
-}
-std::string bleText() {
-  StrText t(256);
-  if (!g_on) { t.buf().add(tr("Bluetooth spento (ble on per accenderlo)")).add('\n'); return t.take(); }
-  char p[16]; snprintf(p, sizeof(p), "%06lu", (unsigned long)(g_pin % 1000000UL));
-  if (!g_lim) t.buf().addf(tr("Bluetooth acceso: nome %s, codice %s, senza limite di tempo (ble off per spegnerlo)"), g_name, p);
-  else t.buf().addf(tr("Bluetooth acceso: nome %s, codice %s, ancora %lu s"), g_name, p, (unsigned long)((g_until - drvMillis()) / 1000));
-  t.buf().add('\n');
-  return t.take();
+bool bleRunning() { return g_phase == UP; }
+const char* bleStateName() { return g_phase != UP ? "off" : g_conn ? "connected" : "on"; }
+
+void bleStatusLine(char* out, size_t n) {
+  VosLock lk(g_mx);
+  if (g_phase != UP) {
+    if (g_err[0]) snprintf(out, n, "off err=%s", g_err); else snprintf(out, n, "off");
+    return;
+  }
+  long left = g_lim ? (long)((int32_t)(g_until - drvMillis()) / 1000) : -1;
+  if (left < 0 && g_lim) left = 0;
+  snprintf(out, n, "%s owner=%s left=%ld adv=%s paired=%s name=%s", bleStateName(), g_owner, left, g_adv ? "yes" : "no", drvBleSecure() ? "yes" : "no", g_name);
 }
 
-// ---- contratto dei servizi (vos_service): il Bluetooth e il primo servizio ----
-static int      svcState() { return g_on ? SVC_ON : SVC_OFF; }
-static uint32_t svcRam() { return g_on ? 62000u : 0u; }                                                   // misurato (1.7.38, free detail): ~62 KB con la radio accesa
+bool blePasskey(char* out, size_t n) {
+  VosLock lk(g_mx);
+  if (g_phase != UP || n < 7) return false;
+  snprintf(out, n, "%06lu", (unsigned long)(g_pin % 1000000UL));
+  return true;
+}
+
+// ---- servizio nel registro (vos_service): solo stato e spegnimento. Accendere da qui NON e possibile ----
+static int      svcState() { return g_phase == UP ? SVC_ON : SVC_OFF; }
+static uint32_t svcRam() { return g_phase == UP ? 62000u : 0u; }               // misurato (1.7.38, free detail): ~62 KB con la radio accesa
+static bool     svcBegin(ErrBuf& err) { err = tr("Il Bluetooth si accende solo da un programma VesevOS con il permesso ble"); return false; }
+static bool     svcJson(HeapBuf& out) { return out.addf("{\"have\":true,\"on\":%s}", g_phase == UP ? "true" : "false"); }
 static const ServiceOps BLE_OPS = { "ble", "Bluetooth", "Radio", "ble", ROLE_ADMIN, ROLE_ADMIN,
-                                    svcState, bleStart, bleStop, nullptr, bleJson, nullptr, svcRam };
-// Prova a vuoto al boot, SOLO se l'impostazione "ble" e accesa: dopo il primo ciclo acceso/spento NimBLE lascia 2 piccoli blocchi
-// nel mezzo della RAM e il pezzo piu grande scendeva (misurato con Arduino: da 79 a 47 KB). Facendo il ciclo subito, a RAM ancora
-// in un pezzo, quei blocchi stanno in fondo. Con il BLE spento (di fabbrica) non si alloca niente al boot.
-#ifndef VOS_BLE_PRIME
-#define VOS_BLE_PRIME 1
-#endif
-static void blePrime() {
-#if VOS_BLE_PRIME
-  uint32_t before = drvHeapMaxBlock();
-  if (!drvBlePrime()) return;
-  vlog("BLE: memoria preparata al boot, blocco piu grande %u KB prima, %u KB dopo", (unsigned)(before / 1024), (unsigned)(drvHeapMaxBlock() / 1024));
-#endif
-}
-void bleServiceInit() {
-  serviceRegister(&BLE_OPS);
-  if (!cfg.bleOn) return;                            // spento: niente memoria BLE al boot
-  if (cfg.airOn) { vlog("BLE: impostazione accesa ma modo aereo attivo, resta spento"); return; }
-  blePrime();
-  g_bootPend = true;
-}
+                                    svcState, svcBegin, bleStop, nullptr, svcJson, nullptr, svcRam };
 
+void bleServiceInit() {
+  g_mx.init();
+  resetConfig();
+  serviceRegister(&BLE_OPS);                         // niente RAM Bluetooth al boot: tutto parte solo su richiesta di un programma
+}
 #endif

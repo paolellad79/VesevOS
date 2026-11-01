@@ -24,16 +24,16 @@ void pinsInit() {
   pinClaim(VOS_PIN_USB_DP, "USB", "USB D+  (nativo)", true);
 }
 
-bool pinClaim(uint8_t gpio, const char* owner, const char* note, bool fixed) {
+bool pinClaim(uint8_t gpio, const char* owner, const char* note, bool fixed, const char* sig) {
   if (gpio < VOS_GPIO_COUNT && cfg.pinNote[gpio].length()) vlog("PIN: GPIO%u e segnato come collegato a '%s' ma %s lo vuole usare", (unsigned)gpio, cfg.pinNote[gpio].c_str(), owner);
   for (int i = 0; i < g_n; i++) {
     if (g_pins[i].gpio == gpio) {
-      if (strcmp(g_pins[i].owner, owner) == 0) { g_pins[i].note = note; return true; }
+      if (strcmp(g_pins[i].owner, owner) == 0) { g_pins[i].note = note; g_pins[i].sig = sig; return true; }
       return false;   // gia usato da altri
     }
   }
   if (g_n >= MAX_PINS) return false;
-  g_pins[g_n++] = { gpio, owner, note, fixed };
+  g_pins[g_n++] = { gpio, owner, note, fixed, sig };
   return true;
 }
 
@@ -62,6 +62,7 @@ bool pinsJson(HeapBuf& j) {
     j.addJson(tr(g_pins[i].owner));
     j.add("\",\"note\":\"");
     j.addJson(tr(g_pins[i].note));
+    j.add("\",\"sig\":\""); j.addJson(g_pins[i].sig);
     j.addf("\",\"fixed\":%s}", g_pins[i].fixed ? "true" : "false");
   }
   return j.add(']');

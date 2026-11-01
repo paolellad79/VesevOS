@@ -12,6 +12,7 @@
 #include "../drivers/vos_drv_heap.h"
 #include "../drivers/vos_drv_sys.h"
 #include "../core/vos_config.h"
+#include "../packages/vos_prog.h"
 
 bool shCmdSys(const Word& c, const Word& a1, const char* line, OutSink& o, int role) {
   (void)role;                                   // nessun comando di questo gruppo cambia comportamento col ruolo (lo decide la tabella dei ruoli)
@@ -81,9 +82,22 @@ bool shCmdSys(const Word& c, const Word& a1, const char* line, OutSink& o, int r
     o.println(trf("PSRAM: libera %u KB, pezzo piu grande %u KB", (unsigned)(ps.total_free_bytes / 1024), (unsigned)(ps.largest_free_block / 1024)));
   }
   else if (c == "free") {
-    o.println(trf("RAM   libera %u KB su %u KB", (unsigned)(drvHeapFree() / 1024), (unsigned)(drvHeapTotal() / 1024)));
-    o.println(trf("PSRAM libera %u KB su %u KB", (unsigned)(drvPsramFree() / 1024), (unsigned)(drvPsramTotal() / 1024)));
-    o.println(trf("RAM minima dall'avvio %u KB, blocco piu grande %u KB", (unsigned)(drvHeapMinFree() / 1024), (unsigned)(drvHeapMaxBlock() / 1024)));
+    DrvMemMap m; drvMemMap(m);
+    char b[4][32];                                                  // iram, data, bss, resto: "N KB" oppure "non misurato"
+    int32_t v[4] = {m.fixedIram, m.fixedData, m.fixedBss, m.fixedRest};
+    for (int i = 0; i < 4; i++) { if (v[i] < 0) snprintf(b[i], sizeof b[i], "%s", tr("non misurato")); else snprintf(b[i], sizeof b[i], "%d KB", (int)((v[i] + 512) / 1024)); }
+    o.println(trf("SRAM nominale del chip     %u KB", (unsigned)(m.sramNominal / 1024)));
+    o.println(trf("Parte fissa di sistema     %u KB (mai heap: sottratta dal totale)", (unsigned)(m.fixedTotal / 1024)));
+    o.println(trf("  codice in IRAM           %s", b[0]));
+    o.println(trf("  dati statici (data)      %s", b[1]));
+    o.println(trf("  dati azzerati (bss)      %s", b[2]));
+    o.println(trf("  resto (cache, ROM, ecc.) %s", b[3]));
+    o.println(trf("Parte variabile (heap)    %u KB", (unsigned)(m.heapTotal / 1024)));
+    o.printf("%-8s %9s %9s %9s %9s %9s\r\n", "", "total", "used", "free", "min", "largest");
+    o.printf("%-8s %9u %9u %9u %9u %9u\r\n", "Mem:", (unsigned)(m.heapTotal / 1024), (unsigned)(m.heapUsed / 1024), (unsigned)(m.heapFree / 1024), (unsigned)(m.heapMin / 1024), (unsigned)(m.heapMaxBlock / 1024));
+    o.printf("%-8s %9u %9u %9u\r\n", "Psram:", (unsigned)(m.psramTotal / 1024), (unsigned)((m.psramTotal - m.psramFree) / 1024), (unsigned)(m.psramFree / 1024));
+    o.println(trf("Flash del chip             %u KB", (unsigned)(m.flashSize / 1024)));
+    o.println(tr("(valori in KB)"));
   }
   else if (c == "temp") { char tt[16]; fmtTemp(sysCpuTemp(), tt, sizeof tt); o.println(trf("Temperatura CPU: %s", tt)); }
   else if (c == "top") {
@@ -93,12 +107,15 @@ bool shCmdSys(const Word& c, const Word& a1, const char* line, OutSink& o, int r
   }
   else if (c == "ps") {
     HeapBuf txt(8192);                                               // il testo si scrive qui (heap), non sullo stack
-    if (!sysTasksText(txt)) o.println(tr("Memoria insufficiente")); else o.print(txt.c_str());
+    if (!sysTasksText(txt)) o.println(tr("Memoria insufficiente"));
+    else { progPsText(txt); o.print(txt.c_str()); }                  // dopo i task del sistema, i programmi dell'utente in corso
   }
   else if (c == "kill") {
     char err[96];
-    if (a1.empty()) o.println(tr("Uso: kill <nome task>"));
+    ErrBuf pe;
+    if (a1.empty()) o.println(tr("Uso: kill <nome task o programma>"));
     else if (sysTaskKill(a1.c_str(), err, sizeof err)) o.println(trf("Task '%s' fermato (start %s per farlo ripartire)", a1.c_str(), a1.c_str()));
+    else if (progStop(a1.c_str(), pe)) o.println(trf("Programma '%s' fermato", a1.c_str()));          // non e un task del sistema: forse e un programma dell'utente
     else o.println(err);
   }
   else if (c == "start" || c == "restart") {

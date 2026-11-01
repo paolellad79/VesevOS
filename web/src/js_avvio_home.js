@@ -3,7 +3,7 @@ var BT={d:null,roots:[],ch:{}};
 var BN=[["sys","Sistema e monitor"],["led","LED"],["net","Rete"],["time","Ora"],["web","Pagina web e API"],["rules","Automazioni"],["mqtt","MQTT"],["mesh","Rete tra schede"],["wd","Watchdog"]];
 var BFIX=[["log","Registro (log)"],["pin","Pin e risorse"],["fs","File e configurazione"],["lang","Lingua"]];
 function bn(id){return lk(BN,id)}
-function bLoad(){api("/api/boot").then(function(r){return r.json()}).then(function(d){BT.d=d;var pos={};d.order.forEach(function(x,i){pos[x]=i});
+function bLoad(){bpLoad();api("/api/boot").then(function(r){return r.json()}).then(function(d){BT.d=d;var pos={};d.order.forEach(function(x,i){pos[x]=i});
   BT.roots=[];BT.ch={};d.svc.forEach(function(x){if(!x.parent)BT.roots.push(x.id);else{(BT.ch[x.parent]=BT.ch[x.parent]||[]).push(x.id)}});
   BT.roots.sort(function(a,b){return pos[a]-pos[b]});for(var k in BT.ch)BT.ch[k].sort(function(a,b){return pos[a]-pos[b]});bDraw()}).catch(function(){})}
 function bSvc(id){return BT.d.svc.filter(function(x){return x.id==id})[0]}
@@ -40,7 +40,7 @@ function uReboot(){dlg({title:t("Riavviare la scheda?"),body:'<p style="margin:0
 function uFw(){api("/api/recovery").then(function(r){return r.json()}).then(function(j){
  if(!j.present){dlg({title:t("Aggiornare il firmware?"),body:'<p style="margin:0">'+esc(t("Il recovery non e presente su questa scheda: il firmware si aggiorna solo con il cavo USB."))+'</p>',buttons:[["ok",t("Chiudi"),""]]});return}
  dlg({title:t("Aggiornare il firmware?"),body:'<p style="margin:0">'+esc(t("La scheda si riavvia nel recovery, una pagina separata dove carichi il file .bin di VesevOS. Servono utente e password di un amministratore."))+'</p>',ok:t("Riavvia nel recovery"),
- onOk:function(){return post("/api/recovery",{}).then(function(r){return r.json()}).then(function(j){if(j.ok)setTimeout(function(){uRecGo("http://"+(j.ip||"")+":80/")},50);return j.ok?"":j.err})}})}).catch(function(){})}
+ onOk:function(){return post("/api/recovery",{}).then(function(r){return r.json()}).then(function(j){if(j.ok)setTimeout(function(){uRecGo("http://"+(j.ip||"")+":80/",uRecName(j.host))},50);return j.ok?"":j.err})}})}).catch(function(){})}
 function uRecUp(){api("/api/recovery").then(function(r){return r.json()}).then(function(j){
  if(!j.present){dlg({title:t("Aggiornare il recovery?"),body:'<p style="margin:0">'+esc(t("Il recovery non e presente su questa scheda: si installa solo con il cavo USB."))+'</p>',buttons:[["ok",t("Chiudi"),""]]});return}
  dlg({title:t("Aggiornare il recovery?"),body:'<p style="margin:0">'+esc(tf("Recovery installato: {0}",j.ver||t("versione sconosciuta")))+'</p><p style="margin:8px 0">'+esc(tf("Scegli il file .bin del recovery (al massimo {0} KB). La scheda lo controlla tutto prima di scriverlo: se e sbagliato il recovery attuale resta com'e.",j.kb))+'</p>'
@@ -55,13 +55,15 @@ function uRecUp(){api("/api/recovery").then(function(r){return r.json()}).then(f
     return k.ok?"":(k.err||t("Errore"))},function(){return t("Caricamento non riuscito")})}})}).catch(function(){})}
 function uRecPrb(x,ok,ko){var c=new AbortController(),m=setTimeout(function(){c.abort()},1500);fetch(x,{mode:"no-cors",cache:"no-store",signal:c.signal}).then(function(){clearTimeout(m);ok()},function(){clearTimeout(m);ko()})}
 function uRecOpen(u){location.href=u}
-function uRecGo(u){var st=0,t0=Date.now(),t1=0,stop=false,sec=location.protocol==="https:";
- var go=function(){stop=true;uRecOpen(u)};
+function uRecName(h){var l=location.hostname;if(!h||/^[0-9.]+$/.test(l)||l.indexOf(":")>=0)return"";return"http://"+(h.indexOf(".")>=0?h:h+".local")+"/"}
+function uRecGo(u,nm){var st=0,t0=Date.now(),t1=0,stop=false,sec=location.protocol==="https:";
+ var go=function(){stop=true;uRecOpen(sec&&nm?nm:u)};   // da HTTPS non si puo sondare un http://: se si e arrivati col nome si apre quello (il nome gia si risolve per il browser), altrimenti l'IP
  dlg({title:t("Scheda nel recovery"),body:'<p style="margin:0" role="status">'+esc(t("Aspetto che la scheda riparta nel recovery: la pagina si apre da sola."))+'</p>',buttons:[["ok",t("Apri ora"),""]],onOk:function(){go();return""}});
  (function tick(){if(stop)return;
   if(Date.now()-t0>60000){stop=true;dlg({title:t("Scheda nel recovery"),body:'<p style="margin:0">'+esc(t("Non riesco ad aprirla da sola."))+'</p><p style="margin:8px 0 0">'+esc(tf("Apri {0} in una finestra privata del browser (scrivi http, non https). Se in 30 secondi non trova la rete di casa, la scheda crea la rete Wi-Fi VesevOS-recovery: la password e sulla seriale.",u))+'</p><p style="margin:8px 0 0">'+esc(t("Dopo l'aggiornamento VesevOS riparte da solo."))+'</p>',buttons:[["ok",t("Apri il recovery"),""]],onOk:function(){uRecOpen(u);return""}});return}
   if(st===0)uRecPrb(location.origin+"/",function(){setTimeout(tick,1000)},function(){st=1;t1=Date.now();setTimeout(tick,1000)});
   else if(sec){if(Date.now()-t1>8000)go();else setTimeout(tick,1000)}
+  else if(nm&&Date.now()-t1<6000)uRecPrb(nm,function(){stop=true;uRecOpen(nm)},function(){setTimeout(tick,1000)});
   else uRecPrb(u,go,function(){setTimeout(tick,1000)})})()}
 function uSleep(){dlg({title:t("Mettere la scheda in sleep?"),body:'<p style="margin:0">'+esc(t("La scheda entra in sonno profondo: Wi-Fi e LED spenti, consuma pochissimo."))+'</p><p style="margin:8px 0 0"><b>'+esc(t("Per riaccenderla premi il tasto RESET sulla scheda (o togli e ridai corrente)."))+'</b></p>',ok:t("Sleep"),danger:true,
  onOk:function(){return post("/api/sleep",{}).then(function(r){return r.json()}).then(function(j){if(j.ok)setTimeout(function(){dlg({title:t("Scheda in sleep"),body:'<p style="margin:0">'+esc(t("Premi RESET sulla scheda, poi ricarica questa pagina."))+'</p>',buttons:[["ok",t("Ricarica"),""]],onOk:function(){location.reload();return""}})},50);return j.ok?"":j.err})}})}
@@ -107,6 +109,18 @@ function hlines(L,mn,mx,px){var w=600,h=100,g="";for(var i=1;i<4;i++)g+='<line x
 function hleg(L){return'<div class="leg">'+L.map(function(q){return'<span><i style="background:'+q[1]+'"></i>'+esc(q[0])+' '+q[2]+'</span>'}).join("")+'</div>'}
 function bps(v){return v>=1024?(v/1024).toFixed(1)+' KB/s':v+' B/s'}
 function memTx(u,t0){return kb(u)+' / '+kb(t0)+'<br>'+kb(t0-u)+' '+esc(t("liberi"))}
+function mkb(v){return typeof v=="number"?kb(v):t("non misurato")}
+function memCard(s){var m=s.mem;if(!m||!m.sram)return"";
+ var pc=function(v){return Math.max(0,Math.min(100,100*(v||0)/m.sram)).toFixed(1)},hf=s.heapFree,hu=m.heapUsed,
+ sub=function(l,v){return'<div class="row msub"><span>'+esc(l)+'</span><span>'+mkb(v)+'</span></div>'},
+ head=function(l){return'<div class="subt mhd"><b>'+esc(l)+'</b></div>'};
+ var bar='<div class="stk" role="img" aria-label="'+esc(tf("RAM {0}: parte fissa {1}, heap usato {2}, heap libero {3}",mkb(m.sram),mkb(m.fixed),mkb(hu),mkb(hf)))+'"><i style="width:'+pc(m.fixed)+'%;background:var(--mut)"></i><i style="width:'+pc(hu)+'%;background:var(--ac)"></i><i style="width:'+pc(hf)+'%;background:var(--ok)"></i></div>';
+ return'<section class="card hid"><h3>'+esc(t("Memoria RAM"))+'</h3>'+bar+
+  hleg([[t("Parte fissa di sistema"),"var(--mut)",mkb(m.fixed)],[t("Usato"),"var(--ac)",mkb(hu)],[t("Libero"),"var(--ok)",mkb(hf)]])+
+  head(t("Totale (SRAM del chip)"))+row(t("Totale"),mkb(m.sram))+
+  head(t("Parte fissa di sistema"))+row(t("Totale"),mkb(m.fixed))+sub(t("Codice in IRAM"),m.iram)+sub(t("Dati statici"),m.data)+sub(t("Dati azzerati"),m.bss)+sub(t("Resto (cache e ROM)"),m.rest)+
+  head(t("Parte variabile (heap)"))+row(t("Totale"),mkb(s.heapTotal))+row(t("Usato"),mkb(hu))+row(t("Libero"),mkb(hf))+row(t("Minimo storico"),mkb(m.heapMin))+row(t("Blocco piu grande"),mkb(m.heapMaxBlock))+
+  '</section>'}
 function homeDraw(){var s=S;if(!s||!$("home"))return;var n=s.net,hp=Math.round(100-100*s.heapFree/s.heapTotal),pp=s.psramTotal?Math.round(100-100*s.psramFree/s.psramTotal):0,fp=s.flashTotal?Math.round(100*s.flashUsed/s.flashTotal):0;
  var wp=n.st==3?2*(n.rssi+100):100,wt=n.st==3?n.rssi+" dBm":(n.st==1?""+(n.clients||0):n.st==4?t("Aereo"):"..."),wc=n.st==3?(n.rssi>-67?"var(--ok)":n.rssi>-75?"var(--wa)":"var(--ko)"):"var(--ac)",
  ws=esc(n.mode)+(n.st==1?" · "+esc(tf("{0} client",n.clients||0)):"")+(n.ip?"<br>"+esc(n.ip):"");
@@ -116,6 +130,7 @@ function homeDraw(){var s=S;if(!s||!$("home"))return;var n=s.net,hp=Math.round(1
  var ih=s.inHist||[],oh=s.outHist||[],mx=Math.max(1024,Math.max.apply(null,ih.concat(oh,[0]))),wx=hlines([[ih,"#3fa7ff"],[oh,"#ff9f43"]],0,mx,34)+hleg([["In","#3fa7ff",bps(ih.length?ih[ih.length-1]:0)],["Out","#ff9f43",bps(oh.length?oh[oh.length-1]:0)]]);
  var h='<section class="rings">'+hring("CPU",s.cpu+"%",s.cpu,hcol(s.cpu,60,85),"i-chipn","task",mhz+" MHz",cx)+hring("RAM",hp+"%",hp,hcol(hp,80,92),"i-mem","task",memTx(s.heapTotal-s.heapFree,s.heapTotal),hlines([[s.ramHist,"#3fa7ff"]],0,100,34))+hring("PSRAM",pp+"%",pp,hcol(pp,80,92),"i-mem","task",memTx(s.psramTotal-s.psramFree,s.psramTotal),hlines([[s.psHist,"#2ecc71"]],0,100,34))+hring(t("File"),fp+"%",fp,hcol(fp,75,90),"i-disk","file",memTx(s.flashUsed,s.flashTotal),hlines([[s.flHist,"#ffb020"]],0,100,34))+hring(t("Wi-Fi"),wt,wp,wc,"i-wifi","wifi",ws,wx)+'</section>';
  h+=homeWid(s,n);
+ h+=memCard(s);
  h+='<section class="card hid"><h3>'+esc(t("Sistema"))+'</h3><div class="big">'+esc(n.host)+'</div><div class="subt">'+esc(s.chip)+" · ID "+boardId(s)+'</div><div style="height:8px"></div>'+
   row(t("Chip"),esc(s.chip)+" rev "+revs)+row(t("Processore"),tf("{0} core a {1} MHz",s.cores,mhz))+row(t("Memoria"),tf("{0} MB flash · {1} MB PSRAM",Math.round(s.flashChip/1048576),Math.round(s.psramTotal/1048576)))+
   row(t("Acceso da"),esc(s.uptime))+row(t("Ore di vita"),fmtDur(s.lifeSec))+row(t("Avvii totali"),s.boots)+row(t("Ultimo reset"),esc(s.reset))+row(t("Versione"),esc(s.name+" "+s.version))+
@@ -141,12 +156,11 @@ function homeWid(s,n){hwFetch();if(!SV.httpPort)svcLoad();
  if(s.mqtt&&canSee("mqtt"))c.push(wid("MQTT",pill(s.mqtt==2,t("collegato"),t("non collegato")),"","mqtt","i-mqtt"));
  if(W.mesh&&canSee("mesh"))c.push(wid("ESP-NOW",esc(t(MROLE[W.role]||"Nodo")),esc(t("Schede vicine"))+": "+W.nodes,"mesh","i-mesh"));
  if(n.mdnsRun)c.push(wid("mDNS",esc(n.fqdn),"","mdns","i-tag"));
- if(W.ble)c.push(W.bleLim?wid("Bluetooth",esc(durText(W.bleLeft)),bar(Math.min(100,Math.round(100*W.bleLeft/(W.bleTot||600)))),"ble","i-link"):wid("Bluetooth",esc(t("Acceso")),"","ble","i-link"));
  if(W.ntp)c.push(wid("NTP",W.last?esc(tf("{0} fa",durText(Math.max(1,now-W.last)))):esc(t("Nessuna sincronizzazione ancora")),"","ntp","i-clock"));
  if(n.dhcpRun)c.push(wid("DHCP",pill(1,t("Attivo"),""),esc(t("Dispositivi collegati"))+": "+(n.clients||0),"dhcp","i-net"));
  if(n.st==1)c.push(wid(t("Punto di accesso (AP)"),(n.clients||0)+"",esc(t("Dispositivi collegati")),"ap","i-ant"));
  if(W.pw)c.push(wid(t("Risparmio energia"),esc(W.pw==1?t("Risparmio Wi-Fi"):t("Sonno a cicli")),"","power","i-leaf"));
- if(W.sd)c.push(widSd(W.sd));
+ if(W.w)W.w.forEach(function(x){c.push(widDrv(x))});
  if(W.stat)c.push(wid(t("Statistiche"),pill(1,t("Attivo"),""),"","stat","i-chart"));
  return c.length?'<div class="wg">'+c.join("")+'</div>':""}
 function identify(){post("/api/identify",{}).then(function(r){return r.json()}).then(function(j){msg("idm",j.ok?t("Guarda il LED: lampeggia a colori per 10 secondi"):j.err,j.ok);setTimeout(function(){var e=$("idm");if(e)e.className="msg"},5000)}).catch(function(){})}

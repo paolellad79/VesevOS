@@ -3,12 +3,14 @@
 // VesevOS - vos_web_dev.cpp
 // Percorsi del server web: periferiche, pin, LED, automazioni. Aiuti e tipi condivisi: vos_web_int.h.
 #include "vos_web_int.h"
+#include "../packages/vos_prog.h"
 #include "vos_shell_sess.h"
 #include "vos_shell_prompt.h"
 #include "vos_shell_complete.h"
 #include "../core/vos_eventbus.h"
 #include "../devices/vos_io.h"
 #include "../devices/vos_mod.h"
+#include "vos_mod_app.h"
 #include "../packages/vos_btn.h"
 #include "../core/vos_clamp.h"
 
@@ -102,7 +104,7 @@ void routesDev(PsychicHttpServer* S, bool sec) {
     auditf(AUD_INFO, "", tr("periferica %s tolta (%s)"), Pc(r, "n"), WhoText(c).s); return ok(s);
   });
   add(S, sec, "/api/io/rename", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t { ErrBuf e; return ioRename(Pc(r, "n"), Pc(r, "to"), e) ? ok(s) : ko(s, e); });
-  // Schede modulo (.vdp): elenco e dettagli per chi puo vedere; installare, caricare ed eliminare solo Admin
+  // Schede modulo (.vdb): elenco e dettagli per chi puo vedere; installare, caricare ed eliminare solo Admin
   add(S, sec, "/api/mods", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
     HeapBuf j(MOD_LIST_JSON_MAX);                                   // il JSON si scrive qui (heap) e si invia senza copiarlo in una String
     if (!modListJson(j)) return ko(s, tr("Memoria insufficiente"));
@@ -115,12 +117,18 @@ void routesDev(PsychicHttpServer* S, bool sec) {
   });
   add(S, sec, "/api/mod/install", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
     HeapBuf out(2048); ErrBuf e;
-    if (!modInstall(Pc(r, "name"), Pc(r, "prefix"), out, e)) return ko(s, e);
+    if (!modInstallDriver(Pc(r, "name"), Pc(r, "prefix"), Pc(r, "pins"), out, e)) return ko(s, e);
     auditf(AUD_INFO, "", tr("scheda modulo %s installata (%s)"), Pc(r, "name"), WhoText(c).s);
     return sendText(s, 200, "application/json", out.c_str(), out.length());
   });
-  add(S, sec, "/api/mod/save", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t { ErrBuf e; return modSave(Pc(r, "name"), Pc(r, "text"), e) ? ok(s) : ko(s, e); });
-  add(S, sec, "/api/mod/del", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t { ErrBuf e; return modDelete(Pc(r, "name"), e) ? ok(s) : ko(s, e); });
+  add(S, sec, "/api/mod/save", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    ErrBuf e; if (!modSaveDriver(Pc(r, "name"), Pc(r, "text"), e)) return ko(s, e);
+    auditf(AUD_INFO, "", tr("scheda modulo %s caricata (%s)"), Pc(r, "name"), WhoText(c).s); return ok(s);
+  });
+  add(S, sec, "/api/mod/del", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    ErrBuf e; if (!modDeleteDriver(Pc(r, "name"), e)) return ko(s, e);
+    auditf(AUD_INFO, "", tr("scheda modulo %s eliminata (%s)"), Pc(r, "name"), WhoText(c).s); return ok(s);
+  });
   add(S, sec, "/api/pins", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { HeapBuf j(PIN_JSON_MAX); return sendBuf(s, pinsJson(j), j); });
   add(S, sec, "/api/pins/info", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { HeapBuf j(PIN_JSON_MAX); return sendBuf(s, pinBoardJson(j), j); });
   add(S, sec, "/api/pinmap", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { HeapBuf j(PIN_JSON_MAX); return sendBuf(s, pinMapJson(j), j); });
@@ -187,11 +195,21 @@ void routesDev(PsychicHttpServer* S, bool sec) {
   });
   add(S, sec, "/api/identify", HTTP_POST, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t { ledIdentify(10000); return ok(s); });
   add(S, sec, "/api/tasklist", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
-    HeapBuf j(SYS_TASKS_JSON_MAX);
-    if (!sysTasksJson(j)) return sendJson(s, "{\"ok\":false}");
+    HeapBuf t(SYS_TASKS_JSON_MAX);
+    if (!sysTasksJson(t)) return sendJson(s, "{\"ok\":false}");
+    HeapBuf j(SYS_TASKS_JSON_MAX + PROG_JSON_MAX);
+    j.add(t.c_str(), t.length() - 1);                                  // il JSON dei task finisce con '}': si toglie e si aggiungono sottosistemi e programmi
+    j.add(',');
+    if (!progJson(j)) return ko(s, tr("Memoria insufficiente"));
+    j.add('}');
+    if (j.oom() || j.over()) return ko(s, tr("Memoria insufficiente"));
     return sendText(s, 200, "application/json", j.c_str(), j.length());
   });
-  add(S, sec, "/api/taskkill", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t { ErrBuf err; return sysTaskKill(Pc(r, "name"), err.data(), err.size()) ? ok(s) : ko(s, err); });
+  add(S, sec, "/api/taskkill", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    ErrBuf err, e2;
+    if (sysTaskKill(Pc(r, "name"), err.data(), err.size())) return ok(s);
+    return progStop(Pc(r, "name"), e2) ? ok(s) : ko(s, err);          // non e un task del sistema: forse e un programma dell'utente
+  });
   add(S, sec, "/api/taskrestart", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t { ErrBuf err; return sysTaskRestart(Pc(r, "name"), err.data(), err.size()) ? ok(s) : ko(s, err); });
 
   // Automazioni

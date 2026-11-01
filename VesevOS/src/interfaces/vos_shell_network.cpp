@@ -15,6 +15,7 @@
 #include "vos_shell_int.h"
 #include "vos_shell_rep.h"
 #include "../drivers/vos_drv_activity.h"
+#include "../drivers/vos_drv_dhcp.h"
 
 namespace {
 
@@ -116,6 +117,8 @@ void summary(OutSink& o, bool full) {
     repRow(h, TRK("Maschera"), IpText(drvWifiMask()).s);
     repRow(h, TRK("Gateway"), IpText(drvWifiGateway()).s);
     rowDns(h);
+    char dom[64];
+    if (drvDhcpDomain(dom, sizeof dom)) repRow(h, TRK("Dominio (router)"), dom);
   }
   char v[96];
   if (drvWifiChannel() > 0) { snprintf(v, sizeof v, "%d", drvWifiChannel()); repRow(h, TRK("Canale"), v); }

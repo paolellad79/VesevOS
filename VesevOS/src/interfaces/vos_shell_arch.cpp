@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_shell_arch.cpp
 // Pezzi in comune dei comandi gzip, gunzip, zcat, unzip e tar (vedi vos_shell_arch.h per limiti e protezioni).
+#include "../core/vos_paths.h"
 #include "vos_shell_arch.h"
 #include "../drivers/vos_drv_console.h"
 #include "../drivers/vos_drv_fs.h"
@@ -85,16 +86,7 @@ const char* shx::archRelName(const char* base, const char* abs, bool& stripped) 
   return abs + 1;
 }
 
-bool shx::archIsSecret(const char* path) {
-  if (fsProtected(path)) return true;
-  static const char* const kExt[] = {".pem", ".key", ".crt", ".der", ".p12", ".vbk"};
-  size_t n = strlen(path);
-  for (const char* ext : kExt) {
-    size_t m = strlen(ext);
-    if (n >= m && strcasecmp(path + n - m, ext) == 0) return true;
-  }
-  return false;
-}
+bool shx::archIsSecret(const char* path) { return pathIsSecret(path); }   // una sola regola per archivi, elenchi e Berry (core/vos_paths)
 
 bool shx::archIsHidden(const char* name) {
   size_t n = strlen(name);

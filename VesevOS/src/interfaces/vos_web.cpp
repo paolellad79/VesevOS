@@ -11,6 +11,7 @@
 // Il filtro IP (vos_fw) chiude la connessione senza risposta a chi non e ammesso.
 #include "vos_web_int.h"
 #include "vos_redirect_plan.h"
+#include "vos_web_csrf.h"
 #include "vos_http_redirect_srv.h"
 #include "../core/vos_ram.h"
 #include "../drivers/vos_drv_time.h"
@@ -103,6 +104,17 @@ void tokenTo(Req* r, char* out, size_t cap) {
   out[0] = 0;
   if (r->hasHeader("Cookie")) authCookieFromHeader(r->headerCStr("Cookie"), out, cap);
 }
+// Le richieste che modificano devono venire dalla nostra pagina (o da un programma, non da un altro sito aperto nel browser)
+bool csrfBlocked(Req* r) {
+  char sf[24] = "", og[160] = "", hs[160] = "";                    // headerCStr() usa un solo buffer: ogni valore va copiato prima del prossimo
+  if (r->hasHeader("Sec-Fetch-Site")) snprintf(sf, sizeof sf, "%s", r->headerCStr("Sec-Fetch-Site"));
+  if (r->hasHeader("Origin")) snprintf(og, sizeof og, "%s", r->headerCStr("Origin"));
+  if (r->hasHeader("Host")) snprintf(hs, sizeof hs, "%s", r->headerCStr("Host"));
+  if (!csrfCrossSite(sf, og, hs)) return false;
+  static uint32_t lastLog = 0;                                      // una riga ogni 10 s al massimo: una pagina ostile non deve riempire il registro
+  if (!lastLog || drvMillis() - lastLog > 10000) { lastLog = drvMillis() | 1; vlog("WEB: richiesta di un altro sito rifiutata (%s)", r->pathCStr()); }
+  return true;
+}
 int userOf(Req* r) { char tk[AUTH_TOKEN_BUF]; tokenTo(r, tk, sizeof tk); return authSessionUser(tk); }
 
 void whoTo(const Ctx& c, char* out, size_t n) {
@@ -129,6 +141,7 @@ void add(PsychicHttpServer* srv, bool secure, const char* path, int method, uint
       }
       if (lvl != L_PUB || method == HTTP_POST) return sendJson(s, "{\"ok\":false,\"err\":\"https\",\"code\":\"https_only\"}", 403);   // anche accesso e prima password
     }
+    if (method != HTTP_GET && csrfBlocked(r)) return sendJson(s, "{\"ok\":false,\"err\":\"richiesta da un altro sito\",\"code\":\"csrf\"}", 403);   // POST e simili: solo dalla nostra pagina
     if (lvl > L_PUB) {
       char tk[AUTH_TOKEN_BUF]; tokenTo(r, tk, sizeof tk);
       int u = authSessionUser(tk);
@@ -143,7 +156,17 @@ void add(PsychicHttpServer* srv, bool secure, const char* path, int method, uint
 }
 
 // Testo corto di dimensione nota (< 400 byte): un solo blocco, consegnato come std::string
-std::string svcJson() {
+#if VOS_WITH_ELF
+// Dettagli del servizio "elf" nello stato dei servizi: solo per l'Admin (la pagina mostra la scheda dei moduli ELF solo se ci sono).
+static void svcElf(StrBuf& b, int role) {
+  const ServiceOps* sv = serviceFind("elf");
+  if (!sv || !sv->json || role < ROLE_ADMIN) return;
+  HeapBuf h(256);
+  if (sv->json(h) && !h.oom()) b.addf(",\"elf\":%s", h.c_str());
+}
+#endif
+
+std::string svcJson(int role) {
   bool pend = (cfg.httpOn != (g_runHttpPort != 0)) || (cfg.httpOn && g_runHttpPort && cfg.httpPort != g_runHttpPort) ||
               (cfg.https != g_tlsUp) || (cfg.https && g_runHttpsPort && cfg.httpsPort != g_runHttpsPort) ||
               (g_runHttpPort && httpMinimalWanted() != g_httpMiniWanted);   // redirect o hotspot cambiati: il server HTTP giusto si sceglie al riavvio
@@ -152,7 +175,11 @@ std::string svcJson() {
   t.buf().addf("{\"apOn\":%s,\"captive\":%s,\"dhcpOn\":%s,\"lease\":%d,\"mdnsOn\":%s,", tf(cfg.apOn), tf(cfg.apCaptive), tf(cfg.dhcpOn), (int)cfg.dhcpLease, tf(cfg.mdnsOn));
   t.buf().addf("\"httpOn\":%s,\"httpPort\":%d,\"httpsOn\":%s,\"httpsPort\":%d,", tf(cfg.httpOn), (int)cfg.httpPort, tf(cfg.https), (int)cfg.httpsPort);
   t.buf().addf("\"runHttp\":%u,\"runHttps\":%u,\"pending\":%s,\"sta\":%s,", (unsigned)g_runHttpPort, (unsigned)g_runHttpsPort, tf(pend), tf(cfg.staEnabled && cfg.staSsid.length()));
-  t.buf().addf("\"clientOk\":%s,\"usersHttp\":%d,\"usersHttps\":%d,\"redirect\":%s,\"httpMin\":%s}", tf(netState() == NET_CLIENT_OK), (int)authSessionCount(0), (int)authSessionCount(1), tf(cfg.httpRedirect), tf(g_httpMini));
+  t.buf().addf("\"clientOk\":%s,\"usersHttp\":%d,\"usersHttps\":%d,\"redirect\":%s,\"httpMin\":%s", tf(netState() == NET_CLIENT_OK), (int)authSessionCount(0), (int)authSessionCount(1), tf(cfg.httpRedirect), tf(g_httpMini));
+#if VOS_WITH_ELF
+  svcElf(t.buf(), role);
+#endif
+  t.buf().add("}");
   return t.take();
 }
 
@@ -248,6 +275,9 @@ static void routesCore(PsychicHttpServer* S, bool sec) {
     jsonBool(j, "https", g_tlsUp && cfg.https);
     jsonStr(j, "fp", g_tlsUp ? tlsFingerprint() : "");
     jsonBool(j, "ble", VOS_WITH_BLE);
+#if VOS_WITH_ELF
+    jsonBool(j, "elf", true);                                         // il firmware ha i moduli ELF: la pagina mostra la scheda (assente = non c'e)
+#endif
     char pk[160];
     snprintf(pk, sizeof pk, ",\"pk\":{\"ble\":%d,\"mqtt\":%d,\"mesh\":%d,\"mfa\":%d,\"stat\":%d,\"wps\":%d,\"script\":%d,\"app\":%d},\"hp\":%u,\"sp\":%u",
              VOS_WITH_BLE, VOS_WITH_MQTT, VOS_WITH_MESH, VOS_WITH_MFA, VOS_WITH_STATS, VOS_WITH_WPS, VOS_WITH_BERRY, VOS_WITH_BERRY, (unsigned)g_runHttpPort, (unsigned)g_runHttpsPort);
@@ -299,13 +329,14 @@ static void routes(PsychicHttpServer* S, bool sec) {
   routesCore(S, sec);
   routesAuth(S, sec);
   routesDev(S, sec);
-#if VOS_WITH_SD
-  routesSd(S, sec);
-#endif
   routesSys(S, sec);
   routesNet(S, sec);
   routesFiles(S, sec);
   routesScript(S, sec);
+  routesProg(S, sec);
+#if VOS_WITH_ELF
+  routesElf(S, sec);
+#endif
   routesApp(S, sec);
   routesUpd(S, sec);
 }

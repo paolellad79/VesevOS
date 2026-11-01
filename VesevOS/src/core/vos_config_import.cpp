@@ -11,6 +11,7 @@
 #include "vos_log.h"
 #include "vos_audit.h"
 #include "vos_config_int.h"
+#include "vos_func_ids.h"
 #include "vos_cpugov.h"
 
 using std::string_view;
@@ -170,7 +171,7 @@ static void applyKey(string_view sec, string_view k, string_view v) {
     else if (k == "channel") cfg.meshCh = clampL(viewToLong(v), 1, 13);
     else if (k == "key" && hexOnly(v, 64)) cfg.meshKey = v;
   } else if (sec == "ble") {
-    if (k == "on") cfg.bleOn = (v == "1");
+    // vecchia impostazione [ble] on=: ignorata (il Bluetooth non parte piu dalla configurazione)
   } else if (sec == "airplane") {
     if (k == "on") cfg.airOn = (v == "1");
     else if (k == "exit") cfg.airExit = clampL(viewToLong(v), 0, 3);
@@ -204,6 +205,39 @@ static void applyKey(string_view sec, string_view k, string_view v) {
       if (nm.size() < sizeof name) { memcpy(name, nm.data(), nm.size()); name[nm.size()] = 0; }
       int i = wdLimIndex(name); long n = viewToLong(v);
       if (wdLimOk(i, n)) cfg.wdLim[i] = (uint16_t)n;
+    }
+#if VOS_WITH_ELF
+  } else if (sec == "elf") {
+    if (k == "enabled") cfg.elfOn = (v == "1");
+#endif
+  } else if (sec == "vdb") {
+    if (k == "enabled") cfg.berryOn = (v == "1");
+  } else if (sec == "func") {
+    if (k == "off") {                                              // "sd,gpio": id sconosciuti ignorati
+      cfg.funcOff = 0;
+      size_t p = 0;
+      while (p < v.size()) {
+        size_t e = v.find(',', p); if (e == string_view::npos) e = v.size();
+        char id[16] = ""; string_view w = v.substr(p, e - p);
+        if (w.size() < sizeof id) { memcpy(id, w.data(), w.size()); id[w.size()] = 0; }
+        int fi = funcIndex(id);
+        if (fi >= 0) cfg.funcOff |= (uint16_t)(1u << fi);
+        p = e + 1;
+      }
+    }
+  } else if (sec == "progboot") {
+    if (k.size() > 1 && k[0] == 'p' && v.size() > 2 && v[1] == ':' && cfg.bootN < VOS_BOOTPROG_MAX && v.size() - 2 <= VOS_BOOTPROG_NAME) {
+      BootProg& b = cfg.boot[cfg.bootN];
+      b.kind = v[0] == 's' ? 0 : v[0] == 'b' ? 1 : 2;
+      memcpy(b.name, v.data() + 2, v.size() - 2); b.name[v.size() - 2] = 0;
+      cfg.bootN++;
+    }
+  } else if (sec == "progdata") {
+    if (k.size() > 1 && k[0] == 's' && v.size() > 2 && v[1] == ':' && (v[0] == 'b' || v[0] == 'e') && cfg.dataSdN < VOS_BOOTPROG_MAX && v.size() - 2 <= VOS_BOOTPROG_NAME) {
+      BootProg& b = cfg.dataSd[cfg.dataSdN];
+      b.kind = v[0] == 'b' ? 1 : 2;
+      memcpy(b.name, v.data() + 2, v.size() - 2); b.name[v.size() - 2] = 0;
+      cfg.dataSdN++;
     }
   } else if (sec == "sd") {
     if (k == "enabled") cfg.sdEnabled = (v == "1");
@@ -247,7 +281,7 @@ bool cfgImport(const char* text, size_t len, ErrBuf& err) {
   char val[CFG_VAL_MAX], tmp[32];
   int ln = 0, applied = 0;
   size_t i = 0;
-  bool fwSeen = false, tooLong;
+  bool fwSeen = false, bootSeen = false, dataSeen = false, tooLong;
   string_view all(text, len);
   while (i <= len) {
     size_t e = all.find('\n', i);
@@ -264,6 +298,8 @@ bool cfgImport(const char* text, size_t len, ErrBuf& err) {
       if (name.size() >= sizeof sec) name = string_view();          // nome troppo lungo: non e nessuna sezione nostra
       memcpy(sec, name.data(), name.size()); sec[name.size()] = 0;
       if (!strcmp(sec, "firewall") && !fwSeen) { fwSeen = true; cfg.fwN = 0; }   // la lista delle regole si sostituisce
+      if (!strcmp(sec, "progboot") && !bootSeen) { bootSeen = true; cfg.bootN = 0; }   // anche quella dei programmi con avvio automatico
+      if (!strcmp(sec, "progdata") && !dataSeen) { dataSeen = true; cfg.dataSdN = 0; }   // e quella delle app che salvano sulla microSD
       continue;
     }
     if (t.substr(0, 7) == "option ") {

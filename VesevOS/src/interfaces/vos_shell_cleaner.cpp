@@ -8,14 +8,14 @@
 //
 // Categorie (e solo queste, scelte una a una perche si sa con certezza che sono pulibili):
 //   tmp      i "nome.tmp~" lasciati da un salvataggio interrotto, SOLO se esiste anche "nome" (la logica e quella di fsTmpClean)
-//   crash    i rapporti dei crash (/crash.txt), con crashClear: lo stesso del comando "crash clear"
+//   crash    i rapporti dei crash (/var/crash.txt), con crashClear: lo stesso del comando "crash clear"
 //   log      il registro degli eventi in RAM, con logClear: lo stesso di "log clear" (non libera flash: e un buffer fisso)
 //   reboots  il diario dei riavvii, con diaryClear: lo stesso di "reboots clear"
 //   cache    /selftest.tmp, il file di prova che l'autodiagnosi scrive e subito toglie (resta solo se la scheda si e spenta nel mezzo)
 //
 // MAI toccati, perche non c'e nessun percorso scelto dall'utente: ogni categoria ha il suo file o la sua funzione scritti qui sopra.
 // Quindi non si puo arrivare a /vesevos.conf, /io.cfg (e i suoi .bak/.tmp), script, app, lingue, certificati, chiavi, /mqtt-ca.pem, utenti,
-// regole, registro di AUDIT (/audit.log: si svuota solo con "audit") ne a cartelle intere. Niente ricorsione, niente jolly.
+// regole, registro di AUDIT (/var/audit.log: si svuota solo con "audit") ne a cartelle intere. Niente ricorsione, niente jolly.
 // Lasciati fuori di proposito: /rules.tmp e io.cfg.tmp (nel momento dello scambio possono essere l'unica copia valida) e i file di prova
 // della microSD (sono sul volume della scheda, non nella memoria interna).
 #include "vos_shell_int.h"
@@ -33,7 +33,7 @@ struct CatInfo {
 
 const CatInfo kCats[C_COUNT] = {
   {"tmp", TRK("residui .tmp~ di salvataggi interrotti (solo se il file completo c'e)")},
-  {"crash", TRK("rapporti dei crash (/crash.txt)")},
+  {"crash", TRK("rapporti dei crash (/var/crash.txt)")},
   {"log", TRK("registro degli eventi in RAM")},
   {"reboots", TRK("diario degli ultimi riavvii")},
   {"cache", TRK("file di prova dell'autodiagnosi (/selftest.tmp)")},

@@ -30,7 +30,7 @@ Wi-Fi, clock, files, LEDs, pins, a shell and much more, all protected by a passw
 </p>
 <p align="center"><sub>Screenshots of the control page (with sample data): Home in dark theme, Automations, startup order with the bottom terminal panel, and the phone layout.</sub></p>
 
-> **Status:** in development (version 1.8.0b). The project grows in stages: see "Where we are going".
+> **Status:** in development (version 1.8.16). The project grows in stages: see "Where we are going".
 
 ## Why "VesevOS"?
 
@@ -68,15 +68,27 @@ in radio silence when needed, or communicating in alternative ways.
 | 🌍 | **For everyone** | Italian, English, Spanish and German, and a new language is just one file. |
 | 🔋 | **Reliable and frugal** | Built to survive blackouts and to use little power, even on battery. |
 
-## What's new in 1.8.0b
+## What's new in 1.8.16
+
+- **One way to install drivers**: `.vdb` (Berry) or `.vde` (ELF), from the Drivers page or with `vesevos-driver list|info|install|pins|remove`. Pins are suggested and you can change them.
+- **Programs**: `.vsb` scripts, `.vab` Berry apps and `.vae` ELF apps live in the Scripts and Apps pages; running programs show up in **Tasks** with stop and restart, and have **auto start** in the Start-up panel.
+- **Features** (System): one switch per group of primitives (log, sd, dev, gpio, i2c, spi, time, files, ble) to decide what programs may use.
+- **microSD**: mounts by itself, is browsed in `/media/sd` with `cd`, `ls`, `cat`, `cp`, `mv`, `rm`, `mkdir`, and is formatted as FAT32 from the panel or with `vesevos-drive_manager format` (without blocking the shell). Programs can also start from the card.
+- **App data**: apps that save data choose between flash (`/var/lib/<name>/`) and microSD (`/media/sd/app/<name>/`).
+- **Pin page**: board diagram, front and back, with peripheral blocks, the possible functions of each pin, and the `lspin` shell command.
+- **ELF built in**: ELF modules load without warnings, with the same primitives as Berry programs.
+- **Install page** in [`flash/`](flash/README.md) with a choice of the parts to write: you can **keep** the settings, restart counter and uptime, or do the full installation.
+- **Site and packages**: start page, a list of drivers, apps and scripts with SHA-256, and a Technologies and licenses page (folders `store/`, `aggiorna/`, `licenze/`).
+
+## Earlier news (1.8.0b)
 
 - **Shell with classic commands**: `pwd`, `cd`, `ls`, prompt `user@hostname:folder$`, Tab, `man`, `whoami`, `id`, `df`, `uname`, `ping`, `gzip`/`unzip`/`tar`/`zip`, `cpu` and the `vesevos-*` commands (cpuinfo, services, bugreport, config, network, led_control, cleaner, drive_manager, backup, update).
 - **Serial login** with user, password and MFA code; roles for each subcommand; the password stays out of the history; suspend and power off with confirmation, `/api/sleep` for Admin only.
 - **LED triggers** (flash, wifi, cpu) and colors of your choice. On the LED/QR page the Admin is now recognized (1.8.0b fix).
 - **Minimal HTTP server** for the redirect to HTTPS (less RAM), fix for the panic after changing the host name, wider and editable watchdogs, CPU governor (ondemand/conservative/schedutil).
 - **Recovery 0.5.1**: the one-time token also works for a normal boot, new page, clearer access messages.
-- **[`firmware/`](firmware/LEGGIMI.md) folder**: ready-made firmware and recovery files (1.8.0b, Recovery 0.5.1 and 0.5.0) with SHA-256 and an `indice.json` list (the folder guide is in Italian).
-- **First-install page** in [`flash/`](flash/README.md): writes the board from the browser (Web Serial). **NOT TESTED with a real board**: try it first on a spare board.
+- **[`firmware/`](firmware/LEGGIMI.md) folder**: ready-made firmware and recovery files (1.8.16, Recovery 0.5.2, 0.5.1 and 0.5.0, and earlier versions) with SHA-256 and an `indice.json` list (the folder guide is in Italian).
+- **First-install page** in [`flash/`](flash/README.md): writes the board from the browser (Web Serial), checking every file before writing.
 - Built only with ESP-IDF 5.5, no Arduino.
 - **Updates with no cable and no SD card** (since 1.7.45): from the user menu choose *Update via recovery*; the recovery checks the file is really a VesevOS firmware (header, marker, size, SHA-256) before activating it.
 - About origin checks: SHA-256 tells you the file is not corrupted, NOT who made it. There is no digital signature (for now): see [SECURITY.md](SECURITY.md).
@@ -113,7 +125,7 @@ These are ideas and plans, not promises: the order may change.
 
 **Further ahead**
 - [ ] **Guided first-time setup** (language, password, country, Wi-Fi, time).
-- [ ] **SD card** and **Berry apps** confined to a "cage" on the SD card.
+- [ ] **SD card** and **apps** confined to a "cage" on the SD card.
 - [ ] **Plug-and-play accessory catalog**: pick the sensor from a list and VesevOS shows how to wire it and installs what is needed.
 - [ ] **Update from the internet** of your choice (never automatic by default), with the firmware origin clearly shown.
 - [ ] **Radio silence mode** and **power saving** for solar-powered use.
@@ -147,11 +159,13 @@ VOS_CFG=vesevos idf.py -B <build folder> build
 | Firmware size limit | app0 = **2,424,832 bytes** (0x250000): the `.bin` must stay below it |
 | Configuration | `idf/sdkconfig.defaults.vesevos` (selected with `VOS_CFG=vesevos`) |
 
+`VesevOS/VesevOS.ino` only holds an `#error` and is not used.
+
 ## Installation
 
 There are three ways (the first is the easiest for a new board):
 
-1. **First-install page** ([`flash/`](flash/README.md), enabled with GitHub Pages): connect the board with a browser that has the serial port (Web Serial), choose "Full installation" and press Write. It checks every file before writing. **NOT TESTED with a real board.**
+1. **First-install page** ([`flash/`](flash/README.md), enabled with GitHub Pages): connect the board with a browser that has the serial port (Web Serial), choose "Update and keep data" (board already used) or "Full installation" (new board), you can also tick the single parts, and press Write. It checks every file before writing.
 2. **Ready-made files in [`firmware/`](firmware/LEGGIMI.md)** with `esptool` (recovery at `0x10000`, firmware at `0x110000`) or, on a board that already runs VesevOS, from the *Update via recovery* menu (file from your computer, or URL + SHA-256 from `indice.json`). Always check the SHA-256.
 3. **Build it yourself**: set up ESP-IDF as above, build VesevOS (`idf/` folder) and the recovery (`idf-recovery/` folder, same command) and follow the guide [docs/PREPARE-THE-BOARD.md](docs/PREPARE-THE-BOARD.md).
 
@@ -181,11 +195,14 @@ Do not hold it at power-up: the board would enter download mode. Everything is e
 ## Repository layout
 
 ```
-VesevOS/      firmware sources (src/ by topic). The ESP-IDF project is in ../idf
+VesevOS/      firmware sources (src/ by topic; VesevOS.ino only holds an #error). The ESP-IDF project is in ../idf
 web/          web page in HTML (source of vos_page.h, gzip-compressed)
 firmware/     ready-made firmware and recovery files, with SHA-256 and indice.json (see firmware/LEGGIMI.md)
-flash/        first-install page for the browser (GitHub Pages; NOT TESTED)
-recovery/     recovery 0.5.1 on ESP-IDF (VesevOS_Recovery_IDF) and install scripts
+flash/        install page for the browser (GitHub Pages), with a choice of the parts to write
+store/        packages to download (drivers, apps, scripts) with SHA-256 and index.json
+aggiorna/     data for updates (latest.json)
+licenze/      Technologies and licenses page (data taken from the SBOM)
+recovery/     recovery 0.5.2 on ESP-IDF (VesevOS_Recovery_IDF) and install scripts
 docs/         manual, known issues (KNOWN_ISSUES) and release guide (RELEASE_DEVELOPER), in Italian and English
 assets/       README banner and screenshots
 lang/         language files (en, es, de) - GENERATED from tools/lang_src.json; only Italian is inside the firmware

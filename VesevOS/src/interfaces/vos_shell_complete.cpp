@@ -12,7 +12,10 @@
 #include "vos_shell_path.h"
 #include "../core/vos_common.h"
 #include "../core/vos_i18n.h"
+#include "../core/vos_layout.h"
 #include "../security/vos_auth.h"
+#include "../packages/vos_drvcmd.h"
+#include "../devices/vos_mod_cmd.h"
 using namespace shx;
 #include "../core/vos_heapbuf.h"
 #include <string.h>
@@ -128,6 +131,9 @@ void addCommands(int role, const char* prefix, Cands& c) {
     if ((ci.flags & CMD_HIDDEN) || strncmp(ci.name, prefix, pl) != 0) continue;
     if (canUse(role, Word(ci.name, strlen(ci.name)), none)) c.add(ci.name, false);
   }
+  char words[8][13];                                                    // i comandi dei driver (scritti in Berry)
+  for (int i = 0, n = drvCmdWords(words, 8); i < n; i++)
+    if (strncmp(words[i], prefix, pl) == 0 && canUse(role, Word(words[i], strlen(words[i])), none)) c.add(words[i], false);
 }
 
 // Una parola word va mostrata a questo ruolo? Alla posizione 1 e il sottocomando stesso; piu avanti conta il sottocomando gia scritto (a1).
@@ -167,7 +173,7 @@ bool typable(const char* n) {
 
 // Percorsi: word e la parola che si sta scrivendo ("scr/fo"), si elencano le voci della cartella "scr/" che cominciano con "fo".
 void completePath(uint32_t sess, const char* word, bool dirsOnly, Cands& c) {
-  if (!strcmp(word, "~")) { c.add("~", true); return; }                  // come bash: "~" diventa "~/"
+  if (!strcmp(word, "~")) { c.add("~", true); return; }                  // come nelle shell classiche: "~" diventa "~/"
   const char* base = baseOf(word);
   size_t dl = (size_t)(base - word);
   char dirArg[FS_PATH_MAX + 2];
@@ -255,8 +261,8 @@ bool shellComplete(uint32_t sess, int role, const char* line, size_t room, bool 
 
   if (idx == 2 && cmd == "vesevos-backup" && (a1 == "restore" || a1 == "delete")) {   // i nomi dei backup: i file di /backup (solo per restore e delete)
     char full[FS_PATH_MAX + 1];
-    if (strlen(word) + 9 > FS_PATH_MAX) return false;
-    snprintf(full, sizeof full, "/backup/%s", word);
+    if (strlen(word) + strlen(layoutPath(LAY_BACKUP)) + 2 > FS_PATH_MAX) return false;
+    snprintf(full, sizeof full, "%s/%s", layoutPath(LAY_BACKUP), word);
     completePath(sess, full, false, c);
     c.finish(word, room);
     return out.n > 0;
@@ -266,6 +272,11 @@ bool shellComplete(uint32_t sess, int role, const char* line, size_t room, bool 
     const CmdInfo* ci = cmdFind(cmd.c_str());
     if (ci && strcmp(ci->subs, "@commands") == 0) addCommands(role, word, c);
     else if (ci && ci->subs[0]) eachWord(ci->subs, word, [&](const char* w) { if (subAllowed(role, cmd, 1, a1, w)) c.add(w, false); });
+    else if (!ci) {                                                      // sottocomandi di un comando di driver
+      DrvCmd subs[MOD_CMD_MAX];
+      for (int i = 0, n = drvCmdSubs(cmd.c_str(), subs, MOD_CMD_MAX); i < n; i++)
+        if (strncmp(subs[i].sub, word, strlen(word)) == 0 && subAllowed(role, cmd, 1, a1, subs[i].sub)) c.add(subs[i].sub, false);
+    }
   }
 
   Word prev = argAt(line, idx - 1);                                      // piu a fondo: regole con contesto (vos_shell_complete_data.cpp)
@@ -286,7 +297,7 @@ void shellCompletePrintList(OutSink& o, const ShellCompletion& c) {
   size_t cols = 78 / w;
   if (cols == 0) cols = 1;
   size_t rows = ((size_t)c.n + cols - 1) / cols;
-  for (size_t r = 0; r < rows; r++) {                                    // come bash: le colonne si riempiono dall'alto in basso
+  for (size_t r = 0; r < rows; r++) {                                    // come nelle shell classiche: le colonne si riempiono dall'alto in basso
     for (size_t k = 0; k < cols; k++) {
       size_t i = k * rows + r;
       if (i >= (size_t)c.n) break;

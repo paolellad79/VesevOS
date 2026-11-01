@@ -1,5 +1,16 @@
 # Cronologia delle versioni
 
+## 1.8.16 (rilasciata il 01/11/2026; include la 1.8.1 - 1.8.15) - Driver unici, programmi nei Task, microSD navigabile
+- Driver: un solo percorso per installarli (pagina Driver e `vesevos-driver list|info|install|pins|remove`), file `.vdb` e `.vde`, pin proposti e modificabili; moduli ELF di serie nel firmware per ESP32-S3 (`vesevos-elf`, installatore, primitive `gpio`, `i2c`, `spi`, `time`, `files`, `dev`, `sd`, `log`).
+- Estensioni dei file: script `.vsb`, app `.vab` e `.vae`, driver `.vdb` e `.vde`, backup `.vbk`; i nomi precedenti si leggono ancora.
+- Task: gli script e le app in esecuzione si vedono e si fermano o riavviano da li; sottosistemi `vdb` e `vde` con interruttore; avvio automatico per programma, con ordine nel pannello Avvio.
+- Sistema: pannello Funzionalita per gruppo di primitive.
+- microSD: montaggio automatico quando c'e (anche a caldo), disponibile in `/media/sd` con `cd`, `ls`, `cat`, `cp`, `mv`, `rm`, `mkdir`; formattazione FAT32 in un task a parte, con `--attendi`; programmi avviabili anche dalla scheda.
+- App con dati: scelta Flash o microSD per ogni app (`/var/lib/<nome>/` o `/media/sd/app/<nome>/`).
+- Pin: nuova grafica a schema di fronte e retro della scheda, funzioni possibili di ogni pin, comando `lspin`.
+- Pagina di installazione `flash/` con caselle per scegliere cosa scrivere o conservare; sito con elenco dei pacchetti e pagina delle licenze.
+- Compilato con ESP-IDF 5.5.5 (2.380.880 byte). Recovery 0.5.2.
+
 ## 1.8.0b (rilasciata il 25/10/2026; include la 1.8.0 e la 1.8.0a, e le 1.7.67-1.7.70h) - Shell classica, login seriale, comandi vesevos-*
 - Novita del rilascio: cartella `firmware/` con i file gia compilati (firmware 1.8.0b, Recovery 0.5.1 e 0.5.0), SHA-256 e `indice.json` (campi `publisher` e `channel`: sono scritte non firmate); pagina di prima installazione dal browser in `flash/` (NON PROVATA con una scheda reale); NOTICE, SBOM e registro legale aggiornati (esptool-js, pako, miniz); repo senza lo sketch vecchio del recovery e senza `licenses/LGPL-2.1.txt`.
 - Pagina LED e QR hotspot: l'admin non veniva piu riconosciuto (confronto tra scale di ruoli diverse), corretto.
@@ -96,7 +107,7 @@
 - Prove sul computer (`tools/hosttest/run.sh`, `prova_iocfg.sh`): **AddressSanitizer + UBSan di fabbrica** (`ASAN=0` li spegne; circa 10% piu lente). Trovati e corretti: (1) `vos_bmp280.cpp`: scorrimento a sinistra di valori negativi (comportamento non definito) nel calcolo della pressione, ora moltiplicazioni per 2^n (stesso risultato); (2) `test_recheck.cpp`: scrittura oltre la fine di un'immagine di prova (difetto della prova, non del firmware).
 - Nuova prova `tools/hosttest/test_hooks.cpp` (68 prove): `vosWire()` riempie TUTTI i ganci di `core/vos_hooks.h`, nessun gancio e usato senza controllo di nullo, un gancio vuoto da risposte sicure.
 - `tools/checklayers.py`, tre controlli nuovi con debito di partenza (solo in discesa): `e_idf` (include `esp_*.h`/`driver/*.h` fuori dai driver: 24 in 19 file), `f_rtos` (primitive FreeRTOS fuori da drivers/ e core/: 52 in 14 file), `cicli` (moduli che si includono a vicenda: 6 gruppi; tra cartelle 0). Provati su copia con una violazione per tipo (tutti danno KO).
-- Documentati in `docs/progetto/REGOLE-ARCHITETTURA.md` e nelle note interne di progetto.
+- Documentati in `docs/progetto/REGOLE-ARCHITETTURA.md` e `CLAUDE.md`.
 - Nessun cambio di comportamento sulla scheda. Controllo legale: non applicabile (strumenti di sviluppo e un'equivalenza matematica).
 
 ## 1.7.65 (ottobre 2026) - Nessun include verso l'alto
@@ -128,7 +139,7 @@
 ## Strumenti (15 ottobre 2026) - Ordine dei livelli (nessun cambio al firmware)
 
 - `tools/checklayers.py`: nuova famiglia **ordine**. Ogni cartella puo includere solo livelli piu bassi (boards < drivers < core < security < devices < net < packages < interfaces < vos_wire/.ino). Include verso l'alto = debito per coppia "da->a" in `layers_baseline.json`: oggi 25 (core->devices 8, core->net 7, core->security 2, drivers->core 5, devices->net 1, packages->interfaces 2). Puo solo scendere; una coppia nuova e un errore.
-- Ordine scritto in `docs/progetto/REGOLE-ARCHITETTURA.md` e nella mappa del codice delle note interne.
+- Ordine scritto in `docs/progetto/REGOLE-ARCHITETTURA.md` e nella mappa di `CLAUDE.md`.
 - Controllo legale: non applicabile (solo strumenti di sviluppo).
 
 ## 1.7.63a (ottobre 2026) - CPU e HTTPS, rapporto dei crash piu chiaro
@@ -138,7 +149,7 @@
 - Controllo legale: radio non applicabile (nessun cambio di canali/potenza); cybersecurity: migliora la disponibilita (meno riavvii) senza cambiare accessi o cifratura; privacy, licenze, marchi, export, IA non applicabili; accessibilita: nuovo avviso solo testo, tradotto. Valutazione preliminare, non consulenza legale.
 
 ## 1.7.63 (ottobre 2026) - Strati in ordine: ganci, riavvio unico, NVS nel driver, niente doppioni
-- **Strati**: `core/`, `devices/` e `net/` non includono piu `packages/` o `interfaces/` (erano 21 righe, ora 0). Lo stato di MQTT, ESP-NOW e Bluetooth si legge dal registro dei servizi (`serviceState`); il resto (avvio di pagina/regole/MQTT/ESP-NOW, HTTPS acceso, chiusura dei collegamenti HTTPS fermi, MFA, messaggio MQTT di prova, click WPS del tasto BOOT, radio spente in modo aereo) passa da ganci in `core/vos_hooks.h`. Li riempie `src/vos_wire.cpp` (`vosWire()`, prima riga di `setup()`), l'unico file insieme al punto di ingresso che conosce tutti gli strati.
+- **Strati**: `core/`, `devices/` e `net/` non includono piu `packages/` o `interfaces/` (erano 21 righe, ora 0). Lo stato di MQTT, ESP-NOW e Bluetooth si legge dal registro dei servizi (`serviceState`); il resto (avvio di pagina/regole/MQTT/ESP-NOW, HTTPS acceso, chiusura dei collegamenti HTTPS fermi, MFA, messaggio MQTT di prova, click WPS del tasto BOOT, radio spente in modo aereo) passa da ganci in `core/vos_hooks.h`. Li riempie `src/vos_wire.cpp` (`vosWire()`, prima riga di `setup()`), l'unico file insieme a `VesevOS.ino` che conosce tutti gli strati.
 - **Device Manager**: le periferiche virtuali dei package (MQTT, ESP-NOW, Bluetooth, MFA, statistiche) passano da `devices/vos_dev.cpp` a `packages/vos_dev_pkg.cpp` e si iscrivono con `devSetVirtual()`. Stesso elenco, stesso ordine.
 - **Riavvio unico**: nuovo `sysReboot(motivo, attesa)` in `core/vos_wd` e driver `drivers/vos_drv_sys` (unico `ESP.restart()`). Ci passano pagina (riavvio, recovery, fabbrica), shell (`reboot`, `factory-reset`, `recovery now`), regole (`reboot`), tasto BOOT (20 s e 8 s) e watchdog (`wdReboot`, che in piu conta per l'antiloop). Il motivo va nel diario dei riavvii come ultima riga ("Riavvio: ..."). Novita visibile solo li.
 - **NVS**: `Preferences` solo nel driver `drivers/vos_drv_nvs.h` (`DrvNvs`, stessi nomi, composizione). Toccati vos_wd, vos_boot, vos_sys, vos_config, vos_tls, vos_drv_ota; tolti 2 include inutili (config import/export). Stesse chiavi, stessi namespace.
@@ -337,7 +348,7 @@ Riassunto riunito (le voci singole non furono scritte allora).
 - Nuovo comando `ram audit`: RAM interna con percentuale occupata, stato del TLS in PSRAM e uno **storico** automatico delle ultime 14 misure (avvio finito, Bluetooth acceso/spento, accesso e uscita dalla pagina) con la variazione della RAM libera tra una e l'altra. Cosi si vede quanto costa davvero il Bluetooth e quanto costa una pagina aperta.
 - Corretta la tabella degli stack: il task `wd` e di 6144 byte (era scritto 3072), quindi il margine recuperabile del comando `ram` era sbagliato per quel task.
 - Costo: 14 voci fisse da 28 byte (circa 0,4 KB, senza heap). Nessun cambio di comportamento.
-- Prima parte del passo 4 (RAM sotto il 75%): piano interno.
+- Prima parte del passo 4 (RAM sotto il 75%): piano in `claude/funzioni/VesevOS-piano-ram-autonomo.md`.
 
 ## 1.7.39 (ottobre 2026) - Bluetooth: meno frammentazione della RAM (prova)
 
@@ -505,7 +516,7 @@ Terzo passo del riordino a strati. **Nessuna funzione nuova, comportamento invar
 
 ## 1.7.13 (ottobre 2026) - Strati: i file in cartelle
 Secondo passo del riordino a strati. **Nessuna funzione nuova, nessun cambio di codice: si spostano solo i file.**
-- `VesevOS/` conteneva solo uno sketch e la cartella `src/` (Arduino IDE compilava `src/` e le sue sottocartelle). Dentro `src/`, una cartella per strato:
+- `VesevOS/` contiene solo `VesevOS.ino` e la cartella `src/` (Arduino IDE compila `src/` e le sue sottocartelle). Dentro `src/`, una cartella per strato:
   - `core/` nucleo sempre presente (configurazione, log, testi, ora, watchdog, file, firmware, autotest, dati generati)
   - `security/` accessi, HTTPS, cifratura
   - `net/` rete e contatori di traffico
@@ -562,7 +573,7 @@ Primo passo del riordino a strati (schema nel Progetto: `VesevOS-schema-strati.m
   - **Diario piu utile**: per ogni riavvio salva il pezzo di RAM libero piu grande, quante volte la seriale non e stata letta e il servizio con il battito piu vecchio (es. "web 12s"). Il vecchio diario resta e si completa (nessuna perdita).
   - **Meno RAM per HTTPS**: se il pezzo di RAM libero piu grande scende sotto 60 KB e la pagina e ferma da 20 secondi, la scheda chiude i collegamenti HTTPS rimasti aperti (circa 40 KB l'uno); il browser li riapre da solo.
 - **Seriale: si puo correggere cio che scrivi** (segnalato dalla prova): il tasto Backspace toglieva il carattere dalla riga ma sullo schermo la lettera restava; ora lo schermo la cancella davvero. In piu **Ctrl+U** e **Ctrl+C** svuotano la riga, e i tasti freccia / Canc / Home non mettono piu lettere strane (`[D`, `[3~`) nella riga.
-- **Misura della RAM** (passo R0 del piano RAM): nuovo modulo `vos_ram` e comando **`ram`** (stack libero minimo e totale di ogni task e quanto si puo togliere tenendo il 25% libero) piu **`ram mark`** / **`ram diff`** (quanto costa in RAM interna, pezzo piu grande e PSRAM accendere o spegnere un servizio). Nessun cambiamento al comportamento della scheda.
+- **Misura della RAM** (passo R0 del piano RAM, claude/VesevOS-piano-ram.md): nuovo modulo `vos_ram` e comando **`ram`** (stack libero minimo e totale di ogni task e quanto si puo togliere tenendo il 25% libero) piu **`ram mark`** / **`ram diff`** (quanto costa in RAM interna, pezzo piu grande e PSRAM accendere o spegnere un servizio). Nessun cambiamento al comportamento della scheda.
 - **NTP piu rispettoso (privacy e sicurezza)**:
   - **Tolto Google**: il secondo server NTP non e piu `time.google.com` fisso. Di fabbrica c'e solo `pool.ntp.org`; un secondo server e a scelta (pagina Servizi > NTP, oppure `ntp server2 <nome|off>`; `ntp server <nome>` cambia il primo). Chiave di configurazione `server2`.
   - **Avviso chiaro**: la scheda NTP dice a quali server parla e che ogni richiesta mostra il tuo IP pubblico; anche la riga di log quando NTP si accende da solo nomina i server.
@@ -625,7 +636,7 @@ Primo passo del riordino a strati (schema nel Progetto: `VesevOS-schema-strati.m
 - Solo dati tecnici nel diario (niente IP, MAC, nomi Wi-Fi o utenti); azzerabile da pagina e seriale.
 
 ## 1.7.7 (ottobre 2026) - "AUTOTEST"
-- **Autotest** (Sistema > Autotest, Admin): 16 prove non distruttive (anche CPU e temperatura: media su 2 secondi, avviso oltre 60%, errore oltre 85%; temperatura avviso oltre 70 C, errore oltre 85 C), una per volta, ognuna con esito chiaro (OK / Avviso / Errore / Saltata) e tempo. Alla fine il **report di testo** si scarica o si copia, per mandarlo a mano a chi ti assiste.
+- **Autotest** (Sistema > Autotest, Admin): 16 prove non distruttive (anche CPU e temperatura: media su 2 secondi, avviso oltre 60%, errore oltre 85%; temperatura avviso oltre 70 C, errore oltre 85 C), una per volta, ognuna con esito chiaro (OK / Avviso / Errore / Saltata) e tempo. Alla fine il **report di testo** si scarica o si copia, per mandarlo a mano a Claude.
 - Il report non contiene mai password, chiavi o token. MAC, nome Wi-Fi, IP e registro sono oscurati, salvo la casella "nomi reali". Le prove attive (LED, messaggio MQTT) partono solo se spunti la casella.
 - Comando seriale `selftest [active] [names]`. Nulla esce dalla scheda; il report sta in RAM (circa 2,7 KB) finche non lo chiudi.
 - **Pagina piu leggera**: aggiornamento ogni 3 s (era 2 s), nessuna richiesta nuova finche la precedente non e finita, e nessuna richiesta quando la scheda del browser e nascosta o in secondo piano (prima la CPU della scheda poteva restare al 100% con la pagina lasciata aperta).

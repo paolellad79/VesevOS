@@ -37,11 +37,11 @@ function ioNum(x,dg){return x.toLocaleString(undefined,{minimumFractionDigits:dg
 function ioI2cVal(d){return d.ok?ioNum(d.v/100,1)+" °C · "+ioNum(d.p/100,1)+" hPa":t("non risponde")}
 function ioPins(d){return d.c=="i2c"?"SDA "+d.g+" · SCL "+d.g2:d.c=="sd"?"CS "+d.g+" · MOSI "+d.g2+" · SCK "+d.g3+" · MISO "+d.g4:String(d.g)}
 function ioCanSw(d){return d.out&&(ROLE>=2||(ROLE>=1&&d.c!="rele"))}
-function ioLoad(){var sel=IOS.sel;$("io_new").className=ROLE>=2?"card":"card hide";$("io_mods").className=ROLE>=2?"card":"card hide";
+function ioLoad(){var sel=IOS.sel;$("io_new").className=ROLE>=2?"card":"card hide";
  api("/api/io").then(function(r){return r.json()}).then(function(j){IOS.list=j.io||[];IOS.sdp=j.sdp||[];
   if(sel&&!ioFind(sel)){ioClose();return}
   if(sel){ioDetDraw();return}
-  $("io_main").className="";$("io_det").className="card hide";ioStop();ioListDraw();if(ROLE>=2)ioModLoad();sdLoad()}).catch(function(){})}
+  $("io_main").className="";$("io_det").className="card hide";ioStop();ioListDraw();}).catch(function(){})}
 function ioListDraw(){var L=IOS.list,h="";
  if(!L.length){$("io_tab").innerHTML='<tr><td class="fhint">'+esc(t("Nessuna voce"))+'</td></tr>';return}
  h='<tr><th>'+esc(t("Nome"))+'</th><th>'+esc(t("Classe"))+'</th><th>GPIO</th><th>'+esc(t("Valore"))+'</th><th></th></tr>';
@@ -86,33 +86,31 @@ function ioDetLive(){var d=ioFind(IOS.sel),e=$("iod_v");if(!d||!e)return;
  else if(d.c=="analogico")e.innerHTML='<b>'+d.v+'</b> <span class="fhint">/ 4095</span><div class="bar" style="margin-top:4px"><i style="width:'+Math.round(d.v*100/4095)+'%"></i></div>';
  else e.innerHTML='<span class="pill dvp '+(d.v?"v":"")+'">'+esc(d.v?t("acceso"):t("spento"))+'</span>'}
 function ioAct(a,v){post("/api/dev/act",{id:IOS.sel,a:a,arg:v}).then(function(r){return r.json()}).then(function(j){if(j.ok===false)msg("iod_m",j.err,false);else msg("iod_m",t("Fatto"),true);ioPoll()}).catch(function(){})}
-/* --- schede modulo (.vdp) --- */
-function ioModLoad(){api("/api/mods").then(function(r){return r.json()}).then(function(j){var L=j.list||[],h="";
- if(!L.length){$("io_ml").innerHTML='<p class="fhint">'+esc(t("Nessuna scheda modulo. Caricane una con il pulsante qui sotto."))+'</p>';return}
- h='<table class="ftab">';
- L.forEach(function(x){h+='<tr><td><span class="scn">'+ioIco(x.ok?x.icon:"")+'<b>'+esc(x.ok?x.t:x.n)+'</b></span>';
-  if(x.ok){h+='<div class="fhint">'+esc(ioCn(x.c))+' x'+x.ns+' · '+esc(x.p=="-"?t("senza alimentazione"):x.p)+(x.l?' · '+esc(x.l):"")+'</div>';if(x.w)h+='<div class="fhint">'+esc(x.w)+'</div>'}
-  else h+='<div class="fhint" style="color:var(--kot)">'+esc(x.e||"")+'</div>';
-  h+='</td><td style="text-align:right;white-space:nowrap">'+(x.ok?'<button class="btn" onclick="ioModOpen(\''+x.n+'\')">'+esc(t("Installa"))+'</button> ':"")+'<button class="btn gray" onclick="ioModDel(\''+x.n+'\')">'+esc(t("Elimina"))+'</button></td></tr>'});
- $("io_ml").innerHTML=h+'</table>'}).catch(function(){})}
-function ioModOpen(n){api("/api/mod?name="+enc(n)).then(function(r){return r.json()}).then(function(j){if(!j.ok){msg("io_mm",j.err,false);return}
+/* --- driver vdb: l'elenco e il caricamento stanno nella pagina Driver (js_driver.js); qui il dialogo di installazione e l'eliminazione --- */
+function ioModOpen(n){api("/api/mod?name="+enc(n)).then(function(r){return r.json()}).then(function(j){if(!j.ok){msg("drvm",j.err,false);return}
   var b='';
   b+=modSchema(j);
   if(j.wiring){var sv=j.wiring;if(sv.indexOf("xmlns")<0)sv=sv.replace("<svg",'<svg xmlns="http://www.w3.org/2000/svg"');b+='<details style="margin-top:8px"><summary>'+esc(t("Disegno allegato al file"))+'</summary><img alt="'+esc(tf("Schema del modulo {0}",j.t))+'" style="width:100%;max-width:420px;background:#fff;border-radius:8px" src="data:image/svg+xml;charset=utf-8,'+enc(sv)+'"></details>'}
   if(j.p=="230V")b+='<p class="fhint" style="color:var(--kot)"><b>'+esc(t("Rete elettrica 230 V: serve un modulo a norma e un installatore. VesevOS comanda solo il segnale."))+'</b></p>';
   if(j.w)b+='<p class="fhint"><b>'+esc(j.w)+'</b></p>';
   if(!j.free)b+='<p class="fhint" style="color:var(--kot)">'+esc(t("Non ci sono abbastanza pin liberi per questo modulo"))+'</p>';
+  if(j.app)b+='<p class="fhint">'+esc(tf("Questo driver porta una app con pagina e codice. Permessi dell'app: {0}. La usa solo l'Admin.",j.u||"-"))+'</p>';
+  b+='<p class="fhint" style="margin-bottom:2px"><b>'+esc(t("Pin"))+'</b> '+esc(t("La scheda propone questi pin liberi. Puoi cambiarli: il sistema controlla che siano ammessi e non gia usati."))+'</p>';
+  j.sig.forEach(function(s,i){b+='<label for="io_pn'+i+'">'+esc(s)+'</label><input id="io_pn'+i+'" inputmode="numeric" maxlength="2" autocomplete="off" style="width:5em" value="'+(j.sug[i]!=null?j.sug[i]:"")+'">'});
   b+='<label for="io_pf">'+esc(t("Nome (facoltativo)"))+'</label><input id="io_pf" maxlength="9" autocomplete="off" spellcheck="false" autocapitalize="off">';
-  dlg({title:j.t,body:b,ok:t("Installa"),onOk:function(){if(!j.free)return t("Non ci sono abbastanza pin liberi per questo modulo");
-   return post("/api/mod/install",{name:n,prefix:dlgV("io_pf")}).then(function(r){return r.json()}).then(function(k){if(!k.ok)return k.err;
+  dlg({title:j.t,body:b,ok:t("Installa"),onOk:function(){var pn=j.sig.map(function(s,i){return dlgV("io_pn"+i)});
+   if(!pn.every(function(x){return /^[0-9]{1,2}$/.test(x)}))return t("Indica un pin per ogni segnale");
+   return post("/api/mod/install",{name:n,prefix:dlgV("io_pf"),pins:pn.join(",")}).then(function(r){return r.json()}).then(function(k){if(!k.ok)return k.err;
     var dv=k.devs||[],same=dv.length>1&&dv[0].n==dv[1].n;
-    msg("io_mm",t("Fatto")+": "+(same?dv[0].n+" ("+dv.map(function(d){return d.s+" = GPIO"+d.g}).join(", ")+")":dv.map(function(d){return d.n+" = GPIO"+d.g}).join(", ")),true);ioLoad();return""})}})}).catch(function(){})}
-function ioModUp(){var f=$("io_mf").files[0];if(!f)return;$("io_mf").value="";var n=f.name.replace(/\.(vdp|txt)$/i,"").toLowerCase();
- if(f.size>8192){msg("io_mm",t("File troppo grande (massimo 8 KB)"),false);return}
- f.text().then(function(x){return post("/api/mod/save",{name:n,text:x})}).then(function(r){return r.json()}).then(function(j){msg("io_mm",j.ok?t("Scheda caricata"):j.err,!!j.ok);if(j.ok)ioModLoad()}).catch(function(){})}
-function ioModDel(n){dlg({title:t("Eliminare?"),body:'<p style="margin:0">'+esc(tf("La scheda modulo {0} verra eliminata. Le periferiche gia create restano.",n))+'</p>',ok:t("Elimina"),danger:true,
- onOk:function(){return post("/api/mod/del",{n:n,name:n}).then(function(r){return r.json()}).then(function(j){if(j.ok){ioModLoad();return""}return j.err})}})}
+    msg("drvm",t("Fatto")+": "+(same?dv[0].n+" ("+dv.map(function(d){return d.s+" = GPIO"+d.g}).join(", ")+")":dv.map(function(d){return d.n+" = GPIO"+d.g}).join(", ")),true);ioLoad();return""})}})}).catch(function(){})}
+function ioModDel(n){dlg({title:t("Eliminare?"),body:'<p style="margin:0">'+esc(tf("Il driver {0} verra eliminato. Le periferiche gia create restano.",n))+'</p>',ok:t("Elimina"),danger:true,
+ onOk:function(){return post("/api/mod/del",{n:n,name:n}).then(function(r){return r.json()}).then(function(j){if(j.ok){drvLoad();return""}return j.err})}})}
 function ioSw(n,v){post("/api/dev/act",{id:n,a:"set",arg:v}).then(function(r){return r.json()}).then(function(j){if(j.ok===false)msg("io_m",j.err,false);ioLoad()}).catch(function(){})}
+/* funzioni possibili del pin scritto: la classe Analogico vale solo sui pin 1-10 (ADC1); le altre classi vanno su ogni pin ammesso.
+   Il controllo vero dei pin (vietati, usati, doppi) resta del firmware: qui si toglie solo cio che il pin non sa fare. */
+function ioPinFn(){var g=parseInt($("io_g").value),f=$("io_fn"),an=$("io_c").querySelector('option[value="analogico"]'),ok=!(g>0)||(g>=1&&g<=10);
+ an.disabled=!ok;if(!ok&&$("io_c").value=="analogico"){$("io_c").value="ingresso";ioClsChg()}
+ f.textContent=g>0&&typeof PFN!="undefined"&&PFN[g]?tf("Funzioni possibili: {0}",PFN[g].replace(/ /g,", ")):""}
 function ioClsChg(){var s=$("io_c").value=="sd";$("io_sdf").className=s?"":"hide";$("io_o").parentNode.className=s?"hide":"";
  if(s){var D=IOS.sdp,F=["io_g","io_sm","io_sk","io_si"];F.forEach(function(i,k){if(!$(i).value&&D[k]!=null)$(i).value=D[k]});if(!$("io_sf").value)$("io_sf").value=1000}}
 function ioAdd(){var g=$("io_g").value,sd=$("io_c").value=="sd",o=sd?"mosi="+$("io_sm").value+" sck="+$("io_sk").value+" miso="+$("io_si").value+" khz="+$("io_sf").value:$("io_o").value;post("/api/io/add",{cls:$("io_c").value,gpio:g,name:$("io_n").value,opt:o}).then(function(r){return r.json()}).then(function(j){
@@ -232,11 +230,6 @@ function msSave(){var k=$("ms_key").value.trim(),d={role:$("ms_role").value,auto
  post("/api/mesh",d).then(function(r){return r.json()}).then(function(j){msg("msm2",j.ok?t("Salvato"):j.err,j.ok);if(j.ok){MS.key=j.key;msPoll()}})}
 function msSend(c){var d={to:$("ms_to").value};if(c){d.cmd=$("ms_cmd").value.trim();if(!d.cmd){msg("msm3",t("Scrivi l'azione"),false);return}}else{d.text=$("ms_tx").value.trim();if(!d.text){msg("msm3",t("Scrivi il messaggio"),false);return}}
  post("/api/mesh/send",d).then(function(r){return r.json()}).then(function(j){msg("msm3",j.ok?t("Inviato"):j.err,j.ok);if(j.ok){$("ms_tx").value="";setTimeout(msPoll,1500)}})}
-var BLT=0;
-function bleLoad(){api("/api/ble").then(function(r){return r.json()}).then(bleDraw).catch(function(){})}
-function bleDraw(b){if(b.have)svcSt("ble",b.on);if(!b.have){$("blecard").innerHTML='<h3>'+esc(t("Bluetooth"))+'</h3><p class="fhint">'+esc(t("Bluetooth non incluso in questo firmware"))+'</p>';return}
- $("blest").innerHTML=b.on?'<div class="law">'+esc(b.lim?tf("Acceso per altri {0}. Nome: {2}. Codice di accoppiamento: {1}",durText(b.left),b.pin,b.name):tf("Acceso, senza limite di tempo. Nome: {1}. Codice di accoppiamento: {0}",b.pin,b.name))+(b.conn?" · "+esc(t("telefono collegato")):"")+'</div>':'<p class="fhint">'+esc(t("Spento"))+(b.last?" · "+esc(b.last):"")+'</p>'}
-function bleRun(a){return post("/api/ble",{a:a}).then(function(r){return r.json()}).then(function(j){if(j.ok===false){msg("blem",j.err,false);return}bleDraw(j);msg("blem",t("Fatto"),true)})}
 
 /* ===== Localizzazione ===== */
 var LOC={cc:"",r:null,mini:null};

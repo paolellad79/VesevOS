@@ -3,7 +3,7 @@
 // VesevOS - vos_shell_wiz.cpp
 // Configurazione guidata da seriale (comando "setup"): stessi passi della pagina web. Le risposte arrivano come testo semplice.
 #include "vos_shell_int.h"
-#include "vos_shell_login.h"
+#include "vos_shell_login.h"  // wipeBytes
 #include "../drivers/vos_drv_time.h"
 #include <string_view>
 
@@ -50,6 +50,7 @@ static void wzFinish(OutSink& o) {
   o.println(trf("Nome: %s.local   Paese: %s   Lingua: %s", cfg.hostname.c_str(), cfg.country.c_str(), cfg.lang.c_str()));
   if (g_wzWifi) { o.println(trf("Mi collego a %s: se non riesce l'hotspot torna da solo.", g_wzSsid)); netReconfigure(); }
   else o.println(tr("Senza Wi-Fi di casa: hotspot e HTTP restano accesi, il server dell'ora e spento."));
+  wipeBytes(g_wzPass, sizeof g_wzPass);              // la password della Wi-Fi e gia in cfg: la copia della guida non serve piu
   o.println(tr("Per i servizi di rete e le porte: svc. Per tutto il resto: help."));
 }
 
@@ -119,7 +120,7 @@ static void upperAscii(char* s) { for (; *s; s++) if (*s >= 'a' && *s <= 'z') *s
 // Una risposta della guida. 'l' e la riga scritta (viene modificata: spazi tolti, a volte maiuscole o minuscole).
 void shx::wzLine(OutSink& o, char* l) {
   trimSpaces(l);
-  if (same(l, "quit")) { g_wz = WZ_OFF; o.println(tr("Configurazione interrotta: la guida resta da finire (scrivi setup per riprendere).")); return; }
+  if (same(l, "quit")) { g_wz = WZ_OFF; wipeBytes(g_wzPass, sizeof g_wzPass); o.println(tr("Configurazione interrotta: la guida resta da finire (scrivi setup per riprendere).")); return; }
   ErrBuf err;
   size_t len = strlen(l);
   bool skip = (same(l, "skip") || len == 0);

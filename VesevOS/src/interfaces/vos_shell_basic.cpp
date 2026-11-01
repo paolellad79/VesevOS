@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_shell_basic.cpp
-// I comandi di base nello stile bash: help, man, whoami, id, echo, df, uname, exit e time (e il collegamento a ping).
+// I comandi di base nello stile delle shell classiche: help, man, whoami, id, echo, df, uname, exit e time (e il collegamento a ping).
 // Le descrizioni stanno nella tabella unica dei comandi (vos_shell_cmdtab.cpp), il testo di help e man in vos_shell_man.cpp.
 #include "vos_shell_int.h"
 #include "../devices/vos_sd.h"
@@ -95,7 +95,7 @@ void cmdDf(const Word& a1, OutSink& o) {
   dfRow(o, "littlefs", (uint32_t)(drvFsTotal() / 1024), (uint32_t)(drvFsUsed() / 1024), "/", human);
 #if VOS_WITH_SD
   uint32_t sdTotal = 0, sdUsed = 0;
-  if (sdSpaceKb(sdTotal, sdUsed)) dfRow(o, "microsd", sdTotal, sdUsed, "/sd", human);   // montata adesso; si usa con il comando sd
+  if (sdSpaceKb(sdTotal, sdUsed)) dfRow(o, "microsd", sdTotal, sdUsed, VOS_SD_MOUNT_POINT, human);   // montata adesso; si usa con il comando sd
 #endif
 }
 
@@ -141,7 +141,7 @@ void cmdUname(const char* line, OutSink& o) {
 
 // ---------- time ----------
 
-// Come il "time" di bash: esegue il comando con la STESSA sessione e lo stesso ruolo, poi scrive il tempo reale in millisecondi
+// Come il "time" delle shell classiche: esegue il comando con la STESSA sessione e lo stesso ruolo, poi scrive il tempo reale in millisecondi
 // (misurato con drvMillis). "user" e "sys" non ci sono: FreeRTOS qui non li misura. Non da' permessi: il comando interno passa dal
 // controllo della tabella dei ruoli come se fosse scritto da solo. Non si annida. Non alloca niente.
 void cmdTime(const char* line, OutSink& o, int role, uint32_t sess) {

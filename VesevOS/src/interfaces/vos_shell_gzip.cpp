@@ -118,7 +118,7 @@ bool packOne(ArchCtx& c, const Opts& op, const char* path, const char* shown) {
   if (size > c.lim().maxIn) { c.tooBig(shown, c.lim().maxIn); return false; }
   char dest[FS_PATH_MAX + 1];
   if (strlen(path) + 3 > FS_PATH_MAX) { c.fail(shown, tr("Percorso non valido")); return false; }
-  snprintf(dest, sizeof dest, "%s.gz", path);
+  snprintf(dest, sizeof dest, "%.*s.gz", (int)sizeof dest - 4, path);   // lunghezza gia controllata sopra
   if (!op.force && drvFsExists(dest)) { c.fail(shown, tr("Esiste gia, non sovrascritto (usa -f)")); return false; }
 
   ArchHeap<ArchIo> io;

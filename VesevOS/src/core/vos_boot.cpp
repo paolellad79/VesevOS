@@ -13,6 +13,7 @@
 #include "vos_sys.h"
 #include "vos_time.h"
 #include "vos_hooks.h"
+#include "vos_layout.h"
 #include "vos_wd.h"
 #include "../drivers/vos_drv_nvs.h"
 #include "../drivers/vos_drv_time.h"
@@ -130,6 +131,7 @@ void bootRun() {
 void bootStable() {
   if (g_stable || drvMillis() < 60000UL) return;
   g_stable = true;
+  if (const char* lay = layoutFinish()) vlog("%s", lay);   // avvio riuscito: se la copia dei file era gia fatta, si tolgono i vecchi
   if (g_custom || g_try) {
     DrvNvs p; p.begin("vos", false); p.putUChar("btry", 0); p.end();
     g_try = 0;

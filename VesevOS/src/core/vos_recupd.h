@@ -16,5 +16,5 @@ void   recUpAbort();                                  // libera la memoria senza
 // Controlla e scrive. sha = impronta attesa (64 cifre esadecimali, facoltativa). who = chi (per il registro).
 // Se va bene: from/to = versione vecchia e nuova. Libera sempre la memoria.
 bool   recUpFinish(const char* sha, const char* who, char* from, char* to, size_t verLen, ErrBuf& err);   // from/to: versione di prima e di dopo (verLen byte ciascuno, 16 bastano)
-bool   recUpFromFile(const char* path, const char* sha, const char* who, char* from, char* to, size_t verLen, ErrBuf& err);   // da un file in memoria interna (shell)
+bool   recUpFromFile(const char* path, const char* sha, const char* who, char* from, char* to, size_t verLen, ErrBuf& err);   // da un file in memoria interna o sulla microSD (shell)
 const char* recVersion();                                // versione del recovery installato ("" = sconosciuta o vecchio senza marchio)

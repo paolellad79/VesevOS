@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_shell_path.h
-// Percorsi della shell: da un argomento (assoluto o relativo alla cartella corrente) al percorso pulito di LittleFS.
+// Percorsi della shell: da un argomento (assoluto o relativo alla cartella corrente) al percorso pulito (memoria interna o /media/sd).
+// Le regole stanno in core/vos_paths.h, che e l'unica risoluzione dei percorsi.
 #pragma once
 #include <stddef.h>
 

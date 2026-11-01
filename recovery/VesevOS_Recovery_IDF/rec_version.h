@@ -3,7 +3,7 @@
 // (vedi VesevOS/src/core/vos_imgcheck.h) per aggiornare il recovery e leggerne la versione.
 #pragma once
 
-#define REC_VERSION "0.5.1"
+#define REC_VERSION "0.5.2"
 
 // Tempi (millisecondi), uguali alla 0.4.4.
 #define HANDOVER_MS 3000

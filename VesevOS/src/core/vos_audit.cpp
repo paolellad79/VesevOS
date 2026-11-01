@@ -10,6 +10,7 @@
 #include "vos_heapbuf.h"
 #include "vos_time.h"
 #include "vos_hooks.h"
+#include "vos_layout.h"
 #include "../drivers/vos_drv_fs.h"
 #include <ctype.h>
 #include <freertos/FreeRTOS.h>
@@ -40,7 +41,7 @@ static void ringPush(char** arr, int& n, char* line) {
 
 // Lo storico resta anche dopo un riavvio: ogni riga va anche in /audit.log (file di sistema, nascosto alle API dei file).
 // Il file si riscrive con le sole ultime righe quando supera HIST_FILE_MAX: poca scrittura sulla flash.
-#define HIST_FILE "/audit.log"
+#define HIST_FILE layoutPath(LAY_AUDIT)      // /var/audit.log (prima della copia /audit.log, vedi vos_layout.h)
 #define HIST_FILE_MAX 6144
 #define HIST_LINE_MAX 512                           // righe del file piu lunghe vengono tagliate
 static bool g_histLoaded = false;

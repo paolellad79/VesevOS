@@ -107,7 +107,7 @@ bool endsTmp(const char* s) {
 
 // Aggiunge abs (file o cartella) con il nome rel. rel vuoto = la cartella stessa non ha intestazione (se ne aggiungono solo i figli).
 bool addTree(Build& b, const char* abs, const char* rel, unsigned depth) {
-  if (fsProtected(abs)) { b.c.fail(rel[0] ? rel : abs, tr("File di sistema protetto, saltato")); return true; }
+  if (archIsSecret(abs)) { b.c.fail(rel[0] ? rel : abs, tr("File di sistema protetto, saltato")); return true; }   // anche chiavi, certificati e copie .vbk, come zip
   if (strcmp(abs, b.archive) == 0) { b.c.fail(rel, tr("E l'archivio stesso, saltato")); return true; }
   if (endsTmp(abs)) return true;
   VosFile f = drvFsOpen(abs, "r");

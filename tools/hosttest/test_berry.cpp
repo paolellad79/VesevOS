@@ -28,7 +28,7 @@ bool rulesAction(const String& a, String& err, const char*) {
   if (a.startsWith("bad") || a == "led-color zzzzzz") { err = "Azione non ammessa"; return false; }
   return true;
 }
-// finto file system: script in /scripts (.vsc), un vecchio script di 1.7.48 in /apps (.be), file e cartelle estranei
+// finto file system: script in /scripts (.vsb), un vecchio script di 1.7.48 in /apps (.be), file e cartelle estranei
 #include <map>
 #include <string>
 #include <string_view>
@@ -38,17 +38,17 @@ static std::map<std::string, std::string> g_fs;
 static int g_listCalls = 0;
 static void fsInit() {
   g_fs.clear(); g_dirOk = true;
-  g_fs["/scripts/demo.vsc"] = "print('hola') var i = 0 while i < 3 sleep(30) i += 1 end print('fine')";
-  g_fs["/scripts/loop.vsc"] = "while true sleep(20) end";
-  g_fs["/scripts/busy.vsc"] = "while true end";
-  g_fs["/scripts/spam.vsc"] = "for i: 0 .. 400 print('0123456789abcdef') sleep(0) end print('FINE')";
-  g_fs["/scripts/big.vsc"] = std::string(9000, 'a');
+  g_fs["/scripts/demo.vsb"] = "print('hola') var i = 0 while i < 3 sleep(30) i += 1 end print('fine')";
+  g_fs["/scripts/loop.vsb"] = "while true sleep(20) end";
+  g_fs["/scripts/busy.vsb"] = "while true end";
+  g_fs["/scripts/spam.vsb"] = "for i: 0 .. 400 print('0123456789abcdef') sleep(0) end print('FINE')";
+  g_fs["/scripts/big.vsb"] = std::string(9000, 'a');
   g_fs["/scripts/x.txt"] = "abc";
   g_fs["/scripts/old.be"] = "print(1)";                  // dentro /scripts un .be NON conta
-  g_fs["/scripts/sub/k.vsc"] = "print(2)";               // cartella dentro /scripts: non conta
+  g_fs["/scripts/sub/k.vsb"] = "print(2)";               // cartella dentro /scripts: non conta
   g_fs["/apps/vecchio.be"] = "print('vecchio')";          // eredita 1.7.48: si sposta
   g_fs["/apps/Bad Name.be"] = "print(3)";                 // nome non valido: resta dove e
-  g_fs["/apps/lampada.vap"] = "[manifest]";               // futura app: non si tocca
+  g_fs["/apps/lampada.vab"] = "[manifest]";               // futura app: non si tocca
 }
 bool fsReadText(const String& p, String& out, String& err) {
   auto it = g_fs.find(p.c_str());
@@ -117,9 +117,9 @@ int main() {
   g_bq[0] = 3; g_bq[1] = 1; g_bn = 2; g_bi = 0;
   CHECK(run("print(btn(), btn(), btn())") && OUT() == "3 1 0\n" && !g_battached && g_battachCalls >= 2);
   g_bn = 0; g_bi = 0;
-  // 0a) esempio docs/esempi/script/torcia.vsc: un click accende il LED bianco, il click dopo lo spegne; spegnimento da solo dopo MINUTI
+  // 0a) esempio docs/esempi/script/torcia.vsb: un click accende il LED bianco, il click dopo lo spegne; spegnimento da solo dopo MINUTI
   {
-    std::string tp = std::string(getenv("VOS_REPO") ? getenv("VOS_REPO") : ".") + "/docs/esempi/script/torcia.vsc", tx;
+    std::string tp = std::string(getenv("VOS_REPO") ? getenv("VOS_REPO") : ".") + "/docs/esempi/script/torcia.vsb", tx;
     FILE* tf = fopen(tp.c_str(), "rb"); CHECK(tf != NULL);
     if (tf) { char b[512]; size_t n; while ((n = fread(b, 1, sizeof b, tf)) > 0) tx.append(b, n); fclose(tf); }
     auto rep = [&](std::string x, const std::string& from, const std::string& to) { size_t p = x.find(from); if (p != std::string::npos) x.replace(p, from.size(), to); return x; };
@@ -213,24 +213,24 @@ int main() {
   String big; for (int i = 0; i < BERRY_CODE_MAX + 1; i++) big += "a";
   CHECK(!berryEval(big.c_str(), o, e) && e.length());
   CHECK(!berryEval("print(1)", o, e, 0) && e == "Lo script non risponde" && g_busy && g_abandoned);   // il task finto non parte
-  CHECK(!berryEval("print(2)", o, e) && e == "Berry e occupato con un altro script");
+  CHECK(!berryEval("print(2)", o, e) && e == "Un altro script e gia in esecuzione");
   runTask(NULL);                                                    // il "task" finisce: libera da solo il busy perche abbandonato
   CHECK(!g_busy);
-  // 10b) script salvati in /scripts (.vsc) (il task finto non parte: lo faccio girare io con runTask)
+  // 10b) script salvati in /scripts (.vsb) (il task finto non parte: lo faccio girare io con runTask)
   String er;
   CHECK(!berryStart("Demo!", er) && er.length() && !g_busy);              // nome non valido
   CHECK(!berryStart("../x", er) && !berryStart("a b", er) && !berryStart("", er));
-  CHECK(g_fs.count("/apps/vecchio.be") == 1 && g_fs.count("/scripts/vecchio.vsc") == 0);   // prima: il vecchio script e in /apps
+  CHECK(g_fs.count("/apps/vecchio.be") == 1 && g_fs.count("/scripts/vecchio.vsb") == 0);   // prima: il vecchio script e in /apps
   CHECK(!berryStart("nope", er) && er.indexOf("Script non trovato: scrivi 'script list'") == 0 && !g_busy);
-  // migrazione (una volta per avvio): solo /apps/<nome valido>.be -> /scripts/<nome>.vsc; il resto non si tocca
-  CHECK(g_fs.count("/apps/vecchio.be") == 0 && g_fs["/scripts/vecchio.vsc"] == "print('vecchio')");
-  CHECK(g_fs.count("/apps/Bad Name.be") == 1 && g_fs.count("/apps/lampada.vap") == 1);
+  // migrazione (una volta per avvio): solo /apps/<nome valido>.be -> /scripts/<nome>.vsb; il resto non si tocca
+  CHECK(g_fs.count("/apps/vecchio.be") == 0 && g_fs["/scripts/vecchio.vsb"] == "print('vecchio')");
+  CHECK(g_fs.count("/apps/Bad Name.be") == 1 && g_fs.count("/apps/lampada.vab") == 1);
   CHECK(berryStart("vecchio.be", er) && berryRunning()); runTask(NULL);       // il vecchio nome .be funziona ancora nei comandi
   CHECK(g_runOk && String(g_obuf) == "vecchio\n" && !berryRunning());
   { int c0 = g_listCalls; g_fs["/apps/ancora.be"] = "print(9)"; BL(); CHECK(g_fs.count("/apps/ancora.be") == 1 && g_listCalls == c0 + 1); }   // niente seconda migrazione
   CHECK(!berryStart("big", er) && er.length() && !g_busy);                // oltre BERRY_FILE_MAX
-  CHECK(berryStart("DEMO.vsc", er) && berryRunning() && g_bg);            // maiuscole e .vsc accettati
-  CHECK(!berryStart("demo", er) && er == "Berry e occupato con un altro script");
+  CHECK(berryStart("DEMO.vsb", er) && berryRunning() && g_bg);            // maiuscole e .vsb accettati
+  CHECK(!berryStart("demo", er) && er == "Un altro script e gia in esecuzione");
   CHECK(BL().indexOf("demo  (70 B)  <- in corso") > 0);
   runTask(NULL);
   CHECK(!berryRunning() && g_runOk && String(g_obuf) == "hola\nfine\n");
@@ -257,11 +257,11 @@ int main() {
   { String j = BJ();
     CHECK(j.startsWith("{\"ok\":true,\"ver\":\"") && j.indexOf("\"busy\":false") > 0 && j.indexOf("{\"n\":\"demo\",\"s\":") > 0 && j.indexOf("\"n\":\"vecchio\"") > 0);
     CHECK(j.indexOf("x.txt") < 0 && j.indexOf("old") < 0 && j.indexOf("\"n\":\"sub\"") < 0 && j.indexOf("\"max\":8192") > 0 && j.endsWith("}"));
-    g_fs["/scripts/virg.vsc"] = "print('a\"b\\\\c') print(1/0)";
+    g_fs["/scripts/virg.vsb"] = "print('a\"b\\\\c') print(1/0)";
     CHECK(berryStart("virg", er) && berryRunning()); runTask(NULL);
     j = BJ();
     CHECK(j.indexOf("\"busy\":false") > 0 && j.indexOf("\"last\":0") > 0 && j.indexOf("\"out\":\"a\\\"b\\\\c\\n\"") > 0 && j.indexOf("divzero_error") > 0 && j.indexOf("\"name\":\"virg\"") > 0);
-    g_fs["/scripts/lungo.vsc"] = "print('x') sleep(200) print('y')";
+    g_fs["/scripts/lungo.vsb"] = "print('x') sleep(200) print('y')";
     CHECK(berryStart("lungo", er)); j = BJ();
     CHECK(j.indexOf("\"busy\":true,\"bg\":true") > 0 && j.indexOf("\"name\":\"lungo\"") > 0 && j.indexOf("\"err\":\"\"") > 0);   // mentre gira: nessun errore vecchio
     runTask(NULL); CHECK(!berryRunning()); }
@@ -271,7 +271,7 @@ int main() {
       HeapBuf h(4096); CHECK(h.addJson(all.data(), all.size()));
       CHECK(String(h.c_str()) == jsonEscape(String(all.c_str()))); }
     auto savedFs = g_fs; g_fs.clear(); g_dirOk = true;                              // i file delle altre prove si rimettono alla fine
-    for (int i = 0; i < 200; i++) g_fs[std::string("/scripts/s") + std::to_string(i) + ".vsc"] = "print(1)";
+    for (int i = 0; i < 200; i++) g_fs[std::string("/scripts/s") + std::to_string(i) + ".vsb"] = "print(1)";
     String bj = BJ(); CHECK(bj != "KO" && bj.startsWith("{\"ok\":true") && bj.endsWith("}") && bj.indexOf("\"n\":\"s199\"") > 0);   // 200 script: entrano nel tetto
     String bl = BL(); CHECK(bl.indexOf("Script in /scripts: 200") == 0 && bl.indexOf("  s199  (8 B)") > 0);
     g_fs = savedFs; g_dirOk = true;
@@ -287,14 +287,14 @@ int main() {
     stopW = true; w.join(); CHECK(allOk);
     g_bg = false; g_olen = 0; g_obuf[0] = 0; g_otrunc = false; }
   // 10d) coda (azione "script <nome>" delle Automazioni): parte subito o va in coda (max 4, senza doppioni); stesso task; stop la svuota
-  g_fs["/scripts/qa.vsc"] = "print('A')"; g_fs["/scripts/qb.vsc"] = "print('B')"; g_fs["/scripts/qc.vsc"] = "print('C')";
-  g_fs["/scripts/qd.vsc"] = "print('D')"; g_fs["/scripts/qe.vsc"] = "print('E')";
+  g_fs["/scripts/qa.vsb"] = "print('A')"; g_fs["/scripts/qb.vsb"] = "print('B')"; g_fs["/scripts/qc.vsb"] = "print('C')";
+  g_fs["/scripts/qd.vsb"] = "print('D')"; g_fs["/scripts/qe.vsb"] = "print('E')";
   CHECK(!berryQueue("Bad Name", er, "t") && er.indexOf("Nome script non valido") == 0 && !berryRunning());
   CHECK(!berryQueue("nonesiste", er, "t") && er.indexOf("Script non trovato") == 0 && !berryRunning() && g_qn == 0);   // libero + errore vero: non si accoda
   uint32_t runs0 = g_runs;
   CHECK(berryQueue("qa", er, "regola") && berryRunning() && g_qn == 0);        // libero: parte subito
   CHECK(berryQueue("qb", er, "regola") && g_qn == 1);                          // occupato: in coda
-  CHECK(!berryQueue("QB.vsc", er, "regola") && er == "Script gia in coda" && g_qn == 1);   // doppione (nome ripulito)
+  CHECK(!berryQueue("QB.vsb", er, "regola") && er == "Script gia in coda" && g_qn == 1);   // doppione (nome ripulito)
   CHECK(berryQueue("qc", er, "mqtt") && berryQueue("nonesiste", er, "t") && berryQueue("qd", er, "t") && g_qn == 4);
   CHECK(!berryQueue("qe", er, "t") && er.indexOf("Coda piena") == 0 && g_qn == 4);
   CHECK(BJ().indexOf("\"q\":4") > 0);
@@ -311,9 +311,9 @@ int main() {
   CHECK(run("print(act('script qa'))") && OUT() == "uno script non puo avviare altri script o app\n" && g_lastAct == "" && g_qn == 0);
   CHECK(run("print(act('  script qa'))") && OUT() == "uno script non puo avviare altri script o app\n" && g_lastAct == "");
   CHECK(run("print(act('note ciao'))") && OUT() == "ok\n" && g_lastAct == "note ciao");        // le altre azioni passano
-  CHECK(berryNameValid("QA.vsc") && !berryNameValid("a b") && !berryNameValid(""));
+  CHECK(berryNameValid("QA.vsb") && !berryNameValid("a b") && !berryNameValid(""));
 
-  // 10e) APP (.vap): codice che resta vivo, on_set dalla pagina, on_tick ogni secondo, dev_get / dev_set, permessi del manifest
+  // 10e) APP (.vab): codice che resta vivo, on_set dalla pagina, on_tick ogni secondo, dev_get / dev_set, permessi del manifest
   {
     auto mk = [](AppInfo& a) {
       a.name = "t1"; a.nctl = 0; a.data = "power=0\nlum=128\ninfo=ciao\nextra=hello\n"; a.ndata = 4;
@@ -400,7 +400,7 @@ int main() {
     CHECK(!g_runOk && ERR().indexOf("timeout_error") >= 0);
     // un solo motore: app e script si escludono; stato JSON dello script vede l'app
     rtInit(*A); CHECK(berryStartApp("t1", "def on_tick() end", "", er));
-    { String n; CHECK(berryRunning() && berryAppRunning(n) && n == "t1" && !berryStartApp("t2", "print(1)", "", er) && er == "Berry e occupato con un altro script" && !berryStart("demo", er)); }
+    { String n; CHECK(berryRunning() && berryAppRunning(n) && n == "t1" && !berryStartApp("t2", "print(1)", "", er) && er == "Un altro script e gia in esecuzione" && !berryStart("demo", er)); }
     { std::thread th([&] { std::this_thread::sleep_for(std::chrono::milliseconds(200)); String s2; berryStop(s2); }); runTask(NULL); th.join(); }
     CHECK(!berryRunning() && g_runOk);
     { HeapBuf h(BERRY_STATE_MAX); CHECK(berryAppOutJson(h)); String o(h.c_str()); CHECK(o.indexOf("\"out\":\"") == 0 && o.indexOf("\"last\":1") > 0); }
@@ -412,18 +412,18 @@ int main() {
   // 10c) pulizia del nome: cleanNameTo (senza String) uguale al vecchio cleanName + utilNameOk su 20000 testi a caso
   {
     auto oldClean = [](const String& in) { String n = in; n.trim(); n.toLowerCase(); if (n.endsWith(SCRIPT_EXT)) n.remove(n.length() - 4); else if (n.endsWith(".be")) n.remove(n.length() - 3); return n; };
-    const char* parts[] = {"a", "B", "z9", "-", "_", ".", ".vsc", ".VSC", ".be", ".BE", " ", "\t", "\r\n", "x", "0", "/", "..", "\xc3\xa8", "vsc", "be"};
+    const char* parts[] = {"a", "B", "z9", "-", "_", ".", ".vsb", ".VSC", ".be", ".BE", " ", "\t", "\r\n", "x", "0", "/", "..", "\xc3\xa8", "vsc", "be"};
     srand(7); int bad = 0;
     for (int i = 0; i < 20000; i++) {
       std::string t; int np = rand() % 14; for (int k = 0; k < np; k++) t += parts[rand() % 20];
-      if (i % 50 == 0) t = std::string(20 + rand() % 40, 'a') + (rand() % 2 ? ".vsc" : "") + (rand() % 2 ? "  " : "");   // lunghi, vicini a 24 e a 40
+      if (i % 50 == 0) t = std::string(20 + rand() % 40, 'a') + (rand() % 2 ? ".vsb" : "") + (rand() % 2 ? "  " : "");   // lunghi, vicini a 24 e a 40
       String o = oldClean(t.c_str()); bool ov = utilNameOk(o);
       char n[NAME_BUF]; bool nv = cleanNameTo(t.c_str(), n);
       if (nv != ov || (nv && o != n)) { if (bad++ < 3) printf("diverso: [%s]\n", t.c_str()); }
     }
     CHECK(bad == 0);
     char nb[NAME_BUF];
-    CHECK(!cleanNameTo(NULL, nb) && !cleanNameTo("", nb) && !cleanNameTo(".vsc", nb) && !cleanNameTo(".be", nb) && !cleanNameTo(std::string(24, 'a').append("x").c_str(), nb));
+    CHECK(!cleanNameTo(NULL, nb) && !cleanNameTo("", nb) && !cleanNameTo(".vsb", nb) && !cleanNameTo(".be", nb) && !cleanNameTo(std::string(24, 'a').append("x").c_str(), nb));
     CHECK(cleanNameTo("  Demo.VSC \n", nb) && String(nb) == "demo" && cleanNameTo(std::string(24, 'a').c_str(), nb) && strlen(nb) == 24);
     CHECK(!cleanNameTo(std::string(39, 'a').c_str(), nb) && !cleanNameTo(std::string(40, 'a').c_str(), nb) && !cleanNameTo(std::string(200, 'a').c_str(), nb));
   }
@@ -439,10 +439,10 @@ int main() {
     int mv = migrateOld();
     int rimasti = 0; for (int i = 0; i < 20; i++) { char nm[40]; snprintf(nm, sizeof nm, "/apps/m%02d.be", i); rimasti += g_fs.count(nm); }
     CHECK(mv == 16 && g_migDone);
-    CHECK(rimasti == 4 && g_fs.count("/scripts/m00.vsc") == 1 && g_fs.count("/scripts/m15.vsc") == 1 && g_fs.count("/scripts/m16.vsc") == 0);   // vanno in ordine alfabetico: m00..m15
+    CHECK(rimasti == 4 && g_fs.count("/scripts/m00.vsb") == 1 && g_fs.count("/scripts/m15.vsb") == 1 && g_fs.count("/scripts/m16.vsb") == 0);   // vanno in ordine alfabetico: m00..m15
     CHECK(g_fs.count("/apps/.be") == 1 && g_fs.count("/apps/" + std::string(25, 'q') + ".be") == 1 && g_fs.count("/apps/sotto/k.be") == 1);
     CHECK(migrateOld() == 0);                                            // una volta per avvio
-    g_migDone = false; CHECK(migrateOld() == 5 && g_fs.count("/scripts/" + std::string(24, 'q') + ".vsc") == 1 && g_fs.count("/scripts/m19.vsc") == 1);   // al giro dopo gli altri 4 e il nome da 24
+    g_migDone = false; CHECK(migrateOld() == 5 && g_fs.count("/scripts/" + std::string(24, 'q') + ".vsb") == 1 && g_fs.count("/scripts/m19.vsb") == 1);   // al giro dopo gli altri 4 e il nome da 24
     CHECK(g_fs.count("/apps/.be") == 1 && g_fs.count("/apps/" + std::string(25, 'q') + ".be") == 1 && g_fs.count("/apps/sotto/k.be") == 1);   // nomi non validi e cartelle restano
     g_dirOk = false; g_migDone = false; g_fs.clear(); CHECK(migrateOld() == 0 && g_migDone);   // niente /apps: zero
     fsInit();

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_shell_prompt.h
-// Il prompt della shell, uguale a quello di bash: utente@hostname:cartella$
+// Il prompt della shell, nello stile delle shell classiche: utente@hostname:cartella$
 #pragma once
 #include <stddef.h>
 #include <stdint.h>

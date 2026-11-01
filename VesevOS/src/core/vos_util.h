@@ -16,7 +16,7 @@ void   uptimeTo(uint64_t seconds, char* out, size_t n);   // come uptimeStr, in 
 void   durStr(uint64_t seconds, char* out, size_t n);   // durata: "45 s", "12 min", "3 h 5 min", "5 g 23 h 11 min" (giorni al posto di mesi/anni)
 size_t cleanAscii(std::string_view s, char* out, size_t cap);   // toglie i \r, i caratteri strani diventano '?'; scrive in out (zero finale, tagliato a cap-1); ritorna i caratteri scritti
 void   sha256HexOf(std::string_view data, char out[65]);        // SHA-256 in esadecimale minuscolo (64 cifre + zero)
-bool   utilNameOk(const char* s, size_t n);      // nome corto valido (script, schede .vdp): 1-24 caratteri a-z 0-9 - _
+bool   utilNameOk(const char* s, size_t n);      // nome corto valido (script, schede .vdb): 1-24 caratteri a-z 0-9 - _
 bool   utilLineErr(ErrBuf& err, int line, const char* msg);   // err = "Riga N: msg"; sempre false (per i lettori di file a righe)
 bool   hostnameValid(std::string_view s);      // 1-32: lettere, numeri, trattino
 uint32_t utilStackSpare(uint32_t total, uint32_t freeMin);        // byte di stack che si potrebbero togliere tenendo il 25% libero (a passi di 256); 0 se total e 0

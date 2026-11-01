@@ -1,0 +1,29 @@
+# Driver BMP280 in ELF (.vde): sensore di temperatura e pressione su I2C. Formato: docs/progetto/formato-vde.md.
+# I pin SDA e SCL li sceglie l'utente quando installa il driver (vesevos-elf driver install bmp280.vde 21,22, o dalla pagina).
+[module]
+name=bmp280
+title=Sensore BMP280
+bus=i2c
+addr=0x76
+freq=100000
+power=3V3
+level=3V3
+author=Mimmo
+version=1.0
+license=CC0
+warn=Alimenta il sensore a 3V3. SDA e SCL a 3,3 V con resistenze di pull-up.
+use=i2c
+who=oper
+[signals]
+SDA
+SCL
+[icon]
+<svg viewBox="0 0 24 24"><path d="M10 14V5a2 2 0 0 1 4 0v9a4 4 0 1 1-4 0z" fill="none" stroke="#c0392b" stroke-width="2"/></svg>
+[widget]
+title=Sensore BMP280
+alt=Sensore BMP280 non risponde
+who=oper
+[commands]
+bmp id oper
+bmp read oper
+bmp init admin

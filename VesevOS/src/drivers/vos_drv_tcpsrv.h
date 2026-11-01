@@ -20,10 +20,14 @@ class DrvTcpMini {
 public:
   bool begin(uint16_t port, DrvTcpHandler h, const char* taskName);   // false se la porta non e disponibile o manca la memoria
   bool running() const { return task_ != nullptr; }
+  // Byte di stack che il task che chiama non ha MAI usato (minimo storico, ESP-IDF uxTaskGetStackHighWaterMark). Si chiama dal gestore.
+  static uint32_t stackFreeMin();
 private:
   static void run(void* self);
   void        serve(int c, uint32_t peerIp, char* in, char* out);
   int           sock_ = -1;
   DrvTcpHandler handler_ = nullptr;
   void*         task_ = nullptr;      // TaskHandle_t
+  char          in_[TCPSRV_IN_MAX + 1];   // buffer fuori dallo stack del task (una connessione alla volta, quindi bastano questi)
+  char          out_[TCPSRV_OUT_MAX];
 };

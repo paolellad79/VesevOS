@@ -1,4 +1,4 @@
-// VesevOS - prove sul computer: schede modulo .vdp (vos_mod.cpp) con file e periferiche finti
+// VesevOS - prove sul computer: schede modulo .vdb (vos_mod.cpp) con file e periferiche finti
 #include <Arduino.h>
 #include "mini.h"
 #include <map>
@@ -78,36 +78,36 @@ int main() {
   CHECK(!modParse(rep(ok2(), "power=5V", "power=5V\npart=serie,1k,IN1\npart=serie,1k,IN1\npart=serie,1k,IN1\npart=serie,1k,IN1\npart=serie,1k,IN1"), "rele2ch", m, err) && err.indexOf("Troppi") > 0);
   // salvataggio, elenco, dettagli
   CHECK(!modSave("rele2ch", "pezzo", err) && g_fs.empty());                                   // un file sbagliato non si salva
-  CHECK(modSave("rele2ch", ok2(), err) && g_fs.count("/devs/rele2ch.vdp") == 1);
+  CHECK(modSave("rele2ch", ok2(), err) && g_fs.count("/devs/rele2ch.vdb") == 1);
   CHECK(!modSave("Rele 2", ok2(), err));
   String j = modListJson();
   CHECK(j.indexOf("\"n\":\"rele2ch\"") > 0 && j.indexOf("\"ok\":true") > 0 && j.indexOf("\"ns\":2") > 0 && j.indexOf("\"icon\":\"<svg") > 0);
-  g_fs["/devs/rotto.vdp"] = "[module]\nname=rotto\n";
+  g_fs["/devs/rotto.vdb"] = "[module]\nname=rotto\n";
   j = modListJson(); CHECK(j.indexOf("\"n\":\"rotto\",\"ok\":false") > 0 && j.indexOf("\"e\":\"") > 0);
   j = modInfoJson("rele2ch");
   CHECK(j.indexOf("\"wiring\":\"<svg") > 0 && j.indexOf("\"sug\":[5,6]") > 0 && j.indexOf("\"free\":1") > 0 && j.indexOf("\"sig\":[\"IN1\",\"IN2\"]") > 0 && j.indexOf("\"w\":\"Usare") > 0);
   CHECK(j.indexOf("\"lv\":\"3V3\"") > 0 && j.indexOf("\"parts\":[]") > 0);
-  g_fs["/devs/rele2ch.vdp"] = rep(ok2(), "power=5V", "power=5V\nlevel=5V\npart=serie,330 ohm,IN1").c_str();
+  g_fs["/devs/rele2ch.vdb"] = rep(ok2(), "power=5V", "power=5V\nlevel=5V\npart=serie,330 ohm,IN1").c_str();
   j = modInfoJson("rele2ch"); CHECK(j.indexOf("\"lv\":\"5V\"") > 0 && j.indexOf("{\"k\":\"serie\",\"v\":\"330 ohm\",\"s\":\"IN1\"}") > 0);
-  g_fs["/devs/rele2ch.vdp"] = ok2().c_str();
+  g_fs["/devs/rele2ch.vdb"] = ok2().c_str();
   CHECK(modInfoJson("nonc").indexOf("\"ok\":false") > 0);
   CHECK(modListText().indexOf("rele2ch") >= 0 && modInfoText("rele2ch").indexOf("IN1 -> GPIO5") >= 0);
   // installazione: pin proposti, tutto o niente
   String out;
-  CHECK(modInstall("rele2ch", "", out, err) && out.indexOf("\"s\":\"IN1\"") > 0 && out.indexOf("\"g\":6") > 0 && g_added == 2);
+  CHECK(modInstall("rele2ch", "", "", out, err) && out.indexOf("\"s\":\"IN1\"") > 0 && out.indexOf("\"g\":6") > 0 && g_added == 2);
   g_added = g_removed = 0; g_free = 1;
-  CHECK(!modInstall("rele2ch", "", out, err) && g_added == 0);                                // pin liberi insufficienti
+  CHECK(!modInstall("rele2ch", "", "", out, err) && g_added == 0);                                // pin liberi insufficienti
   g_free = 10; g_added = g_removed = 0; g_failAt3 = true;
-  CHECK(!modInstall("rele2ch", "", out, err) && err == "pin occupato" && g_added == 1 && g_removed == 1);   // il secondo fallisce: il primo si toglie
+  CHECK(!modInstall("rele2ch", "", "", out, err) && err == "pin occupato" && g_added == 1 && g_removed == 1);   // il secondo fallisce: il primo si toglie
   g_failAt3 = false; g_added = g_removed = 0;
-  CHECK(modInstall("rele2ch", "pompa", out, err) && out.indexOf("\"n\":\"pompa1\"") > 0 && out.indexOf("\"n\":\"pompa2\"") > 0);
+  CHECK(modInstall("rele2ch", "pompa", "", out, err) && out.indexOf("\"n\":\"pompa1\"") > 0 && out.indexOf("\"n\":\"pompa2\"") > 0);
   g_added = g_removed = 0;
-  CHECK(!modInstall("nonc", "", out, err));
-  CHECK(modDelete("rotto", err) && !g_fs.count("/devs/rotto.vdp") && !modDelete("rotto", err) && !modDelete("../x", err));
+  CHECK(!modInstall("nonc", "", "", out, err));
+  CHECK(modDelete("rotto", err) && !g_fs.count("/devs/rotto.vdb") && !modDelete("rotto", err) && !modDelete("../x", err));
   // le schede di esempio in docs/devs devono passare il vero controllo
   { const char* r = getenv("VOS_REPO"); std::string dir = std::string(r ? r : "../..") + "/docs/devs"; int n = 0;
     DIR* d = opendir(dir.c_str()); CHECK(d != nullptr);
-    if (d) { struct dirent* e; while ((e = readdir(d))) { std::string f = e->d_name; if (f.size() < 5 || f.substr(f.size() - 4) != ".vdp") continue;
+    if (d) { struct dirent* e; while ((e = readdir(d))) { std::string f = e->d_name; if (f.size() < 5 || f.substr(f.size() - 4) != ".vdb") continue;
       std::ifstream in(dir + "/" + f); std::stringstream ss; ss << in.rdbuf(); ModInfo mm; String er;
       bool okp = modParse(String(ss.str().c_str()), String(f.substr(0, f.size() - 4).c_str()), mm, er);
       if (!okp) printf("  scheda %s: %s\n", f.c_str(), er.c_str());
@@ -152,20 +152,20 @@ int main() {
   // senza [pins] tutto come prima
   CHECK(modParse(ok2(), "rele2ch", m, err) && m.nwp == 0 && m.drv[0] == 0 && modInfoJson("rele2ch").indexOf("\"pins\":[]") > 0);
   // JSON, testo e installazione del sensore
-  g_fs["/devs/bmp.vdp"] = BMP;
+  g_fs["/devs/bmp.vdb"] = BMP;
   j = modInfoJson("bmp");
   CHECK(j.indexOf("\"c\":\"i2c\"") > 0 && j.indexOf("\"drv\":\"bmp280\"") > 0 && j.indexOf("\"addr\":119") > 0 && j.indexOf("\"sug\":[5,6]") > 0);
   CHECK(j.indexOf("\"pins\":[{") > 0 && j.indexOf("\"l\":\"VDD\"") > 0 && j.indexOf("\"#e53935\"") > 0 && j.indexOf("\"cn\":\"red\"") > 0);
   CHECK(modInfoText("bmp").indexOf("VDD") >= 0 && modInfoText("bmp").indexOf("0x77") >= 0);
   g_added = g_removed = 0; g_free = 10; g_i2cCalls = 0;
-  CHECK(modInstall("bmp", "", out, err) && g_i2cCalls == 1 && g_i2cDrv == "bmp280" && g_i2cSda == 5 && g_i2cScl == 6 && g_i2cAddr == 0x77 && !g_i2cFast && g_added == 0);
+  CHECK(modInstall("bmp", "", "", out, err) && g_i2cCalls == 1 && g_i2cDrv == "bmp280" && g_i2cSda == 5 && g_i2cScl == 6 && g_i2cAddr == 0x77 && !g_i2cFast && g_added == 0);
   CHECK(out.indexOf("\"s\":\"SDA\",\"n\":\"bmp1\",\"g\":5") > 0 && out.indexOf("\"s\":\"SCL\"") > 0);
-  g_free = 1; CHECK(!modInstall("bmp", "", out, err) && g_i2cCalls == 1);                  // pin liberi insufficienti: niente da fare
-  g_free = 10; g_fs.erase("/devs/bmp.vdp");
+  g_free = 1; CHECK(!modInstall("bmp", "", "", out, err) && g_i2cCalls == 1);                  // pin liberi insufficienti: niente da fare
+  g_free = 10; g_fs.erase("/devs/bmp.vdb");
   // il catalogo periferiche/ deve passare il vero controllo
   { const char* r = getenv("VOS_REPO"); std::string dir = std::string(r ? r : "../..") + "/periferiche"; int n = 0, ni = 0;
     DIR* d = opendir(dir.c_str()); CHECK(d != nullptr);
-    if (d) { struct dirent* e; while ((e = readdir(d))) { std::string f = e->d_name; if (f.size() < 5 || f.substr(f.size() - 4) != ".vdp") continue;
+    if (d) { struct dirent* e; while ((e = readdir(d))) { std::string f = e->d_name; if (f.size() < 5 || f.substr(f.size() - 4) != ".vdb") continue;
       std::ifstream in(dir + "/" + f); std::stringstream ss; ss << in.rdbuf(); ModInfo mm; String er;
       bool okp = modParse(String(ss.str().c_str()), String(f.substr(0, f.size() - 4).c_str()), mm, er);
       if (!okp) printf("  periferica %s: %s\n", f.c_str(), er.c_str());

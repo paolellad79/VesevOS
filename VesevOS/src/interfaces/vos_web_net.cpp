@@ -14,6 +14,21 @@ static esp_err_t wpsReply(Res* s) {
   return sendJson(s, j);
 }
 
+#if VOS_WITH_ELF
+// Interruttore dei moduli ELF (servizio "elf", registro dei servizi). Nessuna conferma: yes=1, se arriva, e ignorato. Solo Admin (la rotta lo e gia).
+static esp_err_t elfSwitch(Req* r, Res* s, Ctx& c) {
+  if (!serviceFind("elf")) return ko(s, tr("Servizio sconosciuto"));
+  bool on = Pis(r, "elf", "1");
+  ErrBuf e;
+  if (on && serviceState("elf") != SVC_ON) {
+    if (!serviceStart("elf", e)) return ko(s, e);
+  } else if (!on) {
+    serviceStop("elf", e);
+  }
+  return sendJsonBuf(s, svcJson(c.role));
+}
+#endif
+
 void routesNet(PsychicHttpServer* S, bool sec) {
   // ---- prima configurazione ----
   add(S, sec, "/api/setup/done", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
@@ -91,8 +106,11 @@ void routesNet(PsychicHttpServer* S, bool sec) {
   });
 
   // ---- servizi di rete: punto di accesso, HTTP, HTTPS, porte ----
-  add(S, sec, "/api/svc", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJsonBuf(s, svcJson()); });
+  add(S, sec, "/api/svc", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendJsonBuf(s, svcJson(c.role)); });
   add(S, sec, "/api/svc", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+#if VOS_WITH_ELF
+    if (has(r, "elf")) return elfSwitch(r, s, c);                  // interruttore dei moduli ELF: nessun'altra voce in questa richiesta
+#endif
     bool apOn = has(r, "apOn") ? Pis(r, "apOn", "1") : cfg.apOn;
     bool cap = has(r, "captive") ? Pis(r, "captive", "1") : cfg.apCaptive;
     bool dh = has(r, "dhcpOn") ? Pis(r, "dhcpOn", "1") : cfg.dhcpOn;
@@ -113,7 +131,7 @@ void routesNet(PsychicHttpServer* S, bool sec) {
     cfg.apOn = apOn; cfg.apCaptive = cap; cfg.httpOn = hOn; cfg.https = sOn; cfg.httpPort = hp; cfg.httpsPort = sp;
     cfg.dhcpOn = dh; cfg.dhcpLease = lease; cfg.mdnsOn = md;
     cfgSave(); netApplyServices();
-    return sendJsonBuf(s, svcJson());
+    return sendJsonBuf(s, svcJson(c.role));
   });
 
   // ---- WPS: collegamento alla Wi-Fi di casa con il router (pulsante o PIN) ----

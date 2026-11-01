@@ -9,7 +9,7 @@ function loadPins(){brdLoad().then(function(b){if(!b)return;$("pinchip").textCon
  $("pintab").innerHTML=h;if(PM.length)drawPins()});
  api("/api/pinmap").then(function(r){return r.json()}).then(function(m){PM=m;drawPins();pinPanel();pinInv()});
  api("/api/pinnotes").then(function(r){return r.json()}).then(function(n){PNOTE=n;drawPins();pinInv()});
- pinViewBtns();
+ pinViewBtns();pinDevLoad();
  clearInterval(PTM);PTM=setInterval(pinPoll,1000);pinPoll()}
 function pinViewBtns(){$("pinview").innerHTML='<button class="'+(PV=="f"?"on":"")+'" onclick="pinV(\'f\')">'+esc(t("Fronte"))+'</button><button class="'+(PV=="b"?"on":"")+'" onclick="pinV(\'b\')">'+esc(t("Retro"))+'</button>'}
 function pinV(v){PV=v;pinViewBtns();drawPins()}
@@ -18,49 +18,50 @@ var PUSE=[];
 function pinOwner(g){for(var i=0;i<PUSE.length;i++)if(PUSE[i].gpio==g)return PUSE[i];return null}
 function drawPins(){var e=$("pinsvg");if(!PBI||!PBI.lay){e.innerHTML="";return}
  var FL=brdLay("fl"),FR=brdLay("fr"),BL=brdLay("bl").map(Number),BR=brdLay("br").map(Number),LED=PBI.led,UA=PBI.uart||[];
- var W=400,bx=140,bw=120,top=56,st=30,bh=Math.max(FL.length,FR.length,BL.length,BR.length,1)*st+50,s="",ink="#8b98a8";
- var fr=PV=="f",L=fr?FL:FR,R=fr?FR:FL;
+ var W=400,bw=120,top=64,st=30,bh=Math.max(FL.length,FR.length,BL.length,BR.length,1)*st+50,s="",ink=pinInk();
+ var fr=PV=="f",L=fr?FL:FR,R=fr?FR:FL,plan=fr?pinSchemaPlan(L,R,top,st,bw):null,bx=plan?plan.bx:140;
  s+='<rect x="'+bx+'" y="'+top+'" width="'+bw+'" height="'+bh+'" rx="12" fill="'+(fr?"#1f2a37":"#243246")+'" stroke="#3a4a5e"/>';
- s+='<rect x="'+(bx+bw/2-22)+'" y="'+(top-14)+'" width="44" height="22" rx="6" fill="#9aa5b1" stroke="#5c6670"/><text x="'+(bx+bw/2)+'" y="'+(top+2)+'" font-size="8" text-anchor="middle" fill="#1f2a37">USB-C</text>';
- s+='<text x="'+(bx+bw/2)+'" y="'+(top-22)+'" font-size="10" font-weight="700" text-anchor="middle" fill="'+ink+'">'+esc(fr?t("FRONTE"):t("RETRO (vista da sotto)"))+'</text>';
+ s+='<rect x="'+(bx+bw/2-24)+'" y="'+(top-18)+'" width="48" height="28" rx="6" fill="#aab4bf" stroke="#5c6670"/><rect x="'+(bx+bw/2-17)+'" y="'+(top-8)+'" width="34" height="9" rx="4.5" fill="#1f2a37"/><text x="'+(bx+bw/2)+'" y="'+(top-10.5)+'" font-size="6.5" text-anchor="middle" fill="#1f2a37">USB-C</text>';
+ s+='<text x="'+(bx+bw/2)+'" y="'+(top-24)+'" font-size="10" font-weight="700" text-anchor="middle" fill="'+ink+'">'+esc(fr?t("FRONTE"):t("RETRO (vista da sotto)"))+'</text>';
  if(fr){
   s+='<rect x="'+(bx+16)+'" y="'+(top+14)+'" width="30" height="14" rx="3" fill="#46566a"/><text x="'+(bx+31)+'" y="'+(top+24)+'" font-size="7" text-anchor="middle" fill="#fff">BOOT</text>';
   s+='<rect x="'+(bx+bw-46)+'" y="'+(top+14)+'" width="30" height="14" rx="3" fill="#46566a"/><text x="'+(bx+bw-31)+'" y="'+(top+24)+'" font-size="7" text-anchor="middle" fill="#fff">RESET</text>';
-  if(LED!=null){var iL=pinInfo(LED),cL=LED==PT.gpio?"#e0a020":(iL&&iL.owner)?"#3fa7ff":"#3a4352";
-  s+='<g style="cursor:pointer" onclick="pinSel('+LED+')" role="button" aria-label="GPIO '+LED+' LED RGB"><circle cx="'+(bx+bw/2)+'" cy="'+(top+44)+'" r="6" fill="'+cL+'" stroke="'+(PSEL==LED?"#fff":"#0b0f14")+'"/><title>GPIO'+LED+' - LED RGB</title></g><text x="'+(bx+bw/2)+'" y="'+(top+62)+'" font-size="7" text-anchor="middle" fill="'+ink+'">LED RGB '+LED+'</text>'}
-  s+='<circle cx="'+(bx+bw/2+28)+'" cy="'+(top+44)+'" r="3" fill="#c0392b"/><text x="'+(bx+bw/2+28)+'" y="'+(top+62)+'" font-size="6" text-anchor="middle" fill="'+ink+'">'+esc(t("LED batteria"))+'</text>';
-  s+='<rect x="'+(bx+30)+'" y="'+(top+110)+'" width="60" height="60" rx="4" fill="#2b3644" stroke="#46566a"/><text x="'+(bx+60)+'" y="'+(top+143)+'" font-size="9" text-anchor="middle" fill="'+ink+'">'+esc((PBI&&PBI.chip)||"ESP32-S3")+'</text>';
-  s+='<rect x="'+(bx+14)+'" y="'+(top+bh-34)+'" width="92" height="24" rx="5" fill="#e58fb3"/><text x="'+(bx+60)+'" y="'+(top+bh-18)+'" font-size="8" text-anchor="middle" fill="#5a1b35">'+esc(t("ANTENNA"))+'</text>'}
+  if(LED!=null){var iL=pinInfo(LED),cL=LED==PT.gpio?"#e0a020":(iL&&iL.owner)?"#3fa7ff":"#3a4352",lx=bx+bw/2,ly0=top+44;
+  s+='<g style="cursor:pointer" onclick="pinSel('+LED+')" role="button" tabindex="0" onkeydown="pinKey(event,'+LED+')" aria-label="GPIO '+LED+' LED RGB"><rect x="'+(lx-7)+'" y="'+(ly0-7)+'" width="14" height="14" rx="3" fill="#e8ecf0" stroke="'+(PSEL==LED?"#fff":cL)+'" stroke-width="'+(PSEL==LED?2.5:1.5)+'"/><circle cx="'+(lx-3)+'" cy="'+(ly0-2.5)+'" r="1.6" fill="#d64545"/><circle cx="'+(lx+3)+'" cy="'+(ly0-2.5)+'" r="1.6" fill="#2e9e5b"/><circle cx="'+(lx)+'" cy="'+(ly0+3)+'" r="1.6" fill="#3a7bd5"/><title>GPIO'+LED+' - LED RGB</title></g><text x="'+(lx)+'" y="'+(ly0+17)+'" font-size="7" text-anchor="middle" fill="'+ink+'">'+LED+'</text>'}
+  s+='<circle cx="'+(bx+bw/2+26)+'" cy="'+(top+44)+'" r="3" fill="#c0392b"/><text x="'+(bx+bw/2+26)+'" y="'+(top+61)+'" font-size="6" text-anchor="middle" fill="'+ink+'">BAT</text>';
+  s+='<rect x="'+(bx+30)+'" y="'+(top+110)+'" width="60" height="60" rx="4" fill="#2b3644" stroke="#46566a"/><path d="M'+(bx+60)+' '+(top+118)+'L'+(bx+82)+' '+(top+140)+'L'+(bx+60)+' '+(top+162)+'L'+(bx+38)+' '+(top+140)+'Z" fill="#3a4658" stroke="#5c6670"/><text x="'+(bx+60)+'" y="'+(top+143)+'" font-size="8" text-anchor="middle" fill="'+ink+'">'+esc((PBI&&PBI.chip)||"ESP32-S3")+'</text>';
+  s+='<rect x="'+(bx+14)+'" y="'+(top+bh-34)+'" width="92" height="24" rx="5" fill="#e58fb3"/><path d="M'+(bx+22)+' '+(top+bh-16)+'h8v-10h8v10h8v-10h8v10h8v-10h8v10h8v-10h8" fill="none" stroke="#a24a6f" stroke-width="1.4"/><text x="'+(bx+60)+'" y="'+(top+bh-38)+'" font-size="7" text-anchor="middle" fill="'+ink+'">'+esc(t("ANTENNA"))+'</text>'}
  else{
-  ["B+","B-","BOOST"].forEach(function(l,k){var x=bx+22+k*34;s+='<rect x="'+x+'" y="'+(top+bh-30)+'" width="28" height="16" rx="3" fill="'+(l=="B+"?"#d64545":l=="B-"?"#222":"#7a6a2a")+'" stroke="#555"/><text x="'+(x+14)+'" y="'+(top+bh-19)+'" font-size="7" text-anchor="middle" fill="#fff">'+l+'</text>'});
-  s+='<text x="'+(bx+bw/2)+'" y="'+(top+bh-36)+'" font-size="6.5" text-anchor="middle" fill="'+ink+'">'+esc(t("BOOST: solo con batteria oltre 500 mAh"))+'</text>'}
+  ["B+","B-","BOOST"].forEach(function(l,k){var x=bx+16+k*32;s+='<rect x="'+x+'" y="'+(top+10)+'" width="28" height="14" rx="3" fill="'+(l=="B+"?"#d64545":l=="B-"?"#222":"#7a6a2a")+'" stroke="#555"/><text x="'+(x+14)+'" y="'+(top+20)+'" font-size="7" text-anchor="middle" fill="#fff">'+l+'</text>'})}
  function col(g,x2,u){var nt=PNOTE[g];return g==PT.gpio?"#e0a020":x2.ok?(nt?"#9b6bd6":"#2e9e5b"):(x2.owner||u)?"#3fa7ff":nt?"#9b6bd6":"#3a4352"}
- function tip(g,x2,u){return"GPIO"+g+" - "+(PFN[g]||"")+(x2.why?" - "+x2.why:"")+(u?" - "+u.owner:"")+(PNOTE[g]?" - "+PNOTE[g]:"")+(pinWarnTxt(g)?" - "+pinWarnTxt(g):"")}
+ function tip(g,x2,u){return"GPIO"+g+" - "+(PFN[g]||"")+(x2.why?" - "+x2.why:"")+(u?" - "+u.owner+(u.sig?" ("+u.sig+")":""):"")+(PNOTE[g]?" - "+PNOTE[g]:"")+(pinWarnTxt(g)?" - "+pinWarnTxt(g):"")}
  function one(lab,x,y,side){var g=+lab,pw=PWR[lab];if(pw){s+='<circle cx="'+x+'" cy="'+y+'" r="11" fill="'+pw+'" stroke="#555"/><text x="'+x+'" y="'+(y+3)+'" font-size="7.5" text-anchor="middle" fill="#fff">'+lab+'</text>';return}
   var x2=pinInfo(g)||{g:g,ok:false},u=pinOwner(g),c=col(g,x2,u),nm=g==UA[0]?"TX":g==UA[1]?"RX":"";
-  s+='<g style="cursor:pointer" onclick="pinSel('+g+')" role="button" aria-label="GPIO '+g+'"><circle cx="'+x+'" cy="'+y+'" r="11" fill="'+c+'" stroke="'+(g==PSEL?"#fff":"#0b0f14")+'" stroke-width="'+(g==PSEL?2.5:1)+'"/><text x="'+x+'" y="'+(y+3)+'" font-size="8.5" font-weight="700" text-anchor="middle" fill="#fff">'+g+'</text><title>'+esc(tip(g,x2,u))+'</title></g>';
+  s+='<g style="cursor:pointer" onclick="pinSel('+g+')" role="button" tabindex="0" onkeydown="pinKey(event,'+g+')" aria-label="'+esc(tip(g,x2,u))+'"><circle cx="'+x+'" cy="'+y+'" r="11" fill="'+c+'" stroke="'+(g==PSEL?"#fff":"#0b0f14")+'" stroke-width="'+(g==PSEL?2.5:1)+'"/><text x="'+x+'" y="'+(y+3)+'" font-size="8.5" font-weight="700" text-anchor="middle" fill="#fff">'+g+'</text><title>'+esc(tip(g,x2,u))+'</title></g>';
   if(nm)s+='<text x="'+(x+(side<0?16:-16))+'" y="'+(y+3)+'" font-size="7" text-anchor="'+(side<0?"start":"end")+'" fill="'+ink+'">'+nm+'</text>';
-  var lab2=PNOTE[g]||(u?u.owner+(u.note?": "+u.note:""):(g==PT.gpio?t("in prova"):""));
-  if(lab2){s+='<path d="M'+(x+side*12)+' '+y+'H'+(x+side*24)+'" stroke="'+c+'" stroke-width="2"/><text x="'+(x+side*28)+'" y="'+(y+3)+'" font-size="8.5" text-anchor="'+(side<0?"end":"start")+'" fill="'+c+'">'+esc(lab2.length>18?lab2.slice(0,17)+"…":lab2)+'</text>'}}
+  if(plan&&plan.pinBlk[g]){var sg=plan.pinSig[g];if(sg)s+='<text x="'+(x+side*14)+'" y="'+(y-3)+'" font-size="7" text-anchor="'+(side<0?"end":"start")+'" fill="'+c+'">'+esc(sg)+'</text>'}}
  L.forEach(function(l,i){one(l,bx,top+40+i*st,-1)});R.forEach(function(l,i){one(l,bx+bw,top+40+i*st,1)});
  if(!fr){[[BL,bx+30],[BR,bx+bw-30]].forEach(function(cl){cl[0].forEach(function(g,i){var y=top+36+i*st*0.9,x2=pinInfo(g)||{g:g,ok:false},u=pinOwner(g),c=col(g,x2,u);
-  s+='<g style="cursor:pointer" onclick="pinSel('+g+')" role="button" aria-label="GPIO '+g+'"><rect x="'+(cl[1]-12)+'" y="'+(y-9)+'" width="24" height="18" rx="4" fill="'+c+'" stroke="'+(g==PSEL?"#fff":"#0b0f14")+'" stroke-width="'+(g==PSEL?2.5:1)+'"/><text x="'+cl[1]+'" y="'+(y+3)+'" font-size="8" font-weight="700" text-anchor="middle" fill="#fff">'+g+'</text><title>'+esc(tip(g,x2,u))+'</title></g>'})})}
- var ly=top+bh+26;[["#2e9e5b",t("provabile")],["#3fa7ff",t("in uso")],["#9b6bd6",t("collegato (tuo nome)")],["#3a4352",t("vietato")],["#e0a020",t("in prova")]].forEach(function(l,i){var lx=14+i*78;s+='<circle cx="'+lx+'" cy="'+ly+'" r="5" fill="'+l[0]+'"/><text x="'+(lx+9)+'" y="'+(ly+3)+'" font-size="8" fill="'+ink+'">'+esc(l[1])+'</text>'});
- if(fr)s+='<text x="'+(W/2)+'" y="'+(ly+20)+'" font-size="8" text-anchor="middle" fill="'+ink+'">'+esc(t("Gli altri pin (piazzole) sono sul retro: premi Retro."))+'</text>';
- e.setAttribute("viewBox","0 0 "+W+" "+(ly+30));e.innerHTML=s}
+  s+='<g style="cursor:pointer" onclick="pinSel('+g+')" role="button" tabindex="0" onkeydown="pinKey(event,'+g+')" aria-label="'+esc(tip(g,x2,u))+'"><rect x="'+(cl[1]-12)+'" y="'+(y-9)+'" width="24" height="18" rx="4" fill="'+c+'" stroke="'+(g==PSEL?"#fff":"#0b0f14")+'" stroke-width="'+(g==PSEL?2.5:1)+'"/><text x="'+cl[1]+'" y="'+(y+3)+'" font-size="8" font-weight="700" text-anchor="middle" fill="#fff">'+g+'</text><title>'+esc(tip(g,x2,u))+'</title></g>'})})}
+ if(plan)s+=pinSchemaSvg(plan);
+ var x0=plan?plan.xMin:0,Wd=plan?plan.w:W,ly=Math.max(top+bh,plan?plan.bottom:0)+26;[["#2e9e5b",t("provabile")],["#3fa7ff",t("in uso")],["#9b6bd6",t("collegato (tuo nome)")],["#3a4352",t("vietato")],["#e0a020",t("in prova")]].reduce(function(lx,l){s+='<circle cx="'+lx+'" cy="'+ly+'" r="5" fill="'+l[0]+'"/><text x="'+(lx+9)+'" y="'+(ly+3)+'" font-size="8" fill="'+ink+'">'+esc(l[1])+'</text>';return lx+23+l[1].length*4.4},x0+14);
+ if(!fr){var bt=t("Ponticello BOOST: la corrente di carica passa da 100 a 300 mA. Solo con una batteria oltre 500 mAh."),bk=bt.indexOf(". ")+1,bw2=bk>0?[bt.slice(0,bk),bt.slice(bk)]:[bt];bw2.forEach(function(r,i){s+='<text x="'+(x0+Wd/2)+'" y="'+(ly+20+i*11)+'" font-size="8" text-anchor="middle" fill="#d9a521">'+esc(r.trim())+'</text>'})}
+ if(plan)s+='<text x="'+(x0+Wd/2)+'" y="'+(ly+34)+'" font-size="8" text-anchor="middle" fill="'+ink+'">'+esc(t("Filo tratteggiato: dato mancante, da verificare."))+'</text>';
+ e.style.maxWidth=plan?"780px":"520px";e.style.minWidth=plan?"640px":"";
+ e.setAttribute("viewBox",x0+" 0 "+Wd+" "+(ly+(plan?44:fr?30:42)));e.innerHTML=s}
 function pinInv(){var h="<tr><th>GPIO</th><th>"+esc(t("Posizione"))+"</th><th>"+esc(t("Funzioni"))+"</th><th>"+esc(t("Stato"))+"</th><th>"+esc(t("Collegato a"))+"</th></tr>",gs=PM.map(function(x){return x.g}).sort(function(a,b){return a-b});
  gs.forEach(function(g){var x=pinInfo(g),u=pinOwner(g),st=u?u.owner:(x.ok?t("libero"):(x.why||t("vietato"))),w=pinWarnTxt(g);
   h+="<tr><td><b>"+g+"</b></td><td>"+esc(pinPos(g))+"</td><td>"+esc(PFN[g]||"")+(w?'<div class="fhint">'+esc(w)+'</div>':"")+"</td><td>"+esc(st)+"</td><td>"+(ROLE>=2?'<input maxlength="24" value="'+esc(PNOTE[g]||"")+'" aria-label="GPIO '+g+'" onchange="pinNote('+g+',this)" style="min-width:120px">':esc(PNOTE[g]||""))+"</td></tr>"});
  $("pininv").innerHTML=h}
 function pinNote(g,e){post("/api/pinnotes",{g:g,name:e.value}).then(function(r){return r.json()}).then(function(j){if(j.ok===false){msg("pinvm",j.err,false);return}PNOTE[g]=e.value.trim();if(!PNOTE[g])delete PNOTE[g];msg("pinvm",t("Salvato"),true);drawPins()}).catch(function(){})}
-function pinSvgDl(){var x='<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+$("pinsvg").getAttribute("viewBox")+'" font-family="Arial,sans-serif"><rect width="100%" height="100%" fill="#10151c"/>'+$("pinsvg").innerHTML+'</svg>';
+function pinSvgDl(){var x='<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+$("pinsvg").getAttribute("viewBox")+'" font-family="Arial,sans-serif"><rect x="-1000" y="-1000" width="4000" height="4000" fill="'+(pinInk()=="#566676"?"#ffffff":"#10151c")+'"/>'+$("pinsvg").innerHTML+'</svg>';
  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([x],{type:"image/svg+xml"}));a.download="vesevos-pin.svg";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)}
 function pinSel(g){PSEL=g;drawPins();pinPanel()}
 function pinPanel(){var e=$("pinpanel"),h="";
  h+='<label for="pn_g">'+esc(t("Altro GPIO"))+'</label><input type="number" id="pn_g" min="0" max="'+brdMax()+'" value="'+(PSEL<0?"":PSEL)+'" style="width:90px" onchange="pinSel(parseInt(this.value))"> ';
  var x=pinInfo(PSEL);
  if(PSEL<0){e.innerHTML=h;return}
- h+='<h3 style="margin-top:10px">GPIO'+PSEL+'</h3>';if(PFN[PSEL])h+='<div class="fhint">'+esc(PFN[PSEL])+(pinWarnTxt(PSEL)?" - "+esc(pinWarnTxt(PSEL)):"")+'</div>';
+ h+='<h3 style="margin-top:10px">GPIO'+PSEL+'</h3>'+pinWho(PSEL);if(PFN[PSEL])h+='<div class="fhint">'+esc(PFN[PSEL])+(pinWarnTxt(PSEL)?" - "+esc(pinWarnTxt(PSEL)):"")+'</div>';
  if(PNOTE[PSEL])h+='<div class="law">'+esc(tf("Segnato come collegato a: {0}. Una prova puo disturbare il circuito.",PNOTE[PSEL]))+'</div>';
  if(!x){h+='<div class="msg ko">'+esc(t("Pin inesistente su questa scheda"))+'</div>'}
  else if(!x.ok&&PSEL!=PT.gpio){h+='<div class="msg ko">'+esc(t("Non provabile:"))+" "+esc(x.why)+'</div>'}
@@ -220,7 +221,7 @@ function langPop(e){e.stopPropagation();var m=$("lpop");if(!m.classList.contains
 document.addEventListener("click",function(e){var m=$("lpop");if(m&&!m.classList.contains("hide")&&!e.target.closest("#lpop")){m.className="pop hide";if(LANGB)LANGB.setAttribute("aria-expanded","false")}});
 
 /* ===== navigazione con ruoli ===== */
-var TMIN={dmgr:1,btn:1,usb:1,temp:1,mem:1,cpu:1,rad:1,selftest:2,stat:1,power:1,cert:1,radio:1,ntp:1,dhcp:1,dns:1,mdns:1,ble:1,ap:1,http:1,wifi:1,wps:2,mqtt:1,mesh:1,pin:1,io:1,led:1,task:1,file:1,ora:1,loc:1,auto:1,boot:1,wd:1,shell:1,audit:1,https:1,users:2,fw:2,script:2,app:1,conf:2};
+var TMIN={dmgr:1,btn:1,usb:1,temp:1,mem:1,cpu:1,rad:1,selftest:2,stat:1,power:1,cert:1,radio:1,ntp:1,dhcp:1,dns:1,mdns:1,ap:1,http:1,wifi:1,wps:2,mqtt:1,mesh:1,pin:1,io:1,led:1,task:1,file:1,ora:1,loc:1,auto:1,boot:1,wd:1,shell:1,audit:1,https:1,users:2,fw:2,script:2,app:1,drv:2,func:1,conf:2};
 function canSee(id){if(AUTH&&AUTH.pk&&AUTH.pk[id]===0)return false;return ROLE>=(TMIN[id]||0)}
 function gTabs(g){return GMAP[g].filter(canSee)}
 function buildNav(){var h='<svg class="i slogo" style="stroke:url(#vg)"><use href="#i-chipn"/></svg>';
@@ -237,7 +238,7 @@ function show(id){if(id=="temp")id="cpu";if(!canSee(id))id="sum";cur=id;var g=gO
   h+='<button class="'+(k==id?"on":"")+'" onclick="show(\''+k+'\')">'+esc(t(x[1]))+'</button>'})}
  $("gsub").innerHTML=h;$("gsub").className="sub gsub"+(h?"":" hide");$("alerts").className="alerts hide";
  if(id=="dmgr")dmLoad();if(id!="wps")clearTimeout(WP.tm);if(id=="wps")wpsLoad();if(id!="io")ioStop();if(id=="io")ioLoad();if(["btn","usb","mem","rad"].indexOf(id)>=0)dvRows(id);if(id!="cpu")clearInterval(CPU.tm);if(id=="cpu")cpuLoad();if(id=="btn")btnLoad();if(id=="shell")cpToggle(true);if(id!="auto"){clearInterval(RU.tm)}if(id=="auto")rLoad();if(id=="boot")bLoad();if(id!="script")scTimerStop();if(id!="app")apTimerStop();if(id=="script")scLoad();if(id=="app")apLoad();if(id!="task")clearInterval(TK.tm);if(id=="task")loadTasks();if(id=="pin")loadPins();if(id=="loc")loadLangs();if(id=="log"){lgInit();loadLog();lgAuto()}else clearInterval(LG.tm);if(id=="wifi")fillNet();if(id=="led")fillLed();if(id=="ora")loadTime();if(id=="file")fList(fp);
- if(id=="sec")fillSec();if(id=="sum"){homeDraw()}if(id=="mqtt")mqLoad();if(id=="mesh")msLoad();if(id=="loc")lcLoad();if(id=="wd")wdLoad();if(id=="users")usLoad();if(id=="fw")fwLoad();if(id=="https"){tlsLoad();svcLoad()}if(id=="ap"){fillNet();svcLoad()}if(id=="http"||id=="dhcp"||id=="dns"||id=="mdns")svcLoad();if(id=="ntp")loadTime();if(id=="mfa")mfLoad();if(id!="stat")clearInterval(STT);if(id=="stat"){stLoad();clearInterval(STT);STT=setInterval(stLoad,5000)}if(id=="power")pwLoad();if(id=="selftest")stlPoll();if(id=="cert")tlsLoad();if(id=="ble"&&ROLE==2){bleLoad();clearInterval(BLT);BLT=setInterval(function(){if(cur!="ble")clearInterval(BLT);else bleLoad()},3000)}if(id=="radio")lcLoad();if(id=="audit")auLoad();if(id=="legal")lgLoad();
+ if(id=="drv")drvLoad();if(id=="func")fnLoad();if(id=="sec")fillSec();if(id=="sum"){homeDraw()}if(id=="mqtt")mqLoad();if(id=="mesh")msLoad();if(id=="loc")lcLoad();if(id=="wd")wdLoad();if(id=="users")usLoad();if(id=="fw")fwLoad();if(id=="https"){tlsLoad();svcLoad()}if(id=="ap"){fillNet();svcLoad()}if(id=="http"||id=="dhcp"||id=="dns"||id=="mdns")svcLoad();if(id=="ntp")loadTime();if(id=="mfa")mfLoad();if(id!="stat")clearInterval(STT);if(id=="stat"){stLoad();clearInterval(STT);STT=setInterval(stLoad,5000)}if(id=="power")pwLoad();if(id=="selftest")stlPoll();if(id=="cert")tlsLoad();if(id=="radio")lcLoad();if(id=="audit")auLoad();if(id=="legal")lgLoad();
  if(id=="help"&&location.hash!="#aiuto")try{history.replaceState(null,"","#aiuto")}catch(e){}if(id!="help"&&location.hash=="#aiuto")try{history.replaceState(null,"",location.pathname)}catch(e){}}
 window.addEventListener("hashchange",function(){if(location.hash=="#aiuto"&&loggedIn())show("help")});
 

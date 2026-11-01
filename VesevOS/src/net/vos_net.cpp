@@ -17,6 +17,7 @@
 #include "vos_wps.h"
 #include "../drivers/vos_drv_wifi.h"
 #include "../drivers/vos_drv_mdns.h"
+#include "../drivers/vos_drv_dhcp.h"
 #include "vos_dns.h"
 #include "../core/vos_service.h"
 #include "../core/vos_strbuf.h"
@@ -227,6 +228,8 @@ std::string netInfoText() {
   if (g_state == NET_CLIENT_OK) {
     b.addf(tr("Rete:        %s (%d dBm, canale %d)"), drvWifiSsid().s, drvWifiRssi(), drvWifiChannel()).add('\n');
     b.addf(tr("Gateway:     %s"), IpText(drvWifiGateway()).s).add('\n');
+    char dom[64];
+    if (drvDhcpDomain(dom, sizeof dom)) b.addf(tr("Dominio:     %s (dal router)"), dom).add('\n');
   }
   b.addf(tr("MAC client:  %s"), mac1).add('\n');
   b.addf(tr("MAC AP:      %s"), mac2).add('\n');
@@ -407,6 +410,7 @@ static void netTask(void*) {
         fails = 0;
         if (apAllowed()) { vlog("NET: troppi tentativi, torno in AP"); startAp(); }
         else { vlog("NET: Wi-Fi assente, il servizio AP e spento: riprovo"); tryClient(); }   // scelta dell'utente: recupero con BOOT 8 s
+        mdnsApply();                                 // startAp e tryClient fermano mDNS: si riaccende sulla rete di adesso
       }
     } else fails = 0;
     vTaskDelay(pdMS_TO_TICKS(1000));

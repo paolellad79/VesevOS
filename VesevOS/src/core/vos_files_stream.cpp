@@ -11,7 +11,8 @@ namespace {
 const size_t kSpaceMargin = 8192;       // come fsWriteText: spazio da lasciare sempre libero
 }
 
-size_t fsFreeBytes() {
+size_t fsFreeBytes(const char* cleanPath) {
+  if (cleanPath) return fsFreeAt(cleanPath);
   size_t total = drvFsTotal(), used = drvFsUsed();
   return total > used ? total - used : 0;
 }
@@ -59,7 +60,7 @@ bool FsAtomicWriter::begin(const char* path, bool overwrite, size_t maxBytes, Er
     if (!drvFsExists(parent)) { err = tr("Cartella non trovata"); return false; }
   }
   if (const char* why = fsRoomFor(dst_)) { err = why; return false; }   // posto per una voce in piu (sovrascrivere non ne aggiunge)
-  size_t freeB = fsFreeBytes();
+  size_t freeB = fsFreeBytes(dst_);
   if (freeB <= kSpaceMargin) { err = tr("Spazio esaurito"); return false; }
   max_ = freeB - kSpaceMargin;
   if (maxBytes < max_) max_ = maxBytes;

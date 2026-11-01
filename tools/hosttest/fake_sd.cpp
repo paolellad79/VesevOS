@@ -22,6 +22,7 @@ void fakeSdReset() {
   g_sd.writes = 0;
   g_sd.reads = 0;
   g_sd.proves = 0;
+  g_sd.formats = 0;
   g_sd.files.clear();
   g_sd.dirs.clear();
 }
@@ -105,6 +106,21 @@ void drvSdEnd() {
   g_sd.up = false;
 }
 
+// Formattazione finta: la scheda diventa FAT32, vuota, montata. Senza scheda: DSFM_NO_CARD.
+uint8_t drvSdFormat(int, int, int, int, uint32_t) {
+  g_sd.formats++;
+  if (g_sd.up) return DSFM_BUSY;
+  if (!g_sd.card || g_sd.gone) return DSFM_NO_CARD;
+  g_sd.files.clear();
+  g_sd.dirs.clear();
+  g_sd.exfat = false;
+  g_sd.badfs = false;
+  g_sd.fs = DFS_FAT32;
+  g_sd.lastFail = DSF_NONE;
+  g_sd.up = true;
+  return DSFM_OK;
+}
+
 bool drvSdUp() {
   return g_sd.up;
 }
@@ -146,6 +162,28 @@ int drvSdRead(const char* path, uint8_t* buf, size_t max) {
 
   size_t n = it->second.size() < max ? it->second.size() : max;
   memcpy(buf, it->second.data(), n);
+  return (int)n;
+}
+
+int drvSdReadAt(const char* path, uint32_t off, uint8_t* buf, size_t max) {
+  g_sd.reads++;
+
+  if (!cardUsable()) {
+    return -1;
+  }
+
+  auto it = g_sd.files.find(path);
+
+  if (it == g_sd.files.end()) {
+    return -1;
+  }
+
+  if (off >= it->second.size()) {
+    return 0;
+  }
+
+  size_t n = it->second.size() - off < max ? it->second.size() - off : max;
+  memcpy(buf, it->second.data() + off, n);
   return (int)n;
 }
 

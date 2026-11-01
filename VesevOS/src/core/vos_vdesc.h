@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_vdesc.h
-// Aiuti per leggere i file descrittivi a righe (.vap delle app, .vdp delle schede modulo) senza la classe di testo di Arduino: lavorano su viste e buffer fissi.
+// Aiuti per leggere i file descrittivi a righe (.vab delle app, .vdb delle schede modulo) senza la classe di testo di Arduino: lavorano su viste e buffer fissi.
 // heapAddf scrive un testo formattato in un HeapBuf (per i JSON e i testi della shell); il resto sono piccole funzioni sulle viste.
 #pragma once
 #include <stdarg.h>

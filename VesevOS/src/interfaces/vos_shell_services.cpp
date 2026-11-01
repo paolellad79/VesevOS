@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_shell_services.cpp
-// Comando "vesevos-services": elenco dei servizi con stato, porta e RAM, e start/stop/restart/status di uno solo (stile systemctl semplice).
+// Comando "vesevos-services": elenco dei servizi con stato, porta e RAM, e start/stop/restart/status di uno solo (stile semplice dei gestori di servizi).
 //
 //   vesevos-services                       elenco (tutti i ruoli)
 //   vesevos-services <servizio> [status]   stato di uno (con i dettagli dove ci sono)
 //   vesevos-services <servizio> start|stop|restart   solo Admin
+//   vesevos-services vdb start|stop        interruttore del sottosistema Berry (script, app, comandi dei driver); acceso di fabbrica
+//   vesevos-services vde start|stop        (solo con VOS_WITH_ELF) interruttore del sottosistema ELF ("elf" resta valido come sinonimo); acceso di fabbrica
 //
-// Nessun servizio nuovo e nessuna logica nuova: le azioni passano dalle stesse funzioni che usano gia i comandi mqtt, mesh, ble, ntp e svc
-// (e la pagina). I comandi svc, start, restart, kill, mqtt, mesh, ble, ntp restano com'erano. Il ruolo del comando e Operatore (tabella dei ruoli):
+// Nessun servizio nuovo e nessuna logica nuova: le azioni passano dalle stesse funzioni che usano gia i comandi mqtt, mesh, ntp e svc
+// (e la pagina). I comandi svc, start, restart, kill, mqtt, mesh, ntp restano com'erano. Il ruolo del comando e Operatore (tabella dei ruoli):
 // chi non e Admin puo solo leggere, e qui si controlla.
 //
 // Servizi di SOLA LETTURA (oggi non si fermano da shell): wifi (si spegne con il modo aereo), wps (comando wps), rules, script, wd.
@@ -19,7 +21,7 @@
 
 namespace {
 
-enum Sid : uint8_t { S_HTTP, S_HTTPS, S_REDIRECT, S_AP, S_CAPTIVE, S_DHCP, S_MDNS, S_WIFI, S_WPS, S_MQTT, S_MESH, S_BLE, S_NTP, S_RULES, S_SCRIPT, S_WD };
+enum Sid : uint8_t { S_HTTP, S_HTTPS, S_REDIRECT, S_AP, S_CAPTIVE, S_DHCP, S_MDNS, S_WIFI, S_WPS, S_MQTT, S_MESH, S_NTP, S_RULES, S_SCRIPT, S_WD, S_VDB, S_ELF };
 
 struct Row {
   const char* name;      // come si scrive nel comando (nomi propri e sigle: non si traducono)
@@ -32,9 +34,15 @@ const Row kRows[] = {
   {"http", S_HTTP, true, true},   {"https", S_HTTPS, true, true},  {"redirect", S_REDIRECT, true, false},
   {"ap", S_AP, true, true},       {"captive", S_CAPTIVE, true, false}, {"dhcp", S_DHCP, true, false},
   {"mdns", S_MDNS, true, false},  {"wifi", S_WIFI, false, false},  {"wps", S_WPS, false, false},
-  {"mqtt", S_MQTT, true, false},  {"mesh", S_MESH, true, false},   {"ble", S_BLE, true, false},
+  {"mqtt", S_MQTT, true, false},  {"mesh", S_MESH, true, false},
   {"ntp", S_NTP, true, false},    {"rules", S_RULES, false, false}, {"script", S_SCRIPT, false, false},
   {"wd", S_WD, false, false},
+#if VOS_WITH_BERRY
+  {"vdb", S_VDB, true, false},
+#endif
+#if VOS_WITH_ELF
+  {"vde", S_ELF, true, false},
+#endif
 };
 
 // Il servizio del registro (vos_service.h) che sta dietro alla riga, o nullptr se la riga non ne ha uno.
@@ -44,14 +52,19 @@ const char* registryId(Sid s) {
     case S_WPS:  return "wps";
     case S_MQTT: return "mqtt";
     case S_MESH: return "mesh";
-    case S_BLE:  return "ble";
+#if VOS_WITH_BERRY
+    case S_VDB:  return "vdb";
+#endif
+#if VOS_WITH_ELF
+    case S_ELF:  return "elf";
+#endif
     default:     return nullptr;
   }
 }
 
 bool present(Sid s) {
   const char* id = registryId(s);
-  return !id || serviceFind(id) != nullptr;                // MQTT, mesh, BLE e WPS possono non essere nel firmware
+  return !id || serviceFind(id) != nullptr;                // MQTT, mesh, WPS e moduli ELF possono non essere nel firmware
 }
 
 int stateOf(Sid s) {
@@ -93,6 +106,7 @@ unsigned portOf(Sid s) {
 }
 
 const Row* findRow(const char* name) {
+  if (!strcmp(name, "elf")) name = "vde";                  // il vecchio nome del sottosistema ELF
   for (const Row& r : kRows) if (!strcmp(r.name, name) && present(r.id)) return &r;
   return nullptr;
 }
@@ -111,7 +125,7 @@ void printRow(OutSink& o, const Row& r) {
 void svcList(OutSink& o) {
   o.println(tr("Servizio   Stato         Porta  RAM"));
   for (const Row& r : kRows) if (present(r.id)) printRow(o, r);
-  o.println(tr("Cambiare (solo Admin): vesevos-services <servizio> start|stop|restart. Di sola lettura: wifi, wps, rules, script, wd."));
+  o.println(tr("Cambiare (solo Admin): vesevos-services <servizio> start|stop|restart. Di sola lettura: wifi, wps, rules, script, wd. vdb e vde sono i sottosistemi Berry ed ELF: spegnerli ferma i loro programmi."));
   o.println(tr("http, https e ap: la modifica vale dal riavvio. Task e altri servizi: ps, start, kill."));
 }
 
@@ -119,7 +133,6 @@ void svcStatus(OutSink& o, const Row& r) {
   o.println(trf("%s: %s", r.name, stateWord(stateOf(r.id))));
   if (r.id == S_MQTT) o.print(mqttStatusText().c_str());
   else if (r.id == S_MESH) o.print(meshText().c_str());
-  else if (r.id == S_BLE) o.print(bleText().c_str());
   else if (r.id == S_HTTPS && cfg.https && !webHttpsUp()) o.println(tr("HTTPS acceso nella configurazione ma non ancora in funzione (serve un riavvio o il certificato e in preparazione)"));
 }
 
@@ -134,16 +147,16 @@ void svcAct(OutSink& o, int role, const Row& r, int what) {
   ErrBuf err;
   char old[48];
   switch (r.id) {
-    case S_MQTT: case S_MESH: {
-      bool ok = what == 1 ? serviceStart(r.name, err) : what == 3 ? serviceRestart(r.name, err) : serviceStop(r.name, err);
-      if (!ok) { o.println(err.c_str()); return; }
-      break;
-    }
-    case S_BLE: {
-      bool ok = true;
-      if (what == 1) ok = bleUserOn(0, err);                    // come "ble on": senza limite di tempo
-      else if (what == 2) bleUserOff();
-      else ok = serviceRestart("ble", err);
+    case S_MQTT: case S_MESH:
+#if VOS_WITH_BERRY
+    case S_VDB:
+#endif
+#if VOS_WITH_ELF
+    case S_ELF:
+#endif
+    {
+      const char* sid = registryId(r.id) ? registryId(r.id) : r.name;       // vde e il servizio "elf" del registro
+      bool ok = what == 1 ? serviceStart(sid, err) : what == 3 ? serviceRestart(sid, err) : serviceStop(sid, err);
       if (!ok) { o.println(err.c_str()); return; }
       break;
     }
@@ -201,6 +214,10 @@ bool shCmdVesevos(const Word& c, const Word& a1, const char* line, OutSink& o, i
   else if (c == "vesevos-drive_manager") shDriveManager(line, o, role, sess);
   else if (c == "vesevos-backup") shBackup(line, o, role);
   else if (c == "vesevos-update") shUpdate(line, o, role);
+#if VOS_WITH_ELF
+  else if (c == "vesevos-elf") shElf(line, o, role, sess);
+#endif
+  else if (c == "vesevos-driver") shDriver(line, o, role, sess);
   else return false;
   return true;
 }

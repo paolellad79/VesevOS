@@ -80,3 +80,8 @@ uint8_t drvI2cWriteReg(uint8_t addr, uint8_t reg, const uint8_t* buf, size_t n) 
   if (n) memcpy(out + 1, buf, n);
   return errCode(i2c_master_transmit(d, out, n + 1, TIMEOUT_MS));
 }
+
+bool drvI2cProbe(uint8_t addr) {
+  if (!g_bus) return false;
+  return i2c_master_probe(g_bus, addr, TIMEOUT_MS) == ESP_OK;
+}

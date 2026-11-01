@@ -9,6 +9,9 @@
 #include "../core/vos_heapbuf.h"
 
 #define IO_MAX 16
+#define IO_SD_KHZ_MIN 400                            // frequenza SPI della microSD: da 400 kHz (prova iniziale, fili lunghi) a 20 MHz
+#define IO_SD_KHZ_MAX 20000
+#define IO_SD_KHZ_DEF 1000                           // di fabbrica 1 MHz: prudente per i fili volanti dei moduli economici
 
 enum IoClass : uint8_t { IC_NONE = 0, IC_RELE = 1, IC_LED = 2, IC_PIN = 3, IC_IN = 4, IC_ADC = 5, IC_I2C = 6, IC_SD = 7 };
 #define IOF_INV   1     // attivo basso (acceso = livello 0)
@@ -39,6 +42,7 @@ bool   ioListJson(HeapBuf& out);                         // {"io":[{n,c,g,f,v,ou
 bool   ioText(HeapBuf& out);                             // per la shell. false = manca la memoria
 bool   ioNameOk(const char* n, ErrBuf& err);             // forma e parole riservate
 bool   ioParseCls(const char* s, uint8_t& c);
+bool   ioHasI2c();                                        // c'e il sensore I2C a classi (tiene il bus): i driver ELF non lo usano
 int    ioSuggest(uint8_t cls, int n, int* out);          // fino a n pin liberi consigliati per la classe; ritorna quanti ne ha trovati
 bool   ioPulse(const char* name, uint32_t ms, int role, ErrBuf& err);   // acceso per ms (100-5000) poi si spegne da solo
 bool   ioBlink(const char* name, uint32_t sec, int role, ErrBuf& err);  // lampeggia per sec (1-10) poi si spegne (non per il rele)

@@ -45,6 +45,8 @@ void cmdHelpList(OutSink& o, int role);
 // help <comando> (full = false) e man <comando> (full = true). Ritorna false se il comando non esiste o il ruolo non lo puo usare
 // (stessa risposta nei due casi: l'aiuto non rivela i comandi che il ruolo non vede).
 bool cmdHelpOne(OutSink& o, const char* name, int role, bool full);
+// help <comando> per un comando di driver (vos_shell_drvcmd.cpp); false = non e un comando di driver
+bool drvCmdHelp(OutSink& o, const char* name, int role);
 // "Uso: <sintassi>" di un comando della tabella
 void cmdUsage(OutSink& o, const char* name);
 

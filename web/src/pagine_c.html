@@ -11,7 +11,7 @@
   <h4>Avviso del browser su HTTPS</h4>
   <p>La scheda usa un certificato fatto da lei: il browser avvisa la prima volta. Confronta l'impronta (Servizi > HTTPS) e prosegui.</p>
   <h4>Servizi</h4>
-  <p>MQTT, rete tra schede e Bluetooth sono spenti di fabbrica: li accendi tu dalla categoria Servizi quando servono.</p>
+  <p>MQTT e rete tra schede sono spenti di fabbrica: li accendi tu dalla categoria Servizi quando servono. Il Bluetooth e spento e non ha comandi ne interruttori: lo accende solo un programma VesevOS con il permesso ble.</p>
   <h4>Hotspot, HTTP e porte</h4>
   <p>Servizi > Punto di accesso, HTTP e HTTPS: ogni servizio si accende e si spegne. Almeno un protocollo web resta acceso. Le porte (HTTP 80, HTTPS 443, oppure da 1024 a 65535) valgono dal riavvio. Tasto BOOT 8 secondi: hotspot, HTTP, HTTPS e porte tornano di fabbrica.</p>
   <h4>Configurare solo dalla seriale</h4>
@@ -19,8 +19,8 @@
   <h4>Terminale</h4>
   <p>Scrivi help per l'elenco dei comandi. Sulla seriale premi 1 o 2 per cambiare lingua.</p>
   <p>Dalla seriale si entra come in una shell classica: nome utente, password e, se l'hai attivato, il codice MFA. Gli errori contano nel blocco degli accessi insieme a quelli del web. Scrivi exit (o premi Ctrl+D) per uscire. Se l'ora della scheda non e sincronizzata, con l'MFA vale solo un codice di recupero.</p>
-  <p>Cartella corrente e percorsi: pwd mostra la cartella corrente, cd la cambia (cd .. sale, cd - torna indietro, cd da solo va alla radice), ls elenca come in una shell classica (ls -l, ls -a, ls -h, ls /scripts). Anche cat, mkdir, rm, mv, cp e write accettano percorsi relativi alla cartella corrente. La cartella corrente e per utente (sulla seriale e unica) e torna alla radice dopo 30 minuti senza comandi.</p>
-  <p>Il prompt e come in una shell classica: utente@hostname:cartella$ . L'utente e quello con cui sei entrato, l'hostname e il nome della scheda (se lo cambi, il prompt cambia al comando dopo). ~ e la radice /, la cartella di casa; fuori dalla radice si vede il percorso (per esempio /scripts). Il simbolo # indica l'amministratore, $ gli altri utenti. Prima di entrare si vede solo hostname>.</p>
+  <p>Cartella corrente e percorsi: pwd mostra la cartella corrente, cd la cambia (cd .. sale, cd - torna indietro, cd da solo va alla radice), ls elenca come in una shell classica (ls -l, ls -a, ls -h, ls /sbin). Anche cat, mkdir, rm, mv, cp e write accettano percorsi relativi alla cartella corrente. La cartella corrente e per utente (sulla seriale e unica) e torna alla radice dopo 30 minuti senza comandi.</p>
+  <p>Il prompt e come in una shell classica: utente@hostname:cartella$ . L'utente e quello con cui sei entrato, l'hostname e il nome della scheda (se lo cambi, il prompt cambia al comando dopo). ~ e la radice /, la cartella di casa; fuori dalla radice si vede il percorso (per esempio /sbin). Il simbolo # indica l'amministratore, $ gli altri utenti. Prima di entrare si vede solo hostname>.</p>
   <p>Il tasto Tab completa come in una shell classica: premi Tab per comandi, sottocomandi, opzioni e percorsi (cd /scr, ls -, cpu ). Se c'e un solo candidato lo completa; se ce ne sono piu scrive la parte comune; un secondo Tab di seguito elenca le possibilita (al massimo 64). Vede solo cio che il tuo ruolo puo usare. I nomi con spazi non si completano. Su riga vuota il Tab non fa niente. Sulla seriale vale lo stesso.</p>
   <p>Il comando cpu: scrivi cpu per il riepilogo (governor, frequenza, tetto, motivo, temperatura e carico dei due core), cpu info per chip e frequenze (lscpu fa lo stesso), cpu governor e cpu freq per vedere o cambiare la scelta (cambiare e solo per l'Admin), cpu why per il motivo del tetto. fixed vuol dire frequenza fissa (cpu governor fixed 160 oppure cpu freq 160). Le forme vecchie cpu 80, cpu 160, cpu 240, cpu ondemand, cpu conservative, cpu schedutil e cpu auto funzionano ancora. vesevos-cpuinfo mostra riepilogo e informazioni insieme.</p>
   <p>vesevos-services elenca i servizi con stato, porta e RAM; vesevos-services mqtt status ne mostra uno solo. start, stop e restart (per esempio vesevos-services mqtt restart) sono solo per l'Admin; fermare http, https o ap chiede conferma e vale dal riavvio. I comandi svc, start e kill restano come prima.</p>
@@ -28,8 +28,8 @@
   <p>vesevos-config (per aree) e il fronte unico di configurazione: senza argomenti scrive un riepilogo (sistema, rete, paese e radio, ora, servizi, utenti, LED, CPU, sicurezza), con vesevos-config region mostra i valori di un'area e i comandi che li cambiano. Aree: system, network, region, time, services, users, security, led, cpu. Per cambiare (solo Admin) scrivi il comando dopo l'area, per esempio vesevos-config region country IT: la riga passa dal percorso normale della shell, con gli stessi ruoli, limiti della radio, conferme e domande di password; non c'e nessun altro modo di cambiare le impostazioni. vesevos-config setup avvia la guida. L'Operatore vede solo il riepilogo e le aree in lettura; users e security sono solo per l'Admin. Non mostra mai password, hash o chiavi.</p>
   <p>vesevos-network scrive un riepilogo di rete in testo: modo (client, hotspot, aereo), nome host e mDNS, IP, maschera, gateway, DNS, canale, segnale, rete Wi-Fi, MAC, DHCP, NTP, traffico, hotspot (nome e client collegati) e servizi di rete aperti con le porte. Non mostra mai le password; il MAC e mascherato, con -f (solo Admin) e intero. vesevos-network scan e vesevos-network ping &lt;indirizzo&gt; sono come wifi scan e ping (solo Admin). I comandi ip, net e wifi restano come prima.</p>
   <p>vesevos-cleaner (solo Admin) fa una pulizia SICURA. Senza argomenti e una prova a secco: elenca le categorie (tmp = residui .tmp~ di salvataggi interrotti con il file completo accanto, crash = rapporti dei crash, log = registro in RAM, reboots = diario dei riavvii, cache = file di prova dell'autodiagnosi) con le voci e lo spazio che si libera, senza cancellare niente. vesevos-cleaner -y [categoria ...] pulisce dopo conferma (finestra della pagina o y/n dalla seriale) e dice i byte liberati. Non tocca mai configurazione, periferiche, utenti, certificati, script, app, lingue e il registro di audit (quello si svuota solo con audit). Rapporti e registri possono contenere dati identificativi: cancellarli e un tuo diritto.</p>
-  <p>vesevos-drive_manager elenca i volumi: memoria interna (LittleFS) e microSD, con stato (montata, non montata, non presente, formato non supportato), formato, dimensione, usato, libero e frequenza SPI. vesevos-drive_manager mount, unmount e test (solo Admin) sono sd mount, sd unmount e sd test, con gli stessi controlli; unmount chiede conferma se la scheda e in uso. Non c'e format: VesevOS non formatta mai la microSD (formattala in FAT32 sul computer, exFAT non e supportato). vesevos-led_control e un alias di led (stesso comando, stessi ruoli).</p>
-  <p>vesevos-backup (solo Admin) salva e ripristina la configurazione in /backup, sempre cifrata con una frase che scegli tu. Senza argomenti mostra i backup e lo spazio libero. vesevos-backup create [nome] crea il file .vbk (la frase si chiede due volte, senza mostrarla; al massimo 5 backup), restore nome chiede la frase, dice quante righe cambierebbero (mai i valori) e chiede conferma prima di applicare, delete nome cancella dopo conferma. La frase non si scrive mai nella riga e non resta nella cronologia. Il formato e quello del backup con i segreti della pagina Sistema: un file si ripristina anche dall'altra parte. Il backup contiene password e dati identificativi: se perdi la frase non si recupera e decidi tu dove tenerlo.</p>
+  <p>vesevos-drive_manager elenca i volumi: memoria interna (LittleFS) e microSD, con stato (montata, non montata, non presente, formato non supportato), formato, dimensione, usato, libero e frequenza SPI. vesevos-drive_manager mount, unmount e test (solo Admin) sono sd mount, sd unmount e sd test, con gli stessi controlli; unmount chiede conferma se la scheda e in uso. vesevos-drive_manager format microsd FORMATTA (solo Admin) la formatta in FAT32 e CANCELLA TUTTO (anche dal pannello della microSD); funziona anche con una scheda che non si monta; la memoria interna non si formatta. vesevos-led_control e un alias di led (stesso comando, stessi ruoli).</p>
+  <p>vesevos-backup (solo Admin) salva e ripristina la configurazione in /var/backup, sempre cifrata con una frase che scegli tu. Senza argomenti mostra i backup e lo spazio libero. vesevos-backup create [nome] crea il file .vbk (la frase si chiede due volte, senza mostrarla; al massimo 5 backup), restore nome chiede la frase, dice quante righe cambierebbero (mai i valori) e chiede conferma prima di applicare, delete nome cancella dopo conferma. La frase non si scrive mai nella riga e non resta nella cronologia. Il formato e quello del backup con i segreti della pagina Sistema: un file si ripristina anche dall'altra parte. Il backup contiene password e dati identificativi: se perdi la frase non si recupera e decidi tu dove tenerlo.</p>
   <p>vesevos-update (solo Admin) mostra la versione del firmware e del recovery, le partizioni e l'esito dell'ultimo ordine. vesevos-update file riavvia nel recovery e stampa UNA volta l'indirizzo con un codice monouso (15 minuti, legato al tuo computer: non condividerlo) per caricare un file; dalla seriale scrivi l'IP del computer. vesevos-update net indirizzo-https sha256 fa scaricare il file dal recovery da un indirizzo consentito e ne controlla lo SHA-256 (sovrascrive il firmware prima di verificarlo tutto). Chiede sempre conferma; il recovery lavora in HTTP sulla rete locale. Sono gli stessi ordini della pagina Aggiornamento e non cerca niente in rete da solo.</p>
   <p>Aiuto sui comandi: help elenca i comandi che il tuo ruolo puo usare; help df oppure man df spiegano un comando (uso, opzioni, alias, ruolo minimo, esempi). Dopo help, man e time il Tab completa i nomi dei comandi. I nomi ufficiali sono in inglese; i vecchi nomi italiani (aereo, licenza, locale, niente, trova e gli altri) restano validi come alias nascosti.</p>
   <p>Comandi di base come in una shell classica: whoami scrive il tuo utente; id scrive uid, gid e gruppo (numeri simulati: uid = 1000 + posto dell'utente, il gruppo e il ruolo); echo [-n] testo scrive il testo senza variabili; df [-h] mostra lo spazio della memoria interna e della microSD se e montata; uname [-a|-s|-n|-r|-v|-m] scrive nome, host, versione, ESP-IDF e chip; exit chiude la sessione sulla seriale.</p>
@@ -41,9 +41,10 @@
 </section>
 <section id="t_app" class="hide">
   <div class="card"><h3>App</h3>
-   <p style="color:var(--mut)">Programmi con una pagina propria, salvati come file .vap nella cartella /apps. Un file solo contiene manifest, icona, pagina, codice e dati. Si apre un'app, si avvia e si comanda dai suoi controlli. Una sola app alla volta (e nessuno script mentre gira).</p>
+   <p style="color:var(--mut)">Le app stanno nella cartella /bin. Si avviano, si fermano e si eliminano da qui. Le app con una pagina propria si aprono dal nome e si comandano dai loro controlli. Un'app con pagina gira da sola: mentre gira non parte nessuno script.</p>
    <div class="ftb adm">
     <button class="btn" onclick="apNew()"><svg class="i" aria-hidden="true"><use href="#i-fvap"/></svg><span>Nuova app</span></button>
+    <input type="file" id="apup" accept=".vab,.vae,.vap,.vel" aria-label="App da caricare"><button class="btn gray" onclick="apUp()"><svg class="i" aria-hidden="true"><use href="#i-dl"/></svg><span>Carica</span></button>
    </div>
    <table id="aptab" class="ftab"></table>
    <div id="appm" class="msg" role="status"></div></div>
@@ -53,19 +54,20 @@
    <pre id="apout" class="lgv hide" tabindex="0" aria-label="Uscita dell'app" aria-live="polite"></pre></div>
   <div class="card adm"><h3>Come e fatto un file app</h3>
    <ul class="scfn">
-    <li><code>[manifest]</code> <span>name (uguale al nome del file), title, version, author, use (permessi: led, time, temp, log, logread, act, btn, mqtt, gpio:N), who (admin oppure oper)</span></li>
+    <li><code>[manifest]</code> <span>name (uguale al nome del file), title, version, author, use (permessi: led, time, temp, log, logread, act, btn, mqtt, ble, files, gpio:N), who (admin oppure oper)</span></li>
     <li><code>[icon]</code> <span>un solo disegno svg con forme semplici, massimo 2 KB</span></li>
     <li><code>[page]</code> <span>un controllo per riga: switch, slider, color, text, button, chart, con id e label</span></li>
-    <li><code>[code]</code> <span>codice Berry, massimo 8 KB. Funzioni: on_set(id, valore) quando tocchi un controllo, on_tick() ogni secondo, dev_get(id), dev_set(id, valore); e led, act, log, time, temp, btn, logtail, mqtt se il manifest le permette (use)</span></li>
+    <li><code>[code]</code> <span>codice VesevOS, massimo 8 KB. Funzioni: on_set(id, valore) quando tocchi un controllo, on_tick() ogni secondo, dev_get(id), dev_set(id, valore); e led, act, log, time, temp, btn, logtail, mqtt se il manifest le permette (use)</span></li>
     <li><code>[data]</code> <span>valori iniziali: chiave=valore (se la chiave e un controllo ne e il valore di partenza)</span></li>
    </ul></div>
  </section>
 <section id="t_script" class="hide">
  <div class="card"><h3>Script</h3>
-  <p style="color:var(--mut)">Programmi in linguaggio Berry, salvati come file .vsc nella cartella /scripts. Girano in sottofondo, uno alla volta. Un ciclo deve fare pause con sleep(): senza pause per piu di 3 secondi lo script viene fermato.</p>
+  <p style="color:var(--mut)">Programmi VesevOS, salvati come file .vsb nella cartella /sbin. Girano in sottofondo, uno alla volta. Un ciclo deve fare pause con sleep(): senza pause per piu di 3 secondi lo script viene fermato.</p>
   <div id="scst" class="fhint" role="status"></div>
   <div class="ftb">
    <button class="btn" onclick="scNew()"><svg class="i" aria-hidden="true"><use href="#i-fvsc"/></svg><span>Nuovo script</span></button>
+   <span class="adm"><input type="file" id="scup" accept=".vsb,.vsc" aria-label="Script da caricare"><button class="btn gray" onclick="scUp()"><svg class="i" aria-hidden="true"><use href="#i-dl"/></svg><span>Carica</span></button></span>
    <button class="btn gray" id="scstop" onclick="scStopRun()"><svg class="i" aria-hidden="true"><use href="#i-stop"/></svg><span>Ferma</span></button>
   </div>
   <table id="sctab" class="ftab"></table>
@@ -85,8 +87,22 @@
    <li><code>btn()</code> <span>click liberi del tasto BOOT: 1, 2 o 3, oppure 0 se non ce ne sono (non aspetta). Vedi Dispositivi &gt; Tasto BOOT</span></li>
    <li><code>logtail(n)</code> <span>ultime n righe del registro (1-20, massimo 2000 caratteri). Nelle app serve logread in use=: il registro puo contenere indirizzi e nomi</span></li>
    <li><code>mqtt("nome", "testo")</code> <span>invia un testo al broker MQTT su &lt;prefisso&gt;/app/&lt;nome&gt; (vero = inviato, falso = non inviato; massimo 20 al minuto). Nelle app serve mqtt in use=</span></li>
+   <li><code>ble_on(min)</code> <span>ble_on(minuti), ble_off(), ble_status(), ble_name(nome), ble_adv(vero), ble_service(...), ble_set(uuid, dati), ble_notify(uuid, dati), ble_disconnect(): Bluetooth, solo nelle app con ble in use=. Spento di fabbrica, abbinamento con codice obbligatorio. Negli script (lanciati dall'Admin): ble_status(), ble_off(), ble_passkey()</span></li>
    <li><code>sleep(ms)</code> <span>pausa</span></li>
   </ul></div>
+</section>
+<section id="t_drv" class="hide">
+ <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-prog"/></svg>Driver</h3>
+  <p class="fhint">Un driver descrive una periferica: icona, collegamenti, pagina e comandi. Carica il file, poi installalo: ti propone i pin liberi e puoi cambiarli. Il sistema controlla che siano ammessi e non gia usati.</p>
+  <div id="drvlist"></div>
+  <div class="ftb adm"><label class="btn gray" for="drvup" tabindex="0" onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();$('drvup').click()}"><svg class="i" aria-hidden="true"><use href="#i-upl"/></svg><span>Carica</span></label><input type="file" id="drvup" class="sr" accept=".vdb,.vdp,.vde,.txt" onchange="drvUp()" aria-label="Driver da caricare"></div>
+  <div id="drvm" class="msg" role="status"></div></div>
+</section>
+<section id="t_func" class="hide">
+ <div class="card"><h3>Funzionalita</h3>
+  <p class="fhint">Cio che i programmi possono usare. Se ne togli una nessun programma la usa piu e quelli che la stanno usando si fermano. Ogni programma chiede solo cio che gli serve: qui puoi solo togliere.</p>
+  <div id="funclist"></div>
+  <div id="funcm" class="msg"></div></div>
 </section>
 <div class="foot"><a href="#" onclick="show('legal');return false">Note legali e licenze</a> &middot; <a href="#aiuto">Aiuto</a> &middot; <a href="https://github.com/paolellad79/VesevOS" target="_blank" rel="noopener">GitHub</a><div id="fver" style="margin-top:4px"></div></div>
 </main></div>

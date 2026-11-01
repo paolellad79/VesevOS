@@ -105,7 +105,7 @@ static bool generate(bool apply) {
   if (apply) {                                       // mai mentre il server lo sta usando
     free(g_cert); free(g_key);
     g_cert = cert; g_key = kpem;
-    memcpy(g_fp, fp, sizeof(g_fp)); snprintf(g_name, sizeof(g_name), "%s", cfg.hostname.c_str()); g_custom = false;
+    memcpy(g_fp, fp, sizeof(g_fp)); snprintf(g_name, sizeof(g_name), "%.39s", cfg.hostname.c_str()); g_custom = false;
   } else { free(cert); free(kpem); g_pending = true; }
   vlog("TLS: nuovo certificato per %s.local in %lu ms", cfg.hostname.c_str(), (unsigned long)(drvMillis() - t0));
   return true;

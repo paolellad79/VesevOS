@@ -34,3 +34,23 @@ inline uint32_t drvPsramFree()    { return heap_caps_get_free_size(MALLOC_CAP_SP
 // Da ora in poi i blocchi di memoria di almeno `limit` byte (malloc, new) vanno in PSRAM e lasciano libera la RAM interna.
 // Solo con la PSRAM presente (drvPsramTotal() > 0).
 inline void drvExtmemEnable(size_t limit) { heap_caps_malloc_extmem_enable(limit); }
+
+// Mappa della RAM in tre parti: totale nominale, parte fissa di sistema, parte variabile (heap interno).
+// Campi di tipo int32_t: -1 = non misurato (mai un numero inventato). Tutto in byte.
+struct DrvMemMap {
+  uint32_t sramNominal;    // SRAM interna nominale del chip (boards: VOS_SRAM_KB)
+  uint32_t fixedTotal;     // parte fissa = sramNominal - heapTotal (il programma non la usa mai come heap)
+  int32_t  fixedIram;      // codice in IRAM (simboli del linker _iram_start/_iram_end)
+  int32_t  fixedData;      // dati statici inizializzati (_data_start/_data_end)
+  int32_t  fixedBss;       // dati statici azzerati (_bss_start/_bss_end)
+  int32_t  fixedRest;      // resto = fixedTotal - le tre voci sopra (cache, ROM riservata, buffer del chip, intestazioni heap)
+  uint32_t heapTotal;      // heap interno gestibile
+  uint32_t heapUsed;       // = heapTotal - heapFree
+  uint32_t heapFree;
+  uint32_t heapMin;        // minimo storico dall'avvio
+  uint32_t heapMaxBlock;   // blocco libero piu grande
+  uint32_t psramTotal;     // 0 se la scheda non ne ha
+  uint32_t psramFree;
+  uint32_t flashSize;      // dimensione fisica rilevata dal chip (0 se non si legge)
+};
+void drvMemMap(DrvMemMap& m);

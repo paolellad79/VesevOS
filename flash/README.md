@@ -4,8 +4,7 @@ Pagina statica (solo HTML, CSS, JavaScript) da pubblicare con GitHub Pages: sta 
 Scrive il firmware VesevOS su una scheda ESP32-S3 dal browser, con la porta seriale del browser (Web Serial) e `esptool-js`.
 Licenza: GPL-3.0-or-later (licenza commerciale alternativa: vedi `COMMERCIAL.md` del repo). Copyright 2026 Domenico Paolella.
 
-**STATO: NON PROVATA con una scheda reale.** Controllata solo la sintassi JavaScript (`node --check`) e la coerenza dell'elenco con `../firmware/indice.json`.
-Da provare con una scheda sacrificabile (vedi "Cosa va provato").
+**STATO:** provata con una scheda reale (Firefox, 29/10/2026). Le parti da scrivere si scelgono una per una: di serie si conservano impostazioni, contatore dei riavvii e tempo di vita.
 
 ## Cosa fa
 - Elenco dei file ufficiali in `firmware.json` (versione, indirizzo, dimensione, SHA-256).
@@ -13,17 +12,18 @@ Da provare con una scheda sacrificabile (vedi "Cosa va provato").
   (b) marchio `{FW:VesevOS}` nel firmware (nel recovery: marchio "VesevOS Recovery" e NON quello del firmware),
   (c) dimensione nello slot (firmware al massimo 2.424.832 byte, recovery al massimo 1.048.576 byte, bootloader 32 KiB, ecc.),
   (d) SHA-256 (con `crypto.subtle`) uguale a quello dell'elenco.
+- Per ogni parte c'e una casella (Scrivi / Non si tocca; per le impostazioni "Si conserva" o "SI CANCELLA") e due preimpostazioni: "Aggiorna e conserva i dati" (scheda gia usata) e "Installazione completa". Avvisi chiari per le combinazioni che richiedono attenzione; se non scegli niente il tasto Scrivi resta disattivato.
 - Si scrivono SOLO i file scaricati da `bin/` e da `../firmware/` e presenti in `firmware.json`. Non c'e scelta di file dal disco.
 - Indirizzi e dimensioni massime stanno nel codice (`controlli.js`), non nell'elenco: un elenco sbagliato non puo mettere un file nel posto sbagliato.
 - Se il browser non ha la porta seriale: la pagina mostra solo "Browser non compatibile".
-- Lingue it/en/es/de (testi in `lang.js`), tema chiaro/scuro con `prefers-color-scheme`, barra di avanzamento, registro delle fasi con `aria-live`.
+- Lingue it/en/es/de (testi in `lang.js`), tema automatico/chiaro/scuro e accessibilita come nella pagina della scheda (`../assets/sito.css`, `sito.js`), barra di avanzamento, registro delle fasi con `aria-live`.
 - Nessun upload, nessun tracker, nessun cookie. Tutto con `Content-Security-Policy` che ammette solo file dello stesso sito.
 - Nota in pagina: gli aggiornamenti successivi si fanno dalla scheda (recovery); la pagina serve solo per la prima installazione o il recupero.
 
 ## File
 | File | Scopo |
 |---|---|
-| `index.html`, `stile.css` | pagina e stile |
+| `index.html`, `stile.css` | pagina e stile (i colori e il tema vengono da `../assets/sito.css`) |
 | `app.js` | interfaccia, elenco, controlli, avvio della scrittura |
 | `controlli.js` | regole (indirizzi, dimensioni, marchi) e SHA-256 |
 | `scrittura.js` | collegamento alla scheda e scrittura con esptool-js |
@@ -36,20 +36,22 @@ Da provare con una scheda sacrificabile (vedi "Cosa va provato").
 ## Pacchetti
 La scheda ha la tabella: `nvs` 0x9000 (20 KiB), `otadata` 0xe000 (8 KiB), recovery 0x10000 (max 1 MiB), `app0` 0x110000 (max 2.424.832 byte), spazio file 0x360000.
 
-- **Installazione completa (scheda nuova)**, scelta predefinita. Scrive 6 file:
+Preimpostazioni (le caselle si possono cambiare una per una):
+- **Aggiorna e conserva i dati (scheda gia usata)**, scelta predefinita. Scrive 4 file: bootloader, tabella, recovery e firmware. Non tocca `nvs` (impostazioni, Wi-Fi, contatore dei riavvii, tempo di vita) ne `otadata`.
+- **Installazione completa - cancella impostazioni e contatori (scheda nuova)**. Scrive 6 file:
   | Indirizzo | File | Note |
   |---|---|---|
-  | 0x0 | `bootloader-1.8.0.bin` | dal build del firmware 1.8.0 (con memoria RTC riservata) |
-  | 0x8000 | `partition-table-1.8.0.bin` | uguale nei build di firmware e recovery |
-  | 0x9000 | `nvs-vuoto.bin` | 20 KiB di 0xFF: NIENTE dati di nessuna scheda |
-  | 0xe000 | `otadata-app0.bin` | primo avvio direttamente su `app0` (stesso contenuto che ha una scheda in uso, solo numero di sequenza e CRC) |
-  | 0x10000 | `../firmware/recovery/0.5.1/VesevOS-Recovery-0.5.1.bin` | recovery |
-  | 0x110000 | `../firmware/1.8.0b/VesevOS-1.8.0b.bin` | firmware |
+  | 0x0 | `bin/bootloader-1.8.16.bin` | dal build del firmware (con memoria RTC riservata) |
+  | 0x8000 | `bin/partition-table-1.8.16.bin` | uguale nei build di firmware e recovery |
+  | 0x9000 | `bin/nvs-vuoto.bin` | 20 KiB di 0xFF: NIENTE dati di nessuna scheda |
+  | 0xe000 | `bin/otadata-app0.bin` | primo avvio direttamente su `app0` (stesso contenuto che ha una scheda in uso, solo numero di sequenza e CRC) |
+  | 0x10000 | `../firmware/recovery/0.5.2/VesevOS-Recovery-0.5.2.bin` | recovery |
+  | 0x110000 | `../firmware/1.8.16/VesevOS-1.8.16.bin` | firmware |
 - **Solo firmware** (0x110000) e **Solo recovery** (0x10000): per recuperare una scheda con tabella e avvio gia buoni.
 - Scelta fatta: file separati, uno per parte, ognuno con il suo SHA-256 e i suoi controlli, al posto di una immagine unica da 4 MB.
   Motivi: si riusano i binari ufficiali senza copie "fuse"; ogni controllo (marchio, slot) e chiaro; niente 4 MB quasi tutti vuoti; il file con i dati di una scheda non esiste.
-- NON si scrive: lo spazio file (0x360000, LittleFS). Una scheda usata puo quindi tenere `/vesevos.conf` e utenti; una scheda nuova non ha nulla.
-  Il pacchetto completo cancella invece la memoria `nvs` (impostazioni Wi-Fi ecc.).
+- NON si scrive MAI: lo spazio file (0x360000, LittleFS). Una scheda usata tiene quindi `/vesevos.conf` e utenti; una scheda nuova non ha nulla.
+  La memoria `nvs` si cancella solo se scegli quella voce o l'installazione completa.
 - Mai usare un backup (`backup-*.bin`) come origine: contiene dati personali (Wi-Fi, utenti, chiavi, certificati).
 
 ## Come pubblicare con GitHub Pages
@@ -71,19 +73,19 @@ Nota: se pubblichi solo la cartella `flash/` altrove, i percorsi `../firmware/` 
 5. Pulizia: togli le versioni che non vuoi piu offrire.
 Script rapido per rigenerare dimensioni e SHA: vedi il comando in fondo a questo file.
 
-## Dubbi aperti
-- Bootloader: scelto quello del build del firmware 1.8.0 (con RTC riservata, `FLASHMODE` QIO nella configurazione ma intestazione DIO nel file); quello del recovery e diverso (1.200 byte meno). Da confermare su scheda.
-- Reset automatico dell'USB nativa: `esptool-js` usa il reset dedicato (PID 0x1001), ma il riavvio finale (`hard_reset`) potrebbe non partire da solo: la pagina dice di ricollegare il cavo o premere reset.
-- Velocita: per l'USB nativa il valore della velocita non conta, ma `esptool-js` cambia comunque velocita dopo il collegamento (460800): da vedere se serve abbassarla.
+## Note tecniche
+- Bootloader: scelto quello del build del firmware 1.8.0 (con RTC riservata, `FLASHMODE` QIO nella configurazione ma intestazione DIO nel file); quello del recovery e diverso (1.200 byte meno). 
+- Reset automatico dell'USB nativa: `esptool-js` usa il reset dedicato (PID 0x1001). Al termine, se la scheda non riparte da sola, la pagina dice di ricollegare il cavo o premere reset.
+- Velocita: per l'USB nativa il valore della velocita non conta; `esptool-js` usa 460800 dopo il collegamento.
 - Scrittura con compressione e "keep" per modo/frequenza/dimensione flash: l'intestazione resta quella del file.
 - Il controllo MD5 di `esptool-js` dopo la scrittura NON e attivo (manca la funzione MD5): il controllo e lo SHA-256 prima di scrivere.
 - Il bundle di `esptool-js` e Apache-2.0 (non MIT), con dentro pako (MIT AND Zlib). Altre parti incluse: da verificare nel `package.json` dello strumento.
 
-## Cosa va provato (prima di dire che funziona)
-Con una scheda SACRIFICABILE (non quelle in uso) e con il backup a portata di mano:
+## Controlli consigliati
+Se vuoi rifare le prove, usa prima una scheda di prova e tieni il backup a portata di mano:
 1. Collegamento e reset automatico su tutti i sistemi operativi, con un browser che supporta la porta seriale: scheda in uso, scheda spenta e scheda che non parte.
-2. Installazione completa su scheda nuova, poi avvio: la scheda deve partire su VesevOS 1.8.0b; recovery raggiungibile.
-3. Solo firmware e solo recovery su scheda gia installata.
+2. Installazione completa su scheda nuova, poi avvio: la scheda deve partire su VesevOS 1.8.16; recovery raggiungibile.
+3. "Aggiorna e conserva i dati" su una scheda gia usata: impostazioni, contatore dei riavvii e tempo di vita devono restare. Poi solo firmware e solo recovery.
 4. Rifiuti: file modificato di 1 byte, elenco con SHA sbagliato, firmware messo come recovery, sito non raggiungibile, pagina aperta da disco.
 5. Browser senza porta seriale: deve comparire solo "Browser non compatibile".
 6. Lettori di schermo e tastiera; telefono (la porta seriale su telefono spesso non esiste: atteso "Browser non compatibile").
@@ -97,7 +99,7 @@ Con una scheda SACRIFICABILE (non quelle in uso) e con il backup a portata di ma
 - **Sicurezza** (RED/EN 18031, CRA): lo SHA-256 e preso dallo STESSO sito dei file: protegge da file rovinati, NON da un sito compromesso. L'autenticita vera richiede la firma Ed25519 dell'elenco (fase futura, `SIC-002`/`SIC-011`). Secure Boot non e toccato.
   "Solo file ufficiali" e una scelta di questa pagina, non un divieto tecnico: chi vuole puo usare `esptool` a mano.
 - **Marchi**: i testi della pagina non nominano marchi di terzi (browser, sistemi, produttori). Nel codice restano solo i nomi tecnici necessari ai controlli. Il marchio VesevOS va usato solo per i file ufficiali.
-- Export, IA, radio: non applicabile. Accessibilita: etichette, focus visibile, contrasto, `aria-live`; non verificata con lettori di schermo.
+- Export, IA, radio: non applicabile. Accessibilita: etichette, focus visibile, contrasto, `aria-live`; verifica con lettori di schermo consigliata.
 
 ## Rigenerare dimensioni e SHA (comando)
 ```
@@ -110,4 +112,4 @@ for p in j['parti'].values():
 open('firmware.json', 'w').write(json.dumps(j, indent=1) + '\n')
 PY
 ```
-(Eseguilo dalla cartella `flash/`; poi aggiorna anche `../firmware/indice.json`.)
+(Eseguilo dalla cartella `flash/`; poi aggiorna anche `../firmware/indice.json` e `../aggiorna/latest.json`.)

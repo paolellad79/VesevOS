@@ -13,10 +13,11 @@ struct PinInfo {
   const char* owner;   // chi lo usa
   const char* note;    // descrizione
   bool fixed;          // true = riservato dal sistema
+  const char* sig;     // segnale (CS, MOSI, SDA...): testo fisso, "" se il pin e uno solo
 };
 
 void   pinsInit();
-bool   pinClaim(uint8_t gpio, const char* owner, const char* note, bool fixed = false);
+bool   pinClaim(uint8_t gpio, const char* owner, const char* note, bool fixed = false, const char* sig = "");
 void   pinRelease(uint8_t gpio);
 int    pinCount();
 const PinInfo* pinAt(int i);

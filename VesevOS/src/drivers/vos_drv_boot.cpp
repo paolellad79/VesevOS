@@ -7,18 +7,29 @@
 #include <esp_task_wdt.h>
 #include <sdkconfig.h>
 #include <esp_log.h>
+#include <esp_system.h>
 #include <nvs_flash.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+
+static int g_nvsEraseWhy = 0;                        // codice d'errore che ha fatto cancellare la NVS (0 = mai cancellata)
+
+int drvNvsEraseReason() { return g_nvsEraseWhy; }
 
 bool drvPlatformInit() {
   drvOtaConfirmBoot();
   esp_log_level_set("*", (esp_log_level_t)CONFIG_LOG_DEFAULT_LEVEL);
   esp_err_t e = nvs_flash_init();
   if (e == ESP_ERR_NVS_NO_FREE_PAGES || e == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+    g_nvsEraseWhy = (int)e;
     if (nvs_flash_erase() == ESP_OK) e = nvs_flash_init();
   }
   return e == ESP_OK;
+}
+
+bool drvResetWasCrash() {
+  esp_reset_reason_t r = esp_reset_reason();
+  return r == ESP_RST_PANIC || r == ESP_RST_INT_WDT || r == ESP_RST_TASK_WDT || r == ESP_RST_WDT;
 }
 
 void drvLogOff(const char* tag) { esp_log_level_set(tag, ESP_LOG_NONE); }

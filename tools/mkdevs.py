@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# VesevOS - genera le schede modulo di esempio (.vdp) in docs/devs. Icone disegnate da noi (forme semplici, nessun marchio); lo schema lo disegna la pagina dai dati (power, level, part).
+# VesevOS - genera le schede modulo di esempio (.vdb) in docs/devs. Icone disegnate da noi (forme semplici, nessun marchio); lo schema lo disegna la pagina dai dati (power, level, part).
 # Uso: python3 tools/mkdevs.py   (poi tools/hosttest/run.sh le controlla con il vero parser)
 import os
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'docs', 'devs')
@@ -33,6 +33,6 @@ def write():
         if pull: t += 'pull=%s\n' % pull
         t += 'power=%s\n%sauthor=VesevOS\nversion=1.1\nlicense=CC0\nwarn=%s\n[signals]\n%s\n[icon]\n%s\n' % (power, extra, warn, sig, icon)
         assert len(warn) <= 80, (name, len(warn))
-        open(os.path.join(OUT, name + '.vdp'), 'w').write(t)
-        print('scritto', name + '.vdp', len(t), 'byte')
+        open(os.path.join(OUT, name + '.vdb'), 'w').write(t)
+        print('scritto', name + '.vdb', len(t), 'byte')
 write()

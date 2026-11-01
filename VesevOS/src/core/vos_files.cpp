@@ -6,9 +6,13 @@
 #include "vos_files.h"
 #include "vos_i18n.h"
 #include "vos_parse.h"
+#include "vos_paths.h"
+#include "vos_layout.h"
 #include "../drivers/vos_drv_fs.h"
 #include "../drivers/vos_drv_task.h"
 #include "vos_lock.h"
+#include "../boards/vos_packages.h"
+#include "../drivers/vos_drv_sd.h"
 
 #define MAX_TEXT 32768        // editor della pagina: oltre si scarica soltanto
 #define FS_LIST_MAX 200      // voci massime in un elenco cartella (regola API 13): oltre risponde more:true. Molto sopra FS_DIR_MAX: serve per le cartelle
@@ -86,6 +90,7 @@ int dirCount(const char* dir, int limit) {
 // supera i 5 s del Task watchdog. Il numero e dentro il testo: se si cambia FS_DIR_MAX vanno cambiati anche il testo e le sue traduzioni.
 const char* roomIn(char* path) {
   static_assert(FS_DIR_MAX == 20, "il testo dell'errore dice 20: aggiornalo (e lang_src.json)");
+  if (pathSdRel(path)) return nullptr;                    // il tetto vale per LittleFS: la microSD (FAT) non ne ha
   char* ls = strrchr(path, '/');
   if (!ls) return nullptr;
   char* cut = (ls == path) ? ls + 1 : ls;                 // per la radice resta "/"
@@ -124,11 +129,29 @@ bool fsCleanTo(std::string_view in, char* out, size_t cap) {
     if (i + 1 < n && ((c == '.' && out[i + 1] == '.') || (c == '/' && out[i + 1] == '/'))) return false;
   }
   if (n > 1 && out[n - 1] == '/') out[n - 1] = 0;
-  return true;
+  if (!pathSdShortcut(out, cap, FS_PATH_MAX)) return false;               // "/sd" -> "/media/sd" (vedi vos_paths.h)
+  const char* rel = pathSdRel(out);
+  if (rel && !pathSdRelOk(rel)) return false;                             // sulla microSD i nomi sono quelli ammessi dalla scheda
+  return pathLayoutShortcut(out, cap, FS_PATH_MAX);                       // "/scripts" -> "/sbin" e simili, o il contrario
+}
+
+size_t fsFreeAt(const char* p) {
+#if VOS_WITH_SD
+  if (pathSdRel(p)) {
+    uint64_t total = drvSdTotalBytes(), used = drvSdUsedBytes();
+    uint64_t room = total > used ? total - used : 0;
+    return room > 0xFFFFFFFFULL ? (size_t)0xFFFFFFFFULL : (size_t)room;
+  }
+#endif
+  size_t total = drvFsTotal(), used = drvFsUsed();
+  return total > used ? total - used : 0;
 }
 
 bool fsProtected(const char* p) {
-  return !strncmp(p, "/vesevos.conf", 13) || !strcmp(p, "/audit.log") || !strcmp(p, "/crash.txt");   // configurazione e storico del registro: solo dal firmware
+  // Configurazione e storico del registro: solo dal firmware. "/media" (la cartella virtuale) e quanto sta sotto, tranne la microSD in
+  // "/media/sd", non vivono sulla memoria interna: restano chiusi, cosi nessun comando crea o legge per sbaglio una cartella "media" su LittleFS.
+  // La microSD invece si usa come ogni altra cartella (drvFs* la raggiunge dal suo punto di montaggio).
+  return pathIsSystemFile(p) || (pathIsMedia(p) && !pathSdRel(p));
 }
 
 // dimensione di una cartella (somma dei file dentro, fino a 8 livelli). path e la cartella: ci si aggiunge "/nome" e al ritorno si toglie.
@@ -159,8 +182,10 @@ bool fsListBuild(std::string_view raw, HeapBuf& j) {
   if (!w) return false;
   if (!fsCleanTo(raw, w->a, PATH_BUF)) return addError(j, tr("Percorso non valido"));
   VosFile d = drvFsOpen(w->a);
+  if (!d && pathSdRel(w->a)) return addError(j, tr("microSD non montata"));
   if (!d || !d.isDirectory()) return addError(j, tr("Cartella non trovata"));
   size_t plen = strlen(w->a);
+  const bool onSd = pathSdRel(w->a) != nullptr;            // sulla microSD niente somma delle cartelle (scorrerebbe tutta la scheda) ne spazio della flash
   j.add("{\"ok\":true,\"path\":\""); j.addJson(w->a, plen); j.add("\",\"list\":[");
   bool first = true, more = false;
   int cnt = 0;
@@ -176,14 +201,19 @@ bool fsListBuild(std::string_view raw, HeapBuf& j) {
       first = false;
       j.add("{\"n\":\""); j.addJson(name, strlen(name));
       j.add("\",\"d\":"); j.add(dir ? "true" : "false");
-      j.add(",\"s\":"); j.addUint((uint32_t)(dir ? (full ? dirSize(w->a, full, 1) : 0) : f.size()));
+      j.add(",\"s\":"); j.addUint((uint32_t)(dir ? (full && !onSd ? dirSize(w->a, full, 1) : 0) : f.size()));
       j.add('}');
     }
     w->a[plen] = 0;
   }
   j.add("],\"more\":"); j.add(more ? "true" : "false");
-  j.add(",\"used\":"); j.addUint((uint32_t)drvFsUsed());
-  j.add(",\"total\":"); j.addUint((uint32_t)drvFsTotal());
+  uint32_t used = onSd ? 0 : (uint32_t)drvFsUsed(), total = onSd ? 0 : (uint32_t)drvFsTotal(), unit = 1;
+#if VOS_WITH_SD
+  if (onSd) { used = (uint32_t)(drvSdUsedBytes() >> 10); total = (uint32_t)(drvSdTotalBytes() >> 10); unit = 1024; }   // la scheda supera i 4 GB: in KB
+#endif
+  j.add(",\"used\":"); j.addUint(used);
+  j.add(",\"total\":"); j.addUint(total);
+  j.add(",\"u\":"); j.addUint(unit);                    // byte per unita di used e total
   j.add(",\"max\":"); j.addUint(MAX_TEXT); j.add('}');
   return !j.oom() && !j.over();
 }
@@ -203,6 +233,31 @@ bool fsMkdir(std::string_view raw, ErrBuf& err) {
   if (const char* full = roomIn(w->a)) { err = full; return false; }
   if (!drvFsMkdir(w->a)) { err = tr("Impossibile creare la cartella"); return false; }
   return true;
+}
+
+// Le cartelle di sistema: non si cancellano e non si rinominano (dentro hanno file protetti e il firmware le usa).
+static bool isSystemDir(const char* p) {
+  static const char* const kDirs[] = {"/etc", "/var", "/bin", "/sbin", "/tmp", "/home", "/var/backup"};
+  for (const char* d : kDirs) if (!strcmp(p, d)) return true;
+  return false;
+}
+
+// Dentro la cartella path (lunga len) c'e qualcosa di protetto, a qualunque livello (fino a FS_DEPTH_MAX)? Si controlla PRIMA di cancellare:
+// cosi un'eliminazione che toccherebbe un file di sistema non cancella niente. Oltre il limite di livelli si risponde "si" (per prudenza).
+static bool hasProtected(char* path, size_t len, int depth) {
+  if (depth > FS_DEPTH_MAX) return true;
+  VosFile d = drvFsOpen(path);
+  if (!d || !d.isDirectory()) return false;
+  for (VosFile c = d.openNextFile(); c; c = d.openNextFile()) {
+    drvTaskPause();
+    bool dir = c.isDirectory();
+    size_t n = joinName(path, len, c.name());
+    if (!n) return true;
+    bool found = fsProtected(path) || (dir && hasProtected(path, n, depth + 1));
+    path[len] = 0;
+    if (found) return true;
+  }
+  return false;
 }
 
 // Cancella un file o una cartella con tutto il contenuto, un passo alla volta: apre la cartella, prende la PRIMA voce, chiude, e poi
@@ -247,7 +302,9 @@ bool fsRemove(std::string_view raw, ErrBuf& err) {
   WorkPtr w; if (!w) return noMemory(err);
   if (!okPath(raw, w->a, err)) return false;
   if (!strcmp(w->a, "/")) { err = tr("Non si puo eliminare la radice"); return false; }
+  if (isSystemDir(w->a)) { err = tr("File di sistema protetto"); return false; }
   if (!drvFsExists(w->a)) { err = tr("Non trovato"); return false; }
+  if (hasProtected(w->a, strlen(w->a), 0)) { err = tr("File di sistema protetto"); return false; }
   if (!rmRec(w->a)) { err = tr("Eliminazione non riuscita"); return false; }
   return true;
 }
@@ -255,9 +312,19 @@ bool fsRemove(std::string_view raw, ErrBuf& err) {
 bool fsRename(std::string_view a, std::string_view b, ErrBuf& err) {
   WorkPtr w; if (!w) return noMemory(err);
   if (!okPath(a, w->a, err) || !okPath(b, w->b, err)) return false;
+  if (isSystemDir(w->a)) { err = tr("File di sistema protetto"); return false; }
   if (!drvFsExists(w->a)) { err = tr("Origine non trovata"); return false; }
   if (drvFsExists(w->b)) { err = tr("La destinazione esiste gia"); return false; }
   if (!sameParent(w->a, w->b)) { if (const char* full = roomIn(w->b)) { err = full; return false; } }
+  if ((pathSdRel(w->a) != nullptr) != (pathSdRel(w->b) != nullptr)) {      // tra flash e microSD non si rinomina: si copia e poi si toglie l'origine
+    VosFile d = drvFsOpen(w->a);
+    bool dir = d && d.isDirectory();
+    d.close();
+    if (dir) { err = tr("Tra flash e microSD una cartella non si sposta: usa cp e rm"); return false; }
+    if (!fsCopy(w->a, w->b, err)) return false;
+    if (!drvFsRemove(w->a)) { err = tr("Copiato, ma l'origine non si e potuta togliere"); return false; }
+    return true;
+  }
   if (!drvFsRename(w->a, w->b)) { err = tr("Rinomina non riuscita"); return false; }
   return true;
 }
@@ -269,7 +336,7 @@ bool fsCopy(std::string_view a, std::string_view b, ErrBuf& err) {
   if (!in || in.isDirectory()) { err = tr("Origine non e un file"); return false; }
   if (drvFsExists(w->b)) { in.close(); err = tr("La destinazione esiste gia"); return false; }
   if (const char* full = roomIn(w->b)) { in.close(); err = full; return false; }
-  if ((size_t)in.size() + 8192 > drvFsTotal() - drvFsUsed()) { in.close(); err = tr("Spazio esaurito"); return false; }
+  if ((size_t)in.size() + 8192 > fsFreeAt(w->b)) { in.close(); err = tr("Spazio esaurito"); return false; }
   VosFile out = drvFsOpen(w->b, "w");
   if (!out) { in.close(); err = tr("Impossibile creare la destinazione"); return false; }
   bool ok = true;
@@ -295,7 +362,7 @@ bool fsWriteText(std::string_view raw, std::string_view text, ErrBuf& err, bool 
   bool exists = drvFsExists(p);
   if (exists) { VosFile d = drvFsOpen(p); bool dir = d && d.isDirectory(); d.close(); if (dir) { err = tr("Esiste una cartella con questo nome"); return false; } }
   if (mustBeNew && exists) { err = tr("Esiste gia"); return false; }
-  size_t freeB = drvFsTotal() - drvFsUsed();
+  size_t freeB = fsFreeAt(p);
   if (text.size() + 8192 > freeB) { err = tr("Spazio esaurito"); return false; }
   char* ls = strrchr(p, '/');
   if (ls > p) {                                                         // la cartella che la contiene (se non e la radice) deve esistere
@@ -305,7 +372,7 @@ bool fsWriteText(std::string_view raw, std::string_view text, ErrBuf& err, bool 
     if (!dirOk) { err = tr("Cartella non trovata"); return false; }
   }
   if (!exists) { if (const char* full = roomIn(p)) { err = full; return false; } }   // un file nuovo aggiunge una voce; sovrascrivere no
-  snprintf(w->b, PATH_BUF, "%s.tmp~", p);
+  snprintf(w->b, PATH_BUF, "%.*s.tmp~", (int)PATH_BUF - 6, p);   // p entra sempre: il tetto serve solo a dirlo al compilatore
   VosLock lk(saveMux());                                                // fino all'uscita: scrittura del temporaneo e scambio
   VosFile f = drvFsOpen(w->b, "w");
   if (!f) { err = tr("Impossibile scrivere"); return false; }
@@ -371,7 +438,6 @@ struct TmpWork {
   char tmp[PATH_BUF];                     // percorso del temporaneo
   char cand[FS_TMP_CAND_MAX][FS_PATH_MAX + 1];   // nomi (senza ".tmp~") raccolti mentre si scorre la cartella
 };
-const char* const TMP_DIRS[] = {"/", "/scripts", "/apps", "/lang"};   // dove salva di solito la pagina. Niente scansione di tutto il file system
 }  // namespace
 
 void fsTmpClean(const char* dir, FsTmpStat& st) {
@@ -402,14 +468,14 @@ void fsTmpClean(const char* dir, FsTmpStat& st) {
     memcpy(w->def, dir, dlen + 1);
     size_t len = joinName(w->def, dlen, w->cand[i]);
     if (!len || len + 5 >= PATH_BUF) { st.more = true; continue; }
-    snprintf(w->tmp, PATH_BUF, "%s.tmp~", w->def);
+    snprintf(w->tmp, PATH_BUF, "%.*s.tmp~", (int)PATH_BUF - 6, w->def);   // len + 5 < PATH_BUF e controllato sopra
     if (fsProtected(w->def) || fsProtected(w->tmp)) continue;
     VosLock lk(saveMux());                // un salvataggio in corso ha il suo temporaneo: aspetta che finisca, poi ricontrolla
     VosFile f = drvFsOpen(w->def);
     bool defFile = f && !f.isDirectory();
     f.close();
     if (!defFile) {                       // niente definitivo: il temporaneo puo essere l'unica copia
-      if (!st.orphan++) snprintf(st.firstOrphan, sizeof(st.firstOrphan), "%s", w->def);
+      if (!st.orphan++) snprintf(st.firstOrphan, sizeof(st.firstOrphan), "%.*s", (int)sizeof(st.firstOrphan) - 1, w->def);
       continue;
     }
     VosFile t = drvFsOpen(w->tmp);
@@ -424,5 +490,7 @@ void fsTmpClean(const char* dir, FsTmpStat& st) {
 }
 
 void fsTmpCleanKnown(FsTmpStat& st) {
-  for (const char* d : TMP_DIRS) { fsTmpClean(d, st); drvTaskPause(); }
+  // dove salva di solito la pagina (cartelle in uso, vedi vos_layout.h). Niente scansione di tutto il file system
+  const char* const dirs[] = {"/", layoutPath(LAY_SCRIPTS), layoutPath(LAY_APPS), "/lang", "/var", "/etc", "/var/backup"};
+  for (const char* d : dirs) { fsTmpClean(d, st); drvTaskPause(); }
 }

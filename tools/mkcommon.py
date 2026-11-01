@@ -60,7 +60,7 @@ LANG = {'IT': 'it', 'SM': 'it', 'VA': 'it', 'CH': 'it', 'ES': 'es', 'MX': 'es', 
 
 # ---------- elenco del software usato (SBOM semplice) ----------
 SBOM = [
-    ['VesevOS', '1.8.0b', 'GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial', 'https://github.com/paolellad79/VesevOS'],
+    ['VesevOS', '1.8.14', 'GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial', 'https://github.com/paolellad79/VesevOS'],
     ['ESP-IDF (esp_wifi, esp_now, esp-mqtt, esp_http_server, esp_https_server, esp-tls, NVS)', '5.5.5', 'Apache-2.0', 'https://github.com/espressif/esp-idf'],
     ['Mbed TLS (in ESP-IDF; Apache-2.0 OR GPL-2.0-or-later, scelta Apache-2.0)', 'ESP-IDF 5.5.5', 'Apache-2.0', 'https://github.com/Mbed-TLS/mbedtls'],
     ['FreeRTOS Kernel', 'ESP-IDF 5.5.5', 'MIT', 'https://www.freertos.org'],

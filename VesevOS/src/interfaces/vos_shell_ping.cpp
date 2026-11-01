@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_shell_ping.cpp
-// Comando "ping" nello stile di iputils-ping: ping [-c n] [-i secondi] [-W secondi] [-s byte] [-t ttl] host
+// Comando "ping" nello stile del ping classico: ping [-c n] [-i secondi] [-W secondi] [-s byte] [-t ttl] host
 // Solo Admin (vos_shell_roles.cpp). I LIMITI sono quelli del driver (vos_drv_ping.h): il comando li controlla prima, per dire all'utente
 // cosa e sbagliato, e il driver li ricontrolla. Durata totale: al massimo 30 s dalla seriale e 12 s dalla pagina web. Perche: il comando
 // BLOCCA chi lo esegue; il server web (httpd) ha uno stack da 8 KB, serve tutte le richieste con un solo task e il Task watchdog e a 30 s.
 // Sulla seriale il watchdog si alimenta a ogni giro di attesa (drvTaskPause) e Ctrl+C ferma il ping.
-// Le righe di uscita (risposte, "--- statistics ---", "rtt min/avg/max/mdev") sono in inglese come in iputils: restano leggibili dagli
+// Le righe di uscita (risposte, "--- statistics ---", "rtt min/avg/max/mdev") sono in inglese come nel ping classico: restano leggibili dagli
 // script. Gli errori e gli avvisi si traducono. Un solo host per volta, solo IPv4, niente broadcast/multicast.
 #include "vos_shell_int.h"
 #include "../drivers/vos_drv_ping.h"
@@ -203,7 +203,7 @@ void oneDecimal(char* out, size_t cap, uint32_t us) {
   snprintf(out, cap, "%lu.%lu", (unsigned long)(tenths / 10), (unsigned long)(tenths % 10));
 }
 
-// Una riga per pacchetto, appena concluso: la risposta, oppure "no answer yet" (come ping -O di iputils).
+// Una riga per pacchetto, appena concluso: la risposta, oppure "no answer yet" (come l'opzione -O del ping classico).
 void onSample(const DrvPingSample& s, void* user) {
   Out& w = *(Out*)user;
   if (!s.ok) { w.o->printf("no answer yet for icmp_seq=%u\r\n", (unsigned)s.seq); return; }
@@ -221,7 +221,7 @@ bool serialCancel(void*) {
   return stop;
 }
 
-// Le statistiche finali, come iputils.
+// Le statistiche finali, come nel ping classico.
 void printStats(OutSink& o, const char* host, const DrvPingResult& r) {
   o.printf("\r\n--- %s ping statistics ---\r\n", host);
   unsigned loss = r.sent ? (unsigned)(((uint64_t)(r.sent - r.received) * 100) / r.sent) : 0;

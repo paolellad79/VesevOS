@@ -4,6 +4,7 @@
 // Comandi della shell: Wi-Fi, rete, LED, pin, periferiche, lingua, licenze. Aiuti e include: vos_shell_int.h.
 #include "../devices/vos_io.h"
 #include "../devices/vos_mod.h"
+#include "vos_mod_app.h"
 #include "../net/vos_wps.h"
 #include "../packages/vos_btn.h"
 #include "vos_shell_int.h"
@@ -238,9 +239,6 @@ bool shCmdNet(const Word& c, const Word& a1, const char* line, OutSink& o, int r
     }
     o.println(tr("Uso: dev [status <nome>|on <nome>|off <nome>|act <nome> <azione> [arg]]"));
   }
-#if VOS_WITH_SD
-  else if (c == "sd") shSd(line, o, role);
-#endif
   else if (c == "io") {
     if (role < ROLE_ADMIN) { o.println(tr("Il tuo ruolo non permette questo comando")); return true; }
     Word a2 = argAt(line, 2), a3 = argAt(line, 3);
@@ -256,7 +254,8 @@ bool shCmdNet(const Word& c, const Word& a1, const char* line, OutSink& o, int r
       char optBuf[160]; StrBuf opt(optBuf, sizeof optBuf);
       for (int k = 4; k <= 8; k++) {
         Word t = argAt(line, k); t.lower();
-        if (t == "inv" || t == "up" || t == "down" || t == "fast" || t.startsWith("scl=") || t.startsWith("addr=") || t.startsWith("drv=")) opt.add(t.c_str()).add(',');
+        if (t == "inv" || t == "up" || t == "down" || t == "fast" || t.startsWith("scl=") || t.startsWith("addr=") || t.startsWith("drv=") ||
+            t.startsWith("mosi=") || t.startsWith("sck=") || t.startsWith("miso=") || t.startsWith("khz=")) opt.add(t.c_str()).add(',');
         else if (!t.empty() && nm.empty()) nm = t;
       }
       if (opt.truncated()) { o.println(tr("Comando troppo lungo")); return true; }
@@ -270,7 +269,7 @@ bool shCmdNet(const Word& c, const Word& a1, const char* line, OutSink& o, int r
     if (a1 == "rename") { if (!ioRename(a2.c_str(), a3.c_str(), err)) { o.println(err.c_str()); return true; } o.println("ok"); return true; }
     if (a1 == "set") { if (!ioSet(a2.c_str(), a3.toInt() || a3 == "on", role, err)) { o.println(err.c_str()); return true; } o.println("ok"); return true; }
     if (a1 == "get") { int v = 0; if (!ioGet(a2.c_str(), v, err)) { o.println(err.c_str()); return true; } o.println(v); return true; }
-    o.println(tr("Uso: io [list|add <classe> <pin> [nome] [inv|up|down|scl=N addr=0x76]|del <nome>|rename <nome> <nuovo>|set <nome> <0|1>|get <nome>]"));
+    o.println(tr("Uso: io [list|add <classe> <pin> [nome] [inv|up|down|scl=N addr=0x76|sd: mosi=N sck=N miso=N khz=N]|del <nome>|rename <nome> <nuovo>|set <nome> <0|1>|get <nome>]"));
   }
   else if (c == "btn") {
     if (a1 == "" || a1 == "status") { o.print(btnText().c_str()); return true; }
@@ -306,14 +305,18 @@ bool shCmdNet(const Word& c, const Word& a1, const char* line, OutSink& o, int r
   }
   else if (c == "mod") {
     if (role < ROLE_ADMIN) { o.println(tr("Il tuo ruolo non permette questo comando")); return true; }
-    Word a2 = argAt(line, 2), a3 = argAt(line, 3);
+    Word a2 = argAt(line, 2), a3 = argAt(line, 3), a4 = argAt(line, 4);
     HeapBuf out(2048); ErrBuf err;
     if (a1 == "" || a1 == "list") { HeapBuf t(MOD_TEXT_MAX); modListText(t); o.print(t.c_str()); return true; }
     if (a1 == "info") { HeapBuf t(MOD_TEXT_MAX); modInfoText(a2.c_str(), t); o.print(t.c_str()); return true; }
-    if (a1 == "install") { if (!modInstall(a2.c_str(), a3.c_str(), out, err)) { o.println(err.c_str()); return true; } o.println(out.c_str()); return true; }
-    if (a1 == "del") { if (!modDelete(a2.c_str(), err)) { o.println(err.c_str()); return true; } o.println("ok"); return true; }
-    o.println(tr("Uso: mod [list|info <nome>|install <nome> [prefisso]|del <nome>]"));
+    if (a1 == "install") {
+      const char* pre = a3.c_str(); const char* pins = a4.c_str();
+      if (strchr(pre, ',')) { pins = pre; pre = ""; }                  // "mod install sd 10,11,12,13": il terzo valore con virgole sono i pin
+      if (!modInstallDriver(a2.c_str(), pre, pins, out, err)) { o.println(err.c_str()); return true; } o.println(out.c_str()); return true; }
+    if (a1 == "del") { if (!modDeleteDriver(a2.c_str(), err)) { o.println(err.c_str()); return true; } o.println("ok"); return true; }
+    o.println(tr("Uso: mod [list|info <nome>|install <nome> [prefisso [pin]]|del <nome>]"));
   }
+  else if (c == "lspin") shLspin(line, o);
   else if (c == "pins") {
     for (int i = 0; i < pinCount(); i++) {
       const PinInfo* p = pinAt(i);

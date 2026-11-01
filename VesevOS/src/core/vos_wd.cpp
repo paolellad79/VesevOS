@@ -18,6 +18,7 @@
 #include "vos_diario.h"
 #include "vos_strbuf.h"
 #include "vos_hooks.h"
+#include "vos_service.h"
 #include <time.h>
 #include "../drivers/vos_drv_time.h"
 #include "../drivers/vos_drv_heap.h"
@@ -120,10 +121,11 @@ static void degrade(const char* why, const char* culprit) {
     if (!strcmp(culprit, "led")) sysTaskKill("led", err, sizeof err); else hookDevOff(culprit);
     listAdd(off, sizeof(off), culprit);
   } else {
-    const char* ids[] = {"mqtt", "mesh", "ble"};
-    for (int i = 0; i < 3; i++) {
+    const char* ids[] = {"mqtt", "mesh"};
+    for (int i = 0; i < 2; i++) {
       if (hookDevIsOn(ids[i]) && hookDevOff(ids[i])) listAdd(off, sizeof(off), ids[i]);
     }
+    if (serviceState("ble") == SVC_ON) { ErrBuf be; serviceStop("ble", be); listAdd(off, sizeof(off), "ble"); }   // il Bluetooth non ha piu una riga tra le periferiche: si ferma dal registro dei servizi
   }
   g_degraded = true;
   if (off[0]) listAdd(g_degOff, sizeof(g_degOff), off);

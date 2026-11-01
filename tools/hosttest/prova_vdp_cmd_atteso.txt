@@ -1,0 +1,66 @@
+-- status []
+microSD: montata
+FAT32, 7421 MB liberi su 7421 MB, 1000 kHz
+-- ls []
+a.txt  12
+dir/
+... altri: sd ls /sd 2
+-- ls ['x/y', '2']
+a.txt  12
+dir/
+... altri: sd ls /sd/x/y 2
+-- ls ['/media/sd/z']
+a.txt  12
+dir/
+... altri: sd ls /media/sd/z 2
+-- write ['/a.txt', 'ciao mondo']
+fatto
+-- append ['/a.txt', ' piu']
+fatto
+-- read ['/a.txt']
+ciao mondo piu
+-- read ['/zz']
+file non trovato
+-- rm ['/a.txt']
+fatto
+-- rm ['/a.txt']
+errore: non c e
+-- mkdir ['/d']
+fatto
+-- mount []
+microSD montata
+-- unmount []
+microSD smontata: puoi toglierla
+-- test []
+OK: scrittura e lettura
+-- widget
+st=ok
+v=Montata
+s=FAT32, 7421 MB liberi su 7421 MB, 1000 kHz
+-- widget senza scheda
+st=off
+v=Non montata
+s=0 MB liberi su 0 MB, 1000 kHz
+-- format senza conferma
+-- format []
+ATTENZIONE: cancella TUTTO dalla microSD. Per confermare: sd format FORMATTA
+-- format avviata
+-- format ['FORMATTA']
+Formattazione avviata. Controlla con: sd status
+-- status durante la formattazione
+-- status []
+microSD: formattazione in corso, 01:15
+-- widget durante la formattazione
+st=ok
+v=Formattazione in corso
+s=FAT32, 7421 MB liberi su 7421 MB, 1000 kHz
+-- status dopo la formattazione
+-- status []
+microSD: montata
+FAT32, 7421 MB liberi su 7421 MB, 1000 kHz
+ultima formattazione: riuscita in 01:35
+-- status dopo una formattazione fallita
+-- status []
+microSD: montata
+FAT32, 7421 MB liberi su 7421 MB, 1000 kHz
+ultima formattazione: non riuscita (scheda protetta)

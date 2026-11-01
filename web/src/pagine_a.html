@@ -125,12 +125,6 @@
   <p class="fhint">Chi ha la scheda in mano potrebbe collegarla alla sua rete: tieni il WPS spento (o togli l'azione dal tasto) se la scheda non e al sicuro. Lo stesso gesto ferma anche una prova in corso. Il LED lo dice: blu che respira = in attesa, verde = riuscito, rosso = errore.</p>
   <div id="wps_om" class="msg"></div></div>
 </section>
-<section id="t_ble" class="hide">
- <div class="card adm" id="blecard"><h3>Bluetooth per telefono e applicazioni</h3>
-  <p class="fhint">Resta spento finche non lo accende la pagina, la shell o un'applicazione, e resta acceso finche non lo si spegne (l'applicazione puo anche dare un tempo). Serve circa 70 KB di memoria: se la scheda rifiuta, chiudi le altre pagine web e riprova. Il telefono si accoppia con il codice mostrato qui e scrive i comandi: wifi rete|password, country IT, name cucina, mesh 0 chiave, status, done.</p>
-  <div id="blest"></div>
-  <div class="sc" id="sc_ble"></div><div id="blem" class="msg"></div></div>
-</section>
 <section id="t_radio" class="hide">
  <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-wifi"/></svg>Radio</h3>
   <div class="fhint" style="font-weight:600">Impostazioni (le scegli tu)</div>
@@ -182,8 +176,17 @@
   <div id="bl"></div>
   <button class="btn" onclick="bSave()">Salva ordine</button><button class="btn gray" onclick="bReset()">Ripristina predefinito</button><button class="btn gray" onclick="bReboot()">Riavvia ora</button>
   <div id="bm" class="msg"></div></div>
+ <div class="card"><h3>Programmi con avvio automatico</h3>
+  <p style="color:var(--mut)">Partono da soli dopo i servizi, nell'ordine di questo elenco. Di fabbrica non parte nessun programma. Berry esegue un programma alla volta: se ne scegli piu d'uno, quelli dopo il primo partono solo se il precedente finisce entro 10 secondi.</p>
+  <div id="bpl"></div>
+  <div class="frow adm"><select id="bpsel" aria-label="Programma da aggiungere"></select><button class="btn gray" onclick="bpAdd()">Aggiungi</button><button class="btn" onclick="bpSave()">Salva elenco</button></div>
+  <div id="bpm" class="msg"></div></div>
 </section>
 <section id="t_task" class="hide">
+ <div class="card"><h3>Sottosistemi</h3>
+  <div id="tksub"></div></div>
+ <div class="card"><h3>Programmi</h3>
+  <div id="tkprog"></div></div>
  <div class="card"><h3>Task in esecuzione</h3>
   <div id="tkinfo" style="color:var(--mut);margin-bottom:8px"></div>
   <div style="overflow-x:auto"><table id="tktab" class="sortable"></table></div>
@@ -232,7 +235,7 @@
 </section>
 <section id="t_dmgr" class="hide">
  <div class="card"><h3>Device Manager</h3>
-  <p class="fhint">Tutte le periferiche della scheda: servizi (MQTT, ESP-NOW, Bluetooth, statistiche) e hardware (pin, LED, tasto, USB, sensori, memoria, processore, radio). Rispondono tutte allo stesso modo all'API /api/dev e al comando shell dev. I servizi si accendono e si spengono da qui o con dev on|off nome: di fabbrica sono spenti e, spenti, non occupano memoria.</p>
+  <p class="fhint">Tutte le periferiche della scheda: servizi (MQTT, ESP-NOW, statistiche) e hardware (pin, LED, tasto, USB, sensori, memoria, processore, radio). Rispondono tutte allo stesso modo all'API /api/dev e al comando shell dev. I servizi si accendono e si spengono da qui o con dev on|off nome: di fabbrica sono spenti e, spenti, non occupano memoria.</p>
   <div id="dm_list"></div><div id="dm_m" class="msg"></div>
  </div>
 </section>
@@ -286,10 +289,10 @@
 </section>
 <section id="t_pin" class="hide">
  <div class="card"><h3>Pin e prove</h3>
-  <p style="color:var(--mut);margin-top:0">Tocca un pin verde per provarlo. Blu = pin in uso (la linea porta a chi lo usa), grigio = vietato.</p>
+  <p style="color:var(--mut);margin-top:0">Tocca un pin verde per provarlo. Blu = pin in uso (la linea porta a chi lo usa), grigio = vietato. Ogni periferica ha il suo blocco con l'icona e i segnali: toccalo per aprire la sua pagina.</p>
   <div id="pinchip" class="fhint"></div>
   <div class="sub" id="pinview"></div>
-  <svg id="pinsvg" viewBox="0 0 400 480" style="width:100%;max-width:520px" role="img" aria-label="Schema della scheda con i pin"></svg>
+  <div style="overflow-x:auto"><svg id="pinsvg" viewBox="0 0 400 480" style="width:100%;max-width:520px" role="img" aria-label="Schema della scheda con i pin e delle periferiche collegate"></svg></div>
   <div class="ftb"><button class="btn gray" onclick="pinSvgDl()"><svg class="i" aria-hidden="true"><use href="#i-dl"/></svg><span>Scarica SVG</span></button></div>
   <p class="fhint">Disegno della scheda con la presa USB in alto. Fronte: i pin sul bordo. Retro: le piazzole da saldare e i pad della batteria. Confronta i numeri con la scritta stampata sulla tua scheda: alcune serie hanno un ordine diverso.</p>
   <div id="pinpanel" style="margin-top:8px"></div></div>
@@ -304,22 +307,10 @@
    <p class="fhint">Rele, LED, pin e ingressi con un nome (rele1, led1...). Tocca una periferica per gestirla e provarla. Le app li usano scrivendo il nome in use= e poi dev_set("rele1", 1) o dev_get("in1"). Dopo ogni riavvio le uscite sono spente.</p>
    <div style="overflow-x:auto"><table id="io_tab" class="ftab"></table></div><div id="io_m" class="msg" role="status"></div>
   </div>
-  <div class="card" id="io_mods"><h3>Schede modulo</h3>
-   <p class="fhint">Una scheda modulo (.vdp) descrive un modulo gia pronto, con icona e schema dei collegamenti. Scegline una: la scheda propone i pin liberi e crea le periferiche. Sono solo dati, senza codice.</p>
-   <div id="io_ml"></div>
-   <div class="ftb"><label class="btn gray" for="io_mf" tabindex="0" onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();$('io_mf').click()}"><svg class="i" aria-hidden="true"><use href="#i-upl"/></svg><span>Carica scheda modulo</span></label><input type="file" id="io_mf" class="sr" accept=".vdp,.txt" onchange="ioModUp()"></div>
-   <div id="io_mm" class="msg" role="status"></div>
-  </div>
-  <div class="card hide" id="sd_card"><h3>Scheda microSD</h3>
-   <p class="fhint">Lettore microSD a 3,3 V con la scheda formattata FAT32. Si monta solo quando lo chiedi (l'avvio non la aspetta). I pin e la frequenza sono quelli della periferica microSD che hai aggiunto qui sotto. Prima di toglierla premi Smonta.</p>
-   <div id="sd_rows"></div>
-   <div class="ftb"><button class="btn hide" id="sd_mnt" onclick="sdAct('mount')">Monta</button><button class="btn gray hide" id="sd_umt" onclick="sdAct('unmount')">Smonta</button><button class="btn gray hide" id="sd_tst" onclick="sdAct('test')">Prova scrittura e lettura</button><button class="btn gray hide" id="sd_lsb" onclick="sdLs('/')">Elenca i file</button></div>
-   <div id="sd_ls"></div><div id="sd_m" class="msg" role="status"></div>
-  </div>
   <div class="card" id="io_new"><h3>Aggiungi una periferica a mano</h3>
    <div class="agrid">
     <div><label for="io_c">Classe</label><select id="io_c" onchange="ioClsChg()"><option value="rele">Rele</option><option value="led">LED</option><option value="pin">Pin (uscita)</option><option value="ingresso">Ingresso</option><option value="analogico">Analogico (pin 1-10)</option><option value="sd">Lettore microSD (4 pin)</option></select></div>
-    <div><label for="io_g">Pin (GPIO)</label><input type="number" id="io_g" min="1" inputmode="numeric"></div>
+    <div><label for="io_g">Pin (GPIO)</label><input type="number" id="io_g" min="1" inputmode="numeric" oninput="ioPinFn()"><div class="fhint" id="io_fn" role="status"></div></div>
     <div><label for="io_n">Nome (facoltativo)</label><input id="io_n" maxlength="11" autocomplete="off"></div>
     <div><label for="io_o">Modo</label><select id="io_o"><option value="">Normale</option><option value="inv">Attivo basso (acceso = livello 0)</option><option value="up">Ingresso con pull-up</option><option value="down">Ingresso con pull-down</option></select></div>
    </div>

@@ -14,9 +14,11 @@
 #include "../drivers/vos_drv_nvs.h"
 #include "vos_config_int.h"
 
-#define CFG_FILE "/vesevos.conf"
-#define CFG_TMP  "/vesevos.conf.tmp"
-#define CFG_BAK  "/vesevos.conf.bak"
+#include "vos_layout.h"
+
+#define CFG_FILE VOS_CONF_FILE      // /etc/vesevos.conf (dalla 1.8.1; prima stava in /vesevos.conf)
+#define CFG_TMP  VOS_CONF_TMP
+#define CFG_BAK  VOS_CONF_BAK
 
 VosConfig cfg;
 
@@ -54,7 +56,6 @@ void cfgDefaults() {
   cfg.dateFmt = 0; cfg.timeFmt = 0; cfg.tempUnit = 0; cfg.weekStart = 0; cfg.decSep = 0;
   cfg.country = ""; cfg.antExt = 0; cfg.antGain = 0; cfg.txDbm = 0;
   cfg.fwMode = 0; cfg.fwNtp = false; cfg.fwN = 0;
-  cfg.bleOn = false;
   cfg.meshAuto = false; cfg.meshRole = 0; cfg.meshKey = ""; cfg.meshCh = 1;
   cfg.https = true;
   cfg.apOn = true; cfg.apCaptive = true; cfg.httpOn = true; cfg.httpPort = 80; cfg.httpsPort = 443; cfg.httpRedirect = false;
@@ -63,6 +64,11 @@ void cfgDefaults() {
   cfg.wdTwdt = WD_TWDT_DEF;
   for (int i = 0; i < WD_LIM_N; i++) cfg.wdLim[i] = WD_LIMITS[i].def;
   cfg.sdEnabled = false;
+#if VOS_WITH_ELF
+  cfg.elfOn = true;
+#endif
+  cfg.berryOn = true; cfg.funcOff = 0; cfg.bootN = 0; cfg.dataSdN = 0;
+  for (int i = 0; i < VOS_BOOTPROG_MAX; i++) { cfg.boot[i].kind = 0; cfg.boot[i].name[0] = 0; cfg.dataSd[i].kind = 0; cfg.dataSd[i].name[0] = 0; }
   cfg.sdCs = 10; cfg.sdSck = 12; cfg.sdMiso = 13; cfg.sdMosi = 11;
 }
 
@@ -109,12 +115,13 @@ static bool fileHash(const char* path, char out[HASH_HEX]) {
 }
 static void hashSave(const char* h) { DrvNvs p; if (p.begin("vos", false)) { p.putString("cfgh", h); p.end(); } }
 bool cfgFileChanged() {
-  if (!drvFsExists(CFG_FILE)) return false;
+  const char* file = drvFsExists(CFG_FILE) ? CFG_FILE : VOS_CONF_OLD;   // se /etc manca ancora si guarda il vecchio posto
+  if (!drvFsExists(file)) return false;
   DrvNvs p; char saved[HASH_HEX + 16] = "";
   if (p.begin("vos", true)) { p.getString("cfgh", saved, sizeof saved); p.end(); }
   if (!saved[0]) return false;                       // prima volta: niente da confrontare
   char now[HASH_HEX] = "";
-  fileHash(CFG_FILE, now);                           // file illeggibile: impronta vuota, quindi "cambiato" (come prima)
+  fileHash(file, now);                               // file illeggibile: impronta vuota, quindi "cambiato" (come prima)
   return strcmp(now, saved) != 0;
 }
 
@@ -138,6 +145,7 @@ bool cfgSave() {
   auditFix();                                        // valori fuori regola: corretti prima di salvare
   HeapBuf s(CFG_TEXT_MAX);
   if (!cfgExport(s, true)) return saveFail("memoria insufficiente per il testo");
+  layoutEnsureDirs();                                // /etc deve esistere
   VosFile f = drvFsOpen(CFG_TMP, "w");
   if (!f) return saveFail("errore apertura tmp");
   size_t w = f.write((const uint8_t*)s.c_str(), s.length());
@@ -149,6 +157,10 @@ bool cfgSave() {
   }
   if (!drvFsRename(CFG_TMP, CFG_FILE)) return saveFail("rename fallito");
   g_saveOk = true;
+#if VOS_CONF_MIRROR_OLD
+  // Il recovery fino alla 0.5.1 legge solo /vesevos.conf: lo teniamo uguale (una scrittura in piu, a prova di spegnimento).
+  if (!layoutWriteAtomic(VOS_CONF_OLD, (const uint8_t*)s.c_str(), s.length())) vlog("CFG: copia in %s non aggiornata", VOS_CONF_OLD);
+#endif
   char h[HASH_HEX];
   sha256HexOf(std::string_view(s.c_str(), s.length()), h);
   hashSave(h);
@@ -193,6 +205,9 @@ bool cfgLoad() {
   cfgDefaults(); g_cfgHadSetupKey = false;
   bool found = loadFile(CFG_FILE);
   if (!found && loadFile(CFG_BAK)) { vlog("CFG: ripristinato da .bak"); found = true; }
+  // prima della 1.8.1 la configurazione stava alla radice: se /etc non ha niente si legge da li (il primo salvataggio la porta in /etc)
+  if (!found && loadFile(VOS_CONF_OLD)) { vlog("CFG: letta dal posto vecchio %s", VOS_CONF_OLD); found = true; }
+  if (!found && loadFile(VOS_CONF_OLD_BAK)) { vlog("CFG: ripristinato da %s", VOS_CONF_OLD_BAK); found = true; }
   // file della 1.7.0: la password diventa l'utente "admin" e la scheda risulta gia configurata
   bool any = false;
   for (int i = 0; i < VOS_MAX_USERS; i++) if (!cfg.users[i].name.empty()) any = true;
@@ -243,6 +258,11 @@ void cfgFactoryReset() {
   drvFsRemove(CFG_FILE);
   drvFsRemove(CFG_BAK);
   drvFsRemove(CFG_TMP);
+  drvFsRemove(VOS_CONF_FILE ".tmp~");
+  drvFsRemove(VOS_CONF_OLD);                         // anche i vecchi nomi, altrimenti la scheda ripartirebbe dalle vecchie password
+  drvFsRemove(VOS_CONF_OLD_BAK);
+  drvFsRemove(VOS_CONF_OLD_TMP);
+  drvFsRemove(VOS_CONF_OLD ".tmp~");
   drvFsRemove("/mqtt-ca.pem");
   DrvNvs p;
   if (p.begin("vos", false)) { p.remove("cfgh"); p.remove("audit"); p.end(); }

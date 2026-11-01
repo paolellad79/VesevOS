@@ -83,7 +83,7 @@ extern "C" void vos_berry_write(const char* b, size_t n) {
     memcpy(g_ebuf + g_elen, b, n); g_elen += n; g_ebuf[g_elen] = 0;
   } else {
     size_t room = BERRY_OUT_MAX - g_olen;
-    if (g_bg) {                                            // script in /scripts: si tiene la parte piu recente
+    if (g_bg) {                                            // script in /sbin: si tiene la parte piu recente
       if (n > BERRY_OUT_MAX) { b += n - BERRY_OUT_MAX; n = BERRY_OUT_MAX; g_otrunc = true; }
       if (n > room) { size_t drop = n - room; memmove(g_obuf, g_obuf + drop, g_olen - drop); g_olen -= drop; g_otrunc = true; }
     } else if (n > room) { n = room; g_otrunc = true; }

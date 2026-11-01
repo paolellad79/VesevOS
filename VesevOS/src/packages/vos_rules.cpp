@@ -362,7 +362,7 @@ static uint32_t doAction(string_view a, const char* rn) {
   }
   NullPrint np;
   std::string line(a);                                // la shell vuole un const char* con lo zero finale
-  hookShellExec(line.c_str(), np, true);
+  hookShellExec(line.c_str(), np, ROLE_OPER);   // le regole girano da Operatore (scala UserRole: tabella dei ruoli della shell)
   return 0;
 }
 

@@ -1,8 +1,36 @@
 {
  "schema_version": 1,
- "updated": "2026-10-25",
+ "updated": "2026-11-01",
  "description": "Elenco dei firmware VesevOS pubblicati. 'official' e 'publisher' sono scritte non firmate: lo SHA-256 dice solo che il file non e rotto.",
  "items": [
+  {
+   "id": "firmware-1.8.16",
+   "type": "firmware",
+   "version": "1.8.16",
+   "channel": "official",
+   "publisher": "Domenico Paolella",
+   "date": "2026-10-31",
+   "size": 2380880,
+   "sha256": "2bce5a99e14c54912d8772f966cf4d7ecc77d420c910c604ddaf96d56962cf22",
+   "file": "1.8.16/VesevOS-1.8.16.bin",
+   "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/1.8.16/VesevOS-1.8.16.bin",
+   "board": "ESP32-S3",
+   "notes": "Driver unici .vdb e .vde, programmi nei Task, avvio automatico, pannello Funzionalita, microSD navigabile in /media/sd con formattazione, dati delle app su flash o microSD, pagina Pin con schema della scheda, moduli ELF di serie."
+  },
+  {
+   "id": "recovery-0.5.2",
+   "type": "recovery",
+   "version": "0.5.2",
+   "channel": "official",
+   "publisher": "Domenico Paolella",
+   "date": "2026-10-29",
+   "size": 873296,
+   "sha256": "3dc32d0161075caea5144defe0f0b5bc30f363274d91451e7bfd42161cb9508c",
+   "file": "recovery/0.5.2/VesevOS-Recovery-0.5.2.bin",
+   "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/recovery/0.5.2/VesevOS-Recovery-0.5.2.bin",
+   "board": "ESP32-S3",
+   "notes": "Legge la configurazione anche dalla nuova struttura di cartelle (/etc)."
+  },
   {
    "id": "firmware-1.8.0b",
    "type": "firmware",

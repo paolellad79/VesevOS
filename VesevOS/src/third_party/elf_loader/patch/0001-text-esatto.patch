@@ -1,0 +1,32 @@
+--- a/elf_loader/src/esp_elf.c	2026-10-30 08:03:49
++++ b/elf_loader/src/esp_elf.c	2026-10-30 09:02:03
+@@ -219,7 +219,10 @@
+ 
+                 elf->sec[ELF_SEC_TEXT].v_addr  = shdr[i].addr;
+                 text_size = shdr[i].size;
+-                elf->sec[ELF_SEC_TEXT].size    = ELF_ALIGN(text_size, 4);
++                /* PROVA3: misura esatta (non arrotondata): l'arrotondamento a 4 faceva
++                 * cadere il primo byte di .rodata (se subito dopo .text e non allineato)
++                 * dentro .text, e il simbolo veniva rimappato sul bus istruzioni. */
++                elf->sec[ELF_SEC_TEXT].size    = text_size;
+                 elf->sec[ELF_SEC_TEXT].offset  = shdr[i].offset;
+ 
+                 ESP_LOGD(TAG, ".text   offset is 0x%lx size is 0x%x",
+@@ -293,7 +296,7 @@
+         }
+     }
+ 
+-    elf->ptext = esp_elf_malloc(elf->sec[ELF_SEC_TEXT].size, true);
++    elf->ptext = esp_elf_malloc(ELF_ALIGN(elf->sec[ELF_SEC_TEXT].size, 4), true);
+     if (!elf->ptext) {
+         ESP_LOGE(TAG, "Failed to malloc %"PRIu32" bytes for text section",
+                  (uint32_t)elf->sec[ELF_SEC_TEXT].size);
+@@ -328,7 +331,7 @@
+     /* Dump ".text" from ELF to executable space memory */
+ 
+     elf->sec[ELF_SEC_TEXT].addr = (Elf32_Addr)elf->ptext;
+-    memset(elf->ptext, 0, elf->sec[ELF_SEC_TEXT].size);
++    memset(elf->ptext, 0, ELF_ALIGN(elf->sec[ELF_SEC_TEXT].size, 4));
+     memcpy(elf->ptext, pbuf + elf->sec[ELF_SEC_TEXT].offset, text_size);
+ 
+ #ifdef CONFIG_ELF_LOADER_SET_MMU

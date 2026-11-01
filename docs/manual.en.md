@@ -80,7 +80,7 @@ MQTT, board network, Bluetooth, time server for other devices and IP filter **ar
 - **Board network** (Services > Board network, ESP-NOW): boards talk without a router, up to 3 hops. All boards need the same
   shared key (64 digits); messages without the right key are dropped. Roles: node, gateway (forwards everything to MQTT), sensor.
   Content is not encrypted: do not send personal data.
-- **Bluetooth** (same page): for phones and apps. Off by default; the page, the shell (`ble on [minutes]`) or an app (API `POST /api/ble`, optional `min`) turns it on. By default it stays on until switched off; the phone pairs with a random 6-digit code, different at each start and visible to the administrator only.
+- **Bluetooth**: off and unusable by itself (no command, no switch, no route). Only an app with the `ble` permission turns it on (see `docs/ble-driver.md`); the phone pairs with a random 6-digit code, different at each start and visible to the administrator only (program `ble.vsb`).
 
 ## 7. IP filter
 Security > IP filter decides who can talk to the board (my network only, allow list, block list).
@@ -109,7 +109,7 @@ Regulation 2022/30 (EN 18031); UK PSTI Act 2022; Italian Civil Code art. 1229. I
 apply to that version and a support period will be declared.
 
 ## 11. Terminal (serial and page)
-Type `help`. New commands: `welcome`, `ap`, `user`, `passwd`, `locale`, `firewall`, `audit`, `watchdog`, `mesh`, `ble`, `cert`, `legal`.
+Type `help`. New commands: `welcome`, `ap`, `user`, `passwd`, `locale`, `firewall`, `audit`, `watchdog`, `mesh`, `cert`, `legal`.
 On the serial, at an empty line, keys `1` and `2` change language.
 
 ## 12. Menus, hotspot, HTTP/HTTPS, ports and end of the guide (new in 1.7.3, 1.7.4, 1.7.5, 1.7.6 and 1.7.7)
@@ -158,6 +158,7 @@ After the guide the security rules apply (serial password, if on).
 Each one has its own tab under **Services** and can be turned off.
 - **NTP**: time from the Internet (needs the home Wi-Fi). Off = set time by hand. By default it contacts only `pool.ntp.org`; you may add a second server (`ntp server2 <name>`). Every request shows your public IP to the servers. If the received time is not credible (before 2026 or a jump of more than a day) it is discarded and a warning appears.
 - **DHCP**: gives addresses to whoever joins the hotspot. Lease 10 to 1440 minutes. It can be turned off only while the home Wi-Fi is connected.
+- **Router domain (1.8.8)**: if the router sends it (DHCP option 15), the `network` command and the network status show a "Domain" line. It is information only: it is not saved or used to connect.
 - **DNS**: the hotspot's automatic portal (needs HTTP on port 80).
 - **mDNS**: the NAME.local name. Off = IP address only.
 DHCP, mDNS and portal change at once; web and ports after reboot. Over serial: `svc dhcp off`, `svc mdns on`, `diag`.
@@ -172,9 +173,10 @@ a warning appears if you test a pin already marked. GP33-37 are free with this b
 
 
 ## 16. Security and energy (new in 1.7.3)
-- **MFA**: Security > Two-step login. Scan the QR with an app (Google Authenticator, Aegis...), type the code, keep the 8 recovery codes (each works once). The QR shows only over HTTPS or from the hotspot.
+- **MFA**: Security > Two-step login. Scan the QR with an authenticator app (any app that supports TOTP codes), type the code, keep the 8 recovery codes (each works once). The QR shows only over HTTPS or from the hotspot.
 - **Time**: the code depends on time. Without valid time you can choose: ask the browser time (after correct password and code) or recovery codes only / block.
 - **Recovery**: BOOT 8 s turns off MFA for Admins.
+- **Requests from other sites (since 1.8.8)**: requests that change something (POST) are accepted only if they come from the board page or from a program (like `aggiorna.py`); if they come from another site open in the browser, the board answers 403 `csrf`. The cookie also has `SameSite=Strict`.
 - **Anti-bot**: at login the browser solves a small proof of work (level in Security). No external captcha.
 - **Certificate**: System > Certificate: expiry, fingerprint, download, regenerate, import.
 - **Power saving**: Services > Power saving. Scheduled sleep = the board sleeps and wakes after the chosen time (1 min - 7 days). BOOT does not wake it: use RESET. While asleep Wi-Fi and page are off.
@@ -202,7 +204,7 @@ System > Security > **Serial port (USB cable)** (Admin only) or, from the serial
 - `free detail` (1.7.9a): internal RAM, largest piece, fragmentation, PSRAM. If the largest piece drops below 45 KB a yellow "Memory is fragmented" warning appears: restart the board.
 
 ## 20. Device Manager (new in 1.7.11)
-One menu group, **Device Manager**, with all peripherals: virtual (MQTT, board network, Bluetooth, MFA, statistics) and hardware (pins, LED, BOOT button, USB, temperature, memory, processor, radio). Each follows the same rules: list, state (off / on / with a problem), switch on and off (Admin only), details and actions.
+One menu group, **Device Manager**, with all peripherals: virtual (MQTT, board network, MFA, statistics) and hardware (pins, LED, BOOT button, USB, temperature, memory, processor, radio). Each follows the same rules: list, state (off / on / with a problem), switch on and off (Admin only), details and actions.
 - From the serial port or the terminal: `dev list`, `dev status <name>`, `dev on <name>`, `dev off <name>`, `dev act <name> <action> [value]` (e.g. `dev act pin test 5,high`).
 - **Build-time packages** (for people who compile): in `vos_common.h` `VOS_WITH_BLE`, `VOS_WITH_MQTT`, `VOS_WITH_MESH`, `VOS_WITH_MFA`, `VOS_WITH_STATS` (1 = in the firmware, 0 = out). The pages of removed parts disappear. The `diag` command lists the packages present.
 
@@ -219,7 +221,7 @@ The board holds two programs: **VesevOS** and the **recovery** (small, used only
 2. The page waits for the board to restart and **opens the recovery by itself** (usually within seconds; "Open now" to skip the wait). If it cannot, it shows the address, for example `http://192.168.1.50:80/`: open it in a **private window** and type **http**, not https (the recovery is not encrypted).
    The recovery tries your **home network** first; if it cannot find it within 30 seconds it creates the Wi-Fi network `VesevOS-recovery` (random password written on the serial port).
 3. Sign in with the user and password of a VesevOS **Administrator** (the password never travels in clear). With an empty flash and no administrators you need the 8-digit code shown on the serial port. Five mistakes = a 60-second wait.
-4. Choose the firmware `.bin` file (not `.merged.bin`). *Expected SHA-256* is optional: if you fill it in, the file must match.
+4. Choose the `VesevOS.ino.bin` file (not `.merged.bin`). *Expected SHA-256* is optional: if you fill it in, the file must match.
 5. Pick the file with the button or **drag it** onto the page (on a phone, button only). *Upload and install*. First the page and then the board check: ESP32-S3 header, **VesevOS marker**, size, complete image. A wrong file is refused and **the old firmware is left untouched**; if the error comes after writing has started, the recovery stays on and you just upload the good file.
 6. The board **LED** shows the state: slow orange = waiting for the file; fast cyan = writing; solid green = done; red = error (back to orange after 10 seconds). After about 10 seconds VesevOS restarts. *Start VesevOS without updating* goes back. After 15 minutes without access the recovery goes back to VesevOS by itself. BOOT held at power-up = stay in the recovery.
 - The file check guarantees it is a complete VesevOS firmware; it is **not a digital signature**. Download files only from trusted sources.
@@ -236,10 +238,10 @@ The board holds two programs: **VesevOS** and the **recovery** (small, used only
 
 ## 24. Module cards and a page for each device (new in 1.7.55)
 - **Page for each device**: in Devices > Periferiche tap *Manage*. You see class, pin, level, live value and the **tests**: Switch on, Switch off, 1-second pulse, Blink for 5 seconds (LED and pin only; the relay does not blink). Inputs and analog devices show a value that updates by itself. *Rename* and *Remove* (Admin) are here too. Pulse and blinking switch off by themselves; *switching off* is always possible, at once.
-- **Module card (.vdp)**: a text file describing a module (class, signals, icon, SVG diagram). Data only. Folder `/devs`. Examples are in `docs/devs` (1-, 2- and 4-channel relay, LED, button, PIR sensor, LDR).
+- **Module card (.vdb)**: a text file describing a module (class, signals, icon, SVG diagram). Data only. Folder `/devs`. Examples are in `docs/devs` (1-, 2- and 4-channel relay, LED, button, PIR sensor, LDR).
 - **How to use**: Periferiche > *Upload module card*, then *Install*: the board shows the diagram, suggests free and safe pins, and creates the devices (all or nothing). You can choose the name (pompa1, pompa2...).
 - **Wiring diagram (new in 1.7.57)**: the page draws it from the card data. The board with its pins (5V or 3V3, GND, suggested GPIOs) on the left, the module on the right. Coloured wires: **red** supply, **black** ground, **blue** signal (orange if analog), with the **voltage written** on the wire and an arrow for the direction. Resistors and other parts to add are drawn with their value (e.g. 330 ohm in series with the LED). Below is a table wire / from the board / to the module / voltage and notes: colours are also written in words. 12, 24 or 230 V supplies show a "Power supply" box: join its ground to the board GND. If the module signal is 5 V on an input a red warning appears: the pins only tolerate 3.3 V.
-- **For card authors**: add `level=3V3|5V` (signal level) and up to 4 lines `part=serie|gnd|vcc,value,signal` (for example `part=serie,330 ohm,OUT`) to `[module]`. The `[wiring]` section is no longer needed: if present it shows below as "Drawing attached to the file". Full format: in the internal documentation of the .vdp format.
+- **For card authors**: add `level=3V3|5V` (signal level) and up to 4 lines `part=serie|gnd|vcc,value,signal` (for example `part=serie,330 ohm,OUT`) to `[module]`. The `[wiring]` section is no longer needed: if present it shows below as "Drawing attached to the file". Full format: claude/funzioni/VesevOS-formato-vdp.md in the Project.
 - **Serial**: `mod list`, `mod info <name>`, `mod install <name> [prefix]`, `mod del <name>`.
 - **Warning**: always check the connections on your module's datasheet. A wrong diagram can damage the module. For 230 V you need an installer.
 
@@ -260,8 +262,8 @@ The board holds two programs: **VesevOS** and the **recovery** (small, used only
 - **`mqtt("name", "text")`**: sends the text to the broker on the topic `<prefix>/app/<name>`. Returns true if it was sent, false if it was not sent (MQTT not connected or over the limit). The name has 1 to 40 characters (a-z, 0-9, `_`, `-`, `/`), the text up to 2048. At most **20 messages per minute**. In apps it needs `mqtt` in `use=`.
 - **Where it goes**: only under `app/`. An app cannot write to `cmd` (the board commands), `status` or `state`.
 - **MQTT must be on** (Network > MQTT, off by default) and you need a broker. Forwarding to email is done by a program of your own (for example Home Assistant, Node-RED, ntfy): the board does not talk to mail servers.
-- **Example**: `docs/esempi/app/logmqtt.vap` (copy it to /apps): a button and an "every hour" switch that send the last 10 log lines to `<prefix>/app/log`.
-- **Flashlight example**: `docs/esempi/script/torcia.vsc` (copy it to /scripts and start it). One click of the BOOT button turns the white LED on, the next click turns it off; it also turns off by itself after 10 minutes (change `MINUTI`, 0 = never). First set **Free** on the gesture you want in *Devices > BOOT button* (by default only 3 clicks are free). The white LED is bright and gets warm.
+- **Example**: `docs/esempi/app/logmqtt.vab` (copy it to /apps): a button and an "every hour" switch that send the last 10 log lines to `<prefix>/app/log`.
+- **Flashlight example**: `docs/esempi/script/torcia.vsb` (copy it to /scripts and start it). One click of the BOOT button turns the white LED on, the next click turns it off; it also turns off by itself after 10 minutes (change `MINUTI`, 0 = never). First set **Free** on the gesture you want in *Devices > BOOT button* (by default only 3 clicks are free). The white LED is bright and gets warm.
 - **Privacy**: the log can contain IP addresses and names. Whoever installs the app (Administrator only) decides with `logread` and `mqtt` whether it may read it and send it out. If the broker is outside your home, use encrypted MQTT (user and password) and choose who receives the data.
 
 ## 27. What is new in 1.8.0 and 1.8.0b (summary)

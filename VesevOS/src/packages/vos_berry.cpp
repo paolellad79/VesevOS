@@ -13,6 +13,7 @@
 #include "esp_heap_caps.h"
 #include "vos_rules.h"
 #include "vos_app_rt.h"
+#include "vos_app.h"
 #include "../core/vos_log.h"
 #include "../core/vos_cpuboost.h"
 #include "../core/vos_time.h"
@@ -22,6 +23,8 @@
 #include "../core/vos_util.h"
 #include "../core/vos_parse.h"
 #include "vos_berry_int.h"
+#include "vos_func.h"
+#include "../core/vos_config.h"
 #include "../devices/vos_led.h"
 #include "vos_btn.h"
 #include "vos_mqtt.h"
@@ -39,14 +42,18 @@ char     g_obuf[BERRY_OUT_MAX + 1]; size_t g_olen = 0; bool g_otrunc = false;
 char     g_ebuf[BERRY_EBUF_SZ];     size_t g_elen = 0;
 static char     g_msg[100];                // messaggio d'errore delle nostre funzioni (letto dopo la fine dello script)
 static uint32_t g_deadline = 0;            // millis() oltre il quale lo script e fermato (comando "berry <codice>")
-volatile bool g_bg = false;         // script di /scripts in sottofondo (senza scadenza, ma con le pause obbligatorie)
+volatile bool g_bg = false;         // script di /sbin in sottofondo (senza scadenza, ma con le pause obbligatorie)
 volatile bool g_stop = false;       // richiesta di fermare lo script
 static uint32_t g_lastYield = 0;           // ultima pausa (sleep) dello script in sottofondo
-char     g_name[25] = "";           // nome dello script in /scripts in corso o ultimo
+char     g_name[25] = "";           // nome dello script in /sbin in corso o ultimo
+uint32_t g_startMs = 0;             // quando e partita l'esecuzione in corso
 static uint32_t g_beats = 0;
 static const char* g_stackTop = NULL;      // cima dello stack del task (per misurare quanto ne usa lo script)
 static bool     g_runOk = false;
-volatile bool g_app = false;        // in corso c'e un'APP (file .vap): dopo il codice resta viva e riceve i comandi della pagina
+volatile bool g_admin = false;      // lanciato dall'Admin
+volatile bool g_app = false;        // in corso c'e un'APP (file .vab): dopo il codice resta viva e riceve i comandi della pagina
+volatile bool g_appAdmin = false;   // l'app in corso ha who=admin (la avvia solo l'Admin); serve alle funzioni della microSD, non cambia g_admin
+volatile bool g_cmd = false;        // in corso c'e un COMANDO di un driver (vos_berry_cmd.cpp): sincrono, con args(), senza il ciclo dell'app
 static char     g_use[80] = "";           // permessi dell'app (use= del manifest)
 // memoria
 size_t   g_used = 0, g_peak = 0;
@@ -97,7 +104,7 @@ static bool actDo(const char* arg) {
   const char* ap = arg; while (*ap == ' ' || *ap == '\t') ap++;
   if (strncmp(ap, "script", 6) == 0 || strncmp(ap, "app", 3) == 0) { strncpy(g_msg, "uno script non puo avviare altri script o app", sizeof(g_msg) - 1); g_msg[sizeof(g_msg) - 1] = 0; return false; }
   bool ok; ErrBuf e;
-  ok = rulesAction(arg, e, "BERRY");
+  ok = rulesAction(arg, e, "SCRIPT");
   if (!ok) { strncpy(g_msg, e.c_str(), sizeof(g_msg) - 1); g_msg[sizeof(g_msg) - 1] = 0; }
   return ok;
 }
@@ -121,7 +128,7 @@ static int bfAct(bvm* vm) {                                 // act("gpio 4 1") -
 }
 static int bfLog(bvm* vm) {
   if (be_top(vm) < 1) be_raise(vm, "type_error", "log(testo)");
-  vlog("BERRY: %s", be_tostring(vm, 1));
+  vlog("SCRIPT: %s", be_tostring(vm, 1));
   be_return_nil(vm);
 }
 static int bfMillis(bvm* vm) { be_pushint(vm, (bint)(drvMillis() & 0x7FFFFFFFUL)); be_return(vm); }
@@ -170,50 +177,8 @@ static int bfSleep(bvm* vm) {
   be_return_nil(vm);
 }
 
-// ---------- funzioni delle APP: dev_get(id), dev_set(id, valore) ----------
-// dev_get: numero per switch/slider/button/chart, testo per color/text e per i dati di [data]. dev_set: aggiorna cio che la pagina mostra
-// (per chart aggiunge un punto). Nessun oggetto con distruttore vivo quando si chiama be_raise.
-static bool useHas(const char* w);
-static char g_ioMsg[100];
-// periferica a classi (rele1, led1, pin1, ingresso1, adc1): serve il nome nel use= del manifest. 0 = non e una periferica, 1 = fatto, -1 = errore (testo in g_ioMsg)
-static bool useHasDev(const char* nm) {                     // "bmp1.p" (pressione) si autorizza con "bmp1"
-  char b[16]; size_t n = strcspn(nm, "."); if (n >= sizeof b) return false;
-  memcpy(b, nm, n); b[n] = 0; return useHas(b);
-}
-static int ioGetFor(const char* nm, long& v) {
-  if (!ioHas(nm)) return 0;
-  if (!useHasDev(nm)) { snprintf(g_ioMsg, sizeof g_ioMsg, "permesso mancante: aggiungi %s a use= nel manifest", nm); return -1; }
-  int x = 0; ErrBuf e; if (!ioGet(nm, x, e)) { snprintf(g_ioMsg, sizeof g_ioMsg, "%s", e.c_str()); return -1; }
-  v = x; return 1;
-}
-static int ioSetFor(const char* nm, long v) {
-  if (!ioHas(nm)) return 0;
-  if (!useHas(nm)) { snprintf(g_ioMsg, sizeof g_ioMsg, "permesso mancante: aggiungi %s a use= nel manifest", nm); return -1; }
-  ErrBuf e; if (!ioSet(nm, v != 0, ROLE_ADMIN, e)) { snprintf(g_ioMsg, sizeof g_ioMsg, "%s", e.c_str()); return -1; }   // il permesso lo ha dato l'Admin installando l'app
-  return 1;
-}
-static int bfDevGet(bvm* vm) {
-  if (be_top(vm) < 1 || !be_isstring(vm, 1)) be_raise(vm, "type_error", "dev_get(\"id\"): serve il nome di un controllo");
-  { long pv = 0; int pr = ioGetFor(be_tostring(vm, 1), pv); if (pr < 0) be_raise(vm, "value_error", g_ioMsg); if (pr > 0) { be_pushint(vm, (bint)pv); be_return(vm); } }
-  bool isNum = false, ok; long iv = 0; char sv[RT_TXT + 1];
-  ok = rtGet(be_tostring(vm, 1), isNum, iv, sv, sizeof(sv));
-  if (!ok) be_raise(vm, "value_error", "id sconosciuto (non e un controllo ne un dato dell'app)");
-  if (isNum) be_pushint(vm, (bint)iv); else be_pushstring(vm, sv);
-  be_return(vm);
-}
-static int bfDevSet(bvm* vm) {
-  if (be_top(vm) < 2 || !be_isstring(vm, 1)) be_raise(vm, "type_error", "dev_set(\"id\", valore)");
-  bool isNum = false; long iv = 0; const char* sv = NULL; const char* why = "";
-  if (be_isint(vm, 2)) { isNum = true; iv = (long)be_toint(vm, 2); }
-  else if (be_isreal(vm, 2)) { isNum = true; iv = (long)be_toreal(vm, 2); }
-  else if (be_isbool(vm, 2)) { isNum = true; iv = be_tobool(vm, 2) ? 1 : 0; }
-  else if (be_isstring(vm, 2)) sv = be_tostring(vm, 2);
-  else be_raise(vm, "type_error", "dev_set: il valore deve essere un numero o un testo");
-  { int pr = isNum ? ioSetFor(be_tostring(vm, 1), iv) : 0; if (pr < 0) be_raise(vm, "value_error", g_ioMsg); if (pr > 0) be_return_nil(vm); }
-  if (!rtSetApp(be_tostring(vm, 1), isNum, iv, sv, &why)) be_raise(vm, "value_error", why);
-  be_return_nil(vm);
-}
-static bool useHas(const char* w) {                         // permesso presente nel use= dell'app?
+// ---------- permessi dell'app (use= del manifest) ----------
+bool vosberry::useHas(const char* w) {                      // permesso presente nel use= dell'app?
   size_t n = strlen(w); const char* p = g_use;
   while (*p) {
     const char* e = strchr(p, ','); size_t l = e ? (size_t)(e - p) : strlen(p);
@@ -238,8 +203,8 @@ static bool appHas(bvm* vm, const char* fn) {
 }
 // ciclo dell'app: comandi dalla pagina (on_set) subito, on_tick ogni secondo. Si esce con g_stop o con un errore (che finisce nell'uscita).
 static int appLoop(bvm* vm) {
-  bool hasSet = appHas(vm, "on_set"), hasTick = appHas(vm, "on_tick");
-  if (!hasSet && !hasTick) return 0;                          // nessuna funzione: l'app finisce con il suo codice
+  bool hasSet = appHas(vm, "on_set"), hasTick = appHas(vm, "on_tick"), hasBle = useHas("ble") && (appHas(vm, "on_write") || appHas(vm, "on_read"));
+  if (!hasSet && !hasTick && !hasBle) return 0;                          // nessuna funzione: l'app finisce con il suo codice
   uint32_t lastTick = drvMillis();
   while (!g_stop) {
     char id[13], sv[RT_TXT + 1]; bool isNum; long iv;
@@ -248,6 +213,7 @@ static int appLoop(bvm* vm) {
       if (hasSet) { int r = appCall(vm, "on_set", id, isNum, iv, sv); if (r != 0) return r; }
       continue;
     }
+    if (hasBle) { bool did; int r = berryBleDispatch(vm, did); if (r != 0) return r; if (did) continue; }   // eventi dal telefono
     if (hasTick && (int32_t)(drvMillis() - lastTick) >= 1000) {
       lastTick = drvMillis(); g_lastYield = lastTick;
       int r = appCall(vm, "on_tick", NULL, false, 0, NULL); if (r != 0) return r;
@@ -258,16 +224,16 @@ static int appLoop(bvm* vm) {
 }
 
 // azzera lo stato di una esecuzione (comune a startRun e al passaggio al prossimo script in coda)
-static void prepGlobals(bool bg, uint32_t maxMs, const char* name, bool app = false, const char* use = "") {
+static void prepGlobals(bool bg, uint32_t maxMs, const char* name, bool app = false, const char* use = "", bool admin = false, bool appAdmin = false, bool cmd = false) {
   portENTER_CRITICAL(&g_mux); g_olen = 0; g_obuf[0] = 0; g_otrunc = false; g_elen = 0; g_ebuf[0] = 0; g_toErr = false; portEXIT_CRITICAL(&g_mux);
-  g_done = false; g_abandoned = false; g_beats = 0; g_stop = false; g_bg = bg; g_app = app;
+  g_done = false; g_abandoned = false; g_beats = 0; g_stop = false; g_bg = bg; g_app = app; g_admin = admin; g_appAdmin = appAdmin; g_cmd = cmd;
   strncpy(g_use, use, sizeof(g_use) - 1); g_use[sizeof(g_use) - 1] = 0;
   strncpy(g_name, name, sizeof(g_name) - 1); g_name[sizeof(g_name) - 1] = 0;
-  g_deadline = drvMillis() + maxMs; g_lastYield = drvMillis();
+  g_deadline = drvMillis() + maxMs; g_lastYield = drvMillis(); g_startMs = drvMillis();
 }
 
-// ---------- script salvati in /scripts (.vsc): nome, vecchi script .be di /apps, lettura ----------
-// Nome pulito di uno script: senza spazi ai lati, minuscolo, senza l'estensione .vsc o .be. out ha almeno NAME_BUF byte.
+// ---------- script salvati in /sbin (.vsb, o il vecchio .vsc): nome, vecchi script .be di /apps, lettura ----------
+// Nome pulito di uno script: senza spazi ai lati, minuscolo, senza l'estensione .vsb, .vsc o .be. out ha almeno NAME_BUF byte.
 // true = il nome e valido (1-24 caratteri: a-z 0-9 - _). E lo stesso di utilNameOk(cleanName(x)) di prima, ma senza la classe di testo di Arduino.
 #define NAME_BUF 40
 static bool cleanNameTo(const char* in, char* out) {
@@ -276,49 +242,17 @@ static bool cleanNameTo(const char* in, char* out) {
   size_t n = v.size();
   for (size_t i = 0; i < n; i++) out[i] = (char)tolower((unsigned char)v[i]);
   out[n] = 0;
-  size_t ext = strlen(SCRIPT_EXT);
-  if (n >= ext && strcmp(out + n - ext, SCRIPT_EXT) == 0) n -= ext;
+  size_t ext = progExtLen(std::string_view(out, n), PEXT_SCRIPT);   // .vsb, o il vecchio .vsc
+  if (ext) n -= ext;
   else if (n >= 3 && strcmp(out + n - 3, ".be") == 0) n -= 3;
   out[n] = 0;
   return utilNameOk(out, n);
 }
 
-// Eredita 1.7.48: gli script stavano in /apps/<nome>.be. Ora /apps e per le app (.vap): li sposto in /scripts/<nome>.vsc.
-// Torna quanti ne ha spostati. Non tocca altro.
-static bool g_migDone = false;                                          // una volta per avvio: dopo, /apps e delle app
-int vosberry::migrateOld() {
-  if (g_migDone) return 0;
-  g_migDone = true;
-  HeapBuf jb(FS_JSON_MAX);
-  if (!fsListBuild("/apps", jb)) return 0;
-  std::string_view j(jb.c_str(), jb.length());
-  if (j.find("\"ok\":true") == std::string_view::npos) return 0;
-  const size_t none = std::string_view::npos;
-  int moved = 0;
-  size_t pos = 0;
-  while (moved < 16) {
-    size_t a = j.find("{\"n\":\"", pos); if (a == none) break;
-    size_t b = j.find('"', a + 6); if (b == none) break;
-    std::string_view name = j.substr(a + 6, b - (a + 6));
-    size_t d = j.find("\"d\":", b);
-    bool isDir = d != none && j.substr(d + 4, 4) == "true";
-    pos = b + 1;
-    if (isDir || name.size() < 3 || name.substr(name.size() - 3) != ".be") continue;
-    std::string_view n = name.substr(0, name.size() - 3);
-    if (!utilNameOk(n.data(), n.size())) continue;
-    char from[40], to[40];                                              // nome valido: al massimo 24 caratteri
-    snprintf(from, sizeof from, "/apps/%.*s.be", (int)n.size(), n.data());
-    snprintf(to, sizeof to, "%s/%.*s%s", SCRIPT_DIR, (int)n.size(), n.data(), SCRIPT_EXT);
-    ErrBuf e; fsMkdir(SCRIPT_DIR, e);                                   // se esiste gia, "Esiste gia": non importa
-    if (fsRename(from, to, e)) { moved++; vlog("BERRY: script %.*s spostato da /apps a /scripts", (int)n.size(), n.data()); }
-  }
-  return moved;
-}
-
 #define FILE_READ_MAX 32768   // come fsReadText: oltre non legge
-static bool loadScript(const char* n, HeapBuf& code, ErrBuf& err) {   // legge /scripts/<n>.vsc (n gia ripulito e valido)
-  char path[40];
-  snprintf(path, sizeof path, "%s/%s%s", SCRIPT_DIR, n, SCRIPT_EXT);
+static bool loadScript(const char* n, HeapBuf& code, ErrBuf& err) {   // legge /sbin/<n>.vsb (o il vecchio .vsc; n gia ripulito e valido)
+  char path[64];
+  progPercorsoAvvio(path, sizeof path, SCRIPT_DIR, n, PEXT_SCRIPT);   // memoria interna, poi microSD
   ErrBuf e;
   if (!fsReadText(path, code, e)) {
     if (migrateOld() > 0) fsReadText(path, code, e);                    // forse era un vecchio /apps/<nome>.be
@@ -338,40 +272,50 @@ static void runTask(void*) {
   cpuBoost("berry", 10);                        // l'avvio di uno script chiede velocita per qualche secondo
   bvm* vm = be_vm_new();
   g_runOk = false;
-  if (!vm) { portENTER_CRITICAL(&g_mux); strncpy(g_ebuf, "memoria insufficiente per Berry", sizeof(g_ebuf) - 1); g_elen = strlen(g_ebuf); portEXIT_CRITICAL(&g_mux); }
+  if (!vm) { portENTER_CRITICAL(&g_mux); strncpy(g_ebuf, "memoria insufficiente per lo script", sizeof(g_ebuf) - 1); g_elen = strlen(g_ebuf); portEXIT_CRITICAL(&g_mux); }
   else {
-    be_set_obs_hook(vm, obsHook);
+    be_set_obs_hook(vm, obsHook); berryBleInit();
     if (!g_app) {
-      be_regfunc(vm, "led", bfLed);     be_regfunc(vm, "act", bfAct);       be_regfunc(vm, "log", bfLog);
-      be_regfunc(vm, "millis", bfMillis); be_regfunc(vm, "time", bfTime);   be_regfunc(vm, "temp", bfTemp);
+      be_regfunc(vm, "led", bfLed);     be_regfunc(vm, "act", bfAct);       if (funcOn("log")) be_regfunc(vm, "log", bfLog);
+      be_regfunc(vm, "millis", bfMillis); if (funcOn("time")) be_regfunc(vm, "time", bfTime);   be_regfunc(vm, "temp", bfTemp);
       be_regfunc(vm, "sleep", bfSleep);
       be_regfunc(vm, "btn", bfBtn);   btnScriptAttach(true);
       be_regfunc(vm, "logtail", bfLogtail); be_regfunc(vm, "mqtt", bfMqtt);
-      berryBleRegister(vm);
+      if (funcOn("ble")) berryBleRegister(vm, false, g_admin);
+      if (funcOn("files")) berryFilesRegister(vm);
+      berrySdRegister(vm, false, g_admin);
+      berryHwRegister(vm, false, g_admin);
     } else {                                                   // app: solo cio che il manifest (use=) permette
       be_regfunc(vm, "millis", bfMillis); be_regfunc(vm, "sleep", bfSleep);
-      be_regfunc(vm, "dev_get", bfDevGet); be_regfunc(vm, "dev_set", bfDevSet);
+      if (g_cmd) berryCmdRegister(vm); else berryDevRegister(vm);   // un comando ha args(); dev_get/dev_set sono della pagina dell'app
       if (useHas("led")) be_regfunc(vm, "led", bfLed);
       if (useHas("act")) be_regfunc(vm, "act", bfAct);
-      if (useHas("log")) be_regfunc(vm, "log", bfLog);
-      if (useHas("time")) be_regfunc(vm, "time", bfTime);
+      if (useHas("log") && funcOn("log")) be_regfunc(vm, "log", bfLog);
+      if (useHas("time") && funcOn("time")) be_regfunc(vm, "time", bfTime);
       if (useHas("temp")) be_regfunc(vm, "temp", bfTemp);
       if (useHas("logread")) be_regfunc(vm, "logtail", bfLogtail);
       if (useHas("mqtt")) be_regfunc(vm, "mqtt", bfMqtt);
-      if (useHas("ble")) berryBleRegister(vm);
+      if (useHas("ble") && funcOn("ble")) berryBleRegister(vm, true, false);
+      if (useHas("files") && funcOn("files")) {
+        berryFilesRegister(vm);
+        if (!g_cmd && appSavesData(g_name) == 1) berryDataRegister(vm, g_name);   // data=1 nel manifest: la cartella dei dati
+      }
+      if (useHas("sd")) berrySdRegister(vm, true, g_appAdmin);
+      berryHwRegister(vm, true, g_appAdmin);
       if (useHas("btn")) { be_regfunc(vm, "btn", bfBtn); btnScriptAttach(true); }
     }
     int r = be_loadstring(vm, g_code);
     free(g_code); g_code = NULL;
     if (r == 0) r = be_pcall(vm, 0);
-    if (r == 0 && g_app) r = appLoop(vm);
-    if (r != 0 && g_app && g_stop) r = 0;                      // l'app e stata fermata a mano: non e un errore
+    if (r == 0 && g_app && !g_cmd) r = appLoop(vm);
+    if (r != 0 && g_app && !g_cmd && g_stop) r = 0;                      // l'app e stata fermata a mano: non e un errore
     if (r == BE_MALLOC_FAIL) { g_toErr = true; be_writestring("memory_error: memoria esaurita (tetto di memoria dello script)\n"); g_toErr = false; }   // senza memoria non si puo nemmeno stampare l'errore di Berry
     else if (r != 0) { g_toErr = true; be_dumpexcept(vm); g_toErr = false; }
     g_runOk = (r == 0);
     be_vm_delete(vm);
   }
   btnScriptAttach(false);                                  // fine programma: i click liberi tornano a nessuno
+  if (g_app && !g_cmd) berryBleEnded(g_name);                        // il Bluetooth dell'app si spegne (lo fa il ciclo principale)
   ledScript(-1);                                           // fine script: il LED torna al modo normale
   g_lastMs = drvMillis() - t0; g_lastPeak = (uint32_t)g_peak; g_lastLeak = (uint32_t)berryFreeAll();   // dopo be_vm_delete di solito non resta nulla
   g_lastOk = g_runOk; g_runs++;
@@ -379,20 +323,20 @@ static void runTask(void*) {
     char first[81]; size_t k = 0;                          // prima riga dell'errore, per il registro
     while (k < sizeof(first) - 1 && g_ebuf[k] && g_ebuf[k] != '\n') { first[k] = g_ebuf[k]; k++; }
     first[k] = 0;
-    if (g_runOk) vlog("BERRY: %s %s finita (%lu ms)", g_app ? "app" : "script", g_name, (unsigned long)g_lastMs);
-    else vlog("BERRY: %s %s fermata: %s", g_app ? "app" : "script", g_name, first);
+    if (g_runOk) vlog("SCRIPT: %s %s finita (%lu ms)", g_app ? "app" : "script", g_name, (unsigned long)g_lastMs);
+    else vlog("SCRIPT: %s %s fermata: %s", g_app ? "app" : "script", g_name, first);
   }
   // script in coda (azione "script <nome>" delle Automazioni): se non e stato fermato a mano si passa al prossimo con lo stesso task
   if (g_bg && !g_stop) {
     char nm[25], who[16]; bool next = false;
     while (qPop(nm, who)) {
       HeapBuf code(FILE_READ_MAX); ErrBuf e;
-      if (!loadScript(nm, code, e)) { vlog("BERRY: script %s dalla coda non avviato: %s", nm, e.c_str()); continue; }
+      if (!loadScript(nm, code, e)) { vlog("SCRIPT: script %s dalla coda non avviato: %s", nm, e.c_str()); continue; }
       g_code = (char*)malloc(code.length() + 1);
-      if (!g_code) { vlog("BERRY: script %s dalla coda non avviato: memoria", nm); continue; }
+      if (!g_code) { vlog("SCRIPT: script %s dalla coda non avviato: memoria", nm); continue; }
       memcpy(g_code, code.c_str(), code.length() + 1);
       prepGlobals(true, 0, nm);
-      vlog("BERRY: script %s avviato da %s (dalla coda)", nm, who);
+      vlog("SCRIPT: script %s avviato da %s (dalla coda)", nm, who);
       next = true; break;
     }
     if (next) continue;
@@ -404,28 +348,26 @@ static void runTask(void*) {
  }
 }
 
-// avvia il task (comune a "berry <codice>" e agli script di /scripts)
-static bool startRun(const char* code, size_t len, bool bg, uint32_t maxMs, const char* name, ErrBuf& err, bool app = false, const char* use = "") {
+// avvia il task (comune a "berry <codice>" e agli script di /sbin)
+static bool startRun(const char* code, size_t len, bool bg, uint32_t maxMs, const char* name, ErrBuf& err, bool app = false, const char* use = "", bool admin = false, bool appAdmin = false, const CmdCall* call = nullptr) {
+  if (!cfg.berryOn) { err = tr("Il sottosistema vdb e spento: accendilo dai Task"); return false; }
   if (heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL) < 24000) { err = tr("RAM interna troppo bassa per avviare uno script"); return false; }
   bool was;
   portENTER_CRITICAL(&g_mux); was = g_busy; g_busy = true; portEXIT_CRITICAL(&g_mux);
-  if (was) { err = tr("Berry e occupato con un altro script"); return false; }
+  if (was) { err = tr("Un altro script e gia in esecuzione"); return false; }
   g_code = (char*)malloc(len + 1);
   if (!g_code) { g_busy = false; err = tr("RAM interna troppo bassa per avviare uno script"); return false; }
   memcpy(g_code, code, len); g_code[len] = 0;
-  prepGlobals(bg, maxMs, name, app, use);
+  if (call) cmdCallSet(*call);                              // gli argomenti del comando: si copiano solo ora che il "busy" e nostro
+  prepGlobals(bg, maxMs, name, app, use, admin, appAdmin, call != nullptr);
   if (!drvTaskCreate(runTask, "berry", BERRY_STACK_SIZE, NULL, 1, NULL, DRV_CORE_ANY)) {   // core: automatico (prima: core 1 fisso)
-   
     free(g_code); g_code = NULL; g_busy = false; err = tr("Non riesco ad avviare lo script"); return false;
   }
   return true;
 }
 
-bool berryEval(const char* code, HeapBuf& out, ErrBuf& err, uint32_t maxMs) {
-  out.clear(); err = "";
-  size_t len = code ? strlen(code) : 0;
-  if (len == 0 || len > BERRY_CODE_MAX) { err = tr("Script vuoto o troppo lungo"); return false; }
-  if (!startRun(code, len, false, maxMs, "", err)) return false;
+// Aspetta la fine dell'esecuzione partita con startRun (non in sottofondo) e ne prende uscita ed errore.
+static bool waitRun(HeapBuf& out, ErrBuf& err, uint32_t maxMs) {
   uint32_t t0 = drvMillis();
   while (!g_done && drvMillis() - t0 < maxMs + 2500UL) vTaskDelay(pdMS_TO_TICKS(10));
   if (!g_done) {                                           // non risponde: il task liberera da solo il "busy"
@@ -441,6 +383,38 @@ bool berryEval(const char* code, HeapBuf& out, ErrBuf& err, uint32_t maxMs) {
   return ok;
 }
 
+bool berryEval(const char* code, HeapBuf& out, ErrBuf& err, uint32_t maxMs) {
+  out.clear(); err = "";
+  size_t len = code ? strlen(code) : 0;
+  if (len == 0 || len > BERRY_CODE_MAX) { err = tr("Script vuoto o troppo lungo"); return false; }
+  if (!startRun(code, len, false, maxMs, "", err, false, "", true)) return false;   // "vsh <codice>" lo lancia solo l'Admin
+  return waitRun(out, err, maxMs);
+}
+
+// Comando di un driver (vos_berry_cmd.cpp): il codice del driver con i permessi del suo use=, sincrono e con tempo limitato.
+// admin = chi lo lancia e Admin E il sottocomando e dichiarato "admin": solo cosi le funzioni di scrittura della microSD sono presenti.
+bool berryRunCommand(const char* code, const char* use, bool admin, const CmdCall& call, HeapBuf& out, ErrBuf& err, uint32_t maxMs) {
+  out.clear(); err = "";
+  size_t len = code ? strlen(code) : 0;
+  if (len == 0 || len > BERRY_FILE_MAX) { err = tr("Il comando del driver e vuoto o troppo lungo"); return false; }
+  if (!startRun(code, len, false, maxMs, "", err, true, use, false, admin, &call)) return false;
+  return waitRun(out, err, maxMs);
+}
+
+bool berryOn() { return cfg.berryOn; }
+
+bool berryRunInfo(BerryRunInfo& r) {
+  memset(&r, 0, sizeof r);
+  if (!g_busy) return false;
+  snprintf(r.name, sizeof r.name, "%s", g_name);
+  r.app = g_app && !g_cmd;
+  r.cmd = g_cmd || (!g_bg && !g_app);
+  if (g_app) snprintf(r.use, sizeof r.use, "%s", g_use);
+  r.seconds = (drvMillis() - g_startMs) / 1000;
+  r.memory = (uint32_t)g_used;
+  return true;
+}
+
 bool berryNameValid(const char* nameIn) { char n[NAME_BUF]; return cleanNameTo(nameIn, n); }
 
 bool berryStart(const char* nameIn, ErrBuf& err) {
@@ -449,8 +423,8 @@ bool berryStart(const char* nameIn, ErrBuf& err) {
   if (!cleanNameTo(nameIn, n)) { err = tr("Nome script non valido (1-24 caratteri: lettere minuscole, numeri, trattino, sottotrattino)"); return false; }
   HeapBuf code(FILE_READ_MAX);
   if (!loadScript(n, code, err)) return false;
-  if (!startRun(code.c_str(), code.length(), true, 0, n, err)) return false;
-  vlog("BERRY: script %s avviato (%u caratteri)", n, (unsigned)code.length());
+  if (!startRun(code.c_str(), code.length(), true, 0, n, err, false, "", true)) return false;   // avvio diretto: solo Admin (shell, pagina)
+  vlog("SCRIPT: script %s avviato (%u caratteri)", n, (unsigned)code.length());
   return true;
 }
 
@@ -463,7 +437,7 @@ bool berryQueue(const char* nameIn, ErrBuf& err, const char* who) {
   if (!busy) {
     HeapBuf code(FILE_READ_MAX);
     if (!loadScript(n, code, err)) return false;
-    if (startRun(code.c_str(), code.length(), true, 0, n, err)) { vlog("BERRY: script %s avviato da %s (%u caratteri)", n, who, (unsigned)code.length()); return true; }
+    if (startRun(code.c_str(), code.length(), true, 0, n, err)) { vlog("SCRIPT: script %s avviato da %s (%u caratteri)", n, who, (unsigned)code.length()); return true; }
     if (!g_busy) return false;                                        // errore vero (RAM, task): non si accoda
     err = "";                                                         // nel frattempo si e occupato: in coda
   }
@@ -477,17 +451,17 @@ bool berryQueue(const char* nameIn, ErrBuf& err, const char* who) {
   portEXIT_CRITICAL(&g_mux);
   if (dup) { err = tr("Script gia in coda"); return false; }
   if (full) { err = tr("Coda piena (massimo 4 script in attesa)"); return false; }
-  vlog("BERRY: script %s in coda (richiesto da %s)", n, who);
+  vlog("SCRIPT: script %s in coda (richiesto da %s)", n, who);
   return true;
 }
 
 // Avvia il codice di un'app (gia letta e controllata da vos_app.cpp) con i permessi del suo manifest. Torna subito.
-bool berryStartApp(const char* name, const char* code, const char* use, ErrBuf& err) {
+bool berryStartApp(const char* name, const char* code, const char* use, ErrBuf& err, bool appAdmin) {
   err = "";
   size_t len = code ? strlen(code) : 0;
   if (len == 0 || len > BERRY_FILE_MAX) { err = tr("Script vuoto o troppo lungo"); return false; }
-  if (!startRun(code, len, true, 0, name, err, true, use)) return false;
-  vlog("BERRY: app %s avviata (%u caratteri)", name, (unsigned)len);
+  if (!startRun(code, len, true, 0, name, err, true, use, false, appAdmin)) return false;
+  vlog("SCRIPT: app %s avviata (%u caratteri)", name, (unsigned)len);
   return true;
 }
 #endif

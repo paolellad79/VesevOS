@@ -50,7 +50,7 @@ int main() {
   CHECK(sha256Hex("") == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
   { const uint8_t b[] = {0x00, 0x0f, 0xa5, 0xff}; CHECK(hexOf(b, 4) == "000fa5ff"); CHECK(hexOf(b, 0) == ""); }   // 1.7.63: un solo hexOf
   CHECK(utilNameOk("a")); CHECK(utilNameOk("bmp280_77-x")); CHECK(utilNameOk("abcdefghijklmnopqrstuvwx"));
-  CHECK(!utilNameOk("")); CHECK(!utilNameOk("abcdefghijklmnopqrstuvwxy")); CHECK(!utilNameOk("Bmp")); CHECK(!utilNameOk("a b")); CHECK(!utilNameOk("a.vsc"));
+  CHECK(!utilNameOk("")); CHECK(!utilNameOk("abcdefghijklmnopqrstuvwxy")); CHECK(!utilNameOk("Bmp")); CHECK(!utilNameOk("a b")); CHECK(!utilNameOk("a.vsb"));
   { String e; CHECK(!utilLineErr(e, 7, "x")); CHECK(e.indexOf("7") >= 0 && e.endsWith("x")); }
   // numeri casuali
   String r = randomHex(16);

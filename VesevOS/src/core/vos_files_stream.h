@@ -11,7 +11,7 @@
 #include "../drivers/vos_drv_file.h"
 
 // Spazio libero della memoria interna, in byte: l'ultimo valore ricordato (vedi drvFsUsed: puo avere fino a 60 s di ritardo).
-size_t fsFreeBytes();
+size_t fsFreeBytes(const char* cleanPath = nullptr);   // con un percorso sulla microSD: lo spazio della scheda
 
 // Crea la cartella e tutte quelle che mancano sopra (come "mkdir -p"). Ogni cartella passa da fsMkdir: tetto di voci e file protetti compresi.
 // Una cartella che c'e gia va bene; un file con quel nome no. cleanDir: percorso gia pulito.

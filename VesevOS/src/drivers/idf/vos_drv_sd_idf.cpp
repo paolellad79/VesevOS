@@ -13,6 +13,7 @@
 #include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <time.h>
 #include <unistd.h>
 #include "esp_timer.h"
 #include "esp_vfs_fat.h"
@@ -23,12 +24,19 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 
-static const char* MOUNT_POINT = "/sd";
+// Punto di montaggio: lo sceglie boards/vos_packages.h (oggi "/media/sd"). Il limite di ESP-IDF per il percorso base e di 15 caratteri
+// (ESP_VFS_PATH_MAX): "/media/sd" ne ha 9. Le scorciatoie di input (come "/sd") non sono cosa del driver: stanno in core/vos_paths.
+static const char* MOUNT_POINT = VOS_SD_MOUNT_POINT;
+static_assert(sizeof(VOS_SD_MOUNT_POINT) - 1 <= 15, "il percorso base dei file system virtuali di ESP-IDF e al massimo di 15 caratteri");
 static const spi_host_device_t SPI_HOST = SPI2_HOST;
 static const int MAX_OPEN_FILES = 5;
 static const int MAX_TRANSFER_BYTES = 4096;
 static const uint32_t LOCK_WAIT_MS = 3000;
 static const size_t FULL_PATH_MAX = 160;
+
+// Diagnosi della scheda (vos_drv_sd_diag_idf.cpp)
+bool drvSdRawSector(void* ctx, uint8_t* buf, uint32_t lba);
+uint8_t drvSdWhyMountFailed(const sdmmc_host_t& hostTemplate, const sdspi_device_config_t& slot);
 
 static sdmmc_card_t* g_card = nullptr;
 static bool g_busOwned = false;     // il bus SPI l'abbiamo creato noi (va liberato noi)
@@ -62,16 +70,12 @@ uint32_t drvSdMs() {
   return (uint32_t)(esp_timer_get_time() / 1000);
 }
 
-// "/dir/file" diventa "/sd/dir/file".
+// "/dir/file" diventa "/media/sd/dir/file".
 static bool fullPath(const char* path, char* out) {
   int n = snprintf(out, FULL_PATH_MAX, "%s%s", MOUNT_POINT, path);
   return n > 0 && (size_t)n < FULL_PATH_MAX;
 }
 
-static bool readRawSector(void* ctx, uint8_t* buf, uint32_t lba) {
-  sdmmc_card_t* card = (sdmmc_card_t*)ctx;
-  return sdmmc_read_sectors(card, buf, lba, 1) == ESP_OK;
-}
 
 static void releaseBus() {
   if (g_busOwned) {
@@ -80,40 +84,6 @@ static void releaseBus() {
   }
 }
 
-// Dopo un montaggio fallito: la scheda risponde? Che formato ha?
-// Il montaggio libera tutto quando fallisce: si riapre la scheda a mano e si legge il settore 0.
-static uint8_t whyMountFailed(const sdmmc_host_t& hostTemplate, const sdspi_device_config_t& slot) {
-  sdspi_dev_handle_t handle;
-
-  if (sdspi_host_init_device(&slot, &handle) != ESP_OK) {
-    return DSF_NO_CARD;
-  }
-
-  sdmmc_host_t host = hostTemplate;
-  host.slot = handle;
-
-  sdmmc_card_t* card = (sdmmc_card_t*)malloc(sizeof(sdmmc_card_t));
-  uint8_t* sector = (uint8_t*)malloc(512);
-  uint8_t why = DSF_NO_CARD;
-
-  if (card && sector && sdmmc_card_init(&host, card) == ESP_OK) {
-    uint8_t fs = DFS_UNKNOWN;
-    uint8_t sector0 = DS0_UNREADABLE;
-    drvSdProbeFs(readRawSector, card, sector, fs, sector0);
-
-    if (sector0 != DS0_VALID) {
-      why = DSF_NO_RESPONSE;
-    } else {
-      why = (fs == DFS_EXFAT) ? DSF_EXFAT : DSF_BAD_FS;
-    }
-  }
-
-  sdspi_host_remove_device(handle);
-  free(card);
-  free(sector);
-
-  return why;
-}
 
 // ---- Montaggio ----
 
@@ -141,6 +111,26 @@ static bool openBus(int mosi, int sck, int miso) {
   return err == ESP_OK || err == ESP_ERR_INVALID_STATE;
 }
 
+// Monta sui 4 pin. fmt = se non si monta (exFAT, vuota, non FAT) formatta e monta (solo per drvSdFormat). Con il blocco preso.
+static esp_err_t mountCard(int cs, int mosi, int sck, int miso, uint32_t hz, bool fmt, sdmmc_host_t& host, sdspi_device_config_t& slot) {
+  if (!openBus(mosi, sck, miso)) {
+    return ESP_ERR_NOT_SUPPORTED;            // il bus SPI non si apre
+  }
+
+  host = SDSPI_HOST_DEFAULT();
+  host.slot = SPI_HOST;
+  host.max_freq_khz = (int)(hz / 1000);
+  slot = SDSPI_DEVICE_CONFIG_DEFAULT();
+  slot.gpio_cs = (gpio_num_t)cs;
+  slot.host_id = SPI_HOST;
+
+  esp_vfs_fat_mount_config_t mount = {};
+  mount.format_if_mount_failed = fmt;       // false = mai formattare da soli
+  mount.max_files = MAX_OPEN_FILES;
+  mount.allocation_unit_size = 16 * 1024;
+  return esp_vfs_fat_sdspi_mount(MOUNT_POINT, &host, &slot, &mount, &g_card);
+}
+
 bool drvSdBegin(int cs, int mosi, int sck, int miso, uint32_t hz) {
   SdLock lock;
 
@@ -152,36 +142,56 @@ bool drvSdBegin(int cs, int mosi, int sck, int miso, uint32_t hz) {
   }
 
   g_fail = DSF_NONE;
+  sdmmc_host_t host;
+  sdspi_device_config_t slot;
 
-  if (!openBus(mosi, sck, miso)) {
-    g_fail = DSF_NO_CARD;
-    return false;
-  }
-
-  sdmmc_host_t host = SDSPI_HOST_DEFAULT();
-  host.slot = SPI_HOST;
-  host.max_freq_khz = (int)(hz / 1000);
-
-  sdspi_device_config_t slot = SDSPI_DEVICE_CONFIG_DEFAULT();
-  slot.gpio_cs = (gpio_num_t)cs;
-  slot.host_id = SPI_HOST;
-
-  esp_vfs_fat_mount_config_t mount = {};
-  mount.format_if_mount_failed = false;    // mai formattare da soli
-  mount.max_files = MAX_OPEN_FILES;
-  mount.allocation_unit_size = 16 * 1024;
-
-  esp_err_t err = esp_vfs_fat_sdspi_mount(MOUNT_POINT, &host, &slot, &mount, &g_card);
+  esp_err_t err = mountCard(cs, mosi, sck, miso, hz, false, host, slot);
 
   if (err != ESP_OK) {
     g_card = nullptr;
-    g_fail = whyMountFailed(host, slot);
+    g_fail = err == ESP_ERR_NOT_SUPPORTED ? (uint8_t)DSF_NO_CARD : drvSdWhyMountFailed(host, slot);
     releaseBus();
     return false;
   }
 
   g_up = true;
   return true;
+}
+
+uint8_t drvSdFormat(int cs, int mosi, int sck, int miso, uint32_t hz) {
+  SdLock lock;
+
+  if (!lock.ok) {
+    return DSFM_BUSY;
+  }
+  if (g_up) {
+    return DSFM_BUSY;
+  }
+
+  sdmmc_host_t host;
+  sdspi_device_config_t slot;
+  esp_err_t err = mountCard(cs, mosi, sck, miso, hz, false, host, slot);   // gia FAT: si monta e si rifa il volume
+
+  if (err == ESP_OK) {
+    err = esp_vfs_fat_sdcard_format(MOUNT_POINT, g_card);
+  } else {
+    g_card = nullptr;
+    releaseBus();                                                            // il bus aperto dal primo tentativo si riapre dal secondo
+    err = mountCard(cs, mosi, sck, miso, hz, true, host, slot);              // non si monta: lo formatta il montaggio stesso
+  }
+
+  if (err != ESP_OK) {
+    if (g_card) {
+      esp_vfs_fat_sdcard_unmount(MOUNT_POINT, g_card);
+      g_card = nullptr;
+    }
+    releaseBus();
+    return (err == ESP_ERR_NOT_SUPPORTED || err == ESP_ERR_TIMEOUT) ? DSFM_NO_CARD : DSFM_FAIL;
+  }
+
+  g_fail = DSF_NONE;
+  g_up = true;
+  return DSFM_OK;
 }
 
 void drvSdEnd() {
@@ -213,7 +223,7 @@ uint8_t drvSdFsType() {
   uint8_t sector[512];
   uint8_t fs = DFS_UNKNOWN;
   uint8_t sector0 = DS0_UNREADABLE;
-  drvSdProbeFs(readRawSector, g_card, sector, fs, sector0);
+  drvSdProbeFs(drvSdRawSector, g_card, sector, fs, sector0);
 
   return fs;
 }
@@ -321,6 +331,33 @@ int drvSdRead(const char* path, uint8_t* buf, size_t max) {
   return failed ? -1 : (int)count;
 }
 
+int drvSdReadAt(const char* path, uint32_t off, uint8_t* buf, size_t max) {
+  char full[FULL_PATH_MAX];
+  SdLock lock;
+
+  if (!lock.ok || !g_up || !fullPath(path, full)) {
+    return -1;
+  }
+
+  FILE* file = fopen(full, "rb");
+
+  if (!file) {
+    return -1;
+  }
+
+  if (fseek(file, (long)off, SEEK_SET) != 0) {
+    fclose(file);
+    return -1;
+  }
+
+  drvActAdd(ACT_SD_READ);
+  size_t count = fread(buf, 1, max, file);
+  bool failed = ferror(file) != 0;
+  fclose(file);
+
+  return failed ? -1 : (int)count;
+}
+
 bool drvSdWrite(const char* path, const uint8_t* buf, size_t n, bool append) {
   char full[FULL_PATH_MAX];
   SdLock lock;
@@ -342,30 +379,36 @@ bool drvSdWrite(const char* path, const uint8_t* buf, size_t n, bool append) {
   return written == n && closed;
 }
 
+// Una data di file FAT vale solo se e dopo il 2000: il valore di partenza dei file senza data e il 1980. 0 = non valida.
+static uint32_t validMtime(time_t t) {
+  const time_t YEAR_2000 = 946684800;
+  return t >= YEAR_2000 ? (uint32_t)t : 0;
+}
+
 static void fillEntry(DrvSdEntry& out, const char* folderPath, const dirent& entry) {
   strncpy(out.name, entry.d_name, sizeof(out.name) - 1);
   out.name[sizeof(out.name) - 1] = 0;
   out.dir = entry.d_type == DT_DIR;
   out.size = 0;
+  out.mtime = 0;
 
-  if (!out.dir) {
-    char full[FULL_PATH_MAX];
-    struct stat info;
-    int n = snprintf(full, sizeof full, "%s/%s", folderPath, entry.d_name);
+  char full[FULL_PATH_MAX];
+  struct stat info;
+  int n = snprintf(full, sizeof full, "%s/%s", folderPath, entry.d_name);
 
-    if (n > 0 && (size_t)n < sizeof full && stat(full, &info) == 0) {
-      out.size = (uint32_t)info.st_size;
-    }
+  if (n > 0 && (size_t)n < sizeof full && stat(full, &info) == 0) {
+    out.size = out.dir ? 0 : (uint32_t)info.st_size;
+    out.mtime = validMtime(info.st_mtime);
   }
 }
 
-int drvSdList(const char* dir, DrvSdEntry* out, int max, bool& more) {
+int drvSdListFrom(const char* dir, int start, DrvSdEntry* out, int max, bool& more) {
   more = false;
 
   char full[FULL_PATH_MAX];
   SdLock lock;
 
-  if (!lock.ok || !g_up || !fullPath(dir, full)) {
+  if (start < 0 || !lock.ok || !g_up || !fullPath(dir, full)) {
     return -1;
   }
 
@@ -376,11 +419,16 @@ int drvSdList(const char* dir, DrvSdEntry* out, int max, bool& more) {
   }
 
   int count = 0;
+  int skipped = 0;
 
   for (struct dirent* entry = readdir(folder); entry; entry = readdir(folder)) {
     bool dotEntry = !strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..");
 
     if (dotEntry) {
+      continue;
+    }
+    if (skipped < start) {
+      skipped++;
       continue;
     }
     if (count >= max) {
@@ -394,6 +442,35 @@ int drvSdList(const char* dir, DrvSdEntry* out, int max, bool& more) {
 
   closedir(folder);
   return count;
+}
+
+int drvSdList(const char* dir, DrvSdEntry* out, int max, bool& more) {
+  return drvSdListFrom(dir, 0, out, max, more);
+}
+
+bool drvSdStat(const char* path, DrvSdEntry& out) {
+  char full[FULL_PATH_MAX];
+  SdLock lock;
+
+  if (!lock.ok || !g_up || !fullPath(path, full)) {
+    return false;
+  }
+
+  struct stat info;
+
+  if (stat(full, &info) != 0) {
+    return false;
+  }
+
+  const char* slash = strrchr(path, '/');
+  const char* name = slash ? slash + 1 : path;
+
+  strncpy(out.name, name, sizeof(out.name) - 1);
+  out.name[sizeof(out.name) - 1] = 0;
+  out.dir = S_ISDIR(info.st_mode);
+  out.size = out.dir ? 0 : (uint32_t)info.st_size;
+  out.mtime = validMtime(info.st_mtime);
+  return true;
 }
 
 bool drvSdRemove(const char* path) {

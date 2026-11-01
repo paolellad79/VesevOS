@@ -3,15 +3,15 @@
 // VesevOS - vos_shell_backup.cpp
 // Comando "vesevos-backup" (solo Admin): backup e ripristino della CONFIGURAZIONE, sempre CIFRATO con una frase.
 //
-//   vesevos-backup [status]        elenco dei backup in /backup, spazio libero e avvertenza (la configurazione ha password e chiavi)
+//   vesevos-backup [status]        elenco dei backup in /var/backup, spazio libero e avvertenza (la configurazione ha password e chiavi)
 //   vesevos-backup list            solo l'elenco
-//   vesevos-backup create [nome]   crea /backup/<nome>.vbk (senza nome: backup-1, backup-2...). La frase si chiede due volte
+//   vesevos-backup create [nome]   crea /var/backup/<nome>.vbk (senza nome: backup-1, backup-2...). La frase si chiede due volte
 //   vesevos-backup restore <nome>  chiede la frase, mostra QUANTE righe cambierebbero (mai i valori), chiede conferma, poi applica
 //   vesevos-backup delete <nome>   cancella il file, dopo conferma
 //
 // FORMATO: lo stesso del backup con i segreti della pagina (cfgExport con i segreti, poi cryptSeal: riga "VOSENC1 ..."). Quindi un file creato
 // qui si ripristina dalla pagina (Sistema > Backup > Ripristina, dopo averlo scaricato da Sistema > File) e viceversa (basta caricarlo in
-// /backup con il nome terminato in .vbk). La configurazione in chiaro NON si scrive mai su file da qui.
+// /var/backup con il nome terminato in .vbk). La configurazione in chiaro NON si scrive mai su file da qui.
 //
 // SEGRETI: la frase non sta mai nella riga (ne in cronologia, ne in registro): seriale = domanda senza eco; pagina = campo "pw" a parte.
 // Una riga con la frase in coda viene rifiutata. Il testo della configurazione e la frase si cancellano dalla memoria appena usati.
@@ -21,6 +21,7 @@
 #include "vos_shell_ask.h"
 #include "vos_shell_rep.h"
 #include "../core/vos_files_stream.h"
+#include "../core/vos_layout.h"
 #include "../security/vos_crypt.h"
 #include "../drivers/vos_drv_task.h"
 #include <ctype.h>
@@ -28,7 +29,7 @@
 
 namespace {
 
-const char* const kDir = "/backup";
+const char* backupDir() { return layoutPath(LAY_BACKUP); }   // /var/backup (prima della copia /var/backup, vedi core/vos_layout.h)
 const char* const kExt = ".vbk";
 const size_t      kExtLen = 4;
 const size_t      kNameMax = 24;
@@ -74,7 +75,7 @@ bool isBackupFile(const char* fname) {
   return n > kExtLen && strcmp(fname + n - kExtLen, kExt) == 0 && nameCharsOk(fname, n - kExtLen);
 }
 
-void pathOf(const char* name, char* out, size_t cap) { snprintf(out, cap, "%s/%s%s", kDir, name, kExt); }
+void pathOf(const char* name, char* out, size_t cap) { snprintf(out, cap, "%s/%s%s", backupDir(), name, kExt); }
 
 // Il nome (terza parola) senza l'eventuale "yes" messo dalla conferma. Vuoto se manca.
 Word nameWord(const char* line) {
@@ -92,9 +93,9 @@ bool noSecretInLine(const char* line, int idx, OutSink& o) {
 }
 
 // ---- elenco ----
-// Conta i backup di /backup; se o c'e li stampa (nome e dimensione). Guarda al massimo il doppio del tetto di voci.
+// Conta i backup di /var/backup; se o c'e li stampa (nome e dimensione). Guarda al massimo il doppio del tetto di voci.
 int listBackups(OutSink* o) {
-  VosFile d = drvFsOpen(kDir, "r");
+  VosFile d = drvFsOpen(backupDir(), "r");
   if (!d || !d.isDirectory()) return 0;
   int n = 0;
   VosFile e = d.openNextFile();
@@ -112,7 +113,7 @@ int listBackups(OutSink* o) {
 }
 
 void cmdStatus(OutSink& o, bool full) {
-  o.println(tr("Backup della configurazione (cifrati con una frase) in /backup:"));
+  o.println(tr("Backup della configurazione (cifrati con una frase) in /var/backup:"));
   int n = listBackups(&o);
   if (!n) o.println(tr("  nessun backup"));
   if (!full) return;
@@ -163,7 +164,7 @@ void createApply(const char* name, const char* pass, OutSink& o) {
   pathOf(name, path, sizeof path);
   if (!createCheck(path, o)) return;
   ErrBuf err;
-  if (!drvFsExists(kDir) && !fsMkdirs(kDir, err)) { o.println(err.c_str()); return; }
+  if (!drvFsExists(backupDir()) && !fsMkdirs(backupDir(), err)) { o.println(err.c_str()); return; }
   HeapBuf plain(CFG_TEXT_MAX);
   if (!cfgExport(plain, true)) { scrub(plain); o.println(tr("Memoria insufficiente")); return; }
   HeapBuf sealed(CRYPT_OUT_MAX(plain.length()));

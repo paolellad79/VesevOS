@@ -1,0 +1,452 @@
+# Driver microSD (modulo SPI a 4 fili). UN solo file: dati del modulo, icona, pagina, codice e comandi della shell.
+# Si carica da Dispositivi > Periferiche > Schede modulo. Il firmware propone i pin (di solito CS 10, MOSI 11, SCK 12, MISO 13);
+# l'utente puo cambiarli prima di installare. Il controllo dei pin (vietati, gia usati, doppi) lo fa il firmware, una volta sola.
+# Il widget della Home e definito qui ([widget] e on_widget()): il firmware disegna soli dati. Solo ASCII. Nessun segreto.
+[module]
+name=microsd
+title=Lettore microSD (SPI)
+class=sd
+khz=1000
+power=3V3
+level=3V3
+author=VesevOS
+version=1.0
+license=CC0
+warn=VCC a 3V3 (mai 5 V). Scheda FAT32 (o FAT16 se piccola).
+use=sd,log,files
+who=admin
+
+[signals]
+CS
+MOSI
+SCK
+MISO
+
+[pins]
+VCC=vcc,red
+GND=gnd,black
+CS=CS,yellow
+DI=MOSI,green
+CLK=SCK,blue
+DO=MISO,orange
+
+[icon]
+<svg viewBox="0 0 24 24"><path d="M7 3h8l3 3v15H7z" fill="none" stroke="#2c6fbb" stroke-width="2"/><path d="M10 7v3M13 7v3" stroke="#2c6fbb" stroke-width="2"/></svg>
+
+[page]
+text id=stato label="Stato"
+text id=spazio label="Spazio"
+text id=l1 label="Passo"
+text id=l2 label="Cosa fare"
+text id=l3 label="Nota"
+text id=esito label="Esito"
+button id=monta label="Monta"
+button id=espelli label="Espelli"
+button id=run label="Prova la microSD"
+button id=formatta label="Formatta..."
+button id=conferma label="Conferma formattazione"
+
+[code]
+# Pagina del driver microSD: stato, monta, espelli e prova a 9 passi (uno al secondo, si ferma al primo KO con i consigli).
+# I pin non si scelgono qui: li sceglie l'utente quando installa il driver.
+var T = 0              # passo della prova (0 = ferma, 1-9 = in corso)
+var KO = 0             # 1 = ultima prova fallita: i consigli girano
+var C = 0              # consiglio mostrato
+var AD = []            # consigli dell'ultimo KO
+var ST = 0             # stato della scheda al passo 1
+var N = 0              # secondi dall'ultimo aggiornamento di stato
+var ARM = 0            # secondi che restano per confermare la formattazione (0 = non richiesta)
+var FM = 0             # 1 = ho visto la formattazione in corso (a fine lavoro mostro l'esito)
+var DIR = '/sd/provavos'
+var FIL = '/sd/provavos/t.txt'
+var TX1 = 'ciao VesevOS'
+var TX2 = ' + riga2'
+var NOMI = ['non configurata', 'montata', 'non montata', 'non rilevata', 'formato non supportato']
+
+def corto(s)
+  s = str(s)
+  if size(s) > 40
+    return s[0..39]
+  end
+  return s
+end
+def mostra(a, b, c)
+  dev_set('l1', corto(a))
+  dev_set('l2', corto(b))
+  dev_set('l3', corto(c))
+end
+
+def mmss(n)
+  var m = n / 60
+  var r = n % 60
+  return (m < 10 ? '0' : '') + str(m) + ':' + (r < 10 ? '0' : '') + str(r)
+end
+
+# Formattazione (parte in un task a parte): mostra il tempo trascorso e, a fine lavoro, l'esito. true = in corso.
+def formattazione()
+  var s = sd_status()
+  if s['fmt_run'] == 1
+    FM = 1
+    dev_set('stato', 'formattazione')
+    dev_set('spazio', mmss(s['fmt_secs']))
+    mostra('Formatta', 'Formattazione in corso ' + mmss(s['fmt_secs']), 'Non togliere la scheda')
+    return true
+  end
+  if FM == 1
+    FM = 0
+    if s['fmt_last'] == 1
+      mostra('Formatta', 'OK: scheda formattata FAT32', 'Durata ' + mmss(s['fmt_last_secs']))
+    else
+      mostra('Formatta', 'KO: formattazione non riuscita', s['fmt_err'])
+    end
+    aggiorna()
+  end
+  return false
+end
+
+# Stato e spazio della scheda nei due riquadri in alto
+def aggiorna()
+  var s = sd_status()
+  dev_set('stato', NOMI[s['state']])
+  if s['state'] == 1
+    dev_set('spazio', corto(str(s['fs']) + ' ' + str((s['total_kb'] - s['used_kb']) / 1024) + ' MB liberi su ' + str(s['total_kb'] / 1024)))
+  else
+    dev_set('spazio', '-')
+  end
+end
+
+def fine_ok(n, titolo, dett)
+  mostra('Passo ' + str(n) + '/9: ' + titolo, 'OK: ' + dett, ' ')
+  dev_set('esito', 'OK ' + str(n) + '/9')
+  log('SDPROVA ' + str(n) + ' OK ' + titolo)
+  T = T + 1
+end
+def fine_ko(n, titolo, dett, cons)
+  mostra('Passo ' + str(n) + '/9: ' + titolo, 'KO: ' + dett, cons[0])
+  dev_set('esito', 'KO al passo ' + str(n) + '/9')
+  log('SDPROVA ' + str(n) + ' KO ' + titolo + ': ' + dett)
+  AD = cons; C = 0; KO = 1; T = 0
+end
+var CAVI = ['Controlla i 4 fili (MOSI/MISO scambiati?)', 'VCC a 3V3 (non 5 V) e GND in comune', 'Pull-up 10k a 3V3 su CS e MISO', 'Scheda FAT32 (o FAT16 se piccola, max 32 GB)', 'Fili corti; frequenza 400 kHz', 'Riinserisci la scheda a modulo spento']
+var FAT = ['Formatta la scheda FAT32 (o FAT16 se piccola)', 'Schede oltre 32 GB: usa FAT32 lo stesso', 'Poi riprova']
+var SCR = ['Scheda piena o protetta in scrittura?', 'Fili lunghi: prova 400 kHz', 'Alimentazione debole: aggiungi 100 nF e 47 uF', 'Prova un\'altra microSD']
+
+def passo()
+  var s = nil
+  if T == 1
+    s = sd_status()
+    ST = s['state']
+    if ST == 0
+      fine_ko(1, 'stato', 'microSD non configurata', ['Installa prima il driver microSD', 'Dispositivi > Periferiche > Schede modulo'])
+    elif ST == 4
+      fine_ko(1, 'stato', 'formato non supportato', FAT)
+    elif ST == 3
+      fine_ko(1, 'stato', 'scheda non rilevata', CAVI)
+    else
+      fine_ok(1, 'stato', ST == 1 ? 'gia montata' : 'configurata, non montata')
+    end
+  elif T == 2
+    var m = (ST == 1)
+    if !m
+      try
+        m = sd_mount()
+      except .. as e, d
+        m = false
+      end
+    end
+    if m
+      fine_ok(2, 'montaggio', 'montata')
+    else
+      fine_ko(2, 'montaggio', 'non si monta', CAVI)
+    end
+  elif T == 3
+    s = sd_status()
+    if s['state'] != 1
+      fine_ko(3, 'info', 'non risulta montata', CAVI)
+    else
+      fine_ok(3, 'info', str(s['fs']) + ' ' + str(s['total_kb'] / 1024) + ' MB, ' + str(s['khz']) + ' kHz')
+    end
+  elif T == 4
+    try
+      sd_rm(FIL)
+    except ..
+    end
+    try
+      sd_rm(DIR)
+    except ..
+    end
+    try
+      sd_mkdir(DIR)
+      fine_ok(4, 'crea cartella', DIR)
+    except .. as e, d
+      fine_ko(4, 'crea cartella', d, SCR)
+    end
+  elif T == 5
+    try
+      sd_write(FIL, TX1)
+      fine_ok(5, 'scrivo file', 't.txt scritto')
+    except .. as e, d
+      fine_ko(5, 'scrivo file', d, SCR)
+    end
+  elif T == 6
+    try
+      var r = sd_read(FIL)
+      if r != nil && r.asstring() == TX1
+        fine_ok(6, 'leggo file', 'contenuto uguale')
+      else
+        fine_ko(6, 'leggo file', 'contenuto diverso', CAVI)
+      end
+    except .. as e, d
+      fine_ko(6, 'leggo file', d, CAVI)
+    end
+  elif T == 7
+    try
+      sd_write(FIL, TX2, true)
+      var r = sd_read(FIL)
+      if r != nil && r.asstring() == TX1 + TX2
+        fine_ok(7, 'aggiungo in coda', 'append corretto')
+      else
+        fine_ko(7, 'aggiungo in coda', 'contenuto diverso', SCR)
+      end
+    except .. as e, d
+      fine_ko(7, 'aggiungo in coda', d, SCR)
+    end
+  elif T == 8
+    try
+      sd_rm(FIL)
+      sd_rm(DIR)
+      fine_ok(8, 'cancello prova', 'file e cartella tolti')
+    except .. as e, d
+      fine_ko(8, 'cancello prova', d, SCR)
+    end
+  elif T == 9
+    if sd_eject()
+      fine_ok(9, 'espulsione', 'smontata: puoi toglierla')
+      dev_set('esito', 'TUTTO OK 9/9')
+      dev_set('l3', 'La microSD funziona.')
+      T = 0
+    else
+      fine_ko(9, 'espulsione', 'scheda in uso', ['Aspetta qualche secondo e riprova', 'Chiudi altre app che usano la microSD'])
+    end
+  end
+end
+
+def on_set(id, v)
+  if v == 0
+    return nil
+  end
+  if formattazione()
+    return nil
+  end
+  if id == 'run'
+    T = 1; KO = 0
+    dev_set('esito', 'Prova in corso...')
+  elif id == 'monta' && T == 0
+    var ok = false
+    try
+      ok = sd_mount()
+    except .. as e, d
+      ok = false
+    end
+    if ok
+      mostra('Monta', 'OK: scheda montata', ' ')
+    else
+      mostra('Monta', 'KO: non si monta', CAVI[0])
+    end
+    aggiorna()
+  elif id == 'formatta' && T == 0
+    ARM = 15
+    mostra('Formatta', 'ATTENZIONE: cancella TUTTO', 'Premi Conferma entro 15 secondi')
+  elif id == 'conferma' && T == 0
+    if ARM <= 0
+      mostra('Formatta', 'Prima premi Formatta...', ' ')
+    else
+      ARM = 0
+      var ok = false
+      try
+        ok = sd_format('FORMATTA')
+      except .. as e, d
+        ok = false
+      end
+      if ok
+        mostra('Formatta', 'Formattazione avviata', 'Puo durare qualche minuto')
+        formattazione()
+      else
+        mostra('Formatta', 'KO: formattazione non avviata', 'Scheda in uso? Riprova')
+        aggiorna()
+      end
+    end
+  elif id == 'espelli' && T == 0
+    if sd_eject()
+      mostra('Espelli', 'OK: puoi togliere la scheda', ' ')
+    else
+      mostra('Espelli', 'KO: scheda in uso', 'Riprova tra qualche secondo')
+    end
+    aggiorna()
+  end
+end
+
+def on_tick()
+  if formattazione()
+    return nil
+  end
+  if ARM > 0
+    ARM = ARM - 1
+    if ARM == 0
+      mostra('Formatta', 'Annullata', ' ')
+    end
+  end
+  if T > 0
+    passo()
+  elif KO == 1
+    C = C + 1
+    dev_set('l3', corto(AD[C % size(AD)]))
+  end
+  N = N + 1
+  if T == 0 && N >= 3
+    N = 0
+    aggiorna()
+  end
+end
+
+aggiorna()
+
+[data]
+stato=-
+spazio=-
+l1=Driver microSD
+l2=Monta, espelli o prova la scheda
+l3=Scheda FAT32 (o FAT16 se piccola)
+esito=Da fare
+
+[widget]
+title=Scheda microSD
+alt=Scheda microSD non presente
+who=oper
+
+[commands]
+sd status oper
+sd ls oper
+sd read oper
+sd mount admin
+sd unmount admin
+sd format admin
+sd test admin
+sd write admin testo
+sd append admin testo
+sd rm admin
+sd mkdir admin
+
+[cmd]
+# Comandi della shell: "sd <sotto> [parole]". Gira solo quando si lancia un comando. Il percorso "/" e la radice della scheda.
+# Le funzioni di scrittura (sd_mount, sd_write...) ci sono solo se il sottocomando e "admin" e chi lancia e Admin.
+def sdpath(a)
+  if a == nil || a == ''
+    return '/sd'
+  end
+  if a[0] != '/'
+    a = '/' + a
+  end
+  if a == '/sd' || a == '/media/sd' || (size(a) > 3 && a[0..3] == '/sd/') || (size(a) > 9 && a[0..9] == '/media/sd/')
+    return a
+  end
+  return '/sd' + (a == '/' ? '' : a)
+end
+
+def par(args, i)
+  return size(args) > i ? args[i] : nil
+end
+
+def mmss(n)
+  var m = n / 60
+  var r = n % 60
+  return (m < 10 ? '0' : '') + str(m) + ':' + (r < 10 ? '0' : '') + str(r)
+end
+
+def stato()
+  var s = sd_status()
+  if s['fmt_run'] == 1
+    print('microSD: formattazione in corso, ' + mmss(s['fmt_secs']))
+    return nil
+  end
+  var n = ['non configurata', 'montata', 'non montata', 'non rilevata', 'formato non supportato']
+  print('microSD: ' + n[s['state']])
+  if s['state'] == 1
+    print(str(s['fs']) + ', ' + str((s['total_kb'] - s['used_kb']) / 1024) + ' MB liberi su ' + str(s['total_kb'] / 1024) + ' MB, ' + str(s['khz']) + ' kHz')
+  end
+  if s['fmt_last'] == 1
+    print('ultima formattazione: riuscita in ' + mmss(s['fmt_last_secs']))
+  elif s['fmt_last'] == 2
+    print('ultima formattazione: non riuscita (' + str(s['fmt_err']) + ')')
+  end
+end
+
+def elenca(args)
+  var p = sdpath(par(args, 0))
+  var r = listdir(p, size(args) > 1 ? int(args[1]) : 0)
+  for e: r['items']
+    print(e['dir'] ? e['name'] + '/' : e['name'] + '  ' + str(e['size']))
+  end
+  if r['more']
+    print('... altri: sd ls ' + p + ' ' + str(r['next']))
+  end
+end
+
+def leggi(args)
+  var r = sd_read(sdpath(par(args, 0)), size(args) > 1 ? int(args[1]) : 0)
+  print(r == nil ? 'file non trovato' : r.asstring())
+end
+
+def prova()
+  var f = '/sd/provavos.tmp'
+  sd_write(f, 'prova')
+  var r = sd_read(f)
+  sd_rm(f)
+  print(r != nil && r.asstring() == 'prova' ? 'OK: scrittura e lettura' : 'KO: contenuto diverso')
+end
+
+def on_cmd(sub, args)
+  try
+    if sub == 'status'
+      stato()
+    elif sub == 'ls'
+      elenca(args)
+    elif sub == 'read'
+      leggi(args)
+    elif sub == 'mount'
+      print(sd_mount() ? 'microSD montata' : 'non si monta')
+    elif sub == 'unmount'
+      print(sd_eject() ? 'microSD smontata: puoi toglierla' : 'microSD in uso: riprova')
+    elif sub == 'format'
+      if par(args, 0) == 'FORMATTA'
+        print(sd_format('FORMATTA') ? 'Formattazione avviata. Controlla con: sd status' : 'formattazione non avviata')
+      else
+        print('ATTENZIONE: cancella TUTTO dalla microSD. Per confermare: sd format FORMATTA')
+      end
+    elif sub == 'test'
+      prova()
+    elif sub == 'write' || sub == 'append'
+      sd_write(sdpath(par(args, 0)), par(args, 1) == nil ? '' : par(args, 1), sub == 'append')
+      print('fatto')
+    elif sub == 'rm'
+      sd_rm(sdpath(par(args, 0)))
+      print('fatto')
+    elif sub == 'mkdir'
+      sd_mkdir(sdpath(par(args, 0)))
+      print('fatto')
+    end
+  except .. as e, d
+    print('errore: ' + str(d))
+  end
+end
+
+# Widget della Home: il firmware chiama on_widget() al massimo ogni 10 secondi, senza diritti di scrittura, e mostra le righe stampate:
+# st=ok (icona normale) oppure st=off (icona sbarrata e dati grigi), v=riga principale, s=riga secondaria.
+def on_widget()
+  var s = sd_status()
+  var n = ['Non configurata', 'Montata', 'Non montata', 'Non rilevata', 'Formato non supportato: serve FAT32']
+  var k = s['state'] == 1
+  print('st=' + (k ? 'ok' : 'off'))
+  print('v=' + (s['fmt_run'] == 1 ? 'Formattazione in corso' : n[s['state']]))
+  print('s=' + (k ? str(s['fs']) + ', ' + str((s['total_kb'] - s['used_kb']) / 1024) + ' MB liberi su ' + str(s['total_kb'] / 1024) + ' MB, ' : '0 MB liberi su 0 MB, ') + str(s['khz']) + ' kHz')
+end

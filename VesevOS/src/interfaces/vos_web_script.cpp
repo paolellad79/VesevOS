@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_web_script.cpp
 // Percorsi del server web: pagina Script (elenco, stato e uscita; avvio e stop). Solo Admin.
-// Il testo degli script si legge e si salva con i percorsi dei file (/api/fs/text, /api/fs/save) nella cartella /scripts.
+// Il testo degli script si legge e si salva con i percorsi dei file (/api/fs/text, /api/fs/save) nella cartella /sbin.
 #include "vos_web_int.h"
 #include "../packages/vos_berry.h"
 
@@ -14,7 +14,7 @@ void routesScript(PsychicHttpServer* S, bool sec) {
     return sendText(s, 200, "application/json", j.c_str(), j.length());
   });
   add(S, sec, "/api/script/run", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
-    if (berryRunning()) return ko(s, tr("Berry e occupato con un altro script"), "state");
+    if (berryRunning()) return ko(s, tr("Un altro script e gia in esecuzione"), "state");
     ErrBuf e;
     if (!berryStart(Pc(r, "name"), e)) return ko(s, e);
     return ok(s);

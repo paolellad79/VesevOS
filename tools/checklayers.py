@@ -12,6 +12,7 @@ BASE = os.path.join(HERE, 'layers_baseline.json')
 # famiglia -> (espressione, file driver che possono usarla; vos_license_data.h e solo testo di licenze)
 RULES = {
   'ble':    (r'\bNimBLE\w*|\bBLEDevice\b',                    {'vos_drv_ble.cpp', 'vos_drv_ble.h', 'vos_license_data.h'}),
+  'elf':    (r'\besp_elf_\w+|\belf_set_symbol_resolver\b|\besp_elf\.h', {'vos_drv_elf.cpp', 'vos_drv_elf.h'}),   # caricatore dei moduli ELF: solo il suo driver
   'espnow': (r'\besp_now_\w+',                                 {'vos_drv_espnow.cpp', 'vos_drv_espnow.h'}),
   'mqtt':   (r'\besp_mqtt_client_\w+|\bmqtt_client\.h',        {'vos_drv_mqtt.cpp', 'vos_drv_mqtt.h'}),
   'wifi':   (r'\bWiFi\.|\besp_wifi_\w+',                       {'vos_drv_espnow.cpp', 'vos_drv_wifi.cpp', 'vos_drv_wifi.h', 'vos_drv_wps.cpp'}),     # il driver ESP-NOW legge solo modo e canale
@@ -140,7 +141,7 @@ def scan():
                 tf, tt = top, next((os.path.relpath(p, os.path.join(SRC, 'src')).split(os.sep)[0] for g, p in allf if g == os.path.basename(mi.group(1))), '')
                 if tf in LEVEL and tt in LEVEL and tf != tt: out.setdefault('_cart', {}).setdefault(tf, set()).add(tt)
             for fam, (rx, ok) in RULES.items():
-                if f in ok: continue
+                if f in ok or os.sep + 'third_party' + os.sep in path: continue      # third_party e fuori scala (copie di librerie, es. il caricatore ELF)
                 n = len(re.findall(rx, c))
                 if n: out.setdefault(fam, {}); out[fam][f] = out[fam].get(f, 0) + n
             raw = re.sub(r'//.*', '', line)

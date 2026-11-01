@@ -36,6 +36,9 @@ inline bool drvTaskCreate(void (*fn)(void*), const char* name, uint32_t stackByt
   return xTaskCreatePinnedToCore(fn, name, stackBytes, arg, priority, handle, core) == pdPASS;
 }
 
+// Identificatore del task chiamante (per chi deve sapere "chi sta chiamando" senza includere FreeRTOS: i moduli ELF in esecuzione).
+inline void* drvTaskSelf() { return (void*)xTaskGetCurrentTaskHandle(); }
+
 // Pausa dentro i calcoli lunghi (hash delle password, misure). Fa due cose:
 //  1) il task dorme per un tick: cosi il task "idle" del core puo girare e dare il segnale al suo watchdog;
 //  2) alimenta il watchdog del task chiamante, se e iscritto (il loopTask lo e: senza questo scatta dopo 5 s anche con la pausa).

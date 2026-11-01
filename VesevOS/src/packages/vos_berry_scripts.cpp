@@ -80,7 +80,7 @@ bool berryStop(ErrBuf& err) {
 
 bool berryRunning() { return g_busy; }
 
-// scorre gli script di /scripts (solo file .vsc): chiama cb(nome, byte, ctx). Crea la cartella se manca; sposta i vecchi /apps/<nome>.be.
+// scorre gli script di /sbin (file .vsb, e i vecchi .vsc): chiama cb(nome, byte, ctx). Crea la cartella se manca; sposta i vecchi /bin/<nome>.be.
 // L'elenco dei file e un JSON {"n":"nome","d":true|false,"s":byte}: si legge con viste, senza copiare i nomi.
 typedef void (*ScriptCb)(std::string_view name, long size, void* ctx);
 static int scanScripts(ScriptCb cb, void* ctx) {
@@ -103,8 +103,11 @@ static int scanScripts(ScriptCb cb, void* ctx) {
     bool isDir = d != none && v.substr(d + 4, 4) == "true";
     long size = sz != none ? viewToLong(v.substr(sz + 4)) : 0;
     pos = b + 1;
-    if (isDir || name.size() < 4 || name.substr(name.size() - 4) != SCRIPT_EXT) continue;
-    cb(name.substr(0, name.size() - 4), size, ctx); n++;
+    size_t ext = isDir ? 0 : progExtLen(name, PEXT_SCRIPT);            // .vsb, o il vecchio .vsc
+    if (!ext) continue;
+    std::string_view stem = name.substr(0, name.size() - ext);
+    if (name.substr(name.size() - ext) != PEXT_SCRIPT.nuovo && progVecchioCoperto(SCRIPT_DIR, stem, PEXT_SCRIPT)) continue;   // c'e anche il nuovo: vale quello
+    cb(stem, size, ctx); n++;
   }
   return n;
 }
@@ -118,8 +121,8 @@ static void listCb(std::string_view nm, long size, void* c) {
 void berryList(HeapBuf& o) {
   HeapBuf body(BERRY_TEXT_MAX);
   int n = scanScripts(listCb, &body);
-  if (!n) { o.add(tr("Nessuno script in /scripts. Esempio: write /scripts/prova.vsc print('ciao')")); o.add('\n'); return; }
-  o.add(trf("Script in /scripts: %d", n).c_str()); o.add('\n');
+  if (!n) { o.add(tr("Nessuno script in /sbin. Esempio: write /sbin/prova.vsb print('ciao')")); o.add('\n'); return; }
+  o.add(trf("Script in /sbin: %d", n).c_str()); o.add('\n');
   o.add(body.c_str(), body.length());
 }
 
@@ -173,12 +176,44 @@ void berryOutText(HeapBuf& o) {
 }
 
 void berryStatusText(HeapBuf& o) {
-  o.add("Berry "); o.add(BERRY_VERSION); o.add(' ');
+  o.add("VesevOS script "); o.add(BERRY_VERSION); o.add(' ');
   o.add(trf("(tetto memoria %lu KB, tempo %lu s)", (unsigned long)(BERRY_MEM_LIMIT / 1024), (unsigned long)(BERRY_TIME_MS / 1000)).c_str()); o.add('\n');
   if (g_busy) { o.add(g_bg ? trf("In corso: %s", g_name).c_str() : tr("In corso: comando")); o.add('\n'); }
   o.add(trf("Esecuzioni: %lu", (unsigned long)g_runs).c_str()); o.add('\n');
   if (g_runs) { o.add(trf("Ultima: %s, %lu ms, memoria massima %lu byte, non liberata %lu byte", g_lastOk ? "OK" : tr("Errore"), (unsigned long)g_lastMs, (unsigned long)g_lastPeak, (unsigned long)g_lastLeak).c_str()); o.add('\n'); }
   o.add(tr("Funzioni: print, led, act, time, millis, temp, log, sleep, btn")); o.add('\n');
-  o.add(tr("Comandi: berry <codice> | script list | script run <nome> | script stop | script out")); o.add('\n');
+  o.add(tr("Comandi: vsh <codice> | script list | script run <nome> | script stop | script out")); o.add('\n');
+}
+
+// Eredita 1.7.48: gli script stavano in /apps/<nome>.be. Ora /apps e per le app (.vab): li sposto in /sbin/<nome>.vsb.
+// Torna quanti ne ha spostati. Non tocca altro.
+static bool g_migDone = false;                                          // una volta per avvio: dopo, /apps e delle app
+int vosberry::migrateOld() {
+  if (g_migDone) return 0;
+  g_migDone = true;
+  HeapBuf jb(FS_JSON_MAX);
+  if (!fsListBuild(layoutPath(LAY_APPS), jb)) return 0;
+  std::string_view j(jb.c_str(), jb.length());
+  if (j.find("\"ok\":true") == std::string_view::npos) return 0;
+  const size_t none = std::string_view::npos;
+  int moved = 0;
+  size_t pos = 0;
+  while (moved < 16) {
+    size_t a = j.find("{\"n\":\"", pos); if (a == none) break;
+    size_t b = j.find('"', a + 6); if (b == none) break;
+    std::string_view name = j.substr(a + 6, b - (a + 6));
+    size_t d = j.find("\"d\":", b);
+    bool isDir = d != none && j.substr(d + 4, 4) == "true";
+    pos = b + 1;
+    if (isDir || name.size() < 3 || name.substr(name.size() - 3) != ".be") continue;
+    std::string_view n = name.substr(0, name.size() - 3);
+    if (!utilNameOk(n.data(), n.size())) continue;
+    char from[40], to[40];                                              // nome valido: al massimo 24 caratteri
+    snprintf(from, sizeof from, "%s/%.*s.be", layoutPath(LAY_APPS), (int)n.size(), n.data());
+    snprintf(to, sizeof to, "%s/%.*s%s", SCRIPT_DIR, (int)n.size(), n.data(), SCRIPT_EXT);
+    ErrBuf e; fsMkdir(SCRIPT_DIR, e);                                   // se esiste gia, "Esiste gia": non importa
+    if (fsRename(from, to, e)) { moved++; vlog("SCRIPT: script %.*s spostato da /apps a /sbin", (int)n.size(), n.data()); }
+  }
+  return moved;
 }
 #endif

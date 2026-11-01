@@ -5,7 +5,7 @@
 // PROTEZIONI (valgono per tutti):
 //  - zip slip: un nome di una voce con '/' iniziale, '..', '\' o caratteri strani rifiuta TUTTO l'archivio prima di scrivere qualcosa;
 //    il percorso finale passa da shellResolvePath e deve restare dentro la cartella di destinazione (mai la radice "/")
-//  - file protetti (/vesevos.conf, /audit.log, /crash.txt): non si leggono, non si scrivono, non si sovrascrivono
+//  - file protetti (/vesevos.conf, /var/audit.log, /var/crash.txt): non si leggono, non si scrivono, non si sovrascrivono
 //  - zip e tar -c non mettono MAI in un archivio i file protetti (un archivio non deve diventare un modo per portare fuori i segreti)
 //  - zip bomb: al massimo ARCH_MAX_ENTRIES voci, ARCH_MAX_ENTRY byte per voce, ARCH_MAX_TOTAL byte in tutto (e mai oltre lo spazio libero),
 //    rapporto di espansione al massimo ARCH_MAX_RATIO a 1 (sopra ARCH_RATIO_FROM byte espansi)
@@ -79,7 +79,7 @@ bool archTarget(const char* base, const char* rel, char* out);   // out: almeno 
 // Ritorna "" se abs e base stessa.
 const char* archRelName(const char* base, const char* abs, bool& stripped);
 
-// File che non devono mai finire in un archivio: i protetti (fsProtected) e quelli che portano chiavi, certificati o copie di configurazione
+// File che non devono mai finire in un archivio (regola unica in core/vos_paths: pathIsSecret): i protetti e quelli che portano chiavi, certificati o copie di configurazione
 // (estensioni .pem .key .crt .der .p12 .vbk, senza badare alle maiuscole). path: percorso pulito.
 bool archIsSecret(const char* path);
 // Nome nascosto: comincia con '.' oppure e un temporaneo ".tmp~". name: solo il nome, senza cartelle.

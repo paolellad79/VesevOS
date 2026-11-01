@@ -12,6 +12,13 @@ typedef void (*DrvTaskFn)(void* arg);
 // (se e rovinata o di una versione nuova la cancella e la rifa, come faceva initArduino). false = la NVS non parte.
 bool drvPlatformInit();
 
+// Se drvPlatformInit() ha dovuto cancellare la NVS: il codice d'errore di ESP-IDF che l'ha causato (ESP_ERR_NVS_NO_FREE_PAGES
+// o ESP_ERR_NVS_NEW_VERSION_FOUND). 0 = la NVS non e stata cancellata. Serve a scriverlo nel registro dopo logInit().
+int drvNvsEraseReason();
+
+// true se l'ultimo riavvio e stato un guasto (panico o watchdog); false per accensione, riavvio voluto o altro. Vale per tutta la vita del programma.
+bool drvResetWasCrash();
+
 // Spegne i messaggi di log di un componente di ESP-IDF (per esempio "httpd").
 void drvLogOff(const char* tag);
 

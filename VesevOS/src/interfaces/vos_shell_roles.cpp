@@ -16,6 +16,7 @@
 // scheda dalla rete: e un rischio noto e accettato, perche e proprio cio che le regole devono poter fare.
 #include "vos_shell_roles.h"
 #include "../core/vos_common.h"
+#include "../packages/vos_drvcmd.h"
 
 namespace {
 
@@ -36,7 +37,7 @@ const RoleRule kRoles[] = {
   {"free", "*", OPE}, {"df", "*", OPE}, {"temp", "*", OPE}, {"top", "*", OPE}, {"ps", "*", OPE},
   {"info", "*", OPE}, {"net", "*", OPE}, {"ip", "*", OPE}, {"events", "*", OPE},
   {"legal", "*", OPE}, {"license", "*", OPE},
-  {"pin", "*", OPE}, {"pins", "*", OPE}, {"rules", "*", OPE}, {"reboot", "*", OPE},
+  {"pin", "*", OPE}, {"pins", "*", OPE}, {"lspin", "*", OPE}, {"rules", "*", OPE}, {"reboot", "*", OPE},
   // --- usati dalle regole (vedi sopra) ---
   {"led", "*", OPE}, {"led-color", "*", OPE}, {"led-bright", "*", OPE}, {"airplane", "*", OPE},   // led trigger/threshold/color <sorgente>: il comando chiede Admin per CAMBIARE (lettura: Operatore)
   {"ntp", "", OPE}, {"ntp", "sync", OPE}, {"ntp", "*", ADM},
@@ -51,10 +52,17 @@ const RoleRule kRoles[] = {
   {"vesevos-config", "setup", ADM}, {"vesevos-config", "users", ADM}, {"vesevos-config", "security", ADM}, {"vesevos-config", "*", OPE},   // riepilogo e dettagli in lettura: Operatore; users, security e setup: Admin. Cambiare: solo Admin (controllato nel comando), poi la riga inoltrata ripassa da questa tabella
   {"vesevos-network", "-f", ADM}, {"vesevos-network", "scan", ADM}, {"vesevos-network", "ping", ADM}, {"vesevos-network", "*", OPE},   // riepilogo: lettura; scan e ping sono "wifi scan" e "ping" (Admin, come oggi); -f = MAC intero
   {"vesevos-led_control", "*", OPE},                                       // alias VISIBILE di "led": nella lista di help; l'esecuzione usa la riga di "led" (canonicalName lo cambia prima)
-  {"vesevos-drive_manager", "mount", ADM}, {"vesevos-drive_manager", "unmount", ADM}, {"vesevos-drive_manager", "test", ADM}, {"vesevos-drive_manager", "*", OPE},   // elenco e status: lettura; mount/unmount/test inoltrano a "sd" (solo Admin)
+  {"vesevos-drive_manager", "mount", ADM}, {"vesevos-drive_manager", "unmount", ADM}, {"vesevos-drive_manager", "test", ADM}, {"vesevos-drive_manager", "format", ADM}, {"vesevos-drive_manager", "*", OPE},   // elenco e status: lettura; mount/unmount/test inoltrano a "sd" (solo Admin)
   {"vesevos-cleaner", "*", ADM},                                           // pulizia: solo Admin (cancella rapporti e registri)
   {"vesevos-bugreport", "*", ADM},                                         // rapporto per l'assistenza: solo Admin
   {"vesevos-backup", "*", ADM},                                            // backup cifrato della configurazione: contiene password e chiavi, solo Admin
+#if VOS_WITH_ELF
+  {"vesevos-driver", "", OPE}, {"vesevos-driver", "list", OPE}, {"vesevos-driver", "info", OPE},   // elenco e dettagli: Operatore; installare, pin, rimuovere: Admin
+  {"vesevos-driver", "*", ADM},
+  {"vesevos-elf", "", OPE}, {"vesevos-elf", "status", OPE}, {"vesevos-elf", "ps", OPE}, {"vesevos-elf", "which", OPE},   // lettura: Operatore
+  {"vesevos-elf", "list", OPE}, {"vesevos-elf", "quarantine", OPE}, {"vesevos-elf", "driver", OPE},   // driver: il sottocomando decide (list e info Operatore, il resto Admin)
+  {"vesevos-elf", "*", ADM},                                               // prova di moduli ELF: codice nativo con tutti i diritti, solo Admin
+#endif
   {"vesevos-update", "*", ADM},                                            // ordini di aggiornamento tramite recovery: solo Admin
   {"wd", "", OPE}, {"wd", "status", OPE}, {"wd", "*", ADM},
   {"log", "clear", ADM}, {"log", "level", ADM}, {"log", "*", OPE},
@@ -66,6 +74,7 @@ const RoleRule kRoles[] = {
   {"suspend", "*", ADM}, {"sleep", "*", ADM}, {"poweroff", "*", ADM},      // sonno profondo / spegnimento
   {"ping", "*", ADM},                                                      // solo Admin: genera traffico di rete verso indirizzi scelti dall'utente (rischio di sondare/inondare); con limiti di conteggio, intervallo e durata
   {"gzip", "*", ADM}, {"gunzip", "*", ADM}, {"zcat", "*", ADM}, {"unzip", "*", ADM}, {"zip", "*", ADM}, {"tar", "*", ADM},   // solo Admin come i comandi sui file: scrivono e tolgono file, usano la PSRAM e tempo di CPU (tetti in vos_shell_arch.h)
+  {"run", "*", ADM}, {"which", "*", ADM},                                  // avviano e cercano programmi (.vsb, .vab): stessi permessi di "script run" e "app start"; il lancio diretto del solo nome passa da qui con ADM
   {"factory-reset", "*", ADM}, {"crash", "*", ADM}, {"passwd", "*", ADM}, {"user", "*", ADM},
 };
 
@@ -80,6 +89,9 @@ int shx::roleMin(const Word& cmd, const Word& sub) {
     if (c != r.cmd) continue;
     if (r.sub[0] == '*' || s == r.sub) return r.min;
   }
+  DrvCmd d;                                   // un comando di driver: il ruolo lo dichiara il driver per ogni sottocomando (chi non e nel registro resta solo Admin)
+  if (drvCmdFind(c.c_str(), s.c_str(), d)) return d.admin ? ADM : OPE;
+  if (drvCmdHas(c.c_str())) return OPE;      // il comando da solo o un sottocomando sbagliato: l'Operatore vede l'uso, poi decide la shell
   return ADM;
 }
 

@@ -23,6 +23,14 @@ struct VosUser {
   FixedStr<137> rec;             // codici di recupero: hash corti separati da virgola (8 x 17)
 };
 
+// Programma con avvio automatico: kind 0 script, 1 app Berry, 2 app ELF (come in packages/vos_prog.h).
+#define VOS_BOOTPROG_MAX 8
+#define VOS_BOOTPROG_NAME 24
+struct BootProg {
+  uint8_t kind;
+  char name[VOS_BOOTPROG_NAME + 1] = "";
+};
+
 #define VOS_FW_MAX 16
 #define FW_NAME_MAX 24
 struct FwRule {
@@ -105,6 +113,15 @@ struct VosConfig {
   uint16_t cpuHold;              // secondi minimi prima di scendere
   FixedStr<16> lang;                // codice lingua: "it" (predefinita), "en" (interna) o file /lang/<codice>.json
   bool   sdEnabled;
+#if VOS_WITH_ELF
+  bool   elfOn;                  // sottosistema vde (ELF): di fabbrica ACCESO dal 31/10/2026; solo Admin lo cambia (dai Task); codice nativo senza protezione di memoria
+#endif
+  bool   berryOn;                // sottosistema vdb (Berry): di fabbrica acceso; spento = nessuno script, app o comando di driver parte
+  uint16_t funcOff;              // Funzionalita tolte dall'utente (Sistema > Funzionalita): un bit per id di vos_func_ids.h; 0 = tutte concesse
+  uint8_t  bootN;                // programmi con avvio automatico (di fabbrica nessuno)
+  BootProg boot[VOS_BOOTPROG_MAX];   // l'ordine e l'ordine di avvio, dopo i servizi
+  uint8_t  dataSdN;              // app che salvano i dati sulla microSD (scelta dell'utente; le altre usano la flash)
+  BootProg dataSd[VOS_BOOTPROG_MAX];   // kind 1 app Berry, 2 app ELF (come boot)
   uint8_t sdCs, sdSck, sdMiso, sdMosi;
   // Filtro IP
   uint8_t fwMode;                // 0 spento, 1 solo la mia rete, 2 lista consentita, 3 lista bloccati
@@ -116,8 +133,6 @@ struct VosConfig {
   uint8_t meshRole;              // 0 nodo, 1 gateway, 2 sensore
   FixedStr<65> meshKey;             // chiave comune (64 cifre esadecimali)
   uint8_t meshCh;                // canale di partenza (1-13)
-  // Bluetooth (BLE): spento di fabbrica; true = si accende all'avvio (impostazione dell'utente, vedi vos_ble.h)
-  bool    bleOn;
   // HTTPS
   bool    https;                 // pagina e API cifrate (predefinito acceso)
   bool    apOn;                  // servizio Punto di accesso: se spento e la Wi-Fi di casa e configurata, l'hotspot non riparte da solo

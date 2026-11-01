@@ -9,6 +9,7 @@
 #include "vos_i18n.h"
 #include "vos_audit.h"
 #include "vos_files.h"
+#include "vos_paths.h"
 #include "../drivers/vos_drv_ota.h"
 #include "../drivers/vos_drv_fs.h"
 #include "mbedtls/sha256.h"

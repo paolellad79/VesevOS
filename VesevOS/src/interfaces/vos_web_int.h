@@ -32,7 +32,6 @@
 #include "../core/vos_wd.h"
 #include "../security/vos_tls.h"
 #include "../packages/vos_mesh.h"
-#include "../packages/vos_ble.h"
 #include "../core/vos_service.h"
 #include "../core/vos_serial.h"
 #include "../packages/vos_mfa.h"
@@ -106,10 +105,11 @@ inline esp_err_t ko(Res* s, const ErrBuf& e, const char* code = "error") { retur
 esp_err_t   notFound(Res* s);
 esp_err_t   sendFile(Res* s, const char* fsPath, const char* contentType, bool download);   // un file della memoria interna (vos_web_sendfile.cpp)
 void        tokenTo(Req* r, char* out, size_t cap);             // cookie di sessione in out ("" se manca)
+bool        csrfBlocked(Req* r);                                // true = richiesta partita da un altro sito (CSRF): da rifiutare
 int         userOf(Req* r);                                     // utente della sessione di questa richiesta, -1 se non c'e
 void        whoTo(const Ctx& c, char* out, size_t n);           // "web <utente> <ip>" per il registro
 void        add(PsychicHttpServer* srv, bool secure, const char* path, int method, uint8_t lvl, Handler h);   // registra con livello di accesso
-std::string svcJson();
+std::string svcJson(int role);   // role: i dettagli dei moduli ELF (solo con VOS_WITH_ELF) li vede solo l'Admin
 #define SETTINGS_JSON_MAX 2048
 bool        settingsJson(HeapBuf& out);                         // false = manca la memoria o supera il tetto
 void        delayedRestart(void*);
@@ -131,10 +131,13 @@ using namespace webx;
 // gruppi di percorsi (uno per file); routes() in vos_web.cpp li chiama tutti
 void routesAuth(PsychicHttpServer* S, bool sec);    // vos_web_auth.cpp : accesso, MFA, utenti
 void routesDev(PsychicHttpServer* S, bool sec);     // vos_web_dev.cpp  : periferiche, pin, LED, automazioni
-void routesSd(PsychicHttpServer* S, bool sec);      // vos_web_sd.cpp   : scheda microSD (senza String)
 void routesSys(PsychicHttpServer* S, bool sec);     // vos_web_sys.cpp  : MQTT, autodiagnosi, ora, localizzazione
 void routesNet(PsychicHttpServer* S, bool sec);     // vos_web_net.cpp  : configurazione, filtro IP, watchdog, servizi di rete, HTTPS
 void routesFiles(PsychicHttpServer* S, bool sec);   // vos_web_files.cpp: rete tra schede, Bluetooth, file
+#if VOS_WITH_ELF
+void routesElf(PsychicHttpServer* S, bool sec);     // vos_web_elf.cpp: moduli ELF (elenco, avvio, stop, quarantena)
+#endif
+void routesProg(PsychicHttpServer* S, bool sec);    // vos_web_prog.cpp: programmi in corso, sottosistemi vdb e vde, Funzionalita, avvio automatico
 void routesScript(PsychicHttpServer* S, bool sec);  // vos_web_script.cpp: pagina Script (elenco, stato, avvio, stop)
-void routesApp(PsychicHttpServer* S, bool sec);     // vos_web_app.cpp: pagina App (elenco e controllo dei file .vap)
+void routesApp(PsychicHttpServer* S, bool sec);     // vos_web_app.cpp: pagina App (elenco e controllo dei file .vab)
 void routesUpd(PsychicHttpServer* S, bool sec);     // vos_web_upd.cpp: aggiornamento tramite recovery (ordine in NVS, esito)

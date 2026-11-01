@@ -15,7 +15,7 @@ namespace webx {
 
 // Nome con cui raggiungere la scheda: nome.dominio se il dominio e impostato, altrimenti l'indirizzo IP in uso.
 static void targetHost(char* out, size_t n) {
-  if (cfg.domain.length()) snprintf(out, n, "%s.%s", cfg.hostname.c_str(), cfg.domain.c_str());
+  if (cfg.domain.length()) snprintf(out, n, "%.32s.%.60s", cfg.hostname.c_str(), cfg.domain.c_str());   // limiti del nome (32) e del dominio (60)
   else netIpTo(out, n);
 }
 

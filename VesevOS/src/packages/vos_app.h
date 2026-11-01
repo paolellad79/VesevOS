@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_app.h
-// App (.vap): UN file di testo in /apps con manifest, icona, pagina (controlli dichiarati), codice Berry e dati iniziali.
+// App (.vab): UN file di testo in /apps con manifest, icona, pagina (controlli dichiarati), codice Berry e dati iniziali.
 // 1.7.52: lettura e controllo del file. 1.7.53: ESECUZIONE (start/stop/set), pagina generica con i controlli dichiarati.
-// Formato: vedi il manuale (app .vap)
-//   [manifest]  name= title= version= author= use= who=
+// Formato: vedi il manuale (app .vab)
+//   [manifest]  name= title= version= author= use= who= autostart= (allowed|required|never: puo partire da solo all'avvio?) data= (1 = l'app salva dati: la
+//               pagina App lascia scegliere dove, flash o microSD; senza, nessuna scelta)
 //   [icon]      un solo <svg> (max 2 KB, solo forme semplici: niente script, collegamenti, immagini, stili)
 //   [page]      una riga per controllo:  switch|slider|color|text|button|chart id=... label="..." [min= max= points=]
 //   [code]      codice Berry (max 8 KB) fino alla prossima sezione
@@ -14,6 +15,8 @@
 #include "../core/vos_errbuf.h"
 #include "../core/vos_heapbuf.h"
 #include "../core/vos_common.h"
+#include "../core/vos_layout.h"
+#include "../core/vos_ext.h"
 #include "vos_berry.h"
 
 // Tetti dei testi e dei JSON (oltre: errore, mai testo troncato in silenzio)
@@ -23,8 +26,8 @@
 #define APP_STATE_MAX  45056    // JSON dello stato: uscita (BERRY_STATE_MAX) + valori dei controlli e dei grafici
 
 #if VOS_WITH_BERRY
-#define APP_DIR        "/apps"
-#define APP_EXT        ".vap"
+#define APP_DIR        layoutPath(LAY_APPS)   // /bin (prima della copia /apps, vedi core/vos_layout.h)
+#define APP_EXT        VOS_EXT_APP_B       // da core/vos_ext.h
 #define APP_FILE_MAX   16384
 #define APP_ICON_MAX   2048
 #define APP_CODE_MAX   8192
@@ -34,7 +37,8 @@
 struct AppCtl { char k; char id[13]; char label[25]; int32_t mn, mx; uint16_t pts; };   // k: s=switch l=slider c=color t=text b=button g=chart
 // Tutto a buffer fissi (l'oggetto sta sempre sull'heap: ~11 KB). icon e code sono chiusi con 0; data = righe chiave=valore di [data].
 struct AppInfo {
-  char name[25], title[25], ver[11], author[25], who[6], use[100];
+  char name[25], title[25], ver[11], author[25], who[6], use[100], autostart[9];   // autostart: vuoto = permesso, "required" = obbligatorio, "never" = vietato
+  bool saves;                 // data=1: l'app salva dati (cartella dati scelta dall'utente, vedi vos_prog_data.h)
   char icon[APP_ICON_MAX + 16];
   char code[APP_CODE_MAX + 16];
   char data[APP_DATA_MAX * 54 + 8];
@@ -42,7 +46,7 @@ struct AppInfo {
   int ndata; size_t size, codeLen;
 };
 
-// Legge e controlla il testo di un file .vap. fileName = nome senza cartella ne estensione (deve essere uguale a name=).
+// Legge e controlla il testo di un file .vab. fileName = nome senza cartella ne estensione (deve essere uguale a name=).
 // true = valido (a riempito). false = err contiene "Riga N: motivo".
 bool   appParse(std::string_view text, const char* fileName, AppInfo& a, ErrBuf& err);
 bool   appIconSafe(std::string_view svg);       // true se l'icona SVG e ammessa (solo forme semplici)
@@ -56,6 +60,9 @@ bool   appInfoJson(const char* name, HeapBuf& out, uint8_t role = 2);   // GET /
 // role: 1 = operatore, 2 = admin. L'operatore vede e usa solo le app con who=oper.
 bool   appStart(const char* name, ErrBuf& err, uint8_t role, const char* who);
 bool   appStop(const char* name, ErrBuf& err, uint8_t role);
+int    appRequiredList(char names[][25], int max);                   // le app con autostart=required (nomi), fino a max
+int    appSavesData(const char* name);                              // 1 se il manifest dice data=1, 0 se no, -1 l'app non c'e o non e valida
+int    appAutostart(const char* name);                              // regola di avvio automatico: 0 permesso, 1 obbligatorio, 2 vietato, -1 l'app non c'e o non e valida
 bool   appSet(const char* name, const char* id, const char* value, ErrBuf& err, uint8_t role);   // un controllo della pagina -> on_set(id, valore)
 bool   appStateJson(const char* name, HeapBuf& out, uint8_t role);   // GET /api/app/state: in esecuzione?, valori dei controlli, uscita, errore
 void   appRunText(HeapBuf& out);                                     // comando "app out"
@@ -66,6 +73,9 @@ inline bool   appListJson(HeapBuf& o, uint8_t = 2) { return o.add("{\"ok\":false
 inline bool   appInfoJson(const char*, HeapBuf& o, uint8_t = 2) { return o.add("{\"ok\":false,\"err\":\"App non presenti in questo firmware\"}"); }
 inline bool   appStart(const char*, ErrBuf& err, uint8_t, const char*) { err = "App non presenti in questo firmware"; return false; }
 inline bool   appStop(const char*, ErrBuf& err, uint8_t) { err = "App non presenti in questo firmware"; return false; }
+inline int    appAutostart(const char*) { return -1; }
+inline int    appSavesData(const char*) { return -1; }
+inline int    appRequiredList(char[][25], int) { return 0; }
 inline bool   appSet(const char*, const char*, const char*, ErrBuf& err, uint8_t) { err = "App non presenti in questo firmware"; return false; }
 inline bool   appStateJson(const char*, HeapBuf& o, uint8_t) { return o.add("{\"ok\":false,\"err\":\"App non presenti in questo firmware\"}"); }
 inline void   appRunText(HeapBuf& o) { o.add("App: non presenti in questo firmware\n"); }

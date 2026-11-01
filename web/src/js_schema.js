@@ -8,7 +8,7 @@ function modSchema(j){
  R.push({l:"GND",r:"GND",c:"#222222",cn:t("nero"),v:ext?t("0 V (massa dell'alimentatore unita a GND della scheda)"):t("0 V (massa)"),k:"gnd"});
  j.sig.forEach(function(s,i){var p=parts.filter(function(x){return x.s==s}),d=[];
   p.forEach(function(x){d.push(x.v+" "+(x.k=="serie"?t("in serie"):x.k=="gnd"?t("verso GND"):t("verso l'alimentazione")))});
-  var nt=[tf("segnale a {0}",lv),out?t("scheda → modulo"):t("modulo → scheda")];
+  var nt=[tf("segnale a {0}",lv),j.c=="sd"?t("bus SPI"):out?t("scheda → modulo"):t("modulo → scheda")];
   if(j.pull=="u")nt.push(t("pull-up interno acceso"));if(j.pull=="d")nt.push(t("pull-down interno acceso"));
   if(j.low)nt.push(t("attivo basso (0 = acceso)"));
   R.push({l:j.sug[i]!=null?"GPIO"+j.sug[i]:"GPIO ?",r:s,sg:s,c:j.c=="analogico"?"#d4730a":"#2d6cdf",cn:j.c=="analogico"?t("arancione"):t("blu"),v:nt.concat(d).join(" · "),k:"sig",p:p,out:out})});

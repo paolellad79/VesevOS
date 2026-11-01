@@ -1,4 +1,4 @@
-// VesevOS Recovery - impostazioni lette (in sola lettura) dal file /vesevos.conf di VesevOS, nella partizione LittleFS "spiffs".
+// VesevOS Recovery - impostazioni lette (in sola lettura) dal file /etc/vesevos.conf di VesevOS (o /vesevos.conf, il posto di prima), nella partizione LittleFS "spiffs".
 #pragma once
 #include <string>
 

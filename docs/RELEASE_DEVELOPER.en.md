@@ -10,7 +10,7 @@ Last update: 25 October 2026 (version 1.8.0b; sections 1, 4, 5 and 6 for ESP-IDF
 - Licence: GPL-3.0-or-later or commercial licence (COMMERCIAL.md). The Arduino core (LGPL) is no longer in the product (pure ESP-IDF since phase 5).
 
 ## 2. Layout
-- `VesevOS/` firmware: `src/` with one folder per layer: `core/` core, `security/` access and encryption, `net/` network, `devices/` Device Manager and pins/LED, `drivers/` hardware and radio libraries (`vos_drv_*`), `packages/` optional services, `interfaces/` web and shell. Includes are relative to the file. `vos_page.h`, `vos_common_data.h`, `vos_lang_en.h` and `vos_license_data.h` are GENERATED (in `src/interfaces/` and `src/core/`).
+- `VesevOS/` firmware: `VesevOS.ino` + `src/` with one folder per layer: `core/` core, `security/` access and encryption, `net/` network, `devices/` Device Manager and pins/LED, `drivers/` hardware and radio libraries (`vos_drv_*`), `packages/` optional services, `interfaces/` web and shell. Includes are relative to the file. `vos_page.h`, `vos_common_data.h`, `vos_lang_en.h` and `vos_license_data.h` are GENERATED (in `src/interfaces/` and `src/core/`).
 - `web/index.html` page; `lang/` generated languages.
 - `tools/`: `lang_src.json` (it/en/es/de translations), `mklang.py`, `mkpage.py`, `mklicense.py`, `mkcommon.py`.
 - `tools/stub/`: fake headers to compile on a computer. `tools/webtest/`: fake server + Playwright. `tools/hosttest/`: host tests (`run.sh`).
@@ -33,7 +33,7 @@ Last update: 25 October 2026 (version 1.8.0b; sections 1, 4, 5 and 6 for ESP-IDF
 
 ## 5. Versions
 - New features = new number (1.7.11). Bug fixes only = a letter (1.7.9b).
-- The version goes in: `vos_common.h` (VOS_VERSION), ZIP name, CHANGELOG, README it/en, SBOM, `mkcommon.py`, LEGGIMI, manuals.
+- The version goes in: `vos_common.h` (VOS_VERSION; `VesevOS.ino` is no longer used), ZIP name, CHANGELOG, README it/en, SBOM, `mkcommon.py`, LEGGIMI, manuals.
 - Architecture refactoring: one step = one version, never two layers at once.
 
 ## 6. Release

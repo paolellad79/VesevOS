@@ -33,11 +33,6 @@ static bool js_mesh(HeapBuf& out) { return meshJson(out); }
 static int  st_mesh() { return serviceState("mesh"); }
 static bool set_mesh(bool on, ErrBuf& err) { if (!on) return serviceStop("mesh", err); return serviceStart("mesh", err); }
 #endif
-#if VOS_WITH_BLE
-static bool js_ble(HeapBuf& out) { return bleJson(out); }
-static int  st_ble() { return serviceState("ble"); }
-static bool set_ble(bool on, ErrBuf& err) { if (!on) { bleUserOff(); return true; } return bleUserOn(0, err); }
-#endif
 #if VOS_WITH_MFA
 static int  st_mfa() { for (int i = 0; i < VOS_MAX_USERS; i++) if (cfg.users[i].name.length() && mfaOn(i)) return 1; return 0; }
 static bool js_mfa(HeapBuf& out) {
@@ -62,9 +57,6 @@ static const DevOps VIRT[] = {
 #endif
 #if VOS_WITH_MESH
   { "mesh", "ESP-NOW",           "Radio",      DEV_VIRT, "mesh", ROLE_GUEST, st_mesh, set_mesh, js_mesh,       nullptr },
-#endif
-#if VOS_WITH_BLE
-  { "ble",  "Bluetooth",         "Radio",      DEV_VIRT, "ble",  ROLE_ADMIN, st_ble,  set_ble,  js_ble,        nullptr },
 #endif
 #if VOS_WITH_MFA
   { "mfa",  "MFA (due passaggi)", "Sicurezza", DEV_VIRT, "mfa",  ROLE_GUEST, st_mfa,  nullptr,  js_mfa,         nullptr },

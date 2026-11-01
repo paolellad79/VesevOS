@@ -28,7 +28,7 @@ const char* pinTestBlock(int g) {
   if (claimed[g]) return "gia usato";
   return nullptr;
 }
-bool pinClaim(uint8_t g, const char* o, const char*, bool) { if (claimed[g] && owner[g] && strcmp(owner[g], o)) return false; claimed[g] = 1; owner[g] = o; return true; }
+bool pinClaim(uint8_t g, const char* o, const char*, bool, const char*) { if (claimed[g] && owner[g] && strcmp(owner[g], o)) return false; claimed[g] = 1; owner[g] = o; return true; }
 void pinRelease(uint8_t g) { claimed[g] = 0; owner[g] = nullptr; }
 const DevOps* devFind(const char* id) { static DevOps d; return (!strcmp(id, "mqtt") || !strcmp(id, "boot")) ? &d : nullptr; }
 

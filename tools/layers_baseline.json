@@ -32,7 +32,6 @@
   "vos_auth.cpp": 1,
   "vos_berry.cpp": 5,
   "vos_berry_scripts.cpp": 1,
-  "vos_ble.cpp": 1,
   "vos_io.cpp": 1,
   "vos_led.cpp": 11,
   "vos_mesh.cpp": 5,

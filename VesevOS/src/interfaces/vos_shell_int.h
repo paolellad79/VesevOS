@@ -37,7 +37,6 @@
 #include "../core/vos_fw.h"
 #include "../core/vos_wd.h"
 #include "../packages/vos_mesh.h"
-#include "../packages/vos_ble.h"
 #include "../core/vos_service.h"
 #include "../security/vos_tls.h"
 #include "vos_web.h"
@@ -77,6 +76,10 @@ void shGzip(const char* cmd, const char* line, OutSink& o, const ShellSess& ss, 
 void shUnzip(const char* line, OutSink& o, const ShellSess& ss, uint32_t sess);                       // vos_shell_zip.cpp  : unzip (elenco ed estrazione)
 void shZip(const char* line, OutSink& o, const ShellSess& ss, uint32_t sess);                         // vos_shell_zipc.cpp : zip (crea archivi .zip)
 void shTar(const char* line, OutSink& o, const ShellSess& ss, uint32_t sess);                         // vos_shell_tar.cpp  : tar -t, -x (e -c con vos_shell_tarc.cpp)
+bool shCmdRun(const Word& c, const char* line, OutSink& o, const ShellSess& ss, int role);              // vos_shell_run.cpp  : run, which (programmi .vsb e .vab per nome o percorso)
+bool shRunDirect(const char* line, OutSink& o, const ShellSess& ss, int role);                        // vos_shell_run.cpp  : lancio diretto stile DOS (false = nessun programma con quel nome)
+bool shStartScript(const char* name, OutSink& o);                                                     // vos_shell_run.cpp  : avvia /sbin/<nome>.vsb e lo dice (usata da "script run" e da "run")
+bool shStartApp(const char* name, OutSink& o, int role);                                              // vos_shell_run.cpp  : avvia /bin/<nome>.vab e lo dice (usata da "app start" e da "run")
 bool shCmdBasic(const Word& c, const Word& a1, const char* line, OutSink& o, int role, uint32_t sess);   // vos_shell_basic.cpp: help man whoami id echo df uname exit time
 bool shCmdSys(const Word& c, const Word& a1, const char* line, OutSink& o, int role);     // vos_shell_sys.cpp  : help ... ntp (stato, memoria, ora)
 bool shCmdCpu(const Word& c, const Word& a1, const char* line, OutSink& o, int role);     // vos_shell_cpu.cpp : cpu, lscpu, vesevos-cpuinfo
@@ -92,9 +95,16 @@ void shCleaner(const char* line, OutSink& o, int role);                         
 void shDriveManager(const char* line, OutSink& o, int role, uint32_t sess);       // vos_shell_drive.cpp  : vesevos-drive_manager (volumi; mount/unmount/test inoltrati a "sd")
 void shBackup(const char* line, OutSink& o, int role);                            // vos_shell_backup.cpp : vesevos-backup (backup cifrato della configurazione in /backup, solo Admin)
 void shUpdate(const char* line, OutSink& o, int role);                            // vos_shell_update.cpp : vesevos-update (stato e ordini di aggiornamento tramite recovery, solo Admin)
+void shProgData(uint8_t kind, const char* name, const char* where, OutSink& o);   // vos_shell_progdata.cpp: dove un'app salva i dati (app data, vesevos-elf data)
+void shLspin(const char* line, OutSink& o);                                       // vos_shell_lspin.cpp  : lspin (pin occupati e liberi, come lspci; sola lettura)
+void shDriver(const char* line, OutSink& o, int role, uint32_t sess);             // vos_shell_driver.cpp : vesevos-driver (driver vdb e vde: elenco, info, installa, pin, rimuovi)
+#if VOS_WITH_ELF
+void shVde(const char* line, OutSink& o, int role, uint32_t sess, int base);   // vos_shell_vde.cpp    : parte vde di vesevos-driver (base = posizione del sottocomando: 1, o 2 per vesevos-elf driver)
+void shElf(const char* line, OutSink& o, int role, uint32_t sess);                // vos_shell_elf.cpp    : vesevos-elf (prova di un modulo ELF, solo Admin, solo con VOS_WITH_ELF)
+#endif
 }  // namespace shx
 bool shCmdVesevos(const Word& c, const Word& a1, const char* line, OutSink& o, int role, uint32_t sess); // vos_shell_services.cpp: dispatch dei vesevos-* (services, bugreport, config, network)
 bool shCmdLed(const Word& c, const Word& a1, const char* line, OutSink& o, int role);     // vos_shell_led.cpp  : led, led-color, led-bright (modo, trigger, colori)
 bool shCmdNet(const Word& c, const Word& a1, const char* line, OutSink& o, int role);     // vos_shell_net.cpp  : wifi ... pins (rete, LED, pin, periferiche)
-void shSd(const char* line, OutSink& o, int role);                                 // vos_shell_sd.cpp   : comando "sd" (microSD), senza String
+bool shDriverCmd(const Word& c, const char* line, OutSink& o, int role);          // vos_shell_drvcmd.cpp: comandi dei driver (scritti in Berry, dichiarati nel file del driver)
 bool shCmdAdmin(const Word& c, const Word& a1, const char* line, OutSink& o, int role);   // vos_shell_admin.cpp: config ... reboot (utenti, sicurezza, servizi)

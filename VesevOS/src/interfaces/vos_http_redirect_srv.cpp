@@ -8,10 +8,20 @@
 #include "../drivers/vos_drv_tcpsrv.h"
 #include "../core/vos_fw.h"
 #include "../core/vos_i18n.h"
+#include "../core/vos_log.h"
 #include <stdio.h>
 #include <string.h>
 
 static DrvTcpMini g_srv;
+
+// Scrive nel registro il margine di stack ogni volta che scende a un nuovo minimo (sono pochi righe in tutto): serve a sapere se 4096 byte bastano.
+static void noteStack() {
+  static uint32_t lowest = 0xFFFFFFFFu;
+  uint32_t left = DrvTcpMini::stackFreeMin();
+  if (left >= lowest) return;
+  lowest = left;
+  vlog("%sredirect HTTP: stack libero minimo %u byte su 4096", left < 1024 ? "ATTENZIONE: " : "", (unsigned)left);
+}
 
 static const char* reason(int code) {
   switch (code) {
@@ -56,7 +66,9 @@ static size_t answer(uint32_t ip, char* in, size_t n, char* out, size_t cap) {
   char url[300];
   const char* text = "";
   int code = webx::redirectPlan(methodOk, target, query, url, sizeof url, &text);
-  return buildReply(out, cap, code, url, text, head);
+  size_t len = buildReply(out, cap, code, url, text, head);
+  noteStack();
+  return len;
 }
 
 bool httpRedirectSrvStart(uint16_t port) { return g_srv.begin(port, answer, "httpmin"); }

@@ -8,6 +8,7 @@
 #include "vos_shell_cmdtab.h"
 #include "vos_shell_roles.h"
 #include "../core/vos_common.h"
+#include "../packages/vos_drvcmd.h"
 #include "../core/vos_i18n.h"
 #include <string.h>
 
@@ -31,11 +32,11 @@ const ManText kMan[] = {
       TRK("Con un nome mostra sintassi, descrizione breve, alias e ruolo minimo; 'man' da' di piu."), nullptr},
     "help\nhelp df"},
   {"time",
-    {TRK("Esegue il comando e poi scrive quanto e durato, come il 'time' di bash: real 0m1.234s."),
+    {TRK("Esegue il comando e poi scrive quanto e durato, come nelle shell classiche: real 0m1.234s."),
       TRK("Il tempo e misurato in millisecondi. 'user' e 'sys' non ci sono: FreeRTOS qui non li misura."),
       TRK("Il comando gira con la tua sessione e il tuo ruolo: 'time' non da' nessun permesso in piu."),
       TRK("Non si annida ('time time ls' e un errore). Senza comando scrive l'uso: per l'ora usa 'date'."), nullptr},
-    "time ls /scripts\ntime wifi-scan"},
+    "time ls /sbin\ntime wifi-scan"},
   {"ping",
     {TRK("Invia pacchetti ICMP echo a un indirizzo IPv4 (o a un nome) e scrive le risposte come il ping classico: tempo, TTL, perdita."),
       TRK("-c pacchetti (4, al massimo 20), -i secondi tra i pacchetti (1, minimo 0.2), -W attesa della risposta (2, al massimo 5), -s byte di dati (56, da 16 a 1024), -t TTL (64)."),
@@ -73,6 +74,16 @@ const ManText kMan[] = {
       TRK("Stesse protezioni e tetti di unzip: nomi pericolosi rifiutati, file protetti, 64 voci, 1 MB per voce. Estraendo un file che c'e gia si salta: --overwrite lo sostituisce (il tar classico lo sostituisce sempre)."),
       TRK("Creando: 3 livelli di cartelle e 128 KB in tutto dalla pagina web (1 MB dalla seriale; Ctrl+C ferma). Solo Admin."), nullptr},
     "tar -cf bk.tar scripts\ntar -tvf bk.tar\ntar -xf bk.tar -C /ripristino"},
+  {"run",
+    {TRK("Avvia uno script (.vsb) o un'app (.vab) per nome o per percorso, come nelle vecchie shell a riga di comando. L'estensione si puo omettere: si prova .vsb e poi .vab."),
+      TRK("Un nome senza barre si cerca nella cartella corrente, poi in /bin, in /sbin e nelle vecchie /apps e /scripts. Con una barra (prova.vsb, ./prova, /sbin/prova) si prova solo quel percorso."),
+      TRK("Si puo anche scrivere solo il nome ('prova'): se non e un comando interno parte il programma. I comandi interni vincono sempre; con 'which' vedi cosa partirebbe."),
+      TRK("Per ora gli script partono da /sbin e le app da /bin, e gli argomenti dopo il nome non vengono ancora passati. Stessi permessi di 'script run' e 'app start': solo Admin."), nullptr},
+    "run prova\nrun prova.vsb\nrun /sbin/prova\nprova"},
+  {"which",
+    {TRK("Dice cosa partirebbe scrivendo quel nome, senza avviare niente: un comando interno oppure il percorso del file (script o app)."),
+      TRK("Cerca come 'run'. Un comando interno vince sempre su un file con lo stesso nome. Solo Admin."), nullptr},
+    "which ls\nwhich prova"},
   {"whoami",
     {TRK("Scrive il nome dell'utente con cui hai fatto login in questa sessione."),
       TRK("Senza utente (regole, script, primo avvio senza password) scrive 'sistema'."), nullptr},
@@ -89,7 +100,7 @@ const ManText kMan[] = {
   {"df",
     {TRK("Mostra lo spazio dei dischi: la memoria interna (LittleFS, montata su /) e, se montata, la microSD."),
       TRK("Colonne come df: filesystem, dimensione in blocchi da 1K, usato, disponibile, percentuale d'uso e dove e montato."),
-      TRK("-h scrive le dimensioni in K, M o G. La microSD non e dentro l'albero delle cartelle: si usa con il comando 'sd'."), nullptr},
+      TRK("-h scrive le dimensioni in K, M o G. La microSD non e dentro l'albero delle cartelle: la gestisce il driver microSD (comando 'sd')."), nullptr},
     "df\ndf -h"},
   {"uname",
     {TRK("Senza opzioni scrive nome, versione e core del sistema. Con le opzioni, come il comando uname classico."),
@@ -102,11 +113,11 @@ const ManText kMan[] = {
   {"ls",
     {TRK("Elenca file e cartelle. Senza percorso usa la cartella corrente; i percorsi possono essere relativi."),
       TRK("-l formato lungo (senza data), -a anche i nomi nascosti, -h dimensioni in K o M, -1 una voce per riga."), nullptr},
-    "ls\nls -l /scripts\nls -lah .."},
+    "ls\nls -l /sbin\nls -lah .."},
   {"cd",
     {TRK("Cambia la cartella corrente. Senza nome torna alla radice (~). '..' sale di un livello, '-' torna alla cartella di prima."),
       TRK("I percorsi senza / iniziale partono dalla cartella corrente. La cartella e per sessione e si perde con il logout."), nullptr},
-    "cd /scripts\ncd ..\ncd -"},
+    "cd /sbin\ncd ..\ncd -"},
   {"cat",
     {TRK("Mostra il contenuto di un file di testo. Il percorso puo essere relativo alla cartella corrente."),
       TRK("Non mostra i file binari ne' quelli sopra 32 KB; i file protetti del sistema non si aprono."), nullptr},
@@ -136,21 +147,30 @@ const ManText kMan[] = {
       TRK("Non tocca MAI: configurazione, periferiche (io.cfg), utenti, certificati e chiavi, script, app, regole, lingue, registro di audit (si svuota solo con 'audit'), file protetti, cartelle intere. Non scende nelle sottocartelle."),
       TRK("Rapporti e registri possono contenere dati che identificano l'uso della scheda: cancellarli e un tuo diritto. Si registra una riga nel registro con le categorie e i byte liberati."), nullptr},
     "vesevos-cleaner\nvesevos-cleaner tmp crash\nvesevos-cleaner -y tmp"},
+  {"lspin",
+    {TRK("Elenca i pin come lspci elenca le periferiche: una riga per pin occupato con la periferica, il segnale e il tipo (periferica, driver, riservato dal sistema). Sola lettura: non cambia nessun pin."),
+      TRK("-v aggiunge il livello letto adesso, le funzioni possibili e la nota; -vv mostra anche i pin liberi; -s <pin> mostra solo quel pin; -k <nome> solo i pin di una periferica o di un driver. Usa gli stessi dati della pagina Pin; 'pins' resta come elenco semplice."), nullptr, nullptr},
+    "lspin\nlspin -v\nlspin -vv\nlspin -s 12\nlspin -k sd1"},
+  {"vesevos-driver",
+    {TRK("Una sola famiglia di comandi per i driver delle periferiche in /devs, sia vdb sia vde: il tipo si capisce dall'estensione del file o dal nome. list elenca, info mostra i dettagli."),
+      TRK("install <file|nome> [prefisso] [pin,pin] (Admin) mette il file in /devs, se serve, e crea le periferiche sui pin che scegli tu o, senza, su quelli proposti; il controllo dei pin (vietati, gia usati, doppi) e quello del registro dei pin. Un nome vale per un solo driver."),
+      TRK("pins <nome> pin,pin (Admin) da' altri pin a un driver vde installato: se i nuovi non vanno restano i vecchi e dice quale pin e occupato e da chi. remove <nome> (Admin) toglie il driver: un vde libera i pin, un vdb lascia le periferiche gia create (si tolgono da Periferiche)."), nullptr},
+    "vesevos-driver\nvesevos-driver info microsd\nvesevos-driver install microsd 10,11,12,13\nvesevos-driver pins bmp280 21,22\nvesevos-driver remove microsd"},
   {"vesevos-drive_manager",
     {TRK("Elenca i volumi: memoria interna (LittleFS, su /) e microSD se la periferica 'sd' e configurata. Per ognuno stato (montata, non montata, non presente, formato non supportato), formato, dimensione, usato, libero e, per la microSD, la frequenza SPI."),
-      TRK("mount, unmount e test (solo Admin) sono i comandi 'sd mount', 'sd unmount' e 'sd test': passano dal percorso normale, con gli stessi controlli. unmount chiede conferma se la scheda e in uso. status e come l'elenco (l'Admin vede anche 'sd status')."),
-      TRK("NON c'e format: VesevOS non formatta mai la microSD (formattala in FAT32 sul computer) e exFAT non e supportato. Se la microSD non e configurata, aggiungila dalla pagina Periferiche."), nullptr},
-    "vesevos-drive_manager\nvesevos-drive_manager mount\nvesevos-drive_manager unmount"},
+      TRK("mount, unmount e test (solo Admin) passano dal comando 'sd' del driver microSD, con gli stessi controlli; senza il driver dicono che manca. unmount rifiuta se la scheda e in uso. status e come l'elenco (l'Admin vede anche 'sd status')."),
+      TRK("format microsd FORMATTA [--attendi] (solo Admin) formatta la microSD in FAT32 e CANCELLA TUTTO; senza la parola dice cosa succede e non fa niente. La formattazione parte in un task a parte e il comando torna subito: si segue con 'sd status' o con la riga della microSD in 'vesevos-drive_manager'. Con --attendi il comando aspetta (al massimo 60 secondi) e scrive il tempo trascorso. Funziona anche con una scheda che non si monta (exFAT, vuota). La memoria interna non si formatta. Se la microSD non e configurata, installa il driver microSD dalla pagina Driver."), nullptr},
+    "vesevos-drive_manager\nvesevos-drive_manager mount\nvesevos-drive_manager unmount\nvesevos-drive_manager format microsd FORMATTA [--attendi]"},
   {"vesevos-network",
     {TRK("Riepilogo di rete in testo: modo (client, hotspot, aereo), IP, maschera, gateway, DNS, canale, segnale, rete Wi-Fi, nome host e mDNS, MAC, DHCP, NTP, traffico, hotspot e servizi aperti con le porte."),
       TRK("Mai le password. Il MAC e mascherato (AA:BB:CC:xx:xx:xx) come in vesevos-bugreport; con -f (solo Admin) e intero. Non fa scansioni ne prove: e veloce."),
       TRK("scan e uguale a 'wifi scan' e ping a 'ping': passano dal percorso normale (solo Admin, stessi limiti). ip, net e wifi restano com'erano."), nullptr},
     "vesevos-network\nvesevos-network -f\nvesevos-network scan\nvesevos-network ping 192.168.1.1"},
   {"vesevos-backup",
-    {TRK("Solo Admin. Salva e ripristina la CONFIGURAZIONE (rete, utenti, servizi, periferiche) in /backup, sempre CIFRATA con una frase che scegli tu. Senza argomenti mostra i backup, lo spazio libero e l'avvertenza."),
-      TRK("create [nome] crea /backup/<nome>.vbk (la frase si chiede due volte). restore <nome> chiede la frase, dice quante righe cambierebbero (mai i valori) e chiede conferma prima di applicare. delete <nome> cancella dopo conferma. Al massimo 5 backup."),
+    {TRK("Solo Admin. Salva e ripristina la CONFIGURAZIONE (rete, utenti, servizi, periferiche) in /var/backup, sempre CIFRATA con una frase che scegli tu. Senza argomenti mostra i backup, lo spazio libero e l'avvertenza."),
+      TRK("create [nome] crea /var/backup/<nome>.vbk (la frase si chiede due volte). restore <nome> chiede la frase, dice quante righe cambierebbero (mai i valori) e chiede conferma prima di applicare. delete <nome> cancella dopo conferma. Al massimo 5 backup."),
       TRK("Il backup contiene password e chiavi: la frase non si scrive mai nella riga (la chiedo io, senza mostrarla) e non resta in cronologia. Se la perdi non si recupera. Tienilo dove decidi tu: e un tuo dato personale."),
-      TRK("Stesso formato del backup con i segreti della pagina: si ripristina anche da li (scaricalo da Sistema > File) e viceversa (caricalo in /backup con il nome che finisce in .vbk). Nomi: lettere, numeri, - e _."), nullptr},
+      TRK("Stesso formato del backup con i segreti della pagina: si ripristina anche da li (scaricalo da Sistema > File) e viceversa (caricalo in /var/backup con il nome che finisce in .vbk). Nomi: lettere, numeri, - e _."), nullptr},
     "vesevos-backup\nvesevos-backup create prima-della-prova\nvesevos-backup restore prima-della-prova\nvesevos-backup delete prima-della-prova"},
   {"vesevos-update",
     {TRK("Solo Admin. Senza argomenti mostra versione del firmware e del recovery, le partizioni, lo spazio e l'esito dell'ultimo ordine. Non cerca aggiornamenti in rete da solo."),
@@ -158,6 +178,14 @@ const ManText kMan[] = {
       TRK("net <url-https> <sha256> [versione]: il recovery scarica da un indirizzo https consentito (le Release ufficiali o i prefissi di /updurl.txt) e controlla lunghezza e SHA-256. Sovrascrive il firmware prima di verificare lo SHA completo."),
       TRK("Chiede sempre conferma (y/n, o yes dalla pagina). Sono gli stessi ordini della pagina Aggiornamento: nessun permesso in piu. Il recovery lavora in HTTP sulla rete locale."), nullptr},
     "vesevos-update\nvesevos-update file 192.168.1.20\nvesevos-update net https://github.com/paolellad79/VesevOS/releases/download/v1.7.71/VesevOS-1.7.71.bin <sha256>"},
+#if VOS_WITH_ELF
+  {"vesevos-elf",
+    {TRK("Moduli ELF (.vae): codice nativo caricato a richiesta. Lettura (status, ps, which, list, quarantine): Operatore; il resto: Admin. Funziona con il sottosistema vde acceso (di fabbrica lo e; vesevos-services vde start|stop)."),
+      TRK("run [-t secondi] [-u gruppi] <nome|file> [argomenti]: avvia il modulo in sottofondo e torna subito. Un nome semplice e il file /bin/<nome>.vae; un percorso puo stare in /bin, /apps, /devs o sulla microSD. Senza -u concede i gruppi di funzioni che il modulo chiede; con -u solo quelli indicati (per esempio log,sd); il gruppo base e sempre concesso. Le Funzionalita tolte in Sistema valgono comunque. -t ferma il modulo dopo quei secondi; senza -t gira finche non finisce o non lo fermi. Al massimo 4 moduli insieme, 128 KB di RAM ciascuno."),
+      TRK("ps: moduli in corso e ultimi finiti. kill <numero|nome>: ferma. which <nome|file>: dove sta e se e valido. list: i .vae in /bin. install <file>: controlla e mette in /bin. quarantine / unquarantine <nome>: elenco e rimozione; un modulo che fa cadere la scheda 3 volte di fila non parte piu da solo. driver list|info|install|remove: driver in ELF (.vde) in /devs; install <file|nome> [pin,pin] da' i pin: i tuoi o, senza, quelli proposti dal firmware (stesso controllo di tutte le periferiche); remove toglie pin e file."),
+      TRK("test [-t secondi] [-u gruppi] <file> [argomenti]: prova in primo piano (tetto 1-30 s, di solito 5) e scrive valore restituito, tempo e memoria. Se un modulo cade, la scheda si riavvia."), nullptr},
+    "vesevos-elf run -u log,sd sensore\nvesevos-elf driver install bmp1.vde 21,22\nvesevos-elf ps\nvesevos-elf kill sensore\nvesevos-elf install /media/sd/sensore.vae\nvesevos-elf test -t 10 -u log prova.vae uno due"},
+#endif
   {"btn",
     {TRK("Mostra o cambia l'azione di 1, 2 o 3 click sul tasto BOOT: none (niente), airplane (modo aereo), wps, find (trova la scheda)."),
       TRK("I vecchi nomi niente, aereo, wps e trova restano validi. Cambiare e solo per l'Admin."), nullptr},
@@ -222,6 +250,10 @@ void shx::cmdHelpList(OutSink& o, int role) {
     if (!roleAllows(role, Word(ci.name, strlen(ci.name)), Word())) continue;
     o.printf("  %-22s %s\r\n", ci.name, tr(ci.brief));
   }
+  if (role >= ROLE_OPER) {                                           // comandi dei driver (scritti in Berry, nei loro file)
+    char words[8][13];
+    for (int i = 0, n = drvCmdWords(words, 8); i < n; i++) o.printf("  %-22s %s\r\n", words[i], tr("comando di un driver"));
+  }
   o.println(tr("Tab completa comandi, opzioni e percorsi; due Tab di fila elencano le possibilita."));
 }
 
@@ -230,7 +262,8 @@ bool shx::cmdHelpOne(OutSink& o, const char* name, int role, bool full) {
   w.lower();
   canonicalName(w);
   const CmdInfo* ci = cmdFind(w.c_str());
-  if (!ci || !roleAllows(role, Word(ci->name, strlen(ci->name)), Word())) return false;   // stessa risposta per "non esiste" e "non per te"
+  if (!ci) return drvCmdHelp(o, w.c_str(), role);                    // forse e il comando di un driver
+  if (!roleAllows(role, Word(ci->name, strlen(ci->name)), Word())) return false;   // stessa risposta per "non esiste" e "non per te"
   const ManText* man = manFind(ci->name);
   int base = minRole(*ci, "");
 

@@ -2,36 +2,20 @@
 /* Copyright (C) 2026 Domenico Paolella */
 
 :root {
-  --sfondo: #f6f7f9;
-  --carta: #ffffff;
-  --testo: #1b1f24;
-  --testo2: #4a5360;
-  --bordo: #c3cad3;
-  --accento: #0b5cad;
-  --accento-testo: #ffffff;
-  --ok: #0a6b2d;
-  --err: #a31515;
-  --err-sfondo: #fdecec;
-  --avviso-sfondo: #fff4d6;
-  --info-sfondo: #e8f1fb;
-  --focus: #b35c00;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --sfondo: #12161b;
-    --carta: #1b2129;
-    --testo: #eaeef3;
-    --testo2: #b4bdc9;
-    --bordo: #3b4552;
-    --accento: #6cb2ff;
-    --accento-testo: #07131f;
-    --ok: #5fd68a;
-    --err: #ff8f8f;
-    --err-sfondo: #3a1c1c;
-    --avviso-sfondo: #3a3017;
-    --info-sfondo: #17283a;
-    --focus: #ffb454;
-  }
+  /* i colori vengono da ../assets/sito.css (gli stessi della pagina della scheda, con il tema chiaro/scuro) */
+  --sfondo: var(--bg);
+  --carta: var(--card);
+  --testo: var(--tx);
+  --testo2: var(--mut);
+  --bordo: var(--bd);
+  --accento: var(--ac);
+  --accento-testo: var(--ac-tx);
+  --ok: var(--okt);
+  --err: var(--kot);
+  --err-sfondo: var(--kobg);
+  --avviso-sfondo: var(--wabg);
+  --info-sfondo: var(--vbg);
+  --focus: var(--wat);
 }
 
 * { box-sizing: border-box; }
@@ -109,3 +93,7 @@ footer { color: var(--testo2); font-size: 0.85rem; padding-bottom: 24px; }
 .salta { position: absolute; left: -999px; }
 .salta:focus { left: 8px; top: 8px; background: var(--carta); padding: 8px; z-index: 5; }
 [hidden] { display: none !important; }
+
+.avvisi-scelta { margin: 0.5rem 0 0; padding-left: 1.2rem; }
+.avvisi-scelta li { background: var(--avviso-sfondo); color: var(--testo); border-left: 4px solid var(--focus); padding: 0.4rem 0.6rem; margin: 0.3rem 0; list-style: none; }
+input.sc { width: 1.2rem; height: 1.2rem; }

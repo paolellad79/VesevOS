@@ -22,8 +22,11 @@ class VosMutex;
 
 // Percorso pulito in out (almeno FS_PATH_MAX + 1 byte). Toglie gli spazi ai lati e la barra finale; un percorso vuoto diventa "/".
 // false se non e valido: piu di 100 caratteri, "..", "//", "\", caratteri di controllo (anche uno zero dentro) o non ASCII.
+// Qui "/sd" e "/sd/x" diventano "/media/sd" e "/media/sd/x" (scorciatoia, vedi vos_paths.h): anche cosi superare 100 caratteri e un errore.
 bool   fsCleanTo(std::string_view in, char* out, size_t cap);
-bool   fsProtected(const char* cleanPath);       // file di sistema nascosti
+bool   fsProtected(const char* cleanPath);
+// Spazio libero, in byte, dove sta il percorso pulito: sulla microSD quello del suo volume (al massimo 4 GB: size_t), altrimenti quello della memoria interna.
+size_t fsFreeAt(const char* cleanPath);       // file di sistema nascosti e tutto cio che sta sotto /media (non e memoria interna)
 // Elenco {"ok":true,"path":"/","list":[{n,d,s}],"more":false,...} scritto in j (che ha il tetto FS_JSON_MAX).
 // Un percorso non valido o una cartella che manca danno un JSON {"ok":false,"err":...} e ritornano true: false solo se manca la memoria.
 bool   fsListBuild(std::string_view path, HeapBuf& j);
@@ -52,4 +55,4 @@ struct FsTmpStat {
   char     firstOrphan[FS_PATH_MAX + 1] = "";   // il primo orfano, per il log
 };
 void fsTmpClean(const char* dir, FsTmpStat& st);   // una cartella. Lenta con tante voci: da un task di fondo, mai dal web server
-void fsTmpCleanKnown(FsTmpStat& st);               // "/", "/scripts", "/apps", "/lang"
+void fsTmpCleanKnown(FsTmpStat& st);               // "/", gli script, le app (cartelle in uso, vedi vos_layout.h), "/lang", "/var", "/etc", "/var/backup"

@@ -9,10 +9,13 @@
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
 <title>VesevOS - Prima installazione</title>
+<link rel="stylesheet" href="../assets/sito.css">
 <link rel="stylesheet" href="stile.css">
+<script src="../assets/sito.js" defer></script>
 </head>
-<body>
+<body data-pg="flash" data-propria="1">
 <a class="salta" href="#principale" data-t="salta">Vai al contenuto</a>
+<div id="nav-sito"></div>
 <header>
   <div class="barra">
     <h1 id="titolo" data-t="titolo">VesevOS - Prima installazione</h1>
@@ -33,7 +36,6 @@
     <section class="riquadro info" aria-labelledby="h-nota">
       <h2 id="h-nota" data-t="nota_agg_t"></h2>
       <p data-t="nota_agg"></p>
-      <p data-t="prova_nota"></p>
     </section>
 
     <section class="riquadro avviso" aria-labelledby="h-avvisi">
@@ -50,6 +52,8 @@
       <h2 id="h-scelta" data-t="scelta_t"></h2>
       <label for="pacchetto" data-t="pacchetto"></label>
       <select id="pacchetto"></select>
+      <p data-t="sc_intro"></p>
+      <ul id="avvisi-scelta" class="avvisi-scelta" aria-live="polite"></ul>
     </section>
 
     <section class="riquadro" aria-labelledby="h-controlli">

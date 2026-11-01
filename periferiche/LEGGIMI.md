@@ -4,12 +4,12 @@ Questa cartella e il catalogo delle periferiche: sensori e moduli che si collega
 Un giorno la scheda potra scaricare da GitHub solo quella che ti serve. Oggi NON e ancora cosi (vedi "Stato").
 
 ## Idea
-- Una periferica = un file, per esempio `dht11.vdp`.
+- Una periferica = un file, per esempio `dht11.vdb`.
 - Il file dice come collegarla: i pin con il loro nome vero (VDD, DATA, SDA, SCL, GND...) e il colore dei fili.
 - Nella pagina di VesevOS si sceglie la periferica, si vedono i fili da collegare e la scheda propone i pin liberi.
 
 ## Formato dei file
-- Si usa lo stesso formato delle schede modulo `.vdp` che esistono gia (cartella `docs/devs`). Sono solo dati, niente codice.
+- Si usa lo stesso formato delle schede modulo `.vdb` che esistono gia (cartella `docs/devs`). Sono solo dati, niente codice.
 - Sezioni: `[module]`, `[signals]`, `[pins]` (facoltativa), `[icon]`, `[wiring]` (facoltativa). Il file deve avere lo stesso nome del campo `name=`.
 - Chiavi di `[module]` usate: `name`, `title`, `class` (rele, led, pin, ingresso, analogico, i2c), `power`, `level`, `pull`, `part`, `author`, `version`, `license`, `warn`.
 - Solo per `class=i2c`: `driver=` (oggi solo `bmp280`), `addr=` (0x76 o 0x77) e `freq=` (100000 o 400000, facoltativa).
@@ -34,8 +34,8 @@ Un giorno la scheda potra scaricare da GitHub solo quella che ti serve. Oggi NON
 - Analogico: solo i GPIO 1-10 (gli altri disturbano il Wi-Fi).
 - I numeri dei GPIO NON si scrivono nei file del catalogo: li sceglie la scheda tra quelli liberi.
 
-### Programma Berry del driver (idea)
-- Il formato `.vdp` oggi non contiene codice. Un driver potrebbe essere un file Berry accanto (`<nome>.vsc` o `.vap`).
+### Programma VesevOS del driver (idea)
+- Il formato `.vdb` oggi non contiene codice. Un driver potrebbe essere un file di script accanto (`<nome>.vsb` o `.vab`).
 - Non basta: il bus I2C (BMP280) ha il suo driver nel firmware (dalla 1.7.61), il DHT11 (tempi in microsecondi) ne vuole ancora uno.
 
 ## Stato (cosa funziona davvero)
@@ -44,7 +44,7 @@ Un giorno la scheda potra scaricare da GitHub solo quella che ti serve. Oggi NON
   (nelle app: `dev_get("nome")` = centesimi di grado, `dev_get("nome.p")` = pascal). Il chip BME280 (id 0x60) viene accettato ma misura solo temperatura e pressione, non l'umidita.
 - Solo schema, NON legge niente: `dht11`. Manca nel firmware il driver DHT (un filo).
   Se lo installi dalla pagina, la scheda crea solo un pin normale: non e un errore, ma non misura. Lo dice anche l'avviso (`warn`) dentro il file.
-- Il download da GitHub NON esiste ancora. Oggi i file si caricano a mano dalla pagina Periferiche, come i `.vdp` di `docs/devs`.
+- Il download da GitHub NON esiste ancora. Oggi i file si caricano a mano dalla pagina Periferiche, come i `.vdb` di `docs/devs`.
 - Quando si fara serviranno almeno:
   - firma Ed25519 (ancora da fare) e controllo SHA-256 dell'indice;
   - consenso esplicito prima del primo scarico (privacy);
@@ -52,14 +52,14 @@ Un giorno la scheda potra scaricare da GitHub solo quella che ti serve. Oggi NON
   - catalogo spegnibile e uso offline (file a mano).
 
 ## Come si aggiunge una periferica
-1. Copia un file simile (`ldr.vdp` come modello) e dagli il nome nuovo: minuscole, numeri, `_` e `-`, massimo 24 caratteri.
+1. Copia un file simile (`ldr.vdb` come modello) e dagli il nome nuovo: minuscole, numeri, `_` e `-`, massimo 24 caratteri.
 2. Scrivi `name=` uguale al nome del file, il titolo (massimo 32 caratteri) e un avviso `warn=` (massimo 80 caratteri).
 3. Metti nella sezione `[pins]` i fili con i nomi veri dei pin e i colori (e, se vuoi, anche nei commenti). Scrivi se e "FUNZIONA" o "SOLO SCHEMA".
 4. Scrivi i dati con parole tue e con i dati dal datasheet. Non copiare testi o disegni protetti.
 5. Licenza dei dati: CC0 (come gli esempi), salvo accordi diversi. Il codice resta GPL-3.0-or-later o commerciale.
 6. Controlla il file con le prove sul computer (`tools/hosttest/run.sh`, parte `test_mod`; legge `docs/devs`: per questa cartella
    si puo provare con una copia della prova che punta a `periferiche/`).
-7. Aggiungi la riga in `INDICE.md` con il suo SHA-256 (comando: `shasum -a 256 nomefile.vdp`). Se cambi il file, aggiorna l'impronta.
+7. Aggiungi la riga in `INDICE.md` con il suo SHA-256 (comando: `shasum -a 256 nomefile.vdb`). Se cambi il file, aggiorna l'impronta.
 
 ## Controllo legale (valutazione preliminare, non e consulenza legale; le norme possono essere cambiate)
 - **Licenze:** i file del catalogo sono dati nostri con licenza CC0, compatibile con GPL-3.0-or-later e con la licenza commerciale.

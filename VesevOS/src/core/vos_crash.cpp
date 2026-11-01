@@ -7,6 +7,7 @@
 #include "vos_strbuf.h"
 #include "vos_i18n.h"
 #include "vos_time.h"
+#include "vos_layout.h"
 #include "../drivers/vos_drv_fs.h"
 #include "../drivers/vos_drv_panic.h"
 #include <freertos/FreeRTOS.h>
@@ -19,7 +20,7 @@
 
 #define CRASH_MAGIC 0x56435253u      // "VCRS"
 #define CRASH_BT    16
-#define CRASH_FILE  "/crash.txt"
+#define CRASH_FILE  layoutPath(LAY_CRASH)    // /var/crash.txt (prima della copia /crash.txt)
 #define CRASH_KEEP  5
 
 struct CrashRtc { uint32_t magic, chk; int32_t core; uint32_t pc, n; uint32_t bt[CRASH_BT]; uint8_t corrupt, more, pad0, pad1; char reason[48]; char task[16]; char ver[16]; };

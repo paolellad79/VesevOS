@@ -4,11 +4,17 @@
  function nx(){while(act<2&&q.length)run(q.shift())}
  window.fetch=function(u,o){return new Promise(function(res,rej){q.push({u:u,o:o,res:res,rej:rej});nx()})}})();
 var GRP=[["home","Home"],["dev","Dispositivi"],["rete","Rete"],["prog","Programmi"],["sys","Sistema"],["sec","Sicurezza"],["adm","Admin"],["info","Informazioni"]];
-var GMAP={home:["sum"],dev:["dmgr","stat","mem","cpu","led","pin","io","btn","usb","ble","rad"],rete:["wifi","wps","ap","radio","dhcp","dns","http","https","mdns","mqtt","mesh"],prog:["auto","script","app"],sys:["ora","ntp","loc","power","file","task","wd","log","shell"],sec:["sec","mfa","users","fw","cert","audit"],adm:["conf","boot","selftest"],info:["help","acc","legal"]};
+var GMAP={home:["sum"],dev:["dmgr","stat","mem","cpu","led","pin","io","btn","usb","rad"],rete:["wifi","wps","ap","radio","dhcp","dns","http","https","mdns","mqtt","mesh"],prog:["auto","script","app","drv"],sys:["ora","ntp","loc","power","func","file","task","wd","log","shell"],sec:["sec","mfa","users","fw","cert","audit"],adm:["conf","boot","selftest"],info:["help","acc","legal"]};
 var GICO={home:"i-home",dev:"i-usb",rete:"i-wifi",prog:"i-prog",sys:"i-gear",sec:"i-shield",adm:"i-adm",info:"i-info"};
-var TABS=[["sum","Panoramica"],["wifi","Wi-Fi"],["wps","WPS"],["mqtt","MQTT"],["mesh","Rete tra schede"],["pin","Pin"],["io","Periferiche"],["led","LED"],["task","Task"],["file","File"],["ora","Ora"],["loc","Localizzazione"],["auto","Automazioni"],["script","Script"],["app","App"],["boot","Avvio"],["wd","Watchdog"],["log","Log"],["shell","Terminale"],["conf","Configurazione"],["legal","Note legali"],["help","Aiuto"],["sec","Password"],["users","Utenti"],["fw","Filtro IP"],["https","HTTPS"],["audit","Stato conformita"],["mfa","MFA"],["cert","Certificato"],["stat","Statistiche"],["selftest","Autotest"],["power","Risparmio energia"],["acc","Accessibilita"],["ap","Punto di accesso"],["http","HTTP"],["radio","Radio"],["ntp","NTP"],["dhcp","DHCP"],["dns","DNS"],["mdns","mDNS"],["ble","Bluetooth"],["dmgr","Elenco dispositivi"],["btn","Tasto BOOT"],["usb","USB"],["mem","Memoria"],["cpu","Processore"],["rad","Radio 2,4 GHz"]];
+var TABS=[["sum","Panoramica"],["wifi","Wi-Fi"],["wps","WPS"],["mqtt","MQTT"],["mesh","Rete tra schede"],["pin","Pin"],["io","Periferiche"],["led","LED"],["task","Task"],["file","File"],["ora","Ora"],["loc","Localizzazione"],["auto","Automazioni"],["script","Script"],["app","App"],["drv","Driver"],["func","Funzionalita"],["boot","Avvio"],["wd","Watchdog"],["log","Log"],["shell","Terminale"],["conf","Configurazione"],["legal","Note legali"],["help","Aiuto"],["sec","Password"],["users","Utenti"],["fw","Filtro IP"],["https","HTTPS"],["audit","Stato conformita"],["mfa","MFA"],["cert","Certificato"],["stat","Statistiche"],["selftest","Autotest"],["power","Risparmio energia"],["acc","Accessibilita"],["ap","Punto di accesso"],["http","HTTP"],["radio","Radio"],["ntp","NTP"],["dhcp","DHCP"],["dns","DNS"],["mdns","mDNS"],["dmgr","Elenco dispositivi"],["btn","Tasto BOOT"],["usb","USB"],["mem","Memoria"],["cpu","Processore"],["rad","Radio 2,4 GHz"]];
+/* UN solo punto per le estensioni dei file (come core/vos_ext.h): schema v + tipo (s script, a app, d driver) + linguaggio (b Berry, e ELF). Oggi script .vsb, app Berry .vab, app ELF .vae, driver .vdb e .vde. I vecchi nomi (.vsc, .vap, .vel) si leggono ancora e non si scrivono piu */
+var EXT={s:".vsb",b:".vab",e:".vae",db:".vdb",de:".vde"},EXTOLD={s:".vsc",b:".vap",e:".vel"};
+/* Un file di programma: prima il nome nuovo, se non c'e il vecchio. fn(percorso) torna una promessa con {ok,...} */
+function progTry(dir,n,k,fn){return fn(dir+n+EXT[k]).then(function(o){return o.ok?o:fn(dir+n+EXTOLD[k]).then(function(o2){return o2.ok?o2:o})})}
+/* Il file finisce per l'estensione nuova o per la vecchia di quel tipo? */
+function extOk(name,k){var l=name.toLowerCase();return l.slice(-EXT[k].length)==EXT[k]||l.slice(-EXTOLD[k].length)==EXTOLD[k]}
 var SECN=["Stato","Comandi","Radio","Diagnostica"];
-var TSEC={stat:0,mem:0,cpu:0,led:1,pin:1,io:1,btn:1,usb:1,ble:2,rad:2,task:3,wd:3,log:3,shell:3};
+var TSEC={stat:0,mem:0,cpu:0,led:1,pin:1,io:1,btn:1,usb:1,rad:2,task:3,wd:3,log:3,shell:3};
 var LASTG={};
 function gOf(id){for(var g in GMAP)if(GMAP[g].indexOf(id)>=0)return g;return"home"}
 var A11Y={fs:0,hc:"auto",cb:0,rm:"auto"};try{var _a=JSON.parse(localStorage.getItem("va11y")||"{}");for(var _k in A11Y)if(_a[_k]!==undefined)A11Y[_k]=_a[_k]}catch(e){}
@@ -35,7 +41,8 @@ var THEME="auto";try{THEME=localStorage.getItem("vth")||"auto"}catch(e){}
 function themeApply(){var m=THEME;if(m=="auto")m=(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches)?"light":"dark";document.documentElement.setAttribute("data-theme",m);
  var nm=THEME=="auto"?t("Automatico"):THEME=="light"?t("Chiaro"):t("Scuro");
  var u=$("thu");if(u)u.setAttribute("href",THEME=="auto"?"#i-auto":THEME=="light"?"#i-sun":"#i-moon");var b=$("thb");if(b){var nt=tf("Tema: {0}",nm);b.title=nt;b.setAttribute("aria-label",nt)}
- ["auto","light","dark"].forEach(function(k){var e=$("tm_"+k);if(e)e.className=k==THEME?"on":""})}
+ ["auto","light","dark"].forEach(function(k){var e=$("tm_"+k);if(e)e.className=k==THEME?"on":""});
+ if(typeof cur!="undefined"&&cur=="pin"&&typeof PM!="undefined"&&PM.length)drawPins()}
 function thOpen(on){var m=$("thm");if(m)m.className=on?"pop":"pop hide";var b=$("thb");if(b)b.setAttribute("aria-expanded",on?"true":"false")}
 function themeSet(m){THEME=m;try{localStorage.setItem("vth",THEME)}catch(e){}themeApply();thOpen(false)}
 function thMenu(e){e.stopPropagation();thOpen($("thm").classList.contains("hide"))}

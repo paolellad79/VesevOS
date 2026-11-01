@@ -80,7 +80,7 @@ MQTT, rete tra schede, Bluetooth, server dell'ora per altri dispositivi e filtro
 - **Rete tra schede** (Servizi > Rete tra schede, ESP-NOW): le schede parlano senza router, fino a 3 salti. Serve la stessa
   chiave comune (64 cifre) su tutte; i messaggi senza chiave giusta vengono scartati. Ruoli: nodo, gateway (manda tutto a MQTT), sensore.
   Il contenuto non e cifrato: non mandare dati personali.
-- **Bluetooth** (nella stessa pagina): per telefoni e applicazioni. Spento di fabbrica; lo accende la pagina, la shell (`ble on [minuti]`) o un'app (API `POST /api/ble`, con `min` facoltativo). Di fabbrica resta acceso finche non lo si spegne; il telefono si accoppia con un codice casuale a 6 cifre, diverso a ogni accensione e visibile solo all'amministratore.
+- **Bluetooth**: spento e inutilizzabile da solo (nessun comando, nessun interruttore, nessuna rotta). Lo accende solo un'app con il permesso `ble` (vedi `docs/ble-driver.md`); il telefono si accoppia con un codice casuale a 6 cifre, diverso a ogni accensione e visibile solo all'amministratore (programma `ble.vsb`).
 
 ## 7. Filtro IP
 Sicurezza > Filtro IP decide chi puo parlare con la scheda (solo la mia rete, lista consentita, lista bloccati).
@@ -109,7 +109,7 @@ Direttiva radio 2014/53/UE con Regolamento delegato 2022/30 (EN 18031); UK PSTI 
 Se VesevOS diventa un prodotto a pagamento, questi obblighi valgono per quella versione e si dichiarera il periodo di supporto.
 
 ## 11. Terminale (seriale e pagina)
-Scrivi `help`. Comandi nuovi: `welcome`, `ap`, `user`, `passwd`, `locale`, `firewall`, `audit`, `watchdog`, `mesh`, `ble`, `cert`, `legal`.
+Scrivi `help`. Comandi nuovi: `welcome`, `ap`, `user`, `passwd`, `locale`, `firewall`, `audit`, `watchdog`, `mesh`, `cert`, `legal`.
 Sulla seriale, a riga vuota, i tasti `1` e `2` cambiano lingua.
 
 ## 12. Menu, hotspot, HTTP/HTTPS, porte e fine della guida (novita 1.7.3, 1.7.4, 1.7.5, 1.7.6 e 1.7.7)
@@ -158,6 +158,7 @@ Dopo la guida valgono le regole di sicurezza (seriale con password, se acceso).
 Ognuno ha la sua scheda in **Servizi** e si puo spegnere.
 - **NTP**: ora da Internet (serve la Wi-Fi di casa). Spento = ora a mano. Di fabbrica contatta solo `pool.ntp.org`; un secondo server si aggiunge a scelta (`ntp server2 <nome>`). Ogni richiesta mostra ai server il tuo IP pubblico. Se l'ora ricevuta non e credibile (prima del 2026 o un salto di oltre un giorno) viene scartata e compare un avviso.
 - **DHCP**: da gli indirizzi a chi si collega all'hotspot. Durata da 10 a 1440 minuti. Si spegne solo con la Wi-Fi di casa collegata.
+- **Dominio del router (1.8.8)**: se il router lo manda (opzione 15 del DHCP), il comando `network` e lo stato rete mostrano la riga "Dominio". E solo un'informazione: non viene salvata ne usata per collegarsi.
 - **DNS**: il portale automatico dell'hotspot (serve HTTP sulla porta 80).
 - **mDNS**: il nome NOME.local. Spento = solo indirizzo IP.
 DHCP, mDNS e portale cambiano subito; web e porte dal riavvio. Dalla seriale: `svc dhcp off`, `svc mdns on`, `diag`.
@@ -173,9 +174,10 @@ PSRAM da 2 MB di questa scheda (occupati sulle schede con PSRAM octal).
 
 
 ## 16. Sicurezza e energia (novita 1.7.3)
-- **MFA**: Sicurezza > Accesso in due passi. Scansiona il QR con un'app (Google Authenticator, Aegis...), inserisci il codice, salva gli 8 codici di recupero (ognuno vale una volta). Il QR si vede solo da HTTPS o dall'hotspot.
+- **MFA**: Sicurezza > Accesso in due passi. Scansiona il QR con un'app di autenticazione (qualsiasi app compatibile con i codici TOTP), inserisci il codice, salva gli 8 codici di recupero (ognuno vale una volta). Il QR si vede solo da HTTPS o dall'hotspot.
 - **Ora**: il codice dipende dall'ora. Se la scheda non ha ora valida puoi scegliere: chiedere l'ora al browser (dopo password e codice giusti) oppure solo codici di recupero / blocco.
 - **Recupero**: tasto BOOT 8 s spegne l'MFA degli Admin.
+- **Richieste di altri siti (dalla 1.8.8)**: le richieste che modificano qualcosa (POST) sono accettate solo se partono dalla pagina della scheda o da un programma (come `aggiorna.py`); se partono da un altro sito aperto nel browser la scheda risponde 403 `csrf`. In piu il cookie ha `SameSite=Strict`.
 - **Anti-bot**: all'accesso il browser risolve una piccola prova di lavoro (difficolta in Sicurezza). Niente captcha esterni.
 - **Certificato**: Sistema > Certificato: scadenza, impronta, scarica, rigenera, importa.
 - **Risparmio energia**: Servizi > Risparmio energia. Sonno programmato = la scheda dorme e si sveglia dopo il tempo scelto (1 min - 7 giorni). Non si sveglia con BOOT: usa RESET. Nel sonno Wi-Fi e pagina sono spenti.
@@ -203,7 +205,7 @@ Sistema > Sicurezza > **Seriale (cavo USB)** (solo Admin) oppure, dalla seriale 
 - `free detail` (1.7.9a): RAM interna, pezzo piu grande, frammentazione, PSRAM. Se il pezzo piu grande scende sotto 45 KB compare un avviso giallo "Memoria frammentata": riavvia la scheda.
 
 ## 20. Device Manager (novita 1.7.11)
-Un solo gruppo di menu, **Device Manager**, con tutte le periferiche: virtuali (MQTT, rete tra schede, Bluetooth, MFA, statistiche) e hardware (pin, LED, tasto BOOT, USB, temperatura, memoria, processore, radio). Ognuna risponde alle stesse regole: elenco, stato (spenta / accesa / con problema), accendi e spegni (solo Admin), dettagli e azioni.
+Un solo gruppo di menu, **Device Manager**, con tutte le periferiche: virtuali (MQTT, rete tra schede, MFA, statistiche) e hardware (pin, LED, tasto BOOT, USB, temperatura, memoria, processore, radio). Ognuna risponde alle stesse regole: elenco, stato (spenta / accesa / con problema), accendi e spegni (solo Admin), dettagli e azioni.
 - Dalla seriale o dal terminale: `dev list`, `dev status <nome>`, `dev on <nome>`, `dev off <nome>`, `dev act <nome> <azione> [valore]` (es. `dev act pin test 5,high`).
 - **Package a compilazione** (per chi compila): in `vos_common.h` `VOS_WITH_BLE`, `VOS_WITH_MQTT`, `VOS_WITH_MESH`, `VOS_WITH_MFA`, `VOS_WITH_STATS` (1 = dentro il firmware, 0 = fuori). Le schede delle parti tolte spariscono dalla pagina. Il comando `diag` dice quali package ci sono.
 
@@ -220,7 +222,7 @@ Sulla scheda ci sono due programmi: **VesevOS** e il **recovery** (piccolo, serv
 2. La pagina aspetta che la scheda riparta e **apre da sola** il recovery (di solito in pochi secondi; "Apri ora" per anticipare). Se non ci riesce, ti mostra l'indirizzo, per esempio `http://192.168.1.50:80/`: aprilo in una **finestra privata** e scrivi **http**, non https (il recovery non e cifrato).
    Il recovery prova prima la **rete di casa**; se in 30 secondi non la trova crea la rete Wi-Fi `VesevOS-recovery` (password casuale scritta sulla seriale).
 3. Entra con utente e password di un **Amministratore** di VesevOS (la password non viaggia in chiaro). Con la flash vuota, e senza amministratori, serve il codice a 8 cifre mostrato sulla seriale. Cinque errori = attesa di 60 secondi.
-4. Scegli il file `.bin` del firmware (non il `.merged.bin`). *SHA-256 atteso* e facoltativo: se lo scrivi, il file deve coincidere.
+4. Scegli il file `VesevOS.ino.bin` (non il `.merged.bin`). *SHA-256 atteso* e facoltativo: se lo scrivi, il file deve coincidere.
 5. Scegli il file con il pulsante oppure **trascinalo** sulla pagina (dal telefono solo il pulsante). *Carica e installa*. Prima la pagina e poi la scheda controllano: intestazione per ESP32-S3, **marchio VesevOS**, dimensione, immagine completa. Se il file e sbagliato viene rifiutato e **il vecchio firmware non si tocca**; se l'errore arriva a scrittura iniziata, il recovery resta acceso e basta ricaricare il file buono.
 6. Il **LED** della scheda dice lo stato: arancione lento = attesa del file; azzurro veloce = scrittura in corso; verde fisso = finito; rosso = errore (dopo 10 secondi torna arancione). Dopo circa 10 secondi VesevOS riparte. *Avvia VesevOS senza aggiornare* torna indietro. Dopo 15 minuti senza accessi il recovery torna da solo a VesevOS. Tasto BOOT premuto all'accensione = resta nel recovery.
 - Il controllo del file garantisce che e un firmware VesevOS completo; **non e una firma digitale**. Scarica i file solo da fonti fidate.
@@ -237,10 +239,10 @@ Sulla scheda ci sono due programmi: **VesevOS** e il **recovery** (piccolo, serv
 
 ## 24. Schede modulo e pagina di ogni periferica (novita 1.7.55)
 - **Pagina di ogni periferica**: in Dispositivi > Periferiche tocca *Gestisci*. Vedi classe, pin, livello, valore dal vivo e le **prove**: Accendi, Spegni, Impulso di 1 secondo, Lampeggia per 5 secondi (solo LED e pin; il rele non lampeggia). Gli ingressi e gli analogici mostrano il valore che cambia da solo. Da qui si usa anche *Rinomina* e *Togli* (Admin). Impulso e lampeggio si spengono da soli; *spegnere* si puo sempre, subito.
-- **Scheda modulo (.vdp)**: file di testo con la descrizione di un modulo (classe, segnali, icona, schema SVG). Contiene solo dati. Cartella `/devs`. Nel Progetto/GitHub trovi esempi in `docs/devs` (rele a 1, 2 e 4 canali, LED, pulsante, sensore PIR, LDR).
+- **Scheda modulo / driver (.vdb)**: file di testo con la descrizione di un modulo (classe, segnali, icona, schema SVG). Dalla 1.8.5 puo essere un **driver completo**: oltre ai dati porta le sezioni `[page]`, `[code]` e `[data]` (pagina, codice dello script e valori iniziali, come in una app) e le chiavi `use=` e `who=`. All'installazione il firmware crea le periferiche e scrive l'app del driver in `/bin`; l'app gira con gli stessi permessi di una app normale. La classe `sd` ha i segnali CS, MOSI, SCK, MISO e la chiave `khz=`. I pin li propone il firmware (microSD: di solito 10, 11, 12, 13) e **l'utente li puo cambiare** nella finestra di installazione, oppure da shell: `mod install microsd sd1 10,11,12,13`. Il controllo dei pin (vietati, gia usati, doppi) lo fa il firmware, una volta sola. **Comandi (1.8.6)**: un driver puo portare anche i comandi della shell, scritti come script VesevOS nelle sezioni `[commands]` e `[cmd]`: il firmware non conosce nessun comando di periferica. Per la microSD il comando `sd` (`status`, `ls`, `read`, `mount`, `unmount`, `test`, `write`, `append`, `rm`, `mkdir`) viene dal driver: senza il driver non esiste. Gli argomenti arrivano come lista di parole (massimo 8, 96 caratteri ciascuna). I sottocomandi `admin` li lancia solo l'Admin; un solo comando alla volta (se la pagina del driver e aperta, dalla 1.8.7 il comando la ferma e poi la riavvia: il suo stato si azzera). **Widget (1.8.7)**: il riquadro del driver nella Home e definito dal driver con la sezione `[widget]` (`title=`, `alt=`, `who=`) e la funzione `on_widget()` (stampa `st=ok|off`, `v=` e `s=`); il firmware chiama la funzione al massimo ogni 10 secondi, senza diritti di scrittura, e se l'interprete degli script e occupato mostra l'ultimo valore. Lo vedono Operatore e Admin. La gestione della microSD non e piu una scheda della pagina Periferiche: si usa il comando `sd` o la pagina del driver; anche il widget della Home viene dal driver. Formato: `docs/progetto/formato-vdp.md`. Esempio: `docs/esempi/driver/microsd.vdb`. Il file puo arrivare a 16 KB. Cartella `/devs`. Nel Progetto/GitHub trovi esempi in `docs/devs` (rele a 1, 2 e 4 canali, LED, pulsante, sensore PIR, LDR).
 - **Come si usa**: Periferiche > *Carica scheda modulo*, poi *Installa*: la scheda mostra lo schema, propone i pin liberi e sicuri, e crea le periferiche (tutto o niente). Il nome si puo scegliere (pompa1, pompa2...).
 - **Schema dei collegamenti (novita 1.7.57)**: lo disegna la pagina dai dati della scheda. A sinistra la scheda con i pin (5V o 3V3, GND, GPIO proposti), a destra il modulo. Fili colorati: **rosso** alimentazione, **nero** massa, **blu** segnale (arancione se analogico), con la **tensione scritta** sul filo e una freccia per la direzione. Resistenze e altri componenti da aggiungere sono disegnati con il valore (es. 330 ohm in serie al LED). Sotto c'e una tabella filo / dalla scheda / al modulo / tensione e note: i colori sono scritti anche a parole. Alimentazioni a 12, 24 o 230 V mostrano un riquadro "Alimentatore": unisci la sua massa a GND della scheda. Se il segnale del modulo e a 5 V su un ingresso compare un avviso rosso: i pin reggono solo 3,3 V.
-- **Per chi scrive schede**: nel file `[module]` si aggiungono `level=3V3|5V` (livello del segnale) e fino a 4 righe `part=serie|gnd|vcc,valore,segnale` (per esempio `part=serie,330 ohm,OUT`). La sezione `[wiring]` non serve piu: se c'e, si vede sotto come "Disegno allegato al file". Formato completo: nella documentazione interna del formato .vdp.
+- **Per chi scrive schede**: nel file `[module]` si aggiungono `level=3V3|5V` (livello del segnale) e fino a 4 righe `part=serie|gnd|vcc,valore,segnale` (per esempio `part=serie,330 ohm,OUT`). La sezione `[wiring]` non serve piu: se c'e, si vede sotto come "Disegno allegato al file". Formato completo: claude/funzioni/VesevOS-formato-vdp.md nel Progetto.
 - **Seriale**: `mod list`, `mod info <nome>`, `mod install <nome> [prefisso]`, `mod del <nome>`.
 - **Attenzione**: controlla sempre i collegamenti sul datasheet del tuo modulo. Uno schema sbagliato puo danneggiare il modulo. Per i 230 V serve un installatore.
 
@@ -261,8 +263,8 @@ Sulla scheda ci sono due programmi: **VesevOS** e il **recovery** (piccolo, serv
 - **`mqtt("nome", "testo")`**: invia il testo al broker sull'argomento `<prefisso>/app/<nome>`. Risponde vero se e partito, falso se non e stato inviato (MQTT non collegato o oltre il tetto). Il nome ha da 1 a 40 caratteri (a-z, 0-9, `_`, `-`, `/`), il testo fino a 2048. Massimo **20 messaggi al minuto**. Nelle app serve `mqtt` in `use=`.
 - **Dove arriva**: solo sotto `app/`. Un'app non puo scrivere su `cmd` (i comandi della scheda), `status` o `state`.
 - **Serve MQTT acceso** (Rete > MQTT, spento di fabbrica) e un broker. Dal broker l'inoltro per email lo fai con un programma tuo (per esempio Home Assistant, Node-RED, ntfy): la scheda non parla con i server di posta.
-- **Esempio**: `docs/esempi/app/logmqtt.vap` (copialo in /apps): un pulsante e un interruttore "ogni ora" che mandano le ultime 10 righe su `<prefisso>/app/log`.
-- **Esempio torcia**: `docs/esempi/script/torcia.vsc` (copialo in /scripts e avvialo). Un click del tasto BOOT accende il LED bianco, il click dopo lo spegne; si spegne anche da solo dopo 10 minuti (cambi `MINUTI`, 0 = mai). Prima metti **Libero** sul gesto che vuoi usare in *Dispositivi > Tasto BOOT* (di fabbrica sono liberi solo i 3 click). Il LED bianco e forte e scalda.
+- **Esempio**: `docs/esempi/app/logmqtt.vab` (copialo in /apps): un pulsante e un interruttore "ogni ora" che mandano le ultime 10 righe su `<prefisso>/app/log`.
+- **Esempio torcia**: `docs/esempi/script/torcia.vsb` (copialo in /scripts e avvialo). Un click del tasto BOOT accende il LED bianco, il click dopo lo spegne; si spegne anche da solo dopo 10 minuti (cambi `MINUTI`, 0 = mai). Prima metti **Libero** sul gesto che vuoi usare in *Dispositivi > Tasto BOOT* (di fabbrica sono liberi solo i 3 click). Il LED bianco e forte e scalda.
 - **Privacy**: il registro puo contenere indirizzi IP e nomi. Chi installa l'app (solo Amministratore) decide con `logread` e `mqtt` se puo leggerlo e mandarlo fuori. Se il broker e fuori casa, usa MQTT cifrato (utente e password) e scegli tu chi riceve i dati.
 
 ## 27. Novita della 1.8.0 e 1.8.0b (riassunto)

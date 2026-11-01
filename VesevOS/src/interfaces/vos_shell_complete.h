@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_shell_complete.h
-// Completamento col tasto Tab, come in bash. Una sola funzione, usata dalla seriale e dalla pagina web (POST /api/shell con tab=1).
+// Completamento col tasto Tab, come nelle shell classiche. Una sola funzione, usata dalla seriale e dalla pagina web (POST /api/shell con tab=1).
 #pragma once
 #include <stddef.h>
 #include <stdint.h>
@@ -38,5 +38,5 @@ struct ShellCompletion {
 // Ritorna true se c'e almeno un candidato. Nessun log di contenuti.
 bool shellComplete(uint32_t sess, int role, const char* line, size_t room, bool web, ShellCompletion& out);
 
-// Scrive i candidati in colonne (come bash, 78 colonne), una riga dopo l'altra. Per la seriale.
+// Scrive i candidati in colonne (come le shell classiche, 78 colonne), una riga dopo l'altra. Per la seriale.
 void shellCompletePrintList(OutSink& o, const ShellCompletion& c);

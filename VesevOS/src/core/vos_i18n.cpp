@@ -269,7 +269,7 @@ int langList(char codes[][LANG_CODE_BUF], char names[][LANG_NAME_BUF], int max) 
     char code[LANG_CODE_BUF];
     while (h && n < max && nextLangCode(d, code)) {
       fileHead(code, *h);
-      snprintf(codes[n], LANG_CODE_BUF, "%s", code); snprintf(names[n], LANG_NAME_BUF, "%s", h->name); n++;
+      snprintf(codes[n], LANG_CODE_BUF, "%s", code); snprintf(names[n], LANG_NAME_BUF, "%.*s", LANG_NAME_BUF - 1, h->name); n++;
     }
     free(h);
   }

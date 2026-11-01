@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_web_app.cpp
 // Percorsi del server web: pagina App (elenco, controllo, avvio, stop, valori dei controlli). Il testo dell'app si legge e si salva con i
-// percorsi dei file (/api/fs/text, /api/fs/save) nella cartella /apps (solo Admin).
+// percorsi dei file (/api/fs/text, /api/fs/save) nella cartella /bin (solo Admin).
 // Operatore: vede e usa solo le app valide con who=oper (avvia, ferma, comanda i controlli); il resto e solo Admin.
 #include "vos_web_int.h"
 #include "../packages/vos_app.h"

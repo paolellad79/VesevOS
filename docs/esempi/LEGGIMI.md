@@ -1,23 +1,26 @@
 # Esempi (demo) per VesevOS
 
-Programmi Berry pronti da leggere, copiare e provare. Sono DEMO: servono a capire come si scrive un programma per VesevOS.
+Programmi VesevOS pronti da leggere, copiare e provare. Sono DEMO: servono a capire come si scrive un programma per VesevOS.
 
 ## Due tipi di programma
-- **Script** (`.vsc`): solo codice Berry, senza pagina. Vive in `/scripts` sulla scheda. Ha tutte le funzioni. Lo gestisce l'Admin.
-- **App** (`.vap`): un file con una pagina (pulsanti, interruttori, testi...) e il suo codice. Vive in `/apps`. Puo usare solo le funzioni dei permessi scritti in `use=`.
+- **Script** (`.vsb`): solo codice VesevOS, senza pagina. Vive in `/scripts` sulla scheda. Ha tutte le funzioni. Lo gestisce l'Admin.
+- **App** (`.vab`): un file con una pagina (pulsanti, interruttori, testi...) e il suo codice. Vive in `/apps`. Puo usare solo le funzioni dei permessi scritti in `use=`.
 
 ## Cartelle
-- `script/` - esempi di script (`.vsc`).
-- `app/` - esempi di app (`.vap`).
+- `script/` - esempi di script (`.vsb`).
+- `app/` - esempi di app (`.vab`).
 
 ## Esempi
-- `app/logmqtt.vap` - un pulsante (e un interruttore "ogni ora") che manda le ultime 10 righe del registro al broker MQTT, su `<prefisso>/app/log`. Usa i permessi `logread`, `mqtt`, `time`.
-- `script/torcia.vsc` - un click del tasto BOOT accende il LED bianco, il click dopo lo spegne.
+- `app/logmqtt.vab` - un pulsante (e un interruttore "ogni ora") che manda le ultime 10 righe del registro al broker MQTT, su `<prefisso>/app/log`. Usa i permessi `logread`, `mqtt`, `time`.
+- `app/ble-stato.vab` - Bluetooth: espone la temperatura del chip e il tempo di attivita (sola lettura) e un "ping" a cui la scheda risponde "ok". Usa il permesso `ble`. Spiegazioni e sicurezza: `docs/ble-driver.md`.
+- `script/ble.vsb` - mostra lo stato del Bluetooth e, solo se lanciato dall'Admin, il codice di abbinamento (`script run ble`).
+- `script/ble-off.vsb` - spegne il Bluetooth (`script run ble-off`).
+- `script/torcia.vsb` - un click del tasto BOOT accende il LED bianco, il click dopo lo spegne.
 - `io-sd.cfg` - esempio di riga di `io.cfg` per la microSD (modulo SPI, pin 10-13, 1 MHz): solo da leggere, il modo normale e la pagina Periferiche. Collegamento: `docs/progetto/sd-collegamento.md`.
 
 ## Come si caricano sulla scheda
 1. Dalla pagina: Sistema > File, cartella `/scripts` (script) oppure `/apps` (app), poi carica il file. Poi si avviano dalla pagina (le app compaiono tra le app della scheda; gli script nella sezione degli script).
-2. Oppure con l'API (solo Admin): `POST /api/fs/save` con il percorso `/scripts/nome.vsc` o `/apps/nome.vap`.
+2. Oppure con l'API (solo Admin): `POST /api/fs/save` con il percorso `/scripts/nome.vsb` o `/apps/nome.vab`.
 
 ## Come si provano
 - Prima su una scheda di prova, mai su una scheda che non puoi recuperare.
@@ -28,7 +31,7 @@ Programmi Berry pronti da leggere, copiare e provare. Sono DEMO: servono a capir
 ## Regole
 - Solo ASCII (niente lettere accentate, niente emoji).
 - Titoli ed etichette delle app: da 1 a 24 caratteri.
-- Codice di un'app: massimo 8 KB. File `.vap`: massimo 16 KB, 12 controlli.
+- Codice di un'app: massimo 8 KB. File `.vab`: massimo 16 KB, 12 controlli.
 - Un ciclo senza `sleep` si ferma dopo 3 secondi: metti sempre una pausa.
 - Se aggiungi un esempio nuovo, aggiungilo anche all'elenco qui sopra.
 

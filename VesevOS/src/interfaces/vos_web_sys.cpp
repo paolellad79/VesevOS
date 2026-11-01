@@ -4,7 +4,7 @@
 // Percorsi del server web: MQTT, autodiagnosi, ora/NTP, localizzazione. Aiuti e tipi condivisi: vos_web_int.h.
 #include "vos_web_int.h"
 #include "../core/vos_cpupm.h"
-#include "../devices/vos_sd.h"
+#include "../packages/vos_drvwidget.h"
 #include "../core/vos_clamp.h"
 
 // statistiche per la pagina
@@ -17,17 +17,17 @@ static esp_err_t statsReply(Res* s) {
 void routesSys(PsychicHttpServer* S, bool sec) {
   // ---- MQTT (servizio spento di fabbrica: la prima volta si avvia a mano) ----
   add(S, sec, "/api/home", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t {      // un solo pezzo per i widget della Home
-    HeapBuf j(1024);
+    HeapBuf j(1024 + DRVW_JSON_MAX);
     char t[320];
-    snprintf(t, sizeof t, "{\"mesh\":%d,\"role\":%d,\"nodes\":%d,\"ntp\":%d,\"last\":%lu,\"ble\":%d,\"bleLeft\":%lu,\"bleLim\":%d,\"bleTot\":%lu,\"pw\":%d,\"stat\":%d",
+    snprintf(t, sizeof t, "{\"mesh\":%d,\"role\":%d,\"nodes\":%d,\"ntp\":%d,\"last\":%lu,\"pw\":%d,\"stat\":%d",
              meshRunning() ? 1 : 0, (int)cfg.meshRole, (int)meshNodeCount(), cfg.ntpOn ? 1 : 0, (unsigned long)timeLastSync(),
-             bleRunning() ? 1 : 0, (unsigned long)bleLeftSec(), bleLimited() ? 1 : 0, (unsigned long)bleTotalSec(), (int)cfg.pwMode, cfg.statOn ? 1 : 0);
+             (int)cfg.pwMode, cfg.statOn ? 1 : 0);
     j.add(t);
     timePubJson(j);                                                                           // pezzo JSON gia pronto dall'ora (comincia con la virgola)
-#if VOS_WITH_SD
-    if (c.role >= ROLE_OPER) {                                                              // widget della microSD: solo se configurata, e non per gli ospiti
-      char sd[SD_HOME_MAX]; sdHomeJson(sd, sizeof sd);
-      if (sd[0]) { j.add(",\"sd\":"); j.add(sd); }
+#if VOS_WITH_DRVCMD && VOS_WITH_BERRY
+    if (c.role >= ROLE_OPER) {                                                              // widget dei driver (la microSD e nel suo driver): solo dati, non per gli ospiti
+      j.add(",\"w\":");
+      if (!drvWidgetsJson(j, c.role)) return ko(s, tr("Memoria insufficiente"), "off");
     }
 #endif
     j.add('}');
@@ -96,8 +96,14 @@ void routesSys(PsychicHttpServer* S, bool sec) {
     if (!drvRecoveryEnter()) return ko(s, tr("Non riesco a passare al recovery."), "state");
     char w[96]; whoTo(c, w, sizeof w);
     vlog("SISTEMA: riavvio nel recovery dalla pagina (%s)", w);
-    char ip[16], body[48]; netIpTo(ip, sizeof ip);
-    snprintf(body, sizeof body, "{\"ok\":true,\"ip\":\"%s\"}", ip);
+    char ip[16], host[96]; netIpTo(ip, sizeof ip);
+    if (cfg.domain.length()) snprintf(host, sizeof host, "%.32s.%.60s", cfg.hostname.c_str(), cfg.domain.c_str());   // come targetHost del redirect (nome 32 + dominio 60 stanno nei 96)
+    else snprintf(host, sizeof host, "%.32s", cfg.hostname.c_str());
+    HeapBuf body(192);
+    body.add("{\"ok\":true");
+    jsonStr(body, "ip", ip);
+    jsonStr(body, "host", host);      // la pagina prova prima il nome e poi ripiega sull'IP
+    body.add('}');
     esp_err_t e = sendJson(s, body);
     xTaskCreate(delayedRestart, "rst", 2048, (void*)"recovery dalla pagina", 1, NULL);
     return e;
@@ -108,6 +114,7 @@ void routesSys(PsychicHttpServer* S, bool sec) {
   ru->onUpload([sec](Req* r, const auto& filename, uint64_t index, uint8_t* data, size_t len, bool final) -> esp_err_t {
     uint32_t ip = ipOf(r);
     if (!fwAllow(ip, false)) return ESP_FAIL;
+    if (csrfBlocked(r)) return ESP_FAIL;                                       // caricamento partito da un altro sito
     int u = userOf(r);
     if (u < 0 || cfg.users[u].role < ROLE_ADMIN) return ESP_FAIL;
     if (!sec && g_tlsUp && cfg.https && !netOnAp(ip)) return ESP_FAIL;

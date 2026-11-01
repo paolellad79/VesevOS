@@ -49,16 +49,22 @@ enum DrvSdFs : uint8_t {
 struct DrvSdEntry {
   char name[48];
   bool dir;
-  uint32_t size;
+  uint32_t size;       // byte del file (0 per una cartella)
+  uint32_t mtime;      // ultima modifica, secondi dal 1970; 0 = data non valida (scheda senza ora)
 };
 
 // ---- Montaggio ----
 
-// Monta la scheda. false = manca, non risponde o non e FAT/FAT32.
+// Monta la scheda (il punto di montaggio, oggi /media/sd, e dentro il backend). false = manca, non risponde o non e FAT/FAT32.
 bool drvSdBegin(int cs, int mosi, int sck, int miso, uint32_t hz);
 
 // Smonta e libera i pin (si puo chiamare sempre).
 void drvSdEnd();
+
+// Formatta la scheda in FAT32 e la lascia montata. Cancella TUTTO: lo chiede solo una persona (Admin), mai il firmware da solo.
+// Funziona anche se la scheda non si monta (exFAT, vuota, non FAT). Prima va smontata (drvSdEnd).
+enum DrvSdFmt : uint8_t { DSFM_OK = 0, DSFM_BUSY = 1, DSFM_NO_CARD = 2, DSFM_FAIL = 3 };
+uint8_t drvSdFormat(int cs, int mosi, int sck, int miso, uint32_t hz);
 
 bool drvSdUp();
 
@@ -85,10 +91,19 @@ uint64_t drvSdUsedBytes();
 // Byte letti (al massimo max), -1 = errore.
 int drvSdRead(const char* path, uint8_t* buf, size_t max);
 
+// Come drvSdRead, ma parte dal byte "off" del file (al massimo max byte). 0 = off oltre la fine del file; -1 = errore.
+int drvSdReadAt(const char* path, uint32_t off, uint8_t* buf, size_t max);
+
 bool drvSdWrite(const char* path, const uint8_t* buf, size_t n, bool append);
 
 // Voci scritte in out, -1 = errore. more = ce ne sono altre.
 int drvSdList(const char* dir, DrvSdEntry* out, int max, bool& more);
+
+// Come drvSdList, ma salta le prime "start" voci (per continuare un elenco lungo). -1 = errore.
+int drvSdListFrom(const char* dir, int start, DrvSdEntry* out, int max, bool& more);
+
+// Informazioni su UNA voce (file o cartella). false = non c'e o la scheda non e montata. Il nome e solo l'ultimo pezzo del percorso.
+bool drvSdStat(const char* path, DrvSdEntry& out);
 
 // Solo file.
 bool drvSdRemove(const char* path);

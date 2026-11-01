@@ -1,6 +1,6 @@
 # VesevOS - Release Developer (guida per chi sviluppa e rilascia)
 
-Ultimo aggiornamento: 25 ottobre 2026 (versione 1.8.0b; sezioni 1, 4, 5 e 6 per ESP-IDF; le altre non riviste dalla 1.7.45). Si pubblica anche su GitHub (docs/). La procedura passo-passo sta nella checklist di rilascio (documento interno); qui c'e il quadro per chi lavora sul codice.
+Ultimo aggiornamento: 25 ottobre 2026 (versione 1.8.0b; sezioni 1, 4, 5 e 6 per ESP-IDF; le altre non riviste dalla 1.7.45). Si pubblica anche su GitHub (docs/). La procedura passo-passo sta nella checklist di rilascio (claude/VesevOS-checklist-rilascio.md nel Progetto); qui c'e il quadro per chi lavora sul codice.
 
 ## 1. Ambiente
 - Scheda: ESP32-S3 SuperMini (4 MB flash, 2 MB PSRAM, USB nativa, LED WS2812 su GPIO48, solo antenna interna).
@@ -10,7 +10,7 @@ Ultimo aggiornamento: 25 ottobre 2026 (versione 1.8.0b; sezioni 1, 4, 5 e 6 per 
 - Licenza: GPL-3.0-or-later oppure licenza commerciale (COMMERCIAL.md). Il core Arduino (LGPL) non e piu nel prodotto (ESP-IDF puro dalla fase 5).
 
 ## 2. Struttura
-- `VesevOS/` firmware: `src/` con una cartella per strato: `core/` nucleo, `security/` accessi e cifratura, `net/` rete, `devices/` Device Manager e pin/LED, `drivers/` hardware e librerie radio (`vos_drv_*`), `packages/` servizi opzionali, `interfaces/` web e shell. Gli include sono relativi al file. `vos_page.h`, `vos_common_data.h`, `vos_lang_en.h` e `vos_license_data.h` sono GENERATI (in `src/interfaces/` e `src/core/`).
+- `VesevOS/` firmware: `VesevOS.ino` + `src/` con una cartella per strato: `core/` nucleo, `security/` accessi e cifratura, `net/` rete, `devices/` Device Manager e pin/LED, `drivers/` hardware e librerie radio (`vos_drv_*`), `packages/` servizi opzionali, `interfaces/` web e shell. Gli include sono relativi al file. `vos_page.h`, `vos_common_data.h`, `vos_lang_en.h` e `vos_license_data.h` sono GENERATI (in `src/interfaces/` e `src/core/`).
 - `web/index.html` pagina; `lang/` lingue generate.
 - `tools/`: `lang_src.json` (traduzioni it/en/es/de), `mklang.py`, `mkpage.py`, `mklicense.py`, `mkcommon.py`.
 - `tools/stub/`: finti header per compilare sul computer. `tools/webtest/`: finto server + Playwright. `tools/hosttest/`: prove sul computer (`run.sh`).
@@ -33,7 +33,7 @@ Ultimo aggiornamento: 25 ottobre 2026 (versione 1.8.0b; sezioni 1, 4, 5 e 6 per 
 
 ## 5. Versioni
 - Funzioni nuove = numero nuovo (1.7.45). Solo correzioni di bug = lettera (1.7.9b).
-- La versione va in: `vos_common.h` (VOS_VERSION), nome ZIP, CHANGELOG, README it/en, SBOM, `mkcommon.py`, LEGGIMI, manuali.
+- La versione va in: `vos_common.h` (VOS_VERSION; `VesevOS.ino` non si usa piu), nome ZIP, CHANGELOG, README it/en, SBOM, `mkcommon.py`, LEGGIMI, manuali.
 - Rifacimento di architettura: un passo = una versione, mai due strati insieme.
 
 ## 6. Rilascio

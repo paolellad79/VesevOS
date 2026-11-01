@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
-// VesevOS - vos_mod.cpp (vedi vos_mod.h): lettura e controllo delle schede modulo .vdp, pin proposti, installazione.
+// VesevOS - vos_mod.cpp (vedi vos_mod.h): lettura e controllo delle schede modulo .vdb (colori, sezioni, modParse). L'elenco dei file, i JSON, il testo e l'installazione stanno in vos_mod_files.cpp.
 #include "vos_mod.h"
 #include <strings.h>
 #include "vos_io.h"
+#include "vos_mod_line.h"
 #include "../core/vos_i18n.h"
 #include "../core/vos_log.h"
 #include "../core/vos_util.h"
@@ -51,28 +52,64 @@ bool modColor(const char* vIn, char* hex, char* cname) {
   return false;
 }
 
+bool modSectionKnown(std::string_view s) {
+  static const char* const N[] = {"module", "signals", "icon", "wiring", "pins", "page", "code", "data", "commands", "cmd", "widget"};
+  for (const char* n : N) if (viewEqI(s, n)) return true;
+  return false;
+}
+
 bool modParse(std::string_view text, const char* fileName, ModInfo& m, ErrBuf& err) {
   memset(&m, 0, sizeof(m));
-  strcpy(m.power, "-"); strcpy(m.ver, "1");
+  strcpy(m.power, "-"); strcpy(m.ver, "1"); strcpy(m.who, "admin"); m.khz = IO_SD_KHZ_DEF;
   m.pull = 'n'; m.level = '3'; m.size = text.size(); err = "";
-  if (text.size() > MOD_FILE_MAX) { err = tr("File troppo grande (massimo 8 KB)"); return false; }
-  enum { NONE, MOD, SIG, ICO, WIR, PIN };
-  int sec = NONE; bool seen[6] = {false, false, false, false, false, false}; bool hasPull = false; bool hasFreq = false;
-  size_t iconLen = 0, wiringLen = 0;                                 // m.icon e m.wiring si riempiono riga per riga
+  if (text.size() > MOD_FILE_MAX) { err = tr("File troppo grande (massimo 16 KB)"); return false; }
+  enum { NONE, MOD, SIG, ICO, WIR, PIN, PAG, COD, DAT, CMS, CMC, WGT };
+  int sec = NONE; bool seen[12] = {false}; bool hasPull = false; bool hasFreq = false; bool hasKhz = false;
+  size_t iconLen = 0, wiringLen = 0, codeLen = 0, cmdLen = 0; bool cmdHasCode = false, cmdHasWidget = false;                    // m.icon e m.wiring si riempiono riga per riga; di [code], [page] e [data] si contano solo le righe (le controlla vos_mod_app)
+  int pageRows = 0, dataRows = 0;
+  char cmdSubs[MOD_CMD_MAX][13];                                     // i sottocomandi gia visti (niente doppioni)
+  ModCmd firstCmd{};                                                 // prima riga di [commands]: tutte le altre hanno la stessa parola
   LineIter lines(text);
   std::string_view raw;
   while (lines.next(raw)) {
     int line = lines.line();
     std::string_view t = trimView(raw);
-    if (t.empty() || t[0] == '#') continue;
     if (t.size() > 1 && t[0] == '[' && t.back() == ']') {
       std::string_view s = t.substr(1, t.size() - 2);
-      int ns = viewEqI(s, "module") ? MOD : viewEqI(s, "signals") ? SIG : viewEqI(s, "icon") ? ICO : viewEqI(s, "wiring") ? WIR : viewEqI(s, "pins") ? PIN : NONE;
-      if (ns == NONE) return utilLineErr(err, line, tr("Sezione sconosciuta (ammesse: module, signals, icon, wiring, pins)"));
-      if (seen[ns]) return utilLineErr(err, line, tr("Sezione ripetuta"));
-      seen[ns] = true; sec = ns; continue;
+      int ns = viewEqI(s, "module") ? MOD : viewEqI(s, "signals") ? SIG : viewEqI(s, "icon") ? ICO : viewEqI(s, "wiring") ? WIR : viewEqI(s, "pins") ? PIN
+             : viewEqI(s, "page") ? PAG : viewEqI(s, "code") ? COD : viewEqI(s, "data") ? DAT : viewEqI(s, "commands") ? CMS : viewEqI(s, "cmd") ? CMC : viewEqI(s, "widget") ? WGT : NONE;
+      if (ns == NONE && sec != COD && sec != CMC) return utilLineErr(err, line, tr("Sezione sconosciuta (ammesse: module, signals, icon, wiring, pins, page, code, data, commands, cmd, widget)"));
+      if (ns != NONE) {                                              // dentro [code] una riga tra parentesi quadre che non e una sezione e codice
+        if (seen[ns]) return utilLineErr(err, line, tr("Sezione ripetuta"));
+        seen[ns] = true; sec = ns; continue;
+      }
     }
+    if (sec == COD) {
+      codeLen += raw.size() + 1;
+      if (codeLen > MOD_CODE_MAX + 8) return utilLineErr(err, line, tr("Codice troppo lungo (massimo 8 KB)"));
+      continue;
+    }
+    if (sec == CMC) {
+      cmdLen += raw.size() + 1;
+      if (!t.empty() && t[0] != '#') cmdHasCode = true;                  // righe vuote e commenti non sono codice
+      if (t.rfind("def on_widget(", 0) == 0) cmdHasWidget = true;
+      if (cmdLen > MOD_CMDCODE_MAX + 8) return utilLineErr(err, line, tr("Codice dei comandi troppo lungo (massimo 4 KB)"));
+      continue;
+    }
+    if (t.empty() || t[0] == '#') continue;
     if (sec == NONE) return utilLineErr(err, line, tr("Riga fuori da una sezione"));
+    if (sec == PAG) { if (++pageRows > MOD_PAGE_MAX) return utilLineErr(err, line, tr("Troppi controlli (massimo 12)")); continue; }
+    if (sec == CMS) {
+      ModCmd c; const char* why = nullptr;
+      if (!modCmdLine(t, c, &why)) return utilLineErr(err, line, why);
+      if (m.ncmd == 0) firstCmd = c;
+      else if (strcmp(c.cmd, firstCmd.cmd)) return utilLineErr(err, line, tr("Tutti i comandi di un driver hanno la stessa prima parola"));
+      if (m.ncmd >= MOD_CMD_MAX) return utilLineErr(err, line, tr("Troppi comandi (massimo 12)"));
+      for (int k = 0; k < m.ncmd; k++) if (!strcmp(cmdSubs[k], c.sub)) return utilLineErr(err, line, tr("Sottocomando ripetuto"));
+      memcpy(cmdSubs[m.ncmd], c.sub, sizeof cmdSubs[0]);
+      m.ncmd++; snprintf(m.cmdWord, sizeof m.cmdWord, "%s", c.cmd); continue;
+    }
+    if (sec == DAT) { if (++dataRows > MOD_PAGE_MAX) return utilLineErr(err, line, tr("Troppi dati (massimo 12)")); continue; }
     if (sec == ICO) {
       if (iconLen + t.size() + 1 > MOD_ICON_MAX + 8) return utilLineErr(err, line, tr("Icona non ammessa (un solo svg con forme semplici, massimo 2 KB)"));
       bufAppend(m.icon, sizeof m.icon, iconLen, t); bufAppend(m.icon, sizeof m.icon, iconLen, "\n");
@@ -91,6 +128,11 @@ bool modParse(std::string_view text, const char* fileName, ModInfo& m, ErrBuf& e
     }
     size_t q = t.find('=');
     if (q == std::string_view::npos || q < 1) return utilLineErr(err, line, tr("Serve chiave=valore"));
+    if (sec == WGT) {
+      const char* why = nullptr;
+      if (!modWidgetKey(trimView(t.substr(0, q)), trimView(t.substr(q + 1)), m.widget, &why)) return utilLineErr(err, line, why);
+      continue;
+    }
     if (sec == PIN) {
       std::string_view lab = trimView(t.substr(0, q)), rest = trimView(t.substr(q + 1));
       size_t cm = rest.find(',');
@@ -111,7 +153,7 @@ bool modParse(std::string_view text, const char* fileName, ModInfo& m, ErrBuf& e
     if (viewEqI(k, "name")) { if (!utilNameOk(v.data(), v.size()) || v != std::string_view(fileName)) return utilLineErr(err, line, tr("Nome non valido o diverso dal nome del file")); viewCopy(m.name, sizeof m.name, v); }
     else if (viewEqI(k, "title")) { if (!txtOk(v, 32)) return utilLineErr(err, line, tr("Testo non valido (1-32 caratteri, niente caratteri di controllo)")); viewCopy(m.title, sizeof m.title, v); }
     else if (viewEqI(k, "class")) {
-      uint8_t c; if (!vfit || !ioParseCls(vb, c) || !viewCopy(m.cls, sizeof m.cls, v)) return utilLineErr(err, line, tr("Classe non valida (rele, led, pin, ingresso, analogico, i2c)"));
+      uint8_t c; if (!vfit || !ioParseCls(vb, c) || !viewCopy(m.cls, sizeof m.cls, v)) return utilLineErr(err, line, tr("Classe non valida (rele, led, pin, ingresso, analogico, i2c, sd)"));
     }
     else if (viewEqI(k, "driver")) { if (v != "bmp280") return utilLineErr(err, line, tr("Driver I2C sconosciuto (ammesso: bmp280)")); strcpy(m.drv, "bmp280"); }
     else if (viewEqI(k, "addr")) {
@@ -119,6 +161,14 @@ bool modParse(std::string_view text, const char* fileName, ModInfo& m, ErrBuf& e
       if (!vfit || v.empty() || *e || a < 0x08 || a > 0x77) return utilLineErr(err, line, tr("Indirizzo I2C non valido (da 0x08 a 0x77)"));
       m.addr = (int)a;
     }
+    else if (viewEqI(k, "khz")) {
+      char* e = nullptr; long f = vfit ? strtol(vb, &e, 10) : 0;
+      if (!vfit || v.empty() || *e || f < IO_SD_KHZ_MIN || f > IO_SD_KHZ_MAX) return utilLineErr(err, line, tr("khz: da 400 a 20000"));
+      m.khz = (int)f; hasKhz = true;
+    }
+    else if (viewEqI(k, "use")) { if (!txtOk(v, 99)) return utilLineErr(err, line, tr("Permessi non validi (come use= di una app)")); viewCopy(m.use, sizeof m.use, v); }
+    else if (viewEqI(k, "who")) { if (v != "admin" && v != "oper") return utilLineErr(err, line, tr("Chi la usa: admin oppure oper")); viewCopy(m.who, sizeof m.who, v); }
+    else if (viewEqI(k, "autostart")) { if (v != "allowed" && v != "required" && v != "never") return utilLineErr(err, line, tr("autostart: allowed, required oppure never")); viewCopy(m.autostart, sizeof m.autostart, v == "allowed" ? std::string_view() : v); }
     else if (viewEqI(k, "freq")) { if (v != "100000" && v != "400000") return utilLineErr(err, line, tr("freq: 100000 oppure 400000")); m.fast = (v == "400000"); hasFreq = true; }
     else if (viewEqI(k, "active")) { if (v != "low" && v != "high") return utilLineErr(err, line, tr("active: low oppure high")); m.low = (v == "low"); }
     else if (viewEqI(k, "pull")) { if (v != "none" && v != "up" && v != "down") return utilLineErr(err, line, tr("pull: none, up oppure down")); m.pull = v == "up" ? 'u' : v == "down" ? 'd' : 'n'; hasPull = true; }
@@ -162,7 +212,21 @@ bool modParse(std::string_view text, const char* fileName, ModInfo& m, ErrBuf& e
     if (m.addr != 0x76 && m.addr != 0x77) { err = tr("Indirizzo I2C del BMP280: 0x76 oppure 0x77"); return false; }
     if (m.nsig != 2 || strcmp(m.sig[0], "SDA") || strcmp(m.sig[1], "SCL")) { err = tr("Classe i2c: i segnali sono SDA e SCL, in questo ordine"); return false; }
     if (m.low || hasPull) { err = tr("active e pull non valgono per la classe i2c"); return false; }
+  } else if (!strcmp(m.cls, "sd")) {
+    if (m.nsig != 4 || strcmp(m.sig[0], "CS") || strcmp(m.sig[1], "MOSI") || strcmp(m.sig[2], "SCK") || strcmp(m.sig[3], "MISO")) { err = tr("Classe sd: i segnali sono CS, MOSI, SCK, MISO, in questo ordine"); return false; }
+    if (m.low || hasPull || m.drv[0] || m.addr || hasFreq) { err = tr("Classe sd: active, pull, driver, addr e freq non valgono"); return false; }
   } else if (m.drv[0] || m.addr || hasFreq) { err = tr("driver, addr e freq valgono solo per la classe i2c"); return false; }
+  if (hasKhz && strcmp(m.cls, "sd")) { err = tr("khz vale solo per la classe sd"); return false; }
+  m.hasApp = seen[COD] && codeLen > 0;
+  if (seen[CMS] != seen[CMC] || (seen[CMS] && (m.ncmd == 0 || !cmdHasCode))) { err = tr("I comandi servono sia [commands] sia [cmd], entrambe non vuote"); return false; }
+  m.hasCmd = seen[CMS];
+  if (seen[WGT]) {                                  // il widget vive di on_widget() nel codice dei comandi
+    if (!m.hasCmd || !cmdHasWidget) { err = tr("Il widget ha bisogno dei comandi: servono [commands] e [cmd] con la funzione on_widget()"); return false; }
+    m.widget.on = true;
+    if (!m.widget.who[0]) strcpy(m.widget.who, "oper");
+  }
+  if ((seen[PAG] || seen[DAT]) && !m.hasApp) { err = tr("Pagina e dati servono solo con la sezione [code]"); return false; }
+  if (m.use[0] && !m.hasApp && !m.hasCmd) { err = tr("I permessi servono solo con [code] o con i comandi"); return false; }
   if (seen[PIN]) {                                  // ogni filo va a vcc, gnd o a un segnale del modulo; ogni segnale deve avere il suo filo
     bool wired[MOD_SIG_MAX] = {false};
     for (int i = 0; i < m.nwp; i++) {
@@ -176,212 +240,8 @@ bool modParse(std::string_view text, const char* fileName, ModInfo& m, ErrBuf& e
   if (hasPull && strcmp(m.cls, "ingresso")) { err = tr("pull vale solo per la classe ingresso"); return false; }
   if (m.low && !strcmp(m.cls, "analogico")) { err = tr("active=low non vale per la classe analogico"); return false; }
   if (m.title[0] == 0) strcpy(m.title, m.name);
+  if (m.widget.on && !m.widget.title[0]) strcpy(m.widget.title, m.title);
   if (seen[ICO]) { trimBuf(m.icon); if (!utilSvgSafe(m.icon, MOD_ICON_MAX)) { err = tr("Icona non ammessa (un solo svg con forme semplici, massimo 2 KB)"); return false; } } else m.icon[0] = 0;
   if (seen[WIR]) { trimBuf(m.wiring); if (!utilSvgSafe(m.wiring, MOD_WIRING_MAX)) { err = tr("Schema non ammesso (un solo svg con forme semplici, massimo 4 KB)"); return false; } } else m.wiring[0] = 0;
   return true;
-}
-
-
-// ---------- elenco dei file /devs/*.vdp ----------
-// Scrive in names (mx nomi da MOD_NAME_BUF byte) i primi nomi delle schede e ritorna quante ce ne sono in tutto. Crea la cartella se manca.
-#define MOD_NAME_BUF 48
-static int scan(char (*names)[MOD_NAME_BUF], int mx) {
-  HeapBuf j(FS_JSON_MAX);
-  if (!fsListBuild(MOD_DIR, j)) return 0;                          // manca la memoria
-  if (!strstr(j.c_str(), "\"ok\":true")) { ErrBuf e; fsMkdir(MOD_DIR, e); j.clear(); if (!fsListBuild(MOD_DIR, j)) return 0; }
-  std::string_view v(j.c_str(), j.length());
-  const size_t none = std::string_view::npos;
-  int n = 0; size_t pos = 0;
-  while (true) {
-    size_t a = v.find("{\"n\":\"", pos); if (a == none) break;
-    size_t b = v.find('"', a + 6); if (b == none) break;
-    std::string_view name = v.substr(a + 6, b - (a + 6));
-    size_t d = v.find("\"d\":", b);
-    bool isDir = d != none && v.substr(d + 4, 4) == "true";
-    pos = b + 1;
-    if (isDir || name.size() < 4 || name.substr(name.size() - 4) != MOD_EXT) continue;
-    if (n < mx) {                                                  // un nome troppo lungo si taglia: resta comunque non valido
-      size_t k = name.size() - 4 < MOD_NAME_BUF - 1 ? name.size() - 4 : MOD_NAME_BUF - 1;
-      memcpy(names[n], name.data(), k); names[n][k] = 0;
-    }
-    n++;
-  }
-  return n;
-}
-// Percorso del file di una scheda modulo (il nome e gia valido: al massimo 24 caratteri).
-static void modPath(char* out, size_t cap, const char* name) { snprintf(out, cap, "%s/%s%s", MOD_DIR, name, MOD_EXT); }
-
-static bool load(const char* name, ModInfo& m, ErrBuf& err) {
-  HeapBuf text(fsTextMax()); ErrBuf e;
-  if (!utilNameOk(name, strlen(name))) { err = tr("Nome non valido"); return false; }
-  char path[64];
-  modPath(path, sizeof path, name);
-  if (!fsReadText(path, text, e)) { err = e.empty() ? tr("File non trovato") : e.c_str(); return false; }
-  return modParse(std::string_view(text.c_str(), text.length()), name, m, err);
-}
-
-static bool full(const HeapBuf& o) { return o.oom() || o.over(); }
-static void addJ(HeapBuf& o, const char* s) { o.addJson(s, strlen(s)); }        // testo libero dentro virgolette JSON
-
-// Campi comuni dell'elenco e del dettaglio (senza graffe)
-static void headJson(const ModInfo& m, HeapBuf& o) {
-  heapAddf(o, "\"n\":\"%s\",\"t\":\"", m.name); addJ(o, m.title);
-  heapAddf(o, "\",\"c\":\"%s\",\"p\":\"%s\",\"ns\":%d,\"low\":%d,\"pull\":\"%c\",\"v\":\"%s\",\"a\":\"", m.cls, m.power, m.nsig, m.low ? 1 : 0, m.pull, m.ver);
-  addJ(o, m.author); o.add("\",\"l\":\""); addJ(o, m.lic); o.add("\",\"w\":\""); addJ(o, m.warn); o.add("\",\"sig\":[");
-  for (int i = 0; i < m.nsig; i++) heapAddf(o, "%s\"%s\"", i ? "," : "", m.sig[i]);
-  o.add(']');
-  if (!strcmp(m.cls, "i2c")) heapAddf(o, ",\"drv\":\"%s\",\"addr\":%d,\"freq\":%d", m.drv, m.addr, m.fast ? 400000 : 100000);
-}
-static void wiresJson(const ModInfo& m, HeapBuf& o) {      // fili colorati: l = pin della periferica, d = destinazione, c = #rrggbb, cn = nome base del colore
-  o.add('[');
-  for (int i = 0; i < m.nwp; i++)
-    heapAddf(o, "%s{\"l\":\"%s\",\"d\":\"%s\",\"c\":\"%s\",\"cn\":\"%s\"}", i ? "," : "", m.wp[i].lab, m.wp[i].dst, m.wp[i].hex, m.wp[i].cname);
-  o.add(']');
-}
-
-bool modListJson(HeapBuf& out) {
-  char (*names)[MOD_NAME_BUF] = new char[MOD_LIST_MAX][MOD_NAME_BUF];
-  int total = scan(names, MOD_LIST_MAX), n = total < MOD_LIST_MAX ? total : MOD_LIST_MAX;
-  ModInfo* m = new ModInfo();
-  heapAddf(out, "{\"ok\":true,\"total\":%d,\"list\":[", total);
-  for (int i = 0; i < n; i++) {
-    ErrBuf err;
-    if (i) out.add(',');
-    if (load(names[i], *m, err)) {
-      out.add('{'); headJson(*m, out); out.add(",\"ok\":true,\"icon\":\""); addJ(out, m->icon); out.add("\"}");
-    } else {
-      out.add("{\"n\":\""); addJ(out, names[i]); out.add("\",\"ok\":false,\"e\":\""); addJ(out, err.c_str()); out.add("\"}");
-    }
-  }
-  delete m; delete[] names;
-  out.add("]}");
-  return !full(out);
-}
-
-static void partsJson(const ModInfo& m, HeapBuf& o) {
-  o.add('[');
-  for (int i = 0; i < m.npart; i++) {
-    heapAddf(o, "%s{\"k\":\"%s\",\"v\":\"", i ? "," : "", m.part[i].pos == 's' ? "serie" : m.part[i].pos == 'g' ? "gnd" : "vcc");
-    addJ(o, m.part[i].val); heapAddf(o, "\",\"s\":\"%s\"}", m.part[i].sig);
-  }
-  o.add(']');
-}
-
-bool modInfoJson(const char* name, HeapBuf& out) {
-  ModInfo* m = new ModInfo(); ErrBuf err;
-  if (!load(name, *m, err)) {
-    delete m;
-    out.add("{\"ok\":false,\"err\":\""); addJ(out, err.c_str()); out.add("\"}");
-    return !full(out);
-  }
-  int pins[MOD_SIG_MAX]; uint8_t c = 0; ioParseCls(m->cls, c);
-  int k = ioSuggest(c, m->nsig, pins);
-  out.add("{\"ok\":true,"); headJson(*m, out);
-  out.add(",\"icon\":\""); addJ(out, m->icon); out.add("\",\"wiring\":\""); addJ(out, m->wiring);
-  heapAddf(out, "\",\"lv\":\"%s\",\"parts\":", m->level == '5' ? "5V" : "3V3"); partsJson(*m, out);
-  out.add(",\"pins\":"); wiresJson(*m, out);
-  heapAddf(out, ",\"free\":%d,\"sug\":[", k >= m->nsig ? 1 : 0);
-  for (int i = 0; i < k; i++) heapAddf(out, "%s%d", i ? "," : "", pins[i]);
-  delete m;
-  out.add("]}");
-  return !full(out);
-}
-
-bool modInstall(const char* name, const char* prefixIn, HeapBuf& outJson, ErrBuf& err) {
-  ModInfo* m = new ModInfo();
-  if (!load(name, *m, err)) { delete m; return false; }
-  uint8_t c = 0; ioParseCls(m->cls, c);
-  int pins[MOD_SIG_MAX]; int k = ioSuggest(c, m->nsig, pins);
-  if (k < m->nsig) { err = tr("Non ci sono abbastanza pin liberi per questo modulo"); delete m; return false; }
-  char prefix[112];                                             // prefisso: senza spazi ai lati, minuscolo
-  if (!viewCopyLower(prefix, sizeof prefix, trimView(std::string_view(prefixIn ? prefixIn : "")))) { err = tr("Nome non valido"); delete m; return false; }
-  if (!strcmp(m->cls, "i2c")) {                                 // un solo sensore su due pin: SDA e SCL (in questo ordine) prendono i primi due pin proposti
-    int sda = pins[0], scl = pins[1];
-    char out[16] = "", eb[IO_ERR_MAX] = "";
-    if (!ioAddI2c(m->drv, sda, scl, m->addr, m->fast, prefix, out, eb)) { err = eb; delete m; return false; }
-    vlog("MOD: %s installato (sensore I2C)", m->name);
-    char js[128];                                               // 2 nomi da 15 + 2 numeri: sta largo, per non tagliare mai la risposta
-    snprintf(js, sizeof js, "{\"ok\":true,\"devs\":[{\"s\":\"SDA\",\"n\":\"%s\",\"g\":%d},{\"s\":\"SCL\",\"n\":\"%s\",\"g\":%d}]}", out, sda, out, scl);
-    delete m;
-    return outJson.add(js);
-  }
-  if (ioCount() + m->nsig > IO_MAX) { err = tr("Troppe periferiche (massimo 16)"); delete m; return false; }
-  char opt[16] = "";                                            // opzioni: inv, up, down
-  if (m->low) strcat(opt, "inv,");
-  if (m->pull == 'u') strcat(opt, "up,"); else if (m->pull == 'd') strcat(opt, "down,");
-  char made[MOD_SIG_MAX][16]; int nm = 0; bool ok = true;
-  HeapBuf res(1024);
-  res.add("{\"ok\":true,\"devs\":[");
-  for (int i = 0; i < m->nsig && ok; i++) {
-    char nm1[128] = "";                                         // nome della periferica: prefisso, con il numero se i segnali sono piu d'uno
-    if (prefix[0]) { if (m->nsig == 1) snprintf(nm1, sizeof nm1, "%s", prefix); else snprintf(nm1, sizeof nm1, "%s%d", prefix, i + 1); }
-    char out[16];
-    if (!ioAdd(m->cls, pins[i], nm1, opt, out, err)) { ok = false; break; }
-    strcpy(made[nm++], out);
-    heapAddf(res, "%s{\"s\":\"%s\",\"n\":\"%s\",\"g\":%d}", i ? "," : "", m->sig[i], out, pins[i]);
-  }
-  if (!ok) { ErrBuf e2; for (int i = 0; i < nm; i++) ioRemove(made[i], e2); delete m; return false; }   // tutto o niente
-  vlog("MOD: %s installato (%d periferiche)", m->name, m->nsig);
-  delete m;
-  res.add("]}");
-  if (full(res)) { err = tr("Memoria insufficiente"); return false; }
-  return outJson.add(res.c_str(), res.length());
-}
-
-bool modSave(const char* name, std::string_view text, ErrBuf& err) {
-  ModInfo* m = new ModInfo();
-  bool ok = utilNameOk(name, strlen(name)) ? modParse(text, name, *m, err) : (err = tr("Nome non valido"), false);
-  delete m;
-  if (!ok) return false;
-  ErrBuf e0; fsMkdir(MOD_DIR, e0);
-  char path[64];
-  modPath(path, sizeof path, name);
-  return fsWriteText(path, text, err, false);
-}
-bool modDelete(const char* name, ErrBuf& err) {
-  if (!utilNameOk(name, strlen(name))) { err = tr("Nome non valido"); return false; }
-  char path[64];
-  modPath(path, sizeof path, name);
-  return fsRemove(path, err);
-}
-
-void modListText(HeapBuf& out) {
-  char (*names)[MOD_NAME_BUF] = new char[MOD_LIST_MAX][MOD_NAME_BUF];
-  int total = scan(names, MOD_LIST_MAX), n = total < MOD_LIST_MAX ? total : MOD_LIST_MAX;
-  if (!total) { out.add(tr("Nessuna scheda modulo in /devs. Si caricano dalla pagina Periferiche")); out.add('\n'); }
-  else {
-    heapAddf(out, tr("Schede modulo in /devs: %d"), total); out.add('\n');
-    ModInfo* m = new ModInfo();
-    for (int i = 0; i < n; i++) {
-      ErrBuf err;
-      if (load(names[i], *m, err)) heapAddf(out, "  %s  %s  %s x%d  OK\n", names[i], m->title, m->cls, m->nsig);
-      else heapAddf(out, "  %s  %s: %s\n", names[i], tr("ERRORE"), err.c_str());
-    }
-    delete m;
-  }
-  delete[] names;
-}
-void modInfoText(const char* name, HeapBuf& out) {
-  ModInfo* m = new ModInfo(); ErrBuf err;
-  if (!load(name, *m, err)) heapAddf(out, "%s: %s\n", tr("ERRORE"), err.c_str());
-  else {
-    uint8_t c = 0; ioParseCls(m->cls, c); int pins[MOD_SIG_MAX]; int k = ioSuggest(c, m->nsig, pins);
-    heapAddf(out, "%s (%s)  v%s\n", m->title, m->name, m->ver);
-    heapAddf(out, "%s: %s  %s: %s%s\n", tr("Classe del modulo"), m->cls, tr("Alimentazione"), m->power, m->low ? "  active=low" : "");
-    for (int i = 0; i < m->nsig; i++) {
-      if (i < k) heapAddf(out, "  %s -> GPIO%d\n", m->sig[i], pins[i]);
-      else heapAddf(out, "  %s -> ?\n", m->sig[i]);
-    }
-    heapAddf(out, "%s: %s\n", tr("Livello del segnale"), m->level == '5' ? "5 V" : "3,3 V");
-    if (!strcmp(m->cls, "i2c")) heapAddf(out, "I2C: %s  0x%x  %s\n", m->drv, m->addr, m->fast ? "400 kHz" : "100 kHz");
-    for (int i = 0; i < m->nwp; i++) {
-      heapAddf(out, "%s: %s -> %s  %s", tr("Filo"), m->wp[i].lab, m->wp[i].dst, m->wp[i].hex);
-      if (m->wp[i].cname[0]) heapAddf(out, " (%s)", m->wp[i].cname);
-      out.add('\n');
-    }
-    for (int i = 0; i < m->npart; i++) heapAddf(out, "%s: %s (%s) %s\n", tr("Componente"), m->part[i].val, m->part[i].pos == 's' ? "serie" : m->part[i].pos == 'g' ? "GND" : "VCC", m->part[i].sig);
-    if (m->warn[0]) heapAddf(out, "%s: %s\n", tr("Avviso del modulo"), m->warn);
-    if (k < m->nsig) { out.add(tr("Non ci sono abbastanza pin liberi per questo modulo")); out.add('\n'); }
-  }
-  delete m;
 }

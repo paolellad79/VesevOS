@@ -1,4 +1,4 @@
-// VesevOS - prove sul computer: lettura e controllo dei file .vap (vos_app.cpp)
+// VesevOS - prove sul computer: lettura e controllo dei file .vab (vos_app.cpp)
 #include <Arduino.h>
 #include "mini.h"
 #include <string.h>
@@ -118,14 +118,14 @@ int main() {
   { std::string big = "<svg>"; while (big.size() < 2100) big += "<path d=\"M0 0\"/>"; big += "</svg>"; CHECK(!appIconSafe(String(big.c_str()))); }
   // 6) elenco, informazioni (testo e JSON)
   g_fs.clear();
-  g_fs["/apps/lamp.vap"] = good("lamp");
-  g_fs["/apps/rotta.vap"] = rep(good("rotta"), "[code]", "[codice]");
-  g_fs["/apps/nome.vap"] = good("altro");                   // name diverso dal file
-  g_fs["/apps/vecchio.be"] = "print(1)";                    // non e .vap
-  g_fs["/apps/Bad Name.vap"] = "x";
+  g_fs["/apps/lamp.vab"] = good("lamp");
+  g_fs["/apps/rotta.vab"] = rep(good("rotta"), "[code]", "[codice]");
+  g_fs["/apps/nome.vab"] = good("altro");                   // name diverso dal file
+  g_fs["/apps/vecchio.be"] = "print(1)";                    // non e .vab
+  g_fs["/apps/Bad Name.vab"] = "x";
   String lt = appListText();
   CHECK(lt.indexOf("App in /apps: 4") == 0 && lt.indexOf("lamp  Lampada  v1.2  OK") > 0 && lt.indexOf("rotta  ERRORE: Riga") > 0 && lt.indexOf("nome  ERRORE") > 0 && lt.indexOf("vecchio") < 0);
-  String it = appInfoText("LAMP.vap");
+  String it = appInfoText("LAMP.vab");
   CHECK(it.indexOf("Lampada (lamp) v1.2 - Mimmo") == 0 && it.indexOf("Permessi: led,gpio:5,gpio:6") > 0 && it.indexOf("Controlli: 6") > 0 && it.indexOf("switch power  Accesa") > 0 && it.indexOf("Dati iniziali: 2") > 0 && it.indexOf("Icona: si") > 0);
   CHECK(appInfoText("rotta").indexOf("ERRORE: Riga") == 0 && appInfoText("../x").indexOf("Nome app non valido") == 0 && appInfoText("manca").indexOf("ERRORE: File non trovato") == 0);
   String lj = appListJson();
@@ -137,13 +137,13 @@ int main() {
   CHECK(appInfoJson("manca").indexOf("\"ok\":false") == 1 && appInfoJson("a b").indexOf("Nome app non valido") > 0);
   g_fs.clear(); g_dirOk = false;
   CHECK(appListJson().indexOf("\"list\":[]") > 0 && g_dirOk && appListText().indexOf("Nessuna app") == 0);       // cartella mancante: creata
-  for (int i = 0; i < 15; i++) g_fs["/apps/a" + std::to_string(i) + ".vap"] = good(("a" + std::to_string(i)).c_str());
+  for (int i = 0; i < 15; i++) g_fs["/apps/a" + std::to_string(i) + ".vab"] = good(("a" + std::to_string(i)).c_str());
   CHECK(appListJson().indexOf("\"more\":true") > 0);
   // ---- esecuzione: ruoli, avvio, stop, valori ----
   g_fs.clear(); g_dirOk = true;
-  g_fs["/apps/lamp.vap"] = good("lamp");                                         // who=oper
-  g_fs["/apps/solo.vap"] = rep(good("solo"), "who=oper", "who=admin");             // solo Admin
-  g_fs["/apps/rotta.vap"] = "[manifest]\nname=rotta\n[page]\nswitch id=\n";
+  g_fs["/apps/lamp.vab"] = good("lamp");                                         // who=oper
+  g_fs["/apps/solo.vab"] = rep(good("solo"), "who=oper", "who=admin");             // solo Admin
+  g_fs["/apps/rotta.vab"] = "[manifest]\nname=rotta\n[page]\nswitch id=\n";
   { String e;
     // elenco e dettaglio per ruolo
     String lo = appListJson(1), la = appListJson(2);
@@ -153,7 +153,7 @@ int main() {
     CHECK(!appStart("solo", e, 1, "t") && e.indexOf("ruolo") > 0 && !g_aRun);
     CHECK(!appStart("rotta", e, 2, "t") && e.indexOf("Riga") == 0 && !g_aRun && !rtLoaded());
     CHECK(!appStart("a b", e, 2, "t") && e == "Nome app non valido" && !appStart("manca", e, 2, "t"));
-    CHECK(appStart("LAMP.vap", e, 1, "t") && g_aRun && g_aName == "lamp" && g_aUse == "led,gpio:5,gpio:6" && g_aCode.indexOf("on_set") >= 0 && rtLoaded() && rtName() == "lamp");
+    CHECK(appStart("LAMP.vab", e, 1, "t") && g_aRun && g_aName == "lamp" && g_aUse == "led,gpio:5,gpio:6" && g_aCode.indexOf("on_set") >= 0 && rtLoaded() && rtName() == "lamp");
     CHECK(!appStart("lamp", e, 2, "t") && e == "App gia in esecuzione" && !appStart("solo", e, 2, "t") && e.indexOf("occupato") >= 0 && g_starts == 1);
     // stato: valori iniziali da [data] (power=0, lum=128), controlli, uscita
     String st = appStateJson("lamp", 1);
@@ -182,7 +182,7 @@ int main() {
     int found = 0;
     while (d) {
       struct dirent* de = readdir(d); if (!de) break;
-      std::string fn = de->d_name; if (fn.size() < 5 || fn.compare(fn.size() - 4, 4, ".vap") != 0) continue;
+      std::string fn = de->d_name; if (fn.size() < 5 || fn.compare(fn.size() - 4, 4, ".vab") != 0) continue;
       std::string tx; FILE* f = fopen((dir + "/" + fn).c_str(), "rb"); CHECK(f != NULL);
       if (f) { char b[512]; size_t n; while ((n = fread(b, 1, sizeof b, f)) > 0) tx.append(b, n); fclose(f); }
       AppInfo* X = new AppInfo(); String ee;

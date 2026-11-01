@@ -1,0 +1,37 @@
+--- a/elf_loader/src/esp_elf.c	2026-10-30 09:02:03
++++ b/elf_loader/src/esp_elf.c	2026-10-30 09:26:18
+@@ -608,7 +608,7 @@
+  *
+  * @return ESP_OK if success or other if failed.
+  */
+-int esp_elf_relocate(esp_elf_t *elf, const uint8_t *pbuf, size_t size)
++static int esp_elf_relocate_inner(esp_elf_t *elf, const uint8_t *pbuf, size_t size)
+ {
+     int ret;
+ 
+@@ -781,6 +781,25 @@
+ }
+ 
+ /**
++ * @brief Decode and relocate ELF data (public entry).
++ *
++ * VOS PATCH 2 (prova 4): se la rilocazione fallisce, il caricatore originale
++ * restituisce l'errore SENZA liberare .text e dati gia allocati (chi chiama
++ * deve ricordarsi esp_elf_deinit). Qui li liberiamo noi: esp_elf_deinit e
++ * innocuo se richiamato dopo (azzera la struttura, i puntatori sono NULL).
++ */
++int esp_elf_relocate(esp_elf_t *elf, const uint8_t *pbuf, size_t size)
++{
++    int ret = esp_elf_relocate_inner(elf, pbuf, size);
++
++    if (ret && elf) {
++        esp_elf_deinit(elf);
++    }
++
++    return ret;
++}
++
++/**
+  * @brief Request running relocated ELF function.
+  *
+  * @param elf  - ELF object pointer

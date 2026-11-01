@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
-// VesevOS - vos_app.cpp (vedi vos_app.h): lettura e controllo dei file .vap. Nessuna esecuzione in questa versione.
+// VesevOS - vos_app.cpp (vedi vos_app.h): lettura e controllo dei file .vab. Nessuna esecuzione in questa versione.
 #include "vos_app.h"
+#include "vos_prog_data.h"
+#include "vos_progext.h"
 #if VOS_WITH_BERRY
 #include "vos_berry.h"
 #include "vos_app_rt.h"
+#include "vos_func.h"
 #include "../core/vos_common.h"
 #include "../core/vos_log.h"
 #include "../core/vos_i18n.h"
@@ -93,7 +96,7 @@ static bool usePermOk(std::string_view u, char* norm, size_t cap) {
     pos = e + 1;
     if (p.empty()) { if (u.empty()) break; return false; }
     char gp[16];                                                     // "gpio:N" riscritto senza zeri davanti
-    bool ok = (p == "led" || p == "time" || p == "temp" || p == "log" || p == "act" || p == "btn" || p == "mqtt" || p == "logread" || p == "ble");
+    bool ok = (p == "led" || p == "time" || p == "temp" || p == "log" || p == "act" || p == "btn" || p == "mqtt" || p == "logread" || p == "ble" || p == "files" || p == "sd");
     bool isGpio = p.substr(0, 4) == "gpio";
     if (!ok && p.size() >= 2 && p.size() <= 11 && !isGpio) {          // nome di una periferica a classi (rele1, led1...)
       ok = true;
@@ -200,7 +203,9 @@ bool appParse(std::string_view text, const char* fileName, AppInfo& a, ErrBuf& e
       viewCopy(a.ver, sizeof a.ver, v);
     }
     else if (viewEqI(k, "who")) { if (v != "admin" && v != "oper") return utilLineErr(err, line, tr("Chi la usa: admin oppure oper")); viewCopy(a.who, sizeof a.who, v); }
-    else if (viewEqI(k, "use")) { if (!usePermOk(v, a.use, sizeof a.use)) return utilLineErr(err, line, tr("Permesso non ammesso (led, time, temp, log, logread, act, btn, mqtt, ble, gpio:N o il nome di una periferica come rele1)")); }
+    else if (viewEqI(k, "data")) { if (v != "0" && v != "1") return utilLineErr(err, line, tr("data: 1 se l'app salva dati, altrimenti 0")); a.saves = v == "1"; }
+    else if (viewEqI(k, "autostart")) { if (v != "allowed" && v != "required" && v != "never") return utilLineErr(err, line, tr("autostart: allowed, required oppure never")); viewCopy(a.autostart, sizeof a.autostart, v == "allowed" ? std::string_view() : v); }
+    else if (viewEqI(k, "use")) { if (!usePermOk(v, a.use, sizeof a.use)) return utilLineErr(err, line, tr("Permesso non ammesso (led, time, temp, log, logread, act, btn, mqtt, ble, files, sd, gpio:N o il nome di una periferica come rele1)")); }
     else return utilLineErr(err, line, tr("Chiave sconosciuta nel manifest"));
   }
   if (!seen[MAN] || a.name[0] == 0) { err = tr("Manca [manifest] con name="); return false; }
@@ -215,8 +220,8 @@ bool appParse(std::string_view text, const char* fileName, AppInfo& a, ErrBuf& e
   return true;
 }
 
-// ---------- elenco dei file /apps/*.vap ----------
-// Chiama cb(nome senza estensione, ctx) per ogni file .vap della cartella (la crea se manca). Ritorna quanti ne ha trovati.
+// ---------- elenco dei file /apps/*.vab ----------
+// Chiama cb(nome senza estensione, ctx) per ogni file .vab (e i vecchi .vap) della cartella (la crea se manca). Ritorna quanti ne ha trovati.
 typedef void (*NameCb)(std::string_view, void*);
 static int scanApps(NameCb cb, void* ctx) {
   HeapBuf j(FS_JSON_MAX);
@@ -232,8 +237,11 @@ static int scanApps(NameCb cb, void* ctx) {
     size_t d = v.find("\"d\":", b);
     bool isDir = d != none && v.substr(d + 4, 4) == "true";
     pos = b + 1;
-    if (isDir || name.size() < 4 || name.substr(name.size() - 4) != APP_EXT) continue;
-    cb(name.substr(0, name.size() - 4), ctx); n++;
+    size_t ext = isDir ? 0 : progExtLen(name, PEXT_APP_B);             // .vab, o il vecchio .vap
+    if (!ext) continue;
+    std::string_view stem = name.substr(0, name.size() - ext);
+    if (name.substr(name.size() - ext) != PEXT_APP_B.nuovo && progVecchioCoperto(APP_DIR, stem, PEXT_APP_B)) continue;   // c'e anche il nuovo: vale quello
+    cb(stem, ctx); n++;
   }
   return n;
 }
@@ -242,7 +250,7 @@ static bool loadApp(const char* name, AppInfo& a, ErrBuf& err) {
   HeapBuf text(fsTextMax()); ErrBuf e;
   if (!appNameValid(name)) { err = tr("Nome app non valido"); return false; }
   char path[64];
-  snprintf(path, sizeof path, "%s/%s%s", APP_DIR, name, APP_EXT);   // il nome e gia valido: al massimo 24 caratteri
+  progPercorsoAvvio(path, sizeof path, APP_DIR, name, PEXT_APP_B);       // memoria interna, poi microSD; il nome e gia valido: al massimo 24 caratteri; .vab, o il vecchio .vap
   if (!fsReadText(path, text, e)) { err = e.empty() ? tr("File non trovato") : e.c_str(); return false; }
   return appParse(std::string_view(text.c_str(), text.length()), name, a, err);
 }
@@ -263,22 +271,22 @@ static void namesCb(std::string_view nm, void* c) {
 
 static bool full(const HeapBuf& o) { return o.oom() || o.over(); }
 
-// Nome scritto dall'utente -> nome pulito: senza spazi ai lati, minuscolo, senza ".vap". Se e troppo lungo per essere un nome, out resta vuoto
+// Nome scritto dall'utente -> nome pulito: senza spazi ai lati, minuscolo, senza ".vab" o ".vap". Se e troppo lungo per essere un nome, out resta vuoto
 // (e vuoto non e un nome valido).
 static void cleanAppName(const char* in, char* out, size_t cap) {
   std::string_view v = trimView(std::string_view(in ? in : ""));
   if (!viewCopyLower(out, cap, v)) return;
-  size_t n = v.size(), e = strlen(APP_EXT);
-  if (n >= e && !strcmp(out + n - e, APP_EXT)) out[n - e] = 0;
+  size_t n = v.size();
+  if (n < cap) progTogliExt(out, n, PEXT_APP_B);                     // senza ".vab" (o il vecchio ".vap")
 }
 #define APP_CLEAN_BUF 64
 
 void appListText(HeapBuf& out) {
   NamesCtx* x = new NamesCtx(); x->n = 0; x->total = 0;
   scanApps(namesCb, x);
-  if (!x->total) { out.add(tr("Nessuna app in /apps. Si crea dalla pagina App (Programmi > App)")); out.add('\n'); }
+  if (!x->total) { out.add(tr("Nessuna app in /bin. Si crea dalla pagina App (Programmi > App)")); out.add('\n'); }
   else {
-    heapAddf(out, tr("App in /apps: %d"), x->total); out.add('\n');
+    heapAddf(out, tr("App in /bin: %d"), x->total); out.add('\n');
     AppInfo* a = new AppInfo();
     for (int i = 0; i < x->n; i++) {
       ErrBuf err;
@@ -302,6 +310,7 @@ void appInfoText(const char* nameIn, HeapBuf& out) {
     out.add('\n');
     heapAddf(out, tr("Permessi: %s"), a->use[0] ? a->use : "-"); out.add('\n');
     heapAddf(out, tr("Chi la usa: %s"), a->who); out.add('\n');
+    if (a->saves) { out.add(tr("Salva dati: si (cartella scelta dall'utente: flash o microSD)")); out.add('\n'); }
     heapAddf(out, tr("Controlli: %d"), a->nctl); out.add('\n');
     for (int i = 0; i < a->nctl; i++) heapAddf(out, "  %s %s  %s\n", kindName(a->ctl[i].k), a->ctl[i].id, a->ctl[i].label);
     heapAddf(out, tr("Dati iniziali: %d"), a->ndata); out.add('\n');
@@ -336,7 +345,7 @@ bool appListJson(HeapBuf& out, uint8_t role) {
     if (okl) {
       heapAddf(out, "{\"n\":\"%s\",\"ok\":true,\"t\":\"", a->name); out.addJson(a->title, strlen(a->title));
       heapAddf(out, "\",\"v\":\"%s\",\"a\":\"", a->ver); out.addJson(a->author, strlen(a->author));
-      heapAddf(out, "\",\"w\":\"%s\",\"u\":\"%s\",\"c\":%d,\"s\":%u,\"icon\":\"", a->who, a->use, a->nctl, (unsigned)a->size);
+      heapAddf(out, "\",\"w\":\"%s\",\"u\":\"%s\",\"as\":\"%s\",\"d\":%s,\"c\":%d,\"s\":%u,\"icon\":\"", a->who, a->use, a->autostart, a->saves ? "true" : "false", a->nctl, (unsigned)a->size);
       out.addJson(a->icon, strlen(a->icon)); out.add("\"}");
     } else {
       out.add("{\"n\":\""); out.addJson(x->names[i], strlen(x->names[i]));
@@ -381,13 +390,44 @@ bool appStart(const char* nameIn, ErrBuf& err, uint8_t role, const char* who) {
   if (!loadApp(n, *a, err)) { delete a; return false; }
   if (!roleCan(*a, role)) { err = tr("Il tuo ruolo non permette questa operazione"); delete a; return false; }
   char cur[32];
-  if (berryAppRunning(cur, sizeof cur)) { err = !strcmp(n, cur) ? tr("App gia in esecuzione") : tr("Berry e occupato con un altro script"); delete a; return false; }
-  if (berryRunning()) { err = tr("Berry e occupato con un altro script"); delete a; return false; }
+  if (berryAppRunning(cur, sizeof cur)) { err = !strcmp(n, cur) ? tr("App gia in esecuzione") : tr("Un altro script e gia in esecuzione"); delete a; return false; }
+  if (berryRunning()) { err = tr("Un altro script e gia in esecuzione"); delete a; return false; }
+  if (const char* off = funcMissing(a->use)) { err = trf("L'app chiede la funzionalita %s, che e spenta (Sistema > Funzionalita)", off); delete a; return false; }
+  if (!progDataReady(PK_APP_B, a->name, err)) { delete a; return false; }   // dati sulla microSD scelta e la scheda non c'e: l'app non parte
   rtInit(*a);
-  if (!berryStartApp(a->name, a->code, a->use, err)) { rtFree(); delete a; return false; }
+  if (!berryStartApp(a->name, a->code, a->use, err, !strcmp(a->who, "admin"))) { rtFree(); delete a; return false; }
   vlog("APP: %s avviata da %s", a->name, who ? who : "?");
   delete a;
   return true;
+}
+
+int appAutostart(const char* nameIn) {
+  char n[APP_CLEAN_BUF] = "";
+  cleanAppName(nameIn, n, sizeof n);
+  AppInfo* a = new AppInfo(); ErrBuf e;
+  int r = loadApp(n, *a, e) ? (!strcmp(a->autostart, "required") ? 1 : !strcmp(a->autostart, "never") ? 2 : 0) : -1;
+  delete a;
+  return r;
+}
+
+int appSavesData(const char* nameIn) {
+  char n[APP_CLEAN_BUF] = "";
+  cleanAppName(nameIn, n, sizeof n);
+  AppInfo* a = new AppInfo(); ErrBuf e;
+  int r = loadApp(n, *a, e) ? (a->saves ? 1 : 0) : -1;
+  delete a;
+  return r;
+}
+
+int appRequiredList(char names[][25], int max) {
+  NamesCtx* x = new NamesCtx(); x->n = 0; x->total = 0;
+  scanApps(namesCb, x);
+  int n = 0;
+  for (int i = 0; i < x->n && n < max; i++) {
+    if (appAutostart(x->names[i]) == 1) { snprintf(names[n], 25, "%s", x->names[i]); n++; }
+  }
+  delete x;
+  return n;
 }
 
 bool appStop(const char* nameIn, ErrBuf& err, uint8_t role) {

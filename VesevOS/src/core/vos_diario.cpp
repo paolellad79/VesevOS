@@ -3,6 +3,7 @@
 // VesevOS - vos_diario.cpp
 #include "vos_diario.h"
 #include "vos_log.h"
+#include "vos_layout.h"
 #include <freertos/FreeRTOS.h>
 #include "vos_i18n.h"
 #include "vos_util.h"
@@ -19,7 +20,7 @@
 #define RTC_NOINIT_ATTR
 #endif
 
-#define DIARY_FILE "/boots3.bin"
+#define DIARY_FILE layoutPath(LAY_DIARY)    // /var/boots3.bin (prima della copia /boots3.bin)
 #define DIARY_OLD  "/boots2.bin"
 #define DIARY_OLD1 "/boots.bin"
 #define HDR_MAGIC  0x56444941u

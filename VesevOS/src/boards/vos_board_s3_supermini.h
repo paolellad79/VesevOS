@@ -12,6 +12,7 @@
 // ---- memoria ----
 #define VOS_FLASH_MB      4
 #define VOS_PSRAM_MB      2
+#define VOS_SRAM_KB       512           // SRAM interna nominale del chip (ESP32-S3); la mappa della RAM (drvMemMap) parte da qui
 
 // ---- cosa c'e sulla scheda ----
 #define VOS_HAS_PSRAM        1
@@ -62,6 +63,16 @@
 #define VOS_PIN_UART_RX   44
 #define VOS_PSRAMQ_FIRST  33            // liberi con PSRAM quad (2 MB), occupati con PSRAM octal
 #define VOS_PSRAMQ_LAST   37
+
+// ---- moduli ELF (package VOS_WITH_ELF): cosa puo fare questa scheda con il codice nativo caricato ----
+// Valori provati in prova su scheda (prova ELF 3, 30/10/2026). Il driver (drivers/vos_drv_elf) li legge, il livello A (packages/vos_elf) rifiuta cio che non entra.
+#define VOS_ELF_ARCH           1        // 1 = Xtensa, 2 = RISC-V
+#define VOS_ELF_MACHINE        94       // e_machine accettato dall'ELF (94 = Xtensa, 243 = RISC-V)
+#define VOS_ELF_ABI            1        // 1 = Xtensa con finestre di registri (quello dei moduli di serie)
+#define VOS_ELF_HAS_PSRAM      1        // la scheda ha la PSRAM (la presenza vera si misura all'avvio)
+#define VOS_ELF_EXEC_PSRAM     1        // il codice del modulo puo girare dalla PSRAM
+#define VOS_ELF_RAM_MAX_MODULE 131072   // tetto di RAM per un modulo (byte)
+#define VOS_ELF_FILE_MAX       131072   // tetto della dimensione del file ELF (byte)
 
 // ---- disegno della scheda nella pagina (JSON) ----
 // fl/fr = file di piedini sinistra/destra viste dal fronte, dall'alto verso il basso (numero = GPIO, testo = alimentazione);

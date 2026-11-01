@@ -1,0 +1,22 @@
+Caricatore ELF (elf_loader) - copia nostra per VesevOS
+=======================================================
+Origine: componente "elf_loader" versione 2.0.0 del registro dei componenti di Espressif Systems (Shanghai) CO LTD
+(repository esp-iot-solution, percorso components/elf_loader, commit 12ba34b0d5db3f6811f80c2de2dd292ddc29ef1b).
+Licenza: Apache License 2.0 (testo in license.txt, qui accanto). Copyright 2023-2026 Espressif Systems (Shanghai) CO LTD.
+
+File copiati (senza modifiche, salvo src/esp_elf.c): include/*, src/esp_elf_symbol.c, src/esp_elf_validate.c,
+src/esp_elf_adapter.c, src/arch/esp_elf_xtensa.c, src/arch/esp_elf_riscv.c, license.txt.
+NON copiati: src/dlso/, src/soc/, src/esp_all_symbol.c, test, strumenti, linker.lf (tabelle dei simboli di
+libc/IDF, caricamento di librerie condivise e ESP32-S2 non si usano).
+
+MODIFICHE NOSTRE (dichiarate come richiede la licenza), tutte in src/esp_elf.c, con commento "VesevOS patch":
+  1) patch/0001-text-esatto.patch  - la sezione .text si misura esatta (non arrotondata a 4 byte); l'arrotondamento si fa
+     solo nell'allocazione e nell'azzeramento. Senza, un .text non multiplo di 4 con .rodata subito dopo faceva
+     rimappare il primo byte di .rodata dentro .text.
+  2) patch/0002-relocate-libera-su-errore.patch - esp_elf_relocate() libera da sola le sezioni gia caricate se la
+     rilocazione fallisce (prima restavano allocate fino a esp_elf_deinit).
+Le due patch in patch/ sono quelle applicate al file originale; nel file copiato i soli commenti sono stati
+leggermente riscritti ("VesevOS patch 1/2" al posto di "PROVA3"/"VOS PATCH 2").
+
+Compilazione: solo con VOS_WITH_ELF=1 (vedi elf_loader.cmake). Opzioni: CONFIG_ELF_LOADER_* date da elf_loader.cmake.
+Aggiornare il caricatore = rifare le due patch sulla versione nuova e riprovare (vedi docs/progetto/piano-integrazione-elf.md).

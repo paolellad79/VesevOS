@@ -30,7 +30,7 @@ rete Wi-Fi, ora, file, LED, pin, shell e tante altre cose, tutto protetto da una
 </p>
 <p align="center"><sub>Schermate della pagina di controllo (con dati di esempio): Home in tema scuro, Automazioni, ordine di avvio con il terminale a pannello, e la versione per telefono.</sub></p>
 
-> **Stato:** in sviluppo (versione 1.8.0b). Il progetto cresce a fasi: guarda "Dove stiamo andando".
+> **Stato:** in sviluppo (versione 1.8.16). Il progetto cresce a fasi: guarda "Dove stiamo andando".
 
 ## Perché si chiama VesevOS
 
@@ -68,15 +68,27 @@ una situazione di emergenza, in silenzio radio quando serve, o comunicando in mo
 | 🌍 | **Per tutti** | Italiano, inglese, spagnolo e tedesco, e si può aggiungere una lingua con un solo file. |
 | 🔋 | **Affidabile e frugale** | Pensato per reggere i blackout e per consumare poco, anche con la batteria. |
 
-## Novità della 1.8.0b
+## Novità della 1.8.16
+
+- **Driver unici**: un solo modo per installare i driver, `.vdb` (Berry) o `.vde` (ELF), dalla pagina Driver o con `vesevos-driver list|info|install|pins|remove`. I pin sono proposti e puoi cambiarli.
+- **Programmi**: script `.vsb`, app Berry `.vab` e app ELF `.vae` stanno nelle pagine Script e App; i programmi in esecuzione compaiono nei **Task** con ferma e riavvia, e hanno l'**avvio automatico** nel pannello Avvio.
+- **Funzionalità** (Sistema): un interruttore per gruppo di primitive (log, sd, dev, gpio, i2c, spi, time, files, ble) per decidere cosa possono usare i programmi.
+- **microSD**: si monta da sola, si naviga in `/media/sd` con `cd`, `ls`, `cat`, `cp`, `mv`, `rm`, `mkdir`, si formatta in FAT32 dal pannello o con `vesevos-drive_manager format` (senza bloccare la shell). I programmi si possono avviare anche dalla scheda.
+- **Dati delle app**: le app che salvano dati scelgono tra memoria flash (`/var/lib/<nome>/`) e microSD (`/media/sd/app/<nome>/`).
+- **Pagina Pin**: schema della scheda fronte e retro con i blocchi delle periferiche, le funzioni possibili di ogni pin e il comando `lspin` nella shell.
+- **ELF di serie**: moduli ELF caricabili senza avvisi, con le stesse primitive dei programmi Berry.
+- **Pagina di installazione** in [`flash/`](flash/README.md) con scelta delle parti da scrivere: puoi **conservare** le impostazioni, il contatore dei riavvii e il tempo di vita, oppure fare l'installazione completa.
+- **Sito e pacchetti**: pagina iniziale, elenco di driver, app e script con SHA-256, e pagina Tecnologie e licenze (cartelle `store/`, `aggiorna/`, `licenze/`).
+
+## Novità precedenti (1.8.0b)
 
 - **Shell con comandi classici**: `pwd`, `cd`, `ls`, prompt `utente@hostname:cartella$`, Tab, `man`, `whoami`, `id`, `df`, `uname`, `ping`, `gzip`/`unzip`/`tar`/`zip`, `cpu` e i comandi `vesevos-*` (cpuinfo, services, bugreport, config, network, led_control, cleaner, drive_manager, backup, update).
 - **Accesso alla seriale** con utente, password e codice MFA; ruoli per ogni sottocomando; la password non resta nella cronologia; spegnimento e sospensione con conferma, `/api/sleep` solo per l'Admin.
 - **LED con trigger** (flash, wifi, cpu) e colori scelti da te. Nella pagina LED/QR l'Admin ora e riconosciuto (correzione della 1.8.0b).
 - **Server HTTP minimo** per il redirect verso HTTPS (meno RAM), correzione del panico dopo il cambio del nome host, watchdog piu larghi e modificabili, governor della CPU (ondemand/conservative/schedutil).
 - **Recovery 0.5.1**: il gettone monouso vale anche per l'avvio normale, pagina nuova, messaggi di accesso piu chiari.
-- **Cartella [`firmware/`](firmware/LEGGIMI.md)**: firmware e recovery gia compilati (1.8.0b, Recovery 0.5.1 e 0.5.0) con SHA-256 e un elenco `indice.json`.
-- **Pagina di prima installazione** in [`flash/`](flash/README.md): scrive la scheda dal browser (Web Serial). **NON PROVATA con una scheda reale**: usa prima una scheda di prova.
+- **Cartella [`firmware/`](firmware/LEGGIMI.md)**: firmware e recovery gia compilati (1.8.16, Recovery 0.5.2, 0.5.1 e 0.5.0, e le versioni precedenti) con SHA-256 e un elenco `indice.json`.
+- **Pagina di prima installazione** in [`flash/`](flash/README.md): scrive la scheda dal browser (Web Serial), controllando ogni file prima di scrivere.
 - Costruito solo con ESP-IDF 5.5, senza Arduino.
 - **Aggiornamento senza cavo e senza scheda SD** (dalla 1.7.45): dal menu utente scegli *Aggiorna tramite recovery*; il recovery controlla che il file sia davvero un firmware VesevOS (intestazione, marchio, dimensione, SHA-256) prima di attivarlo.
 - Sul controllo dell'origine: lo SHA-256 dice che il file non e rotto, NON chi lo ha fatto. Non c'e una firma digitale (per ora): vedi [SECURITY.md](SECURITY.md).
@@ -93,7 +105,8 @@ una situazione di emergenza, in silenzio radio quando serve, o comunicando in mo
 - **Localizzazione**: paese, canali e potenza della radio secondo le regole del paese, antenna, fuso, formati.
 - **Modo aereo** con scelta di come riaccendere la rete, **portale automatico** in modalità hotspot, **sleep** profondo e **registro** con filtro.
 - **Ora**: NTP, data e ora a mano, server NTP locale.
-- **File**: memoria interna (LittleFS) con cartelle, carica/scarica/modifica.
+- **File**: memoria interna (LittleFS) e microSD (`/media/sd`) con cartelle, carica/scarica/modifica.
+- **Driver e programmi**: driver `.vdb` e `.vde`, app `.vab`/`.vae`, script `.vsb`, con Task, avvio automatico e pannello Funzionalità.
 - **CPU**: velocità automatica o fissa (80/160/240 MHz), temperatura interna, allarme se troppo calda.
 - **LED**: LED RGB WS2812 (stato del sistema, battito legato al carico CPU, colore fisso).
 - **Configurazione** in stile OpenWrt (`/vesevos.conf`), scaricabile e ripristinabile.
@@ -112,7 +125,7 @@ Queste sono idee e progetti, non promesse: l'ordine può cambiare.
 - [ ] **Aggiornamento del firmware dalla pagina** (OTA).
 
 **Più avanti**
-- [ ] **Scheda SD** e **app Berry** protette in una "gabbia" sulla SD.
+- [ ] **Scheda SD** e **app** protette in una "gabbia" sulla SD.
 - [ ] **Catalogo di accessori plug and play**: scegli il sensore dall'elenco e VesevOS ti mostra come collegarlo e installa il necessario.
 - [ ] **Aggiornamento da internet** scelto da te (mai automatico di fabbrica), con origine del firmware ben visibile.
 - [ ] **Modalità silenzio radio** e **risparmio energetico** per l'uso con pannello solare.
@@ -146,11 +159,13 @@ VOS_CFG=vesevos idf.py -B <cartella di build> build
 | Limite del firmware | app0 = **2.424.832 byte** (0x250000): il `.bin` deve stare sotto |
 | Configurazione | `idf/sdkconfig.defaults.vesevos` (si sceglie con `VOS_CFG=vesevos`) |
 
+Il file `VesevOS/VesevOS.ino` resta solo con un `#error` e non si usa.
+
 ## Installazione
 
 Hai tre strade (la prima e quella piu semplice per una scheda nuova):
 
-1. **Pagina di prima installazione** ([`flash/`](flash/README.md), da abilitare con GitHub Pages): collega la scheda con un browser che ha la porta seriale (Web Serial), scegli "Installazione completa" e premi Scrivi. Controlla ogni file prima di scrivere. **NON PROVATA con una scheda reale.**
+1. **Pagina di prima installazione** ([`flash/`](flash/README.md), da abilitare con GitHub Pages): collega la scheda con un browser che ha la porta seriale (Web Serial), scegli "Aggiorna e conserva i dati" (scheda gia usata) oppure "Installazione completa" (scheda nuova), puoi anche spuntare le singole parti, e premi Scrivi. Controlla ogni file prima di scrivere.
 2. **File pronti in [`firmware/`](firmware/LEGGIMI.md)** con `esptool` (recovery a `0x10000`, firmware a `0x110000`) o, su una scheda gia con VesevOS, dal menu *Aggiorna tramite recovery* (file dal computer, oppure URL + SHA-256 da `indice.json`). Controlla sempre lo SHA-256.
 3. **Compilare tu**: prepara ESP-IDF come sopra, compila VesevOS (cartella `idf/`) e il recovery (cartella `idf-recovery/`, stesso comando) e segui la guida [docs/GUIDA-PREPARARE-LA-SCHEDA.md](docs/GUIDA-PREPARARE-LA-SCHEDA.md).
 
@@ -180,11 +195,14 @@ Non tenerlo premuto all'accensione: la scheda entrerebbe in modo download. Tutto
 ## Organizzazione del repository
 
 ```
-VesevOS/      sorgenti del firmware (src/ per argomento). Il progetto ESP-IDF e in ../idf
+VesevOS/      sorgenti del firmware (src/ per argomento; VesevOS.ino ha solo un #error). Il progetto ESP-IDF e in ../idf
 web/          pagina web in HTML (sorgente di vos_page.h, compressa gzip)
 firmware/     firmware e recovery gia compilati, con SHA-256 e indice.json (vedi firmware/LEGGIMI.md)
-flash/        pagina di prima installazione dal browser (GitHub Pages; NON PROVATA)
-recovery/     recovery 0.5.1 ESP-IDF (VesevOS_Recovery_IDF) e script di installazione
+flash/        pagina di installazione dal browser (GitHub Pages), con scelta delle parti da scrivere
+store/        pacchetti da scaricare (driver, app, script) con SHA-256 e index.json
+aggiorna/     dati per gli aggiornamenti (latest.json)
+licenze/      pagina Tecnologie e licenze (dati ricavati dall'SBOM)
+recovery/     recovery 0.5.2 ESP-IDF (VesevOS_Recovery_IDF) e script di installazione
 docs/         manuale, problemi noti (KNOWN_ISSUES) e guida per chi rilascia (RELEASE_DEVELOPER), in italiano e inglese
 assets/       banner e schermate del README
 lang/         lingue in file (en, es, de) - GENERATE da tools/lang_src.json; nel firmware c'e solo l'italiano

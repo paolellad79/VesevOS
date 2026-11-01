@@ -11,6 +11,7 @@
 #include "vos_shell_prompt.h"
 #include "vos_shell_complete.h"
 #include "../core/vos_heapbuf.h"
+#include "../core/vos_lock.h"
 #include "../core/vos_strbuf.h"
 #include "../drivers/vos_drv_time.h"
 #include "../drivers/vos_drv_console.h"
@@ -55,7 +56,9 @@ void shellExecSess(const char* lineIn, OutSink& o, int role, uint32_t sess) {
   shellSessLoad(sess, ss);
   before = ss;
   bool done = shCmdBasic(c, a1, line, o, role, sess) || shCmdFiles(c, a1, line, o, role, ss) || shCmdArchive(c, line, o, ss, sess) || shCmdSys(c, a1, line, o, role) || shCmdLed(c, a1, line, o, role) || shCmdNet(c, a1, line, o, role) || shCmdAdmin(c, a1, line, o, role)
-              || shCmdCpu(c, a1, line, o, role) || shCmdVesevos(c, a1, line, o, role, sess);
+              || shCmdCpu(c, a1, line, o, role) || shCmdVesevos(c, a1, line, o, role, sess) || shCmdRun(c, line, o, ss, role)
+              || shDriverCmd(c, line, o, role);
+  if (!done) done = shRunDirect(line, o, ss, role);      // niente comando con questo nome: forse e un programma (.vsb, .vab), come nel DOS. I comandi interni hanno gia vinto
   if (strcmp(ss.cwd, before.cwd) != 0 || strcmp(ss.prev, before.prev) != 0) shellSessStore(sess, ss);
   if (!done) o.println(tr("Comando sconosciuto. Scrivi 'help'."));
 }
@@ -64,7 +67,12 @@ static uint32_t g_webIp = 0;                              // vale solo dentro sh
 
 uint32_t shx::shellClientIp() { return g_webIp; }
 
+// HTTP e HTTPS sono due server, quindi due task: senza questo blocco due richieste insieme si scambierebbero la password (g_webSecret),
+// l'IP e la domanda in sospeso. Le richieste della shell dalla pagina passano una alla volta.
+static VosMutex& webMux() { static VosMutex m = [] { VosMutex v; v.init(); return v; }(); return m; }
+
 void shellExecWeb(const char* line, const char* secret, OutSink& o, int role, uint32_t sess, char* ask, size_t askCap, uint32_t clientIp) {
+  VosLock lk(webMux());
   askWebBegin(secret);
   g_webIp = clientIp;
   shellExecSess(line, o, role, sess);
@@ -225,7 +233,7 @@ static bool isLogoutWord(const char* l) {
   return w == "logout" || w == "exit";
 }
 
-// Tab sulla riga in digitazione, come in bash: scrive i caratteri mancanti; al secondo Tab di fila, se restano piu candidati, li elenca
+// Tab sulla riga in digitazione, come nelle shell classiche: scrive i caratteri mancanti; al secondo Tab di fila, se restano piu candidati, li elenca
 // e ristampa prompt e riga. Su riga vuota non fa niente. L'eco dei caratteri aggiunti segue serial echo.
 static void serialTab(bool second) {
   if (!shellComplete(SESS_SERIAL, serRole(), g_buf, (size_t)SER_LINE_MAX - g_bufLen, false, g_tab)) return;
@@ -290,7 +298,7 @@ void shellSerialPoll() {
   if (serialLocked() && loginTick(serOut(), now)) { g_bufLen = 0; wipeBytes(g_buf, sizeof g_buf); }   // fine dell'attesa dopo un errore, o passo scaduto
   if (cfg.serialIdleMin && serialAuthed() && now - g_lastAct >= (uint32_t)cfg.serialIdleMin * 60000UL) {
     serOut().println();
-    endSession(tr("Sessione chiusa per inattivita."));     // come TMOUT di bash
+    endSession(tr("Sessione chiusa per inattivita."));     // uscita automatica per inattivita, come nelle shell classiche
     prompt();
   }
   while (drvConAvailable()) {
@@ -337,7 +345,7 @@ void shellSerialPoll() {
         if (!askActive()) prompt();
         continue;
       }
-      if (wzActive() && !serialLocked()) { setOrigin(); wzLine(serOut(), l); prompt(); continue; }   // risposta alla guida
+      if (wzActive() && !serialLocked()) { setOrigin(); wzLine(serOut(), l); wipeBytes(l, sizeof l); prompt(); continue; }   // risposta alla guida
       if (ll == 0 && !cfg.setupDone) { g_fullWelcome = true; continue; }   // Invio a vuoto: rimostra il benvenuto
       if (serialLocked()) {                                                     // login: utente, password, codice MFA (vos_shell_login.cpp)
         bool entered = loginLine(serOut(), l);                                  // la riga viene cancellata dopo l'uso

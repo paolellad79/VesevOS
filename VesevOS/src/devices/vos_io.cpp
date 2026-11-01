@@ -23,9 +23,6 @@
 #include "../drivers/vos_drv_time.h"
 #define IO_MIN_SWITCH_MS 1000UL
 #define IO_LINE_MAX 192                              // riga di io.cfg: oltre si scarta
-#define IO_SD_KHZ_MIN 400                            // frequenza SPI della microSD: da 400 kHz (prova iniziale, fili lunghi) a 20 MHz
-#define IO_SD_KHZ_MAX 20000
-#define IO_SD_KHZ_DEF 1000                           // di fabbrica 1 MHz: prudente per i fili volanti dei moduli economici
 #if VOS_WITH_SD
 #define IO_NCLS 7                                   // con la microSD la classe "sd" e la settima
 #else
@@ -92,6 +89,7 @@ static void hwSetup(IoDev& d) {
 }
 
 static bool hasI2c() { for (int i = 0; i < g_n; i++) if (g_io[i].cls == IC_I2C) return true; return false; }
+bool ioHasI2c() { IoLock L; return hasI2c(); }
 static int sdMounted() {                                        // microSD: 1 = montata
 #if VOS_WITH_SD
   return drvSdUp() ? 1 : 0;
@@ -115,9 +113,14 @@ static int devPins(const IoDev& d, uint8_t* p) {          // i pin della perifer
   if (d.cls == IC_SD) { p[1] = (uint8_t)d.gpio2; p[2] = d.addr; p[3] = d.drv; return 4; }
   return 1;
 }
+// Nome del segnale di ogni pin, nello stesso ordine di devPins (lo disegna la pagina Pin).
+static const char* pinSignal(uint8_t cls, int i) {
+  static const char* const S[2][4] = {{"SDA", "SCL", "", ""}, {"CS", "MOSI", "SCK", "MISO"}};
+  return cls == IC_I2C ? S[0][i] : cls == IC_SD ? S[1][i] : "";
+}
 static bool claimDev(const IoDev& d) {
   uint8_t p[4]; int n = devPins(d, p);
-  for (int i = 0; i < n; i++) if (!pinClaim(p[i], d.name, CN[d.cls])) { for (int k = 0; k < i; k++) pinRelease(p[k]); return false; }
+  for (int i = 0; i < n; i++) if (!pinClaim(p[i], d.name, CN[d.cls], false, pinSignal(d.cls, i))) { for (int k = 0; k < i; k++) pinRelease(p[k]); return false; }
   return true;
 }
 static void releaseDev(const IoDev& d) { uint8_t p[4]; int n = devPins(d, p); for (int i = 0; i < n; i++) pinRelease(p[i]); }
@@ -412,6 +415,12 @@ int ioSuggest(uint8_t cls, int n, int* out) {
   static_assert(sizeof(C) == sizeof(CI), "le due liste dei pin consigliati devono avere la stessa lunghezza");
   static_assert(CI[0] == VOS_I2C_SDA && CI[1] == VOS_I2C_SCL, "la lista I2C deve cominciare con SDA e SCL della scheda");
   const int8_t* L = cls == IC_I2C ? CI : C;
+  if (cls == IC_SD && n >= 4) {                          // microSD: prima i quattro pin consigliati dalla scheda, se sono tutti liberi
+    static constexpr int8_t D[4] = {VOS_SD_DEF_CS, VOS_SD_DEF_MOSI, VOS_SD_DEF_SCK, VOS_SD_DEF_MISO};
+    bool allFree = true;
+    for (int8_t g : D) if (gpioBlock(g, cls) || cfg.pinNote[g].length()) allFree = false;
+    if (allFree) { for (int i = 0; i < 4; i++) out[i] = D[i]; return 4; }
+  }
   int k = 0;
   for (size_t i = 0; i < sizeof(C) && k < n; i++) {
     int g = L[i];

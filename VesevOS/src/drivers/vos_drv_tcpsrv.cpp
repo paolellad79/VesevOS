@@ -9,7 +9,7 @@
 #include <errno.h>
 #include <string.h>
 
-static const int TASK_STACK = 4096;    // due buffer (richiesta e risposta, circa 1,8 KB) piu il lavoro del gestore; NON misurato sulla scheda
+static const int TASK_STACK = 4096;    // i buffer di richiesta e risposta sono nella classe, non nello stack; se il margine (stackFreeMin) scende sotto 1 KB: alzare a 6144
 static const int TASK_PRIO  = 1;       // la piu bassa dopo l'idle: il redirect non toglie tempo a nessuno
 static const int BACKLOG    = 3;       // chiamate in coda mentre se ne serve una; le altre vengono rifiutate da lwIP
 
@@ -32,15 +32,16 @@ bool DrvTcpMini::begin(uint16_t port, DrvTcpHandler h, const char* taskName) {
   return true;
 }
 
+uint32_t DrvTcpMini::stackFreeMin() { return (uint32_t)uxTaskGetStackHighWaterMark(nullptr); }
+
 void DrvTcpMini::run(void* self) {
   DrvTcpMini* d = (DrvTcpMini*)self;
-  char in[TCPSRV_IN_MAX + 1], out[TCPSRV_OUT_MAX];
   for (;;) {
     struct sockaddr_in from;
     socklen_t fl = sizeof from;
     int c = lwip_accept(d->sock_, (struct sockaddr*)&from, &fl);
     if (c < 0) { vTaskDelay(pdMS_TO_TICKS(50)); continue; }   // niente socket liberi o errore passeggero: si riprova senza girare a vuoto
-    d->serve(c, ntohl(from.sin_addr.s_addr), in, out);
+    d->serve(c, ntohl(from.sin_addr.s_addr), d->in_, d->out_);
   }
 }
 

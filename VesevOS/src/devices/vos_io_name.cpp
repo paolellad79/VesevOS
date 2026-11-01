@@ -11,7 +11,7 @@
 #include <string.h>
 
 bool ioNameReserved(const char* n) {
-  static const char* const R[] = {"led", "time", "temp", "log", "act", "btn", "logread", "mqtt", "mesh", "ble", "mfa", "stat", "pin", "boot", "usb", "mem", "cpu", "rad", "gpio", "all", "tutto", "tutti"};
+  static const char* const R[] = {"led", "time", "temp", "log", "act", "btn", "logread", "files", "mqtt", "mesh", "ble", "mfa", "stat", "pin", "boot", "usb", "mem", "cpu", "rad", "gpio", "all", "tutto", "tutti"};
   for (size_t i = 0; i < sizeof(R) / sizeof(R[0]); i++) if (!strcmp(n, R[i])) return true;
   return devFind(n) != nullptr;
 }

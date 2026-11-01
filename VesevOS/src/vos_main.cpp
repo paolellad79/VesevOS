@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
-// VesevOS 1.8.0b - ESP32-S3 SuperMini
+// VesevOS 1.8.14 - ESP32-S3 SuperMini
 // Piccolo sistema operativo: pagina web (HTTPS), shell, utenti, rete tra schede, automazioni. Progetto in piu file.
 //
 // vos_main.cpp: punto di ingresso del firmware (app_main di ESP-IDF). Prima stava nello sketch Arduino (setup e loop).
@@ -25,7 +25,10 @@
 #include "core/vos_serial.h"
 #include "devices/vos_pins.h"
 #include "devices/vos_io.h"
+#include "devices/vos_drvres.h"
+#include "devices/vos_sd.h"
 #include "core/vos_config.h"
+#include "core/vos_layout.h"
 #include "security/vos_auth.h"
 #include "packages/vos_mfa.h"
 #include "packages/vos_power.h"
@@ -45,6 +48,9 @@
 #include "core/vos_wd.h"
 #include "core/vos_wdset.h"
 #include "packages/vos_ble.h"
+#include "packages/vos_berry.h"
+#include "packages/vos_prog.h"
+#include "packages/vos_elf.h"
 #include "drivers/vos_drv_gpio.h"
 #include "drivers/vos_drv_time.h"
 #include "drivers/vos_drv_console.h"
@@ -116,6 +122,7 @@ static void vosSetup() {
   drvDelayMs(300);
   logInit();
   if (!g_nvsOk) vlog("NVS: non parte (memoria dei dati di sistema)");
+  if (drvNvsEraseReason() != 0) vlog("ATTENZIONE: NVS cancellata e rifatta all'avvio (codice 0x%x): contatori e dati di sistema azzerati", (unsigned)drvNvsEraseReason());
   if (VOS_PSRAM_MALLOC && drvPsramTotal() > 0) { drvExtmemEnable(256); g_extmem = true; ramTlsToPsram(); }
   drvLogOff("esp-tls-mbedtls");                     // un browser che non si fida del certificato non riempie la seriale di errori ogni 30 s
   drvLogOff("esp_https_server");
@@ -129,6 +136,7 @@ static void vosSetup() {
   if (!drvFsBegin(true)) { vlog("FS: LittleFS non parte"); }
   powerBegin();
   diaryStage("cfg");
+  if (const char* lay = layoutInit()) vlog("%s", lay);   // cartelle di sistema e copia della configurazione in /etc (prima di leggerla)
   if (!cfgLoad()) { vlog("CFG: nessun file, uso i valori iniziali"); cfgSave(); }
   logSetLevel(cfg.logLevel);
   wdSetInit();                                     // tempo salvato del Task watchdog (gia dopo la lettura della config)
@@ -139,6 +147,9 @@ static void vosSetup() {
 
   diaryStage("io");
   ioInit();                                        // periferiche a classi (rele, led, pin...): uscite spente
+#if VOS_WITH_ELF
+  drvresInit();                                    // pin dei driver ELF (.vde): dopo ioInit, cosi i pin gia dati alle periferiche non si toccano
+#endif
   diaryStage("lang");
   langInit();
   // La PSRAM parte presto (SPIRAM_BOOT_INIT); qui si dice solo se c'e: senza avviso un guasto passerebbe inosservato.
@@ -147,9 +158,17 @@ static void vosSetup() {
   auditInit();                                     // controllo della configurazione (allarmi)
   updOutcomeBoot();                                // esito di un aggiornamento fatto dal recovery (registro e audit), poi lo cancella
   bleServiceInit();                                // servizi iscritti nel registro (vos_service) prima dell'avvio
+  berryServiceInit();                              // sottosistema vdb (Berry): acceso di fabbrica, si spegne dai Task
+#if VOS_WITH_ELF
+  elfServiceInit();                                // sottosistema vde (moduli ELF): acceso di fabbrica (interruttore salvato in /vesevos.conf)
+#endif
   bootRun();   // sys, led, net, time, web, rules, mqtt, mesh, wd: nell'ordine scelto (con le dipendenze)
+  progBootStart();                                 // i programmi con avvio automatico (di fabbrica nessuno), dopo i servizi
   diaryStage("avviato");
   ramNote("avviato");
+#if VOS_WITH_SD
+  if (sdConfigured()) sdAutoStart();               // la microSD configurata si monta da sola appena risponde (task di fondo, priorita bassa); senza microSD il task (6 KB di stack) non nasce
+#endif
   tmpCleanStart();                                 // tra 30 s toglie i .tmp~ lasciati da un taglio di corrente (task di fondo, una volta)
   diaryInit();                                     // dopo sysInit: contatore avvii pronto; scrive la riga AVVIO e, se anomalo, i dettagli
   ledSetSetup(!cfg.setupDone);                     // arcobaleno lento finche la prima configurazione non e finita

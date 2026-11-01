@@ -1,0 +1,146 @@
+{
+ "schema": 1,
+ "fonte": "SBOM.spdx.json",
+ "firmware": [
+  {
+   "nome": "VesevOS",
+   "versione": "1.8.16",
+   "licenza": "GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial",
+   "origine": "https://github.com/paolellad79/VesevOS"
+  },
+  {
+   "nome": "ESP-IDF",
+   "versione": "5.5.5",
+   "licenza": "Apache-2.0",
+   "origine": "https://github.com/espressif/esp-idf"
+  },
+  {
+   "nome": "Mbed TLS",
+   "versione": "5.5.5",
+   "licenza": "Apache-2.0",
+   "origine": "https://github.com/Mbed-TLS/mbedtls"
+  },
+  {
+   "nome": "FreeRTOS Kernel",
+   "versione": "5.5.5",
+   "licenza": "MIT",
+   "origine": "https://www.freertos.org"
+  },
+  {
+   "nome": "lwIP",
+   "versione": "5.5.5",
+   "licenza": "BSD-3-Clause",
+   "origine": "https://savannah.nongnu.org/projects/lwip"
+  },
+  {
+   "nome": "esp_littlefs",
+   "versione": "1.22.3",
+   "licenza": "MIT",
+   "origine": "https://github.com/joltwallet/esp_littlefs"
+  },
+  {
+   "nome": "LittleFS",
+   "versione": "2.x (in esp_littlefs)",
+   "licenza": "BSD-3-Clause",
+   "origine": "https://github.com/littlefs-project/littlefs"
+  },
+  {
+   "nome": "espressif/mdns",
+   "versione": "1.14.0",
+   "licenza": "Apache-2.0",
+   "origine": "https://github.com/espressif/esp-protocols"
+  },
+  {
+   "nome": "esp-nimble-cpp",
+   "versione": "2.5.0",
+   "licenza": "Apache-2.0",
+   "origine": "https://github.com/h2zero/esp-nimble-cpp"
+  },
+  {
+   "nome": "NimBLE",
+   "versione": "5.5.5",
+   "licenza": "Apache-2.0",
+   "origine": "https://github.com/apache/mynewt-nimble"
+  },
+  {
+   "nome": "Certificate bundle di ESP-IDF",
+   "versione": "5.5.5",
+   "licenza": "MPL-2.0",
+   "origine": "https://curl.se/docs/caextract.html"
+  },
+  {
+   "nome": "PsychicHttp",
+   "versione": "3.1.2",
+   "licenza": "MIT",
+   "origine": "https://github.com/hoeken/PsychicHttp"
+  },
+  {
+   "nome": "ArduinoJson",
+   "versione": "7.4.3",
+   "licenza": "MIT",
+   "origine": "https://github.com/bblanchon/ArduinoJson"
+  },
+  {
+   "nome": "Berry",
+   "versione": "1.1.0",
+   "licenza": "MIT",
+   "origine": "https://github.com/berry-lang/berry"
+  },
+  {
+   "nome": "Natural Earth",
+   "versione": "5.1",
+   "licenza": "LicenseRef-PublicDomain",
+   "origine": "https://www.naturalearthdata.com"
+  },
+  {
+   "nome": "IANA tz database",
+   "versione": "2025+",
+   "licenza": "LicenseRef-PublicDomain",
+   "origine": "https://www.iana.org/time-zones"
+  },
+  {
+   "nome": "posix_tz_db",
+   "versione": "2025",
+   "licenza": "MIT",
+   "origine": "https://github.com/nayarsystems/posix_tz_db"
+  },
+  {
+   "nome": "VesevOS Recovery",
+   "versione": "0.5.2",
+   "licenza": "GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial",
+   "origine": "https://github.com/paolellad79/VesevOS"
+  },
+  {
+   "nome": "miniz",
+   "versione": "5.5.5",
+   "licenza": "MIT",
+   "origine": "https://github.com/richgel999/miniz"
+  },
+  {
+   "nome": "newlib",
+   "versione": "4.3.0",
+   "licenza": "Licenze di tipo BSD",
+   "origine": "https://sourceware.org/newlib/"
+  },
+  {
+   "nome": "elf_loader",
+   "versione": "2.0.0",
+   "licenza": "Apache-2.0",
+   "origine": "https://components.espressif.com/components/espressif/elf_loader"
+  }
+ ],
+ "sito": [
+  {
+   "nome": "esptool-js",
+   "versione": "0.5.7",
+   "licenza": "Apache-2.0",
+   "origine": "https://github.com/espressif/esptool-js"
+  },
+  {
+   "nome": "pako",
+   "versione": "2.1.0",
+   "licenza": "MIT AND Zlib",
+   "origine": "https://github.com/nodeca/pako"
+  }
+ ]
+}

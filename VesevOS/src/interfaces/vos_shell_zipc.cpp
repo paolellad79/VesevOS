@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_shell_zipc.cpp
-// Comando zip in stile shell classica (Info-ZIP): zip [-r] [-0..-9] [-q] [-f] [-j] archivio.zip file...   CREA un archivio .zip nuovo da file e cartelle di LittleFS.
+// Comando zip in stile shell classica: zip [-r] [-0..-9] [-q] [-f] [-j] archivio.zip file...   CREA un archivio .zip nuovo da file e cartelle di LittleFS.
 // (La lettura e l'estrazione sono in vos_shell_zip.cpp, il comando unzip.)
 // FORMATO scritto (leggibile da unzip e dagli altri programmi): ZIP standard versione 2.0, metodi 0 (store, con -0 e per i file vuoti) e 8 (deflate,
 // livelli 1-9 come gzip, 6 di norma). Per ogni voce un'intestazione locale con CRC32 e dimensioni scritti TORNANDO INDIETRO nel file (seek) dopo i dati:
@@ -10,7 +10,7 @@
 // DATA E ORA: LittleFS non salva la data dei file. Tutte le voci portano l'ora di sistema del momento in cui si crea l'archivio, se e valida
 // (NTP sincronizzato o ora impostata a mano), altrimenti 1980-01-01 00:00 (l'inizio del formato DOS).
 // NON SUPPORTATO: aggiornare, togliere o aggiungere voci a un archivio che c'e gia (-u, -d, -g): si ricrea da zero con -f. Senza -f un archivio che c'e
-// gia non si tocca (Info-ZIP lo aggiornerebbe: qui no).
+// gia non si tocca (il comando classico lo aggiornerebbe: qui no).
 // OPZIONI: -r scende nelle cartelle (al massimo 3 livelli), -j memorizza solo il nome del file, -q silenzio, -f sovrascrive l'archivio di destinazione.
 // Senza -r una cartella entra come sola voce vuota. Con -j le cartelle non entrano.
 // PROTEZIONI: i file protetti (fsProtected, chiavi, certificati, copie di configurazione: archIsSecret) non entrano MAI: nominati a mano fanno fallire
@@ -180,7 +180,7 @@ bool addFile(Build& b, VosFile& f, const char* name) {
   if (size > ARCH_MAX_ENTRY) { b.c.tooBig(name, ARCH_MAX_ENTRY); b.fatal = true; return false; }
   b.inBytes += size;
   if (b.inBytes > b.c.lim().maxIn) { b.c.tooBig(name, b.c.lim().maxIn); b.fatal = true; return false; }
-  uint16_t method = (b.op.level == 0 || size == 0) ? 0 : 8;       // un file vuoto non si comprime (come in Info-ZIP)
+  uint16_t method = (b.op.level == 0 || size == 0) ? 0 : 8;       // un file vuoto non si comprime (come fa il comando classico)
   Entry* e = beginEntry(b, name, false, method);
   if (!e) return false;
 
@@ -332,7 +332,7 @@ bool parseArgs(const char* line, OutSink& o, Opts& op) {
   return true;
 }
 
-// Il nome ha un suffisso (un '.' dopo l'ultima '/')? Come Info-ZIP, senza suffisso si aggiunge ".zip".
+// Il nome ha un suffisso (un '.' dopo l'ultima '/')? Come il comando classico, senza suffisso si aggiunge ".zip".
 bool hasSuffix(const char* s) {
   const char* dot = strrchr(s, '.');
   const char* slash = strrchr(s, '/');
