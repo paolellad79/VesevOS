@@ -151,7 +151,7 @@ void shellWelcome(OutSink& o, bool full) {
     wLine(o, tr("1. Collegati alla rete Wi-Fi:"));
     snprintf(buf, sizeof buf, "     %s      %s", tr("Nome:"), cfg.apSsid.c_str()); wLine(o, buf);
     snprintf(buf, sizeof buf, "     %s  %s", tr("Password:"), cfg.apPass.c_str()); wLine(o, buf);
-    snprintf(buf, sizeof buf, "%s      http://192.168.4.1", tr("2. Apri:")); wLine(o, buf);
+    snprintf(buf, sizeof buf, "%s      https://192.168.4.1", tr("2. Apri:")); wLine(o, buf);
     snprintf(buf, sizeof buf, "   %s", tr("(di solito la pagina si apre da sola)")); wLine(o, buf);
     wLine(o, tr("3. Segui la configurazione guidata."));
     wLine(o, "");
@@ -159,9 +159,9 @@ void shellWelcome(OutSink& o, bool full) {
     wBar(o);
     wPara(o, tr("Perche una password diversa per ogni scheda? Lo chiedono le leggi sulla sicurezza dei dispositivi: UE (RED/EN 18031, Cyber Resilience Act) e Regno Unito (PSTI). Niente password uguali."));
     wBar(o);
-    wLine(o, tr("Password persa?  Tieni premuto BOOT 8 s  -> la riscrivo qui"));
-    wLine(o, tr("Da capo?         Tieni premuto BOOT 20 s -> fabbrica"));
-    wLine(o, tr("Aiuto: http://192.168.4.1/#aiuto   Comandi: scrivi  help"));
+    wLine(o, tr("Password persa?  Tasto fisico 8 s  -> la riscrivo qui"));
+    wLine(o, tr("Da capo?         Tasto fisico 20 s -> fabbrica"));
+    wLine(o, tr("Aiuto: https://192.168.4.1/#aiuto   Comandi: scrivi  help"));
   } else {
     snprintf(buf, sizeof buf, "%s %s  -  %s (%s.local)", VOS_NAME, VOS_VERSION, cfg.hostname.c_str(), cfg.hostname.c_str()); wLine(o, buf);
     char ip[16]; netIpTo(ip, sizeof ip);
@@ -262,7 +262,7 @@ void shellSerialWho(OutSink& o) {
   o.print("\n");
 }
 
-void shellSerialShowPass() { g_fullWelcome = true; }   // tasto BOOT 8 s: rimostra la password dell'hotspot
+void shellSerialShowPass() { g_fullWelcome = true; }   // tasto fisico 8 s: rimostra la password dell'hotspot
 
 bool shellWizardActive() { return wzActive(); }
 

@@ -42,7 +42,7 @@ void cfgDefaults() {
   for (int i = 0; i < VOS_MAX_USERS; i++) { cfg.users[i].name = ""; cfg.users[i].salt = ""; cfg.users[i].hash = ""; cfg.users[i].role = ROLE_GUEST; cfg.users[i].on = false; cfg.users[i].mfa = ""; cfg.users[i].mfaOn = false; cfg.users[i].mfaLast = 0; cfg.users[i].rec = ""; }
   cfg.ledMode = LED_STATE;
   cfg.ledColor = 0x0000FF;
-  cfg.ledBrightness = 40;
+  cfg.ledBrightness = 5;
   cfg.ledPin = VOS_PIN_LED_RGB;
   for (int i = 0; i < LEDSRC_COUNT; i++) cfg.ledSrcColor[i] = kLedSrcDefault[i];
   cfg.ledCpuThr = LED_CPU_THR_DEFAULT;
@@ -58,8 +58,9 @@ void cfgDefaults() {
   cfg.fwMode = 0; cfg.fwNtp = false; cfg.fwN = 0;
   cfg.meshAuto = false; cfg.meshRole = 0; cfg.meshKey = ""; cfg.meshCh = 1;
   cfg.https = true;
-  cfg.apOn = true; cfg.apCaptive = true; cfg.httpOn = true; cfg.httpPort = 80; cfg.httpsPort = 443; cfg.httpRedirect = false;
+  cfg.apOn = true; cfg.apCaptive = true; cfg.httpOn = true; cfg.httpPort = 80; cfg.httpsPort = 443;
   cfg.dhcpOn = true; cfg.dhcpLease = 120; cfg.mdnsOn = true;
+  cfg.aggModo = 0; cfg.aggFreq = 0; cfg.aggGiorno = 1; cfg.aggOra = 180;
   cfg.wdTask = true; cfg.wdNet = true; cfg.wdRam = true; cfg.wdNetMin = 10; cfg.wdRamKb = 20; cfg.wdUpDays = 0; cfg.wdAt = -1; cfg.wdDays = 0x7F;
   cfg.wdTwdt = WD_TWDT_DEF;
   for (int i = 0; i < WD_LIM_N; i++) cfg.wdLim[i] = WD_LIMITS[i].def;
@@ -241,7 +242,7 @@ bool cfgLoad() {
 
 bool cfgSvcRecover() {
   bool ch = !cfg.apOn || !cfg.apCaptive || !cfg.dhcpOn || !cfg.httpOn || !cfg.https || cfg.httpPort != 80 || cfg.httpsPort != 443;
-  cfg.apOn = true; cfg.apCaptive = true; cfg.dhcpOn = true; cfg.httpOn = true; cfg.https = true; cfg.httpPort = 80; cfg.httpsPort = 443; cfg.httpRedirect = false;   // ripristino: nessun reindirizzamento, si entra sempre
+  cfg.apOn = true; cfg.apCaptive = true; cfg.dhcpOn = true; cfg.httpOn = true; cfg.https = true; cfg.httpPort = 80; cfg.httpsPort = 443;   // ripristino: nessun reindirizzamento, si entra sempre
   return ch;
 }
 

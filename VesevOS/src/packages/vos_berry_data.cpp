@@ -45,7 +45,7 @@ static int bfDataDir(bvm* vm) {
   berryNeedFunc(vm, "files");
   static char dir[FS_PATH_MAX + 1];
   stopCheck(vm);
-  if (!progDataDir(PK_APP_B, g_owner, dir, sizeof dir, g_er)) { snprintf(g_msg, sizeof g_msg, "data_dir: %s", g_er.c_str()); be_raise(vm, "io_error", g_msg); }
+  if (!progDataDir(PK_APP_B, g_owner, dir, sizeof dir, g_er)) { snprintf(g_msg, sizeof g_msg, "data_dir: %.70s", g_er.c_str()); be_raise(vm, "io_error", g_msg); }
   be_pushstring(vm, dir);
   be_return(vm);
 }

@@ -88,7 +88,7 @@ const char* pinTestBlock(int g) {
   if (!pinExists(g)) return tr("Pin inesistente su questa scheda");
   if (g == VOS_PIN_USB_DM || g == VOS_PIN_USB_DP) return tr("USB: serve al collegamento con il PC");
   if (g == VOS_PIN_LED_RGB) return tr("LED RGB della scheda");
-  if (g == VOS_PIN_BOOT) return tr("Tasto BOOT");
+  if (g == VOS_PIN_BOOT) return tr("Tasto fisico");
   if (VOS_GPIO_STRAP(g)) return tr("Pin di avvio: meglio non toccarlo");
   if (pinIsUsed(g) && g != g_tPin) return tr("Gia usato dal sistema");
   // (se l'utente lo ha segnato come collegato a qualcosa, la prova e permessa ma la pagina avvisa)

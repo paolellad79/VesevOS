@@ -15,6 +15,7 @@ RULES = {
   'elf':    (r'\besp_elf_\w+|\belf_set_symbol_resolver\b|\besp_elf\.h', {'vos_drv_elf.cpp', 'vos_drv_elf.h'}),   # caricatore dei moduli ELF: solo il suo driver
   'espnow': (r'\besp_now_\w+',                                 {'vos_drv_espnow.cpp', 'vos_drv_espnow.h'}),
   'mqtt':   (r'\besp_mqtt_client_\w+|\bmqtt_client\.h',        {'vos_drv_mqtt.cpp', 'vos_drv_mqtt.h'}),
+  'https':  (r'\besp_http_client_\w+|\besp_http_client\.h',    {'vos_drv_https.cpp', 'vos_drv_https.h'}),
   'wifi':   (r'\bWiFi\.|\besp_wifi_\w+',                       {'vos_drv_espnow.cpp', 'vos_drv_wifi.cpp', 'vos_drv_wifi.h', 'vos_drv_wps.cpp'}),     # il driver ESP-NOW legge solo modo e canale
   'fs':     (r'\bLittleFS\b(?!\.h)|\besp_(?:vfs_)?littlefs\w*', {'vos_drv_fs.cpp', 'vos_drv_fs.h', 'vos_license_data.h'}),
   'ota':    (r'\besp_partition_\w+|\besp_ota_\w+',                {'vos_drv_ota.cpp', 'vos_drv_ota.h'}),

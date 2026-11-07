@@ -16,6 +16,8 @@
 #include "vos_mod_app.h"
 #include "../core/vos_ext.h"
 #include "../core/vos_files.h"
+#include "../core/vos_pacchetto.h"
+#include "../packages/vos_pacchetto_nome.h"
 #include "../devices/vos_mod.h"
 #include "../drivers/vos_drv_fs.h"
 #if VOS_WITH_ELF
@@ -84,7 +86,8 @@ void cmdInfo(const char* line, OutSink& o, int role, uint32_t sess) {
 }
 
 // Legge un file di testo (driver vdb) e lo salva in /devs controllandolo.
-bool salvaVdb(const char* path, const char* nome, ErrBuf& err) {
+// Il nome corto dichiarato nel file sostituisce quello preso dal nome del file (in nome, cap byte).
+bool salvaVdb(const char* path, char* nome, size_t cap, ErrBuf& err, ErrBuf& avviso) {
   VosFile f = drvFsOpen(path);
   if (!f || f.isDirectory()) { err = tr("File non trovato"); return false; }
   size_t n = f.size();
@@ -92,8 +95,15 @@ bool salvaVdb(const char* path, const char* nome, ErrBuf& err) {
   char* b = (char*)malloc(n + 1);
   if (!b) { err = tr("Memoria insufficiente"); return false; }
   bool ok = f.read((uint8_t*)b, n) == n;
-  if (ok) ok = modSave(nome, std::string_view(b, n), err);
-  else err = tr("Impossibile leggere");
+  if (ok) {
+    PacDati d;
+    pacLeggi(std::string_view(b, n), d);
+    if (d.nome[0]) snprintf(nome, cap, "%s", d.nome);
+    char installato[64];
+    modFilePath(installato, sizeof installato, nome);
+    pacchettoAvviso(installato, std::string_view(b, n), avviso);
+    ok = modSave(nome, std::string_view(b, n), err);
+  } else err = tr("Impossibile leggere");
   free(b);
   return ok;
 }
@@ -119,7 +129,9 @@ void cmdInstall(const char* line, OutSink& o, int role, uint32_t sess) {
     ShellSess ss; shellSessLoad(sess, ss);
     char path[FS_PATH_MAX + 1];
     if (!shellResolvePath(ss.cwd, w.c_str(), path, sizeof path)) { o.println(tr("Serve il nome di un file valido")); return; }
-    if (!salvaVdb(path, nome, err)) { o.println(trf("%s non installato: %s", nome, err.c_str())); return; }
+    ErrBuf avviso;
+    if (!salvaVdb(path, nome, sizeof nome, err, avviso)) { o.println(trf("%s non installato: %s", nome, err.c_str())); return; }
+    if (!avviso.empty()) o.println(avviso.c_str());
   }
   const char* pre = a3.c_str(); const char* pins = a4.c_str();
   if (strchr(pre, ',')) { pins = pre; pre = ""; }             // "install sd 10,11,12,13": il terzo valore con virgole sono i pin

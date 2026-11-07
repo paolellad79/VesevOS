@@ -1,0 +1,255 @@
+<section id="t_dmgr" class="hide">
+ <div class="card"><h3>Elenco dispositivi</h3>
+  <p class="fhint">L'hardware della scheda, diviso per gruppi. Premi una riga per aprire la sua voce. I servizi stanno nelle loro voci, in Rete e in Sistema.</p>
+  <div id="dm_list"></div><div id="dm_m" class="msg"></div>
+ </div>
+</section>
+<section id="t_mem" class="hide">
+ <div class="sub" id="sk_mem"><button>Riepilogo</button><button>Memoria RAM</button></div>
+ <div>
+ <div class="card"><h3>Memoria</h3>
+  <p class="fhint">RAM interna, PSRAM, flash e file system.</p>
+  <div id="dv_mem"></div>
+ </div>
+ </div>
+ <div>
+ <div class="card" id="mem_ram"></div>
+ </div>
+</section>
+<section id="t_cpu" class="hide">
+ <div class="card"><h3>Processore</h3>
+  <p class="fhint">Temperatura, velocita e carico del chip. Sopra 80 C il tetto scende di un gradino (con HTTPS il tetto non scende sotto 160 MHz; a riposo la CPU resta a 80; oltre 90 C scende al minimo).</p>
+  <div id="cpu_st" class="pill dvp v" role="status"></div>
+  <h4 style="margin:14px 0 6px">Temperatura</h4>
+  <div id="cpu_t"></div>
+  <h4 style="margin:14px 0 6px">Processore</h4>
+  <div id="cpu_p"></div>
+ </div>
+</section>
+<section id="t_sens" class="hide">
+ <div class="card"><h3>Sensori</h3>
+  <p class="fhint">Temperatura del chip e valori delle periferiche. Sola lettura.</p>
+  <div id="sens_t"></div>
+ </div>
+</section>
+<section id="t_led" class="hide">
+ <div class="card"><h3>LED</h3>
+  <label for="l_mode">Modo</label><select id="l_mode" onchange="ledShow()">
+   <option value="0">Colore = stato del sistema</option>
+   <option value="1">Battito (heartbeat) colore scelto</option>
+   <option value="2">Colore fisso</option><option value="3">Spento</option>
+   <option value="4">Lampi: attivita della flash</option>
+   <option value="5">Lampi: pacchetti Wi-Fi</option>
+   <option value="6">Colore che cambia con il carico della CPU</option></select>
+  <label for="l_col">Colore</label><input type="color" id="l_col">
+  <label for="l_br">Luminosita (0-255)</label><input type="number" id="l_br" min="0" max="255">
+  <fieldset id="l_src" class="hide"><legend>Colori del trigger</legend>
+   <label for="l_s0">Flash, lettura</label><input type="color" id="l_s0">
+   <label for="l_s1">Flash, scrittura</label><input type="color" id="l_s1">
+   <label for="l_s2">Wi-Fi, ricevuto</label><input type="color" id="l_s2">
+   <label for="l_s3">Wi-Fi, inviato</label><input type="color" id="l_s3">
+   <label for="l_s4">CPU, carico alto</label><input type="color" id="l_s4">
+   <label for="l_thr">Soglia di carico della CPU (10-95)</label><input type="number" id="l_thr"
+    min="10" max="95">
+   <p class="fhint">I lampi sono al massimo 3 al secondo. Il trigger e i suoi colori li cambia solo l'amministratore. Di fabbrica il modo resta quello di sempre.</p>
+  </fieldset>
+  <button class="btn" onclick="saveLed()">Salva</button><div id="lm2" class="msg"></div>
+  <p style="color:var(--mut)">Colori di stato: arancio = avvio, blu = AP, giallo = connessione, verde = client collegato, rosso lampeggiante = errore.</p>
+  </div>
+</section>
+<section id="t_pin" class="hide">
+ <div class="sub" id="sk_pin"><button>Pin</button><button>Pin sistema</button><button>Inventario</button></div>
+ <div>
+ <div class="card"><h3>Pin e prove</h3>
+  <p style="color:var(--mut);margin-top:0">Tocca un pin verde per provarlo. Blu = pin in uso (la linea porta a chi lo usa), grigio = vietato. Ogni periferica ha il suo blocco con l'icona e i segnali: toccalo per aprire la sua pagina.</p>
+  <div id="pinchip" class="fhint"></div>
+  <div class="sub" id="pinview"></div>
+  <div style="overflow-x:auto">
+   <svg id="pinsvg" viewBox="0 0 400 480" style="width:100%;max-width:520px" role="img"
+    aria-label="Schema della scheda con i pin e delle periferiche collegate"></svg></div>
+  <div class="ftb"><button class="btn gray" onclick="pinSvgDl()"><svg class="i" aria-hidden="true">
+     <use href="#i-dl"/></svg><span>Scarica SVG</span></button></div>
+  <p class="fhint">Disegno della scheda con la presa USB in alto. Fronte: i pin sul bordo. Retro: le piazzole da saldare e i pad della batteria. Confronta i numeri con la scritta stampata sulla tua scheda: alcune serie hanno un ordine diverso.</p>
+  <div id="pinpanel" style="margin-top:8px"></div></div>
+ </div>
+ <div>
+ <div class="card"><h3>Pin usati dal sistema</h3><table id="pintab"></table></div>
+ </div>
+ <div>
+ <div class="card"><h3>Inventario dei pin</h3>
+  <p class="fhint">Scrivi a cosa colleghi ogni pin (per esempio "sensore porta"): il nome resta salvato nella configurazione e il sistema ti avvisa se una funzione vuole un pin gia segnato.</p>
+  <div style="overflow-x:auto"><table id="pininv" class="ftab"></table></div>
+  <div id="pinvm" class="msg"></div></div>
+ </div>
+</section>
+<section id="t_io" class="hide">
+ <div class="sub" id="sk_io"><button>Periferiche</button><button class="adm">Aggiungi</button><button class="adm">Driver</button></div>
+ <div>
+ <div id="io_main">
+  <div class="card"><h3>Periferiche</h3>
+   <p class="fhint">Rele, LED, pin e ingressi con un nome (rele1, led1...). Tocca una periferica per gestirla e provarla. Le app li usano scrivendo il nome in use= e poi dev_set("rele1", 1) o dev_get("in1"). Dopo ogni riavvio le uscite sono spente.</p>
+   <div style="overflow-x:auto"><table id="io_tab" class="ftab"></table></div>
+   <div id="io_m" class="msg" role="status"></div>
+  </div>
+ </div>
+ <div id="io_det" class="card hide"></div>
+ </div>
+ <div>
+  <div class="card" id="io_new"><h3>Aggiungi una periferica a mano</h3>
+   <div class="agrid">
+    <div><label for="io_c">Classe</label><select id="io_c" onchange="ioClsChg()">
+      <option value="rele">Rele</option><option value="led">LED</option>
+      <option value="pin">Pin (uscita)</option><option value="ingresso">Ingresso</option>
+      <option value="analogico">Analogico (pin 1-10)</option>
+      <option value="sd">Lettore microSD (4 pin)</option></select></div>
+    <div><label for="io_g">Pin (GPIO)</label><input type="number" id="io_g" min="1"
+      inputmode="numeric" oninput="ioPinFn()"><div class="fhint" id="io_fn" role="status"></div>
+    </div>
+    <div><label for="io_n">Nome (facoltativo)</label><input id="io_n" maxlength="11"
+      autocomplete="off"></div>
+    <div><label for="io_o">Modo</label><select id="io_o"><option value="">Normale</option>
+      <option value="inv">Attivo basso (acceso = livello 0)</option>
+      <option value="up">Ingresso con pull-up</option>
+      <option value="down">Ingresso con pull-down</option></select></div>
+   </div>
+   <div class="hide" id="io_sdf"><div class="agrid">
+    <div><label for="io_sm">MOSI (dati verso la scheda)</label><input type="number" id="io_sm"
+      min="1" inputmode="numeric"></div>
+    <div><label for="io_sk">SCK (clock)</label><input type="number" id="io_sk" min="1"
+      inputmode="numeric"></div>
+    <div><label for="io_si">MISO (dati dalla scheda)</label><input type="number" id="io_si" min="1"
+      inputmode="numeric"></div>
+    <div><label for="io_sf">Frequenza SPI (kHz)</label><input type="number" id="io_sf" min="400"
+      max="20000" inputmode="numeric"></div>
+    <p class="fhint">Il pin "Pin (GPIO)" qui sopra e CS. Frequenza da 400 a 20000 kHz: di solito 1000; se la scheda non si monta prova 400 con fili corti.</p>
+   </div></div>
+   <button class="btn" onclick="ioAdd()">Aggiungi</button><div id="io_am" class="msg"></div>
+   <p class="fhint">Il pin viene controllato: non si possono usare USB, tasto fisico, LED della scheda, pin di avvio o pin gia usati. Massimo 16 periferiche. Un rele collegato alla rete elettrica richiede un modulo a norma e un installatore: VesevOS comanda solo il segnale.</p>
+  </div>
+ </div>
+ <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-prog"/></svg>Driver</h3>
+  <p class="fhint">Un driver descrive una periferica: icona, collegamenti, pagina e comandi. Carica il file, poi installalo: ti propone i pin liberi e puoi cambiarli. Il sistema controlla che siano ammessi e non gia usati.</p>
+  <div id="drvlist"></div>
+  <div class="ftb adm">
+   <label class="btn gray" for="drvup" tabindex="0"
+    onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();$('drvup').click()}"><svg
+     class="i" aria-hidden="true"><use href="#i-upl"/>
+    </svg><span>Carica</span></label><input type="file" id="drvup" class="sr"
+    accept=".vdb,.vdp,.vde,.txt" onchange="drvUp()" aria-label="Driver da caricare"></div>
+  <div id="drvm" class="msg" role="status"></div></div>
+</section>
+<section id="t_btn" class="hide">
+ <div class="sub" id="sk_btn"><button>Tasto fisico</button><button class="adm">Azioni dei click</button><button class="adm">Prova del tasto</button></div>
+ <div class="card"><h3>Tasto fisico</h3>
+  <p class="fhint">Il tasto fisico (BOOT, GPIO0) della scheda: le pressioni lunghe (2, 8 e 20 secondi) servono al recupero e non si cambiano.</p>
+  <div id="dv_btn"></div>
+ </div>
+
+ <div class="card adm"><h3>Azioni dei click</h3>
+  <p class="fhint">Premi e lascia il tasto in fretta, 1, 2 o 3 volte: la scheda aspetta mezzo secondo dopo l'ultimo click e poi fa l'azione scelta. Il LED fa un lampo quando ha capito.</p>
+  <label for="bt_c1">1 click</label><select id="bt_c1" onchange="btnSave(1,this)"></select>
+  <label for="bt_c2">2 click</label><select id="bt_c2" onchange="btnSave(2,this)"></select>
+  <label for="bt_c3">3 click</label><select id="bt_c3" onchange="btnSave(3,this)"></select>
+  <p class="fhint law hide" id="bt_w"></p>
+  <p class="fhint" id="bt_f"></p>
+  <div id="btm" class="msg"></div></div>
+ <div class="card adm"><h3>Prova del tasto</h3>
+  <p class="fhint">Per 60 secondi il tasto non fa niente (nemmeno le pressioni lunghe): qui vedi cosa la scheda capisce. Poi torna normale da solo.</p>
+  <button class="btn" id="bt_t" onclick="btnTest()">Avvia la prova</button>
+  <div id="bt_ts" class="msg" role="status" aria-live="polite"></div>
+  <div id="bt_tl" class="big"></div></div>
+</section>
+<section id="t_rad" class="hide">
+ <div class="sub" id="sk_rad"><button>Interruttori</button><button>Modo aereo</button><button>Wi-Fi + BLE</button></div>
+ <div>
+ <div class="card"><h3>Interruttori radio</h3>
+  <div class="agrid adm"><div><span>Radio generale</span>
+   <span id="rad_sw"></span></div></div>
+  <p class="fhint">L'interruttore generale spegne sia Wi-Fi che Bluetooth LE.</p>
+  <div id="radm" class="msg"></div>
+ </div>
+ </div>
+ <div>
+ <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-plane"/>
+   </svg>Modo aereo</h3>
+  <div id="airst" class="airst"></div>
+  <p class="fhint">Spegne tutte le radio della scheda: Wi-Fi, hotspot, ESP-NOW e Bluetooth LE. Le Automazioni continuano a funzionare. Mentre e attivo la pagina NON si raggiunge.</p>
+  <label for="air_ex">Quando finisce il modo aereo</label>
+  <select id="air_ex" onchange="airUi()"><option value="0">Al prossimo avvio della scheda</option>
+   <option value="1">Dopo un tempo</option><option value="2">A un certo orario</option>
+   <option value="3">Fisso: solo a mano</option></select>
+  <div id="air_t" class="agrid hide"><div>
+    <label for="air_n">Tempo</label><input type="number" id="air_n" min="1" value="10"></div><div>
+    <label for="air_u">Unita</label><select id="air_u"><option value="1">secondi</option>
+     <option value="60" selected>minuti</option><option value="3600">ore</option></select></div>
+  </div>
+  <div id="air_h" class="hide">
+   <label for="air_at">Orario</label><input type="time" id="air_at" value="07:00"></div>
+  <p class="fhint">Per uscire prima: tasto fisico, se la sua azione non e stata cambiata (Dispositivi &gt; Tasto); comando <code>airplane off</code> dalla seriale (USB); oppure una regola nelle Automazioni.</p>
+  <p class="fhint">All'uscita Wi-Fi e hotspot tornano come prima. ESP-NOW e Bluetooth LE possono restare spenti: si riaccendono a mano.</p>
+  <button class="btn" onclick="airOn()"><svg class="i" aria-hidden="true"><use href="#i-plane"/>
+   </svg><span>Attiva modo aereo</span></button><div id="airm" class="msg"></div></div>
+ </div>
+ <div>
+ <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-wifi"/></svg>Wi-Fi + Bluetooth LE</h3>
+  <p class="fhint">Una sola radio a 2,4 GHz: Wi-Fi e Bluetooth la usano a turno.</p>
+  <div id="lcpaese"></div>
+  <p class="fhint">Si cambia in Sistema &gt; Localizzazione.</p>
+  <div id="lcradio"></div>
+  <div id="ifmac"></div>
+  <div class="fhint adm" style="font-weight:600;margin-top:12px">Impostazioni (le scegli tu)</div>
+  <div class="agrid adm">
+   <div><label for="lc_ant">Antenna</label><select id="lc_ant" onchange="lcAnt()">
+     <option value="0">Interna (sul circuito)</option><option value="1">Esterna</option></select>
+   </div>
+   <div id="lc_gw" class="hide">
+    <label for="lc_gain">Guadagno dell'antenna esterna (dBi)</label><input type="number"
+     id="lc_gain" min="0" max="15" value="0"></div>
+   <div><label for="lc_tx">Potenza di trasmissione (dBm)</label><input type="range" id="lc_tx"
+     min="2" max="20" oninput="lcTx()"><div id="lc_txv" class="fhint"></div></div>
+  </div>
+  <p class="fhint">La potenza non supera mai il limite del paese.</p>
+  <div class="law">La scheda applica i limiti noti del paese scelto (canali e potenza massima) e abbassa la potenza se usi un'antenna esterna. Questo non garantisce la conformita del prodotto finito: dipende anche dall'hardware, dall'antenna, dal montaggio e dalle regole del luogo. Chi installa la scheda ne e responsabile.</div>
+  </div>
+ <div class="card adm"><button class="btn" onclick="lcSave('lcm3')">Salva</button>
+  <div id="lcm3" class="msg"></div></div>
+ </div>
+</section>
+<section id="t_usb" class="hide">
+ <div class="card"><h3>USB</h3>
+  <p class="fhint">Collegamento USB nativo del chip (seriale e JTAG).</p>
+  <div id="dv_usb"></div>
+ </div>
+</section>
+<section id="t_ser" class="hide">
+ <div class="sub" id="sk_ser"><button class="adm">Seriale</button><button class="adm">Password</button></div>
+ <div class="card adm"><h3>Seriale (cavo USB)</h3>
+  <p class="fhint">Come si comporta la seriale. Le modifiche valgono subito e restano dopo il riavvio. Gli stessi comandi si danno anche dalla seriale (scrivi: serial).</p>
+  <label for="sr_baud">Velocita (baud)</label><select id="sr_baud"
+   onchange="srSet('baud',this.value)"></select>
+  <div id="sr_usb" class="fhint"></div>
+  <div id="sr_trial" class="msg ko hide" style="margin-top:8px">
+   <span>Velocita nuova in prova: se non la confermi entro 20 secondi torna quella di prima.</span> <button
+    class="btn sm" onclick="srSet('keep','1')">Conferma</button></div>
+  <label for="sr_eol">A capo</label><select id="sr_eol" onchange="srSet('eol',this.value)"></select>
+  <div class="tog"><div>Eco dei tasti che scrivi</div>
+   <button class="sw1" id="sw_sr_echo" onclick="srTog('echo')" aria-label="Eco"></button></div>
+  <div class="tog"><div>La seriale accetta comandi</div>
+   <button class="sw1" id="sw_sr_input" onclick="srTog('input')" aria-label="Comandi"></button>
+  </div>
+  <div class="tog"><div>Scrivi il registro sulla seriale</div>
+   <button class="sw1" id="sw_sr_log" onclick="srTog('log')" aria-label="Registro"></button></div>
+  <div class="tog"><div>Mostra il benvenuto quando apri il monitor</div>
+   <button class="sw1" id="sw_sr_banner" onclick="srTog('banner')" aria-label="Benvenuto"></button>
+  </div>
+  <label for="sr_tx">Attesa massima di scrittura (ms, 0-200)</label><input type="number" id="sr_tx"
+   min="0" max="200" onchange="srSet('tx',this.value)">
+  <div id="srm" class="msg"></div></div>
+ <div class="card adm"><h3>Password sulla seriale</h3>
+  <div class="tog"><div>Proteggi la seriale (cavo USB) con la password</div>
+   <button class="sw1" id="sw_ser" onclick="serToggle()" aria-label="Seriale"></button></div>
+  <div id="serwarn" class="msg ko" style="margin-top:8px"></div>
+  <p style="color:var(--mut)">Pagina web, shell web e API sono sempre protette dalla password. Se spegni questo interruttore, chi collega il cavo USB ottiene subito la shell. Il tasto fisico tenuto da 8 a 19 secondi azzera le password degli amministratori e riaccende la protezione.</p>
+  <p style="color:var(--mut)">Anche la seriale chiede nome utente, password e codice MFA (se acceso). Gli errori si contano nel blocco degli accessi, insieme a quelli del web (origine seriale).</p>
+  <div id="serm" class="msg"></div></div>
+</section>

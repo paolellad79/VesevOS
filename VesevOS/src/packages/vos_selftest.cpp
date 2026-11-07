@@ -225,9 +225,9 @@ static void tRadio() {
     cfg.country.length() ? cfg.country.c_str() : tr("NON scelto"), regionChannels(), ch, regionTxDbm(), regionMaxDbm(), regionLimitDbm(), cfg.antExt ? tr("esterna") : tr("interna"));
 }
 static void tPer() {
-  title(tr("Periferiche e tasto BOOT"));
+  title(tr("Periferiche e tasto fisico"));
   bool boot = !drvGpioRead(VOS_PIN_BOOT);
-  repf(boot ? SELF_WARN : SELF_OK, tr("LED sul pin %u, modo %u; pin registrati %d; tasto BOOT %s"), (unsigned)cfg.ledPin, (unsigned)cfg.ledMode, pinCount(), boot ? tr("PREMUTO") : tr("rilasciato"));
+  repf(boot ? SELF_WARN : SELF_OK, tr("LED sul pin %u, modo %u; pin registrati %d; tasto fisico %s"), (unsigned)cfg.ledPin, (unsigned)cfg.ledMode, pinCount(), boot ? tr("PREMUTO") : tr("rilasciato"));
 #if VOS_WITH_SD
   if (sdConfigured()) {                                             // senza periferica "sd" in io.cfg non si dice nulla
   char sd[112]; sdText(sd, sizeof sd);                              // non montata non e un errore: si monta a richiesta

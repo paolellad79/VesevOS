@@ -4,6 +4,7 @@
 // Utenti (fino a 8, ruoli Amministratore / Operatore / Ospite), password con hash e sale,
 // accesso senza password in chiaro (numero casuale + HMAC), sessioni, blocco dopo troppi errori.
 #pragma once
+#include "../core/vos_eventi.h"
 #include "../core/vos_errbuf.h"
 #include "../core/vos_heapbuf.h"
 #include "../core/vos_common.h"
@@ -35,7 +36,8 @@ void   authLoginStart(const char* name, HeapBuf& j);   // {"salt":"..","nonce":"
 //    ritorna 0 ok (idx = utente), 1 errato, 2 IP bloccato (waitSec)
 int    authLoginFinish(uint32_t ip, const char* name, const char* nonce, const char* mac, int& idx, uint32_t& waitSec);
 bool   authIpBlocked(uint32_t ip, uint32_t& waitSec);
-bool   authFailIp(uint32_t ip, const char* why);   // conta un errore (password, MFA, trappola); true = ora bloccato
+// conta un errore (password, MFA, trappola); true = ora bloccato. tipo = voce degli Eventi di sicurezza; nome solo se l'utente esiste
+bool   authFailIp(uint32_t ip, const char* why, EventoTipo tipo = EV_ALTRO, const char* nome = nullptr);
 void   authIpOk(uint32_t ip);                     // accesso riuscito da quell'origine: azzera errori e livello di blocco
 // Origine fissa della seriale nella tabella dei blocchi (la seriale non ha un IP): stesso meccanismo, stesso tetto di errori e stessa
 // durata del web, ma una riga a parte, cosi un cavo USB non si confonde con un indirizzo di rete. Nell'elenco si legge "seriale".

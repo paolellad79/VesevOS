@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_net.cpp
 #include "vos_net.h"
+#include "../core/vos_apwin.h"
 #include "../drivers/vos_drv_task.h"
 #include "../core/vos_eventbus.h"
 #include "../core/vos_i18n.h"
@@ -46,6 +47,7 @@ static void setState(NetState s) {
 static volatile int g_apCh = 0;            // 0 = canale di partenza della rete schede
 static volatile bool g_apChReq = false;
 void netSetApChannel(int ch) { if (regionChannelOk(ch)) { g_apCh = ch; g_apChReq = true; } }
+void netApRefresh() { g_apCh = regionChannelOk(g_apCh) ? g_apCh : (regionChannelOk(cfg.meshCh) ? cfg.meshCh : 1); g_apChReq = true; }
 bool netOnAp(uint32_t ip) { return (ip & 0xFFFFFF00UL) == 0xC0A80400UL; }
 
 // ---- portale automatico (captive portal): in modo AP ogni nome DNS punta alla scheda ----
@@ -130,7 +132,7 @@ std::string netAirplaneText() {
   }
   else snprintf(w, sizeof(w), "%s", tr("solo a mano"));
   StrText t(256);
-  t.buf().addf(tr("Modalita aereo: ATTIVA (si riattiva %s; sempre: 'airplane off' dalla seriale o tasto BOOT)"), w);
+  t.buf().addf(tr("Modalita aereo: ATTIVA (finisce %s; per uscire prima: 'airplane off' dalla seriale)"), w);
   return t.take();
 }
 
@@ -255,7 +257,7 @@ static void startAp() {
   regionApplyRadio();                                 // paese e potenza PRIMA di trasmettere
   int ch = g_apCh ? g_apCh : cfg.meshCh;
   if (!regionChannelOk(ch)) ch = 1;
-  drvWifiApStart(cfg.apSsid.c_str(), cfg.apPass.c_str(), ch, 0xC0A80401, 0xC0A80401, 0xFFFFFF00);   // 192.168.4.1 / 255.255.255.0   // sempre con password (WPA2), unica per ogni scheda
+  drvWifiApStart(cfg.apSsid.c_str(), apWinIsOpen() ? "" : cfg.apPass.c_str(), ch, 0xC0A80401, 0xC0A80401, 0xFFFFFF00);   // 192.168.4.1 / 255.255.255.0   // sempre con password (WPA2), unica per ogni scheda
   setState(NET_AP);
   vlog("NET: AP '%s' su 192.168.4.1 (canale %d)", cfg.apSsid.c_str(), ch);
   if (!dhcpWanted()) dhcpApply(); else if (cfg.dhcpLease != 120) dhcpApply();   // di fabbrica: DHCP gia acceso, 120 minuti
@@ -366,9 +368,10 @@ static void netTask(void*) {
   for (;;) {
     wdBeat("net");
     fwTick();
+    if (apWinTick()) netApRefresh();                 // finestra del BOOT scaduta: hotspot torna con la password
     if (g_apChReq) {                                 // cambio canale dell'hotspot senza spegnere il Wi-Fi (la rete schede resta accesa)
       g_apChReq = false;
-      if (g_state == NET_AP) { drvWifiApRetune(cfg.apSsid.c_str(), cfg.apPass.c_str(), g_apCh); vlog("NET: hotspot sul canale %d", (int)g_apCh); }
+      if (g_state == NET_AP) { drvWifiApRetune(cfg.apSsid.c_str(), apWinIsOpen() ? "" : cfg.apPass.c_str(), g_apCh); vlog("NET: hotspot sul canale %d", (int)g_apCh); }
     }
     if (g_airOffReq) { g_airOffReq = false; g_reconf = true; }
     if (g_airReq || (cfg.airOn && g_state != NET_AIR)) {

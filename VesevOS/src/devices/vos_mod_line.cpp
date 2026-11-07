@@ -3,6 +3,7 @@
 // VesevOS - vos_mod_line.cpp (vedi vos_mod_line.h)
 #include "vos_mod_line.h"
 #include <string.h>
+#include "../core/vos_pacchetto.h"
 #include "../core/vos_i18n.h"
 #include "../core/vos_util.h"
 #include "../core/vos_vdesc.h"
@@ -50,6 +51,7 @@ static bool plainOk(std::string_view s, size_t mx) {                  // ASCII s
 }
 
 bool modWidgetKey(std::string_view key, std::string_view val, ModWidget& w, const char** why) {
+  key = pacChiave(key);
   if (key == "title") {
     if (!plainOk(val, 32)) { *why = tr("Titolo del widget: 1-32 caratteri ASCII, senza < > virgolette o barra"); return false; }
     memcpy(w.title, val.data(), val.size()); w.title[val.size()] = 0;

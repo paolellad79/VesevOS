@@ -138,7 +138,7 @@ bool shCmdAdmin(const Word& c, const Word& a1, const char* line, OutSink& o, int
     o.printf("%s %s - GPL-3.0-or-later / %s\r\n", VOS_NAME, VOS_VERSION, tr("licenza commerciale"));
     o.println(tr("Software di terzi e testi delle licenze: comando license, pagina Informazioni > Note legali."));
     o.println(tr("Dati salvati sulla scheda: configurazione, utenti (solo impronta della password), registro (150 righe con indirizzi IP), allarmi. Nessun dato va fuori dalla scheda se non attivi tu MQTT o la rete tra schede."));
-    o.println(tr("Cancellare tutto: factory-reset oppure tasto BOOT 20 secondi."));
+    o.println(tr("Cancellare tutto: factory-reset oppure tasto fisico 20 secondi."));
     o.println(tr("Sicurezza: segnala i problemi a paolellad79@gmail.com (risposta entro 7 giorni). Progetto gratuito: gli aggiornamenti non hanno date garantite."));
     o.println(tr("Radio: comando region. Non e consulenza legale."));
     o.println(tr("Software libero gratuito, fornito fuori da attivita commerciale e senza garanzia (GPL-3.0 sezioni 15-16). Riferimenti normativi: comando license notice."));
@@ -158,13 +158,15 @@ bool shCmdAdmin(const Word& c, const Word& a1, const char* line, OutSink& o, int
     else { std::string d = diaryText(20, true); if (d.empty()) { o.print(tr("Nessun avvio registrato")); o.print("\n"); } else o.print(d.c_str()); }
   }
   else if (c == "factory-reset") {
+    // Dal terminale della pagina non si azzera: la via web e una sola, /api/factory, che vuole la password.
+    if (!serIsOut(o)) { o.println(tr("Dal terminale della pagina non si azzera: usa Sistema > Configurazione, che chiede la password.")); return true; }
     if (needConfirm(line, o, tr("Azzero TUTTO (impostazioni, utenti, password) e riavvio. Non si annulla. Procedo?"))) return true;
     o.println(tr("Azzero tutto e riavvio..."));
     vlog("SISTEMA: ripristino di fabbrica dalla shell");
     cfgFactoryReset(); sysReboot("ripristino di fabbrica dalla shell", 300);
   }
   else if (c == "airplane") {
-    if (a1 == "off") { netAirplaneOff("dalla shell"); o.println(tr("Modalita aereo spenta: la rete riparte")); }
+    if (a1 == "off") { netAirplaneOff("dalla shell"); o.println(tr("Modalita aereo spenta: il Wi-Fi riparte")); }
     else if (a1 == "on") {
       Word m = argAt(line, 2); m.lower();
       const char* colon = strchr(m.c_str(), ':');

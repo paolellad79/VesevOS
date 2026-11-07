@@ -15,6 +15,8 @@
 #if VOS_WITH_ELF
 #include <stdlib.h>
 #include "../core/vos_files.h"
+#include "../core/vos_pacchetto.h"
+#include "../packages/vos_pacchetto_nome.h"
 #include "../devices/vos_drvres.h"
 #include "../packages/vos_elf.h"
 #include "../packages/vos_elf_file.h"
@@ -45,6 +47,8 @@ void cmdInfo(const char* line, OutSink& o, int base) {
   ErrBuf e;
   if (!vdeLeggi(w.c_str(), *v, nullptr, e)) { o.println(trf("%s: %s", w.c_str(), e.c_str())); delete v; return; }
   o.println(trf("%s - %s (vde, bus %s, %u byte)", v->name, v->title, nomeBus(v->bus), (unsigned)v->elfLen));
+  o.print("  "); o.println(trf("Versione: %s", v->ver));
+  if (v->author[0]) { o.print("  "); o.println(trf("Autore: %s", v->author)); }
   int pin[VDE_SIG_MAX], np = vdePinDati(v->name, pin, VDE_SIG_MAX);      // per la microSD i pin stanno nella periferica sd
   for (int i = 0; i < v->nsig; i++) {
     if (i < np) o.println(trf("  %-6s GPIO %d", v->sig[i], pin[i]));
@@ -72,10 +76,18 @@ void cmdInstall(const char* line, OutSink& o, uint32_t sess, int base) {
     VosElfImg im;
     int r = vos_elf_img_leggi(path, VDE_TEXT_MAX + 64 + vos_elf_caps()->file_max, im);
     if (r != VOS_ELF_OK) { o.println(trf("%s: %s", w.c_str(), vos_elf_err_testo(r))); return; }
+    PacDati d;
+    pacLeggi(std::string_view((const char*)im.p, im.n < VDE_TEXT_MAX ? im.n : VDE_TEXT_MAX), d);
+    if (d.nome[0]) snprintf(nome, sizeof nome, "%s", d.nome);      // il nome corto dichiarato vale piu del nome del file
+    ErrBuf avviso;
+    char installato[64];
+    snprintf(installato, sizeof installato, "%s/%s%s", VDE_DIR, nome, VDE_EXT);
+    pacchettoAvviso(installato, std::string_view((const char*)im.p, im.n < VDE_TEXT_MAX ? im.n : VDE_TEXT_MAX), avviso);
     if (!vdeSalva(nome, im.p, im.n, err)) { o.println(trf("%s non installato: %s", nome, err.c_str())); return; }
+    if (!avviso.empty()) o.println(avviso.c_str());
   } else {
     if (strlen(w.c_str()) > 24) { o.println(trf("%s: nome troppo lungo", w.c_str())); return; }
-    snprintf(nome, sizeof nome, "%s", w.c_str());
+    snprintf(nome, sizeof nome, "%.47s", w.c_str());
     if (!vdeEsiste(nome)) { o.println(trf("%s: file non trovato in /devs", nome)); return; }
   }
   if (!vdeInstalla(nome, pins.empty() ? "" : pins.c_str(), err)) { o.println(trf("%s: file salvato, pin non dati: %s", nome, err.c_str())); return; }

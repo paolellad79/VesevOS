@@ -45,7 +45,7 @@ bool shCmdSys(const Word& c, const Word& a1, const char* line, OutSink& o, int r
     }
     if (k == "keep") { o.println(serialKeep() ? tr("Velocita confermata") : tr("Nessuna velocita in prova")); return true; }
     if (!k.empty()) {
-      if (k == "input" && (v == "off" || v == "0") && argAt(line, 3) != "yes") { o.println(tr("Attenzione: la seriale non accettera piu comandi (si riattiva da pagina web o con il tasto BOOT). Per confermare: serial input off yes")); return true; }
+      if (k == "input" && (v == "off" || v == "0") && argAt(line, 3) != "yes") { o.println(tr("Attenzione: la seriale non accettera piu comandi (si riattiva da pagina web o con il tasto fisico). Per confermare: serial input off yes")); return true; }
       ErrBuf err;
       if (!serialSet(k.c_str(), v.c_str(), err)) { o.println(err.c_str()); return true; }
     }

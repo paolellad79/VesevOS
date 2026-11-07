@@ -54,7 +54,9 @@ const char* logName(const char* typed) {
 // Un errore (utente, password o codice): conta nel blocco condiviso, va nel registro, poi si aspetta e si dice sempre la stessa cosa.
 // t0 = quando e arrivata la riga: l'attesa parte da li, cosi dura uguale anche se la verifica della password ha richiesto del tempo.
 void fail(uint32_t t0, bool mfaStep) {
-  g_blocked = authFailIp(AUTH_IP_SERIAL, mfaStep ? "seriale: codice MFA errato" : "seriale: password errata");
+  int utente = userFind(g_name);                    // negli Eventi di sicurezza solo un nome che esiste
+  g_blocked = authFailIp(AUTH_IP_SERIAL, mfaStep ? "seriale: codice MFA errato" : "seriale: password errata",
+                         mfaStep ? EV_MFA : EV_PASSWORD, utente >= 0 ? cfg.users[utente].name.c_str() : nullptr);
   auditEvent(AUD_INFO, "serlogin", trf("Seriale: accesso non riuscito (utente %s, %s)", logName(g_name), mfaStep ? tr("codice MFA") : tr("utente o password")).c_str());
   uint8_t extra = g_run > 3 ? 3 : g_run;
   if (g_run < 250) g_run++;

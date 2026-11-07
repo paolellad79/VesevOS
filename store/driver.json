@@ -1,5 +1,66 @@
 {
   "versione_schema": 1,
   "categoria": "driver",
-  "voci": []
+  "voci": [
+    {
+      "id": "driver-sd-spi-vde",
+      "nome": "sd-spi",
+      "descrizione": {
+        "it": "Lettore di microSD (SPI) come driver ELF: montaggio, stato, comandi sd e formattazione.",
+        "en": "microSD reader (SPI) as an ELF driver: mounting, status, sd commands and formatting.",
+        "es": "Lector de microSD (SPI) como controlador ELF: montaje, estado, comandos sd y formateo.",
+        "de": "microSD-Leser (SPI) als ELF-Treiber: Einbinden, Status, sd-Befehle und Formatieren."
+      },
+      "versione": "1.0",
+      "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/store/drivers/sd-spi-vde/sd-spi.vde",
+      "sha256": "7d1e8c2a3c3f119fd27748d1f5a80ab30de01246c9435fc6e5ec24e66a3496a2",
+      "dimensione": 5780,
+      "firmware_minimo": "da confermare",
+      "permessi": "da confermare",
+      "licenza": "CC0-1.0",
+      "autore": "Domenico Paolella",
+      "sorgente": "da confermare",
+      "aggiornato": "2026-11-05"
+    },
+    {
+      "id": "driver-sd-spi-vdb",
+      "nome": "sd-spi",
+      "descrizione": {
+        "it": "Lettore di microSD (SPI) come driver Berry: pagina con prova a 9 passi, widget della Home, comandi sd e formattazione.",
+        "en": "microSD reader (SPI) as a Berry driver: page with a 9-step test, Home widget, sd commands and formatting.",
+        "es": "Lector de microSD (SPI) como controlador Berry: pagina con prueba de 9 pasos, widget de Inicio, comandos sd y formateo.",
+        "de": "microSD-Leser (SPI) als Berry-Treiber: Seite mit 9-Schritte-Test, Start-Widget, sd-Befehle und Formatieren."
+      },
+      "versione": "1.0",
+      "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/store/drivers/sd-spi-vdb/sd-spi.vdb",
+      "sha256": "d641b6d72135268eac7e5b3210a5800111c3b21c789a0fbac0ededd7517d3beb",
+      "dimensione": 13033,
+      "firmware_minimo": "da confermare",
+      "permessi": "da confermare",
+      "licenza": "CC0-1.0",
+      "autore": "Domenico Paolella",
+      "sorgente": "da confermare",
+      "aggiornato": "2026-11-05"
+    },
+    {
+      "id": "driver-bmp280-vde",
+      "nome": "bmp280",
+      "descrizione": {
+        "it": "Sensore BMP280 su I2C come driver ELF: temperatura e pressione.",
+        "en": "BMP280 sensor on I2C as an ELF driver: temperature and pressure.",
+        "es": "Sensor BMP280 en I2C como controlador ELF: temperatura y presion.",
+        "de": "BMP280-Sensor am I2C als ELF-Treiber: Temperatur und Luftdruck."
+      },
+      "versione": "1.0",
+      "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/store/drivers/bmp280-vde/bmp280.vde",
+      "sha256": "86b13d135aef6657faa05d7922bf19189009262b59a87fb5cde40abb456f385c",
+      "dimensione": 3867,
+      "firmware_minimo": "da confermare",
+      "permessi": "da confermare",
+      "licenza": "CC0-1.0",
+      "autore": "Domenico Paolella",
+      "sorgente": "da confermare",
+      "aggiornato": "2026-11-05"
+    }
+  ]
 }

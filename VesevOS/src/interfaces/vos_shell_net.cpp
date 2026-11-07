@@ -117,7 +117,6 @@ bool shCmdNet(const Word& c, const Word& a1, const char* line, OutSink& o, int r
       o.println(trf("Portale auto:  %s", cfg.apCaptive ? tr("acceso") : tr("spento")));
       o.println(trf("HTTP:          %s, porta %u", cfg.httpOn ? tr("acceso") : tr("spento"), (unsigned)cfg.httpPort));
       o.println(trf("HTTPS:         %s, porta %u", cfg.https ? tr("acceso") : tr("spento"), (unsigned)cfg.httpsPort));
-      o.println(trf("Redirect:       %s (HTTP verso HTTPS, serve HTTP e HTTPS accesi)", cfg.httpRedirect ? tr("acceso") : tr("spento")));
       o.println(trf("DHCP hotspot:  %s, durata %u minuti", cfg.dhcpOn ? tr("acceso") : tr("spento"), (unsigned)cfg.dhcpLease));
       o.println(trf("mDNS:          %s", cfg.mdnsOn ? tr("acceso") : tr("spento")));
       return true;
@@ -130,18 +129,12 @@ bool shCmdNet(const Word& c, const Word& a1, const char* line, OutSink& o, int r
     else if (a1 == "https" && onoff) sOn = v;
     else if (a1 == "http-port" && !a2.empty()) hp = a2.toInt();
     else if (a1 == "https-port" && !a2.empty()) sp = a2.toInt();
-    else if (a1 == "redirect" && onoff) {                           // vale subito; nel registro modifiche come ogni salvataggio
-      cfg.httpRedirect = v; cfgSave();
-      o.println(tr("Salvato e applicato."));
-      if (v && !(cfg.httpOn && cfg.https)) o.println(tr("Il redirect agisce solo con HTTP e HTTPS tutti e due accesi."));
-      return true;
-    }
     else if ((a1 == "dhcp" || a1 == "mdns") && onoff) {            // si applicano subito
       if (a1 == "dhcp") { if (!v && netState() != NET_CLIENT_OK) { o.println(tr("Spegni il DHCP dell'hotspot solo quando la scheda e collegata alla Wi-Fi di casa: senza DHCP il telefono dovrebbe avere un indirizzo fisso")); return true; } cfg.dhcpOn = v; }
       else cfg.mdnsOn = v;
       cfgSave(); netApplyServices(); o.println(tr("Salvato e applicato.")); return true;
     }
-    else { o.println(tr("Uso: svc [ap|captive|http|https|redirect|dhcp|mdns on|off] [http-port|https-port <numero>]")); return true; }
+    else { o.println(tr("Uso: svc [ap|captive|http|https|dhcp|mdns on|off] [http-port|https-port <numero>]")); return true; }
     const char* why = cfgSvcCheck(apOn, hOn, hp, sOn, sp);
     if (why) { o.println(why); return true; }
     if (!apOn && cfg.apOn) cfg.dhcpOn = false; else if (apOn && !cfg.apOn) cfg.dhcpOn = true;   // il DHCP segue il punto di accesso

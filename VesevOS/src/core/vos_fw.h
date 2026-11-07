@@ -16,7 +16,7 @@ void   fwConfirm();                             // conferma la regola in prova
 bool   fwTrying();                              // c'e una regola in prova?
 uint32_t fwTryLeft();                           // secondi rimasti della prova
 void   fwTick();                                // ogni secondo (task di rete): scadenza della prova
-void   fwOff(const char* why);                  // uscita di emergenza (seriale, tasto BOOT 2-7 s)
+void   fwOff(const char* why);                  // uscita di emergenza (seriale, tasto fisico 2-7 s)
 #define FW_JSON_MAX 4096
 bool   fwJson(HeapBuf& out, uint32_t yourIp);   // stato per la pagina (JSON aggiunto in coda)
 std::string fwText();

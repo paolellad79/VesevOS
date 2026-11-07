@@ -1,0 +1,16 @@
+# Scheda modulo di esempio VesevOS (dati propri, licenza CC0). Controlla sempre i collegamenti sul datasheet del tuo modulo.
+[module]
+name=pir-hc-sr501
+title=Sensore di movimento PIR
+class=ingresso
+pull=none
+power=5V
+level=3V3
+author=VesevOS
+version=1.1
+license=CC0
+warn=Il segnale e a 3,3 V sulla maggior parte dei moduli: controlla il tuo
+[signals]
+OUT
+[icon]
+<svg viewBox="0 0 24 24"><path d="M4 16a8 8 0 0 1 16 0z" fill="none" stroke="#1e7a4c" stroke-width="2"/><circle cx="12" cy="16" r="2" fill="#1e7a4c"/></svg>

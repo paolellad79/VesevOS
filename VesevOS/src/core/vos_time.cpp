@@ -207,8 +207,8 @@ void timeInit() {
   timeStart();
 }
 
-// Temperatura nell'unita scelta (C o F), arrotondata all'intero: i decimali sarebbero falsa precisione
+// Temperatura nell'unita scelta (C o F), con un decimale: il valore come lo legge il sensore, senza arrotondare
 void fmtTemp(float c, char* out, size_t n) {
-  if (cfg.tempUnit) snprintf(out, n, "%ld F", lroundf(c * 9.0f / 5.0f + 32.0f));
-  else snprintf(out, n, "%ld C", lroundf(c));
+  if (cfg.tempUnit) snprintf(out, n, "%.1f F", (double)(c * 9.0f / 5.0f + 32.0f));
+  else snprintf(out, n, "%.1f C", (double)c);
 }

@@ -97,6 +97,8 @@ bool progSdUsable() {
 #endif
 }
 
+int progSdAppCount() { return cfg.dataSdN; }
+
 int progWhere(uint8_t kind, const char* name) {
   return kindOk(kind) && name && slotSd(kind, name) >= 0 ? PW_SD : PW_FLASH;
 }

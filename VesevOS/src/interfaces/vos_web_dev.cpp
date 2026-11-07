@@ -122,8 +122,10 @@ void routesDev(PsychicHttpServer* S, bool sec) {
     return sendText(s, 200, "application/json", out.c_str(), out.length());
   });
   add(S, sec, "/api/mod/save", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
-    ErrBuf e; if (!modSaveDriver(Pc(r, "name"), Pc(r, "text"), e)) return ko(s, e);
-    auditf(AUD_INFO, "", tr("scheda modulo %s caricata (%s)"), Pc(r, "name"), WhoText(c).s); return ok(s);
+    ErrBuf e, avviso; char nome[MOD_NAME_BUF] = "";
+    if (!modSaveDriver(Pc(r, "name"), Pc(r, "text"), e, nome, sizeof nome, &avviso)) return ko(s, e);
+    auditf(AUD_INFO, "", tr("scheda modulo %s caricata (%s)"), nome, WhoText(c).s);
+    return okAvviso(s, avviso);
   });
   add(S, sec, "/api/mod/del", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
     ErrBuf e; if (!modDeleteDriver(Pc(r, "name"), e)) return ko(s, e);

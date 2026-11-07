@@ -21,7 +21,7 @@ struct VosHooks {
   void (*meshInit)();
   bool (*mqttPublish)(const char* sub, const char* msg);   // <prefisso>/<sub>; false se non collegato
   bool (*mfaOn)(int user);
-  int  (*btnWpsClicks)();                           // click del tasto BOOT che avviano il WPS (0 = nessuno)
+  int  (*btnWpsClicks)();                           // click del tasto fisico che avviano il WPS (0 = nessuno)
   void (*radiosOff)();                              // modo aereo: ferma ESP-NOW e Bluetooth
   // LED, rete, traffico e periferiche stanno sopra il nucleo (devices/, net/): il nucleo li chiede qui
   void (*ledInit)();

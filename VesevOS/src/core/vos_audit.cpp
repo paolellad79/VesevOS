@@ -166,7 +166,7 @@ void auditRefresh() {
   AudLock L;
   cond(!cfgLastSaveOk(), AUD_RED, "saveerr", tr("Salvataggio della configurazione fallito: le modifiche si perdono al riavvio (memoria piena?)"));
   cond(!cfg.setupDone, AUD_YELLOW, "setupnd", tr("Guida di configurazione non finita: hotspot e HTTP restano forzati accesi a ogni avvio"));
-  cond(cfg.setupDone && !hasAdmin(), AUD_RED, "noadmin", tr("Nessun amministratore attivo: tieni premuto BOOT 8 s per crearlo di nuovo"));
+  cond(cfg.setupDone && !hasAdmin(), AUD_RED, "noadmin", tr("Nessun amministratore attivo: tieni premuto il tasto fisico 8 s per crearlo di nuovo"));
   cond(!cfg.country.length(), AUD_YELLOW, "nocountry", tr("Paese non scelto: radio con regole prudenti (canali 1-11). Sceglilo in Sistema > Localizzazione"));
   cond(!cfg.serialAuth, AUD_YELLOW, "serial", tr("Seriale senza password: chi collega il cavo USB entra senza password"));
   cond(cfg.mqttPass.length() && !cfg.mqttTls, AUD_YELLOW, "mqtttls", tr("MQTT con password ma senza cifratura (mqtts): la password viaggia in chiaro"));

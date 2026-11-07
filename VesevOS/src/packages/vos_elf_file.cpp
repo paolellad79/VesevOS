@@ -13,6 +13,7 @@
 #include "vos_elf.h"
 #include "vos_elf_quar.h"
 #include "../core/vos_files.h"
+#include "../core/vos_pacchetto.h"
 #include "../drivers/vos_drv_fs.h"
 #include "../core/vos_layout.h"
 #include "../devices/vos_sd.h"
@@ -44,6 +45,7 @@ bool nomeDaPercorso(const char* path, char* nome) {
   base = base ? base + 1 : path;
   size_t n = strlen(base);
   if (estModulo(base)) n -= 4;                                // tutte le estensioni dei moduli hanno 4 caratteri
+  if (pacNomeDaFile(std::string_view(base, n), nome, VOS_ELF_NOME_MAX + 1)) return vos_elf_nome_valido(nome);   // sensore-S3-1.2.vae -> sensore
   if (n == 0 || n > VOS_ELF_NOME_MAX) return false;
   memcpy(nome, base, n);
   nome[n] = 0;

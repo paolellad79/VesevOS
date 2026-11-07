@@ -268,7 +268,7 @@ bool sysStatusJson(HeapBuf& j) {
   ok = ok && j.add("\"idf\":\"") && j.addJson(idf, strlen(idf));
   ok = ok && j.add("\",\"reset\":\"") && j.addJson(g_reset, strlen(g_reset)) && j.add("\",");
   ok = ok && addFmt(j, "\"cpu\":%d,\"cpu0\":%d,\"cpu1\":%d,", (int)g_cpu, (int)g_cpu0, (int)g_cpu1);
-  ok = ok && addFmt(j, "\"temp\":%ld,\"tempUnit\":%d,\"hot\":%s,", lroundf(g_temp), (int)cfg.tempUnit, g_hot ? "true" : "false");
+  ok = ok && addFmt(j, "\"temp\":%.1f,\"tempUnit\":%d,\"hot\":%s,", (double)g_temp, (int)cfg.tempUnit, g_hot ? "true" : "false");
   { char cp[320]; int cn = hookCpuStatus(cp, sizeof cp); ok = ok && cn >= 0 && j.add(cp, (size_t)cn); }   // campi cpuMhz...cpuChanges, scritti da vos_cpupm
   ok = ok && addFmt(j, "\"heapFree\":%lu,\"heapTotal\":%lu,", (unsigned long)drvHeapFree(), (unsigned long)drvHeapTotal());
   ok = ok && addFmt(j, "\"psramFree\":%lu,\"psramTotal\":%lu,", (unsigned long)drvPsramFree(), (unsigned long)drvPsramTotal());

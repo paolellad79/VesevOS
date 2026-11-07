@@ -34,6 +34,7 @@ enum {
 
 int   progWhere(uint8_t kind, const char* name);                     // PW_SD solo se l'utente l'ha scelta, altrimenti PW_FLASH
 bool  progSdUsable();                                                // la microSD e montata e non si sta formattando?
+int   progSdAppCount();                                               // quante app hanno scelto la microSD per i dati (da 0 a VOS_BOOTPROG_MAX): se 0, la scheda che sparisce non ferma nessuno
 bool  progWhereStore(uint8_t kind, const char* name, int where, ErrBuf& err);   // salva la scelta in configurazione (i controlli "salva dati" e "non in corso" sono di vos_prog_where.h)
 bool  progDataReady(uint8_t kind, const char* name, ErrBuf& err);    // prima di avviare: scelta SD e scheda assente = no
 bool  progDataDir(uint8_t kind, const char* name, char* out, size_t cap, ErrBuf& err);   // la cartella dati (la crea): out "/var/lib/<nome>" o "/media/sd/app/<nome>"

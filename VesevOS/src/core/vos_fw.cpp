@@ -8,6 +8,7 @@
 #include "vos_log.h"
 #include "vos_i18n.h"
 #include "vos_hooks.h"
+#include "vos_eventi.h"
 #include "../drivers/vos_drv_wifi.h"
 #include "../drivers/vos_drv_time.h"
 
@@ -44,6 +45,7 @@ bool fwAllow(uint32_t ip, bool ntp) {
 }
 
 void fwNoteRejected(uint32_t ip) {
+  eventoNota(EV_FILTRO, EVC_WEB, ip);
   Rej* s = &g_rej[0];
   for (int i = 0; i < REJ_N; i++) { if (g_rej[i].ip == ip) { s = &g_rej[i]; break; } if (g_rej[i].n < s->n) s = &g_rej[i]; }
   if (s->ip != ip) { s->ip = ip; s->n = 0; s->lastLog = 0; }

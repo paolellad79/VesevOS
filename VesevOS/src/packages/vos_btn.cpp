@@ -67,11 +67,11 @@ static void run(int n) {
   }
   ledIdentify(150);                                   // lampo: il gesto e stato capito
   if (a == BA_AIR_OFF) {
-    if (netAirplane()) netAirplaneOff("tasto BOOT");
+    if (netAirplane()) netAirplaneOff("tasto fisico");
   } else if (a == BA_WPS) {
     if (wpsActive()) { wpsStop(); return; }
     if (!wpsAllowed()) { vlog("WPS: spento (accendilo in Rete > WPS)"); return; }
-    ErrBuf e; if (!wpsStart(false, "tasto BOOT", e)) vlog("WPS: %s", e.c_str());
+    ErrBuf e; if (!wpsStart(false, "tasto fisico", e)) vlog("WPS: %s", e.c_str());
   } else if (a == BA_FIND) {
     ledIdentify(10000);
   }

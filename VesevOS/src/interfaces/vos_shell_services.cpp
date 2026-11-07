@@ -21,7 +21,7 @@
 
 namespace {
 
-enum Sid : uint8_t { S_HTTP, S_HTTPS, S_REDIRECT, S_AP, S_CAPTIVE, S_DHCP, S_MDNS, S_WIFI, S_WPS, S_MQTT, S_MESH, S_NTP, S_RULES, S_SCRIPT, S_WD, S_VDB, S_ELF };
+enum Sid : uint8_t { S_HTTP, S_HTTPS, S_AP, S_CAPTIVE, S_DHCP, S_MDNS, S_WIFI, S_WPS, S_MQTT, S_MESH, S_NTP, S_RULES, S_SCRIPT, S_WD, S_VDB, S_ELF };
 
 struct Row {
   const char* name;      // come si scrive nel comando (nomi propri e sigle: non si traducono)
@@ -31,7 +31,7 @@ struct Row {
 };
 
 const Row kRows[] = {
-  {"http", S_HTTP, true, true},   {"https", S_HTTPS, true, true},  {"redirect", S_REDIRECT, true, false},
+  {"http", S_HTTP, true, true},   {"https", S_HTTPS, true, true},
   {"ap", S_AP, true, true},       {"captive", S_CAPTIVE, true, false}, {"dhcp", S_DHCP, true, false},
   {"mdns", S_MDNS, true, false},  {"wifi", S_WIFI, false, false},  {"wps", S_WPS, false, false},
   {"mqtt", S_MQTT, true, false},  {"mesh", S_MESH, true, false},
@@ -72,7 +72,6 @@ int stateOf(Sid s) {
   switch (s) {
     case S_HTTP:     return cfg.httpOn ? SVC_ON : SVC_OFF;
     case S_HTTPS:    return !cfg.https ? SVC_OFF : webHttpsUp() ? SVC_ON : SVC_STARTING;
-    case S_REDIRECT: return cfg.httpRedirect ? SVC_ON : SVC_OFF;
     case S_AP:       return cfg.apOn ? SVC_ON : SVC_OFF;
     case S_CAPTIVE:  return netCaptive() ? SVC_ON : SVC_OFF;
     case S_DHCP:     return cfg.dhcpOn ? SVC_ON : SVC_OFF;
@@ -164,7 +163,7 @@ void svcAct(OutSink& o, int role, const Row& r, int what) {
       if (what == 3) runOld(o, role, "ntp sync");               // riavviare il client NTP = risincronizzare
       else runOld(o, role, what == 1 ? "ntp on" : "ntp off");
       return;
-    default:                                                    // http, https, redirect, ap, captive, dhcp, mdns: come "svc <nome> on|off"
+    default:                                                    // http, https, ap, captive, dhcp, mdns: come "svc <nome> on|off"
       if (what == 3) { o.println(tr("Questo servizio non si riavvia da qui: usa stop e poi start")); return; }
       snprintf(old, sizeof old, "svc %s %s", r.name, what == 1 ? "on" : "off");
       runOld(o, role, old);

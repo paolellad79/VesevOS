@@ -13,7 +13,7 @@ OUT_DIR = os.path.join(BASE, 'consegna')
 
 # Dal repo NON si copia (file interni, prove, dati di lavoro).
 ESCLUDI_RADICE = {'CLAUDE.md', 'STATO-tmp.md', 'semaforo-tmp.md', 'COMMIT-1.7.45.txt', 'firmware', 'flash', 'README.md', 'README.en.md'}
-ESCLUDI_PERCORSI = ('.claude', 'docs/progetto', 'tools/webtest', 'tools/__pycache__', 'VesevOS/build', 'node_modules', '.git')
+ESCLUDI_PERCORSI = ('.claude', 'docs/progetto', 'docs/terze-parti', 'tools/webtest', 'tools/__pycache__', 'VesevOS/build', 'node_modules', '.git')
 ESCLUDI_NOMI = {'.DS_Store', '.vesevos-schede', '__pycache__'}
 ESCLUDI_EXT = ('.elf', '.pyc', '.log')
 # Sospetti: nomi di file con assegnazioni letterali o chiavi (si stampano solo i nomi)

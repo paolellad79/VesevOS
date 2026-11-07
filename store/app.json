@@ -1,5 +1,46 @@
 {
   "versione_schema": 1,
   "categoria": "app",
-  "voci": []
+  "voci": [
+    {
+      "id": "app-ble-stato-vab",
+      "nome": "ble-stato",
+      "descrizione": {
+        "it": "App Bluetooth: espone temperatura del chip e secondi di attivita a un telefono abbinato. Solo Admin.",
+        "en": "Bluetooth app: exposes the chip temperature and uptime seconds to a paired phone. Admin only.",
+        "es": "App Bluetooth: expone la temperatura del chip y los segundos de actividad a un telefono emparejado. Solo Admin.",
+        "de": "Bluetooth-App: stellt Chiptemperatur und Laufzeit in Sekunden einem gekoppelten Handy bereit. Nur Admin."
+      },
+      "versione": "1",
+      "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/store/apps/ble-stato/ble-stato.vab",
+      "sha256": "a52d472786b6b8e926091d152726faa9ce602b124b08872a25d0e33b4dc4eaf5",
+      "dimensione": 1593,
+      "firmware_minimo": "da confermare",
+      "permessi": "da confermare",
+      "licenza": "GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial",
+      "autore": "Domenico Paolella",
+      "sorgente": "da confermare",
+      "aggiornato": "2026-11-05"
+    },
+    {
+      "id": "app-logmqtt-vab",
+      "nome": "logmqtt",
+      "descrizione": {
+        "it": "App con un pulsante che invia le ultime righe del registro al broker MQTT, anche da sola ogni ora. Solo Admin.",
+        "en": "App with a button that sends the latest log lines to the MQTT broker, also by itself every hour. Admin only.",
+        "es": "App con un boton que envia las ultimas lineas del registro al broker MQTT, tambien sola cada hora. Solo Admin.",
+        "de": "App mit einer Taste, die die letzten Protokollzeilen an den MQTT-Broker sendet, auch selbst jede Stunde. Nur Admin."
+      },
+      "versione": "1",
+      "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/store/apps/logmqtt/logmqtt.vab",
+      "sha256": "60e922b945d00d4248b9c9bda62af4635af5f13162bdcad3a95c22a05b08585c",
+      "dimensione": 697,
+      "firmware_minimo": "da confermare",
+      "permessi": "da confermare",
+      "licenza": "GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial",
+      "autore": "Domenico Paolella",
+      "sorgente": "da confermare",
+      "aggiornato": "2026-11-05"
+    }
+  ]
 }

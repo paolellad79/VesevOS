@@ -67,7 +67,7 @@ void shx::shLspin(const char* line, OutSink& o) {
     if (w == "-v") v = v < 1 ? 1 : v;
     else if (w == "-vv") v = 2;
     else if (w == "-s") { Word n = argAt(line, ++i); solo = n.empty() ? -2 : atoi(n.c_str()); }
-    else if (w == "-k") { Word n = argAt(line, ++i); snprintf(nome, sizeof nome, "%s", n.c_str()); if (n.empty()) solo = -2; }
+    else if (w == "-k") { Word n = argAt(line, ++i); snprintf(nome, sizeof nome, "%.39s", n.c_str()); if (n.empty()) solo = -2; }
     else { solo = -2; break; }
   }
   if (solo == -2 || (solo >= 0 && !VOS_GPIO_EXISTS(solo))) { o.println(tr("Uso: lspin [-v|-vv] [-s pin] [-k nome]")); return; }

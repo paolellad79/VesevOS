@@ -1,5 +1,16 @@
 # Cronologia delle versioni
 
+## 1.8.21a (rilasciata il 07/11/2026) - Script con assistente, Store, sicurezza web
+
+- Pagina Script: nuova scheda AI con una copia del prompt pronto da usare.
+- Catalogo dello Store: nuova funzione di download, con memoria di lavoro di 20 KB.
+- Sito della scheda: il collegamento HTTP serve solo per passare a HTTPS; il server HTTP completo e stato tolto.
+- Radio: nuovo interruttore generale.
+- NAT e FTM spenti di fabbrica.
+- Fuso orario: si imposta insieme all'ora.
+- Link alla dichiarazione di conformita UE.
+- Correzione della pagina web di gestione.
+
 ## 1.8.16 (rilasciata il 01/11/2026; include la 1.8.1 - 1.8.15) - Driver unici, programmi nei Task, microSD navigabile
 - Driver: un solo percorso per installarli (pagina Driver e `vesevos-driver list|info|install|pins|remove`), file `.vdb` e `.vde`, pin proposti e modificabili; moduli ELF di serie nel firmware per ESP32-S3 (`vesevos-elf`, installatore, primitive `gpio`, `i2c`, `spi`, `time`, `files`, `dev`, `sd`, `log`).
 - Estensioni dei file: script `.vsb`, app `.vab` e `.vae`, driver `.vdb` e `.vde`, backup `.vbk`; i nomi precedenti si leggono ancora.

@@ -101,6 +101,22 @@ void sha256HexOf(std::string_view data, char out[65]) {
   out[64] = 0;
 }
 
+bool sha256HexLetto(UtilLeggi leggi, void* letto, uint8_t* buf, size_t cap, char out[65]) {
+  unsigned char h[32];
+  mbedtls_sha256_context ctx;
+  mbedtls_sha256_init(&ctx);
+  mbedtls_sha256_starts(&ctx, 0);
+  int n;
+  while ((n = leggi(letto, buf, cap)) > 0) mbedtls_sha256_update(&ctx, buf, (size_t)n);
+  mbedtls_sha256_finish(&ctx, h);
+  mbedtls_sha256_free(&ctx);
+  if (n < 0) return false;
+  static const char* hx = "0123456789abcdef";
+  for (int i = 0; i < 32; i++) { out[i * 2] = hx[h[i] >> 4]; out[i * 2 + 1] = hx[h[i] & 15]; }
+  out[64] = 0;
+  return true;
+}
+
 bool utilNameOk(const char* s, size_t n) {
   if (n < 1 || n > 24) return false;
   for (size_t i = 0; i < n; i++) { char c = s[i]; if (!((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_')) return false; }

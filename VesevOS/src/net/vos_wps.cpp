@@ -146,8 +146,8 @@ std::string wpsText() {
   b.addf(tr("WPS: %s"), cfg.wpsOn ? tr("acceso") : (cfg.setupDone ? tr("spento") : tr("acceso (prima configurazione)"))).add('\n');
   b.addf(tr("Metodo PIN: %s"), cfg.wpsPin ? tr("consentito") : tr("non consentito")).add('\n');
   int bc = hookBtnWpsClicks();
-  if (bc) b.addf(tr("Tasto BOOT: %d click avviano il WPS"), bc);
-  else b.add(tr("Tasto BOOT: nessun gesto avvia il WPS"));
+  if (bc) b.addf(tr("Tasto fisico: %d click avviano il WPS"), bc);
+  else b.add(tr("Tasto fisico: nessun gesto avvia il WPS"));
   b.add('\n');
   if (!drvWpsAvailable()) b.add(tr("WPS non presente in questa versione del firmware")).add('\n');
   if (g_st == WPS_WAIT) {

@@ -1,0 +1,9 @@
+<section id="t_sum">
+ <div class="rfbar">
+  <label for="rf">Aggiornamento</label><select id="rf" onchange="rfSet(this.value)">
+   <option value="1">Ogni secondo</option><option value="3">Ogni 3 secondi</option>
+   <option value="5">Ogni 5 secondi</option><option value="10">Ogni 10 secondi</option>
+   <option value="30">Ogni 30 secondi</option><option value="0">Fermo (solo manuale)</option>
+  </select><button class="btn gray sm" onclick="poll()">Aggiorna ora</button></div>
+ <div class="hl" id="home"></div>
+</section>

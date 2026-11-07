@@ -45,6 +45,7 @@
 #include "../drivers/vos_drv_ota.h"
 #include "../core/vos_recupd.h"
 #include "../core/vos_updorder.h"
+#include "../packages/vos_aggiorna.h"
 #include "../core/vos_crash.h"
 #include <algorithm>
 #include <PsychicHttp.h>
@@ -66,12 +67,10 @@ class StrPrint : public OutSink {
 };
 
 namespace webx {
-extern PsychicHttpServer* g_http;
 extern PsychicHttpsServer* g_https;
 extern bool g_tlsUp;
 extern volatile bool g_cleanArm;
 extern uint16_t g_runHttpPort, g_runHttpsPort;
-extern bool g_httpMini, g_httpMiniWanted;
 extern uint32_t g_firstPassUntil;
 extern VosFile g_upFile;
 extern bool g_upOk;
@@ -100,6 +99,7 @@ esp_err_t   sendJson(Res* s, const char* body, int code = 200);
 esp_err_t   sendJson(Res* s, const HeapBuf& body, int code = 200);
 esp_err_t   sendJsonBuf(Res* s, const std::string& body, int code = 200);   // JSON gia in un std::string
 esp_err_t   ok(Res* s);
+esp_err_t   okAvviso(Res* s, const ErrBuf& avviso);              // come ok(), con il campo "avviso" se non e vuoto
 esp_err_t   ko(Res* s, const char* e, const char* code = "error");   // codice HTTP dal "code" (regole API 10-11)
 inline esp_err_t ko(Res* s, const ErrBuf& e, const char* code = "error") { return ko(s, e.c_str(), code); }
 esp_err_t   notFound(Res* s);
@@ -117,9 +117,6 @@ void        delayedSleep(void*);
 esp_err_t   sendPage(Res* s);
 #define COOKIE_ATTRS "; Path=/; HttpOnly; SameSite=Strict"   // + "; Secure" sotto HTTPS
 esp_err_t   loginDone(Res* s, Ctx& c, int idx);
-bool        redirectActive(uint32_t ip);    // vos_web_redirect.cpp: da HTTP a HTTPS per questo indirizzo? (impostazione redirect)
-esp_err_t   redirectReply(Req* r, Res* s);     // 307 verso HTTPS (GET e HEAD), errore breve per gli altri metodi
-esp_err_t   httpNotFound(Req* r, Res* s);      // percorso sconosciuto sul server HTTP
 
 // Pezzi di JSON dentro un HeapBuf: ,"chiave":numero / true|false / "testo protetto".
 inline void jsonNum(HeapBuf& o, const char* key, long v) { char t[40]; snprintf(t, sizeof(t), ",\"%s\":%ld", key, v); o.add(t); }
@@ -140,4 +137,6 @@ void routesElf(PsychicHttpServer* S, bool sec);     // vos_web_elf.cpp: moduli E
 void routesProg(PsychicHttpServer* S, bool sec);    // vos_web_prog.cpp: programmi in corso, sottosistemi vdb e vde, Funzionalita, avvio automatico
 void routesScript(PsychicHttpServer* S, bool sec);  // vos_web_script.cpp: pagina Script (elenco, stato, avvio, stop)
 void routesApp(PsychicHttpServer* S, bool sec);     // vos_web_app.cpp: pagina App (elenco e controllo dei file .vab)
+void routesAgg(PsychicHttpServer* S, bool sec);     // vos_web_agg.cpp: pagina Aggiornamenti
+void routesEventi(PsychicHttpServer* S, bool sec);  // vos_web_eventi.cpp: pagina Eventi di sicurezza
 void routesUpd(PsychicHttpServer* S, bool sec);     // vos_web_upd.cpp: aggiornamento tramite recovery (ordine in NVS, esito)

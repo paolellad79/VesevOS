@@ -47,8 +47,8 @@ bool inUse(const char* use, const char* gruppo) {
 bool funcOnIdx(int i) { return i < 0 || i >= kFuncN || !(cfg.funcOff & (1u << i)); }
 bool funcOn(const char* id) { return funcOnIdx(funcIndex(id)); }
 const char* funcDesc(int i) { return i >= 0 && i < kFuncN ? tr(kInfo[i].desc) : ""; }
-int funcRoleRead(int i) { return i >= 0 && i < kFuncN ? kInfo[i].rr : ROLE_ADMIN; }
-int funcRoleWrite(int i) { return i >= 0 && i < kFuncN ? kInfo[i].rw : ROLE_ADMIN; }
+int funcRoleRead(int i) { return i >= 0 && i < kFuncN ? kInfo[i].rr : (int)ROLE_ADMIN; }
+int funcRoleWrite(int i) { return i >= 0 && i < kFuncN ? kInfo[i].rw : (int)ROLE_ADMIN; }
 
 static FuncUsersFn g_users = nullptr;
 static FuncStopFn  g_stop = nullptr;

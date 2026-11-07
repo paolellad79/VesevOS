@@ -18,7 +18,7 @@ using shx::CmdInfo;
 
 struct ManText {
   const char* name;
-  const char* lines[5];      // righe di descrizione (chiavi tr), chiuse da nullptr
+  const char* lines[6];      // righe di descrizione (chiavi tr), chiuse da nullptr
   const char* examples;      // esempi di comandi, separati da '\n' (non si traducono)
 };
 
@@ -78,8 +78,9 @@ const ManText kMan[] = {
     {TRK("Avvia uno script (.vsb) o un'app (.vab) per nome o per percorso, come nelle vecchie shell a riga di comando. L'estensione si puo omettere: si prova .vsb e poi .vab."),
       TRK("Un nome senza barre si cerca nella cartella corrente, poi in /bin, in /sbin e nelle vecchie /apps e /scripts. Con una barra (prova.vsb, ./prova, /sbin/prova) si prova solo quel percorso."),
       TRK("Si puo anche scrivere solo il nome ('prova'): se non e un comando interno parte il programma. I comandi interni vincono sempre; con 'which' vedi cosa partirebbe."),
+      TRK("Con '?' dopo il nome ('run prova ?') il programma non parte: mostra nome, versione, autore e descrizione. Il '?' e riservato a questo."),
       TRK("Per ora gli script partono da /sbin e le app da /bin, e gli argomenti dopo il nome non vengono ancora passati. Stessi permessi di 'script run' e 'app start': solo Admin."), nullptr},
-    "run prova\nrun prova.vsb\nrun /sbin/prova\nprova"},
+    "run prova\nrun prova.vsb\nrun /sbin/prova\nprova\nrun prova ?"},
   {"which",
     {TRK("Dice cosa partirebbe scrivendo quel nome, senza avviare niente: un comando interno oppure il percorso del file (script o app)."),
       TRK("Cerca come 'run'. Un comando interno vince sempre su un file con lo stesso nome. Solo Admin."), nullptr},
@@ -155,7 +156,7 @@ const ManText kMan[] = {
     {TRK("Una sola famiglia di comandi per i driver delle periferiche in /devs, sia vdb sia vde: il tipo si capisce dall'estensione del file o dal nome. list elenca, info mostra i dettagli."),
       TRK("install <file|nome> [prefisso] [pin,pin] (Admin) mette il file in /devs, se serve, e crea le periferiche sui pin che scegli tu o, senza, su quelli proposti; il controllo dei pin (vietati, gia usati, doppi) e quello del registro dei pin. Un nome vale per un solo driver."),
       TRK("pins <nome> pin,pin (Admin) da' altri pin a un driver vde installato: se i nuovi non vanno restano i vecchi e dice quale pin e occupato e da chi. remove <nome> (Admin) toglie il driver: un vde libera i pin, un vdb lascia le periferiche gia create (si tolgono da Periferiche)."), nullptr},
-    "vesevos-driver\nvesevos-driver info microsd\nvesevos-driver install microsd 10,11,12,13\nvesevos-driver pins bmp280 21,22\nvesevos-driver remove microsd"},
+    "vesevos-driver\nvesevos-driver info sd-spi\nvesevos-driver install sd-spi 10,11,12,13\nvesevos-driver pins bmp280 21,22\nvesevos-driver remove microsd"},
   {"vesevos-drive_manager",
     {TRK("Elenca i volumi: memoria interna (LittleFS, su /) e microSD se la periferica 'sd' e configurata. Per ognuno stato (montata, non montata, non presente, formato non supportato), formato, dimensione, usato, libero e, per la microSD, la frequenza SPI."),
       TRK("mount, unmount e test (solo Admin) passano dal comando 'sd' del driver microSD, con gli stessi controlli; senza il driver dicono che manca. unmount rifiuta se la scheda e in uso. status e come l'elenco (l'Admin vede anche 'sd status')."),
@@ -187,7 +188,7 @@ const ManText kMan[] = {
     "vesevos-elf run -u log,sd sensore\nvesevos-elf driver install bmp1.vde 21,22\nvesevos-elf ps\nvesevos-elf kill sensore\nvesevos-elf install /media/sd/sensore.vae\nvesevos-elf test -t 10 -u log prova.vae uno due"},
 #endif
   {"btn",
-    {TRK("Mostra o cambia l'azione di 1, 2 o 3 click sul tasto BOOT: none (niente), airplane (modo aereo), wps, find (trova la scheda)."),
+    {TRK("Mostra o cambia l'azione di 1, 2 o 3 click sul tasto fisico: none (niente), airplane (modo aereo), wps, find (trova la scheda)."),
       TRK("I vecchi nomi niente, aereo, wps e trova restano validi. Cambiare e solo per l'Admin."), nullptr},
     "btn\nbtn 2 airplane"},
 };

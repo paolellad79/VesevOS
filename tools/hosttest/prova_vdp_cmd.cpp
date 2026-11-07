@@ -60,7 +60,7 @@ bool berryRunCommand(const char* code, const char*, bool admin, const CmdCall&, 
   g_berryRuns++; g_lastAdmin = admin; g_lastCode = code;
   if (!g_berryOk) { err = "errore"; return false; }
   out.add(g_berryOut.c_str()); return true; }
-// ---- finti per vos_drvcmd.cpp (app del driver messa in pausa): l'app "microsd" gira, il comando la ferma e la riavvia ----
+// ---- finti per vos_drvcmd.cpp (app del driver messa in pausa): l'app "sd-spi" gira, il comando la ferma e la riavvia ----
 static char g_appName[32] = ""; static int g_stops = 0, g_starts = 0; static bool g_stopOk = true; static uint8_t g_startRole = 0; static std::string g_startWho;
 bool berryCmdArgsOk(const CmdCall&, ErrBuf&) { return true; }
 bool berryAppRunning(char* name, size_t n) { if (!g_appName[0]) return false; snprintf(name, n, "%s", g_appName); return true; }
@@ -73,17 +73,17 @@ static std::string replace(std::string s, const std::string& a, const std::strin
 int main() {
   const char* r = getenv("VOS_REPO"); std::string repo = r ? r : "../..";
   char tmpl[] = "/tmp/vdpcmdXXXXXX"; g_root = mkdtemp(tmpl); mkdir((g_root + "/devs").c_str(), 0755);
-  std::string good = readAll(repo + "/docs/esempi/driver/microsd.vdb");
+  std::string good = readAll(repo + "/docs/esempi/driver/sd-spi.vdb");
   CHECK(good.size() > 1000);
   ModInfo* m = new ModInfo(); ErrBuf err;
 
   // ---- il driver microSD di esempio passa il controllo vero ----
-  bool ok = modParse(std::string_view(good), "microsd", *m, err);
+  bool ok = modParse(std::string_view(good), "sd-spi", *m, err);
   if (!ok) printf("  errore: %s\n", err.c_str());
   CHECK(ok && m->hasCmd && m->ncmd == 11 && !strcmp(m->cmdWord, "sd") && m->hasApp && strstr(m->use, "files") && strstr(m->use, "sd"));
 
   // ---- righe sbagliate ----
-  auto bad = [&](const std::string& t) { return !modParse(std::string_view(t), "microsd", *m, err); };
+  auto bad = [&](const std::string& t) { return !modParse(std::string_view(t), "sd-spi", *m, err); };
   CHECK(bad(replace(good, "sd status oper", "sd status root")));                                    // ruolo sconosciuto
   CHECK(bad(replace(good, "sd status oper", "sd status")));                                          // manca il ruolo
   CHECK(bad(replace(good, "sd ls oper", "sd status oper")));                                         // sottocomando doppio
@@ -93,38 +93,42 @@ int main() {
   CHECK(bad(replace(good, "\n[cmd]\n", "\n[altro]\n")));                                             // sezione sconosciuta fuori dal codice
   { std::string t = good; size_t i = t.find("\n[cmd]\n"); t = t.substr(0, i) + "\n[cmd]\n"; CHECK(bad(t)); }   // [cmd] vuota
   { std::string t = replace(good, "sd mkdir admin\n", "sd mkdir admin\nsd s1 oper\nsd s2 oper\nsd s3 oper\n"); CHECK(bad(t)); }   // piu di 12 righe
-  { std::string t = good + "x = 1\n"; CHECK(modParse(std::string_view(t), "microsd", *m, err)); }       // righe in fondo a [cmd] sono codice
+  { std::string t = good + "x = 1\n"; CHECK(modParse(std::string_view(t), "sd-spi", *m, err)); }       // righe in fondo a [cmd] sono codice
   { std::string t = good; size_t i = t.find("[cmd]\n") + 6; t.insert(i, std::string(4200, '#') + "\n"); CHECK(bad(t)); }   // codice dei comandi oltre 4 KB
 
+  // ---- chiavi italiane: stesso risultato delle vecchie, nome diverso dal file rifiutato ----
+  { std::string t = replace(replace(good, "[module]\nname=sd-spi", "[module]\nnome=sd-spi"), "title=Scheda microSD\nalt", "titolo=Scheda microSD\nalt");
+    CHECK(modParse(std::string_view(t), "sd-spi", *m, err) && !strcmp(m->name, "sd-spi") && !strcmp(m->widget.title, "Scheda microSD")); }
+  CHECK(bad(replace(good, "[module]\nname=sd-spi", "[module]\nname=sd-spi\nnome=altro")));
   // ---- widget: [widget] e on_widget() ----
-  CHECK(modParse(std::string_view(good), "microsd", *m, err) && m->widget.on && !strcmp(m->widget.title, "Scheda microSD") && !strcmp(m->widget.alt, "Scheda microSD non presente") && !strcmp(m->widget.who, "oper"));
-  CHECK(bad(replace(good, "title=Scheda microSD\nalt", "titolo=Scheda microSD\nalt")));                 // chiave sconosciuta nel widget
+  CHECK(modParse(std::string_view(good), "sd-spi", *m, err) && m->widget.on && !strcmp(m->widget.title, "Scheda microSD") && !strcmp(m->widget.alt, "Scheda microSD non presente") && !strcmp(m->widget.who, "oper"));
+  CHECK(bad(replace(good, "title=Scheda microSD\nalt", "titolone=Scheda microSD\nalt")));                 // chiave sconosciuta nel widget
   CHECK(bad(replace(good, "who=oper\n\n[commands]", "who=root\n\n[commands]")));                       // ruolo sconosciuto
   CHECK(bad(replace(good, "title=Scheda microSD\nalt", "title=<b>x</b>\nalt")));                         // niente < > nel titolo
   CHECK(bad(replace(good, "alt=Scheda microSD non presente", "alt=" + std::string(60, 'a'))));           // alt troppo lungo
   CHECK(bad(replace(good, "def on_widget()", "def altra()")));                                          // [widget] senza on_widget()
-  { std::string t = replace(good, "title=Scheda microSD\n", ""); CHECK(modParse(std::string_view(t), "microsd", *m, err) && !strcmp(m->widget.title, "Lettore microSD (SPI)")); }   // senza title: il titolo del driver
-  { std::string t = replace(good, "who=oper\n\n[commands]", "\n[commands]"); CHECK(modParse(std::string_view(t), "microsd", *m, err) && !strcmp(m->widget.who, "oper")); }   // who predefinito
-  { std::string t = replace(good, "[widget]\ntitle=Scheda microSD\nalt=Scheda microSD non presente\nwho=oper\n\n", ""); CHECK(modParse(std::string_view(t), "microsd", *m, err) && !m->widget.on); }   // il widget e facoltativo
+  { std::string t = replace(good, "title=Scheda microSD\n", ""); CHECK(modParse(std::string_view(t), "sd-spi", *m, err) && !strcmp(m->widget.title, "Lettore microSD (SPI)")); }   // senza title: il titolo del driver
+  { std::string t = replace(good, "who=oper\n\n[commands]", "\n[commands]"); CHECK(modParse(std::string_view(t), "sd-spi", *m, err) && !strcmp(m->widget.who, "oper")); }   // who predefinito
+  { std::string t = replace(good, "[widget]\ntitle=Scheda microSD\nalt=Scheda microSD non presente\nwho=oper\n\n", ""); CHECK(modParse(std::string_view(t), "sd-spi", *m, err) && !m->widget.on); }   // il widget e facoltativo
   { ModWidgetVals v; modWidgetParseOut("st=ok\nv=Montata\r\ns=FAT32, 7421 MB\nxx=1\n", v); CHECK(!strcmp(v.st, "ok") && !strcmp(v.v, "Montata") && !strcmp(v.s, "FAT32, 7421 MB")); }
   { ModWidgetVals v; modWidgetParseOut("st=forse\nv=\x01\x7f" "a\xc3\xa8" "b\n", v); CHECK(!strcmp(v.st, "off") && !strcmp(v.v, "ab")); }                // stato strano = off; caratteri non ASCII tolti
   { ModWidgetVals v; std::string lung = "v=" + std::string(200, 'x') + "\ns=" + std::string(200, 'y'); modWidgetParseOut(lung.c_str(), v); CHECK(strlen(v.v) == MODW_V_MAX && strlen(v.s) == MODW_S_MAX && !strcmp(v.st, "off")); }
   { ModWidgetVals v; modWidgetParseOut("", v); CHECK(!strcmp(v.st, "off") && !v.v[0] && !v.s[0]); modWidgetParseOut(nullptr, v); CHECK(!strcmp(v.st, "off")); }
 
   // ---- il registro legge il driver da /devs ----
-  { ErrBuf e; CHECK(modSave("microsd", std::string_view(good), e)); }
+  { ErrBuf e; CHECK(modSave("sd-spi", std::string_view(good), e)); }
   { ModCmdEntry* tab = new ModCmdEntry[24]; int n = modCmdList(tab, 24);
-    CHECK(n == 11 && !strcmp(tab[0].driver, "microsd") && !strcmp(tab[0].c.cmd, "sd") && !strcmp(tab[0].c.sub, "status") && !tab[0].c.admin);
+    CHECK(n == 11 && !strcmp(tab[0].driver, "sd-spi") && !strcmp(tab[0].c.cmd, "sd") && !strcmp(tab[0].c.sub, "status") && !tab[0].c.admin);
     bool wr = false, ls = false; for (int i = 0; i < n; i++) { if (!strcmp(tab[i].c.sub, "write")) wr = tab[i].c.admin && tab[i].c.rest; if (!strcmp(tab[i].c.sub, "ls")) ls = !tab[i].c.admin && !tab[i].c.rest; }
     CHECK(wr && ls); delete[] tab; }
 
-  { ErrBuf e; CHECK(modSave("microsd", std::string_view(good), e)); }
+  { ErrBuf e; CHECK(modSave("sd-spi", std::string_view(good), e)); }
   { ModWidgetEntry* w = new ModWidgetEntry[2]; int n = modWidgetList(w, 2);
-    CHECK(n == 1 && !strcmp(w[0].driver, "microsd") && !strcmp(w[0].w.title, "Scheda microSD") && !strncmp(w[0].icon, "<svg", 4)); delete[] w; }
+    CHECK(n == 1 && !strcmp(w[0].driver, "sd-spi") && !strcmp(w[0].w.title, "Scheda microSD") && !strncmp(w[0].icon, "<svg", 4)); delete[] w; }
 
   // ---- il codice [cmd] e i permessi ----
   { HeapBuf code(8192); char use[100]; ErrBuf e;
-    CHECK(modCmdCode("microsd", code, use, sizeof use, e));
+    CHECK(modCmdCode("sd-spi", code, use, sizeof use, e));
     CHECK(strstr(use, "sd") && strstr(use, "files"));
     CHECK(strstr(code.c_str(), "def on_cmd(sub, args)") && strstr(code.c_str(), "def sdpath(a)") && strstr(code.c_str(), "def on_widget()"));
     CHECK(!strstr(code.c_str(), "dev_set") && !strstr(code.c_str(), "[data]") && !strstr(code.c_str(), "stato=-") && !strstr(code.c_str(), "[commands]"));   // niente pagina, niente dati
@@ -134,17 +138,17 @@ int main() {
 
 
   // ---- un comando mentre gira l'app del driver: pausa e riavvio; app di un altro driver o script: niente pausa ----
-  { ErrBuf e; CHECK(modSave("microsd", std::string_view(good), e)); drvCmdRefresh();
-    DrvCmd d; CHECK(drvCmdFind("sd", "status", d) && !strcmp(d.driver, "microsd"));
+  { ErrBuf e; CHECK(modSave("sd-spi", std::string_view(good), e)); drvCmdRefresh();
+    DrvCmd d; CHECK(drvCmdFind("sd", "status", d) && !strcmp(d.driver, "sd-spi"));
     CmdCall* call = new CmdCall(); memset(call, 0, sizeof *call); snprintf(call->sub, sizeof call->sub, "status");
     HeapBuf out(512); ErrBuf er; g_berryOut = "microSD: montata\n"; g_berryOk = true; int runs0 = g_berryRuns;
-    snprintf(g_appName, sizeof g_appName, "microsd");                                                    // l'app della pagina del driver e aperta
-    CHECK(drvCmdRun(d, *call, true, out, er) && g_stops == 1 && g_starts == 1 && g_startRole == 2 && g_startWho == "comando" && !strcmp(g_appName, "microsd") && g_berryRuns == runs0 + 1);   // fermata, comando, riavviata
+    snprintf(g_appName, sizeof g_appName, "sd-spi");                                                    // l'app della pagina del driver e aperta
+    CHECK(drvCmdRun(d, *call, true, out, er) && g_stops == 1 && g_starts == 1 && g_startRole == 2 && g_startWho == "comando" && !strcmp(g_appName, "sd-spi") && g_berryRuns == runs0 + 1);   // fermata, comando, riavviata
     snprintf(g_appName, sizeof g_appName, "altra"); int s0 = g_stops, a0 = g_starts;
     CHECK(drvCmdRun(d, *call, true, out, er) && g_stops == s0 && g_starts == a0 && !strcmp(g_appName, "altra"));                 // un'app di altro nome non si tocca (poi il VERO avvio dira "occupato")
     g_appName[0] = 0; s0 = g_stops; a0 = g_starts;
     CHECK(drvCmdRun(d, *call, true, out, er) && g_stops == s0 && g_starts == a0);                       // niente app: nessuna pausa
-    snprintf(g_appName, sizeof g_appName, "microsd"); g_stopOk = false; s0 = g_stops; runs0 = g_berryRuns;
+    snprintf(g_appName, sizeof g_appName, "sd-spi"); g_stopOk = false; s0 = g_stops; runs0 = g_berryRuns;
     CHECK(!drvCmdRun(d, *call, true, out, er) && g_berryRuns == runs0 && !strcmp(er.c_str(), "non si ferma")); g_stopOk = true;   // se l'app non si ferma il comando non parte
     g_appName[0] = 0; delete call; }
 
@@ -154,7 +158,7 @@ int main() {
     CHECK(drvWidgetsJson(j, 0) && !strcmp(j.c_str(), "[]") && g_berryRuns == 0);                          // gli ospiti non vedono niente e on_widget non parte
     j.clear(); CHECK(drvWidgetsJson(j, 1) && g_berryRuns == 1 && !g_lastAdmin && strstr(g_lastCode.c_str(), "on_widget()"));   // l'operatore si; senza diritti di scrittura
     std::string s = j.c_str();
-    CHECK(s[0] == '[' && s.back() == ']' && s.find("\"d\":\"microsd\"") != std::string::npos && s.find("\"t\":\"Scheda microSD\"") != std::string::npos && s.find("\"st\":\"ok\"") != std::string::npos && s.find("\"v\":\"Montata\"") != std::string::npos && s.find("viewBox=\\\"0 0 24 24") != std::string::npos);   // le virgolette dell'icona sono protette
+    CHECK(s[0] == '[' && s.back() == ']' && s.find("\"d\":\"sd-spi\"") != std::string::npos && s.find("\"t\":\"Scheda microSD\"") != std::string::npos && s.find("\"st\":\"ok\"") != std::string::npos && s.find("\"v\":\"Montata\"") != std::string::npos && s.find("viewBox=\\\"0 0 24 24") != std::string::npos);   // le virgolette dell'icona sono protette
     CHECK(s.find("\"i\":\"<svg") != std::string::npos);                                               // icona del driver (testo dentro virgolette JSON)
     j.clear(); g_fake_us += 5000000; CHECK(drvWidgetsJson(j, 2) && g_berryRuns == 1);                   // dopo 5 s la cache vale ancora: on_widget non riparte
     g_berryOut = "st=off\nv=Non montata\ns=0 MB liberi su 0 MB, 1000 kHz\n";
@@ -166,16 +170,16 @@ int main() {
     g_berryOk = true; drvWidgetRefresh();                                                                 // driver ricaricato: si rilegge da zero
     g_berryOut = "st=ok\nv=Nuovo\n"; j.clear(); CHECK(drvWidgetsJson(j, 1) && strstr(j.c_str(), "Nuovo"));
     // driver solo per l'Admin: l'operatore non lo vede
-    { std::string t = replace(good, "who=oper\n\n[commands]", "who=admin\n\n[commands]"); ErrBuf e; CHECK(modSave("microsd", std::string_view(t), e)); drvWidgetRefresh();
-      g_fake_us += 20000000; j.clear(); CHECK(drvWidgetsJson(j, 1) && !strcmp(j.c_str(), "[]")); j.clear(); CHECK(drvWidgetsJson(j, 2) && strstr(j.c_str(), "microsd")); }
+    { std::string t = replace(good, "who=oper\n\n[commands]", "who=admin\n\n[commands]"); ErrBuf e; CHECK(modSave("sd-spi", std::string_view(t), e)); drvWidgetRefresh();
+      g_fake_us += 20000000; j.clear(); CHECK(drvWidgetsJson(j, 1) && !strcmp(j.c_str(), "[]")); j.clear(); CHECK(drvWidgetsJson(j, 2) && strstr(j.c_str(), "sd-spi")); }
     // driver senza widget (o tolto): nessun widget
-    { ErrBuf e; modDelete("microsd", e); drvWidgetRefresh(); j.clear(); CHECK(drvWidgetsJson(j, 2) && !strcmp(j.c_str(), "[]")); }
+    { ErrBuf e; modDelete("sd-spi", e); drvWidgetRefresh(); j.clear(); CHECK(drvWidgetsJson(j, 2) && !strcmp(j.c_str(), "[]")); }
   }
   // ---- estensione .vdb e compatibilita con i vecchi .vdp (1.8.11) ----
   {
     auto here = [&](const char* f) { return access((g_root + "/devs/" + f).c_str(), F_OK) == 0; };
     auto put = [&](const char* f, const std::string& t) { std::ofstream o(g_root + "/devs/" + f); o << t; };
-    auto drv = [&](const char* n) { return replace(good, "name=microsd\n", std::string("name=") + n + "\n"); };   // il name= deve essere quello del file
+    auto drv = [&](const char* n) { return replace(good, "name=sd-spi\n", std::string("name=") + n + "\n"); };   // il name= deve essere quello del file
     char (*nm)[MOD_NAME_BUF] = new char[8][MOD_NAME_BUF]; ErrBuf e;
     CHECK(modSave("nuovo", std::string_view(drv("nuovo")), e) && here("nuovo.vdb") && !here("nuovo.vdp"));          // si scrive .vdb
     put("vecchio.vdp", drv("vecchio"));                                                                                // un driver gia installato con la vecchia estensione

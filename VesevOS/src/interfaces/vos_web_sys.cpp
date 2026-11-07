@@ -3,6 +3,7 @@
 // VesevOS - vos_web_sys.cpp
 // Percorsi del server web: MQTT, autodiagnosi, ora/NTP, localizzazione. Aiuti e tipi condivisi: vos_web_int.h.
 #include "vos_web_int.h"
+#include "../security/vos_auth.h"
 #include "../core/vos_cpupm.h"
 #include "../packages/vos_drvwidget.h"
 #include "../core/vos_clamp.h"
@@ -12,6 +13,32 @@ static esp_err_t statsReply(Res* s) {
   HeapBuf j(STATS_JSON_MAX);
   if (!statsJson(j)) return ko(s, tr("Memoria insufficiente"), "off");
   return sendJson(s, j);
+}
+
+// Password dell'Admin provata come al login (nonce e HMAC, mai in chiaro); un errore conta nel blocco accessi.
+// true = password giusta. false = la risposta di errore e gia in s e l'esito e in err.
+static bool adminPassOk(Req* r, Res* s, Ctx& c, esp_err_t& err) {
+  if (!authIsSet()) return true;
+  const char* nome = c.user >= 0 && c.user < VOS_MAX_USERS ? cfg.users[c.user].name.c_str() : "";
+  int idx = -1;
+  uint32_t attesa = 0;
+  int res = authLoginFinish(c.ip, nome, Pc(r, "nonce"), Pc(r, "mac"), idx, attesa);
+  if (res == 2) {
+    err = ko(s, trf("Troppi errori da questo indirizzo: riprova tra %lu secondi", (unsigned long)attesa).c_str(), "blocked");
+    return false;
+  }
+  if (res != 0 || idx != c.user) {
+    err = ko(s, tr("Password errata"), "bad_login");
+    return false;
+  }
+  return true;
+}
+
+// Risposta OK e riavvio tra poco (un solo punto che crea il task di riavvio)
+static esp_err_t riavviaDopo(Res* s, const char* motivo) {
+  esp_err_t e = ok(s);
+  xTaskCreate(delayedRestart, "rst", 2048, (void*)motivo, 1, NULL);
+  return e;
 }
 
 void routesSys(PsychicHttpServer* S, bool sec) {
@@ -117,7 +144,7 @@ void routesSys(PsychicHttpServer* S, bool sec) {
     if (csrfBlocked(r)) return ESP_FAIL;                                       // caricamento partito da un altro sito
     int u = userOf(r);
     if (u < 0 || cfg.users[u].role < ROLE_ADMIN) return ESP_FAIL;
-    if (!sec && g_tlsUp && cfg.https && !netOnAp(ip)) return ESP_FAIL;
+    if (!sec && g_tlsUp && cfg.https) return ESP_FAIL;
     if (index == 0) {
       s_recErr.clear();
       if (r->contentLength() > drvRecoverySize() + 4096) { s_recErr = tr("File troppo grande per lo spazio del recovery"); return ESP_OK; }   // si capisce subito (es. il firmware)
@@ -186,13 +213,14 @@ void routesSys(PsychicHttpServer* S, bool sec) {
     HeapBuf j(POWER_JSON_MAX);
     return powerJson(j) ? sendJson(s, j) : ko(s, tr("Memoria insufficiente"));
   });
+  // Sicura: serve la password di chi e collegato, provata come al login (nonce e HMAC, mai in chiaro); un errore conta nel blocco accessi.
   add(S, sec, "/api/factory", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    esp_err_t e;
+    if (!adminPassOk(r, s, c, e)) return e;
     char w[96]; whoTo(c, w, sizeof w);
     vlog("SISTEMA: ripristino di fabbrica dalla pagina (%s)", w);
     cfgFactoryReset();
-    esp_err_t e = ok(s);
-    xTaskCreate(delayedRestart, "rst", 2048, (void*)"ripristino di fabbrica dalla pagina", 1, NULL);
-    return e;
+    return riavviaDopo(s, "ripristino di fabbrica dalla pagina");
   });
 
   // ---- ora / NTP ----

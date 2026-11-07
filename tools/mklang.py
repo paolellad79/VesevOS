@@ -20,6 +20,7 @@ langs = data['langs']
 entries = data['entries']
 flags = data.get('flags', {})
 locales = data.get('locales', {})
+UNICODE_FW = ('zh',)              # lingue il cui testo firmware non puo essere ASCII (cinese): solo nel file lang/<codice>.json, mai nel codice
 BUILTIN = ()                      # dalla 1.7.59 nessuna lingua dentro il firmware oltre all'italiano
 
 # ---- chiavi usate dal codice del firmware
@@ -54,9 +55,11 @@ class P(HTMLParser):
 P().feed(static)
 for m in re.finditer(r'\b(?:window\.)?tf?\(\s*"((?:[^"\\]|\\.)*)"', js):
     addw(json.loads('"' + m.group(1) + '"'))
-for arr in ('TABS', 'RSUB', 'TKCOLS', 'GRP', 'DAYS', 'LEDM', 'AIRO', 'UNITS', 'ONOFF', 'TKS', 'CKS', 'AKS', 'BN', 'BFIX'):
+for arr in ('TKCOLS', 'GRP', 'DAYS', 'LEDM', 'AIRO', 'UNITS', 'ONOFF', 'TKS', 'CKS', 'AKS', 'BN', 'BFIX'):
     for m in re.finditer(r'\["([^"]+)","([^"]+)"\]', re.search(r'var %s=.*?;' % arr, js, re.S).group(0)):
         addw(m.group(2))
+for m in re.finditer(r'\{id:"[^"]+",testo:"([^"]+)"', re.search(r'var VOCI=\[.*?\];', js, re.S).group(0)):   # testi del menu
+    addw(m.group(1))
 for arr in ('SECN', 'SUSTEPS', 'MROLE', 'RNAME', 'WDD', 'STLW'):          # elenchi semplici di testi passati a t()
     for m in re.finditer(r'"([^"]+)"', re.search(r'var %s=\[.*?\];' % arr, js, re.S).group(0)):
         addw(m.group(1))
@@ -75,7 +78,7 @@ for e in entries:
         if not e.get(l): err('manca %s per %r' % (l, k)); continue
         v = e[l]
         if e['scope'] == 'fw':
-            if not all(ord(c) < 128 for c in v): err('non ASCII in %s (testo firmware): %r' % (l, v))
+            if l not in UNICODE_FW and not all(ord(c) < 128 for c in v): err('non ASCII in %s (testo firmware): %r' % (l, v))
             if FMT.findall(k) != FMT.findall(v): err('segnaposto diversi in %s: %r' % (l, k))
         else:
             if sorted(BRC.findall(k)) != sorted(BRC.findall(v)): err('segnaposto {n} diversi in %s: %r' % (l, k))

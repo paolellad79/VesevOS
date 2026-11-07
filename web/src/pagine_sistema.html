@@ -1,0 +1,304 @@
+<section id="t_ora" class="hide">
+ <div class="sub" id="sk_ora"><button>Data e ora</button><button class="adm">Imposta a mano</button></div>
+ <div class="card"><h3>Data e ora</h3>
+  <div id="oranow" style="font-size:22px;margin-bottom:8px"></div>
+  <div id="olast" class="fhint"></div>
+  <button class="btn" onclick="syncNow()">Aggiorna ora dalla rete</button><button class="btn gray"
+   onclick="setFromBrowser()">Orario browser</button>
+  <div id="om2" class="msg"></div>
+  <div class="adm" style="margin-top:16px">
+   <label for="o_tz">Fuso orario</label>
+   <select id="o_tz"></select>
+   <button class="btn" onclick="oraTzSave()">Salva</button><div id="om4" class="msg"></div></div></div>
+ <div class="card adm"><h3>Imposta a mano</h3>
+  <div class="agrid"><div><label for="o_md">Data</label><input type="date" id="o_md"></div><div>
+    <label for="o_mt">Ora</label><input type="time" id="o_mt" step="1"></div></div>
+  <button class="btn" onclick="setManual()">Imposta</button><div id="om3" class="msg"></div>
+  <p class="fhint"
+   id="omnote">L'ora usa il fuso orario della scheda. Se la sincronizzazione NTP e attiva, alla prossima sincronizzazione l'ora torna quella della rete.</p>
+  </div>
+</section>
+<section id="t_loc" class="hide">
+ <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-globe"/></svg>Paese</h3>
+  <div id="lcc" class="big"></div>
+  <button class="btn adm" onclick="mapOpen(locPick)">Cambia paese</button>
+  <div class="law">Scegli il paese dove la scheda si trova davvero: decide canali e potenza della radio. Non e consulenza legale.</div>
+  </div>
+ <div class="card"><h3>Lingua, ora e formati</h3>
+  <div class="agrid">
+   <div><label for="lc_lang">Lingua</label><select id="lc_lang"></select></div>
+   <div><label for="lc_tz">Fuso orario</label><select id="lc_tz" onchange="lcTz()"></select></div>
+   <div id="lc_tzc" class="hide">
+    <label for="lc_posix">Regola del fuso (formato POSIX)</label><input id="lc_posix"></div>
+   <div><label for="lc_df">Formato data</label><select id="lc_df">
+     <option value="0">GG/MM/AAAA (31/12/2026)</option>
+     <option value="1">AAAA-MM-GG (2026-12-31)</option>
+     <option value="2">MM/GG/AAAA (12/31/2026)</option></select></div>
+   <div><label for="lc_tf">Formato ora</label><select id="lc_tf">
+     <option value="0">24 ore (18:30:00)</option><option value="1">12 ore (06:30:00 PM)</option>
+    </select></div>
+   <div><label for="lc_ds">Separatore dei decimali</label><select id="lc_ds">
+     <option value="0">Virgola (3,5)</option><option value="1">Punto (3.5)</option></select></div>
+   <div><label for="lc_ws">Primo giorno della settimana</label><select id="lc_ws">
+     <option value="0">Lunedi</option><option value="1">Domenica</option></select></div>
+   <div><label for="lc_tu">Unita di temperatura</label><select id="lc_tu">
+     <option value="0">Gradi Celsius (C)</option><option value="1">Gradi Fahrenheit (F)</option>
+    </select></div>
+  </div></div>
+ <div class="card adm"><h3>Lingue</h3>
+  <div id="lglist"></div>
+  <label for="lgf"
+   style="display:block;margin-top:12px">Carica un file di lingua (.json)</label><input type="file"
+   id="lgf" accept=".json">
+  <button class="btn" onclick="upLang()">Carica lingua</button><div id="lgm" class="msg"></div>
+  <p style="color:var(--mut)">Italiano e inglese sono dentro il firmware. Per le altre: un file per lingua, con il nome uguale al codice (per esempio es.json). Lo stesso file traduce la pagina e i messaggi della shell.</p>
+  <div id="lgsp" style="color:var(--mut)"></div></div>
+ <div class="card adm">
+  <button class="btn" onclick="lcSave()">Salva</button><button class="btn gray"
+   onclick="lcDefaults()">Ripristina valori del paese</button><div id="lcm" class="msg"></div></div>
+</section>
+<section id="t_power" class="hide">
+ <div class="sub" id="sk_power"><button>Risparmio energia</button><button class="adm">Dormi adesso</button><button class="adm">Velocita CPU</button></div>
+ <div class="card"><h3>Risparmio energia</h3>
+  <p class="fhint">Tre livelli, da usare insieme: processore piu lento (sotto), Wi-Fi a risparmio massimo, sonno profondo. Il consumo vero dipende dalla scheda: misuralo con un tester prima di fidarti dei numeri.</p>
+  <div class="sc" id="sc_power"></div>
+  <div id="pwst" class="msg" style="margin-bottom:8px"></div>
+  <label for="pw_mode">Modo (si applica con Avvia)</label>
+  <select id="pw_mode" class="adm" onchange="pwUi()">
+   <option value="1">Wi-Fi a risparmio massimo (la scheda resta raggiungibile)</option>
+   <option value="2">Sonno profondo a cicli</option></select>
+  <div id="pw_c" class="agrid hide"><div>
+    <label for="pw_aw">Resta sveglia (minuti, da 10 a 1440)</label><input type="number" id="pw_aw"
+     min="10" max="1440"></div><div>
+    <label for="pw_sl">Poi dorme (minuti, da 1 a 10080)</label><input type="number" id="pw_sl"
+     min="1" max="10080"></div></div>
+  <div id="pw_w1"
+   class="law hide">Wi-Fi a risparmio massimo: la scheda si sveglia solo a intervalli per ascoltare la rete. Risposte e pagina piu lente; consuma meno di prima ma molto piu del sonno profondo.</div>
+  <div id="pw_w2"
+   class="law hide">Sonno profondo: Wi-Fi, pagina, MQTT, rete tra schede e automazioni sono FERMI mentre dorme. Il cavo USB si scollega. La scheda riparte da sola dopo il tempo scelto (il timer e impreciso di qualche percento) oppure subito con il tasto RESET. L'ora si perde: torna con NTP o a mano. Non dorme nei primi 10 minuti dall'accensione, ne mentre usi la pagina, ne se la guida di configurazione non e finita.</div>
+  <button class="btn adm" onclick="pwSave()">Salva</button><div id="pwm" class="msg"></div></div>
+  <div class="card adm"><h3>Dormi adesso</h3>
+  <div class="agrid"><div>
+    <label for="pw_now">Minuti di sonno (da 1 a 10080)</label><input type="number" id="pw_now"
+     min="1" max="10080" value="30"></div></div>
+  <button class="btn gray" onclick="pwNow()">Dormi per questo tempo</button>
+  <div id="pwm2" class="msg"></div>
+  <p class="fhint">Solo con il tasto RESET (senza tempo): menu in alto a destra &gt; Sleep.</p>
+  </div>
+ <div class="card adm"><h3>Velocita CPU</h3>
+  <label for="cpumode">Governor della CPU</label>
+  <select id="cpumode" onchange="setCpu()"><option value="80">80 MHz (fisso)</option>
+   <option value="160">160 MHz (fisso)</option><option value="240">240 MHz (fisso)</option>
+   <option value="ondemand">ondemand</option><option value="conservative">conservative</option>
+   <option value="schedutil">schedutil</option></select>
+  <p class="fhint" id="cpudesc"></p>
+  <div id="cpupar">
+   <div class="agrid"><div>
+     <label for="cpu_up">Soglia di salita (%, da 50 a 95)</label><input type="number" id="cpu_up"
+      min="50" max="95"></div>
+   <div><label for="cpu_down">Soglia di discesa (%, da 5 a 50)</label><input type="number"
+     id="cpu_down" min="5" max="50"></div>
+   <div><label for="cpu_hold">Attesa prima di scendere (secondi, da 2 a 120)</label><input
+     type="number" id="cpu_hold" min="2" max="120"></div></div>
+   <button class="btn gray" onclick="setCpuPar()">Salva i parametri</button>
+  </div>
+  <div id="cpum" class="msg"></div></div>
+</section>
+<section id="t_func" class="hide">
+ <div class="card"><h3>Funzionalita</h3>
+  <p class="fhint">Cio che i programmi possono usare. Se ne togli una nessun programma la usa piu e quelli che la stanno usando si fermano. Ogni programma chiede solo cio che gli serve: qui puoi solo togliere.</p>
+  <div id="funclist"></div>
+  <div id="funcm" class="msg"></div></div>
+</section>
+<section id="t_file" class="hide">
+ <div class="card"><h3>File - memoria interna</h3>
+  <nav id="fpath" class="crumbs" data-tt aria-label="Percorso"></nav>
+  <div class="ftb">
+   <button class="btn gray" id="fupb" onclick="fUp()"><svg class="i" aria-hidden="true">
+     <use href="#i-up"/></svg><span>Su</span></button>
+   <button class="btn gray" onclick="fMk()"><svg class="i" aria-hidden="true">
+     <use href="#i-folder"/></svg><span>Nuova cartella</span></button>
+   <button class="btn" onclick="fNew()"><svg class="i" aria-hidden="true"><use href="#i-ftxt"/>
+    </svg><span>Nuovo file</span></button>
+   <label class="btn gray" for="fup" tabindex="0"
+    onkeydown="if(event.key=='Enter'||event.key==' '){event.preventDefault();$('fup').click()}"><svg
+     class="i" aria-hidden="true"><use href="#i-upl"/>
+    </svg><span>Carica file</span></label><input type="file" id="fup" class="sr"
+    onchange="fUpload()">
+  </div>
+  <p class="fhint">Tocca un nome per aprirlo. Per le altre azioni usa il pulsante con i tre puntini, il tasto destro del mouse o tieni premuto sul telefono.</p>
+  <div id="fpie" class="fpie"></div><table id="ftab" class="ftab"></table>
+  <div id="fm" class="msg" role="status"></div><div id="fspace" class="fspace"></div></div>
+</section>
+<section id="t_acc" class="hide">
+ <div class="card" id="acc"><h3>Accessibilita</h3>
+  <p class="fhint">Le scelte valgono per questo browser e restano salvate.</p>
+  <div class="agrid">
+   <div><label for="a_fs">Dimensione del testo</label><select id="a_fs"
+     onchange="a11ySet('fs',+this.value)"><option value="0">Normale</option>
+     <option value="1">Grande</option><option value="2">Molto grande</option></select></div>
+   <div><label for="a_hc">Contrasto alto</label><select id="a_hc"
+     onchange="a11ySet('hc',this.value)">
+     <option value="auto">Automatico (come il dispositivo)</option>
+     <option value="on">Attivo</option><option value="off">Spento</option></select></div>
+   <div><label for="a_cb">Colori adatti ai daltonici</label><select id="a_cb"
+     onchange="a11ySet('cb',+this.value)"><option value="0">Spento</option>
+     <option value="1">Attivo (blu, arancione, giallo)</option></select></div>
+   <div><label for="a_rm">Riduci le animazioni</label><select id="a_rm"
+     onchange="a11ySet('rm',this.value)">
+     <option value="auto">Automatico (come il dispositivo)</option>
+     <option value="on">Attivo</option><option value="off">Spento</option></select></div>
+  </div>
+  <div class="aprev" aria-hidden="true">
+   <span class="apk">OK</span><span class="apw">Attenzione</span><span class="apx">Errore</span>
+  </div>
+  <button class="btn gray" onclick="a11yReset()">Ripristina</button>
+  <p class="fhint">Tastiera: Tab per spostarti, Invio per premere, Esc per chiudere finestre e menu, Ctrl + ` per il terminale. Nell'editor dei file: Ctrl+S salva, Ctrl+M cambia il comportamento del tasto Tab.</p>
+  </div>
+</section>
+<section id="t_conf" class="hide">
+ <div class="sub" id="sk_conf"><button class="adm">Backup e ripristino</button><button class="adm">Ripristino di fabbrica</button></div>
+ <div class="card adm"><h3>Backup e ripristino</h3>
+  <p class="fhint">Il file di backup contiene la configurazione della scheda. Di fabbrica non contiene password e chiavi.</p>
+  <button class="btn" onclick="location.href='/api/config/download'">Scarica senza segreti</button>
+  <label class="lgck" style="display:block;margin-top:12px"><input type="checkbox" id="bk_sec"
+    onchange="bkSec()"> Includi anche i segreti (password Wi-Fi e MQTT, utenti)</label>
+  <div id="bk_box" class="hide">
+   <div class="law">I segreti vengono cifrati con una frase che scegli tu. Chi ha il file e la frase puo entrare nella scheda e nella tua rete. Se perdi la frase i segreti non si recuperano. Custodisci il file come una password.</div>
+   <label for="bk_pw">Frase (almeno 10 caratteri)</label><input type="password" id="bk_pw"
+    autocomplete="new-password">
+   <label for="bk_pw2">Ripeti la frase</label><input type="password" id="bk_pw2"
+    autocomplete="new-password">
+   <label class="lgck"><input type="checkbox" id="bk_acc"> Ho letto l'avviso e lo accetto</label>
+   <button class="btn" onclick="bkExport()">Scarica con segreti (cifrato)</button>
+  </div>
+  <label style="display:block;margin-top:16px" for="cf">Ripristina da file</label><input type="file"
+   id="cf">
+  <label for="bk_rp">Frase (solo se il file e cifrato)</label><input type="password" id="bk_rp"
+   autocomplete="off">
+  <button class="btn gray" onclick="restoreCfg()">Ripristina</button>
+  <div id="cm" class="msg"></div></div>
+ <div class="card adm"><h3>Ripristino di fabbrica</h3>
+  <p class="fhint">Cancella impostazioni, utenti e password. La scheda riparte come nuova.</p>
+  <button class="btn red" onclick="factory()">Azzera tutto</button>
+  <div id="fzm" class="msg"></div></div>
+</section>
+<section id="t_boot" class="hide">
+ <div class="sub" id="sk_boot"><button>Ordine di avvio</button><button>Avvio automatico</button></div>
+ <div class="card"><h3>Ordine di avvio</h3>
+  <p style="color:var(--mut)">Scegli in che ordine partono i servizi: trascina per la maniglia oppure usa le frecce. Quello che dipende da un altro servizio resta attaccato a lui e parte dopo. Vale dal prossimo riavvio.</p>
+  <div id="bwarn" class="msg"></div>
+  <h4 style="margin:10px 0 6px;color:var(--mut)">Sempre per primi</h4>
+  <div id="bfix"></div>
+  <h4 style="margin:14px 0 6px;color:var(--mut)">Servizi che puoi spostare</h4>
+  <div id="bl"></div>
+  <button class="btn adm" onclick="bSave()">Salva ordine</button><button class="btn gray adm"
+   onclick="bReset()">Ripristina predefinito</button><button class="btn gray"
+   onclick="bReboot()">Riavvia ora</button>
+  <div id="bm" class="msg"></div></div>
+ <div class="card"><h3>Programmi con avvio automatico</h3>
+  <p style="color:var(--mut)">Partono da soli dopo i servizi, nell'ordine di questo elenco. Di fabbrica non parte nessun programma. Berry esegue un programma alla volta: se ne scegli piu d'uno, quelli dopo il primo partono solo se il precedente finisce entro 10 secondi.</p>
+  <div id="bpl"></div>
+  <div class="frow adm">
+   <select id="bpsel" aria-label="Programma da aggiungere"></select><button class="btn gray"
+    onclick="bpAdd()">Aggiungi</button><button class="btn" onclick="bpSave()">Salva elenco</button>
+  </div>
+  <div id="bpm" class="msg"></div></div>
+</section>
+<section id="t_selftest" class="hide">
+ <div class="card adm"><h3>Autotest</h3>
+  <p class="fhint">La scheda esegue le prove una per volta e mostra l'esito di ognuna. Sono prove di sola lettura (solo un file di prova, subito cancellato). Alla fine puoi scaricare un report di testo: nulla viene inviato fuori, lo mandi tu a chi vuoi.</p>
+  <div class="tog">
+   <div>Prove attive (il LED fa l'arcobaleno e parte un messaggio MQTT di prova)</div>
+   <button class="sw1" id="stl_act" onclick="this.classList.toggle('on')"
+    aria-label="Prove attive"></button></div>
+  <div class="tog"><div>Includi i nomi reali (indirizzi, nome Wi-Fi e registro) nel report</div>
+   <button class="sw1" id="stl_nm" onclick="this.classList.toggle('on')"
+    aria-label="Nomi reali"></button></div>
+  <button class="btn" id="stl_go" onclick="stlGo()">Avvia la diagnosi</button>
+  <div id="stlm" class="msg"></div>
+  <div id="stl_bar" class="hide"></div>
+  <div id="stl_sum" class="fhint"></div>
+  <div id="stl_list"></div>
+  <div class="ftb">
+   <a class="btn gray hide" id="stl_dl" href="/api/selftest/report"
+    download="vesevos-report.txt">Scarica il report</a><button class="btn gray hide" id="stl_cp"
+    onclick="stlCopy()">Copia il report</button><button class="btn gray hide" id="stl_cl"
+    onclick="stlClear()">Chiudi e libera la memoria</button></div>
+ </div>
+</section>
+<section id="t_task" class="hide">
+ <div class="sub" id="sk_task"><button>Sottosistemi</button><button>Programmi</button><button>Task in esecuzione</button></div>
+ <div class="card"><h3>Sottosistemi</h3>
+  <div id="tksub"></div></div>
+ <div class="card"><h3>Programmi</h3>
+  <div id="tkprog"></div></div>
+ <div class="card"><h3>Task in esecuzione</h3>
+  <div id="tkinfo" style="color:var(--mut);margin-bottom:8px"></div>
+  <div style="overflow-x:auto"><table id="tktab" class="sortable"></table></div>
+  <div id="tkm" class="msg"></div></div>
+</section>
+<section id="t_wd" class="hide">
+ <div class="sub" id="sk_wd"><button>Watchdog</button><button class="adm">Controlli</button></div>
+ <div class="card"><h3>Watchdog</h3>
+  <p class="fhint">Controlla che la scheda non resti bloccata e, se serve, la fa ripartire da sola. Non piu di 3 riavvii automatici in un'ora: poi si ferma e avvisa.</p>
+  <div id="wdst"></div></div>
+ <div class="card adm"><h3>Controlli</h3>
+  <div class="tog"><div>Servizi bloccati: prima riavvia il servizio, poi la scheda</div>
+   <button class="sw1" id="wd_task" onclick="this.classList.toggle('on')"
+    aria-label="Servizi bloccati"></button></div>
+  <div class="tog"><div>Rete di casa assente troppo a lungo</div>
+   <button class="sw1" id="wd_net" onclick="this.classList.toggle('on')"
+    aria-label="Rete assente"></button></div>
+  <div class="tog"><div>RAM libera troppo bassa per un minuto</div>
+   <button class="sw1" id="wd_ram" onclick="this.classList.toggle('on')"
+    aria-label="RAM bassa"></button></div>
+  <div class="agrid"><div>
+    <label for="wd_nm">Minuti senza rete</label><input type="number" id="wd_nm" min="2" max="1440">
+   </div>
+   <div><label for="wd_rk">Soglia RAM (KB)</label><input type="number" id="wd_rk" min="8" max="200">
+   </div>
+   <div><label for="wd_ud">Riavvio dopo N giorni accesa (0 = mai)</label><input type="number"
+     id="wd_ud" min="0" max="365"></div>
+   <div><label for="wd_at">Riavvio programmato (vuoto = spento)</label><input type="time"
+     id="wd_at"></div></div>
+  <div id="wd_days" class="ftb"></div>
+  <h4>Tempi dei watchdog</h4>
+  <p class="fhint">Attenzione: piu il tempo e lungo, piu una scheda bloccata davvero impiega a riavviarsi. Un tempo troppo corto invece puo riavviarla per un'operazione lenta ma sana. Nessun watchdog si puo spegnere: i valori fuori dai limiti vengono rifiutati.</p>
+  <div class="agrid"><div>
+    <label for="wd_tw">Task watchdog del chip (secondi)</label><input type="number" id="wd_tw"
+     aria-describedby="wd_tw_h"><small id="wd_tw_h" class="fhint"></small></div>
+   <div><label for="wd_l_net">Servizio rete (secondi)</label><input type="number" id="wd_l_net"
+     aria-describedby="wd_l_net_h"><small id="wd_l_net_h" class="fhint"></small></div>
+   <div><label for="wd_l_monitor">Servizio monitor (secondi)</label><input type="number"
+     id="wd_l_monitor" aria-describedby="wd_l_monitor_h"><small id="wd_l_monitor_h"
+     class="fhint"></small></div>
+   <div><label for="wd_l_mesh">Servizio rete tra schede (secondi)</label><input type="number"
+     id="wd_l_mesh" aria-describedby="wd_l_mesh_h"><small id="wd_l_mesh_h" class="fhint"></small>
+   </div>
+   <div><label for="wd_l_mqtt">Servizio MQTT (secondi)</label><input type="number" id="wd_l_mqtt"
+     aria-describedby="wd_l_mqtt_h"><small id="wd_l_mqtt_h" class="fhint"></small></div>
+   <div><label for="wd_l_led">Servizio LED (secondi)</label><input type="number" id="wd_l_led"
+     aria-describedby="wd_l_led_h"><small id="wd_l_led_h" class="fhint"></small></div></div>
+  <p class="fhint" id="wd_int"></p>
+  <button class="btn" onclick="wdSave()">Salva</button><button class="btn gray"
+   onclick="wdDefaults()">Valori di fabbrica dei tempi</button><div id="wdm" class="msg"></div>
+  </div>
+</section>
+<section id="t_shell" class="hide">
+ <div class="card"><h3>Terminale</h3>
+  <p style="color:var(--mut)">Il terminale e un pannello in basso, sempre disponibile da ogni scheda. Trascina la barra del pannello per cambiare l'altezza.</p>
+  <button class="btn" onclick="cpToggle(true)">Apri il terminale</button><button class="btn gray"
+   onclick="cpSize(2)">A tutto schermo</button>
+  <p style="color:var(--mut)">Scorciatoia da tastiera: Ctrl + `</p></div>
+</section>
+<section id="t_stat" class="hide">
+ <div class="card"><h3>Statistiche locali</h3>
+  <p class="fhint">Contano quanto si usano Wi-Fi, Bluetooth, tasto fisico e LED. Sono statistiche locali: niente indirizzi MAC, niente indirizzi IP, niente nomi. Restano nella memoria della scheda (si azzerano al riavvio) e non vengono mai inviate fuori. Spente di fabbrica.</p>
+  <div class="sc" id="sc_stat"></div>
+  <div id="stbody"></div>
+  <a class="btn gray hide" id="st_csv" href="/api/stats.csv"
+   download="vesevos-statistiche.csv">Scarica CSV</a><button class="btn gray adm hide" id="st_rst"
+   onclick="stReset()">Azzera</button><div id="stm" class="msg"></div>
+  <p class="fhint">I pin e il consumo di corrente non sono ancora contati.</p></div>
+</section>

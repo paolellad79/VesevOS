@@ -3,14 +3,11 @@
 // VesevOS - vos_web.cpp
 // Server web con PsychicHttp (MIT), basato sul server ufficiale di ESP-IDF.
 //  - porta 443 (HTTPS): pagina e API cifrate, certificato unico della scheda (vos_tls)
-//  - porta 80  (HTTP):  portale automatico e, per chi e collegato all'hotspot (gia cifrato da WPA2), anche la pagina;
-//                       dalla rete di casa porta a https://
-//                       Con il redirect acceso e l'hotspot che non puo accendersi, la porta 80 la tiene un server MINIMO (solo redirect,
-//                       vos_http_redirect_srv.cpp) invece di questo server completo: risparmia RAM. Scelta in startHttp().
+//  - porta 80  (HTTP):  solo il redirect verso https:// (server minimo, vos_http_redirect_srv.cpp).
+//                       Niente pagine in chiaro: se HTTPS non parte, la porta 80 resta chiusa (si resta dalla seriale).
 // Ogni API ha un livello: pubblica, Ospite, Operatore, Amministratore (controllo nel firmware, non solo nella pagina).
 // Il filtro IP (vos_fw) chiude la connessione senza risposta a chi non e ammesso.
 #include "vos_web_int.h"
-#include "vos_redirect_plan.h"
 #include "vos_web_csrf.h"
 #include "vos_http_redirect_srv.h"
 #include "../core/vos_ram.h"
@@ -18,13 +15,10 @@
 #include "../drivers/vos_drv_heap.h"
 
 namespace webx {
-PsychicHttpServer* g_http = nullptr;
 PsychicHttpsServer* g_https = nullptr;
 bool g_tlsUp = false;
 volatile bool g_cleanArm = false;   // fine guida con Wi-Fi di casa: al primo accesso dalla rete di casa si spengono hotspot e HTTP (solo in RAM)
 uint16_t g_runHttpPort = 0, g_runHttpsPort = 0;   // porte con cui i server sono partiti (0 = non attivo)
-bool g_httpMini = false;           // la porta HTTP e tenuta dal server minimo (solo redirect)
-bool g_httpMiniWanted = false;     // cosa aveva deciso httpMinimalWanted() all'avvio (se cambia dopo, serve il riavvio)
 uint32_t g_firstPassUntil = 0;     // dopo il reset con BOOT: 10 minuti per scegliere la password anche dalla rete di casa
 VosFile g_upFile;
 bool g_upOk = false;
@@ -80,6 +74,13 @@ esp_err_t sendJson(Res* s, const char* body, int code) { return sendText(s, code
 esp_err_t sendJson(Res* s, const HeapBuf& body, int code) { return sendText(s, code, "application/json", body.c_str(), body.length()); }
 esp_err_t sendJsonBuf(Res* s, const std::string& body, int code) { return sendText(s, code, "application/json", body.data(), body.size()); }
 esp_err_t ok(Res* s) { return sendJson(s, "{\"ok\":true}"); }
+// Riuscito, ma con qualcosa da dire a chi ha caricato il file: la pagina mostra "avviso".
+esp_err_t okAvviso(Res* s, const ErrBuf& avviso) {
+  if (avviso.empty()) return ok(s);
+  HeapBuf j(512);
+  j.add("{\"ok\":true,\"avviso\":\""); j.addJson(avviso.c_str(), avviso.length()); j.add("\"}");
+  return j.oom() || j.over() ? ok(s) : sendJson(s, j);
+}
 // errore: "err" e il testo tradotto per la pagina; "code" e il nome breve STABILE per app e prove (regole API 10).
 // Il codice HTTP segue il "code" (regole API 11); il corpo ha sempre ok:false, quindi la pagina legge come prima.
 // Attenzione: MAI 401 per gli errori di accesso (la pagina lo prende per "sessione scaduta" e rimostra il login).
@@ -128,19 +129,6 @@ void add(PsychicHttpServer* srv, bool secure, const char* path, int method, uint
     Ctx c; c.ip = ipOf(r); c.user = -1; c.role = 0; c.secure = secure;
     g_lastReq = drvMillis();
     if (!fwAllow(c.ip, false)) { fwNoteRejected(c.ip); return ESP_FAIL; }     // chiude senza rispondere
-    if (!secure && redirectActive(c.ip)) return redirectReply(r, s);         // impostazione redirect: tutto verso HTTPS, niente servito su HTTP
-    // dalla rete di casa la pagina e le API passano solo da HTTPS (l'hotspot e gia cifrato da WPA2)
-    if (!secure && g_tlsUp && cfg.https && !netOnAp(c.ip)) {
-      if (strcmp(r->pathCStr(), "/") == 0) {                                 // alla pagina HTTPS, stesso nome ma senza la porta
-        const char* host = r->headerCStr("Host");
-        size_t hl = host ? strcspn(host, ":") : 0;
-        char url[160], port[8] = "";
-        if (cfg.httpsPort != 443) snprintf(port, sizeof port, ":%u", (unsigned)cfg.httpsPort);
-        snprintf(url, sizeof url, "https://%.*s%s/", (int)hl, host ? host : "", port);
-        return s->redirect(url);
-      }
-      if (lvl != L_PUB || method == HTTP_POST) return sendJson(s, "{\"ok\":false,\"err\":\"https\",\"code\":\"https_only\"}", 403);   // anche accesso e prima password
-    }
     if (method != HTTP_GET && csrfBlocked(r)) return sendJson(s, "{\"ok\":false,\"err\":\"richiesta da un altro sito\",\"code\":\"csrf\"}", 403);   // POST e simili: solo dalla nostra pagina
     if (lvl > L_PUB) {
       char tk[AUTH_TOKEN_BUF]; tokenTo(r, tk, sizeof tk);
@@ -168,14 +156,13 @@ static void svcElf(StrBuf& b, int role) {
 
 std::string svcJson(int role) {
   bool pend = (cfg.httpOn != (g_runHttpPort != 0)) || (cfg.httpOn && g_runHttpPort && cfg.httpPort != g_runHttpPort) ||
-              (cfg.https != g_tlsUp) || (cfg.https && g_runHttpsPort && cfg.httpsPort != g_runHttpsPort) ||
-              (g_runHttpPort && httpMinimalWanted() != g_httpMiniWanted);   // redirect o hotspot cambiati: il server HTTP giusto si sceglie al riavvio
+              (cfg.https != g_tlsUp) || (cfg.https && g_runHttpsPort && cfg.httpsPort != g_runHttpsPort);
   auto tf = [](bool v) { return v ? "true" : "false"; };
   StrText t(512);
   t.buf().addf("{\"apOn\":%s,\"captive\":%s,\"dhcpOn\":%s,\"lease\":%d,\"mdnsOn\":%s,", tf(cfg.apOn), tf(cfg.apCaptive), tf(cfg.dhcpOn), (int)cfg.dhcpLease, tf(cfg.mdnsOn));
   t.buf().addf("\"httpOn\":%s,\"httpPort\":%d,\"httpsOn\":%s,\"httpsPort\":%d,", tf(cfg.httpOn), (int)cfg.httpPort, tf(cfg.https), (int)cfg.httpsPort);
   t.buf().addf("\"runHttp\":%u,\"runHttps\":%u,\"pending\":%s,\"sta\":%s,", (unsigned)g_runHttpPort, (unsigned)g_runHttpsPort, tf(pend), tf(cfg.staEnabled && cfg.staSsid.length()));
-  t.buf().addf("\"clientOk\":%s,\"usersHttp\":%d,\"usersHttps\":%d,\"redirect\":%s,\"httpMin\":%s", tf(netState() == NET_CLIENT_OK), (int)authSessionCount(0), (int)authSessionCount(1), tf(cfg.httpRedirect), tf(g_httpMini));
+  t.buf().addf("\"clientOk\":%s,\"usersHttp\":%d,\"usersHttps\":%d", tf(netState() == NET_CLIENT_OK), (int)authSessionCount(0), (int)authSessionCount(1));
 #if VOS_WITH_ELF
   svcElf(t.buf(), role);
 #endif
@@ -339,6 +326,8 @@ static void routes(PsychicHttpServer* S, bool sec) {
 #endif
   routesApp(S, sec);
   routesUpd(S, sec);
+  routesAgg(S, sec);
+  routesEventi(S, sec);
 }
 
 void webInit() {
@@ -347,42 +336,21 @@ void webInit() {
   DefaultHeaders::Instance().addHeader("X-Frame-Options", "DENY");
   DefaultHeaders::Instance().addHeader("Referrer-Policy", "no-referrer");
   DefaultHeaders::Instance().addHeader("Content-Security-Policy",
-    "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
+    "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://raw.githubusercontent.com; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
   if (!authIsSet() && cfg.setupDone) g_firstPassUntil = drvMillis() + 600000UL;   // reset con BOOT appena fatto
   vlog("WEB: percorsi pronti");
 }
 
 void webAllowFirstPass() { g_firstPassUntil = drvMillis() + 600000UL; if (!g_firstPassUntil) g_firstPassUntil = 1; }
 
-// Server HTTP COMPLETO (Psychic): pagina, API e portale automatico. Tiene molta RAM (task httpd da 8 KB, tutte le rotte).
-static void startHttpFull(uint16_t port) {
-  g_http = new PsychicHttpServer(port);
-  g_http->config.max_open_sockets = 3;               // basta per hotspot e portale automatico; HTTP e un server in piu, tiene poca RAM
-  g_http->config.lru_purge_enable = true;            // quando i collegamenti sono finiti chiude il piu vecchio invece di rifiutare il nuovo
-  g_http->maxRequestBodySize = 48 * 1024;
-  g_http->maxUploadSize = 4UL * 1024 * 1024;         // oltre questo la libreria risponde in inglese e chiude: i limiti veri li controllano le rotte (messaggi tradotti)
-  routes(g_http, false);
-  g_http->onNotFound(httpNotFound);
-  g_http->start();
-  g_runHttpPort = port;
-  vlog("WEB: server HTTP completo avviato sulla porta %u", (unsigned)port);
-}
-
-// Sceglie chi tiene la porta HTTP: il server MINIMO (solo redirect) se httpMinimalWanted(), altrimenti il completo. Se il minimo non parte
-// (porta occupata o memoria) si ripiega sul completo: la porta HTTP non resta mai senza risposta. La scelta si fa qui, all'avvio dei server:
-// un cambio dopo (redirect, hotspot) vale al riavvio e svcJson() lo segnala come "pending".
-static void startHttp(uint16_t port) {
-  g_httpMiniWanted = httpMinimalWanted();
-  if (g_httpMiniWanted) {
-    if (httpRedirectSrvStart(port)) {
-      g_httpMini = true;
-      g_runHttpPort = port;
-      vlog("WEB: server HTTP minimo (solo redirect a HTTPS) avviato sulla porta %u", (unsigned)port);
-      return;
-    }
-    vlog("WEB: %s", tr("server HTTP minimo non partito (porta occupata o memoria), uso il server completo"));
+// Porta HTTP: solo il redirect verso HTTPS (server minimo, vos_http_redirect_srv.cpp). Parte solo se HTTPS e in funzione.
+static void startHttpRedirect(uint16_t port) {
+  if (httpRedirectSrvStart(port)) {
+    g_runHttpPort = port;
+    vlog("WEB: HTTP solo redirect verso HTTPS sulla porta %u", (unsigned)port);
+  } else {
+    vlog("WEB: %s", tr("server HTTP (redirect) non partito: porta occupata o memoria"));
   }
-  startHttpFull(port);
 }
 
 // Avvia i server solo quando la rete e gia inizializzata (chiamata dal task di rete)
@@ -403,9 +371,9 @@ void webStart() {
     if (g_tlsUp) { g_runHttpsPort = cfg.httpsPort; vlog("WEB: HTTPS avviato sulla porta %u (impronta %.23s...)", (unsigned)cfg.httpsPort, tlsFingerprint()); }
     else { vlog("WEB: HTTPS non partito, resta solo HTTP"); auditEvent(AUD_YELLOW, "httpsfail", tr("HTTPS non partito (memoria?): la pagina resta senza cifratura")); }
   }
-  if (cfg.httpOn) startHttp(cfg.httpPort);
-  else vlog("WEB: HTTP spento (scelta dell'utente)");
-  if (!g_runHttpPort && !g_tlsUp) startHttp(cfg.httpPort);      // mai chiusi fuori: se HTTPS non parte e HTTP era spento, parte HTTP
+  if (!cfg.httpOn) vlog("WEB: HTTP spento (scelta dell'utente)");
+  else if (g_tlsUp) startHttpRedirect(cfg.httpPort);
+  else vlog("WEB: HTTPS non in funzione: porta HTTP chiusa, resta solo la seriale");
 }
 
 bool webHttpsUp() { return g_tlsUp; }

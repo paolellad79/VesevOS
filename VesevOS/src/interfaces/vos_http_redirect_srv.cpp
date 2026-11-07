@@ -65,7 +65,7 @@ static size_t answer(uint32_t ip, char* in, size_t n, char* out, size_t cap) {
   if (query) *query++ = 0; else query = (char*)"";
   char url[300];
   const char* text = "";
-  int code = webx::redirectPlan(methodOk, target, query, url, sizeof url, &text);
+  int code = webx::redirectPlan(ip, methodOk, target, query, url, sizeof url, &text);
   size_t len = buildReply(out, cap, code, url, text, head);
   noteStack();
   return len;

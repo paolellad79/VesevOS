@@ -237,7 +237,10 @@ static bool banActive(Ban* b, uint32_t& wait) {
   return true;
 }
 
-static void banFail(Ban* b, const char* why) {
+static void banFail(Ban* b, const char* why, EventoTipo tipo, const char* nome = nullptr) {
+  EventoCanale canale = b->ip == AUTH_IP_SERIAL ? EVC_SERIALE : EVC_WEB;
+  uint32_t ipEvento = canale == EVC_SERIALE ? 0 : b->ip;
+  eventoNota(tipo, canale, ipEvento, nome);
   b->last = drvMillis();
   uint8_t maxF = cfg.banFails < 3 ? 3 : cfg.banFails;
   if (++b->fails < maxF) { vlog("SICUREZZA: %s da %s (%u/%u)", why, OriginText(b->ip).s, b->fails, maxF); return; }
@@ -245,12 +248,13 @@ static void banFail(Ban* b, const char* why) {
   if (secs > 3600) secs = 3600;
   b->until = drvMillis() + secs * 1000UL; if (!b->until) b->until = 1;
   b->fails = 0; if (b->level < 10) b->level++;
+  eventoNota(EV_BLOCCO, canale, ipEvento, nome);
   vlog("SICUREZZA: origine %s bloccata per %lu s (blocco n. %u)", OriginText(b->ip).s, (unsigned long)secs, b->level);
   EventBus::publish("sec.ban", "", (int32_t)secs);     // l'indirizzo NON va nell'evento (lo vede anche l'Operatore): solo la durata
 }
 
 bool authIpBlocked(uint32_t ip, uint32_t& wait) { AuthLock L; return banActive(banSlot(ip, false), wait); }
-bool authFailIp(uint32_t ip, const char* why) { AuthLock L; Ban* b = banSlot(ip, true); uint32_t w = 0; banFail(b, why); return banActive(b, w); }
+bool authFailIp(uint32_t ip, const char* why, EventoTipo tipo, const char* nome) { AuthLock L; Ban* b = banSlot(ip, true); uint32_t w = 0; banFail(b, why, tipo, nome); return banActive(b, w); }
 void authIpOk(uint32_t ip) { AuthLock L; Ban* b = banSlot(ip, true); b->fails = 0; b->level = 0; b->last = drvMillis(); }
 
 int authLoginFinish(uint32_t ip, const char* name, const char* nonce, const char* mac, int& idx, uint32_t& wait) {
@@ -258,7 +262,7 @@ int authLoginFinish(uint32_t ip, const char* name, const char* nonce, const char
   idx = -1;
   Ban* b = banSlot(ip, true);
   if (banActive(b, wait)) return 2;
-  if (drvMillis() - b->last < 1000 && b->fails) { banFail(b, "tentativi troppo veloci"); return banActive(b, wait) ? 2 : 1; }
+  if (drvMillis() - b->last < 1000 && b->fails) { banFail(b, "tentativi troppo veloci", EV_RICHIESTE); return banActive(b, wait) ? 2 : 1; }
   // il numero casuale vale una volta sola, per quel nome e per 60 secondi
   bool found = false;
   for (int k = 0; k < MAX_NONCES; k++) {
@@ -272,7 +276,7 @@ int authLoginFinish(uint32_t ip, const char* name, const char* nonce, const char
   char want[SEC_HEX_BUF];
   bool ok = found && authUserCanLogin(i) && secHmacSha256Hex(want, cfg.users[i].hash.c_str(), nonce) && secSameText(want, mac);
   if (ok) { b->fails = 0; b->level = 0; b->last = drvMillis(); idx = i; return 0; }
-  banFail(b, "password errata");
+  banFail(b, "password errata", EV_PASSWORD, i >= 0 ? cfg.users[i].name.c_str() : nullptr);
   return banActive(b, wait) ? 2 : 1;
 }
 
@@ -281,7 +285,7 @@ void authNoteDenied(uint32_t ip) {
   Ban* b = banSlot(ip, true);
   uint32_t now = drvMillis();
   if (now - b->deniedT0 > 60000UL) { b->deniedT0 = now; b->denied = 0; }
-  if (++b->denied > 60) { b->denied = 0; b->deniedT0 = now; banFail(b, "troppe richieste senza accesso"); }
+  if (++b->denied > 60) { b->denied = 0; b->deniedT0 = now; banFail(b, "troppe richieste senza accesso", EV_RICHIESTE); }
 }
 
 void authBanJson(HeapBuf& j) {
@@ -465,7 +469,7 @@ void authResetAdmin() {
   { AuthLock L; for (int i = 0; i < MAX_SESSIONS; i++) g_sess[i].used = false; }
   serialClose();
   cfg.serIn = true;                                  // la seriale torna ad accettare comandi
-  vlog("AUTH: password degli amministratori azzerate con il tasto BOOT (primo accesso: '%s')", cfg.users[a].name.c_str());
+  vlog("AUTH: password degli amministratori azzerate con il tasto fisico (primo accesso: '%s')", cfg.users[a].name.c_str());
 }
 
 // Primo accesso (nessun amministratore con password): nome dell'amministratore da creare

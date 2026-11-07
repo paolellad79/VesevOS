@@ -51,7 +51,7 @@ void powerSleepNow(uint32_t seconds) {
   esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
   if (seconds) {
     r_magic = 0xA55A1234; r_plan = seconds;
-    esp_sleep_enable_timer_wakeup((uint64_t)seconds * 1000000ULL);     // il tasto BOOT NON risveglia: tenuto premuto porterebbe in modo programmazione
+    esp_sleep_enable_timer_wakeup((uint64_t)seconds * 1000000ULL);     // il tasto fisico NON risveglia: tenuto premuto porterebbe in modo programmazione
   }
   esp_deep_sleep_start();
 }

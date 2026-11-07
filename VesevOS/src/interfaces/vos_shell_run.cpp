@@ -11,11 +11,13 @@
 // nessun permesso in piu (script solo Admin, app col suo who= e use=). Per ora quelle funzioni leggono solo la cartella dei programmi
 // del loro tipo (script in /sbin, app in /bin) e non hanno argomenti: un file trovato altrove si dice e non si avvia.
 #include "vos_shell_int.h"
+#include <stdlib.h>
 #include "../core/vos_ext.h"
 #include "../core/vos_paths.h"
 #include "../core/vos_layout.h"
 #include "../packages/vos_drvcmd.h"
 #include "../packages/vos_progext.h"
+#include "../core/vos_pacchetto.h"
 #include "../drivers/vos_drv_fs.h"
 
 namespace {
@@ -105,6 +107,23 @@ bool oscuratoDallaFlash(const Found& f) {
   return drvFsExists(p);
 }
 
+// "run <nome> ?": cosa dichiara il programma, senza avviarlo. Stessi limiti dell'avvio: script solo Admin, app col suo who=.
+void mostraDati(const Found& f, OutSink& o, int role) {
+  const size_t kTesta = 2048;
+  char* b = (char*)malloc(kTesta);
+  if (!b) { o.println(tr("Memoria insufficiente")); return; }
+  VosFile file = drvFsOpen(f.path);
+  size_t n = file ? file.read((uint8_t*)b, kTesta) : 0;
+  PacDati d;
+  pacLeggi(std::string_view(b, n), d);
+  free(b);
+  if (role < ROLE_ADMIN && (f.kind == K_SCRIPT || strcmp(d.chi, "oper"))) { o.println(tr("Il tuo ruolo non permette questo comando")); return; }
+  o.println(trf("Nome: %s", f.name));
+  if (d.versione[0]) o.println(trf("Versione: %s", d.versione)); else o.println(tr("Versione: non dichiarata"));
+  if (d.autore[0]) o.println(trf("Autore: %s", d.autore)); else o.println(tr("Autore: non dichiarato"));
+  if (d.descrizione[0]) o.println(trf("Descrizione: %s", d.descrizione)); else o.println(tr("Descrizione: non dichiarata"));
+}
+
 // Avvia il programma trovato; args = il resto della riga dopo il nome ("" se non c'e)
 void startFound(const Found& f, const char* args, OutSink& o, int role) {
   if (!inProgramDir(f)) {
@@ -126,6 +145,7 @@ void cmdRun(const char* line, OutSink& o, const ShellSess& ss, int role) {
   if (nm.empty()) { cmdUsage(o, "run"); return; }
   Found f;
   if (nm.cut() || !findProgram(nm.c_str(), ss, role, f)) { o.println(trf("run: %s: non trovato", nm.c_str())); return; }
+  if (argAt(line, 2) == "?") { mostraDati(f, o, role); return; }
   startFound(f, restFrom(line, 2), o, role);
 }
 
@@ -170,6 +190,7 @@ bool shRunDirect(const char* line, OutSink& o, const ShellSess& ss, int role) {
   Word first = argAt(line, 0);                                   // com'e scritta (le maiuscole contano nei nomi delle cartelle)
   Found f;
   if (first.cut() || !findProgram(first.c_str(), ss, role, f)) return false;
+  if (argAt(line, 1) == "?") { mostraDati(f, o, role); return true; }
   startFound(f, restFrom(line, 1), o, role);
   return true;
 }

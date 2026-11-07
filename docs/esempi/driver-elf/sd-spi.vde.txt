@@ -1,0 +1,38 @@
+# Driver microSD in ELF (.vde). Formato: docs/progetto/formato-vde.md. Il montaggio, i pin e i file veri li tiene il firmware (primitive sd_*);
+# qui ci sono i comandi (sd-spi.c) e lo stato della Home, che il firmware tiene da solo (source=sd).
+[module]
+name=sd-spi
+title=Lettore microSD
+bus=sd
+khz=1000
+power=3V3
+level=3V3
+author=Mimmo
+version=1.0
+license=CC0
+warn=VCC a 3V3 (mai 5 V). Scheda FAT32 (o FAT16 se piccola).
+use=sd
+who=oper
+[signals]
+CS
+MOSI
+SCK
+MISO
+[icon]
+<svg viewBox="0 0 24 24"><path d="M7 3h8l3 3v15H7z" fill="none" stroke="#2c6fbb" stroke-width="2"/><path d="M10 7v3M13 7v3" stroke="#2c6fbb" stroke-width="2"/></svg>
+[widget]
+title=Scheda microSD
+alt=Scheda microSD non presente
+who=oper
+source=sd
+[commands]
+sd status oper
+sd ls oper testo
+sd read oper testo
+sd mount admin
+sd unmount admin
+sd format admin testo
+sd write admin testo
+sd append admin testo
+sd rm admin testo
+sd mkdir admin testo

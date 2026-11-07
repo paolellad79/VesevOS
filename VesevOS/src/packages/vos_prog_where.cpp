@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_prog_where.cpp (vedi vos_prog_where.h)
 #include "vos_prog_where.h"
+#include <new>
 #include <string.h>
 #include "vos_app.h"
 #include "vos_prog.h"
@@ -23,28 +24,48 @@ namespace {
 
 bool kindOk(uint8_t kind) { return kind == PK_APP_B || kind == PK_APP_E; }
 
+// L'elenco dei programmi in corso sta sullo HEAP: 16 voci pesano oltre 2 KB e questo codice gira anche in task con poco stack (il panico del task
+// "appsd" del 31/10/2026 veniva da li: 4 KB di stack, 2 KB di elenco e piu di 1 KB nei frame di progRunning).
+class RunList {
+ public:
+  RunList() : r_(new (std::nothrow) ProgRun[PROG_RUN_MAX]), n_(r_ ? progRunning(r_, PROG_RUN_MAX, false) : 0) {}
+  ~RunList() { delete[] r_; }
+  RunList(const RunList&) = delete;
+  RunList& operator=(const RunList&) = delete;
+  bool ok() const { return r_ != nullptr; }
+  int size() const { return n_; }
+  const ProgRun& operator[](int i) const { return r_[i]; }
+ private:
+  ProgRun* r_;
+  int n_;
+};
+
 bool inCorso(uint8_t kind, const char* name) {
-  ProgRun r[PROG_RUN_MAX];
-  int n = progRunning(r, PROG_RUN_MAX, false);
-  for (int i = 0; i < n; i++) if (r[i].kind == kind && !strcmp(r[i].name, name) && r[i].active) return true;
+  RunList run;
+  for (int i = 0; i < run.size(); i++) if (run[i].kind == kind && !strcmp(run[i].name, name) && run[i].active) return true;
   return false;
 }
 
 // Il controllo "microSD sparita": ferma le app che la usavano. Lavora in un task a parte (il sondaggio della scheda ha poco stack).
 volatile bool g_fermando = false;
 
+constexpr uint32_t kStackBytes = 8192;             // misurato sul computer: elenco su heap, frame di progRunning circa 1,2 KB, resto di vlog/audit; il margine e controllato a ogni passaggio
+
 void taskSdPersa(void*) {
-  ProgRun* r = new ProgRun[PROG_RUN_MAX];                     // sullo heap: lo stack del task e piccolo
-  int n = progRunning(r, PROG_RUN_MAX, false);
-  for (int i = 0; i < n; i++) {
-    if (!r[i].active || !kindOk(r[i].kind) || progWhere(r[i].kind, r[i].name) != PW_SD) continue;
-    ErrBuf e;
-    progStop(r[i].name, e);
-    vlog("APP: %s fermata: la microSD dei suoi dati non c'e piu", r[i].name);
-    auditEvent(AUD_YELLOW, "appsd", trf("App %s fermata: la microSD dei suoi dati non c'e piu", r[i].name).c_str());
-    EventBus::publish("app.sd", r[i].name, 0);
-  }
-  delete[] r;
+  {
+    RunList run;
+    if (!run.ok()) vlog("APP: la microSD non c'e piu ma non riesco a controllare le app (memoria)");
+    for (int i = 0; i < run.size(); i++) {
+      const ProgRun& p = run[i];
+      if (!p.active || !kindOk(p.kind) || progWhere(p.kind, p.name) != PW_SD) continue;
+      ErrBuf e;
+      progStop(p.name, e);
+      vlog("APP: %s fermata: la microSD dei suoi dati non c'e piu", p.name);
+      auditEvent(AUD_YELLOW, "appsd", trf("App %s fermata: la microSD dei suoi dati non c'e piu", p.name).c_str());
+      EventBus::publish("app.sd", p.name, 0);
+    }
+  }                                                          // l'elenco si libera qui, prima di chiudere il task
+  vlog("APP: controllo microSD finito, stack libero al minimo %u byte su %u", (unsigned)uxTaskGetStackHighWaterMark(nullptr), (unsigned)kStackBytes);
   g_fermando = false;
   vTaskDelete(nullptr);
 }
@@ -52,8 +73,12 @@ void taskSdPersa(void*) {
 #if VOS_WITH_SD
 void sdPersa() {
   if (g_fermando) return;
+  if (progSdAppCount() == 0) return;                         // nessuna app ha scelto la microSD: niente da fermare, e niente task
   g_fermando = true;
-  if (!drvTaskCreate(taskSdPersa, "appsd", 8192, nullptr, 1, nullptr, DRV_CORE_ANY)) g_fermando = false;
+  if (!drvTaskCreate(taskSdPersa, "appsd", kStackBytes, nullptr, 1, nullptr, DRV_CORE_ANY)) {
+    g_fermando = false;
+    vlog("APP: la microSD non c'e piu ma non riesco a controllare le app (memoria)");
+  }
 }
 #endif
 

@@ -30,6 +30,7 @@
 #include "core/vos_config.h"
 #include "core/vos_layout.h"
 #include "security/vos_auth.h"
+#include "packages/vos_aggiorna.h"
 #include "packages/vos_mfa.h"
 #include "packages/vos_power.h"
 #include "packages/vos_stats.h"
@@ -57,6 +58,8 @@
 #include "drivers/vos_drv_boot.h"
 #include "drivers/vos_drv_heap.h"
 #include "drivers/vos_drv_sys.h"
+#include "core/vos_apwin.h"
+#include "net/vos_net.h"
 
 // Task principale: valori scelti per fare come il core Arduino (vedi la nota in cima al file).
 static const char*    MAIN_TASK_NAME  = "loopTask";
@@ -83,6 +86,10 @@ static void bootButton() {
   ledSetHold(0);
   if (held >= 2000) btnLongRelease();
   if (btnTestActive()) { if (held >= 2000) btnTestLong(held); else if (held >= 50) btnClick(); return; }   // modo prova: niente azioni
+  if (!cfg.setupDone && held >= 50 && held < 2000) {   // prima configurazione: una pressione apre la finestra del hotspot
+    apWinOpen(); netApRefresh(); vlog("SETUP: finestra hotspot aperta (10 minuti)");
+    return;
+  }
   cfgSetOrigin("tasto BOOT");
   statNote(held >= 20000 ? ST_BOOT_20S : held >= 8000 ? ST_BOOT_8S : held >= 2000 ? ST_BOOT_2S : ST_BOOT_SHORT);
   if (held >= 20000) {
@@ -130,7 +137,7 @@ static void vosSetup() {
   diaryStage("pins");
   pinsInit();
   drvGpioMode(VOS_PIN_BOOT, DG_INPUT_PULLUP);
-  pinClaim(VOS_PIN_BOOT, "Sistema", "Pulsante BOOT (click = azioni scelte, 2 s = filtro IP, 8 s = password, 20 s = fabbrica)", true);
+  pinClaim(VOS_PIN_BOOT, "Sistema", "Tasto fisico (click = azioni scelte, 2 s = filtro IP, 8 s = password, 20 s = fabbrica)", true);
 
   diaryStage("fs");
   if (!drvFsBegin(true)) { vlog("FS: LittleFS non parte"); }
@@ -169,6 +176,7 @@ static void vosSetup() {
 #if VOS_WITH_SD
   if (sdConfigured()) sdAutoStart();               // la microSD configurata si monta da sola appena risponde (task di fondo, priorita bassa); senza microSD il task (6 KB di stack) non nasce
 #endif
+  aggiornaInit();                                  // aggiornamenti: spenti di fabbrica, qui solo la data dell'ultimo controllo
   tmpCleanStart();                                 // tra 30 s toglie i .tmp~ lasciati da un taglio di corrente (task di fondo, una volta)
   diaryInit();                                     // dopo sysInit: contatore avvii pronto; scrive la riga AVVIO e, se anomalo, i dettagli
   ledSetSetup(!cfg.setupDone);                     // arcobaleno lento finche la prima configurazione non e finita
@@ -186,6 +194,7 @@ static void vosLoop() {
   diaryStage("L:io");     ioTick();
   diaryStage("L:stable"); bootStable();
   diaryStage("L:serial"); serialTick();
+  diaryStage("L:agg");    aggiornaTick();
   diaryStage("L:wdt");    drvLoopWdtFeed();
   drvDelayMs(10);
 }

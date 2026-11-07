@@ -133,7 +133,7 @@ static int bfLog(bvm* vm) {
 }
 static int bfMillis(bvm* vm) { be_pushint(vm, (bint)(drvMillis() & 0x7FFFFFFFUL)); be_return(vm); }
 static int bfTime(bvm* vm) { be_pushint(vm, timeValid() ? (bint)time(NULL) : 0); be_return(vm); }      // secondi dal 1970 (0 = ora non valida)
-static int bfBtn(bvm* vm) { be_pushint(vm, (bint)btnScriptPop()); be_return(vm); }   // btn(): click liberi del tasto BOOT (1..3), 0 = nessuno; non aspetta
+static int bfBtn(bvm* vm) { be_pushint(vm, (bint)btnScriptPop()); be_return(vm); }   // btn(): click liberi del tasto fisico (1..3), 0 = nessuno; non aspetta
 static int bfTemp(bvm* vm) { be_pushint(vm, (bint)lroundf(sysCpuTemp())); be_return(vm); }
 // logtail(n): ultime n righe del registro (1-20, di fabbrica 10), al massimo 2000 caratteri. Nelle app serve "logread" in use=: il registro puo contenere indirizzi e nomi.
 static int bfLogtail(bvm* vm) {
@@ -285,6 +285,7 @@ static void runTask(void*) {
       if (funcOn("files")) berryFilesRegister(vm);
       berrySdRegister(vm, false, g_admin);
       berryHwRegister(vm, false, g_admin);
+      berryHttpsRegister(vm);
     } else {                                                   // app: solo cio che il manifest (use=) permette
       be_regfunc(vm, "millis", bfMillis); be_regfunc(vm, "sleep", bfSleep);
       if (g_cmd) berryCmdRegister(vm); else berryDevRegister(vm);   // un comando ha args(); dev_get/dev_set sono della pagina dell'app
@@ -295,6 +296,7 @@ static void runTask(void*) {
       if (useHas("temp")) be_regfunc(vm, "temp", bfTemp);
       if (useHas("logread")) be_regfunc(vm, "logtail", bfLogtail);
       if (useHas("mqtt")) be_regfunc(vm, "mqtt", bfMqtt);
+      if (useHas("https")) berryHttpsRegister(vm);
       if (useHas("ble") && funcOn("ble")) berryBleRegister(vm, true, false);
       if (useHas("files") && funcOn("files")) {
         berryFilesRegister(vm);

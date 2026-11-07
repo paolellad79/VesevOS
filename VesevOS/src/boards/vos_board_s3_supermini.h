@@ -24,7 +24,7 @@
 // ---- LED e tasto ----
 #define VOS_PIN_LED_RGB   48            // LED WS2812 integrato
 #define VOS_LED_TYPE      "WS2812"
-#define VOS_PIN_BOOT       0            // pulsante BOOT
+#define VOS_PIN_BOOT       0            // tasto fisico
 
 // ---- GPIO ----
 // S3: i GPIO 22-25 non esistono, 26-32 sono flash/PSRAM; 33-37 sono liberi con PSRAM quad (SuperMini 2 MB)

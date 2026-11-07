@@ -55,7 +55,7 @@ bool salva(ErrBuf& err, int salta = -1) {
   for (int i = 0; i < g_n; i++) {
     if (i == salta) continue;
     const DrvRes& r = g_res[i];
-    char riga[160];
+    char riga[192];
     snprintf(riga, sizeof riga, "%s %u %u %d %d %d %d %u %u\n", r.name, (unsigned)r.bus, (unsigned)r.npin,
              r.pin[0], r.pin[1], r.pin[2], r.pin[3], (unsigned)r.addr, (unsigned)r.khz);
     out.add(riga);

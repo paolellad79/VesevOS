@@ -8,7 +8,7 @@
 // Protezioni (dalla 0.4.x): se l'ultima volta il passaggio a VesevOS e finito con un ritorno qui, resta fermo; se in app0 non c'e il marchio
 // di VesevOS non ci passa (il comando seriale b forza).
 // Ordini di VesevOS (contratto: docs/progetto/contratto-aggiornamento-recovery-2026-10-22.md): modo 1 = scarica da HTTPS senza pagina;
-// modo 2 = la pagina accetta il caricamento senza login con un gettone.
+// modo 2 = la pagina accetta il caricamento senza login con un gettone; modo 3 = legge dalla microSD il file gia scaricato. Un ordine automatico non riuscito torna a VesevOS se app0 e integra.
 // Comandi sulla seriale (115200): i = info, b = avvia VesevOS (anche senza marchio), r = riavvia.
 #include "rec_version.h"
 #include "rec_boot.h"
@@ -17,6 +17,8 @@
 #include "rec_net.h"
 #include "rec_fetch.h"
 #include "rec_order.h"
+#include "rec_riserva.h"
+#include "rec_sd.h"
 #include "rec_util.h"
 #include "rec_web.h"
 #include <stdio.h>
@@ -90,7 +92,8 @@ extern "C" void app_main(void) {
   bool notFw = ok && !app0Fw();                       // c'e un programma in app0 ma non e VesevOS (es. un altro recovery)
   if (notFw) ok = false;
   recOrderLoad();                                     // ordine di VesevOS (aggiornamento online o con gettone), uso singolo
-  bool stay = stayFlag(false, false) || recOrder().mode != 0;
+  RisScelta riserva = recOrder().mode == 0 ? recRiservaScelta() : RIS_NIENTE;   // il firmware nuovo non e partito?
+  bool stay = stayFlag(false, false) || recOrder().mode != 0 || riserva != RIS_NIENTE;
   bool boot = gpio_get_level((gpio_num_t)BOOT_PIN) == 0;
   bool back = handFlag(false, false);                 // l'ultima volta siamo passati a VesevOS ma siamo tornati qui: non riprovare all'infinito
   recInfo();
@@ -104,11 +107,20 @@ extern "C" void app_main(void) {
   loadConfig();
   recLedStart(rc.ledPin, rc.ledBr);
   recLedSet(LS_WAIT);
+  if (riserva == RIS_RIPROVA) recRiservaRiprova();    // se riesce riavvia e non torna qui
+  if (riserva == RIS_RIPROVA || riserva == RIS_RIPRISTINA) recRiservaUsa();
+  if (riserva == RIS_CHIUDI) recRiservaChiudi();
+  if (recOrder().mode == 3) {                         // niente rete: se riesce riavvia e non torna qui
+    recSdRun();
+    recTornaDopoErrore();                             // se torna qui, app0 non e utilizzabile: resta la pagina normale
+    recOrder().automatico = false;
+  }
   recNetStart();
   if (recOrder().mode == 1) {                         // aggiornamento online invisibile: se non riesce, resta la pagina normale
-    if (recNetIsAp()) recResult(RES_NET, "rete di casa non raggiunta");
-    else recFetchRun();
+    if (recNetIsAp()) { recResult(RES_NET, "rete di casa non raggiunta"); recOrder().burnt = true; }
+    else recFetchRun();                               // se riesce riavvia e non torna qui
   }
+  if (recOrder().automatico) recTornaDopoErrore();    // se torna qui, app0 non e utilizzabile: resta la pagina normale
   recWebStart();
   mainLoop();
 }

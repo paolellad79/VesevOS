@@ -23,7 +23,7 @@ void   mfaOff(int idx);                                       // spegne e cancel
 bool   mfaNewRecovery(int idx, char recovery[MFA_REC_BUF]);   // 8 codici nuovi (vecchi annullati)
 bool   mfaOn(int idx);
 void   mfaJson(int only, HeapBuf& j);                         // stato per ogni utente (only = solo quell'utente, -1 = tutti)
-int    mfaOffAdmins();                                        // tasto BOOT 8 s: spegne l'MFA degli amministratori (ritorna quanti)
+int    mfaOffAdmins();                                        // tasto fisico 8 s: spegne l'MFA degli amministratori (ritorna quanti)
 // ---- accesso in due passi ----
 bool   mfaLoginToken(int idx, char tok[MFA_TOK_BUF]);         // dopo la password giusta: gettone di 120 s (false = bloccato, ora non valida)
 // ritorna 0 ok (idx), 1 codice errato, 2 gettone scaduto, 3 ora non valida (serve ora dal browser), 4 bloccato

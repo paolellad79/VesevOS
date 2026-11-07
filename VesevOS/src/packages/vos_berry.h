@@ -36,7 +36,7 @@ struct CmdCall {
 #define BERRY_CODE_MAX    1500       // lunghezza massima del testo dello script dato nel comando
 #define BERRY_FILE_MAX    8192       // lunghezza massima di uno script in /sbin
 #define BERRY_OUT_MAX     1500       // uscita massima conservata (script in /sbin: si tiene la parte piu recente)
-#define BERRY_STACK_SIZE  12288      // stack del task (byte, RAM interna, solo mentre lo script gira)
+#define BERRY_STACK_SIZE  20480      // stack del task (byte, RAM interna, solo mentre lo script gira). 20 KB: il TLS dello Store (scarica https) gira in questo task.
 #define BERRY_STACK_USE_MAX 6144     // oltre questo l'esecuzione e fermata (margine per i livelli tra un controllo e l'altro)
 
 bool   berryCmdArgsOk(const CmdCall& call, ErrBuf& err);   // limiti: massimo 8 parole, 96 caratteri ciascuna, 300 in tutto, solo ASCII stampabile

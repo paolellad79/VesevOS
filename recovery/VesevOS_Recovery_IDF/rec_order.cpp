@@ -1,5 +1,6 @@
 // VesevOS Recovery - ordine di aggiornamento e esito (vedi rec_order.h).
 #include "rec_order.h"
+#include "rec_sd.h"
 #include "rec_util.h"
 #include <stdio.h>
 #include <string.h>
@@ -7,6 +8,7 @@
 
 #define NS "vosupd"
 #define MAX_WRONG 3
+#define SD_TENTATIVI 2
 
 static RecOrder g_order;
 static bool g_expiredLogged = false;
@@ -34,9 +36,24 @@ static bool printableAscii(const std::string& s) {
   return true;
 }
 
+// Modo 3: percorso corto, senza salite.
+static bool sdFileOk(const std::string& f) {
+  return f.size() >= 2 && f.size() <= 15 && f[0] == '/' && f.find("..") == std::string::npos && printableAscii(f);
+}
+
+// Modo 3: niente pin della flash (26-32) o della USB (19, 20), niente doppioni.
+// Stessa regola in VesevOS/src/core/vos_updorder.h (updPinSdOk): se cambi qui, cambia anche li.
+static bool sdPinsOk(const uint8_t* p) {
+  for (int i = 0; i < 4; i++) {
+    if (p[i] > 48 || p[i] == 19 || p[i] == 20 || (p[i] >= 26 && p[i] <= 32)) return false;
+    for (int j = 0; j < i; j++) if (p[i] == p[j]) return false;
+  }
+  return true;
+}
+
 // Cancella tutte le chiavi dell'ordine (l'esito resta).
 static void eraseOrder(nvs_handle_t h) {
-  static const char* keys[] = {"mode", "url", "sha", "ver", "size", "token", "cip", "sig", "exp"};
+  static const char* keys[] = {"mode", "url", "sha", "ver", "size", "token", "cip", "sig", "exp", "auto", "sdf", "sdp", "khz", "prv"};
   for (const char* k : keys) nvs_erase_key(h, k);
   nvs_commit(h);
 }
@@ -59,10 +76,16 @@ void recOrderLoad() {
   if (nvs_get_u8(h, "mode", &mode) != ESP_OK || mode == 0) { nvs_close(h); return; }
   RecOrder o;
   o.mode = mode;
-  bool ok = (mode == 1 || mode == 2);
+  uint8_t automatico = 0;
+  nvs_get_u8(h, "auto", &automatico);
+  o.automatico = (mode == 1 && automatico == 1) || mode == 3;
+  bool ok = (mode >= 1 && mode <= 3);
   o.haveSha = getBlob(h, "sha", o.sha, 32);                     // obbligatorio nel modo 1, facoltativo nel modo 2
   if (ok && mode == 1) {
     ok = getStr(h, "url", 200, o.url) && o.url.compare(0, 8, "https://") == 0 && printableAscii(o.url) && o.haveSha;
+  } else if (ok && mode == 3) {
+    ok = getStr(h, "sdf", 16, o.sdFile) && sdFileOk(o.sdFile) && o.haveSha && getBlob(h, "sdp", o.sdPin, 4) && sdPinsOk(o.sdPin);
+    if (nvs_get_u32(h, "khz", &o.sdKhz) != ESP_OK || o.sdKhz < 400 || o.sdKhz > 20000) o.sdKhz = 4000;
   } else if (ok) {
     ok = getBlob(h, "token", o.token, 16);
     nvs_get_u32(h, "cip", &o.cip);
@@ -76,11 +99,50 @@ void recOrderLoad() {
     o.t0 = recMillis();
     o.expMs = (uint32_t)minutes * 60000UL;
   }
+  if (ok && mode == 3) {
+    uint8_t fatti = 0;
+    nvs_get_u8(h, "prv", &fatti);
+    if (fatti < SD_TENTATIVI && o.size) {                        // resta nella memoria: se manca la corrente si riparte da qui
+      nvs_close(h);
+      g_order = o;
+      printf("[recovery] ordine di aggiornamento: dalla microSD, versione %s, tentativi fatti %u\n", o.ver.c_str(), (unsigned)fatti);
+      return;
+    }
+    eraseOrder(h);                                               // basta: niente giri a vuoto, resta la pagina
+    nvs_close(h);
+    g_order = RecOrder();
+    g_order.ver = o.ver;
+    recResult(RES_WRITE, "troppi tentativi dalla microSD");
+    return;
+  }
   eraseOrder(h);                                                 // uso singolo: via subito, anche se poi qualcosa va storto
   nvs_close(h);
-  if (!ok) { g_order = RecOrder(); recResult(RES_ORDER, "ordine non valido"); return; }
+  if (!ok) {
+    g_order = RecOrder();
+    g_order.automatico = o.automatico;                           // anche un ordine rifiutato deve tornare a VesevOS
+    recResult(RES_ORDER, "ordine non valido");
+    return;
+  }
   g_order = o;
   printf("[recovery] ordine di aggiornamento: modo %d, versione %s, valido %u minuti\n", o.mode, o.ver.c_str(), (unsigned)(o.expMs / 60000UL));
+}
+
+bool recSdFileOk(const RecSdFile& f) { return sdFileOk(f.file) && sdPinsOk(f.pin); }
+
+void recOrderTentativo() {
+  nvs_handle_t h;
+  if (nvs_open(NS, NVS_READWRITE, &h) != ESP_OK) return;
+  uint8_t fatti = 0;
+  nvs_get_u8(h, "prv", &fatti);
+  nvs_set_u8(h, "prv", (uint8_t)(fatti + 1));
+  nvs_commit(h);
+  nvs_close(h);
+}
+
+void recOrderChiudi() {
+  nvs_handle_t h;
+  if (nvs_open(NS, NVS_READWRITE, &h) == ESP_OK) { eraseOrder(h); nvs_close(h); }
+  g_order.mode = 0;
 }
 
 bool recOrderExpired() {

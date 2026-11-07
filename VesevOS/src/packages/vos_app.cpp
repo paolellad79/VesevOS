@@ -11,6 +11,7 @@
 #include "../core/vos_common.h"
 #include "../core/vos_log.h"
 #include "../core/vos_i18n.h"
+#include "../core/vos_pacchetto.h"
 #include "../core/vos_files.h"
 #include "../core/vos_util.h"
 #include "../core/vos_vdesc.h"
@@ -96,7 +97,7 @@ static bool usePermOk(std::string_view u, char* norm, size_t cap) {
     pos = e + 1;
     if (p.empty()) { if (u.empty()) break; return false; }
     char gp[16];                                                     // "gpio:N" riscritto senza zeri davanti
-    bool ok = (p == "led" || p == "time" || p == "temp" || p == "log" || p == "act" || p == "btn" || p == "mqtt" || p == "logread" || p == "ble" || p == "files" || p == "sd");
+    bool ok = (p == "led" || p == "time" || p == "temp" || p == "log" || p == "act" || p == "btn" || p == "mqtt" || p == "logread" || p == "ble" || p == "files" || p == "sd" || p == "https");
     bool isGpio = p.substr(0, 4) == "gpio";
     if (!ok && p.size() >= 2 && p.size() <= 11 && !isGpio) {          // nome di una periferica a classi (rele1, led1...)
       ok = true;
@@ -193,22 +194,21 @@ bool appParse(std::string_view text, const char* fileName, AppInfo& a, ErrBuf& e
       bufAppend(a.data, sizeof a.data, dl, kb); bufAppend(a.data, sizeof a.data, dl, "="); bufAppend(a.data, sizeof a.data, dl, v); bufAppend(a.data, sizeof a.data, dl, "\n");
       continue;
     }
+    k = pacChiave(k);
     if (viewEqI(k, "name")) { if (!appNameValid(v) || v != std::string_view(fileName)) return utilLineErr(err, line, tr("Nome non valido o diverso dal nome del file")); viewCopy(a.name, sizeof a.name, v); }
     else if (viewEqI(k, "title")) { if (!txtOk(v, 24)) return utilLineErr(err, line, tr("Testo non valido (1-24 caratteri, niente caratteri di controllo)")); viewCopy(a.title, sizeof a.title, v); }
     else if (viewEqI(k, "author")) { if (!txtOk(v, 24)) return utilLineErr(err, line, tr("Testo non valido (1-24 caratteri, niente caratteri di controllo)")); viewCopy(a.author, sizeof a.author, v); }
     else if (viewEqI(k, "version")) {
-      bool ok = v.size() >= 1 && v.size() <= 10;
-      for (size_t i = 0; ok && i < v.size(); i++) if (!((v[i] >= '0' && v[i] <= '9') || v[i] == '.')) ok = false;
-      if (!ok) return utilLineErr(err, line, tr("Versione non valida (solo cifre e punti, massimo 10)"));
+      if (!pacVersioneOk(v)) return utilLineErr(err, line, tr("Versione non valida (solo cifre e punti, massimo 10)"));
       viewCopy(a.ver, sizeof a.ver, v);
     }
     else if (viewEqI(k, "who")) { if (v != "admin" && v != "oper") return utilLineErr(err, line, tr("Chi la usa: admin oppure oper")); viewCopy(a.who, sizeof a.who, v); }
     else if (viewEqI(k, "data")) { if (v != "0" && v != "1") return utilLineErr(err, line, tr("data: 1 se l'app salva dati, altrimenti 0")); a.saves = v == "1"; }
     else if (viewEqI(k, "autostart")) { if (v != "allowed" && v != "required" && v != "never") return utilLineErr(err, line, tr("autostart: allowed, required oppure never")); viewCopy(a.autostart, sizeof a.autostart, v == "allowed" ? std::string_view() : v); }
-    else if (viewEqI(k, "use")) { if (!usePermOk(v, a.use, sizeof a.use)) return utilLineErr(err, line, tr("Permesso non ammesso (led, time, temp, log, logread, act, btn, mqtt, ble, files, sd, gpio:N o il nome di una periferica come rele1)")); }
+    else if (viewEqI(k, "use")) { if (!usePermOk(v, a.use, sizeof a.use)) return utilLineErr(err, line, tr("Permesso non ammesso (led, time, temp, log, logread, act, btn, mqtt, https, ble, files, sd, gpio:N o il nome di una periferica come rele1)")); }
     else return utilLineErr(err, line, tr("Chiave sconosciuta nel manifest"));
   }
-  if (!seen[MAN] || a.name[0] == 0) { err = tr("Manca [manifest] con name="); return false; }
+  if (!seen[MAN] || a.name[0] == 0) { err = tr("Manca [manifest] con nome="); return false; }
   if (a.title[0] == 0) strcpy(a.title, a.name);
   a.codeLen = trimBuf(a.code);
   if (!seen[COD] || a.codeLen == 0) { err = tr("Manca la sezione [code]"); return false; }

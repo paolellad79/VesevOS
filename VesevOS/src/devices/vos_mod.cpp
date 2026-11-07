@@ -6,6 +6,7 @@
 #include "vos_io.h"
 #include "vos_mod_line.h"
 #include "../core/vos_i18n.h"
+#include "../core/vos_pacchetto.h"
 #include "../core/vos_log.h"
 #include "../core/vos_util.h"
 #include "../core/vos_files.h"
@@ -150,6 +151,7 @@ bool modParse(std::string_view text, const char* fileName, ModInfo& m, ErrBuf& e
     std::string_view k = trimView(t.substr(0, q)), v = trimView(t.substr(q + 1));
     char vb[96];                                                     // il valore con lo zero finale, per class= e addr=: uno piu lungo non e comunque valido
     bool vfit = viewCopy(vb, sizeof vb, v);
+    k = pacChiave(k);
     if (viewEqI(k, "name")) { if (!utilNameOk(v.data(), v.size()) || v != std::string_view(fileName)) return utilLineErr(err, line, tr("Nome non valido o diverso dal nome del file")); viewCopy(m.name, sizeof m.name, v); }
     else if (viewEqI(k, "title")) { if (!txtOk(v, 32)) return utilLineErr(err, line, tr("Testo non valido (1-32 caratteri, niente caratteri di controllo)")); viewCopy(m.title, sizeof m.title, v); }
     else if (viewEqI(k, "class")) {
@@ -193,14 +195,12 @@ bool modParse(std::string_view text, const char* fileName, ModInfo& m, ErrBuf& e
     else if (viewEqI(k, "license")) { if (!txtOk(v, 24)) return utilLineErr(err, line, tr("Testo non valido (1-24 caratteri, niente caratteri di controllo)")); viewCopy(m.lic, sizeof m.lic, v); }
     else if (viewEqI(k, "warn")) { if (!txtOk(v, 80)) return utilLineErr(err, line, tr("Avviso non valido (1-80 caratteri)")); viewCopy(m.warn, sizeof m.warn, v); }
     else if (viewEqI(k, "version")) {
-      bool ok = v.size() >= 1 && v.size() <= 10;
-      for (size_t i = 0; ok && i < v.size(); i++) if (!((v[i] >= '0' && v[i] <= '9') || v[i] == '.')) ok = false;
-      if (!ok) return utilLineErr(err, line, tr("Versione non valida (solo cifre e punti, massimo 10)"));
+      if (!pacVersioneOk(v)) return utilLineErr(err, line, tr("Versione non valida (solo cifre e punti, massimo 10)"));
       viewCopy(m.ver, sizeof m.ver, v);
     }
     else return utilLineErr(err, line, tr("Chiave sconosciuta"));
   }
-  if (!seen[MOD] || m.name[0] == 0) { err = tr("Manca [module] con name="); return false; }
+  if (!seen[MOD] || m.name[0] == 0) { err = tr("Manca [module] con nome="); return false; }
   if (!m.cls[0]) { err = tr("Manca class="); return false; }
   if (m.nsig == 0) { err = tr("Manca la sezione [signals] con almeno un segnale"); return false; }
   for (int i = 0; i < m.npart; i++) {            // ogni componente deve riferirsi a un segnale del modulo

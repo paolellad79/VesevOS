@@ -8,6 +8,8 @@
 #include "../core/vos_files.h"
 #include "../core/vos_i18n.h"
 #include "../core/vos_log.h"
+#include "../core/vos_pacchetto.h"
+#include "../packages/vos_pacchetto_nome.h"
 #include "../core/vos_util.h"
 #include "../core/vos_vdesc.h"
 #include "../devices/vos_mod.h"
@@ -47,7 +49,7 @@ static bool buildApp(const char* name, std::string_view vdp, HeapBuf& vap, ErrBu
     if (sec != MOD || t.empty() || t[0] == '#') continue;
     size_t q = t.find('=');
     if (q == std::string_view::npos) continue;
-    std::string_view k = trimView(t.substr(0, q)), v = trimView(t.substr(q + 1));
+    std::string_view k = pacChiave(trimView(t.substr(0, q))), v = trimView(t.substr(q + 1));
     if (viewEqI(k, "title")) v = v.substr(0, 24);         // il titolo di una app ha al massimo 24 caratteri
     if (viewEqI(k, "title") || viewEqI(k, "version") || viewEqI(k, "author") || viewEqI(k, "use") || viewEqI(k, "who") || viewEqI(k, "autostart")) {
       vap.add(k.data(), k.size()); vap.add('='); vap.add(v.data(), v.size()); vap.add('\n');
@@ -143,11 +145,20 @@ bool modInstallDriver(const char* name, const char* prefix, const char* pinsCsv,
   return false;
 }
 
-bool modSaveDriver(const char* name, std::string_view text, ErrBuf& err) {
+bool modSaveDriver(const char* nomeCaricato, std::string_view text, ErrBuf& err, char* salvato, size_t cap, ErrBuf* avviso) {
+  PacDati d;
+  pacLeggi(text, d);
+  const char* name = d.nome[0] ? d.nome : nomeCaricato;   // il nome corto dichiarato nel file vale piu del nome del file caricato
   if (!utilNameOk(name, strlen(name))) { err = tr("Nome non valido"); return false; }
   if (!modAppCheck(name, text, err)) return false;
   if (!cmdWordFree(text, name, err)) return false;
+  ErrBuf avvisoVersione;
+  char installato[64];
+  modFilePath(installato, sizeof installato, name);
+  pacchettoAvviso(installato, text, avvisoVersione);      // si guarda prima: dopo il salvataggio il vecchio non c'e piu
   if (!modSave(name, text, err)) return false;
+  if (avviso) *avviso = avvisoVersione.c_str();
+  if (salvato) snprintf(salvato, cap, "%s", name);
   drvCmdRefresh();
   drvWidgetRefresh();
   return true;

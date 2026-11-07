@@ -4,6 +4,7 @@
 #include "rec_version.h"
 #include "recovery_check.h"
 #include <stdio.h>
+#include <esp_image_format.h>
 #include <esp_ota_ops.h>
 #include <esp_system.h>
 #include <nvs.h>
@@ -41,6 +42,21 @@ bool app0Fw() {
   return g_fwMark == 1;
 }
 
+bool app0Integra() {
+  const esp_partition_t* p = recApp0();
+  if (!p) return false;
+  esp_partition_pos_t pos = {p->address, p->size};
+  esp_image_metadata_t meta = {};
+  return esp_image_verify(ESP_IMAGE_VERIFY_SILENT, &pos, &meta) == ESP_OK;
+}
+
+bool app0Scartata() {
+  esp_ota_img_states_t st;
+  const esp_partition_t* p = recApp0();
+  if (!p || esp_ota_get_state_partition(p, &st) != ESP_OK) return false;
+  return st == ESP_OTA_IMG_ABORTED || st == ESP_OTA_IMG_INVALID;
+}
+
 void app0FwForget() { g_fwMark = -1; }
 void app0FwSet(bool isFw) { g_fwMark = isFw ? 1 : 0; }
 
@@ -74,6 +90,19 @@ void startApp() {
   fflush(stdout);
   vTaskDelay(pdMS_TO_TICKS(100));
   esp_restart();
+}
+
+// Davanti alla scheda non c'e nessuno: si torna a VesevOS, che mostra l'esito nelle notifiche.
+// startApp passa da esp_ota_set_boot_partition, che controlla l'immagine intera e rifiuta un'app0 danneggiata.
+void recTornaDopoErrore() {
+  char n[40], v[40];
+  app0FwForget();
+  if (app0Valid(n, sizeof n, v, sizeof v) && app0Fw()) {
+    printf("[recovery] installazione automatica non riuscita: torno a VesevOS %s\n", v);
+    startApp();
+    handFlag(true, false);                                       // il passaggio non e avvenuto
+  }
+  printf("[recovery] installazione automatica non riuscita e app0 non e utilizzabile: resto qui\n");
 }
 
 // ---- diagnostica ----

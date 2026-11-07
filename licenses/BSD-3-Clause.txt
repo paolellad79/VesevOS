@@ -2,6 +2,7 @@ BSD 3-Clause License - componenti di terzi usati da VesevOS
 
 Il testo vale per ciascuno dei componenti qui sotto, con la sua riga di copyright:
 - lwIP (dentro ESP-IDF): Copyright (c) 2001-2004 Swedish Institute of Computer Science
+- BMP280 (compensazione in VesevOS/src/devices/vos_bmp280.cpp): Copyright (C) 2012-2014 Bosch Sensortec GmbH
 - LittleFS: Copyright (c) 2022, The littlefs authors. Copyright (c) 2017, Arm Limited
 
 Redistribution and use in source and binary forms, with or without

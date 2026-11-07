@@ -12,7 +12,9 @@
 #include "../drivers/vos_drv_sys.h"
 
 static const char* NS = "vosupd";
+static const char* NS_RISERVA = "vosris";
 static const char* OFFICIAL_PREFIX = "https://github.com/paolellad79/VesevOS/releases/";
+static const char* OFFICIAL_PREFIX_SITO = "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/";   // dove punta aggiorna/latest.json
 static const char* PREFIX_FILE = "/updurl.txt";
 static const size_t URL_MAX = 200;              // con il terminatore, come dice il contratto
 
@@ -45,6 +47,8 @@ static bool matchesFilePrefix(const char* url) {
   return false;
 }
 
+bool updUrlUfficiale(const char* url) { return startsWith(url, OFFICIAL_PREFIX) || startsWith(url, OFFICIAL_PREFIX_SITO); }
+
 bool updUrlAllowed(const char* url, ErrBuf& err) {
   size_t n = url ? strlen(url) : 0;
   if (!n) { err = tr("Indirizzo mancante"); return false; }
@@ -56,7 +60,7 @@ bool updUrlAllowed(const char* url, ErrBuf& err) {
     if (c == '@') { err = tr("Indirizzo non valido: niente nome utente e password dentro l'indirizzo"); return false; }
   }
   if (strstr(url, "..") || strchr(url, '\\')) { err = tr("Indirizzo non valido"); return false; }
-  if (startsWith(url, OFFICIAL_PREFIX) || matchesFilePrefix(url)) return true;
+  if (updUrlUfficiale(url) || matchesFilePrefix(url)) return true;
   err = tr("Indirizzo non consentito: sono ammessi solo i file ufficiali di VesevOS su GitHub");
   return false;
 }
@@ -102,7 +106,7 @@ static bool commitOrder(DrvNvs& n, uint8_t mode, ErrBuf& err) {
   return true;
 }
 
-bool updOrderNet(const char* url, const char* sha, const char* ver, uint32_t size, ErrBuf& err) {
+bool updOrderNet(const char* url, const char* sha, const char* ver, uint32_t size, ErrBuf& err, bool automatico) {
   if (!updUrlAllowed(url, err)) return false;
   uint8_t h[32];
   if (!hexTo32(sha, h)) { err = tr("L'impronta SHA-256 deve avere 64 cifre esadecimali"); return false; }
@@ -118,7 +122,56 @@ bool updOrderNet(const char* url, const char* sha, const char* ver, uint32_t siz
   if (ver[0]) n.putString("ver", ver);
   n.putUInt("size", size);
   n.putUChar("exp", 30);                                  // minuti dall'avvio del recovery: rete, ora e scarico possono durare piu del solito
+  if (automatico) n.putUChar("auto", 1);                  // un recovery piu vecchio la ignora; la si cancella con l'esito
   return commitOrder(n, 1, err);
+}
+
+bool updOrderSd(const char* file, const char* sha, const char* ver, uint32_t size, const int pin[4], uint32_t khz, ErrBuf& err) {
+  uint8_t h[32];
+  if (!hexTo32(sha, h)) { err = tr("L'impronta SHA-256 deve avere 64 cifre esadecimali"); return false; }
+  if (!ver) ver = "";
+  if (!verOk(ver)) { err = tr("Versione non valida"); return false; }
+  uint32_t space = drvFreeSketchSpace();
+  if (!size || !space || size > space) { err = tr("Dimensione non valida"); return false; }
+  if (!updPinSdOk(pin)) { err = tr("Dimensione non valida"); return false; }
+  uint8_t p[4];
+  for (int i = 0; i < 4; i++) p[i] = (uint8_t)pin[i];
+  DrvNvs n;
+  if (!n.begin(NS, false)) { err = tr("Memoria di configurazione non disponibile"); return false; }
+  n.clear();
+  n.putString("sdf", file);
+  n.putBlob("sdp", p, sizeof p);
+  n.putUInt("khz", khz);
+  n.putBlob("sha", h, sizeof h);
+  if (ver[0]) n.putString("ver", ver);
+  n.putUInt("size", size);
+  n.putUChar("exp", 30);
+  n.putUChar("auto", 1);
+  return commitOrder(n, 3, err);
+}
+
+bool updRiservaArma(const char* file, const char* sha, uint32_t size, const char* verNuova, const int pin[4], uint32_t khz, ErrBuf& err) {
+  uint8_t h[32];
+  if (!hexTo32(sha, h) || !size || !updPinSdOk(pin)) { err = tr("Dimensione non valida"); return false; }
+  uint8_t p[4];
+  for (int i = 0; i < 4; i++) p[i] = (uint8_t)pin[i];
+  DrvNvs n;
+  if (!n.begin(NS_RISERVA, false)) { err = tr("Memoria di configurazione non disponibile"); return false; }
+  n.clear();
+  n.putString("sdf", file);
+  n.putBlob("sdp", p, sizeof p);
+  n.putUInt("khz", khz);
+  n.putBlob("sha", h, sizeof h);
+  n.putUInt("dim", size);
+  n.putString("ver", verNuova ? verNuova : "");
+  n.putUChar("st", 1);                                     // per ultima: la riserva e valida solo se c'e tutto
+  n.end();
+  return true;
+}
+
+void updRiservaDisarma() {
+  DrvNvs n;
+  if (n.begin(NS_RISERVA, false)) { n.clear(); n.end(); }
 }
 
 bool updOrderFile(uint32_t clientIp, char tokenHex[33], ErrBuf& err) {
@@ -152,6 +205,7 @@ const char* updResText(int res) {
     case UPD_E_SCADUTO: return tr("Tempo scaduto: l'ordine non e stato eseguito");
     case UPD_E_ORDINE: return tr("Il recovery ha rifiutato l'ordine (dati non validi)");
     case UPD_E_ANNULLATO: return tr("Aggiornamento annullato o interrotto");
+    case UPD_E_RIPRISTINO: return tr("Il firmware nuovo non si e avviato: e stato rimesso quello di prima");
     default: return tr("Esito sconosciuto");
   }
 }
@@ -165,7 +219,7 @@ void updOutcomeBoot() {
     if (n.getUChar("mode", 0)) { vlog("AGGIORNAMENTO: ordine rimasto nella memoria, il recovery non lo ha eseguito"); n.putUChar("mode", 0); n.clear(); }
     return;
   }
-  if (res > UPD_E_ANNULLATO) res = UPD_E_ORDINE;
+  if (res > UPD_E_RIPRISTINO) res = UPD_E_ORDINE;
   g_out.res = res; g_out.fresh = true;
   char tmp[44];
   if (n.getString("rmsg", tmp, sizeof tmp)) cleanAscii(tmp, g_out.msg, sizeof g_out.msg);

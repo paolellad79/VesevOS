@@ -64,6 +64,68 @@ bool sdWriteBytes(const char* path, const uint8_t* buf, size_t n, bool append, c
   return true;
 }
 
+static volatile bool g_flusso = false;
+
+bool sdFlussoApri(const char* path, char* err, size_t en) {
+  if (g_flusso) {
+    sdSetErr(err, en, tr("Operazione gia in corso"));
+    return false;
+  }
+  if (!pathReady(path, true, err, en)) {
+    return false;
+  }
+
+  sdOpEnter();
+  if (!drvSdFlussoApri(path)) {
+    sdOpLeave();
+    sdSetErr(err, en, tr("Scrittura fallita (scheda protetta, piena o tolta?)"));
+    return false;
+  }
+
+  g_flusso = true;
+  return true;
+}
+
+bool sdFlussoScrivi(const uint8_t* buf, size_t n, char* err, size_t en) {
+  if (!g_flusso || !drvSdFlussoScrivi(buf, n)) {
+    sdSetErr(err, en, tr("Scrittura fallita (scheda protetta, piena o tolta?)"));
+    return false;
+  }
+
+  return true;
+}
+
+bool sdFlussoChiudi(char* err, size_t en) {
+  if (!g_flusso) {
+    return false;
+  }
+
+  bool done = drvSdFlussoChiudi();
+  g_flusso = false;
+  sdOpLeave();
+
+  if (!done) {
+    sdSetErr(err, en, tr("Scrittura fallita (scheda protetta, piena o tolta?)"));
+  }
+
+  return done;
+}
+
+bool sdRename(const char* da, const char* a, char* err, size_t en) {
+  if (!pathReady(da, true, err, en) || !pathReady(a, true, err, en)) {
+    return false;
+  }
+
+  sdOpEnter();
+  bool done = drvSdRename(da, a);
+  sdOpLeave();
+
+  if (!done) {
+    sdSetErr(err, en, tr("Non riesco a rinominare il file"));
+  }
+  return done;
+}
+
 bool sdRemove(const char* path, char* err, size_t en) {
   if (!pathReady(path, true, err, en)) {
     return false;

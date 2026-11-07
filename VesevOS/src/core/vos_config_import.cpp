@@ -85,7 +85,6 @@ static void applyKey(string_view sec, string_view k, string_view v) {
     else if (k == "wps") cfg.wpsOn = (v == "1");
     else if (k == "wpspin") cfg.wpsPin = (v == "1");
     else if (k == "httpon") cfg.httpOn = (v != "0");
-    else if (k == "redirect") cfg.httpRedirect = (v == "1");
     else if (k == "httpport") { int n = viewToLong(v); if (n == 80 || (n >= 1024 && n <= 65535)) cfg.httpPort = n; }
     else if (k == "httpsport") { int n = viewToLong(v); if (n == 443 || (n >= 1024 && n <= 65535)) cfg.httpsPort = n; }
   }
@@ -189,6 +188,11 @@ static void applyKey(string_view sec, string_view k, string_view v) {
     else if (k == "datefmt") cfg.dateFmt = clampL(viewToLong(v), 0, 2);
     else if (k == "timefmt") cfg.timeFmt = clampL(viewToLong(v), 0, 1);
     else if (k == "tempunit") cfg.tempUnit = clampL(viewToLong(v), 0, 1);
+  } else if (sec == "aggiorna") {
+    if (k == "modo") cfg.aggModo = clampL(viewToLong(v), 0, 2);
+    else if (k == "freq") cfg.aggFreq = clampL(viewToLong(v), 0, 2);
+    else if (k == "giorno") cfg.aggGiorno = clampL(viewToLong(v), 1, 28);
+    else if (k == "ora") cfg.aggOra = clampL(viewToLong(v), 0, 1439);
   } else if (sec == "watchdog") {
     if (k == "task") cfg.wdTask = (v != "0");
     else if (k == "net") cfg.wdNet = (v != "0");

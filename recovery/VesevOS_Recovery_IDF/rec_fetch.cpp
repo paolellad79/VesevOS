@@ -54,7 +54,11 @@ static int openFollowing(esp_http_client_handle_t c, std::string& why) {
   return RES_NET;
 }
 
-static void finish(int code, const std::string& why) { recResult(code, why); }
+// L'ordine e finito: la scadenza non deve sovrascrivere il motivo vero.
+static void finish(int code, const std::string& why) {
+  recResult(code, why);
+  recOrder().burnt = true;
+}
 
 void recFetchRun() {
   RecOrder& o = recOrder();
@@ -90,6 +94,7 @@ void recFetchRun() {
   static uint8_t buf[READ_CHUNK];
   size_t total = 0;
   for (;;) {
+    if (o.automatico && recOrderExpired()) { img.fail(RES_EXPIRED, "ordine scaduto"); break; }   // nessuno puo intervenire: tempo massimo
     int n = esp_http_client_read(c, (char*)buf, sizeof buf);
     if (n < 0) { img.fail(RES_NET, "lettura interrotta"); break; }
     if (n == 0) { if (esp_http_client_is_complete_data_received(c)) break; img.fail(RES_NET, "lettura interrotta"); break; }

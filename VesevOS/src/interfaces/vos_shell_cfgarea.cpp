@@ -124,7 +124,7 @@ void areaServices(OutSink& o, int role) {
   shCmdVesevos(Word("vesevos-services", 16), Word(), "vesevos-services", o, role, SESS_NONE);   // l'elenco lo scrive vesevos-services
   o.println();
   commandsOnly(o, "vesevos-services <servizio> start|stop|restart", TRK("avvia, ferma, riavvia (fermare http, https, ap chiede conferma)"),
-               "svc <nome> on|off", TRK("hotspot, portale, HTTP, HTTPS, redirect, DHCP, mDNS"), nullptr, nullptr);
+               "svc <nome> on|off", TRK("hotspot, portale, HTTP, HTTPS, DHCP, mDNS"), nullptr, nullptr);
 }
 
 // Utenti: nomi e ruoli, mai hash o sale. Solo Admin.

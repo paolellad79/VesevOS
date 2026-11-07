@@ -14,5 +14,5 @@ bool modAppInstall(const char* name, ErrBuf& err);                              
 void modAppRemove(const char* name);                                             // toglie /bin/<nome>.vab solo se l'ha generato un driver
 // Installazione completa: app del driver, poi periferiche sui pin scelti (pinsCsv) o proposti; se le periferiche falliscono l'app si toglie.
 bool modInstallDriver(const char* name, const char* prefix, const char* pinsCsv, HeapBuf& outJson, ErrBuf& err);
-bool modSaveDriver(const char* name, std::string_view text, ErrBuf& err);        // controlla (anche l'app) e salva /devs/<nome>.vdb
+bool modSaveDriver(const char* nomeCaricato, std::string_view text, ErrBuf& err, char* salvato = nullptr, size_t cap = 0, ErrBuf* avviso = nullptr);        // controlla (anche l'app) e salva /devs/<nome>.vdb
 bool modDeleteDriver(const char* name, ErrBuf& err);                             // toglie il driver e la sua app; le periferiche gia create restano

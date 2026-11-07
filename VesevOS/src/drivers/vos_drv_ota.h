@@ -24,4 +24,9 @@ void   drvOtaNextTo(char* out, size_t n);
 uint32_t drvFreeSketchSpace();    // dimensione della partizione che riceve il prossimo aggiornamento
 // Conferma al bootloader che il programma in esecuzione parte bene (con il rollback attivo, un programma appena installato resta
 // "da verificare" e al riavvio dopo si torna indietro). Prima lo faceva initArduino; ora lo chiama drvPlatformInit(), all'inizio dell'avvio.
+// Dopo un'installazione automatica con copia di riserva si conferma piu tardi (drvOtaConfermaProva): se il firmware nuovo cade prima,
+// il bootloader passa al recovery, che rimette la riserva. Con il rollback spento nel bootloader la conferma non cambia nulla.
 void drvOtaConfirmBoot();
+void drvOtaConfermaProva();
+bool drvOtaInProva();             // c'e una copia di riserva armata (spazio NVS "vosris")
+bool drvApp0Leggi(uint32_t off, uint8_t* buf, size_t n);   // legge il programma in esecuzione

@@ -1,4 +1,9 @@
 GET   /  pubblico
+GET   /api/aggiorna  admin
+POST  /api/aggiorna/imposta  admin
+POST  /api/aggiorna/installa  admin
+GET   /api/aggiorna/pacchetti  admin
+POST  /api/aggiorna/verifica  admin
 POST  /api/airplane  operatore
 GET   /api/ap  ospite
 POST  /api/ap  admin
@@ -8,7 +13,7 @@ POST  /api/app/start  operatore
 GET   /api/app/state  operatore
 POST  /api/app/stop  operatore
 GET   /api/apps  operatore
-GET   /api/audit  ospite
+GET   /api/audit  operatore
 POST  /api/audit/ack  operatore
 GET   /api/auth  pubblico
 GET   /api/ban  admin
@@ -21,6 +26,7 @@ GET   /api/boots  operatore
 POST  /api/boots/clear  admin
 GET   /api/btn  operatore
 POST  /api/btn  admin
+GET   /api/casuale  ospite
 GET   /api/common  pubblico
 GET   /api/config/download  admin
 POST  /api/config/export  admin
@@ -32,6 +38,8 @@ POST  /api/dev/act  operatore
 POST  /api/dev/set  admin
 GET   /api/elf  operatore
 POST  /api/elf  admin
+GET   /api/eventi  admin
+POST  /api/eventi/svuota  admin
 GET   /api/events  operatore
 POST  /api/factory  admin
 POST  /api/firstpass  pubblico
@@ -112,6 +120,7 @@ POST  /api/region  admin
 GET   /api/rules  operatore
 POST  /api/rules  operatore
 POST  /api/rules/run  operatore
+GET   /api/script/api  operatore
 GET   /api/script  admin
 POST  /api/script/run  admin
 POST  /api/script/stop  admin

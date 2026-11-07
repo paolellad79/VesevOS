@@ -1,0 +1,101 @@
+<section id="t_auto" class="hide">
+ <div class="card"><h3>Automazioni</h3>
+  <p style="color:var(--mut)">Regole "Quando... Se... Allora..." che la scheda esegue da sola, anche senza rete: sveglie, timer, allarmi di temperatura.</p>
+  <div id="atime" class="msg"></div>
+  <div id="rlist"></div>
+  <button class="btn" onclick="rNew()">Nuova regola</button>
+  <p class="subt" style="margin-top:12px">Modelli pronti:</p>
+  <button class="btn gray" onclick="rTpl(0)">Sveglia</button><button class="btn gray"
+   onclick="rTpl(1)">Dopo l'avvio</button><button class="btn gray"
+   onclick="rTpl(2)">Allarme temperatura</button>
+  <div id="rm" class="msg"></div></div>
+ <div class="card rcard hide" id="redit"></div>
+</section>
+<section id="t_script" class="hide">
+ <div class="sub" id="sk_script"><button>Script</button><button>Funzioni disponibili</button><button>AI</button></div>
+ <div>
+ <div class="card"><h3>Script</h3>
+  <p style="color:var(--mut)">Programmi VesevOS, salvati come file .vsb nella cartella /sbin. Girano in sottofondo, uno alla volta. Un ciclo deve fare pause con sleep(): senza pause per piu di 3 secondi lo script viene fermato.</p>
+  <div id="scst" class="fhint" role="status"></div>
+  <div class="ftb">
+   <button class="btn" onclick="scNew()"><svg class="i" aria-hidden="true"><use href="#i-fvsc"/>
+    </svg><span>Nuovo script</span></button>
+   <span class="adm"><input type="file" id="scup" accept=".vsb,.vsc"
+     aria-label="Script da caricare"><button class="btn gray" onclick="scUp()"><svg class="i"
+      aria-hidden="true"><use href="#i-dl"/></svg><span>Carica</span></button></span>
+   <button class="btn gray" id="scstop" onclick="scStopRun()"><svg class="i" aria-hidden="true">
+     <use href="#i-stop"/></svg><span>Ferma</span></button>
+  </div>
+  <table id="sctab" class="ftab"></table>
+  <div id="scm" class="msg" role="status"></div></div>
+ <div class="card"><h3>Uscita</h3>
+  <pre id="scout" class="lgv" tabindex="0" aria-label="Uscita dello script"></pre>
+  <p class="fhint" id="scinfo"></p></div>
+ </div>
+ <div class="card"><h3>Funzioni disponibili</h3>
+  <ul class="scfn">
+   <li><code>print(x)</code> <span>scrive nell'uscita</span></li>
+   <li><code>led("RRGGBB")</code> <span>colore del LED (led("auto") torna al modo normale)</span>
+   </li>
+   <li><code>act("azione")</code> <span>azione delle Automazioni; risponde "ok" o l'errore</span>
+   </li>
+   <li><code>time()</code> <span>ora in secondi (0 se l'ora non e valida)</span></li>
+   <li><code>millis()</code> <span>millisecondi dall'accensione</span></li>
+   <li><code>temp()</code> <span>temperatura del chip</span></li>
+   <li><code>log(testo)</code> <span>scrive una riga nel registro</span></li>
+   <li><code>btn()</code> <span>click liberi del tasto fisico: 1, 2 o 3, oppure 0 se non ce ne sono (non aspetta). Vedi Dispositivi &gt; Tasto</span>
+   </li>
+   <li><code>logtail(n)</code> <span>ultime n righe del registro (1-20, massimo 2000 caratteri). Nelle app serve logread in use=: il registro puo contenere indirizzi e nomi</span>
+   </li>
+   <li><code>mqtt("nome", "testo")</code> <span>invia un testo al broker MQTT su &lt;prefisso&gt;/app/&lt;nome&gt; (vero = inviato, falso = non inviato; massimo 20 al minuto). Nelle app serve mqtt in use=</span>
+   </li>
+   <li><code>ble_on(min)</code> <span>ble_on(minuti), ble_off(), ble_status(), ble_name(nome), ble_adv(vero), ble_service(...), ble_set(uuid, dati), ble_notify(uuid, dati), ble_disconnect(): Bluetooth, solo nelle app con ble in use=. Spento di fabbrica, abbinamento con codice obbligatorio. Negli script (lanciati dall'Admin): ble_status(), ble_off(), ble_passkey()</span>
+   </li>
+   <li><code>sleep(ms)</code> <span>pausa</span></li>
+  </ul></div>
+ <div class="card"><h3>AI</h3>
+  <p style="color:var(--mut)">Usa un'AI esterna per scrivere lo script: copia il testo qui sotto, incollalo nella chat e descrivi cosa deve fare lo script.</p>
+  <div class="ftb">
+   <button class="btn" onclick="aiCopia()"><span id="aibtn">Copia il testo</span></button>
+   <a class="btn gray" href="https://duck.ai/" target="_blank" rel="noopener">Apri duck.ai</a>
+  </div>
+  <textarea id="aitxt" class="lgv" readonly rows="12" aria-label="Testo del prompt"></textarea></div>
+</section>
+<section id="t_app" class="hide">
+ <div class="sub" id="sk_app"><button>App</button><button class="adm">File app</button></div>
+ <div>
+  <div class="card"><h3>App</h3>
+   <p style="color:var(--mut)">Le app stanno nella cartella /bin. Si avviano, si fermano e si eliminano da qui. Le app con una pagina propria si aprono dal nome e si comandano dai loro controlli. Un'app con pagina gira da sola: mentre gira non parte nessuno script.</p>
+   <div class="ftb adm">
+    <button class="btn" onclick="apNew()"><svg class="i" aria-hidden="true"><use href="#i-fvap"/>
+     </svg><span>Nuova app</span></button>
+    <input type="file" id="apup" accept=".vab,.vae,.vap,.vel" aria-label="App da caricare"><button
+     class="btn gray" onclick="apUp()"><svg class="i" aria-hidden="true"><use href="#i-dl"/>
+     </svg><span>Carica</span></button>
+   </div>
+   <table id="aptab" class="ftab"></table>
+   <div id="appm" class="msg" role="status"></div></div>
+  <div class="card hide" id="apcard"><div class="aphd">
+    <span class="scn" id="aphead"></span><span class="pill" id="appill">ferma</span>
+   <span class="apb"><button class="btn" id="apgo" aria-pressed="false"
+     onclick="apStart()">Avvia</button><button class="btn gray" id="apst" onclick="apStop()"
+     disabled>Ferma</button><button class="btn gray" onclick="apClose()">Chiudi</button></span>
+   </div>
+   <div id="apctl" class="apctl"></div>
+   <pre id="apout" class="lgv hide" tabindex="0" aria-label="Uscita dell'app"
+    aria-live="polite"></pre></div>
+ </div>
+  <div class="card adm"><h3>Come e fatto un file app</h3>
+   <ul class="scfn">
+    <li><code>[manifest]</code> <span>name (uguale al nome del file), title, version, author, use (permessi: led, time, temp, log, logread, act, btn, mqtt, ble, files, gpio:N), who (admin oppure oper)</span>
+    </li>
+    <li><code>[icon]</code> <span>un solo disegno svg con forme semplici, massimo 2 KB</span></li>
+    <li><code>[page]</code> <span>un controllo per riga: switch, slider, color, text, button, chart, con id e label</span>
+    </li>
+    <li><code>[code]</code> <span>codice VesevOS, massimo 8 KB. Funzioni: on_set(id, valore) quando tocchi un controllo, on_tick() ogni secondo, dev_get(id), dev_set(id, valore); e led, act, log, time, temp, btn, logtail, mqtt se il manifest le permette (use)</span>
+    </li>
+    <li><code>[data]</code> <span>valori iniziali: chiave=valore (se la chiave e un controllo ne e il valore di partenza)</span>
+    </li>
+   </ul></div>
+ 
+ </section>

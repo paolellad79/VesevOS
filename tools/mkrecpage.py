@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 # VesevOS - genera recovery/VesevOS_Recovery/recovery_page.h (la pagina del recovery).
-# La parte SHA-256/HMAC/hashPass e COPIATA da web/src/js_pin_accesso.js (stessa formula della pagina del firmware).
+# La parte SHA-256/HMAC/hashPass e COPIATA da web/src/js_cripto.js (stessa formula della pagina del firmware).
+# La pagina del recovery riceve il codice compattato: nei sorgenti le funzioni stanno su piu righe.
 import os, re
+from compattajs import compatta_js
 R = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
-js = open(os.path.join(R, 'web/src/js_pin_accesso.js'), encoding='utf-8').read().split('\n')
+js = open(os.path.join(R, 'web/src/js_cripto.js'), encoding='utf-8').read().split('\n')
 a = [i for i, l in enumerate(js) if l.startswith('var SHK=')][0]
 b = [i for i, l in enumerate(js) if l.startswith('function hashPass(')][0]
-crypto = '\n'.join(js[a:b + 1])
+c = [i for i, l in enumerate(js) if i > b and l == '}'][0]   # la graffa in colonna zero chiude hashPass
+crypto = compatta_js('\n'.join(js[a:c + 1]))
 html = r'''<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>VesevOS Recovery</title>
 <style>body{font:16px system-ui,sans-serif;margin:0;background:#101418;color:#e8edf2}main{max-width:30rem;margin:0 auto;padding:16px}
@@ -71,7 +74,7 @@ if os.path.isdir(os.path.dirname(out)):   # lo sketch vecchio non e piu nel pacc
 
 # Recovery 0.5.1: il gettone vale anche per l'avvio normale (/api/boot); errori in italiano e distinti (scaduto, usato, mancante).
 # Recovery 0.5.0: la pagina accetta anche il permesso di VesevOS (#g=<gettone> nell'indirizzo, modo 2 dell'ordine): nessun login, il gettone va in X-G.
-idf_html = html.replace('Recovery 0.4.3.', 'Recovery 0.5.1.')
+idf_html = html.replace('Recovery 0.4.3.', 'Recovery 0.5.3.')
 # Solo per il recovery IDF: la frase non nomina piu Arduino-ESP32 (il controllo e lo stesso: parola ABCD5432 dell'intestazione dell'app).
 idf_html = idf_html.replace('Non e un firmware Arduino-ESP32 valido', 'Non e un firmware ESP32 valido')
 for a, b in [

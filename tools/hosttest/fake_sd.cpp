@@ -261,6 +261,8 @@ bool drvSdRemove(const char* path) {
   return g_sd.files.erase(path) > 0;
 }
 
+bool drvSdRename(const char*, const char*) { return false; }
+
 bool drvSdMkdir(const char* path) {
   if (!cardUsable()) {
     return false;

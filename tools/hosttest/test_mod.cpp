@@ -32,6 +32,7 @@ bool ioRemove(const char*, String&) { g_removed++; return true; }
 static int g_i2cSda = -1, g_i2cScl = -1, g_i2cAddr = -1, g_i2cCalls = 0; static bool g_i2cFast = false; static String g_i2cDrv;
 bool ioAddI2c(const char* drv, int sda, int scl, int addr, bool fast, const char* name, char* out, char* err) {
   (void)err; g_i2cCalls++; g_i2cDrv = drv; g_i2cSda = sda; g_i2cScl = scl; g_i2cAddr = addr; g_i2cFast = fast; strcpy(out, name[0] ? name : "bmp1"); return true; }
+#include "../../VesevOS/src/core/vos_pacchetto.cpp"
 #include "../../VesevOS/src/devices/vos_mod.cpp"
 
 static String ok2() {

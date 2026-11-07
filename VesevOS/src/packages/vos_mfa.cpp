@@ -153,7 +153,7 @@ int mfaOffAdmins() {
   int n = 0;
   for (int i = 0; i < VOS_MAX_USERS; i++)
     if (cfg.users[i].name.length() && cfg.users[i].role == ROLE_ADMIN && (cfg.users[i].mfaOn || cfg.users[i].mfa.length())) { mfaOff(i); n++; }
-  if (n) auditEvent(AUD_YELLOW, "mfaboot", tr("MFA degli amministratori disattivato con il tasto BOOT"));
+  if (n) auditEvent(AUD_YELLOW, "mfaboot", tr("MFA degli amministratori disattivato con il tasto fisico"));
   return n;
 }
 

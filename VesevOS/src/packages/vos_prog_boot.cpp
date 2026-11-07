@@ -60,7 +60,7 @@ int elencoDaAvviare(ProgBoot* out, int max) {
   int nr = appRequiredList(req, VOS_BOOTPROG_MAX);
   for (int i = 0; i < nr && n < max; i++) {
     out[n].kind = PK_APP_B;
-    snprintf(out[n].name, sizeof out[n].name, "%s", req[i]);
+    snprintf(out[n].name, sizeof out[n].name, "%.24s", req[i]);
     out[n].rule = 1;
     out[n].forced = true;
     n++;

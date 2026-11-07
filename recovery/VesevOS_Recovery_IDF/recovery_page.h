@@ -9,7 +9,7 @@ button{background:#2b6cb0;border:0;cursor:pointer}button:disabled{opacity:.5}.m{
 <div class="c" id="a"><div id="lu1"><label>Utente<input id="u" autocomplete="username"></label></div>
 <label id="pl">Password<input id="p" type="password" autocomplete="current-password"></label>
 <button id="bl" onclick="login()">Entra</button><div class="m" id="lm"></div>
-<small>Recovery 0.5.2. Per entrare serve un amministratore di VesevOS.</small></div>
+<small>Recovery 0.5.3. Per entrare serve un amministratore di VesevOS.</small></div>
 <div class="c" id="b" hidden><div id="info" class="m"></div>
 <div id="dz"><label>Firmware (file .bin di VesevOS)<input id="f" type="file" accept=".bin"></label><div class="m" id="fn"><small>Trascina qui il file .bin oppure usa il pulsante.</small></div></div>
 <label>SHA-256 atteso (facoltativo: lo trovi nella pagina del rilascio)<input id="sh" autocomplete="off" spellcheck="false" placeholder="64 caratteri esadecimali"></label>

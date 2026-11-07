@@ -96,6 +96,11 @@ int drvSdReadAt(const char* path, uint32_t off, uint8_t* buf, size_t max);
 
 bool drvSdWrite(const char* path, const uint8_t* buf, size_t n, bool append);
 
+// Un file grande scritto a blocchi: resta aperto dall'apertura alla chiusura, uno solo alla volta. Lo smontaggio lo chiude: Scrivi e Chiudi danno false.
+bool drvSdFlussoApri(const char* path);            // crea il file, o lo svuota se c'e gia
+bool drvSdFlussoScrivi(const uint8_t* buf, size_t n);
+bool drvSdFlussoChiudi();                          // false = il file puo non essere completo
+
 // Voci scritte in out, -1 = errore. more = ce ne sono altre.
 int drvSdList(const char* dir, DrvSdEntry* out, int max, bool& more);
 
@@ -107,6 +112,7 @@ bool drvSdStat(const char* path, DrvSdEntry& out);
 
 // Solo file.
 bool drvSdRemove(const char* path);
+bool drvSdRename(const char* da, const char* a);                  // la destinazione non deve esistere (regola della FAT)
 
 bool drvSdMkdir(const char* path);
 

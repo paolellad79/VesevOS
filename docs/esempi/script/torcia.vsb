@@ -1,0 +1,43 @@
+# Torcia: un click del tasto BOOT accende il LED bianco, il click dopo lo spegne.
+# PRIMA: in Dispositivi > Tasto BOOT metti "Libero" sul gesto che vuoi usare
+#   (di fabbrica sono liberi solo i 3 click; 1 click esce dal modo aereo, 2 click e il WPS).
+# Le pressioni lunghe del tasto (2 s, 8 s, 20 s) restano sempre del sistema: servono al recupero.
+# ATTENZIONE: il LED bianco e molto forte e scalda. Per questo si spegne da solo dopo MINUTI minuti.
+# La luminosita generale si sceglie in Dispositivi > LED; qui si scala solo il bianco (COLORE).
+
+var COLORE = "ffffff"   # bianco pieno; per meno luce prova "808080" o "404040"
+var MINUTI = 10         # spegnimento automatico (0 = mai)
+
+var acceso = false
+var t0 = 0
+
+def accendi()
+  led(COLORE)
+  acceso = true
+  t0 = millis()
+  print("torcia accesa")
+end
+
+def spegni(motivo)
+  led("auto")
+  acceso = false
+  print("torcia spenta (" + motivo + ")")
+end
+
+print("torcia pronta: premi il tasto per accendere")
+while true
+  sleep(60)
+  if btn() > 0
+    if acceso
+      spegni("click")
+    else
+      accendi()
+    end
+  end
+  if acceso && MINUTI > 0
+    var d = millis() - t0
+    if d < 0 || d >= MINUTI * 60000
+      spegni("tempo scaduto")
+    end
+  end
+end

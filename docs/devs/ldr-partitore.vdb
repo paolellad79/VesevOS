@@ -1,0 +1,16 @@
+# Scheda modulo di esempio VesevOS (dati propri, licenza CC0). Controlla sempre i collegamenti sul datasheet del tuo modulo.
+[module]
+name=ldr-partitore
+title=Sensore di luce LDR
+class=analogico
+power=3V3
+level=3V3
+part=gnd,10 kohm,A0
+author=VesevOS
+version=1.1
+license=CC0
+warn=Partitore con resistenza da 10 kohm; non superare 3,3 V sul pin
+[signals]
+A0
+[icon]
+<svg viewBox="0 0 24 24"><path d="M3 17c3-8 6 4 9-3s6 3 9-6" fill="none" stroke="#d4a017" stroke-width="2"/></svg>

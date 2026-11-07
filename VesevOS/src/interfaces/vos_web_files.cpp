@@ -3,6 +3,10 @@
 // VesevOS - vos_web_files.cpp
 // Percorsi del server web: rete tra schede, Bluetooth, file. Aiuti e tipi condivisi: vos_web_int.h.
 #include "vos_web_int.h"
+#include "../packages/vos_pacchetto_nome.h"
+
+// Il percorso definitivo di un pacchetto che ne sostituisce uno installato; intanto si scrive in "<percorso>.tmp~". Vuoto negli altri casi.
+static char g_upFinale[sizeof g_upPath];
 
 // {"ok":true,"key":"..."} (con ok = true) oppure {"key":"..."}: la chiave della rete tra schede (64 cifre esadecimali, niente da proteggere)
 static esp_err_t keyJson(Res* s, bool withOk = true) {
@@ -83,9 +87,9 @@ void routesFiles(PsychicHttpServer* S, bool sec) {
     if (csrfBlocked(r)) return ESP_FAIL;                                       // caricamento partito da un altro sito
     int u = userOf(r);
     if (u < 0 || cfg.users[u].role < ROLE_ADMIN) return ESP_FAIL;
-    if (!sec && g_tlsUp && cfg.https && !netOnAp(ip)) return ESP_FAIL;
+    if (!sec && g_tlsUp && cfg.https) return ESP_FAIL;
     if (index == 0) {
-      g_upOk = false; g_upErr.clear();
+      g_upOk = false; g_upErr.clear(); g_upFinale[0] = 0;
       char dir[FS_PATH_MAX + 1], raw[2 * FS_PATH_MAX + 2], p[FS_PATH_MAX + 1];   // p: fsCleanTo vuole almeno FS_PATH_MAX + 1 byte, altrimenti rifiuta sempre
       qparamTo(r, "dir", dir, sizeof dir);
       if (!dir[0]) snprintf(dir, sizeof dir, "/");
@@ -101,9 +105,10 @@ void routesFiles(PsychicHttpServer* S, bool sec) {
         if (!drvFsExists(p)) { if (const char* full = fsRoomFor(p)) { g_upErr = full; return ESP_OK; } drvFsMkdir(p); }
         *ls = '/';
       }
-      g_upFile = drvFsOpen(p, "w");
+      if (pacchettoDaProteggere(p)) snprintf(g_upFinale, sizeof g_upFinale, "%s", p);    // quello installato resta intatto fino al controllo
+      snprintf(g_upPath, sizeof g_upPath, g_upFinale[0] ? "%s.tmp~" : "%s", p);
+      g_upFile = drvFsOpen(g_upPath, "w");
       if (!g_upFile) { g_upErr = tr("Impossibile creare il file"); return ESP_OK; }
-      snprintf(g_upPath, sizeof g_upPath, "%s", p);
     }
     if (g_upFile) {
       if (g_upFile.write(data, len) != len) { g_upErr = tr("Spazio esaurito"); g_upFile.close(); drvFsRemove(g_upPath); return ESP_OK; }
@@ -114,15 +119,23 @@ void routesFiles(PsychicHttpServer* S, bool sec) {
   up->onRequest([](Req* r, Res* s) -> esp_err_t {
     int u = userOf(r);
     if (u < 0 || cfg.users[u].role < ROLE_ADMIN) return sendJson(s, "{\"ok\":false,\"err\":\"non autorizzato\"}", 401);
-    return g_upOk ? ok(s) : ko(s, g_upErr.empty() ? tr("Caricamento non riuscito") : g_upErr.c_str());
+    if (g_upOk) {
+      ErrBuf e, avviso;
+      if (!pacchettoCaricato(g_upPath, g_upFinale[0] ? g_upFinale : g_upPath, e, avviso)) { g_upOk = false; return ko(s, e); }
+      return okAvviso(s, avviso);
+    }
+    if (g_upFinale[0]) {                                                         // caricamento interrotto: il temporaneo non serve piu
+      if (g_upFile) g_upFile.close();
+      drvFsRemove(g_upPath);
+    }
+    return ko(s, g_upErr.empty() ? tr("Caricamento non riuscito") : g_upErr.c_str());
   });
   S->on("/api/fs/up", HTTP_POST, up);
 
   // Portale automatico: in modo AP ogni indirizzo sconosciuto (controlli di Android, iPhone, Windows...) porta alla pagina.
-  S->onNotFound([sec](Req* r, Res* s) -> esp_err_t {
+  S->onNotFound([](Req* r, Res* s) -> esp_err_t {
     uint32_t ip = ipOf(r);
     if (!fwAllow(ip, false)) { fwNoteRejected(ip); return ESP_FAIL; }
-    if (!sec && netCaptive() && strncmp(r->pathCStr(), "/api/", 5) != 0) return s->redirect("http://192.168.4.1/");
     return notFound(s);
   });
 }

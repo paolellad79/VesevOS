@@ -1,0 +1,244 @@
+<section id="t_pass" class="hide">
+ <div class="card"><h3>Password</h3><div id="pwho" class="fhint"></div>
+  <label for="p_old">Vecchia</label><input type="password" id="p_old"
+   autocomplete="current-password"><label for="p_new">Nuova (min 6)</label><input type="password"
+   id="p_new" autocomplete="new-password" oninput="pwMisura()">
+  <div id="p_mis" class="fhint" role="status" aria-live="polite"></div>
+  <label for="p_new2">Ripeti la nuova</label><input type="password" id="p_new2"
+   autocomplete="new-password">
+  <label for="p_liv">Complessita</label><select id="p_liv"><option value="0">Da ricordare</option>
+   <option value="1">Forte</option><option value="2">Massima</option></select>
+  <button class="btn gray" onclick="pwGenera()">Genera password</button><button class="btn gray"
+   id="p_ved" aria-pressed="false" onclick="pwVedi()">Mostra</button>
+  <button class="btn" onclick="chPass()">Cambia</button><div id="pm" class="msg"></div></div>
+</section>
+<section id="t_sec" class="hide">
+ <div class="sub" id="sk_sec"><button class="adm">Utenti</button><button class="adm">Nuovo utente</button></div>
+ <div class="card adm"><h3>Utenti</h3>
+  <p class="fhint">Fino a 8 utenti. Amministratore: tutto. Operatore: usa la scheda (LED, pin, automazioni, messaggi) ma non cambia rete, sicurezza e utenti. Ospite: solo guarda (Home, stato, registro). I permessi sono controllati dalla scheda, non solo dalla pagina.</p>
+  <div style="overflow-x:auto"><table id="ustab" class="ftab"></table></div>
+  <div id="usm" class="msg"></div></div>
+ <div class="card adm"><h3>Nuovo utente</h3>
+  <div class="agrid"><div>
+    <label for="u_n">Nome (3-20: lettere, numeri, punto, trattino)</label><input id="u_n"
+     maxlength="20" autocomplete="off"></div>
+   <div><label for="u_r">Ruolo</label><select id="u_r"><option value="0">Ospite</option>
+     <option value="1">Operatore</option><option value="2">Amministratore</option></select></div>
+   <div><label for="u_p">Password (min 6)</label><input type="password" id="u_p"
+     autocomplete="new-password"></div></div>
+  <button class="btn" onclick="uAdd()">Aggiungi</button><div id="usm2" class="msg"></div></div>
+</section>
+<section id="t_mfa" class="hide">
+ <div class="sub" id="sk_mfa"><button>MFA</button><button>L'ora e l'MFA</button><button class="adm">Utenti e impostazioni</button></div>
+ <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-shield"/>
+   </svg>Verifica in due passi (MFA)</h3>
+  <p class="fhint">Oltre alla password, all'accesso serve un codice a 6 cifre che cambia ogni 30 secondi e che crei con un'app di autenticazione sul telefono (qualsiasi app compatibile con i codici TOTP). Facoltativa, consigliata per gli amministratori.</p>
+  <div id="mfst" class="msg" style="margin-bottom:8px"></div>
+  <div class="sc" id="sc_mfa"></div>
+  <button class="btn gray hide" id="mf_rec" onclick="mfRec()">Nuovi codici di recupero</button>
+  <div id="mfact" class="hide" style="margin-top:12px">
+   <p><b>1.</b> Apri l'app e inquadra il QR (oppure scrivi la chiave a mano).</p>
+   <div class="lab prt"><div class="qrbox" id="mfqr"></div><div>
+     <div class="subt">Chiave (se non puoi inquadrare il QR)</div>
+     <div class="big" id="mfkey" style="font-family:monospace;word-break:break-all"></div></div>
+   </div>
+   <p><b>2.</b> Scrivi qui il primo codice di 6 cifre che vedi nell'app. Finche non lo confermi, l'MFA resta spento.</p>
+   <label for="mf_code">Codice</label><input id="mf_code" inputmode="numeric" maxlength="6"
+    autocomplete="one-time-code" onkeydown="if(event.key=='Enter')mfConfirm()">
+   <button class="btn" onclick="mfConfirm()">Conferma e accendi</button><button class="btn gray"
+    onclick="$('mfact').className='hide'">Annulla</button></div>
+  <div id="mfrec" class="hide law" style="margin-top:12px">
+   <b>Codici di recupero</b> (si vedono una sola volta, ognuno vale una volta). Scrivili o stampali e tienili al sicuro.
+   <div id="mfrecl"
+    style="font-family:monospace;font-size:1.1em;margin:8px 0;line-height:1.8"></div>
+   <button class="btn gray" onclick="mfCopy()">Copia</button><button class="btn gray"
+    onclick="window.print()">Stampa</button></div>
+  <div id="mfm" class="msg"></div>
+  <p class="fhint">Se perdi il telefono e i codici: tieni premuto il tasto fisico della scheda per 8 secondi (con il cavo USB). Si spegne l'MFA degli amministratori e si sceglie una password nuova. Chi ha la scheda in mano ha il controllo fisico.</p>
+  </div>
+ <div class="card"><h3>L'ora e l'MFA</h3>
+  <p class="fhint">I codici dipendono dall'ora esatta (UTC). La scheda non ha batteria per l'orologio: dopo un riavvio l'ora si perde finche non torna da Internet (NTP) o la imposti tu. L'ora del telefono deve essere automatica. Fuso orario e ora legale non contano.</p>
+  <div id="mftime" class="msg"></div></div>
+ <div>
+ <div class="card adm" id="mfadm"><h3>Utenti e impostazioni (amministratore)</h3>
+  <div style="overflow-x:auto"><table id="mftab" class="ftab"></table></div>
+  <label for="mf_nt">Se l'ora della scheda non e valida</label>
+  <select id="mf_nt" onchange="mfSet()">
+   <option value="0">Chiedi di impostare l'ora (consigliato)</option>
+   <option value="1">Accetta solo codici di recupero</option>
+   <option value="2">Blocca l'accesso</option></select>
+  <label for="mf_pow">Prova anti-bot all'accesso (il browser fa un piccolo calcolo prima del login)</label>
+  <select id="mf_pow" onchange="mfSet()"><option value="0">Spenta</option>
+   <option value="12">Leggera</option><option value="14">Normale (consigliata)</option>
+   <option value="16">Forte</option>
+   <option value="18">Molto forte (lenta su telefoni vecchi)</option></select>
+  <p class="fhint">Non usa servizi esterni e non salva nulla del visitatore. Dopo errori ripetuti l'indirizzo viene bloccato (Sicurezza &gt; Filtro IP).</p>
+  <div id="mfm2" class="msg"></div></div>
+ </div>
+</section>
+<section id="t_fw" class="hide">
+ <div class="sub" id="sk_fw"><button>Filtro IP</button><button>Ultimi rifiutati</button><button class="adm">Blocco degli accessi</button></div>
+ <div class="card"><h3>Filtro IP</h3>
+  <p class="fhint">Decide chi puo parlare con la scheda. L'hotspot della scheda e la seriale USB sono sempre ammessi. Chi e fuori lista non riceve risposta. Una regola nuova vale 2 minuti: se non la confermi torna quella di prima.</p>
+  <div id="fwyou" class="law"></div>
+  <div class="agrid"><div><label for="fw_m">Modo</label><select id="fw_m">
+     <option value="0">Spento</option><option value="1">Solo la mia rete</option>
+     <option value="2">Lista consentita</option><option value="3">Lista bloccati</option></select>
+   </div>
+   <div class="tog"><div>Filtra anche il server dell'ora (NTP)</div>
+    <button class="sw1" id="fw_ntp" onclick="this.classList.toggle('on')" aria-label="NTP"></button>
+   </div></div>
+  <label for="fw_r">Voci: una per riga, indirizzo|1|nome (anche intervallo 192.168.1.10-192.168.1.20 o rete 192.168.1.0/24; 0 = spenta)</label>
+  <textarea id="fw_r" rows="6" spellcheck="false"></textarea>
+  <button class="btn gray" onclick="fwMine()">Aggiungi il mio indirizzo</button><button class="btn"
+   onclick="fwSave()">Prova la regola</button><button class="btn" id="fwok"
+   onclick="fwConfirm()">Conferma</button>
+  <div id="fwtry" class="msg"></div><div id="fwm" class="msg"></div>
+  <p class="fhint">Uscite di emergenza: comando firewall off dalla seriale oppure tasto fisico tenuto da 2 a 7 secondi.</p>
+  </div>
+ <div class="card"><h3>Ultimi rifiutati</h3><table id="fwrej" class="ftab"></table></div>
+ <div class="card adm"><h3><svg class="i hic" aria-hidden="true"><use href="#i-lockx"/>
+   </svg>Blocco degli accessi</h3>
+  <p class="fhint">Dopo troppe password sbagliate dallo stesso indirizzo, la scheda lo blocca per un po'. Ogni nuovo blocco dura il doppio (massimo 1 ora). Anche troppe richieste senza accesso contano come errore.</p>
+  <div class="agrid"><div>
+    <label for="b_f">Password sbagliate prima del blocco</label><input type="number" id="b_f"
+     min="3" max="20"></div>
+   <div><label for="b_s">Primo blocco (secondi)</label><input type="number" id="b_s" min="10"
+     max="3600"></div></div>
+  <button class="btn" onclick="banSave()">Salva</button><div id="bnm" class="msg"></div>
+  <h3 style="margin-top:14px">Indirizzi bloccati o sospetti</h3>
+  <table id="bntab" class="ftab"></table>
+  <button class="btn gray" onclick="banLoad()">Aggiorna</button><button class="btn red"
+   onclick="banUn('all')">Sblocca tutti</button>
+  <p class="fhint">Dalla seriale: <code>ban</code> mostra l'elenco, <code>unban all</code> sblocca tutti.</p>
+  </div>
+</section>
+<section id="t_cert" class="hide">
+ <div class="sub" id="sk_cert"><button>Certificato</button><button class="adm">Certificato tuo</button></div>
+ <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-lockx"/>
+   </svg>Certificato della scheda</h3>
+  <p class="fhint">Il certificato e unico per questa scheda: lo crea lei, la chiave resta dentro e non esce mai. Serve a cifrare HTTPS (e in futuro gli altri servizi cifrati). Il browser avvisa "connessione non privata" perche non lo ha emesso un'autorita: e normale. Confronta l'impronta con quella del browser (lucchetto &gt; certificato) e con quella della seriale (comando cert).</p>
+  <div id="certst"></div>
+  <a class="btn gray" href="/api/tls/cert"
+   download="vesevos.crt">Scarica il certificato (per fidarti nel browser)</a>
+  <button class="btn gray adm" onclick="tlsRegen()">Nuovo certificato</button>
+  <p class="fhint">Il certificato nuovo vale dal prossimo riavvio: il browser avvisera di nuovo. Quello creato dalla scheda dura 10 anni.</p>
+  </div>
+ <div class="card adm"><h3>Certificato tuo (facoltativo)</h3>
+  <p class="fhint">Se hai un certificato per questo nome (per esempio di una tua autorita), incollalo con la sua chiave (senza password). Vale dal prossimo riavvio.</p>
+  <label for="tls_c">Certificato (PEM)</label><textarea id="tls_c" rows="4"
+   spellcheck="false"></textarea>
+  <label for="tls_k">Chiave privata (PEM)</label><textarea id="tls_k" rows="4"
+   spellcheck="false"></textarea>
+  <button class="btn" onclick="tlsUp()">Carica</button><div id="tlsm2" class="msg"></div></div>
+</section>
+<section id="t_agg" class="hide">
+ <div class="card"><h3>Aggiornamenti</h3>
+  <div class="sub" role="tablist" aria-label="Aggiornamenti" id="ag_tabs"
+   onkeydown="agTasto(event)">
+   <button role="tab" id="ag_t0" class="on" aria-selected="true" aria-controls="ag_p0"
+    onclick="agTab(0)">Stato</button>
+   <button role="tab" id="ag_t1" aria-selected="false" aria-controls="ag_p1" tabindex="-1"
+    onclick="agTab(1)">Firmware</button>
+   <button role="tab" id="ag_t2" aria-selected="false" aria-controls="ag_p2" tabindex="-1"
+    onclick="agTab(2)">Recovery</button>
+   <button role="tab" id="ag_t3" aria-selected="false" aria-controls="ag_p3" tabindex="-1"
+    onclick="agTab(3)">Pacchetti</button>
+  </div>
+  <div role="tabpanel" id="ag_p0" aria-labelledby="ag_t0" tabindex="0">
+   <div id="ag_stato"></div>
+   <button class="btn" id="ag_ver" onclick="agVerifica()">Verifica ora</button>
+   <div id="ag_m" class="msg" role="status"></div>
+   <h4>Controllo automatico</h4>
+   <p class="fhint">Gli aggiornamenti vengono dalla pagina ufficiale del progetto su GitHub. Il controllo verifica che il file sia integro. L'attivazione e facoltativa e puoi spegnerla quando vuoi.</p>
+   <label for="ag_modo">Quando esce una versione nuova</label>
+   <select id="ag_modo" onchange="agScelta()"><option value="0">Spento</option>
+    <option value="1">Solo notifica</option><option value="2">Installa da solo</option></select>
+   <div id="ag_quando">
+    <label for="ag_freq">Frequenza del controllo</label>
+    <select id="ag_freq" onchange="agGiorni()"><option value="0">Ogni giorno</option>
+     <option value="1">Ogni settimana</option><option value="2">Ogni mese</option></select>
+    <div id="ag_ggw"><label for="ag_gg">Giorno</label><select id="ag_gg"></select></div>
+    <label for="ag_ora">Ora</label><input type="time" id="ag_ora">
+   </div>
+   <p class="law hide"
+    id="ag_auto">All'ora scelta la scheda si riavvia, i programmi si fermano e resta fuori servizio per alcuni minuti. Con una microSD inserita il file si scarica e si controlla prima, quindi se la rete cade la scheda continua a lavorare. Sulla microSD resta anche una copia del firmware in uso: se quello nuovo non si avvia, la scheda rimette da sola quello di prima. La copia richiede qualche minuto in piu. Senza microSD il file si scrive mentre arriva: se la rete cade a meta, la scheda aspetta nella pagina del recovery, da cui puoi ricaricare il firmware. Serve il recovery 0.5.3 o piu recente. Si installa solo il firmware ufficiale con versione piu alta, mai il recovery. Scegli un'ora in cui la scheda non serve.</p>
+   <button class="btn" onclick="agSalva()">Salva</button>
+   <div id="ag_ms" class="msg" role="status"></div>
+  </div>
+  <div role="tabpanel" id="ag_p1" aria-labelledby="ag_t1" tabindex="0" class="hide">
+   <div id="ag_fw"></div>
+   <button class="btn hide" id="ag_ins" onclick="agInstalla()">Installa la versione trovata</button>
+   <h4>Altre strade</h4>
+   <button class="btn gray" onclick="agOrdine(updFile)">Carica un file dal computer</button>
+   <button class="btn gray" onclick="agOrdine(updNet)">Indirizzo e impronta a mano</button>
+   <button class="btn gray" onclick="uFw()">Pagina del recovery con utente e password</button>
+  </div>
+  <div role="tabpanel" id="ag_p2" aria-labelledby="ag_t2" tabindex="0" class="hide">
+   <p class="fhint">Il recovery serve a rimettere a posto la scheda. Non si aggiorna mai da solo.</p>
+   <div id="ag_rec"></div>
+   <button class="btn" onclick="uRecUp()">Carica un nuovo recovery</button>
+  </div>
+  <div role="tabpanel" id="ag_p3" aria-labelledby="ag_t3" tabindex="0" class="hide">
+   <p class="fhint">App e driver installati, con la versione pubblicata nello store. Le versioni nuove si segnalano e basta: li aggiorni tu.</p>
+   <div id="ag_pac"></div>
+  </div>
+ </div>
+</section>
+<section id="t_audit" class="hide">
+ <div class="card"><h3>Controlli della configurazione</h3>
+  <p class="fhint">La scheda controlla da sola la configurazione. Rosso: valore vietato (legge o sicurezza), corretto subito. Giallo: permesso ma rischioso, resta con un avviso. Il registro dice chi ha cambiato cosa.</p>
+  <div id="aulist"></div><button class="btn gray op" onclick="auAck(0)">Ho visto tutto</button>
+  <div id="aum" class="msg"></div></div>
+</section>
+<section id="t_evs" class="hide">
+ <div class="card"><h3>Eventi di sicurezza</h3>
+  <p class="fhint">Gli ultimi errori di accesso alla scheda. Una password sbagliata non e un attacco: capita a tutti. Conta se gli stessi errori si ripetono molte volte.</p>
+  <p class="fhint">Il registro resta sulla scheda, si azzera al riavvio e nessun dato viene inviato fuori.</p>
+  <div id="ev_riass" role="status"></div>
+  <label for="ev_tipo">Tipo di evento</label><select id="ev_tipo" onchange="evDraw()"></select>
+  <table id="ev_tab" class="ftab"></table>
+  <button class="btn gray" onclick="evLoad()">Aggiorna</button><button class="btn red"
+   onclick="evSvuota()">Svuota</button>
+  <div id="ev_m" class="msg"></div></div>
+</section>
+<section id="t_log" class="hide">
+ <div class="sub" id="sk_log"><button>Registro</button><button>Diario dei riavvii</button><button class="op">Ultime modifiche</button></div>
+ <div>
+ <div class="card"><h3>Registro (log)</h3>
+  <div class="lgb">
+   <input id="lgq" type="search" placeholder="Filtra (es. NET, errore)" oninput="lgDraw()"
+    aria-label="Filtra il registro">
+   <label class="lgck"><input type="checkbox" id="lgauto" checked
+     onchange="lgAuto()"> Aggiornamento automatico</label>
+   <button class="btn gray" onclick="loadLog()"><svg class="i" aria-hidden="true">
+     <use href="#i-reboot"/></svg><span>Aggiorna</span></button>
+   <button class="btn gray" onclick="lgDl()"><svg class="i" aria-hidden="true"><use href="#i-dl"/>
+    </svg><span>Scarica</span></button>
+   <button class="btn red adm" onclick="lgClear()"><svg class="i" aria-hidden="true">
+     <use href="#i-del"/></svg><span>Svuota</span></button>
+  </div>
+  <div class="lgb">
+   <label class="lgck">Mostra fino a <select id="lgsh" onchange="lgDraw()">
+     <option value="3">Dettaglio</option><option value="2" selected>Informazione</option>
+     <option value="1">Attenzione</option><option value="0">Errore</option></select></label>
+   <label class="lgck">Registra fino a <select id="lglv" onchange="lgSetLv()">
+     <option value="3">Dettaglio</option><option value="2" selected>Informazione</option>
+     <option value="1">Attenzione</option><option value="0">Errore</option></select></label>
+  </div>
+  <div id="lginfo" class="fhint"></div>
+  <div id="lgdw"
+   class="fhint hide">Il livello Dettaglio riempie il registro: usalo solo per cercare un problema.</div>
+  <pre id="lg" class="lgv" tabindex="0" aria-label="Righe del registro"></pre></div>
+ </div>
+ <div>
+ <div class="card"><h3>Diario dei riavvii</h3>
+  <p class="fhint">Gli ultimi 20 avvii restano salvati anche se la scheda si spegne: motivo, da quanto era accesa, RAM minima e task piu attivo.</p>
+  <div class="lgb"><button class="btn gray" onclick="loadBoots()"><svg class="i" aria-hidden="true">
+     <use href="#i-reboot"/></svg><span>Aggiorna</span></button>
+   <button class="btn red" id="btclr" onclick="btClear()"><svg class="i" aria-hidden="true">
+     <use href="#i-del"/></svg><span>Azzera il diario</span></button></div>
+  <pre id="bt" class="lgv" tabindex="0" aria-label="Diario dei riavvii"></pre></div>
+ </div>
+ <div class="card op"><h3>Ultime modifiche</h3><div id="auhist" class="fhint"></div></div>
+</section>

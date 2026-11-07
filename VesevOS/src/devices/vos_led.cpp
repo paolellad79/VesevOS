@@ -7,6 +7,7 @@
 #include "../core/vos_sys.h"
 #include "vos_pins.h"
 #include "vos_led_trigger.h"
+#include "../core/vos_apwin.h"
 #include "../core/vos_log.h"
 #include "../core/vos_wd.h"
 #include <math.h>
@@ -118,10 +119,12 @@ static void ledTask(void*) {
     // colore imposto da uno script (Berry): vale al posto del modo scelto, ma non copre errore grave, tasto BOOT e "trova questa scheda"
     { int32_t sc = g_script;
       if (sc >= 0) { put((sc >> 16) & 255, (sc >> 8) & 255, sc & 255, cfg.ledBrightness); vTaskDelay(pdMS_TO_TICKS(20)); continue; } }
-    // prima configurazione: arcobaleno LENTO (un giro ogni 6 s, nessun lampeggio: adatto anche a chi e sensibile alla luce)
+    // prima configurazione: giallo fisso; con la finestra del BOOT aperta, respiro lento (2 s)
     if (g_setup) {
-      uint8_t r, g, b; hue((now / (6000 / 360)) % 360, r, g, b);
-      put(r, g, b, cfg.ledBrightness < 60 ? 60 : cfg.ledBrightness);
+      uint32_t ph = now % 2000, lv = ph < 1000 ? ph : 2000 - ph;   // 0..1000
+      int lum = apWinIsOpen() ? (int)(lv * cfg.ledBrightness / 1000) : cfg.ledBrightness;
+      if (lum < 20) lum = 20;
+      put(255, 160, 0, (uint8_t)lum);
       vTaskDelay(pdMS_TO_TICKS(40)); continue;
     }
     // allarmi della configurazione: lampo breve ogni 4 s (solo nei modi che mostrano lo stato)

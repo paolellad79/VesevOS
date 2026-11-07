@@ -49,6 +49,8 @@ void berryNeedFunc(bvm* vm, const char* group);   // se l'utente ha tolto la fun
 void berryDataRegister(bvm* vm, const char* appName);
 // in vos_berry_dev.cpp: dev_get() e dev_set() delle app
 void berryDevRegister(bvm* vm);
+// in vos_berry_https.cpp: scarica(url, dimMax) = testo di un file https (driver vos_drv_https). Script sempre; app solo con https in use=.
+void berryHttpsRegister(bvm* vm);
 // in vos_berry_sd.cpp: funzioni della microSD (vedi li). app = app con use=sd; admin = script lanciato dall'Admin o app con who=admin.
 void berrySdRegister(bvm* vm, bool app, bool admin);
 // in vos_berry_hw.cpp: gpio_*, i2c_*, spi_transfer, uptime, delay_us dei driver (solo con i moduli ELF). app = solo i gruppi in use=; admin = scrittura consentita.

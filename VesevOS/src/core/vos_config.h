@@ -80,7 +80,7 @@ struct VosConfig {
   FixedStr<25> pinNote[VOS_GPIO_COUNT];            // inventario pin: "collegato a ..." scritto dall'utente (indice = GPIO)
   bool   apQr;                   // true = il QR Wi-Fi dell'hotspot si vede in Home a chi e entrato
   bool   wpsOn, wpsPin;         // WPS: servizio acceso (di fabbrica spento), metodo PIN consentito
-  uint8_t btnAct[3];            // tasto BOOT: azione di 1, 2 e 3 click (vedi packages/vos_btn.h)
+  uint8_t btnAct[3];            // tasto fisico: azione di 1, 2 e 3 click (vedi packages/vos_btn.h)
   uint32_t serBaud;              // seriale: velocita (solo UART; con USB nativa non conta). Di fabbrica 115200
   uint8_t  serEol, serTx;        // a-capo: 0 CR+LF, 1 LF, 2 CR; attesa massima di scrittura in ms
   bool     serEcho, serIn, serLogOut, serBanner;   // eco dei tasti, accetta comandi, scrive il log, mostra il benvenuto all'apertura
@@ -142,7 +142,6 @@ struct VosConfig {
   bool    mdnsOn;                // annuncio nome.local (mDNS)
   bool    httpOn;                // server HTTP acceso (predefinito si)
   uint16_t httpPort, httpsPort;  // porte (predefinite 80 e 443)
-  bool    httpRedirect;          // HTTP porta a HTTPS (307) per chi non e sull'hotspot; conta solo con HTTP e HTTPS accesi (predefinito no)
   // Watchdog
   bool    wdTask, wdNet, wdRam;  // controlli: task bloccati, rete assente, RAM bassa
   uint16_t wdNetMin;             // minuti senza rete prima del riavvio
@@ -152,6 +151,11 @@ struct VosConfig {
   uint8_t  wdTwdt;               // Task watchdog di ESP-IDF, secondi (5-60)
   uint16_t wdLim[WD_LIM_N];      // limiti del nostro watchdog per servizio (vedi vos_wd_limits.h)
   uint8_t  wdDays;               // giorni del riavvio programmato (bit 0 = lunedi ... bit 6 = domenica)
+  // Aggiornamenti (spenti di fabbrica): vedi packages/vos_aggiorna.h
+  uint8_t  aggModo;              // 0 spento, 1 solo notifica, 2 installa da solo
+  uint8_t  aggFreq;              // 0 ogni giorno, 1 ogni settimana, 2 ogni mese
+  uint8_t  aggGiorno;            // settimana: 1 lunedi ... 7 domenica; mese: 1-28
+  uint16_t aggOra;               // minuti dalla mezzanotte, ora locale
 };
 
 extern VosConfig cfg;

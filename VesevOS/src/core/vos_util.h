@@ -16,6 +16,8 @@ void   uptimeTo(uint64_t seconds, char* out, size_t n);   // come uptimeStr, in 
 void   durStr(uint64_t seconds, char* out, size_t n);   // durata: "45 s", "12 min", "3 h 5 min", "5 g 23 h 11 min" (giorni al posto di mesi/anni)
 size_t cleanAscii(std::string_view s, char* out, size_t cap);   // toglie i \r, i caratteri strani diventano '?'; scrive in out (zero finale, tagliato a cap-1); ritorna i caratteri scritti
 void   sha256HexOf(std::string_view data, char out[65]);        // SHA-256 in esadecimale minuscolo (64 cifre + zero)
+typedef int (*UtilLeggi)(void* ctx, uint8_t* buf, size_t max);   // byte letti, 0 = fine, -1 = errore
+bool   sha256HexLetto(UtilLeggi leggi, void* ctx, uint8_t* buf, size_t cap, char out[65]);   // come sopra, per un file che non entra in memoria
 bool   utilNameOk(const char* s, size_t n);      // nome corto valido (script, schede .vdb): 1-24 caratteri a-z 0-9 - _
 bool   utilLineErr(ErrBuf& err, int line, const char* msg);   // err = "Riga N: msg"; sempre false (per i lettori di file a righe)
 bool   hostnameValid(std::string_view s);      // 1-32: lettere, numeri, trattino

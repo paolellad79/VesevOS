@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_bmp280.cpp (vedi vos_bmp280.h)
+// Compensazione (temperatura e pressione a interi): algoritmo del driver Bosch BMP280,
+// copyright (C) 2012-2014 Bosch Sensortec GmbH, licenza BSD a tre clausole.
+// Testo della licenza: licenses/BSD-3-Clause.txt (e NOTICE.txt). Nessuna modifica di calcolo.
 #include "vos_bmp280.h"
 #include "../drivers/vos_drv_i2c.h"
 

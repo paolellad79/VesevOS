@@ -11,10 +11,8 @@ namespace webx {
 // Cosa rispondere a una richiesta sulla porta HTTP quando il redirect e attivo. Ritorna il codice HTTP:
 //   307 = vai a url (costruito dalle impostazioni della scheda e dalla porta HTTPS, MAI dall'intestazione Host)
 //   405 = metodo non ammesso (solo GET e HEAD), 400 = percorso non valido, 414 = indirizzo troppo lungo: in *text il motivo (tradotto)
+// ip = chi chiede: dall'hotspot si va sempre a https://192.168.4.1/, perche i nomi non si risolvono e i percorsi dei controlli del telefono non esistono.
 // methodOk = il metodo e GET o HEAD; path e query senza il '?' (il percorso vuoto vale "/").
-int  redirectPlan(bool methodOk, const char* path, const char* query, char* url, size_t cap, const char** text);
+int  redirectPlan(uint32_t ip, bool methodOk, const char* path, const char* query, char* url, size_t cap, const char** text);
 
-// Quale server tiene la porta HTTP? true = quello MINIMO (solo redirect), false = quello completo (pagina, API, portale).
-// Il minimo serve solo se il redirect e acceso, HTTP e HTTPS sono accesi e HTTPS e partito, e l'hotspot non puo accendersi da solo.
-bool httpMinimalWanted();
 }  // namespace webx

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Prova sul computer: registrazione VERA delle funzioni sd_* (vos_berry_sd.cpp) col codice [cmd] vero di microsd.vdb.
+# Prova sul computer: registrazione VERA delle funzioni sd_* (vos_berry_sd.cpp) col codice [cmd] vero di sd-spi.vdb.
 # Un sottocomando di sola lettura da non-Admin deve compilare; sd_write da non-Admin = "permesso negato".
 # VECCHIO=1 simula il comportamento di prima della 1.8.11a (funzioni di scrittura registrate solo per l'Admin): la prova DEVE fallire.
 # Uso: tools/hosttest/prova_sdreg.sh

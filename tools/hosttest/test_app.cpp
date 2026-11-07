@@ -34,6 +34,7 @@ bool berryAppOutJson(HeapBuf& o) { return o.add("\"out\":\"ciao\",\"err\":\"\",\
 bool berryStartApp(const char* n, const char* c, const char* u, String& err) { if (g_busyOther || g_aRun) { err = "Berry e occupato"; return false; } g_aRun = true; g_aName = n; g_aUse = u; g_aCode = c; g_lastApp = true; g_starts++; return true; }
 bool berryStop(String& err) { if (!g_aRun) { err = "Nessuno script in corso"; return false; } g_aRun = false; return true; }
 void berryOutText(HeapBuf& o) { o.add("uscita\n"); }
+#include "../../VesevOS/src/core/vos_pacchetto.cpp"
 #include "../../VesevOS/src/packages/vos_app.cpp"
 #include "../../VesevOS/src/packages/vos_app_rt.h"
 

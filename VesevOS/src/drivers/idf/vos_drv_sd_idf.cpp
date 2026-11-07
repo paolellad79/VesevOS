@@ -5,6 +5,7 @@
 // Si compila solo con VOS_BACKEND = VOS_BACKEND_IDF (boards/vos_packages.h). Il contratto sta in ../vos_drv_sd.h.
 // STATO: scritto sulla carta, NON ancora provato su una scheda vera (vedi docs/progetto/da-fare-backend-sostituibili.md).
 #include "../vos_drv_sd.h"
+#include "vos_drv_sd_int.h"
 #include "../../boards/vos_packages.h"
 #if VOS_WITH_SD && VOS_BACKEND == VOS_BACKEND_IDF
 #include <stdio.h>
@@ -31,8 +32,7 @@ static_assert(sizeof(VOS_SD_MOUNT_POINT) - 1 <= 15, "il percorso base dei file s
 static const spi_host_device_t SPI_HOST = SPI2_HOST;
 static const int MAX_OPEN_FILES = 5;
 static const int MAX_TRANSFER_BYTES = 4096;
-static const uint32_t LOCK_WAIT_MS = 3000;
-static const size_t FULL_PATH_MAX = 160;
+static const size_t FULL_PATH_MAX = SD_PERCORSO_MAX;
 
 // Diagnosi della scheda (vos_drv_sd_diag_idf.cpp)
 bool drvSdRawSector(void* ctx, uint8_t* buf, uint32_t lba);
@@ -45,24 +45,10 @@ static uint8_t g_fail = DSF_NONE;
 
 // ---- Blocco: le funzioni si possono chiamare da piu task ----
 
-static SemaphoreHandle_t mutex() {
+SemaphoreHandle_t drvSdMutex() {
   static SemaphoreHandle_t m = xSemaphoreCreateMutex();
   return m;
 }
-
-struct SdLock {
-  bool ok;
-
-  SdLock() {
-    ok = xSemaphoreTake(mutex(), pdMS_TO_TICKS(LOCK_WAIT_MS)) == pdTRUE;
-  }
-
-  ~SdLock() {
-    if (ok) {
-      xSemaphoreGive(mutex());
-    }
-  }
-};
 
 // ---- Aiuti ----
 
@@ -74,6 +60,10 @@ uint32_t drvSdMs() {
 static bool fullPath(const char* path, char* out) {
   int n = snprintf(out, FULL_PATH_MAX, "%s%s", MOUNT_POINT, path);
   return n > 0 && (size_t)n < FULL_PATH_MAX;
+}
+
+bool drvSdPercorso(const char* path, char* out) {
+  return fullPath(path, out);
 }
 
 
@@ -202,6 +192,7 @@ void drvSdEnd() {
   }
 
   g_up = false;
+  drvSdFlussoPerso();
 
   if (g_card) {
     esp_vfs_fat_sdcard_unmount(MOUNT_POINT, g_card);
@@ -478,6 +469,14 @@ bool drvSdRemove(const char* path) {
   SdLock lock;
 
   return lock.ok && g_up && fullPath(path, full) && unlink(full) == 0;
+}
+
+bool drvSdRename(const char* da, const char* a) {
+  char pienoDa[FULL_PATH_MAX];
+  char pienoA[FULL_PATH_MAX];
+  SdLock lock;
+
+  return lock.ok && g_up && fullPath(da, pienoDa) && fullPath(a, pienoA) && rename(pienoDa, pienoA) == 0;
 }
 
 bool drvSdMkdir(const char* path) {

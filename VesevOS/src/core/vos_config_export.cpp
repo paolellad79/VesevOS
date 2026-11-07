@@ -78,7 +78,6 @@ bool cfgExport(HeapBuf& out, bool withSecrets) {
   s.flag("wps", cfg.wpsOn);
   s.flag("wpspin", cfg.wpsPin);
   s.flag("httpon", cfg.httpOn);
-  s.flag("redirect", cfg.httpRedirect);
   s.num("httpport", cfg.httpPort);
   s.num("httpsport", cfg.httpsPort);
   s.section("region", "region");
@@ -172,6 +171,11 @@ bool cfgExport(HeapBuf& out, bool withSecrets) {
   s.num("datefmt", cfg.dateFmt);
   s.num("timefmt", cfg.timeFmt);
   s.num("tempunit", cfg.tempUnit);
+  s.section("aggiorna", "aggiorna");
+  s.num("modo", cfg.aggModo);
+  s.num("freq", cfg.aggFreq);
+  s.num("giorno", cfg.aggGiorno);
+  s.num("ora", cfg.aggOra);
   s.section("watchdog", "watchdog");
   s.flag("task", cfg.wdTask);
   s.flag("net", cfg.wdNet);

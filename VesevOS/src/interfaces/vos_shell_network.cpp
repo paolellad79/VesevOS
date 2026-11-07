@@ -103,7 +103,6 @@ void sectionPorts(HeapBuf& h) {
   else if (!webHttpsUp()) snprintf(v, sizeof v, "%s", tr("acceso ma non ancora in funzione"));
   else snprintf(v, sizeof v, "%s, %s %u (TCP)", tr("aperto"), tr("porta"), (unsigned)cfg.httpsPort);
   repRaw(h, "HTTPS", v);
-  repRow(h, TRK("Redirect"), cfg.httpRedirect && cfg.httpOn && cfg.https ? tr("attivo (HTTP verso HTTPS)") : tr("spento"));
   if (cfg.mdnsOn) snprintf(v, sizeof v, "%s, %s 5353 (UDP)", tr("aperto"), tr("porta"));
   else snprintf(v, sizeof v, "%s", tr("chiuso"));
   repRaw(h, "mDNS", v);

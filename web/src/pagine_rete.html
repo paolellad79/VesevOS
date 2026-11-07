@@ -1,0 +1,263 @@
+<section id="t_wifi" class="hide">
+ <div class="card"><h3>Reti Wi-Fi</h3>
+  <button class="btn" onclick="scan()">Cerca reti</button>
+  <div id="scanmsg" style="color:var(--mut);margin-top:6px"></div>
+  <table id="scanlist"></table></div>
+ <div class="card"><h3>Connessione client</h3>
+  <label for="w_ssid">Rete (SSID)</label><input id="w_ssid">
+  <label for="w_pass">Password Wi-Fi</label><input type="password" id="w_pass"
+   placeholder="(lascia vuoto per non cambiare)">
+  <button class="btn adm" onclick="saveWifi()">Salva e collega</button>
+  <div id="wm" class="msg"></div></div>
+</section>
+<section id="t_wps" class="hide">
+ <div class="sub" id="sk_wps"><button>WPS</button><button class="adm">Collega adesso</button><button class="adm">Impostazioni</button></div>
+ <div class="card"><h3>WPS (collegamento con il router)</h3>
+  <p class="fhint">Il router manda alla scheda il nome e la password della tua Wi-Fi: non devi scriverli. Funziona con il tasto WPS del router, oppure con un PIN. Non funziona se il router e solo WPA3 o ha il WPS spento.</p>
+  <div class="sc" id="sc_wps"></div>
+  <p class="fhint" id="wps_setup"></p>
+  <div id="wpsm" class="msg"></div></div>
+ <div class="card adm"><h3>Collega adesso</h3>
+  <div id="wps_st" class="msg" role="status" aria-live="polite"></div>
+  <div id="wps_pin" class="hide"><p class="fhint">Scrivi questo PIN nella pagina WPS del router:</p>
+   <div class="big" id="wps_pinv"></div></div>
+  <button class="btn" id="wps_go" onclick="wpsGo('pbc')">Collega con il tasto del router</button>
+  <button class="btn gray" id="wps_gp" onclick="wpsGo('pin')">Collega con il PIN</button>
+  <button class="btn gray hide" id="wps_x" onclick="wpsCancel()">Annulla</button>
+  <p class="fhint" id="wps_nt"></p>
+  <p class="fhint">Premi il pulsante qui sopra e, entro 2 minuti, il tasto WPS del router. La scheda cambia rete: se sei collegato al suo hotspot la pagina si interrompe e poi si ricollega da sola.</p>
+  </div>
+ <div class="card adm"><h3>Impostazioni WPS</h3>
+  <div class="tog"><div>Consenti il metodo con PIN</div>
+   <button class="sw1" id="wps_swp" data-tt onclick="wpsOpt('pinOk',this)"
+    aria-label="Metodo con PIN"></button></div>
+  <p class="fhint">Il PIN lo crea la scheda a ogni prova e vale 2 minuti. Se lo lasci spento resta solo il tasto del router (piu sicuro).</p>
+  <p class="fhint" id="wps_bt"></p>
+  <p class="fhint">Chi ha la scheda in mano potrebbe collegarla alla sua rete: tieni il WPS spento (o togli l'azione dal tasto) se la scheda non e al sicuro. Lo stesso gesto ferma anche una prova in corso. Il LED lo dice: blu che respira = in attesa, verde = riuscito, rosso = errore.</p>
+  <div id="wps_om" class="msg"></div></div>
+</section>
+<section id="t_ip" class="hide">
+ <div class="sub" id="sk_ip"><button>IPv4</button><button>IPv6</button></div>
+ <div>
+ <div class="card"><h3>Indirizzo IP</h3>
+  <label for="w_dhcp">Indirizzo IP</label>
+  <select id="w_dhcp" onchange="dh()"><option value="1">Automatico (DHCP)</option>
+   <option value="0">Statico</option></select>
+  <div id="ipnote" style="color:var(--mut);margin-bottom:8px"></div>
+  <label for="w_ip">IP</label><input id="w_ip"><label for="w_mask">Subnet mask</label><input
+   id="w_mask">
+  <label for="w_gw">Gateway</label><input id="w_gw"><label for="w_d1">DNS 1</label><input
+   id="w_d1"><label for="w_d2">DNS 2</label><input id="w_d2">
+  <div id="ipmac" style="margin:6px 0 10px"></div>
+  <button class="btn adm" id="ipsave" onclick="saveWifi()">Salva e collega</button>
+  <div id="wm2" class="msg"></div></div>
+ </div>
+ <div>
+ <div class="card"><h3>IPv6</h3>
+  <p class="fhint">IPv6 non e ancora disponibile su questa scheda.</p></div>
+ </div>
+</section>
+<section id="t_nome" class="hide">
+ <div class="sub" id="sk_nome"><button>Nome</button><button>mDNS</button></div>
+ <div class="card"><h3>Nome della scheda</h3>
+  <label for="s_host">Nome host</label><input id="s_host" maxlength="32">
+  <label for="s_dom">Dominio DNS (facoltativo, es. casa.lan)</label><input id="s_dom"
+   maxlength="60">
+  <div id="s_dn" style="color:var(--mut);margin:-6px 0 8px"></div>
+  <div id="s_fq" style="color:var(--mut);margin-bottom:8px"></div>
+  <button class="btn adm" onclick="saveSys()">Salva</button><div id="sm" class="msg"></div>
+  <p style="color:var(--mut)">Dopo il cambio la scheda si raggiunge anche come NOME.local (se il tuo computer supporta mDNS). La rete si riconnette per un momento.</p>
+  </div>
+ <div class="card"><h3>mDNS (NOME.local)</h3>
+  <p class="fhint">Permette di trovare la scheda con il suo nome (per esempio vesevos.local) senza sapere l'indirizzo. Se lo spegni, la scheda si raggiunge solo con l'indirizzo IP.</p>
+  <div class="sc" id="sc_mdns"></div>
+  <div id="svm_mdns" class="msg"></div></div>
+</section>
+<section id="t_ntp" class="hide">
+ <div class="sub" id="sk_ntp"><button>Servizio</button><button class="adm">Impostazioni</button></div>
+ <div class="card"><h3>Servizio dell'ora (NTP)</h3>
+  <p class="fhint">Tiene l'ora della scheda uguale a quella di Internet. Serve la Wi-Fi di casa. Puoi spegnerlo e mettere l'ora a mano (Sistema &gt; Ora).</p>
+  <div class="sc" id="sc_ntp"></div>
+  <div id="ontpst" class="fhint"></div></div>
+ <div class="card adm"><h3>Impostazioni NTP</h3>
+  <label for="o_ev">Quanto spesso sincronizzare</label>
+  <select id="o_ev"><option value="15">Ogni 15 minuti</option><option value="60">Ogni ora</option>
+   <option value="360">Ogni 6 ore</option><option value="720">Ogni 12 ore</option>
+   <option value="1440">Ogni giorno</option><option value="10080">Ogni settimana</option>
+   <option value="0">Solo all'avvio</option></select>
+  <label for="o_srv">Server NTP</label><input id="o_srv">
+  <label for="o_srv2">Secondo server NTP (vuoto = nessuno)</label><input id="o_srv2">
+  <p class="fhint" id="ontpwho"></p>
+  <p class="fhint">Fuso orario, formati e unita: Sistema &gt; Localizzazione. <a href="#"
+    onclick="show('loc');return false">Apri</a></p>
+  <button class="btn" onclick="saveTime()">Salva</button><div id="om" class="msg"></div></div>
+</section>
+<section id="t_mqtt" class="hide">
+ <div class="sub" id="sk_mqtt"><button>MQTT</button><button class="adm">Impostazioni</button><button class="adm">Certificato</button></div>
+ <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-mqtt"/></svg>MQTT</h3>
+  <div id="mqst" class="airst"></div>
+  <p class="fhint">Servizio spento di fabbrica: la prima volta lo avvii a mano, poi puoi scegliere l'avvio automatico.</p>
+  <div class="sc" id="sc_mqtt"></div>
+  <div class="ftb op">
+   <button class="btn gray" onclick="mqRun('test')"><span>Messaggio di prova</span></button></div>
+  <div id="mqm" class="msg"></div></div>
+ <div class="card adm"><h3>Impostazioni MQTT</h3>
+  <div class="tog"><div>Avvio automatico (parte all'accensione della scheda)</div>
+   <button class="sw1" id="mq_auto" onclick="this.classList.toggle('on')"
+    aria-label="Avvio automatico"></button></div>
+  <div class="agrid"><div>
+    <label for="mq_host">Broker (indirizzo)</label><input id="mq_host"
+     placeholder="es. 192.168.1.10 o broker.casa.lan" autocomplete="off"></div>
+   <div><label for="mq_port">Porta</label><input type="number" id="mq_port" min="1" max="65535"
+     value="1883"></div>
+   <div><label for="mq_user">Utente (facoltativo)</label><input id="mq_user" autocomplete="off">
+   </div>
+   <div><label for="mq_pass">Password (facoltativa)</label><input type="password" id="mq_pass"
+     autocomplete="new-password"></div>
+   <div><label for="mq_pre">Prefisso degli argomenti</label><input id="mq_pre"></div>
+   <div><label for="mq_ev">Invio dello stato ogni (secondi)</label><input type="number" id="mq_ev"
+     min="5" max="3600" value="30"></div></div>
+  <div class="tog">
+   <div>Home Assistant: presenta la scheda da sola (sensori e pulsante Riavvia)</div>
+   <button class="sw1" id="mq_ha" onclick="this.classList.toggle('on')"
+    aria-label="Home Assistant"></button></div>
+  <div class="tog"><div>Collegamento cifrato (mqtts, di solito porta 8883)</div>
+   <button class="sw1" id="mq_tls" onclick="this.classList.toggle('on')"
+    aria-label="mqtts"></button></div>
+  <div id="mqtlsw"
+   class="law hide">Con utente e password, senza cifratura la password viaggia in chiaro sulla rete.</div>
+  <button class="btn" onclick="mqSave()">Salva</button><div id="mqm2" class="msg"></div>
+  <div id="mqtopics" class="fhint"></div></div>
+ <div class="card adm"><h3>Certificato del broker (mqtts)</h3>
+  <p class="fhint">Per un broker con certificato fatto in casa incolla qui il certificato dell'autorita (CA) in formato PEM. Vuoto = autorita pubbliche note.</p>
+  <textarea id="mq_ca" rows="5" spellcheck="false" data-tt
+   aria-label="Certificato CA in formato PEM" placeholder="-----BEGIN CERTIFICATE-----"></textarea>
+  <button class="btn gray" onclick="mqCa()">Salva certificato</button>
+  <div id="mqm3" class="msg"></div></div>
+</section>
+<section id="t_ap" class="hide">
+ <div class="sub" id="sk_ap"><button>Servizio</button><button>Punto di accesso</button><button class="adm">Nome e password</button><button>DHCP</button><button>DNS</button></div>
+ <div class="card"><h3>Servizio Punto di accesso (AP)</h3>
+  <p class="fhint">L'hotspot e la Wi-Fi della scheda: serve per entrare quando la scheda non e collegata alla tua rete. Si accende da solo al primo avvio, dopo un ripristino con il tasto fisico e se la tua Wi-Fi non e configurata.</p>
+  <div class="sc" id="sc_ap"></div>
+  <div id="apdep">
+   <div class="tog adm"><div>Portale automatico (il telefono apre da solo la pagina)</div>
+    <button class="sw1" id="sv_cap" onclick="svcTog('captive',this)"
+     aria-label="Portale automatico"></button></div>
+   <p class="fhint" id="sv_apn"></p></div>
+  <div id="svm_ap" class="msg"></div></div>
+ <div class="card"><h3>Punto di accesso (AP)</h3>
+   <div id="apinfo"></div>
+   <p style="color:var(--mut)">Il punto di accesso serve quando la scheda non e collegata a nessuna rete: ti colleghi direttamente alla scheda con il Wi-Fi. Se il collegamento alla tua rete fallisce, la scheda torna da sola in questo modo.</p>
+   <button class="btn gray adm" onclick="apOnly()">Torna in modo AP</button>
+   <div id="wm3" class="msg"></div></div>
+ <div class="card adm"><h3>Nome e password dell'hotspot</h3>
+   <button class="btn" onclick="apShow()">Mostra password e QR</button>
+   <div id="apsec" style="margin-top:10px"></div>
+   <div class="agrid"><div>
+     <label for="ap_ss">Nome rete (SSID)</label><input id="ap_ss" maxlength="32"></div>
+    <div><label for="ap_pw">Password nuova (8-63 caratteri, vuoto = non cambiare)</label><input
+      type="password" id="ap_pw" autocomplete="new-password"></div></div>
+   <button class="btn gray" onclick="apSave(0)">Salva</button><button class="btn gray"
+    onclick="apSave(1)">Nuova password casuale</button><div id="apm" class="msg"></div>
+   <p class="fhint">Password persa? Cavo USB e tasto fisico tenuto da 8 a 19 secondi (LED giallo): la scheda la scrive sulla seriale. Non mettere la password nel nome della rete: il nome lo vedono tutti.</p>
+   </div>
+ <div>
+ <div class="card"><h3>DHCP (hotspot)</h3>
+  <p class="fhint">Da gli indirizzi ai telefoni e ai PC che si collegano all'hotspot della scheda. Con la Wi-Fi di casa il DHCP lo fa il tuo router, non la scheda.</p>
+  <div class="sc" id="sc_dhcp"></div>
+  <div class="agrid adm"><div>
+    <label for="sv_lease">Durata dell'indirizzo (minuti, da 10 a 1440)</label><input type="number"
+     id="sv_lease" min="10" max="1440"></div></div>
+  <button class="btn adm" onclick="svcPort('lease','sv_lease','svm_dhcp')">Salva durata</button>
+  <div id="svm_dhcp" class="msg"></div>
+  <p class="fhint">Si puo spegnere solo quando la scheda e collegata alla tua Wi-Fi. Se lo spegni mentre l'hotspot e l'unico accesso, nessuno riesce piu a collegarsi.</p>
+  </div>
+ </div>
+ <div>
+ <div class="card"><h3>DNS (portale automatico)</h3>
+  <p class="fhint">Nell'hotspot la scheda risponde ai nomi con il proprio indirizzo: cosi il telefono apre da solo la pagina. Serve HTTP acceso sulla porta 80.</p>
+  <div class="sc" id="sc_dns"></div>
+  <div id="svm_dns" class="msg"></div>
+  <p class="fhint">I DNS usati dalla scheda verso Internet si scelgono in Rete &gt; IP.</p>
+  </div>
+ </div>
+</section>
+<section id="t_web" class="hide">
+ <div class="sub" id="sk_web"><button>HTTP</button><button>HTTPS</button></div>
+ <div>
+ <div class="card"><h3>HTTP</h3>
+  <p class="fhint">Solo passaggio verso HTTPS, che porta la pagina cifrata; la pagina viaggia in chiaro solo se HTTPS non e partito. Serve all'hotspot (portale automatico). Quando la scheda e collegata alla tua Wi-Fi puoi spegnerlo: consigliato, risparmia memoria.</p>
+  <div class="sc" id="sc_http"></div>
+  <div class="agrid adm"><div>
+    <label for="sv_hp">Porta HTTP (80 oppure 1024-65535)</label><input type="number" id="sv_hp"
+     min="80" max="65535"></div></div>
+  <button class="btn adm" onclick="svcPort('httpPort','sv_hp','svm_http')">Salva porta</button>
+  <div id="sv_hw" class="law hide"></div><div id="sv_hpend" class="law hide"></div>
+  <div id="svm_http" class="msg"></div>
+  <p class="fhint">Cambiare porta non e sicurezza vera: la sicurezza resta password, filtro IP e cifratura. Il portale automatico dell'hotspot funziona solo sulla porta 80.</p>
+  </div>
+ </div>
+ <div>
+ <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-lockx"/></svg>HTTPS</h3>
+  <p class="fhint">La pagina e le password viaggiano cifrate. Il certificato e creato dalla scheda e unico: al primo accesso il browser avvisa "connessione non privata". E normale per i dispositivi di casa: confronta l'impronta qui sotto con quella che mostra il browser (lucchetto > certificato) e con quella scritta sulla seriale.</p>
+  <div id="tlsst"></div>
+  <div class="sc" id="sc_https"></div>
+  <div class="agrid adm"><div>
+    <label for="sv_sp">Porta HTTPS (443 oppure 1024-65535)</label><input type="number" id="sv_sp"
+     min="443" max="65535"></div></div>
+  <button class="btn gray adm" onclick="svcPort('httpsPort','sv_sp','tlsm')">Salva porta</button>
+  <div id="sv_sw" class="law hide"></div><div id="sv_spend" class="law hide"></div>
+  <div id="tlsm" class="msg"></div></div>
+ </div>
+</section>
+<section id="t_sntp" class="hide">
+ <div class="sub" id="sk_sntp"><button>Server NTP</button><button class="adm">Impostazioni</button></div>
+ <div class="card"><h3>Server NTP</h3>
+  <p class="fhint">Da l'ora agli altri dispositivi della tua rete. Spento di fabbrica.</p>
+  <div id="ontpsv"></div></div>
+ <div class="card adm"><h3>Impostazioni NTP</h3>
+  <label for="o_serve">Questa scheda come server NTP per altri dispositivi</label>
+  <select id="o_serve"><option value="0">No</option><option value="1">Si (UDP 123)</option></select>
+  <button class="btn" onclick="saveTime(undefined,'om5')">Salva</button>
+  <div id="om5" class="msg"></div></div>
+</section>
+<section id="t_mesh" class="hide">
+ <div class="sub" id="sk_mesh"><button>Rete tra schede</button><button class="adm">Impostazioni</button><button>Schede vicine</button><button>Messaggi e comandi</button></div>
+ <div class="card"><h3><svg class="i hic" aria-hidden="true"><use href="#i-mesh"/>
+   </svg>Rete tra schede (ESP-NOW)</h3>
+  <div id="msst" class="airst"></div>
+  <p class="fhint">Le schede parlano tra loro senza router, fino a 3 salti. Ogni messaggio e firmato con la chiave comune: chi non ha la chiave non puo comandare. Spenta di fabbrica.</p>
+  <div class="sc" id="sc_mesh"></div>
+  <div id="msm" class="msg"></div></div>
+ <div class="card adm"><h3>Impostazioni</h3>
+  <div class="agrid"><div><label for="ms_role">Ruolo di questa scheda</label><select id="ms_role">
+     <option value="0">Nodo (ripete i messaggi)</option>
+     <option value="1">Gateway (annuncia il canale, invia tutto a MQTT)</option>
+     <option value="2">Sensore (manda solo il suo stato)</option></select></div>
+   <div><label for="ms_ch">Canale quando non c'e il Wi-Fi di casa</label><select
+     id="ms_ch"></select></div></div>
+  <div class="tog"><div>Avvio automatico (parte all'accensione della scheda)</div>
+   <button class="sw1" id="ms_auto" onclick="this.classList.toggle('on')"
+    aria-label="Avvio automatico"></button></div>
+  <label for="ms_key">Chiave comune (64 cifre esadecimali, uguale su tutte le schede)</label>
+  <div class="agrid"><div>
+    <input id="ms_key" autocomplete="off" spellcheck="false" placeholder="(salvata: non la mostro)">
+   </div>
+   <div><button class="btn gray" onclick="msKey(1)">Mostra la chiave</button><button
+     class="btn gray" onclick="msKey(2)">Nuova chiave</button></div></div>
+  <p class="fhint">Copia la stessa chiave sulle altre schede. Usa solo canali ammessi nel tuo paese (Sistema > Localizzazione).</p>
+  <button class="btn" onclick="msSave()">Salva</button><div id="msm2" class="msg"></div></div>
+ <div class="card"><h3>Schede vicine</h3><div id="msmap"></div>
+  <div style="overflow-x:auto">
+   <table id="mstab" class="ftab"></table></div></div>
+ <div class="card op"><h3>Messaggi e comandi</h3>
+  <div class="agrid"><div><label for="ms_to">A chi</label><select id="ms_to"></select></div>
+   <div><label for="ms_tx">Messaggio di testo</label><input id="ms_tx" maxlength="150"></div></div>
+  <button class="btn" onclick="msSend(0)">Invia messaggio</button>
+  <label for="ms_cmd">Azione sull'altra scheda (es. led-color 00ff00, gpio 4 1, note ciao, reboot)</label><input
+   id="ms_cmd" maxlength="100">
+  <button class="btn gray" onclick="msSend(1)">Esegui sull'altra scheda</button>
+  <div id="msm3" class="msg"></div>
+  <div id="msmsg" style="margin-top:10px"></div></div>
+</section>

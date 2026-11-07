@@ -9,7 +9,24 @@
 #include <esp_image_format.h>
 #include "vos_drv_nvs.h"
 
+bool drvOtaInProva() {
+  DrvNvs n;
+  if (!n.begin("vosris", true)) return false;
+  uint8_t stato = n.getUChar("st", 0);
+  n.end();
+  return stato == 1;
+}
+
+bool drvApp0Leggi(uint32_t off, uint8_t* buf, size_t n) {
+  const esp_partition_t* run = esp_ota_get_running_partition();
+  return run && off + n <= run->size && esp_partition_read(run, off, buf, n) == ESP_OK;
+}
+
 void drvOtaConfirmBoot() {
+  if (!drvOtaInProva()) drvOtaConfermaProva();
+}
+
+void drvOtaConfermaProva() {
   const esp_partition_t* run = esp_ota_get_running_partition();
   esp_ota_img_states_t state;
   if (run && esp_ota_get_state_partition(run, &state) == ESP_OK && state == ESP_OTA_IMG_PENDING_VERIFY) {

@@ -33,9 +33,9 @@
 // ---- testi del registro (le chiavi per le traduzioni: la tabella usa i testi cosi come sono) ----
 [[maybe_unused]] static void devKeys() {
   tr("Messaggi"); tr("Radio"); tr("Sicurezza"); tr("Misure"); tr("Ingressi e uscite"); tr("Luce"); tr("Pulsante");
-  tr("Collegamenti"); tr("Sensori"); tr("Risorse");
+  tr("Interfacce"); tr("Sensori"); tr("Risorse");
   tr("Bluetooth"); tr("ESP-NOW"); tr("Statistiche"); tr("MFA (due passaggi)");
-  tr("Pin (GPIO)"); tr("LED di stato"); tr("Tasto BOOT"); tr("USB"); tr("Temperatura del chip"); tr("Memoria"); tr("Processore"); tr("Radio 2,4 GHz");
+  tr("Pin (GPIO)"); tr("LED di stato"); tr("Tasto fisico"); tr("USB"); tr("Temperatura del chip"); tr("Memoria"); tr("Processore");
 }
 
 // ---- righe "etichetta / valore" per le schede dell'hardware ----
@@ -195,14 +195,14 @@ static bool js_rad(HeapBuf& out) {
   Rows r(out);
   r.add(tr("Radio"), "Wi-Fi 2,4 GHz + Bluetooth LE");
   r.add(tr("Paese"), cfg.country.length() ? cfg.country.c_str() : tr("non scelto"));
-  r.addf(tr("Canali ammessi"), "1-%d", regionChannels());
+  r.addf(tr("Canali permessi"), "1-%d", regionChannels());
   r.addf(tr("Limite del paese"), "%d dBm", (int)regionLimitDbm());
   r.addf(tr("Potenza in uso"), "%d dBm", (int)regionTxDbm());
   if (cfg.antExt) r.addf(tr("Antenna"), "%s (%d dBi)", tr("esterna"), (int)cfg.antGain);
   else r.add(tr("Antenna"), tr("interna"));
   char mac[24];
   drvWifiMac(false, mac, sizeof mac);
-  r.add("MAC Wi-Fi", mac);
+  r.add(tr("Indirizzo MAC"), mac);
   return r.done();
 }
 
@@ -210,12 +210,12 @@ static bool js_rad(HeapBuf& out) {
 static const DevOps DEVS[] = {
   { "pin",  "Pin (GPIO)",        "Ingressi e uscite", DEV_HW, "pin",  ROLE_GUEST, st_one, nullptr, pinsJson,    act_pin },
   { "led",  "LED di stato",      "Luce",       DEV_HW,   "led",  ROLE_GUEST, st_led,  set_led,  js_led,         act_led },
-  { "boot", "Tasto BOOT",        "Pulsante",   DEV_HW,   "btn", ROLE_GUEST, st_one,  nullptr,  js_boot,        nullptr },
-  { "usb",  "USB",               "Collegamenti", DEV_HW, "usb",  ROLE_GUEST, st_one,  nullptr,  js_usb,         nullptr },
-  { "temp", "Temperatura del chip", "Sensori", DEV_HW,   "cpu",  ROLE_GUEST, st_one,  nullptr,  js_temp,        nullptr },
+  { "boot", "Tasto fisico",        "Pulsante",   DEV_HW,   "btn", ROLE_GUEST, st_one,  nullptr,  js_boot,        nullptr },
+  { "usb",  "USB",               "Interfacce", DEV_HW,   "usb",  ROLE_GUEST, st_one,  nullptr,  js_usb,         nullptr },
+  { "temp", "Temperatura del chip", "Sensori", DEV_HW,   "sens",  ROLE_GUEST, st_one,  nullptr,  js_temp,        nullptr },
   { "mem",  "Memoria",           "Risorse",    DEV_HW,   "mem",  ROLE_GUEST, st_one,  nullptr,  js_mem,         nullptr },
   { "cpu",  "Processore",        "Risorse",    DEV_HW,   "cpu",  ROLE_GUEST, st_one,  nullptr,  js_cpu,         nullptr },
-  { "rad",  "Radio 2,4 GHz",     "Radio",      DEV_HW,   "rad",  ROLE_GUEST, st_rad,  nullptr,  js_rad,         nullptr },
+  { "rad",  "Radio",             "Interfacce", DEV_HW,   "rad",  ROLE_GUEST, st_rad,  nullptr,  js_rad,         nullptr },
 };
 #define NHW ((int)(sizeof(DEVS) / sizeof(DEVS[0])))
 

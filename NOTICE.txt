@@ -24,7 +24,7 @@ Progetto: https://github.com/paolellad79/VesevOS
    sorgenti locali; verifica sempre la licenza della versione che usi.
    Le librerie restano sotto la loro licenza e non fanno parte della
    licenza commerciale di VesevOS.
-   - ESP-IDF 5.5.5 (Espressif; esp_wifi, esp_now, esp-mqtt, esp_http_server,
+   - ESP-IDF 5.5.5 (Espressif; esp_wifi, esp_now, esp-mqtt, esp_http_client, esp_http_server,
      esp_https_server, esp-tls, NVS, tutti i driver): Apache-2.0.
      Testo: "license apache2"
    - Mbed TLS (in ESP-IDF): Apache-2.0 oppure GPL-2.0-or-later, a scelta di
@@ -55,16 +55,27 @@ Progetto: https://github.com/paolellad79/VesevOS
      firmware, ridotto nel recovery 0.5.2): dati dell'elenco CA di Mozilla
      (certdata.txt, copia del 25/2/2025 distribuita da curl.se). Il file
      di ESP-IDF cita l'origine ma non porta il testo della licenza;
-     l'elenco di Mozilla e in genere indicato sotto MPL-2.0 (sono dati,
-     non codice). Licenza NON verificata alla fonte: DA VERIFICARE.
-   - PsychicHttp 3.1.2 (Zach Poulter, Rob Smith, Carbou): MIT. Nel progetto
+     l'elenco di Mozilla (certdata.txt) e' sotto MPL-2.0, verificato il 05/11/2026
+     sull'intestazione del file (dati, non codice).
+   - PsychicHttp 3.1.2 (Copyright (c) 2024 Jeremy Poulter, Zachary Smith,
+     Mathieu Carbou): MIT. Nel progetto
      c'e una copia modificata: ogni #ifdef ARDUINO diventa PSYCHIC_ARDUINO,
      nient'altro (vedi NOTICE-PSYCHIC.txt). Testo: "license mit"
    - ArduinoJson (Benoit Blanchon; copia nel componente aj_json): MIT.
      Testo: "license mit"
-   - Berry (Guan Wenliang, interprete degli script): MIT.
-   - posix_tz_db (fusi orari in formato POSIX): indicata MIT; il testo della
-     licenza non e nei sorgenti locali (25/10/2026). DA VERIFICARE.
+   - BMP280 (Bosch Sensortec GmbH, copyright 2012-2014): la compensazione
+     a interi in VesevOS/src/devices/vos_bmp280.cpp segue il driver Bosch
+     BMP280 (BSD a tre clausole). Testo: licenses/BSD-3-Clause.txt.
+   - Berry 1.1.0 (Copyright (c) 2018-2020 Guan Wenliang, interprete degli
+     script): MIT. Copia modificata in 3 file (vedi README-VesevOS.txt).
+   - FatFs R0.15 (Copyright (c) 2022 ChaN, file system FAT): licenza BSD a
+     una clausola (ridistribuzione con avviso di copyright e clausola,
+     senza garanzia). Testo completo: licenses/FatFs-ChaN.txt.
+   - CC0 1.0 (dati dei dispositivi in periferiche/ e docs/devs/): dedicazione
+     al pubblico dominio. Testo completo: licenses/CC0-1.0.txt.
+   - posix_tz_db (fusi orari in formato POSIX): MIT, verificato il 05/11/2026 sul
+     repository di origine (LICENSE). Nel LICENSE il titolare e' ancora il segnaposto
+     "[year] [fullname]": da completare o da riportare come indicato dall'autore.
    - Pagina di prima installazione (cartella flash/, solo browser, nessun
      codice nel firmware):
      esptool-js 0.5.7 (Espressif): Apache-2.0 (testo in

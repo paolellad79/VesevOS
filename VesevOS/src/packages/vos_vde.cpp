@@ -11,6 +11,7 @@
 #include "vos_elf.h"
 #include "../core/vos_files.h"
 #include "../core/vos_i18n.h"
+#include "../core/vos_pacchetto.h"
 #include "../core/vos_util.h"
 #include "../core/vos_vdesc.h"
 #include "../devices/vos_io.h"
@@ -63,6 +64,7 @@ bool numero(std::string_view v, long mn, long mx, int& out) {
 
 // Una riga chiave=valore di [module]. false = err gia scritto con la riga.
 bool chiaveModulo(VdeInfo& v, std::string_view k, std::string_view val, const char* nomeFile, int riga, ErrBuf& err, bool& haBus) {
+  k = pacChiave(k);
   if (viewEqI(k, "name")) {
     if (!utilNameOk(val.data(), val.size()) || val != std::string_view(nomeFile)) return utilLineErr(err, riga, tr("Nome non valido o diverso dal nome del file"));
     viewCopy(v.name, sizeof v.name, val);
@@ -101,9 +103,7 @@ bool chiaveModulo(VdeInfo& v, std::string_view k, std::string_view val, const ch
     if (!testoOk(val, 80)) return utilLineErr(err, riga, tr("Avviso non valido (1-80 caratteri)"));
     viewCopy(v.warn, sizeof v.warn, val);
   } else if (viewEqI(k, "version")) {
-    bool ok = val.size() >= 1 && val.size() <= 10;
-    for (size_t i = 0; ok && i < val.size(); i++) if (!((val[i] >= '0' && val[i] <= '9') || val[i] == '.')) ok = false;
-    if (!ok) return utilLineErr(err, riga, tr("Versione non valida (solo cifre e punti, massimo 10)"));
+    if (!pacVersioneOk(val)) return utilLineErr(err, riga, tr("Versione non valida (solo cifre e punti, massimo 10)"));
     viewCopy(v.ver, sizeof v.ver, val);
   } else {
     return utilLineErr(err, riga, tr("Chiave sconosciuta"));
@@ -193,7 +193,7 @@ bool vdeParse(const uint8_t* file, size_t len, const char* fileName, VdeInfo& v,
     }
     if (!chiaveModulo(v, k, val, fileName, riga, err, haBus)) return false;
   }
-  if (!visto[MOD] || !v.name[0]) { err = tr("Manca [module] con name="); return false; }
+  if (!visto[MOD] || !v.name[0]) { err = tr("Manca [module] con nome="); return false; }
   if (!haBus) { err = tr("Manca bus="); return false; }
   if (!visto[SIG]) { err = tr("Manca la sezione [signals] con almeno un segnale"); return false; }
   if (!segnaliOk(v, err)) return false;

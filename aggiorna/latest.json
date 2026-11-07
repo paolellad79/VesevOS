@@ -4,6 +4,9 @@
  "description": "Ultime versioni pubblicate. 'channel' e 'publisher' sono scritte non firmate: lo SHA-256 dice solo che il file non e rotto.",
  "firmware": {
   "version": "1.8.16",
+  "channel": "official",
+  "publisher": "Domenico Paolella",
+  "date": "2026-10-31",
   "size": 2380880,
   "sha256": "2bce5a99e14c54912d8772f966cf4d7ecc77d420c910c604ddaf96d56962cf22",
   "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/1.8.16/VesevOS-1.8.16.bin",

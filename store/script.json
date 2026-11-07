@@ -1,5 +1,66 @@
 {
   "versione_schema": 1,
   "categoria": "script",
-  "voci": []
+  "voci": [
+    {
+      "id": "script-torcia-vsb",
+      "nome": "torcia",
+      "descrizione": {
+        "it": "Un click del tasto BOOT accende il LED bianco, il click dopo lo spegne. Si spegne da solo dopo qualche minuto.",
+        "en": "One click of the BOOT button turns the white LED on, the next click turns it off. It switches off by itself after a few minutes.",
+        "es": "Un clic del boton BOOT enciende el LED blanco y el siguiente lo apaga. Se apaga solo tras unos minutos.",
+        "de": "Ein Klick auf die BOOT-Taste schaltet die weisse LED ein, der naechste aus. Nach einigen Minuten geht sie von selbst aus."
+      },
+      "versione": "1",
+      "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/store/scripts/torcia/torcia.vsb",
+      "sha256": "f3563de2d0cccfdd68c58789d0313e4b8307ab81caaf1b5f712dfb27fba8a6cc",
+      "dimensione": 1208,
+      "firmware_minimo": "da confermare",
+      "permessi": "da confermare",
+      "licenza": "GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial",
+      "autore": "Domenico Paolella",
+      "sorgente": "da confermare",
+      "aggiornato": "2026-11-05"
+    },
+    {
+      "id": "script-ble-vsb",
+      "nome": "ble",
+      "descrizione": {
+        "it": "Mostra lo stato del Bluetooth e il codice di abbinamento. Solo Admin.",
+        "en": "Shows the Bluetooth status and the pairing code. Admin only.",
+        "es": "Muestra el estado del Bluetooth y el codigo de emparejamiento. Solo Admin.",
+        "de": "Zeigt den Bluetooth-Status und den Kopplungscode. Nur Admin."
+      },
+      "versione": "1",
+      "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/store/scripts/ble/ble.vsb",
+      "sha256": "c8bae7166136029053a1c8e8947b3928acf4672797725a2cbeada68d6e8e814f",
+      "dimensione": 464,
+      "firmware_minimo": "da confermare",
+      "permessi": "da confermare",
+      "licenza": "GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial",
+      "autore": "Domenico Paolella",
+      "sorgente": "da confermare",
+      "aggiornato": "2026-11-05"
+    },
+    {
+      "id": "script-ble-off-vsb",
+      "nome": "ble-off",
+      "descrizione": {
+        "it": "Spegne il Bluetooth e lo libera. Solo Admin.",
+        "en": "Turns the Bluetooth off and frees it. Admin only.",
+        "es": "Apaga el Bluetooth y lo libera. Solo Admin.",
+        "de": "Schaltet Bluetooth aus und gibt es frei. Nur Admin."
+      },
+      "versione": "1",
+      "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/store/scripts/ble-off/ble-off.vsb",
+      "sha256": "b069025a01a2536dec5d7ab05604d1f431ed1f8122923dedfc75122d4340e108",
+      "dimensione": 248,
+      "firmware_minimo": "da confermare",
+      "permessi": "da confermare",
+      "licenza": "GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial",
+      "autore": "Domenico Paolella",
+      "sorgente": "da confermare",
+      "aggiornato": "2026-11-05"
+    }
+  ]
 }

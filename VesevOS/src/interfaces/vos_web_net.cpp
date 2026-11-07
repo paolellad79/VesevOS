@@ -3,6 +3,7 @@
 // VesevOS - vos_web_net.cpp
 // Percorsi del server web: configurazione, filtro IP, watchdog, servizi di rete, HTTPS. Aiuti e tipi condivisi: vos_web_int.h.
 #include "vos_web_int.h"
+#include "../core/vos_apwin.h"
 #include "../core/vos_parse.h"
 #include "../core/vos_clamp.h"
 #include "../core/vos_wdset.h"
@@ -34,12 +35,13 @@ void routesNet(PsychicHttpServer* S, bool sec) {
   add(S, sec, "/api/setup/done", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
     if (has(r, "ntp")) { cfg.ntpOn = Pis(r, "ntp", "1"); cfg.ntpAutoOff = !cfg.ntpOn; timeApply(); }     // senza Wi-Fi di casa: server dell'ora spento
     cfg.setupDone = true; cfgSave(); ledSetSetup(false);
+    apWinClose(); netApRefresh();
     vlog("SETUP: prima configurazione completata");
     return ok(s);
   });
 
   // ---- controllo della configurazione (allarmi) e registro delle modifiche ----
-  add(S, sec, "/api/audit", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+  add(S, sec, "/api/audit", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
     HeapBuf j(AUDIT_JSON_MAX);
     auditJson(j);
     if (j.oom() || j.over()) return ko(s, tr("Memoria insufficiente"), "off");
@@ -127,7 +129,6 @@ void routesNet(PsychicHttpServer* S, bool sec) {
     if (why) return ko(s, why);
     if (!apOn && cfg.apOn && netState() != NET_CLIENT_OK) return ko(s, tr("Spegni il Punto di accesso solo quando la scheda e collegata alla Wi-Fi di casa"), "state");
     g_cleanArm = false;                                  // modifica a mano: la pulizia automatica non serve piu
-    cfg.httpRedirect = has(r, "redirect") ? Pis(r, "redirect", "1") : cfg.httpRedirect;   // vale subito (si legge a ogni richiesta); la modifica finisce nel registro (auditDiff)
     cfg.apOn = apOn; cfg.apCaptive = cap; cfg.httpOn = hOn; cfg.https = sOn; cfg.httpPort = hp; cfg.httpsPort = sp;
     cfg.dhcpOn = dh; cfg.dhcpLease = lease; cfg.mdnsOn = md;
     cfgSave(); netApplyServices();

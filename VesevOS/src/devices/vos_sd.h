@@ -62,7 +62,12 @@ bool   sdSpaceKb(uint32_t& totalKb, uint32_t& usedKb);          // dimensione e 
 #define SD_IO_MAX 1024
 int    sdReadAt(const char* path, uint32_t off, uint8_t* buf, size_t n, char* err, size_t en);        // byte letti (0 = oltre la fine), -1 = errore
 bool   sdWriteBytes(const char* path, const uint8_t* buf, size_t n, bool append, char* err, size_t en);
+// Un file grande in un solo passaggio: resta aperto per tutto il lavoro e conta come azione in corso dall'apertura alla chiusura. Uno alla volta.
+bool   sdFlussoApri(const char* path, char* err, size_t en);
+bool   sdFlussoScrivi(const uint8_t* buf, size_t n, char* err, size_t en);
+bool   sdFlussoChiudi(char* err, size_t en);                    // sempre dopo Apri riuscita; false = il file puo non essere completo
 bool   sdRemove(const char* path, char* err, size_t en);        // un file o una cartella vuota
+bool   sdRename(const char* da, const char* a, char* err, size_t en);   // la destinazione non deve esistere
 bool   sdMakeDir(const char* path, char* err, size_t en);
 void   sdText(char* out, size_t on);                            // una riga di stato (shell e autodiagnosi)
 

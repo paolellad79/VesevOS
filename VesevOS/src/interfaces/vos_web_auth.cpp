@@ -7,6 +7,7 @@
 #include "../net/vos_net.h"
 #include "../net/vos_traffic.h"
 #include "../drivers/vos_drv_time.h"
+#include "../drivers/vos_drv_sys.h"
 
 // Risposta JSON da un HeapBuf; se la memoria non e bastata, errore al posto di un JSON troncato
 static esp_err_t jsonOrOom(Res* s, const HeapBuf& j) {
@@ -39,7 +40,7 @@ void routesAuth(PsychicHttpServer* S, bool sec) {
     if (res != 0) return ko(s, tr("Nome o password errati"), "bad_login");
     if (mfaOn(idx)) {                                   // password giusta: manca il codice
       char tk[MFA_TOK_BUF];
-      if (!mfaLoginToken(idx, tk)) return ko(s, tr("Ora della scheda non valida: accesso con MFA bloccato. Usa il tasto BOOT 8 secondi o imposta l'ora dalla seriale"));
+      if (!mfaLoginToken(idx, tk)) return ko(s, tr("Ora della scheda non valida: accesso con MFA bloccato. Usa il tasto fisico 8 secondi o imposta l'ora dalla seriale"));
       HeapBuf j(256);
       j.addf("{\"ok\":false,\"mfa\":true,\"tok\":\"%s\",\"notime\":%s,\"recOnly\":%s}", tk, mfaLoginNoTime(tk) ? "true" : "false",
              !timeValid() && cfg.mfaNoTime == 1 ? "true" : "false");
@@ -54,8 +55,8 @@ void routesAuth(PsychicHttpServer* S, bool sec) {
     int res = mfaLoginCheck(Pc(r, "tok"), Pc(r, "code"), (uint32_t)Pint(r, "now"), idx, e);
     if (res == 0) return loginDone(s, c, idx);
     if (res == 3) return ko(s, tr("Ora della scheda non valida: il browser non ha mandato la sua ora"));
-    if (res == 2) { authFailIp(c.ip, "gettone MFA scaduto o tentativi finiti"); return ko(s, tr("Tempo scaduto o troppi errori: rifai l'accesso dall'inizio"), "bad_login"); }
-    authFailIp(c.ip, "codice MFA errato");
+    if (res == 2) { authFailIp(c.ip, "gettone MFA scaduto o tentativi finiti", EV_MFA); return ko(s, tr("Tempo scaduto o troppi errori: rifai l'accesso dall'inizio"), "bad_login"); }
+    authFailIp(c.ip, "codice MFA errato", EV_MFA);
     return ko(s, tr("Codice errato"), "bad_login");
   });
   // ---- MFA: gestione (ognuno il proprio; l'amministratore puo spegnere quello degli altri) ----
@@ -98,7 +99,7 @@ void routesAuth(PsychicHttpServer* S, bool sec) {
   add(S, sec, "/api/firstpass", HTTP_POST, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
     if (authIsSet()) return ko(s, tr("La password e gia impostata"), "state");
     bool fromAp = netOnAp(c.ip), fresh = !cfg.staEnabled || (g_firstPassUntil && (int32_t)(g_firstPassUntil - drvMillis()) > 0);
-    if (!fromAp && !fresh) return ko(s, tr("Per sicurezza la prima password si sceglie dall'hotspot della scheda, oppure entro 10 minuti dal reset con il tasto BOOT"), "forbidden");
+    if (!fromAp && !fresh) return ko(s, tr("Per sicurezza la prima password si sceglie dall'hotspot della scheda, oppure entro 10 minuti dal reset con il tasto fisico"), "forbidden");
     int a = authFirstAdmin();
     ErrBuf e;
     if (a < 0 || !userSetPassword(a, Pc(r, "p"), e)) return ko(s, e.empty() ? tr("Errore") : e.c_str());
@@ -165,13 +166,25 @@ void routesAuth(PsychicHttpServer* S, bool sec) {
     cfg.banFails = f; cfg.banSecs = sc; cfgSave(); return ok(s);
   });
 
+  // 32 byte dal generatore del chip per la password "Massima": la pagina li combina con i suoi. Niente nel registro; no-store lo mette sendText.
+  add(S, sec, "/api/casuale", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    uint8_t b[32];
+    drvRandomFill(b, sizeof b);
+    char j[80] = "{\"rnd\":\"";
+    char* p = j + strlen(j);
+    for (size_t i = 0; i < sizeof b; i++) p += snprintf(p, 3, "%02x", b[i]);
+    strcpy(p, "\"}");
+    return sendJson(s, j);
+  });
   add(S, sec, "/api/status", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { 
     HeapBuf j(SYS_STATUS_JSON_MAX + 2048);          // net e traffico stanno sopra il nucleo: si aggiungono qui
     if (!sysStatusJson(j)) return ko(s, tr("Memoria insufficiente"), "off");
     char traf[TRAFFIC_JSON_MAX];
     trafficJson(traf, sizeof(traf));
     j.cutLast();                                    // toglie la } finale per aggiungere net e traffico
-    j.add(",\"net\":"); netStatusJson(j); j.add(','); j.add(traf); j.add('}');
+    j.add(",\"net\":"); netStatusJson(j); j.add(','); j.add(traf);
+    if (c.role >= ROLE_ADMIN) { j.add(",\"agg\":"); aggiornaNotaJson(j); j.addf(",\"evb\":%lu", (unsigned long)eventiBlocchiNuovi()); }
+    j.add('}');
     if (j.oom() || j.over()) return ko(s, tr("Memoria insufficiente"), "off");
     return sendText(s, 200, "application/json", j.c_str(), j.length()); });
   add(S, sec, "/api/settings", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t { 

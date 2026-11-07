@@ -1,5 +1,5 @@
 // VesevOS - prove sul computer: periferica microSD (devices/vos_sd.cpp, vos_sd_io.cpp, vos_sd_path.cpp) con il driver finto (fake_sd.cpp)
-// I comandi e la gestione della scheda non sono nel firmware: stanno nel driver microSD (docs/esempi/driver/microsd.vdb).
+// I comandi e la gestione della scheda non sono nel firmware: stanno nel driver microSD (docs/esempi/driver/sd-spi.vdb).
 // La microSD e una periferica di io.cfg (vos_io.cpp, vero, con il file system finto): i 4 pin li occupa la periferica per tutta la sua vita,
 // non il montaggio; senza periferica non c'e nessun pin occupato e nessuna azione.
 #include <Arduino.h>

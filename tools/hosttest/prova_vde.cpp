@@ -90,6 +90,7 @@ int main() {
     return bene;
   };
   CHECK(prova("[module]\\nname=prova\\nbus=i2c\\naddr=0x76\\nfreq=100000\\n[signals]\\nSDA\\nSCL\\n", nullptr));           // il minimo
+  CHECK(prova("[module]\\nnome=prova\\ntitolo=Prova\\nversione=1.2\\nautore=Io\\nbus=i2c\\nindirizzo=0x76\\nfrequenza=100000\\n[signals]\\nSDA\\nSCL\\n", nullptr));   // chiavi italiane
   CHECK(prova("[module]\\nname=prova\\n[signals]\\nSDA\\nSCL\\n", "bus="));
   CHECK(prova("[module]\\nname=prova\\nbus=uart\\n[signals]\\nTX\\n", "Bus non valido"));
   CHECK(prova("[module]\\nname=prova\\nbus=i2c\\nfreq=100000\\n[signals]\\nSDA\\nSCL\\n", "addr"));
@@ -134,12 +135,12 @@ int main() {
 
   // gli esempi veri
   std::string dir = std::string(REPO) + "/docs/esempi/driver-elf/";
-  std::string bmp = leggi(dir + "bmp280.vde"), sdc = leggi(dir + "microsd.vde");
+  std::string bmp = leggi(dir + "bmp280.vde"), sdc = leggi(dir + "sd-spi.vde");
   CHECK(!bmp.empty() && !sdc.empty());
   CHECK(analizza(bmp, "bmp280", *v, err) && v->bus == VB_I2C && v->ncmd == 3 && !strcmp(v->cmdWord, "bmp") && v->widget.on && !v->source[0] && v->elfLen > 100);
-  bool okSd = analizza(sdc, "microsd", *v, err);
-  if (!okSd) printf("  (microsd: %s)\n", err.c_str());
-  CHECK(okSd && v->bus == VB_SD && v->ncmd == 9 && !strcmp(v->cmdWord, "sd") && !strcmp(v->source, "sd") && v->khz == 1000 && v->icon[0] == '<');
+  bool okSd = analizza(sdc, "sd-spi", *v, err);
+  if (!okSd) printf("  (sd-spi: %s)\n", err.c_str());
+  CHECK(okSd && v->bus == VB_SD && v->ncmd == 10 && !strcmp(v->cmdWord, "sd") && !strcmp(v->source, "sd") && v->khz == 1000 && v->icon[0] == '<');
   CHECK(!analizza(sdc, "bmp280", *v, err));
   delete v;
   return done("prova_vde");

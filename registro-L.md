@@ -97,3 +97,8 @@ Semaforo accettato dall'utente il 01/11/2026 (valutazione preliminare, non e con
 | Accessibilita | provata in automatico, non con lettori di schermo | 🟡 |
 | Radio, export, IA, marchi | non applicabile | 🟢 |
 Controllo legale: 🟡 (nessun rosso; i gialli sono accettati dall'utente). NOTICE.txt, SBOM.spdx.json, registro e CHANGELOG aggiornati il 01/11/2026.
+
+## P. 1.8.21a (07/11/2026)
+Semaforo accettato dall'utente il 07/11/2026 (valutazione preliminare, non e consulenza legale; le norme citate potrebbero essere cambiate).
+Controllo legale: 🟢 1 / 🟡 10 / 🔴 0 (nessun rosso; i 10 gialli sono accettati dall'utente come nota nel commit). Elenco dettagliato dei gialli: da riportare dal semaforo dell'utente (nel repo non c'e un file con le voci di questa versione).
+NOTICE.txt (aggiunto esp_http_client, ESP-IDF Apache-2.0), SBOM.spdx.json (versione 1.8.21a) e CHANGELOG aggiornati il 07/11/2026.

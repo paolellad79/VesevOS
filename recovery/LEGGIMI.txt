@@ -1,4 +1,4 @@
-VesevOS Recovery 0.5.2 - ESP-IDF 5.5 (29/10/2026, scritto, NON compilato)
+VesevOS Recovery 0.5.3 - ESP-IDF 5.5 (05/11/2026, scritto, NON compilato dopo il modo 3)
 ===============================================================================
 Il recovery e un programma piccolo che vive nella partizione a 0x10000 (massimo 1.048.576 byte) e serve ad aggiornare VesevOS (0x110000)
 senza cavo e senza scheda SD. E un progetto ESP-IDF: sorgenti in recovery/VesevOS_Recovery_IDF/, progetto di compilazione in ../idf-recovery
@@ -17,7 +17,13 @@ Cosa fa
  - Ordini di VesevOS nella NVS: modo 1 = scarica da HTTPS (URL + SHA-256) senza pagina; modo 2 = caricamento dal browser con gettone monouso.
  - LED: arancione lento = attesa; azzurro veloce = scrittura; verde fisso = finito; rosso fisso = errore (dopo 10 s torna arancione).
  - Protezioni: non passa a VesevOS se manca il marchio nel firmware; anti-giro; dopo 15 minuti senza accessi torna a VesevOS.
- - Comandi seriali: i (informazioni), b (avvia VesevOS), r (riavvia). Marchio del recovery: {REC:VesevOS:0.5.2}.
+ - Comandi seriali: i (informazioni), b (avvia VesevOS), r (riavvia). Marchio del recovery: {REC:VesevOS:0.5.3}.
+
+Novita della 0.5.3 rispetto alla 0.5.2
+ - Ordine di modo 3: installa dalla microSD il file gia scaricato e controllato da VesevOS, senza rete. Riprova al massimo 2 volte se manca la corrente.
+ - Copia di riserva: se il firmware nuovo non si conferma per due avvii, o la scrittura fallisce, rimette la copia /AGG/RIS.BIN della microSD (una volta sola). Tocca solo app0.
+ - Installazione automatica di VesevOS (chiave NVS "auto"): se non riesce e app0 e integra torna da solo a VesevOS, che mostra l'esito.
+   Se l'errore arriva dopo l'inizio della scrittura, app0 e gia cancellata e il recovery resta con la sua pagina.
 
 Novita della 0.5.2 rispetto alla 0.5.1
  - Legge la configurazione prima da /etc/vesevos.conf (VesevOS 1.8.1+) e, se manca, da /vesevos.conf (come prima).

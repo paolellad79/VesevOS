@@ -6,9 +6,9 @@ HERE="$(cd "$(dirname "$0")" && pwd)"; REPO="$HERE/../.."
 OUT="${TMPDIR:-/tmp}/vos_vdpcmd"; mkdir -p "$OUT"
 INC="-I$HERE/fake_idf -I$REPO/VesevOS $(find "$REPO/VesevOS/src" -type d | grep -v third_party | sed 's/^/-I/' | tr '\n' ' ')"
 CXX="g++ -std=gnu++17 -w $INC"
-for f in vos_mod vos_mod_files vos_mod_line vos_mod_cmd vos_drvwidget vos_drvcmd; do $CXX -c "$(find "$REPO/VesevOS" -name "$f.cpp")" -o "$OUT/$f.o"; done
+for f in vos_mod vos_mod_files vos_mod_line vos_mod_cmd vos_drvwidget vos_drvcmd vos_pacchetto; do $CXX -c "$(find "$REPO/VesevOS" -name "$f.cpp")" -o "$OUT/$f.o"; done
 $CXX -c "$HERE/prova_vdp_cmd.cpp" -o "$OUT/prova.o"
-g++ "$OUT"/prova.o "$OUT"/vos_mod.o "$OUT"/vos_mod_files.o "$OUT"/vos_mod_line.o "$OUT"/vos_mod_cmd.o "$OUT"/vos_drvwidget.o "$OUT"/vos_drvcmd.o -o "$OUT/prova"
+g++ "$OUT"/prova.o "$OUT"/vos_mod.o "$OUT"/vos_mod_files.o "$OUT"/vos_mod_line.o "$OUT"/vos_mod_cmd.o "$OUT"/vos_drvwidget.o "$OUT"/vos_drvcmd.o "$OUT"/vos_pacchetto.o -o "$OUT/prova"
 VOS_REPO="$(cd "$REPO" && pwd)" "$OUT/prova"
 # Il codice [cmd] estratto dal vero modCmdCode gira nell'interprete Berry vero, con una microSD finta in memoria (prova_vdp_cmd_*.be)
 BE="$REPO/VesevOS/src/third_party/berry/src"; mkdir -p "$OUT/berry"

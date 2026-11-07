@@ -99,7 +99,7 @@ std::string statsText() {
   s.addf(tr("Wi-Fi: collegamenti %lu, cadute %lu, collegato %lu s, segnale medio %d dBm, minimo %d dBm"), (unsigned long)g.wifiUp, (unsigned long)g.wifiDown, (unsigned long)g.wifiSec, avg, (int)g.rssiMin).add('\n');
   s.addf(tr("Hotspot: al massimo %d telefoni insieme"), (int)g.apMax).add('\n');
   s.addf(tr("Bluetooth: accensioni %lu, collegamenti %lu"), (unsigned long)g.bleStart, (unsigned long)g.bleConn).add('\n');
-  s.addf(tr("Tasto BOOT: brevi %lu, 2 s %lu, 8 s %lu, 20 s %lu"), (unsigned long)g.boot[0], (unsigned long)g.boot[1], (unsigned long)g.boot[2], (unsigned long)g.boot[3]).add('\n');
+  s.addf(tr("Tasto fisico: brevi %lu, 2 s %lu, 8 s %lu, 20 s %lu"), (unsigned long)g.boot[0], (unsigned long)g.boot[1], (unsigned long)g.boot[2], (unsigned long)g.boot[3]).add('\n');
   s.addf(tr("LED (secondi): stato %lu, battito %lu, fisso %lu, spento %lu"), (unsigned long)g.ledSec[0], (unsigned long)g.ledSec[1], (unsigned long)g.ledSec[2], (unsigned long)g.ledSec[3]).add('\n');
   return t.take();
 }
