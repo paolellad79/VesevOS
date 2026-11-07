@@ -93,3 +93,8 @@ footer.pie{max-width:64rem;margin:0 auto;padding:0 16px 30px;color:var(--mut);fo
 .msg{padding:8px;border-radius:8px;margin:8px 0;display:none}
 .msg.ok{display:block;background:var(--okbg);color:var(--okt)}
 .msg.ko{display:block;background:var(--kobg);color:var(--kot)}
+
+/* Terminale a riquadro fisso: uscita che scorre, riga di invio sotto, la pagina non si allunga */
+.term-card{display:flex;flex-direction:column;height:70vh;min-height:360px}
+.term-card #uscita{flex:1;max-height:none;min-height:0;margin:0 0 8px}
+.term-card #invio{flex:0 0 auto}
