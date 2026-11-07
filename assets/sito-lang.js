@@ -8,7 +8,7 @@
     it: {
       t_home: 'VesevOS', t_store: 'VesevOS - Pacchetti', t_lic: 'VesevOS - Tecnologie e licenze',
       h_sub: 'Il sistema modulare per ESP32-S3: pagina web, shell, driver e programmi che si installano da soli.',
-      h_inst: 'Installa dal browser', h_pack: 'Sfoglia i pacchetti', h_src: 'Codice sorgente',
+      h_inst: 'Installa dal browser', h_term: 'Terminale', h_pack: 'Sfoglia i pacchetti', h_src: 'Codice sorgente',
       h_cosa: 'Cosa offre',
       c1t: 'Pagina web e shell', c1: 'Una pagina web completa e una shell in stile Debian, con accesso per ruoli: Admin, Operatore, Ospite.',
       c2t: 'Driver e programmi', c2: 'Driver in Berry o in ELF, app e script che si caricano da un solo pannello e si gestiscono dai Task, con avvio automatico.',
@@ -41,7 +41,7 @@
     en: {
       t_home: 'VesevOS', t_store: 'VesevOS - Packages', t_lic: 'VesevOS - Technologies and licenses',
       h_sub: 'The modular system for ESP32-S3: web page, shell, and drivers and programs that install themselves.',
-      h_inst: 'Install from the browser', h_pack: 'Browse the packages', h_src: 'Source code',
+      h_inst: 'Install from the browser', h_term: 'Terminal', h_pack: 'Browse the packages', h_src: 'Source code',
       h_cosa: 'What it offers',
       c1t: 'Web page and shell', c1: 'A complete web page and a Debian-style shell, with role-based access: Admin, Operator, Guest.',
       c2t: 'Drivers and programs', c2: 'Drivers in Berry or ELF, apps and scripts loaded from a single panel and managed from Tasks, with automatic start.',
@@ -74,7 +74,7 @@
     es: {
       t_home: 'VesevOS', t_store: 'VesevOS - Paquetes', t_lic: 'VesevOS - Tecnologias y licencias',
       h_sub: 'El sistema modular para ESP32-S3: pagina web, shell, y controladores y programas que se instalan solos.',
-      h_inst: 'Instalar desde el navegador', h_pack: 'Ver los paquetes', h_src: 'Codigo fuente',
+      h_inst: 'Instalar desde el navegador', h_term: 'Terminal', h_pack: 'Ver los paquetes', h_src: 'Codigo fuente',
       h_cosa: 'Que ofrece',
       c1t: 'Pagina web y shell', c1: 'Una pagina web completa y una shell al estilo Debian, con acceso por roles: Admin, Operador, Invitado.',
       c2t: 'Controladores y programas', c2: 'Controladores en Berry o ELF, apps y scripts que se cargan desde un solo panel y se gestionan desde Tareas, con inicio automatico.',
@@ -107,7 +107,7 @@
     de: {
       t_home: 'VesevOS', t_store: 'VesevOS - Pakete', t_lic: 'VesevOS - Technik und Lizenzen',
       h_sub: 'Das modulare System fuer ESP32-S3: Webseite, Shell sowie Treiber und Programme, die sich selbst installieren.',
-      h_inst: 'Im Browser installieren', h_pack: 'Pakete ansehen', h_src: 'Quellcode',
+      h_inst: 'Im Browser installieren', h_term: 'Terminal', h_pack: 'Pakete ansehen', h_src: 'Quellcode',
       h_cosa: 'Was es bietet',
       c1t: 'Webseite und Shell', c1: 'Eine vollstaendige Webseite und eine Shell im Debian-Stil, mit Zugriff nach Rollen: Admin, Bediener, Gast.',
       c2t: 'Treiber und Programme', c2: 'Treiber in Berry oder ELF, Apps und Skripte, die ueber ein einziges Feld geladen und in den Aufgaben verwaltet werden, mit automatischem Start.',

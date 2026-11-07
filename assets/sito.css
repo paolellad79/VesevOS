@@ -86,3 +86,10 @@ footer.pie{max-width:64rem;margin:0 auto;padding:0 16px 30px;color:var(--mut);fo
 :focus-visible{outline:3px solid var(--wa);outline-offset:2px}
 [hidden]{display:none!important}
 @media (max-width:640px){.top{padding:6px 12px}.top .marca span{display:none}}
+
+/* Stili presi dal firmware (web/src/style.css): uscita di log, note e messaggi */
+.lgv{max-height:60vh;min-height:200px;font:12.5px/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow:auto}
+.fhint{color:var(--mut);font-size:13px;margin:4px 0 8px}
+.msg{padding:8px;border-radius:8px;margin:8px 0;display:none}
+.msg.ok{display:block;background:var(--okbg);color:var(--okt)}
+.msg.ko{display:block;background:var(--kobg);color:var(--kot)}
