@@ -1,0 +1,103 @@
+[manifest]
+name=store
+title=Store
+versione=0.1
+author=VesevOS
+use=https
+
+[page]
+button id=aggiorna label="Leggi il catalogo"
+text id=stato label="Stato"
+text id=v1 label="Voce 1"
+text id=v2 label="Voce 2"
+text id=v3 label="Voce 3"
+text id=v4 label="Voce 4"
+text id=v5 label="Voce 5"
+text id=v6 label="Voce 6"
+text id=v7 label="Voce 7"
+text id=v8 label="Voce 8"
+
+[code]
+# Catalogo: raw di GitHub, ramo main, cartella store/ (URL costante, non cambiare senza aggiornare il firmware)
+var base = 'https://raw.githubusercontent.com/paolellad79/VesevOS/main/store/'
+var cats = [['app.json', 'app'], ['script.json', 'script'], ['driver.json', 'driver']]
+
+# Valore della chiave: cerca la chiave per nome, quindi l'ordine delle chiavi non conta.
+# Il JSON si legge a pezzi divisi dalle virgolette (il modulo json non c'e).
+def valore(pezzi, chiave)
+  var i = 0
+  while i + 2 < size(pezzi)
+    if pezzi[i] == chiave && string.find(pezzi[i + 1], ':') >= 0
+      return pezzi[i + 2]
+    end
+    i = i + 1
+  end
+  return ''
+end
+
+# Estrae nome, versione e categoria. Ogni oggetto sta tra due graffe: si legge un oggetto alla volta.
+# Oggetti senza nome si saltano; senza versione si mostra '?'.
+def leggi(testo, cat, righe)
+  var oggetti = string.split(testo, '{')
+  var n = 0
+  while n < size(oggetti)
+    var pezzi = string.split(oggetti[n], '"')
+    var nome = valore(pezzi, 'nome')
+    var versione = valore(pezzi, 'versione')
+    if nome != ''
+      if versione == ''
+        versione = '?'
+      end
+      righe.push(nome + ' ' + versione + ' ' + cat)
+    end
+    n = n + 1
+  end
+end
+
+def mostra(righe)
+  var n = size(righe)
+  if n == 0
+    dev_set('stato', 'catalogo vuoto')
+  else
+    dev_set('stato', str(n) + ' voci')
+  end
+  var j = 0
+  while j < 8
+    if j < n
+      dev_set('v' + str(j + 1), righe[j])
+    else
+      dev_set('v' + str(j + 1), '')
+    end
+    j = j + 1
+  end
+end
+
+def aggiorna()
+  dev_set('stato', 'Lettura in corso')
+  var righe = []
+  try
+    var indice = scarica(base + 'index.json', 4096)
+    if size(indice) == 0
+      dev_set('stato', 'Catalogo non letto')
+      return
+    end
+    var k = 0
+    while k < size(cats)
+      var testo = scarica(base + cats[k][0], 16384)
+      leggi(testo, cats[k][1], righe)
+      k = k + 1
+    end
+    mostra(righe)
+  except .. as e
+    dev_set('stato', 'Lettura non riuscita')
+  end
+end
+
+def on_set(id, v)
+  if id == 'aggiorna'
+    aggiorna()
+  end
+end
+
+[data]
+stato=Premi Leggi il catalogo
