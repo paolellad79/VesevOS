@@ -1,4 +1,0 @@
-# Spegne il Bluetooth e lo libera, anche se lo usa un'app. Solo per l'Admin: "script run ble-off".
-# L'app che lo usava resta in esecuzione ma non ha piu il Bluetooth (le sue chiamate ble_* ricevono un errore chiaro).
-ble_off()
-print(ble_status())

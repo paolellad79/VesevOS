@@ -1,3 +1,0 @@
-Schermate del finto server di prova (tools/webtest) con dati di esempio, versione 1.7.45.
-Nessun dato reale: nomi, indirizzi e date sono inventati.
-Screenshots from the test server with sample data, version 1.7.45. No real data.
