@@ -54,7 +54,26 @@
  </div>
  <div>
  <div class="card"><h3>IPv6</h3>
-  <p class="fhint">IPv6 non e ancora disponibile su questa scheda.</p></div>
+  <p class="fhint">IPv6 e il nuovo sistema di indirizzi di rete, accanto a quello di sempre (IPv4). Vale solo per la Wi-Fi di casa, non per l'hotspot. Di fabbrica e spento.</p>
+  <div id="i6_stato" class="fhint"></div>
+  <table id="i6_tab" class="ftab"></table>
+  <p class="fhint">Il prefisso della rete e /64. Gateway e DNS IPv6 di fabbrica sono automatici: li da il router. Se vuoi, li scrivi a mano nelle impostazioni qui sotto. Gli indirizzi e i DNS IPv4 non vengono toccati.</p></div>
+ <div class="card adm"><h3>Impostazioni IPv6</h3>
+  <div class="tog"><div>IPv6 acceso</div>
+   <button class="sw1" id="i6_on" onclick="this.classList.toggle('on')" aria-label="IPv6 acceso"></button></div>
+  <label for="i6_modo">Indirizzi</label>
+  <select id="i6_modo" onchange="ip6Modo()"><option value="0">Automatico (li da il router)</option>
+   <option value="1">Automatico, piu un indirizzo fisso</option></select>
+  <div id="i6_fx" class="hide"><label for="i6_ind">Indirizzo fisso (prefisso /64)</label>
+   <input id="i6_ind" maxlength="45" autocomplete="off" spellcheck="false" placeholder="es. 2001:db8::10">
+   <p class="fhint">Solo indirizzi globali (iniziano con 2 o 3) o privati (iniziano con fc o fd). L'indirizzo fisso si aggiunge a quelli del router.</p></div>
+  <label for="i6_gw">Gateway IPv6 (vuoto = automatico, dal router)</label>
+  <input id="i6_gw" maxlength="45" autocomplete="off" spellcheck="false" placeholder="es. fe80::1">
+  <p class="fhint">Deve essere raggiungibile subito: un indirizzo che inizia con fe80 (quello del router) oppure della stessa rete /64 della scheda. Se lo scrivi, vale al posto di quello del router.</p>
+  <label for="i6_dns">DNS IPv6 (vuoto = automatico)</label>
+  <input id="i6_dns" maxlength="45" autocomplete="off" spellcheck="false" placeholder="es. 2001:db8::53">
+  <p class="fhint">Si usa solo se i DNS IPv4 non rispondono: non li sostituisce.</p>
+  <button class="btn" onclick="ip6Save()">Salva</button><div id="i6m" class="msg"></div></div>
  </div>
 </section>
 <section id="t_nome" class="hide">
@@ -138,7 +157,7 @@
 <section id="t_ap" class="hide">
  <div class="sub" id="sk_ap"><button>Servizio</button><button>Punto di accesso</button><button class="adm">Nome e password</button><button>DHCP</button><button>DNS</button></div>
  <div class="card"><h3>Servizio Punto di accesso (AP)</h3>
-  <p class="fhint">L'hotspot e la Wi-Fi della scheda: serve per entrare quando la scheda non e collegata alla tua rete. Si accende da solo al primo avvio, dopo un ripristino con il tasto fisico e se la tua Wi-Fi non e configurata.</p>
+  <p class="fhint">L'hotspot e la Wi-Fi della scheda: serve per entrare quando la scheda non e collegata alla tua rete. Finita la guida con la tua Wi-Fi configurata resta spento: lo accendi tu da qui. Si accende da solo se la tua Wi-Fi non e configurata e dopo un ripristino con il tasto fisico (8 secondi).</p>
   <div class="sc" id="sc_ap"></div>
   <div id="apdep">
    <div class="tog adm"><div>Portale automatico (il telefono apre da solo la pagina)</div>

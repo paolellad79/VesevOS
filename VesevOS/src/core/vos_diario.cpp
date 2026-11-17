@@ -8,6 +8,7 @@
 #include "vos_i18n.h"
 #include "vos_util.h"
 #include "vos_sys.h"
+#include "vos_diag_rule.h"
 #include "vos_strbuf.h"
 #include "../drivers/vos_drv_fs.h"
 #include <esp_system.h>
@@ -30,7 +31,8 @@
 
 struct RtcSnap { uint32_t magic, seq, epoch, upSec, minHeap, chk, mhz; char task[16]; char last[100]; char stage[12]; uint16_t maxBlockKb, stalls; char stuck[20]; };
 struct BootRecV1 { uint32_t n, epoch, prevUp, minHeap, mhz; uint8_t reason, hasSnap, pad0, pad1; char task[16]; char last[100]; char stage[12]; };
-struct BootRec { uint32_t n, epoch, prevUp, minHeap, mhz; uint8_t reason, hasSnap, pad0, pad1; char task[16]; char last[100]; char stage[12]; uint16_t maxBlockKb, stalls; char stuck[20]; };
+struct BootRec { uint32_t n, epoch, prevUp, minHeap, mhz; uint8_t reason, hasSnap, diagClasse, diagDett;   // diagClasse/diagDett: codice del LED (ex pad0/pad1, stessa dimensione e HDR_VER)
+                  char task[16]; char last[100]; char stage[12]; uint16_t maxBlockKb, stalls; char stuck[20]; };
 
 struct DiaryHdr { uint32_t magic; uint16_t ver, recSize; };
 
@@ -143,7 +145,7 @@ int diaryCount() {
   return n > DIARY_MAX ? DIARY_MAX : n;
 }
 
-static bool abnormal(int r) { return r == 4 || r == 5 || r == 6 || r == 7 || r == 9; }
+static bool abnormal(int r) { return r == 4 || r == 5 || r == 6 || r == 7 || r == 9 || r == 10 || r == 13 || r == 14; }   // 10, 13, 14: SDIO, eFuse, glitch (C6, H2)
 
 void diaryInit() {
   drvFsRemove(DIARY_OLD); drvFsRemove(DIARY_OLD1);   // formati vecchi
@@ -153,6 +155,8 @@ void diaryInit() {
   BootRec b; memset(&b, 0, sizeof(b));
   b.n = sysBootCount();
   b.reason = (uint8_t)g_reasonNow;
+  b.diagClasse = diagCodiceAvvio().classe;
+  b.diagDett = diagCodiceAvvio().dett;
   if (g_oldOk && g_reasonNow != 1) {                 // dopo l'accensione l'istantanea non vale
     b.hasSnap = 1; b.mhz = g_old.mhz; b.epoch = g_old.epoch; b.prevUp = g_old.upSec; b.minHeap = g_old.minHeap;
     strncpy(b.task, g_old.task, sizeof(b.task) - 1); strncpy(b.last, g_old.last, sizeof(b.last) - 1); strncpy(b.stage, g_old.stage, sizeof(b.stage) - 1);
@@ -191,6 +195,7 @@ std::string diaryText(int maxN, bool withLast) {
     char rn[64]; sysResetNameTo(b.reason, rn, sizeof rn);
     o.addf(tr("Avvio n.%u - %s - %s"), (unsigned)b.n, when, rn);
     if (abnormal(b.reason)) o.add(" (!)");
+    if (b.diagClasse) o.addf(" [D%u%02u]", (unsigned)b.diagClasse, (unsigned)b.diagDett);
     o.add('\n');
     if (b.hasSnap) {
       char up[64]; uptimeTo(b.prevUp, up, sizeof up);

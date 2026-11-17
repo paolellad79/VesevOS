@@ -237,7 +237,7 @@ bool fsMkdir(std::string_view raw, ErrBuf& err) {
 
 // Le cartelle di sistema: non si cancellano e non si rinominano (dentro hanno file protetti e il firmware le usa).
 static bool isSystemDir(const char* p) {
-  static const char* const kDirs[] = {"/etc", "/var", "/bin", "/sbin", "/tmp", "/home", "/var/backup"};
+  static const char* const kDirs[] = {"/etc", "/var", "/bin", "/sbin", "/tmp", "/home", "/var/backup", "/usr", "/usr/share", "/usr/share/vesevos"};
   for (const char* d : kDirs) if (!strcmp(p, d)) return true;
   return false;
 }
@@ -491,6 +491,6 @@ void fsTmpClean(const char* dir, FsTmpStat& st) {
 
 void fsTmpCleanKnown(FsTmpStat& st) {
   // dove salva di solito la pagina (cartelle in uso, vedi vos_layout.h). Niente scansione di tutto il file system
-  const char* const dirs[] = {"/", layoutPath(LAY_SCRIPTS), layoutPath(LAY_APPS), "/lang", "/var", "/etc", "/var/backup"};
+  const char* const dirs[] = {"/", layoutPath(LAY_SCRIPTS), layoutPath(LAY_APPS), "/lang", "/var", "/etc", "/var/backup", "/usr/share/vesevos"};
   for (const char* d : dirs) { fsTmpClean(d, st); drvTaskPause(); }
 }

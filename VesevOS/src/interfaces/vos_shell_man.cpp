@@ -2,201 +2,69 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_shell_man.cpp
 // Aiuto della shell: l'elenco "help", "help <comando>" e "man <comando>". Tutto viene dalla tabella unica dei comandi
-// (vos_shell_cmdtab.cpp) e dai ruoli (vos_shell_roles.cpp): niente e copiato. Qui stanno anche i testi lunghi di man.
-// MANCANO i testi lunghi (resta sintassi + descrizione breve, alias, ruolo e parole) dei comandi non elencati qui sotto:
-// per aggiungerne uno basta una riga nella tabella kMan (al massimo 4 righe di testo, poi gli esempi con \n tra l'uno e l'altro).
+// (vos_shell_cmdtab.cpp) e dai ruoli (vos_shell_roles.cpp): niente e copiato. I testi di descrizione e gli esempi stanno nel file
+// /usr/share/vesevos/manuale.txt (fuori dal firmware); i comandi che non vi compaiono mostrano sintassi, descrizione breve, alias e ruolo.
+// Per aggiungere o cambiare un testo: tools/data/manuale_src.txt, poi tools/mkrisorse.py.
 #include "vos_shell_cmdtab.h"
 #include "vos_shell_roles.h"
 #include "../core/vos_common.h"
 #include "../packages/vos_drvcmd.h"
 #include "../core/vos_i18n.h"
+#include "../core/vos_risorse_file.h"
+#include "vos_shell_man_rule.h"
 #include <string.h>
 
 namespace {
 
 using shx::CmdInfo;
 
-struct ManText {
-  const char* name;
-  const char* lines[6];      // righe di descrizione (chiavi tr), chiuse da nullptr
-  const char* examples;      // esempi di comandi, separati da '\n' (non si traducono)
-};
+// Il manuale e un file di testo, /usr/share/vesevos/manuale.txt (generato da tools/mkrisorse.py da tools/data/manuale_src.txt, controllato con
+// SHA256SUMS): una voce per comando, "@comando", poi le righe di descrizione (ogni riga e una frase tradotta con tr()), "$ esempio" per gli esempi
+// e ">" al posto delle righe quando l'aiuto e LUNGO (oltre 300 byte): il testo completo sta su GitHub, in sito-github/aiuto/<comando>.md.
+// Se il file manca la shell lo dice; il resto di man (nome, uso, sottocomandi, alias, ruolo) viene dalla tabella dei comandi.
+#define VOS_AIUTO_URL "https://github.com/paolellad79/VesevOS/blob/main/aiuto/"      // uguale a URL_AIUTO in tools/manuale_lib.py
 
-const ManText kMan[] = {
-  {"man",
-    {TRK("Mostra il manuale di un comando: descrizione, uso, opzioni, alias e ruolo minimo."),
-      TRK("Vedi solo i comandi che il tuo ruolo puo usare. Con 'help' senza nome trovi l'elenco."), nullptr},
-    "man ls\nman cpu"},
-  {"help",
-    {TRK("Senza nome elenca i comandi che il tuo ruolo puo usare, in ordine alfabetico."),
-      TRK("Con un nome mostra sintassi, descrizione breve, alias e ruolo minimo; 'man' da' di piu."), nullptr},
-    "help\nhelp df"},
-  {"time",
-    {TRK("Esegue il comando e poi scrive quanto e durato, come nelle shell classiche: real 0m1.234s."),
-      TRK("Il tempo e misurato in millisecondi. 'user' e 'sys' non ci sono: FreeRTOS qui non li misura."),
-      TRK("Il comando gira con la tua sessione e il tuo ruolo: 'time' non da' nessun permesso in piu."),
-      TRK("Non si annida ('time time ls' e un errore). Senza comando scrive l'uso: per l'ora usa 'date'."), nullptr},
-    "time ls /sbin\ntime wifi-scan"},
-  {"ping",
-    {TRK("Invia pacchetti ICMP echo a un indirizzo IPv4 (o a un nome) e scrive le risposte come il ping classico: tempo, TTL, perdita."),
-      TRK("-c pacchetti (4, al massimo 20), -i secondi tra i pacchetti (1, minimo 0.2), -W attesa della risposta (2, al massimo 5), -s byte di dati (56, da 16 a 1024), -t TTL (64)."),
-      TRK("Durata massima 30 s dalla seriale (Ctrl+C ferma) e 12 s dalla pagina web. Un solo host, solo IPv4; broadcast, multicast e 127.x non ammessi."),
-      TRK("I nomi .local usano mDNS (se il servizio e acceso), gli altri il DNS. I tempi hanno la precisione di 1 ms. Solo Admin: genera traffico di rete."), nullptr},
-    "ping 192.168.1.1\nping -c 3 -i 0.5 stanza.local\ntime ping -c 2 192.168.1.1"},
-  {"gzip",
-    {TRK("Comprime ogni file in 'file.gz' (gzip, leggibile dai programmi gzip comuni) e a successo toglie l'originale, come di solito. -k lo tiene, -f sovrascrive un .gz che c'e gia, da -1 (veloce) a -9 (compressione massima, 6 di norma)."),
-      TRK("-d decomprime (come gunzip). -c con -d scrive a schermo, ma solo se il risultato e testo ASCII di al massimo 16 KB: i dati compressi sono binari e la shell e testuale."),
-      TRK("Controlla magic, metodo, CRC32 e dimensione. Serve la PSRAM (il compressore usa circa 168 KB): senza, il comando si rifiuta. Una sola compressione alla volta, anche tra seriale e pagina web."),
-      TRK("Limiti: dalla seriale 120 s e 1 MB (Ctrl+C ferma); dalla pagina web e dagli script 10 s e 128 KB, per file piu grandi usa la seriale. Solo Admin."), nullptr},
-    "gzip notes.txt\ngzip -k -9 notes.txt\ngzip -d notes.txt.gz"},
-  {"gunzip",
-    {TRK("Decomprime i file .gz (come gzip -d): crea il file senza .gz e a successo toglie il .gz. -k lo tiene, -f sovrascrive il file che c'e gia."),
-      TRK("-c scrive a schermo, solo se e testo ASCII di al massimo 16 KB. Controlla CRC32 e dimensione; stessi limiti di gzip. Solo Admin."), nullptr},
-    "gunzip notes.txt.gz\ngunzip -k notes.txt.gz"},
-  {"zcat",
-    {TRK("Scrive a schermo il contenuto di un file .gz (come gzip -dc). Solo testo ASCII fino a 16 KB: per i file binari o piu grandi usa gunzip. Solo Admin."), nullptr},
-    "zcat notes.txt.gz"},
-  {"unzip",
-    {TRK("Elenca (-l) o estrae un archivio .zip che sta nella memoria interna. Solo lettura: metodi store e deflate, CRC32 controllato; niente ZIP64, cifratura, piu volumi o collegamenti. Per creare archivi usa zip o tar."),
-      TRK("Estrae nella cartella corrente o in quella data con -d, mai nella radice '/'. Senza -o un file che c'e gia si salta, con -o si sostituisce. Dopo l'archivio si possono dire i nomi (o le cartelle) da estrarre."),
-      TRK("Prima si controlla TUTTO l'archivio e se una voce e pericolosa lo si rifiuta per intero: nomi assoluti, '..' o con la barra rovesciata (zip slip), file protetti come /vesevos.conf, piu di 64 voci, piu di 1 MB per voce, 2 MB in tutto o oltre lo spazio libero, espansione oltre 100 a 1 (zip bomb)."),
-      TRK("Tempo e dimensione come gzip: 10 s e 128 KB dalla pagina web, 120 s e 1 MB dalla seriale (Ctrl+C ferma). Solo Admin."), nullptr},
-    "unzip -l dati.zip\nunzip -d /lang dati.zip\nunzip -o dati.zip config.txt"},
-  {"zip",
-    {TRK("Crea un archivio .zip nuovo (formato standard, lo leggono anche i comuni programmi unzip) da file e cartelle della memoria interna. -r scende nelle cartelle (3 livelli), -j mette solo il nome del file senza le cartelle, -q non scrive i nomi, da -0 (senza compressione) a -9 (massima), 6 di norma."),
-      TRK("Non aggiorna archivi che ci sono gia (niente -u, -d, -g): senza -f rifiuta se l'archivio esiste, con -f lo ricrea da zero. Si scrive in un file temporaneo e si scambia solo alla fine. LittleFS non salva la data dei file: tutte le voci portano l'ora di sistema se e valida (NTP o impostata), altrimenti 1980-01-01 00:00."),
-      TRK("Non entrano mai i file protetti (configurazione, registro, chiavi, certificati, copie .vbk): nominati a mano il comando fallisce, trovati dentro una cartella si saltano. Si saltano anche i nomi nascosti (.xxx, .tmp~) dentro le cartelle, e l'archivio stesso. Solo nomi relativi, ASCII, al massimo 64 voci e 1 MB per file."),
-      TRK("Dalla pagina web 128 KB in tutto e 10 s, dalla seriale 1 MB e 120 s (Ctrl+C ferma); l'archivio deve stare nello spazio libero (meno 16 KB). Serve la PSRAM per comprimere (-0 no). Niente ZIP64, cifratura o commenti. Solo Admin."), nullptr},
-    "zip -r bk.zip scripts\nzip -9qj lingue.zip lang/it.json lang/en.json\nzip -f -0 tutto.zip notes.txt"},
-  {"tar",
-    {TRK("Crea (-c), elenca (-t) o estrae (-x) un archivio tar ustar nella memoria interna. -f indica l'archivio (obbligatorio), -C la cartella, -v scrive i nomi. Anche unito: tar -xf a.tar, tar xvf a.tar."),
-      TRK("Solo il contenitore, senza compressione (per un .tar.gz: prima gunzip, poi tar). Solo file e cartelle, nomi fino a 100 caratteri, permessi fissi, nessuna data dentro l'archivio."),
-      TRK("Stesse protezioni e tetti di unzip: nomi pericolosi rifiutati, file protetti, 64 voci, 1 MB per voce. Estraendo un file che c'e gia si salta: --overwrite lo sostituisce (il tar classico lo sostituisce sempre)."),
-      TRK("Creando: 3 livelli di cartelle e 128 KB in tutto dalla pagina web (1 MB dalla seriale; Ctrl+C ferma). Solo Admin."), nullptr},
-    "tar -cf bk.tar scripts\ntar -tvf bk.tar\ntar -xf bk.tar -C /ripristino"},
-  {"run",
-    {TRK("Avvia uno script (.vsb) o un'app (.vab) per nome o per percorso, come nelle vecchie shell a riga di comando. L'estensione si puo omettere: si prova .vsb e poi .vab."),
-      TRK("Un nome senza barre si cerca nella cartella corrente, poi in /bin, in /sbin e nelle vecchie /apps e /scripts. Con una barra (prova.vsb, ./prova, /sbin/prova) si prova solo quel percorso."),
-      TRK("Si puo anche scrivere solo il nome ('prova'): se non e un comando interno parte il programma. I comandi interni vincono sempre; con 'which' vedi cosa partirebbe."),
-      TRK("Con '?' dopo il nome ('run prova ?') il programma non parte: mostra nome, versione, autore e descrizione. Il '?' e riservato a questo."),
-      TRK("Per ora gli script partono da /sbin e le app da /bin, e gli argomenti dopo il nome non vengono ancora passati. Stessi permessi di 'script run' e 'app start': solo Admin."), nullptr},
-    "run prova\nrun prova.vsb\nrun /sbin/prova\nprova\nrun prova ?"},
-  {"which",
-    {TRK("Dice cosa partirebbe scrivendo quel nome, senza avviare niente: un comando interno oppure il percorso del file (script o app)."),
-      TRK("Cerca come 'run'. Un comando interno vince sempre su un file con lo stesso nome. Solo Admin."), nullptr},
-    "which ls\nwhich prova"},
-  {"whoami",
-    {TRK("Scrive il nome dell'utente con cui hai fatto login in questa sessione."),
-      TRK("Senza utente (regole, script, primo avvio senza password) scrive 'sistema'."), nullptr},
-    "whoami"},
-  {"id",
-    {TRK("Scrive utente, gruppo e gruppi nella forma classica: uid=1000(mario) gid=1002(admin) groups=1002(admin)."),
-      TRK("I numeri sono SIMULATI (VesevOS non ha uid veri): uid = 1000 + posto dell'utente, gid = 1000 + ruolo."),
-      TRK("Il gruppo e il ruolo: guest (0), oper (1), admin (2). Non mostra niente che tu non sappia gia."), nullptr},
-    "id"},
-  {"echo",
-    {TRK("Scrive il testo che segue, cosi com'e. Con -n non va a capo alla fine."),
-      TRK("Solo testo: niente variabili ($NOME), niente apici o jolly, niente redirezione. Per scrivere un file usa 'write'."), nullptr},
-    "echo ciao a tutti\necho -n senza a capo"},
-  {"df",
-    {TRK("Mostra lo spazio dei dischi: la memoria interna (LittleFS, montata su /) e, se montata, la microSD."),
-      TRK("Colonne come df: filesystem, dimensione in blocchi da 1K, usato, disponibile, percentuale d'uso e dove e montato."),
-      TRK("-h scrive le dimensioni in K, M o G. La microSD non e dentro l'albero delle cartelle: la gestisce il driver microSD (comando 'sd')."), nullptr},
-    "df\ndf -h"},
-  {"uname",
-    {TRK("Senza opzioni scrive nome, versione e core del sistema. Con le opzioni, come il comando uname classico."),
-      TRK("-s nome del sistema, -n nome host, -r versione di VesevOS, -v versione di ESP-IDF, -m chip, -a tutto insieme."), nullptr},
-    "uname\nuname -a\nuname -r"},
-  {"exit",
-    {TRK("Chiude la sessione della seriale: poi serve di nuovo il login. Anche Ctrl+D a riga vuota fa lo stesso. logout e uguale."),
-      TRK("Dalla pagina web non chiude niente: usa il menu utente e Logout."), nullptr},
-    "exit"},
-  {"ls",
-    {TRK("Elenca file e cartelle. Senza percorso usa la cartella corrente; i percorsi possono essere relativi."),
-      TRK("-l formato lungo (senza data), -a anche i nomi nascosti, -h dimensioni in K o M, -1 una voce per riga."), nullptr},
-    "ls\nls -l /sbin\nls -lah .."},
-  {"cd",
-    {TRK("Cambia la cartella corrente. Senza nome torna alla radice (~). '..' sale di un livello, '-' torna alla cartella di prima."),
-      TRK("I percorsi senza / iniziale partono dalla cartella corrente. La cartella e per sessione e si perde con il logout."), nullptr},
-    "cd /sbin\ncd ..\ncd -"},
-  {"cat",
-    {TRK("Mostra il contenuto di un file di testo. Il percorso puo essere relativo alla cartella corrente."),
-      TRK("Non mostra i file binari ne' quelli sopra 32 KB; i file protetti del sistema non si aprono."), nullptr},
-    "cat notes.txt"},
-  {"led",
-    {TRK("led mostra lo stato del LED. led trigger [nome] mostra o cambia che cosa lo accende: none, state (colore dello stato di rete), heartbeat, flash (un lampo a ogni accesso alla flash o alla microSD), wifi (un lampo a ogni pacchetto), cpu (il colore vira con il carico alto), default-on (colore fisso)."),
-      TRK("led color RRGGBB e led brightness 0-255 cambiano colore e luminosita. led color <sorgente> RRGGBB cambia il colore di flash-read, flash-write, wifi-rx, wifi-tx o cpu; led threshold 10-95 e la soglia di carico del trigger cpu. Cambiare trigger, sorgenti e soglia e solo per l'Admin."),
-      TRK("I lampi sono al massimo 3 al secondo. Di fabbrica il trigger e state, come sempre. Le vecchie forme led state|heartbeat|fixed|off e i nomi led-color e led-bright restano validi (le regole li usano)."),
-      TRK("vesevos-led_control e un alias di led: stesso comando, stessi ruoli, stessi argomenti (vesevos-led_control trigger flash).")},
-    "led\nled trigger flash\nled color flash-write ff8800\nled threshold 80"},
-  {"region",
-    {TRK("Mostra o cambia paese, potenza di trasmissione e antenna della radio Wi-Fi. Cambiare e solo per l'Admin."),
-      TRK("Il paese fissa canali e potenza ammessi dalla legge: la scheda non va oltre. 'locale' e il vecchio nome e resta valido."), nullptr},
-    "region\nregion country IT\nregion antenna ext 3"},
-  {"vesevos-config",
-    {TRK("Fronte unico di configurazione per aree: system, network, region, time, services, users, security, led, cpu. Senza argomenti scrive un riepilogo di tutto (mai password, hash o chiavi)."),
-      TRK("vesevos-config <area> mostra i valori dell'area e i comandi che li cambiano. vesevos-config <area> <comando ...> esegue quel comando (per esempio region country IT)."),
-      TRK("Non e un modo nuovo di cambiare le impostazioni: la riga passa dal percorso normale della shell, con gli stessi ruoli, limiti della radio, conferme e domande di password. setup avvia la guida."),
-      TRK("L'Operatore vede il riepilogo e le aree in lettura (users, security e setup sono solo per l'Admin); cambiare e solo per l'Admin."), nullptr},
-    "vesevos-config\nvesevos-config region\nvesevos-config region country IT\nvesevos-config network wifi set casa\nvesevos-config setup"},
-  {"vesevos-led_control",
-    {TRK("Alias di 'led': fa esattamente la stessa cosa, con gli stessi argomenti e gli stessi ruoli (lettura all'Operatore, cambi all'Admin tranne cio che le regole usano). Il manuale completo e quello di 'led': man led."), nullptr},
-    "vesevos-led_control\nvesevos-led_control trigger heartbeat"},
-  {"vesevos-cleaner",
-    {TRK("Pulizia SICURA, solo Admin. Senza argomenti e una prova a secco: elenca cosa si potrebbe pulire e quanto spazio si libera, senza cancellare niente. Con -y pulisce, dopo conferma (y/n dalla seriale, yes dalla pagina)."),
-      TRK("Categorie: tmp (residui .tmp~ di salvataggi interrotti, solo se il file completo esiste), crash (rapporti dei crash), log (registro in RAM: non libera flash), reboots (diario dei riavvii), cache (file di prova /selftest.tmp). Senza nomi vale per tutte."),
-      TRK("Non tocca MAI: configurazione, periferiche (io.cfg), utenti, certificati e chiavi, script, app, regole, lingue, registro di audit (si svuota solo con 'audit'), file protetti, cartelle intere. Non scende nelle sottocartelle."),
-      TRK("Rapporti e registri possono contenere dati che identificano l'uso della scheda: cancellarli e un tuo diritto. Si registra una riga nel registro con le categorie e i byte liberati."), nullptr},
-    "vesevos-cleaner\nvesevos-cleaner tmp crash\nvesevos-cleaner -y tmp"},
-  {"lspin",
-    {TRK("Elenca i pin come lspci elenca le periferiche: una riga per pin occupato con la periferica, il segnale e il tipo (periferica, driver, riservato dal sistema). Sola lettura: non cambia nessun pin."),
-      TRK("-v aggiunge il livello letto adesso, le funzioni possibili e la nota; -vv mostra anche i pin liberi; -s <pin> mostra solo quel pin; -k <nome> solo i pin di una periferica o di un driver. Usa gli stessi dati della pagina Pin; 'pins' resta come elenco semplice."), nullptr, nullptr},
-    "lspin\nlspin -v\nlspin -vv\nlspin -s 12\nlspin -k sd1"},
-  {"vesevos-driver",
-    {TRK("Una sola famiglia di comandi per i driver delle periferiche in /devs, sia vdb sia vde: il tipo si capisce dall'estensione del file o dal nome. list elenca, info mostra i dettagli."),
-      TRK("install <file|nome> [prefisso] [pin,pin] (Admin) mette il file in /devs, se serve, e crea le periferiche sui pin che scegli tu o, senza, su quelli proposti; il controllo dei pin (vietati, gia usati, doppi) e quello del registro dei pin. Un nome vale per un solo driver."),
-      TRK("pins <nome> pin,pin (Admin) da' altri pin a un driver vde installato: se i nuovi non vanno restano i vecchi e dice quale pin e occupato e da chi. remove <nome> (Admin) toglie il driver: un vde libera i pin, un vdb lascia le periferiche gia create (si tolgono da Periferiche)."), nullptr},
-    "vesevos-driver\nvesevos-driver info sd-spi\nvesevos-driver install sd-spi 10,11,12,13\nvesevos-driver pins bmp280 21,22\nvesevos-driver remove microsd"},
-  {"vesevos-drive_manager",
-    {TRK("Elenca i volumi: memoria interna (LittleFS, su /) e microSD se la periferica 'sd' e configurata. Per ognuno stato (montata, non montata, non presente, formato non supportato), formato, dimensione, usato, libero e, per la microSD, la frequenza SPI."),
-      TRK("mount, unmount e test (solo Admin) passano dal comando 'sd' del driver microSD, con gli stessi controlli; senza il driver dicono che manca. unmount rifiuta se la scheda e in uso. status e come l'elenco (l'Admin vede anche 'sd status')."),
-      TRK("format microsd FORMATTA [--attendi] (solo Admin) formatta la microSD in FAT32 e CANCELLA TUTTO; senza la parola dice cosa succede e non fa niente. La formattazione parte in un task a parte e il comando torna subito: si segue con 'sd status' o con la riga della microSD in 'vesevos-drive_manager'. Con --attendi il comando aspetta (al massimo 60 secondi) e scrive il tempo trascorso. Funziona anche con una scheda che non si monta (exFAT, vuota). La memoria interna non si formatta. Se la microSD non e configurata, installa il driver microSD dalla pagina Driver."), nullptr},
-    "vesevos-drive_manager\nvesevos-drive_manager mount\nvesevos-drive_manager unmount\nvesevos-drive_manager format microsd FORMATTA [--attendi]"},
-  {"vesevos-network",
-    {TRK("Riepilogo di rete in testo: modo (client, hotspot, aereo), IP, maschera, gateway, DNS, canale, segnale, rete Wi-Fi, nome host e mDNS, MAC, DHCP, NTP, traffico, hotspot e servizi aperti con le porte."),
-      TRK("Mai le password. Il MAC e mascherato (AA:BB:CC:xx:xx:xx) come in vesevos-bugreport; con -f (solo Admin) e intero. Non fa scansioni ne prove: e veloce."),
-      TRK("scan e uguale a 'wifi scan' e ping a 'ping': passano dal percorso normale (solo Admin, stessi limiti). ip, net e wifi restano com'erano."), nullptr},
-    "vesevos-network\nvesevos-network -f\nvesevos-network scan\nvesevos-network ping 192.168.1.1"},
-  {"vesevos-backup",
-    {TRK("Solo Admin. Salva e ripristina la CONFIGURAZIONE (rete, utenti, servizi, periferiche) in /var/backup, sempre CIFRATA con una frase che scegli tu. Senza argomenti mostra i backup, lo spazio libero e l'avvertenza."),
-      TRK("create [nome] crea /var/backup/<nome>.vbk (la frase si chiede due volte). restore <nome> chiede la frase, dice quante righe cambierebbero (mai i valori) e chiede conferma prima di applicare. delete <nome> cancella dopo conferma. Al massimo 5 backup."),
-      TRK("Il backup contiene password e chiavi: la frase non si scrive mai nella riga (la chiedo io, senza mostrarla) e non resta in cronologia. Se la perdi non si recupera. Tienilo dove decidi tu: e un tuo dato personale."),
-      TRK("Stesso formato del backup con i segreti della pagina: si ripristina anche da li (scaricalo da Sistema > File) e viceversa (caricalo in /var/backup con il nome che finisce in .vbk). Nomi: lettere, numeri, - e _."), nullptr},
-    "vesevos-backup\nvesevos-backup create prima-della-prova\nvesevos-backup restore prima-della-prova\nvesevos-backup delete prima-della-prova"},
-  {"vesevos-update",
-    {TRK("Solo Admin. Senza argomenti mostra versione del firmware e del recovery, le partizioni, lo spazio e l'esito dell'ultimo ordine. Non cerca aggiornamenti in rete da solo."),
-      TRK("file [ip]: la scheda si riavvia nel recovery e accetta UN file di firmware dal computer. Stampa una sola volta l'indirizzo http://<ip>/#g=<codice>: il codice vale 15 minuti ed e legato a quel computer, non condividerlo. Dalla seriale scrivi l'IP del computer."),
-      TRK("net <url-https> <sha256> [versione]: il recovery scarica da un indirizzo https consentito (le Release ufficiali o i prefissi di /updurl.txt) e controlla lunghezza e SHA-256. Sovrascrive il firmware prima di verificare lo SHA completo."),
-      TRK("Chiede sempre conferma (y/n, o yes dalla pagina). Sono gli stessi ordini della pagina Aggiornamento: nessun permesso in piu. Il recovery lavora in HTTP sulla rete locale."), nullptr},
-    "vesevos-update\nvesevos-update file 192.168.1.20\nvesevos-update net https://github.com/paolellad79/VesevOS/releases/download/v1.7.71/VesevOS-1.7.71.bin <sha256>"},
-#if VOS_WITH_ELF
-  {"vesevos-elf",
-    {TRK("Moduli ELF (.vae): codice nativo caricato a richiesta. Lettura (status, ps, which, list, quarantine): Operatore; il resto: Admin. Funziona con il sottosistema vde acceso (di fabbrica lo e; vesevos-services vde start|stop)."),
-      TRK("run [-t secondi] [-u gruppi] <nome|file> [argomenti]: avvia il modulo in sottofondo e torna subito. Un nome semplice e il file /bin/<nome>.vae; un percorso puo stare in /bin, /apps, /devs o sulla microSD. Senza -u concede i gruppi di funzioni che il modulo chiede; con -u solo quelli indicati (per esempio log,sd); il gruppo base e sempre concesso. Le Funzionalita tolte in Sistema valgono comunque. -t ferma il modulo dopo quei secondi; senza -t gira finche non finisce o non lo fermi. Al massimo 4 moduli insieme, 128 KB di RAM ciascuno."),
-      TRK("ps: moduli in corso e ultimi finiti. kill <numero|nome>: ferma. which <nome|file>: dove sta e se e valido. list: i .vae in /bin. install <file>: controlla e mette in /bin. quarantine / unquarantine <nome>: elenco e rimozione; un modulo che fa cadere la scheda 3 volte di fila non parte piu da solo. driver list|info|install|remove: driver in ELF (.vde) in /devs; install <file|nome> [pin,pin] da' i pin: i tuoi o, senza, quelli proposti dal firmware (stesso controllo di tutte le periferiche); remove toglie pin e file."),
-      TRK("test [-t secondi] [-u gruppi] <file> [argomenti]: prova in primo piano (tetto 1-30 s, di solito 5) e scrive valore restituito, tempo e memoria. Se un modulo cade, la scheda si riavvia."), nullptr},
-    "vesevos-elf run -u log,sd sensore\nvesevos-elf driver install bmp1.vde 21,22\nvesevos-elf ps\nvesevos-elf kill sensore\nvesevos-elf install /media/sd/sensore.vae\nvesevos-elf test -t 10 -u log prova.vae uno due"},
-#endif
-  {"btn",
-    {TRK("Mostra o cambia l'azione di 1, 2 o 3 click sul tasto fisico: none (niente), airplane (modo aereo), wps, find (trova la scheda)."),
-      TRK("I vecchi nomi niente, aereo, wps e trova restano validi. Cambiare e solo per l'Admin."), nullptr},
-    "btn\nbtn 2 airplane"},
-};
+void stampaRiga(OutSink& o, const char* t) {
+  o.print("    ");
+  o.println(t);
+}
 
-const ManText* manFind(const char* name) {
-  for (const ManText& m : kMan)
-    if (strcmp(m.name, name) == 0) return &m;
-  return nullptr;
+// Cerca la voce nel file. Con o = nullptr si sa solo se c'e. Altrimenti si scrive la descrizione (esempi = false, con il titolo)
+// oppure gli esempi (esempi = true, con il titolo). Il file si controlla con SHA256SUMS la prima volta (risFileApri).
+ManEsito manVoce(const char* name, OutSink* o, bool esempi) {
+  VosFile f;
+  size_t len = 0;
+  if (risFileApri(RF_MANUALE, f, len) != RIS_OK) {
+    if (o && !esempi) {
+      o->println(tr("DESCRIZIONE"));
+      stampaRiga(*o, tr("Manuale non disponibile: il file /usr/share/vesevos/manuale.txt manca o non e valido."));
+    }
+    return MAN_FILE_NO;
+  }
+  bool titolo = false;
+  return manScorri(
+      name, [&](uint8_t* b, size_t n) { return f.read(b, n); },
+      [&](const char* riga) {                                // descrizione: la riga e italiano, tr() la cerca nel dizionario della lingua scelta
+        if (!o || esempi) return;
+        if (!titolo) o->println(tr("DESCRIZIONE"));
+        titolo = true;
+        stampaRiga(*o, tr(riga));
+      },
+      [&](const char* riga) {                                // esempio (non si traduce)
+        if (!o || !esempi) return;
+        if (!titolo) o->println(tr("ESEMPI"));
+        titolo = true;
+        stampaRiga(*o, riga);
+      },
+      [&]() {                                                // voce lunga: il testo completo e su internet
+        if (!o || esempi) return;
+        o->println(tr("DESCRIZIONE"));
+        stampaRiga(*o, tr("Il testo completo di questo comando e su internet (serve la rete):"));
+        o->print("    ");
+        o->print(VOS_AIUTO_URL);
+        o->print(name);
+        o->println(".md");
+      });
 }
 
 const char* roleName(int role) {
@@ -251,7 +119,7 @@ void shx::cmdHelpList(OutSink& o, int role) {
     if (!roleAllows(role, Word(ci.name, strlen(ci.name)), Word())) continue;
     o.printf("  %-22s %s\r\n", ci.name, tr(ci.brief));
   }
-  if (role >= ROLE_OPER) {                                           // comandi dei driver (scritti in Berry, nei loro file)
+  if (role >= ROLE_OPER) {                                           // comandi dei driver (scritti nelle funzioni VesevOS, nei loro file)
     char words[8][13];
     for (int i = 0, n = drvCmdWords(words, 8); i < n; i++) o.printf("  %-22s %s\r\n", words[i], tr("comando di un driver"));
   }
@@ -265,7 +133,6 @@ bool shx::cmdHelpOne(OutSink& o, const char* name, int role, bool full) {
   const CmdInfo* ci = cmdFind(w.c_str());
   if (!ci) return drvCmdHelp(o, w.c_str(), role);                    // forse e il comando di un driver
   if (!roleAllows(role, Word(ci->name, strlen(ci->name)), Word())) return false;   // stessa risposta per "non esiste" e "non per te"
-  const ManText* man = manFind(ci->name);
   int base = minRole(*ci, "");
 
   if (!full) {                                                       // help <comando>: la scheda breve
@@ -274,7 +141,7 @@ bool shx::cmdHelpOne(OutSink& o, const char* name, int role, bool full) {
     o.println(tr(ci->brief));
     if (ci->alias[0]) o.println(trf("Alias: %s", ci->alias));
     o.println(trf("Ruolo minimo: %s", roleName(base)));
-    if (man) o.println(trf("Per i dettagli: man %s", ci->name));
+    if (manVoce(ci->name, nullptr, false) > MAN_NO) o.println(trf("Per i dettagli: man %s", ci->name));
     return true;
   }
 
@@ -286,13 +153,7 @@ bool shx::cmdHelpOne(OutSink& o, const char* name, int role, bool full) {
   o.println(tr("USO"));
   o.print("    ");
   o.println(ci->usage);
-  if (man) {
-    o.println(tr("DESCRIZIONE"));
-    for (const char* const* l = man->lines; *l; l++) {
-      o.print("    ");
-      o.println(tr(*l));
-    }
-  }
+  manVoce(ci->name, &o, false);
   if (hasSubs(*ci)) {
     o.println(tr("OPZIONI E SOTTOCOMANDI"));
     printSubs(&o, *ci, false);
@@ -310,16 +171,6 @@ bool shx::cmdHelpOne(OutSink& o, const char* name, int role, bool full) {
   o.println(tr("RUOLO MINIMO"));
   o.print("    ");
   o.println(roleName(base));
-  if (man && man->examples[0]) {
-    o.println(tr("ESEMPI"));
-    for (const char* p = man->examples; *p;) {
-      const char* e = strchr(p, '\n');
-      size_t n = e ? (size_t)(e - p) : strlen(p);
-      o.print("    ");
-      o.write(p, n);
-      o.println();
-      p += n + (e ? 1 : 0);
-    }
-  }
+  manVoce(ci->name, &o, true);
   return true;
 }

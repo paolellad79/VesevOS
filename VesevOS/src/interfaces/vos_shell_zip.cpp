@@ -3,8 +3,9 @@
 // VesevOS - vos_shell_zip.cpp
 // Comando unzip in stile shell classica: unzip [-l] [-o] [-d cartella] archivio.zip [file...]. SOLO lettura ed estrazione (la creazione e il comando zip, in vos_shell_zipc.cpp).
 // Si leggono lo "end of central directory" e la "central directory" in fondo al file (con seek): hanno dimensioni, CRC e metodo veri.
-// Metodi 0 (store) e 8 (deflate), CRC32 controllato per ogni file. NON supportati: ZIP64, cifratura, archivi a piu volumi, collegamenti simbolici,
-// commento finale oltre 1 KB. I nomi sono solo ASCII (regola del progetto).
+// Si estraggono solo voci senza compressione (metodo 0, store), CRC32 controllato per ogni file. Con -l si elencano anche le voci compresse (metodo 8),
+// ma estrarle e rifiutato con un messaggio (decisione del 16/11/2026: niente deflate, uguale su S3, C3 e C6). NON supportati: ZIP64, cifratura,
+// archivi a piu volumi, collegamenti simbolici, commento finale oltre 1 KB. I nomi sono solo ASCII (regola del progetto).
 // PRIMA di scrivere qualcosa si controlla TUTTO l'archivio (nomi, metodi, dimensioni, rapporti): se una sola voce e pericolosa
 // (zip slip, file protetto, zip bomb) l'archivio e rifiutato per intero. Le protezioni sono in vos_shell_arch.h.
 // Si estrae nella cartella corrente o in quella data con -d, MAI nella radice "/". Senza -o un file che c'e gia non si tocca (si salta).
@@ -67,8 +68,8 @@ const char* openZip(Zip& z, Work& w) {
     if (le16(p + 4) || le16(p + 6) || le16(p + 8) != entries) return tr("ZIP64, cifratura o piu volumi: non supportati");
     if (entries == 0xFFFF || cdSize == 0xFFFFFFFFu || cdOfs == 0xFFFFFFFFu) return tr("ZIP64, cifratura o piu volumi: non supportati");
     if (entries == 0) return tr("Archivio vuoto");
-    static_assert(ARCH_MAX_ENTRIES == 64, "il testo dell'errore dice 64: aggiornalo (e lang_src.json)");
-    if (entries > ARCH_MAX_ENTRIES) return tr("Troppe voci (massimo 64)");
+    static_assert(ZIP_MAX_ENTRIES == 30, "il testo dell'errore dice 30: aggiornalo (e lang_src.json)");
+    if (entries > ZIP_MAX_ENTRIES) return tr("Troppe voci (massimo 30)");
     if ((uint64_t)cdOfs + cdSize > z.size - win + i) return tr("Archivio troncato o danneggiato");   // l'elenco deve finire prima della fine dell'archivio
     z.cdOfs = cdOfs;
     z.count = entries;
@@ -101,7 +102,7 @@ const char* readEntry(Zip& z, Work& w, uint32_t& pos) {
     if (type == 0x4000) e.isDir = true;
     else if (type && type != 0x8000) return tr("Voce non supportata (collegamento o file speciale)");
   }
-  if (e.method != 0 && e.method != 8) return tr("Metodo di compressione non supportato (solo store e deflate)");
+  if (e.method != 0 && e.method != 8) return tr("Metodo di compressione non supportato");
   if (e.method == 0 && e.csize != e.usize) return tr("Archivio troncato o danneggiato");
   if (e.isDir && e.usize) return tr("Archivio troncato o danneggiato");
   if ((uint64_t)e.localOfs + kLocLen + e.csize > z.size) return tr("Archivio troncato o danneggiato");
@@ -127,7 +128,6 @@ bool checkAll(ArchCtx& c, Zip& z, Work& w, const Opts& op, const char* line, con
     if (const char* why = readEntry(z, w, pos)) { c.fail(op.archive.c_str(), why); return false; }
     const Entry& e = w.e;
     if (e.usize > ARCH_MAX_ENTRY) { c.fail(e.name, trf("Voce troppo grande (massimo %u KB)", (unsigned)(ARCH_MAX_ENTRY / 1024))); return false; }
-    if (e.usize > ARCH_RATIO_FROM && e.usize / ARCH_MAX_RATIO > e.csize) { c.fail(e.name, trf("Rapporto di espansione sopra %u a 1: possibile zip bomb", (unsigned)ARCH_MAX_RATIO)); return false; }
     totalU += e.usize;
     totalC += e.csize;
     if (dest && e.name[0]) {
@@ -135,10 +135,13 @@ bool checkAll(ArchCtx& c, Zip& z, Work& w, const Opts& op, const char* line, con
       if (fsProtected(w.target)) { c.fail(e.name, tr("File di sistema protetto")); return false; }
     }
     if (print && e.name[0]) c.out().printf("%8lu %8lu  %08lx  %s%s\r\n", (unsigned long)e.usize, (unsigned long)e.csize, (unsigned long)e.crc, e.name, e.isDir ? "/" : "");
-    if (e.name[0] && archSelected(line, op.firstFilter, e.name)) { mask |= (uint64_t)1 << i; nSel++; }
+    if (e.name[0] && archSelected(line, op.firstFilter, e.name)) {
+      if (dest && e.method == 8 && !e.isDir) { c.fail(e.name, tr("Voce compressa (deflate): non supportata, si estraggono solo voci senza compressione")); return false; }
+      mask |= (uint64_t)1 << i;
+      nSel++;
+    }
   }
   if (totalU > budget) { c.fail(op.archive.c_str(), trf("Troppo grande dopo l'espansione (massimo %u KB, o manca spazio)", (unsigned)(budget / 1024))); return false; }
-  if (totalU > ARCH_RATIO_FROM && totalU / ARCH_MAX_RATIO > totalC) { c.fail(op.archive.c_str(), trf("Rapporto di espansione sopra %u a 1: possibile zip bomb", (unsigned)ARCH_MAX_RATIO)); return false; }
   if (print) {
     c.out().println("--------  -------            ----");
     c.out().printf("%8lu %8lu            %u files\r\n", (unsigned long)totalU, (unsigned long)totalC, (unsigned)z.count);
@@ -148,19 +151,9 @@ bool checkAll(ArchCtx& c, Zip& z, Work& w, const Opts& op, const char* line, con
 
 // ---------- estrazione ----------
 
-// Tra le voci scelte (mask) ce n'e una compressa con deflate?
-bool anyInflate(Zip& z, Work& w, uint64_t mask) {
-  uint32_t pos = z.cdOfs;
-  for (unsigned i = 0; i < z.count; i++) {
-    if (readEntry(z, w, pos) != nullptr) return false;
-    if (((mask >> i) & 1) && w.e.method == 8 && !w.e.isDir) return true;
-  }
-  return false;
-}
-
 enum Result { X_OK, X_SKIP, X_FAIL };
 
-Result extractOne(ArchCtx& c, Zip& z, Work& w, const char* dest, bool overwrite, DrvInflate& inf) {
+Result extractOne(ArchCtx& c, Zip& z, Work& w, const char* dest, bool overwrite) {
   const Entry& e = w.e;
   ErrBuf err;
   if (!archTarget(dest, e.name, w.target)) { c.fail(e.name, tr("Nome non sicuro: archivio rifiutato")); return X_FAIL; }
@@ -186,26 +179,17 @@ Result extractOne(ArchCtx& c, Zip& z, Work& w, const char* dest, bool overwrite,
   ArchFileOut out;
   if (!out.begin(w.target, overwrite, e.usize, e.usize, err)) { c.fail(e.name, err.c_str()); return X_FAIL; }
   DrvDefErr de = DDF_OK;
-  bool done = (e.method == 0);                         // store: non c'e un fine flusso da aspettare
-  if (e.method == 8) inf.restart();
   uint32_t rem = e.csize;
   while (de == DDF_OK && rem) {
     size_t n = z.f.read(w.io.b, rem < sizeof w.io.b ? rem : sizeof w.io.b);
     if (n == 0) { de = DDF_BAD_DATA; break; }
     rem -= (uint32_t)n;
-    if (e.method == 0) {
-      de = out.put(w.io.b, n) ? c.guard().tick(n) : DDF_SINK;
-    } else if (!done) {
-      size_t used = 0;
-      de = inf.push(w.io.b, n, &used, ArchFileOut::sink, &out, &c.guard());
-      if (de == DDF_DONE) { done = true; de = DDF_OK; }
-    }
+    de = out.put(w.io.b, n) ? c.guard().tick(n) : DDF_SINK;
   }
-  if (de == DDF_OK && !done) de = DDF_BAD_DATA;        // il flusso non si e chiuso: dati troncati
   if (de != DDF_OK) { out.abort(); c.failDef(e.name, de, out.why()); return X_FAIL; }
   if (out.crc() != e.crc) { out.abort(); c.fail(e.name, tr("CRC diverso: file danneggiato")); return X_FAIL; }
   if (!out.finish(err)) { c.fail(e.name, err.c_str()); return X_FAIL; }
-  c.out().printf("%s: %s\r\n", e.method == 0 ? " extracting" : "  inflating", e.name);
+  c.out().printf(" extracting: %s\r\n", e.name);
   return X_OK;
 }
 
@@ -267,17 +251,12 @@ void shUnzip(const char* line, OutSink& o, const ShellSess& ss, uint32_t sess) {
 
   ErrBuf err;
   if (!fsMkdirs(dest, err)) { c.fail(dest, err.c_str()); return; }
-  DrvInflate inf;
-  if (anyInflate(z, *w, mask)) {                                         // la PSRAM serve solo se c'e almeno una voce compressa da estrarre
-    DrvDefErr de = inf.open();
-    if (de != DDF_OK) { c.failDef(op.archive.c_str(), de, nullptr); return; }
-  }
   uint32_t pos = z.cdOfs;
   unsigned done = 0, skipped = 0;
   for (unsigned i = 0; i < z.count && !c.stopped(); i++) {
     if (readEntry(z, *w, pos) != nullptr) break;                         // gia controllata: non puo succedere
     if (!((mask >> i) & 1)) continue;
-    Result r = extractOne(c, z, *w, dest, op.overwrite, inf);
+    Result r = extractOne(c, z, *w, dest, op.overwrite);
     if (r == X_OK) done++;
     else if (r == X_SKIP) skipped++;
     else return;                                                         // un errore ferma tutto: i file gia estratti restano interi

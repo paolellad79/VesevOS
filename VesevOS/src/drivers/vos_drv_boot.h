@@ -19,6 +19,9 @@ int drvNvsEraseReason();
 // true se l'ultimo riavvio e stato un guasto (panico o watchdog); false per accensione, riavvio voluto o altro. Vale per tutta la vita del programma.
 bool drvResetWasCrash();
 
+// Causa dell'ultimo riavvio, il numero di esp_reset_reason_t (0 sconosciuto, 1 accensione, 3 software, 4 panico, 5/6/7 watchdog, 9 brownout...).
+int drvResetReason();
+
 // Spegne i messaggi di log di un componente di ESP-IDF (per esempio "httpd").
 void drvLogOff(const char* tag);
 

@@ -24,6 +24,7 @@ const size_t NET_OUT_MAX = 3072;       // tetto del riepilogo (di solito ne bast
 const char* modeText() {
   switch (netState()) {
     case NET_AIR:        return tr("aereo (radio spenta)");
+    case NET_ATTESA:     return tr("in attesa del tasto BOOT (radio spenta)");
     case NET_CLIENT_OK:  return tr("client (collegata alla Wi-Fi di casa)");
     case NET_CLIENT_TRY: return tr("client (collegamento in corso)");
     case NET_AP:         return tr("hotspot (solo punto di accesso)");

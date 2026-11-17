@@ -45,7 +45,7 @@ int main() {
   CHECK(progToglieVecchio("/sbin", "lampeggio", PEXT_SCRIPT));
   CHECK(g_files.count("/sbin/lampeggio.vsb") && !g_files.count("/sbin/lampeggio.vsc"));
   CHECK(!progToglieVecchio("/sbin", "lampeggio", PEXT_SCRIPT));
-  // 6. app Berry e app ELF nella stessa cartella: i tipi non si mescolano
+  // 6. app e app ELF nella stessa cartella: i tipi non si mescolano
   g_files.insert("/bin/sensore.vel");
   progPercorso(p, sizeof p, "/bin", "sensore", PEXT_APP_E); CHECK(!strcmp(p, "/bin/sensore.vel"));
   progPercorso(p, sizeof p, "/bin", "sensore", PEXT_APP_B); CHECK(!strcmp(p, "/bin/sensore.vab"));

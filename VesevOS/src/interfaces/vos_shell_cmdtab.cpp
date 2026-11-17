@@ -40,7 +40,7 @@ const shx::CmdInfo kCmds[] = {
   {"date", "", "date [set AAAA-MM-GG HH:MM]", TRK("data e ora"), "set", 0},
   {"dev", "", "dev [status <nome>|on <nome>|off <nome>|act <nome> <azione> [arg]]", TRK("periferiche (MQTT, Bluetooth, pin, LED...)"), "status on off act", 0},
   {"df", "", "df [-h]", TRK("spazio su flash e microSD"), "-h", 0},
-  {"diag", "", "diag", TRK("diagnosi: guida, rete, servizi, RAM, flash"), "", 0},
+  {"diag", "", "diag [codici|led <classe> <dettaglio>]", TRK("diagnosi: guida, rete, servizi, RAM, flash"), "codici led", 0},
   {"domain", "", "domain [nome|-]", TRK("mostra, cambia o toglie il dominio"), "", 0},
   {"echo", "", "echo [-n] [testo]", TRK("scrive il testo"), "-n", 0},
   {"events", "", "events [n]", TRK("ultimi eventi del sistema (Event Bus)"), "", 0},
@@ -48,8 +48,6 @@ const shx::CmdInfo kCmds[] = {
   {"factory-reset", "", "factory-reset", TRK("azzera tutto e riavvia (solo dalla seriale, chiede conferma)"), "yes", 0},
   {"firewall", "", "firewall [off|confirm|mode <0-3>|add <ip|a-b|rete/nn> [nome]|del <n>|test <ip>]", TRK("filtro degli indirizzi IP"), "off confirm mode add del test", 0},
   {"free", "", "free [detail]", TRK("memoria RAM e PSRAM"), "detail", 0},
-  {"gunzip", "", "gunzip [-c] [-k] [-f] file.gz ...", TRK("decomprime file .gz"), "-c -k -f", 0},
-  {"gzip", "", "gzip [-d] [-c] [-k] [-f] [-1..-9] file ...", TRK("comprime file (.gz) o li decomprime con -d"), "-d -c -k -f -1 -9", 0},
   {"help", "?", "help [comando]", TRK("elenco dei comandi, o aiuto su uno"), "@commands", 0},
   {"hostname", "", "hostname [nome]", TRK("mostra o cambia il nome host"), "", 0},
   {"id", "", "id", TRK("utente, ruolo e identificativi simulati"), "", 0},
@@ -58,9 +56,12 @@ const shx::CmdInfo kCmds[] = {
   {"ip", "", "ip", TRK("rete e indirizzo"), "", 0},
   {"kill", "", "kill <nome>", TRK("ferma un task"), "", 0},
   {"lang", "", "lang [codice]", TRK("mostra o cambia la lingua"), "", 0},
-  {"led", "", "led [trigger [nome]|color [sorgente] <RRGGBB>|brightness <0-255>|threshold <10-95>|state|heartbeat|fixed|off]", TRK("LED: trigger, colori, luminosita"), "trigger color brightness threshold state heartbeat fixed off", 0},
-  {"led-bright", "", "led-bright <0-255>", TRK("vecchio nome di 'led brightness'"), "", H},
-  {"led-color", "", "led-color <RRGGBB>", TRK("vecchio nome di 'led color'"), "", H},
+  {"led", "", "led", TRK("vecchio nome di 'led_rgb1' (non vale piu)"), "", H},
+  {"led1", "", "led1 [on|off|blink|auto|trigger [nome]|threshold <10-95>|brightness <0-255>]", TRK("LED monocromatico della scheda (se c'e)"), "on off blink auto trigger threshold brightness", 0},
+  {"led2", "", "led2", TRK("vecchio nome di 'led1' (non vale piu)"), "", H},
+  {"led_rgb1", "", "led_rgb1 [trigger [nome]|color [sorgente] <RRGGBB>|brightness <0-255>|threshold <10-95>|state|heartbeat|fixed|off]", TRK("LED a colori: trigger, colori, luminosita"), "trigger color brightness threshold test state heartbeat fixed off", 0},
+  {"led-bright", "", "led-bright <0-255>", TRK("vecchio nome di 'led_rgb1 brightness'"), "", H},
+  {"led-color", "", "led-color <RRGGBB>", TRK("vecchio nome di 'led_rgb1 color'"), "", H},
   {"legal", "", "legal", TRK("note legali: licenze, dati salvati, sicurezza"), "", 0},
   {"license", "licenza", "license [id]", TRK("licenze e note legali"), "notice gpl3 apache2 mit bsd3", 0},
   {"log", "", "log [n|clear|level [0-3]]", TRK("registro: ultime righe, svuota, livello"), "clear level", 0},
@@ -76,6 +77,12 @@ const shx::CmdInfo kCmds[] = {
   {"ntp", "", "ntp [on|off|sync|every <min>]", TRK("ora da internet (NTP)"), "on off sync every", 0},
   {"passwd", "", "passwd <utente>", TRK("cambia la password di un utente"), "", 0},
   {"pin", "", "pin <n> [high|low|blink|read [up|down]|off]", TRK("prova un pin (si spegne da solo)"), "", 0},
+#if VOS_WITH_PWM
+  {"pwm", "", "pwm [list|add <pin> <hz> <duty> [nome]|set <nome> <duty> [hz]|del <nome>]", TRK("PWM su un pin libero: frequenza e duty"), "list add set del", 0},
+#endif
+#if VOS_WITH_CONTATORE
+  {"contatore", "", "contatore [list|add <pin> <salita|discesa|entrambi> [filtro_ns] [nome] [su|giu]|get <nome>|reset <nome>|del <nome>]", TRK("contatore di impulsi su un pin libero"), "list add get reset del", 0},
+#endif
   {"ping", "", "ping [-c n] [-i secondi] [-W secondi] [-s byte] [-t ttl] host", TRK("prova se un indirizzo risponde (ICMP echo)"), "-c -i -W -s -t", 0},
   {"lspin", "", "lspin [-v|-vv] [-s pin] [-k nome]", TRK("pin occupati e liberi, come lspci (sola lettura)"), "", 0},
   {"pins", "", "pins", TRK("pin usati"), "", 0},
@@ -122,11 +129,11 @@ const shx::CmdInfo kCmds[] = {
 #if VOS_WITH_ELF
   {"vesevos-elf", "", "vesevos-elf [status|run|ps|kill|which|list|install|quarantine|unquarantine|data|driver|test]", TRK("moduli ELF: avvio in sottofondo, elenco, ferma, installa, quarantena, driver .vde, prova"), "status run ps kill which list install quarantine unquarantine data driver test -t -u", 0},
 #endif
-  {"vesevos-led_control", "led", "vesevos-led_control [come led]", TRK("alias di 'led' (trigger, colori, luminosita)"), "trigger color brightness threshold state heartbeat fixed off", A},
+  {"vesevos-led_control", "led_rgb1", "vesevos-led_control [come led_rgb1]", TRK("alias di 'led_rgb1' (trigger, colori, luminosita)"), "trigger color brightness threshold state heartbeat fixed off", A},
   {"vesevos-network", "", "vesevos-network [info] [-f] | scan | ping <host>", TRK("riepilogo di rete in testo (senza segreti)"), "info scan ping -f", 0},
   {"vesevos-services", "", "vesevos-services [<servizio> [start|stop|restart|status]]", TRK("servizi con stato, porta e RAM"), "http https ap captive dhcp mdns wifi wps mqtt mesh ntp rules script wd", 0},
   {"vesevos-update", "", "vesevos-update [status|file [ip-del-computer]|net <url-https> <sha256> [versione]]", TRK("aggiornamento tramite recovery: stato, da file, da indirizzo https"), "status file net", 0},
-  {"vsh", "berry", "vsh [codice]", TRK("prova codice VesevOS al volo"), "", 0},
+  {"vsh", "", "vsh [codice]", TRK("prova codice VesevOS al volo"), "", 0},
   {"wd", "watchdog", "wd [status|set twdt <s>|set <servizio> <s>|defaults]", TRK("watchdog: stato e tempi"), "status set defaults", 0},
   {"welcome", "", "welcome", TRK("schermata di benvenuto"), "", 0},
   {"which", "", "which <nome>", TRK("dice cosa parte con un nome: comando interno o file"), "@commands", 0},
@@ -136,8 +143,7 @@ const shx::CmdInfo kCmds[] = {
   {"wifi-scan", "", "wifi-scan", TRK("vecchio nome di 'wifi scan'"), "", H},
   {"wps", "", "wps [on|off|pin on|off|start [pin]|stop]", TRK("collegamento alla Wi-Fi di casa con il WPS"), "on off pin start stop", 0},
   {"write", "", "write <file> <testo>", TRK("scrive un file di testo"), "", 0},
-  {"zip", "", "zip [-r] [-0..-9] [-q] [-f] [-j] archivio.zip file ...", TRK("crea un archivio .zip"), "-r -q -f -j -0 -1 -9", 0},
-  {"zcat", "", "zcat file.gz ...", TRK("mostra un file .gz (solo testo)"), "", 0},
+  {"zip", "", "zip [-r] [-0] [-q] [-f] [-j] archivio.zip file ...", TRK("crea un archivio .zip"), "-r -q -f -j -0", 0},
 };
 
 const size_t kCmdsN = sizeof(kCmds) / sizeof(kCmds[0]);

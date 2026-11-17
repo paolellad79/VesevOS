@@ -41,13 +41,13 @@ $CXXF -c "$HERE/shim.cpp" -o "$FX/shim.o"; $CXXF -c "$HERE/shim_crypto.cpp" -o "
 for f in vos_util vos_config vos_config_export vos_config_import vos_serial vos_log vos_crypt vos_sechash vos_drv_fs vos_io vos_io_cfg vos_io_name vos_io_text vos_bmp280 vos_pins vos_sd vos_sd_path vos_sd_io; do $CXXF -c "$(find "$REPO/VesevOS" -name "$f.cpp")" -o "$FX/$f.o"; done
 BASEF="$FX/vos_util.o $FX/vos_config.o $FX/vos_config_export.o $FX/vos_config_import.o $FX/vos_serial.o $FX/vos_log.o $FX/vos_crypt.o $FX/vos_sechash.o $FX/vos_drv_fs.o $FX/shimc.o $FX/shim.o $OUT/ws.o $OUT/pr.o $OUT/st.o"
 BASE="$OUT/vos_util.o $OUT/vos_config.o $OUT/vos_config_export.o $OUT/vos_config_import.o $OUT/vos_serial.o $OUT/vos_log.o $OUT/vos_crypt.o $OUT/vos_sechash.o $OUT/vos_drv_fs.o $OUT/shimc.o $OUT/shim.o $OUT/ws.o $OUT/pr.o $OUT/st.o"
-# interprete Berry (C) per test_berry (compilato SENZA -I, come fa l Arduino IDE: gli include devono trovarsi da soli)
-BE="$REPO/VesevOS/src/third_party/berry/src"; mkdir -p "$OUT/berry"
-for c in "$BE"/*.c; do gcc $SAN -std=gnu99 -O1 -w -c "$c" -o "$OUT/berry/$(basename "$c").o"; done
+# interprete delle funzioni (C) per test_funzioni (compilato SENZA -I, come fa l Arduino IDE: gli include devono trovarsi da soli)
+BE="$REPO/VesevOS/src/third_party/funzioni/src"; mkdir -p "$OUT/funzioni"
+for c in "$BE"/*.c; do gcc $SAN -std=gnu99 -O1 -w -c "$c" -o "$OUT/funzioni/$(basename "$c").o"; done
 for t in "$HERE"/test_*.cpp; do
   n=$(basename "$t" .cpp)
   if [ "$n" = "test_io" ] || [ "$n" = "test_board" ] || [ "$n" = "test_sd" ]; then $CXXF -c "$t" -o "$OUT/$n.o"; else $CXX -c "$t" -o "$OUT/$n.o"; fi
-  X=""; [ "$n" = "test_service" ] && X="$OUT/vos_service.o $OUT/vos_eventbus.o"; [ "$n" = "test_wps" ] && X="$OUT/vos_service.o $OUT/vos_eventbus.o"; [ "$n" = "test_btn" ] && X="$OUT/vos_eventbus.o"; [ "$n" = "test_eventbus" ] && X="$OUT/vos_eventbus.o"; [ "$n" = "test_berry" ] && X="$OUT/berry/*.o $OUT/vos_app_rt.o"; [ "$n" = "test_app" ] && X="$OUT/vos_app_rt.o"; [ "$n" = "test_io" ] && X="$OUT/vos_io.o $OUT/vos_bmp280.o $OUT/fake_i2c.o"; [ "$n" = "test_board" ] && X="$OUT/vos_io.o $OUT/vos_pins.o $OUT/vos_bmp280.o $OUT/fake_i2c.o"; [ "$n" = "test_bmp280" ] && X="$OUT/vos_bmp280.o $OUT/fake_i2c.o"
+  X=""; [ "$n" = "test_service" ] && X="$OUT/vos_service.o $OUT/vos_eventbus.o"; [ "$n" = "test_wps" ] && X="$OUT/vos_service.o $OUT/vos_eventbus.o"; [ "$n" = "test_btn" ] && X="$OUT/vos_eventbus.o"; [ "$n" = "test_eventbus" ] && X="$OUT/vos_eventbus.o"; [ "$n" = "test_funzioni" ] && X="$OUT/funzioni/*.o $OUT/vos_app_rt.o"; [ "$n" = "test_app" ] && X="$OUT/vos_app_rt.o"; [ "$n" = "test_io" ] && X="$OUT/vos_io.o $OUT/vos_bmp280.o $OUT/fake_i2c.o"; [ "$n" = "test_board" ] && X="$OUT/vos_io.o $OUT/vos_pins.o $OUT/vos_bmp280.o $OUT/fake_i2c.o"; [ "$n" = "test_bmp280" ] && X="$OUT/vos_bmp280.o $OUT/fake_i2c.o"
   B="$BASE"
   if [ "$n" = "test_io" ] || [ "$n" = "test_board" ]; then
     X="$FX/vos_io.o $FX/vos_io_cfg.o $FX/vos_io_name.o $FX/vos_io_text.o $FX/vos_bmp280.o $OUT/fake_i2c.o $OUT/fake_sd.o"; [ "$n" = "test_board" ] && X="$FX/vos_io.o $FX/vos_io_cfg.o $FX/vos_io_name.o $FX/vos_io_text.o $FX/vos_pins.o $FX/vos_bmp280.o $OUT/fake_i2c.o $OUT/fake_sd.o"; B="$BASEF"

@@ -134,6 +134,7 @@ function avvisiScelta() {
   const tipi = new Set(partiScelte().map((id) => elenco.parti[id].tipo));
   const chiavi = [];
   if (tipi.has('nvs')) chiavi.push('sc_nvs');
+  if (tipi.has('risorse')) chiavi.push('sc_risorse');
   if (tipi.has('tabella') && !(tipi.has('recovery') && tipi.has('firmware'))) chiavi.push('sc_tabella');
   if (tipi.has('otadata') && !tipi.has('firmware')) chiavi.push('sc_otadata');
   return chiavi;

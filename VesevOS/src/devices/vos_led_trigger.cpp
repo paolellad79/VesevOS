@@ -8,6 +8,7 @@
 #include "../core/vos_sys.h"
 #include "../drivers/vos_drv_activity.h"
 #include <string.h>
+#include <math.h>
 
 namespace {
 
@@ -29,55 +30,79 @@ struct Pulse {
   uint8_t  mode;                  // modo per cui valgono i contatori qui sotto
   uint32_t seen[ACT_COUNT];
 };
-Pulse g_pulse = {};
+Pulse g_pulse[LEDTRIG_SLOTS] = {};     // un blocco per LED: ognuno ha i suoi contatori visti
 
-void resetBaseline(uint8_t mode) {
-  for (int i = 0; i < ACT_COUNT; i++) g_pulse.seen[i] = drvActGet((DrvAct)i);
-  g_pulse.mode = mode;
-  g_pulse.active = false;
+void resetBaseline(Pulse& p, uint8_t mode) {
+  for (int i = 0; i < ACT_COUNT; i++) p.seen[i] = drvActGet((DrvAct)i);
+  p.mode = mode;
+  p.active = false;
 }
 
-bool changed(DrvAct k) { return drvActGet(k) != g_pulse.seen[k]; }
+bool changed(const Pulse& p, DrvAct k) { return drvActGet(k) != p.seen[k]; }
 
 // Guarda i contatori del modo attuale; se e cambiato qualcosa torna il colore del lampo, altrimenti -1
-int32_t pickColor(uint8_t mode) {
+int32_t pickColor(const Pulse& p, uint8_t mode) {
   if (mode == LED_FLASH) {
-    bool wr = changed(ACT_FS_WRITE) || changed(ACT_SD_WRITE);
-    bool rd = changed(ACT_FS_READ) || changed(ACT_SD_READ);
+    bool wr = changed(p, ACT_FS_WRITE) || changed(p, ACT_SD_WRITE);
+    bool rd = changed(p, ACT_FS_READ) || changed(p, ACT_SD_READ);
     if (wr) return (int32_t)cfg.ledSrcColor[LEDSRC_FLASH_W];
     if (rd) return (int32_t)cfg.ledSrcColor[LEDSRC_FLASH_R];
   } else {
-    if (changed(ACT_WIFI_TX)) return (int32_t)cfg.ledSrcColor[LEDSRC_WIFI_TX];
-    if (changed(ACT_WIFI_RX)) return (int32_t)cfg.ledSrcColor[LEDSRC_WIFI_RX];
+    if (changed(p, ACT_WIFI_TX)) return (int32_t)cfg.ledSrcColor[LEDSRC_WIFI_TX];
+    if (changed(p, ACT_WIFI_RX)) return (int32_t)cfg.ledSrcColor[LEDSRC_WIFI_RX];
   }
   return -1;
 }
 
+int clampThr(int thr) {
+  if (thr < 10) return 10;
+  if (thr > 95) return 95;
+  return thr;
+}
+
 }  // namespace
 
-bool ledTrigOverlay(uint32_t nowMs, uint8_t& r, uint8_t& g, uint8_t& b) {
-  uint8_t mode = cfg.ledMode;
-  if (mode != LED_FLASH && mode != LED_WIFI) { g_pulse.mode = 0xFF; return false; }
-  if (g_pulse.mode != mode) resetBaseline(mode);              // appena scelto: non mostrare l'attivita di prima
+bool ledTrigPulse(int slot, uint8_t mode, uint32_t nowMs, uint32_t* color) {
+  if (slot < 0 || slot >= LEDTRIG_SLOTS) return false;
+  Pulse& p = g_pulse[slot];
+  if (mode != LED_FLASH && mode != LED_WIFI) { p.mode = 0xFF; return false; }
+  if (p.mode != mode) resetBaseline(p, mode);                 // appena scelto: non mostrare l'attivita di prima
 
-  uint32_t age = nowMs - g_pulse.start;
-  if (!g_pulse.active || age >= CYCLE_MS) {
-    int32_t c = pickColor(mode);
-    if (c < 0) { g_pulse.active = false; return false; }
-    for (int i = 0; i < ACT_COUNT; i++) g_pulse.seen[i] = drvActGet((DrvAct)i);
-    g_pulse.start = nowMs; g_pulse.color = (uint32_t)c; g_pulse.active = true;
+  uint32_t age = nowMs - p.start;
+  if (!p.active || age >= CYCLE_MS) {
+    int32_t c = pickColor(p, mode);
+    if (c < 0) { p.active = false; return false; }
+    for (int i = 0; i < ACT_COUNT; i++) p.seen[i] = drvActGet((DrvAct)i);
+    p.start = nowMs; p.color = (uint32_t)c; p.active = true;
     age = 0;
   }
   if (age >= PULSE_MS) return false;                          // lampo finito, si aspetta la fine del ciclo
-  r = (g_pulse.color >> 16) & 255; g = (g_pulse.color >> 8) & 255; b = g_pulse.color & 255;
+  if (color) *color = p.color;
   return true;
+}
+
+bool ledTrigOverlay(uint32_t nowMs, uint8_t& r, uint8_t& g, uint8_t& b) {
+  uint32_t c = 0;
+  if (!ledTrigPulse(0, cfg.ledMode, nowMs, &c)) return false;
+  r = (c >> 16) & 255; g = (c >> 8) & 255; b = c & 255;
+  return true;
+}
+
+float ledTrigBeat(uint32_t t, uint32_t period) {
+  float x = (float)(t % period) / (float)period;
+  float a = expf(-powf((x - 0.10f) / 0.05f, 2));
+  float b = expf(-powf((x - 0.26f) / 0.06f, 2)) * 0.7f;
+  float v = a + b;
+  return v > 1.0f ? 1.0f : v;
+}
+
+bool ledTrigCpuOver(uint8_t thr) {
+  return sysCpuPercent() > clampThr(thr);
 }
 
 bool ledTrigCpuMix(uint8_t& r, uint8_t& g, uint8_t& b) {
   int load = sysCpuPercent();
-  int thr = cfg.ledCpuThr;
-  if (thr < 10) thr = 10;
-  if (thr > 95) thr = 95;
+  int thr = clampThr(cfg.ledCpuThr);
   if (load <= thr) return false;
   int t = (load - thr) * 256 / (100 - thr);                   // 0..256
   if (t > 256) t = 256;

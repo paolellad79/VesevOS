@@ -7,6 +7,7 @@
 #include <esp_partition.h>
 #include <esp_ota_ops.h>
 #include <esp_image_format.h>
+#include <esp_app_format.h>
 #include "vos_drv_nvs.h"
 
 bool drvOtaInProva() {
@@ -91,6 +92,48 @@ int drvRecoveryWrite(const uint8_t* d, uint32_t n) {
     if (esp_partition_read(p, o, b, k) != ESP_OK || memcmp(b, d + o, k) != 0) return REC_W_VERIFY;
   }
   return REC_W_OK;
+}
+
+bool drvRecoveryExists() { return recPart() != nullptr; }
+
+uint16_t drvImgChipId() {
+#if CONFIG_IDF_TARGET_ESP32C6
+  return ESP_CHIP_ID_ESP32C6;
+#elif CONFIG_IDF_TARGET_ESP32C3
+  return ESP_CHIP_ID_ESP32C3;
+#else
+  return ESP_CHIP_ID_ESP32S3;
+#endif
+}
+
+int drvRecoveryBlkStart() {
+  const esp_partition_t* p = recPart();
+  if (!p) return REC_W_NOPART;
+  const esp_partition_t* run = esp_ota_get_running_partition();
+  if (!run || run == p) return REC_W_RUNNING;
+  if (esp_ota_get_boot_partition() != run && esp_ota_set_boot_partition(run) != ESP_OK) return REC_W_BOOT;
+  return REC_W_OK;
+}
+
+int drvRecoveryBlkPut(uint32_t off, const uint8_t* d, uint32_t n) {
+  const esp_partition_t* p = recPart();
+  const uint32_t SEC = 4096;
+  if (!p) return REC_W_NOPART;
+  if (off % SEC || n > SEC || off + SEC > p->size) return REC_W_SIZE;
+  if (esp_partition_erase_range(p, off, SEC) != ESP_OK) return REC_W_ERASE;
+  if (d && n && esp_partition_write(p, off, d, n) != ESP_OK) return REC_W_WRITE;
+  return REC_W_OK;
+}
+
+bool drvRecoveryBlkVerify(uint32_t* len) {
+  const esp_partition_t* p = recPart();
+  if (!p) return false;
+  esp_partition_pos_t pos = { p->address, p->size };
+  esp_image_metadata_t meta = {};
+  meta.start_addr = pos.offset;
+  if (esp_image_verify(ESP_IMAGE_VERIFY, &pos, &meta) != ESP_OK) return false;
+  if (len) *len = meta.image_len;
+  return true;
 }
 
 uint32_t drvSketchSize() {

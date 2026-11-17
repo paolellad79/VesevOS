@@ -7,7 +7,11 @@ function wdLoad(){
         w.off||"-"))+'</div>':"")+
       (w.stopped?'<div class="msg ko" style="display:block">'+
         esc(t("Riavvii automatici sospesi: troppi in un'ora. Controlla il registro."))+'</div>':"")+
-      (w.last?row(esc(t("Ultimo riavvio automatico")),esc(w.last)):"");
+      (w.last?row(esc(t("Ultimo riavvio automatico")),esc(w.last)):"")+
+      (w.ramUsed>=0?row(esc(t("RAM interna usata")),esc(w.ramUsed+"% - "+
+        [t("normale"),t("segnala"),t("riduci"),t("critico")][w.ramLvl])):"")+
+      (w.ramOff?row(esc(t("Spento per la memoria")),esc(w.ramOff)):"")+
+      (w.ramMin?'<p class="fhint">'+esc(t("Scheda con poca memoria: il watchdog segnala e riduce ma non riavvia per la RAM."))+'</p>':"");
     h+='<table class="ftab"><thead><tr><th>'+esc(t("Servizio"))+'</th><th>'+
       esc(t("Ultimo segno di vita"))+'</th><th>'+esc(t("Limite"))+'</th><th>'+esc(t("Riavvii"))+
       '</th></tr></thead><tbody>';
@@ -20,7 +24,7 @@ function wdLoad(){
     $("wd_net").classList.toggle("on",w.net);
     $("wd_ram").classList.toggle("on",w.ram);
     $("wd_nm").value=w.netMin;
-    $("wd_rk").value=w.ramKb;
+    $("wd_rk").value=w.ramPerc;
     $("wd_ud").value=w.upDays;
     $("wd_at").value=w.at>=0?("0"+Math.floor(w.at/60)).slice(-2)+":"+("0"+w.at%60).slice(-2):"";
     wdTimes(w);
@@ -64,7 +68,7 @@ function wdSave(){
   [].forEach.call($("wd_days").children,function(b,i){if(b.dataset.on==1)days|=1<<i});
   post("/api/wd",{task:$("wd_task").classList.contains("on")?1:0,
     net:$("wd_net").classList.contains("on")?1:0,ram:$("wd_ram").classList.contains("on")?1:0,
-    netmin:$("wd_nm").value,ramkb:$("wd_rk").value,updays:$("wd_ud").value,
+    netmin:$("wd_nm").value,ramperc:$("wd_rk").value,updays:$("wd_ud").value,
     at:at?+at.slice(0,2)*60+ +at.slice(3,5):-1,days:days,twdt:$("wd_tw").value,
     lim_net:$("wd_l_net").value,lim_monitor:$("wd_l_monitor").value,lim_mesh:$("wd_l_mesh").value,
     lim_mqtt:$("wd_l_mqtt").value,lim_led:$("wd_l_led").value})

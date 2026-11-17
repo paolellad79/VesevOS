@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_app_rt.cpp (vedi vos_app_rt.h)
 #include "vos_app_rt.h"
-#if VOS_WITH_BERRY
+#if VOS_WITH_FUNZIONI
 #include <stdlib.h>
 #include <string.h>
 #include <freertos/FreeRTOS.h>   // mutex (SemaphoreHandle_t)

@@ -4,7 +4,7 @@
 
 <p align="center">
   <img alt="License" src="https://img.shields.io/badge/license-GPL%20v3%20%2B%20commercial-3fa7ff">
-  <img alt="Board" src="https://img.shields.io/badge/board-ESP32--S3-37e0b0">
+  <img alt="Board" src="https://img.shields.io/badge/board-ESP32--S3%20%C2%B7%20ESP32--C6-37e0b0">
   <img alt="ESP-IDF" src="https://img.shields.io/badge/ESP--IDF-5.5-e7352c">
   <img alt="Status" src="https://img.shields.io/badge/status-in%20development-orange">
   <img alt="Languages" src="https://img.shields.io/badge/languages-it%20%C2%B7%20en%20%C2%B7%20es%20%C2%B7%20de-blueviolet">
@@ -12,7 +12,7 @@
 
 <p align="center"><a href="README.md">Italiano</a> · <a href="README.en.md"><b>English</b></a></p>
 
-<p align="center"><b>A small operating system for the ESP32-S3: easy to use, secure by default, and useful even where there is no internet.</b></p>
+<p align="center"><b>Turn a few-euro board into a small control centre: easy to use, secure by default, alive even where there is no internet. For ESP32-S3 and ESP32-C6.</b></p>
 
 ---
 
@@ -30,7 +30,7 @@ Wi-Fi, clock, files, LEDs, pins, a shell and much more, all protected by a passw
 </p>
 <p align="center"><sub>Screenshots of the control page (with sample data): Home in dark theme, Automations, startup order with the bottom terminal panel, and the phone layout.</sub></p>
 
-> **Status:** in development (version 1.8.16). The project grows in stages: see "Where we are going".
+> **Status:** version 1.8.24c, for ESP32-S3 and ESP32-C6. The project grows in stages: see "Where we are going".
 
 ## Why "VesevOS"?
 
@@ -68,15 +68,24 @@ in radio silence when needed, or communicating in alternative ways.
 | 🌍 | **For everyone** | Italian, English, Spanish and German, and a new language is just one file. |
 | 🔋 | **Reliable and frugal** | Built to survive blackouts and to use little power, even on battery. |
 
+## What's new in 1.8.24c
+
+- **Two boards, one system**: VesevOS now runs on the **ESP32-S3** and on the **ESP32-C6** (Wi-Fi 6 and Bluetooth 5). Same page, same features, same way of working: pick your board and VesevOS does the rest.
+- **Lighter and faster**: the page, the manual, the languages, the licences, the municipalities data and the radio table are now **their own files on the board** (`/usr/share/vesevos/`), each one checked with SHA-256. The firmware is leaner and leaves more room for your ideas.
+- **Load from file, everywhere**: every section has a button to load firmware, recovery, packages and resource files from your computer. One gesture, always the same.
+- **Help at your fingertips**: the Help tab gives you the essentials in a few lines; the detailed, complete guide is on the project's GitHub site.
+- **Your board talks with its LED**: a small flash code tells you what is going on, even without a screen or a computer. On the single-colour LED the heartbeat fades all the way to off, so you can spot it at a glance.
+- **First activation in a moment**: at the first power-up **press the BOOT button and the guided installation starts**. Step by step you choose language, password and network.
+
 ## What's new in 1.8.16
 
-- **One way to install drivers**: `.vdb` (Berry) or `.vde` (ELF), from the Drivers page or with `vesevos-driver list|info|install|pins|remove`. Pins are suggested and you can change them.
-- **Programs**: `.vsb` scripts, `.vab` Berry apps and `.vae` ELF apps live in the Scripts and Apps pages; running programs show up in **Tasks** with stop and restart, and have **auto start** in the Start-up panel.
+- **One way to install drivers**: `.vdb` (VesevOS functions) or `.vde` (ELF), from the Drivers page or with `vesevos-driver list|info|install|pins|remove`. Pins are suggested and you can change them.
+- **Programs**: `.vsb` scripts, `.vab` apps and `.vae` ELF apps live in the Scripts and Apps pages; running programs show up in **Tasks** with stop and restart, and have **auto start** in the Start-up panel.
 - **Features** (System): one switch per group of primitives (log, sd, dev, gpio, i2c, spi, time, files, ble) to decide what programs may use.
 - **microSD**: mounts by itself, is browsed in `/media/sd` with `cd`, `ls`, `cat`, `cp`, `mv`, `rm`, `mkdir`, and is formatted as FAT32 from the panel or with `vesevos-drive_manager format` (without blocking the shell). Programs can also start from the card.
 - **App data**: apps that save data choose between flash (`/var/lib/<name>/`) and microSD (`/media/sd/app/<name>/`).
 - **Pin page**: board diagram, front and back, with peripheral blocks, the possible functions of each pin, and the `lspin` shell command.
-- **ELF built in**: ELF modules load without warnings, with the same primitives as Berry programs.
+- **ELF built in**: ELF modules load without warnings, with the same primitives as VesevOS function programs.
 - **Install page** in [`flash/`](flash/README.md) with a choice of the parts to write: you can **keep** the settings, restart counter and uptime, or do the full installation.
 - **Site and packages**: start page, a list of drivers, apps and scripts with SHA-256, and a Technologies and licenses page (folders `store/`, `aggiorna/`, `licenze/`).
 
@@ -87,7 +96,7 @@ in radio silence when needed, or communicating in alternative ways.
 - **LED triggers** (flash, wifi, cpu) and colors of your choice. On the LED/QR page the Admin is now recognized (1.8.0b fix).
 - **Minimal HTTP server** for the redirect to HTTPS (less RAM), fix for the panic after changing the host name, wider and editable watchdogs, CPU governor (ondemand/conservative/schedutil).
 - **Recovery 0.5.1**: the one-time token also works for a normal boot, new page, clearer access messages.
-- **[`firmware/`](firmware/LEGGIMI.md) folder**: ready-made firmware and recovery files (1.8.16, Recovery 0.5.2, 0.5.1 and 0.5.0, and earlier versions) with SHA-256 and an `indice.json` list (the folder guide is in Italian).
+- **[`firmware/`](firmware/LEGGIMI.md) folder**: ready-made firmware and recovery files (1.8.24c for S3 and C6, Recovery 0.5.3, 0.5.2 and 0.5.1, and earlier versions) with SHA-256 and an `indice.json` list (the folder guide is in Italian).
 - **First-install page** in [`flash/`](flash/README.md): writes the board from the browser (Web Serial), checking every file before writing.
 - Built only with ESP-IDF 5.5, no Arduino.
 - **Updates with no cable and no SD card** (since 1.7.45): from the user menu choose *Update via recovery*; the recovery checks the file is really a VesevOS firmware (header, marker, size, SHA-256) before activating it.
@@ -133,7 +142,7 @@ These are ideas and plans, not promises: the order may change.
 
 ## Requirements
 
-- An **ESP32-S3 SuperMini** board (ESP32-S3FH4R2: 4 MB flash, 2 MB PSRAM).
+- An **ESP32-S3 SuperMini** board (ESP32-S3FH4R2: 4 MB flash, 2 MB PSRAM) or an **ESP32-C6 SuperMini** (4 MB flash).
 - **ESP-IDF 5.5** (VesevOS is pure ESP-IDF; 5.5.5 is used), installed in `~/esp/esp-idf`. Python 3 and a network connection the first time (the component manager downloads `mdns`, `esp_littlefs` and `esp-nimble-cpp`).
 - Components in the project (`idf/components` folder): **PsychicHttp** 3.1.2 (MIT, modified copy) and **aj_json** (ArduinoJson 7.x, MIT).
 - For cable-free updates: Python 3 and `esptool` (only for the first install, see the guide).
@@ -165,7 +174,7 @@ VOS_CFG=vesevos idf.py -B <build folder> build
 
 There are three ways (the first is the easiest for a new board):
 
-1. **First-install page** ([`flash/`](flash/README.md), enabled with GitHub Pages): connect the board with a browser that has the serial port (Web Serial), choose "Update and keep data" (board already used) or "Full installation" (new board), you can also tick the single parts, and press Write. It checks every file before writing.
+1. **First-install page** ([`flash/`](flash/README.md), enabled with GitHub Pages): connect the board with a browser that has the serial port (Web Serial), choose "Update and keep data" (board already used) or "Full installation" (new board; it also writes the VesevOS files into the file space: page, manual, licenses, data), you can also tick the single parts, and press Write. An update never touches the file space. It checks every file before writing.
 2. **Ready-made files in [`firmware/`](firmware/LEGGIMI.md)** with `esptool` (recovery at `0x10000`, firmware at `0x110000`) or, on a board that already runs VesevOS, from the *Update via recovery* menu (file from your computer, or URL + SHA-256 from `indice.json`). Always check the SHA-256.
 3. **Build it yourself**: set up ESP-IDF as above, build VesevOS (`idf/` folder) and the recovery (`idf-recovery/` folder, same command) and follow the guide [docs/PREPARE-THE-BOARD.md](docs/PREPARE-THE-BOARD.md).
 
@@ -173,9 +182,8 @@ After the first install you update from the page (*Update via recovery*), with n
 
 ## First access
 
-1. Open the serial monitor (115200) and press RESET: the board prints the network name (**VesevOS**) and **its own password**,
-   different for every board (required by device security laws: EU RED/EN 18031, Cyber Resilience Act; UK PSTI).
-2. Join that network and open `http://192.168.4.1` (it usually opens by itself).
+1. Power up the board and **press the BOOT button**: the **guided installation** starts.
+2. Join the **VesevOS** network the board opens for you and open `http://192.168.4.1` (it usually opens by itself).
 3. Choose the panel password (at least 6 characters) and follow the guided setup (rainbow LED).
 
 **BOOT button** (hold while running, then release): under 2 s leaves airplane mode; 2-7 s (light blue LED) turns off the IP filter;
@@ -228,7 +236,7 @@ The firmware sources use only ASCII characters.
 Italian is inside the firmware. For the other languages:
 
 1. Open the page, tab **System > Localization** (Languages card).
-2. Choose the file (`en.json`, `es.json` or `de.json` from the `lang/` folder) and press **Upload language**.
+2. Choose the file (for example `en.vld` and `en.vlp` from the `lang/` folder, also together) and press **Upload language**.
 3. Pick the language from the menu at the top right. The board remembers it; from the shell: `lang en`.
 
 Each language takes about 17 KB of internal memory. **To add a language**: copy an entry of

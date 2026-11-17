@@ -13,7 +13,7 @@
 //     Torna subito (formattazione in un task a parte, devices/vos_sd_fmt.cpp); si guarda con "sd status". --attendi: resta in attesa (al massimo 60 s) e scrive il tempo trascorso.
 // La formattazione la fa la primitiva sdFormat (devices/vos_sd.cpp); decisione dell'utente del 31/10/2026 (prima la microSD non si formattava mai).
 // mount, unmount, test e la riga di status non hanno codice qui: ricostruiscono la riga del comando "sd" e la fanno passare dal PERCORSO
-// NORMALE della shell (shellExecSess). "sd" e il comando del driver microSD (scritto in Berry, nel suo file in /devs): senza il driver non c'e
+// NORMALE della shell (shellExecSess). "sd" e il comando del driver microSD (scritto nelle funzioni VesevOS, nel suo file in /devs): senza il driver non c'e
 // la periferica e queste azioni lo dicono. Stessa tabella dei ruoli e stessi controlli del driver.
 // L'elenco legge soltanto variabili e un settore della scheda (per vedere se e stata tolta): e veloce e non blocca la pagina.
 #include "vos_shell_int.h"

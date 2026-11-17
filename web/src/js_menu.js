@@ -1,6 +1,8 @@
 /* ===== navigazione con ruoli ===== */
 function canSee(id){
   if(AUTH&&AUTH.pk&&AUTH.pk[id]===0)return false;
+  var v=voceDi(id);
+  if(v&&v.bordo&&!BDV[id])return false;
   return ROLE>=(TMIN[id]||0)
 }
 
@@ -34,17 +36,66 @@ function subDraw(id,g){
     var sp=ix>0?TSEC[L[ix-1]]:undefined;
     if(sc!==undefined&&sc!==sp)h+='<span class="gsep">'+esc(t(SECN[sc]))+'</span>';
     else if(sc===undefined&&sp!==undefined)h+='<span class="gsep"></span>';
-    h+='<button class="'+(k==id?"on":"")+'" onclick="show(\''+k+'\')">'+esc(t(voceDi(k).testo))+
-      '</button>';
+    var nv=voceNomeVero(k);
+    h+='<button class="'+(k==id?"on":"")+'" onclick="show(\''+k+'\')">'+esc(voceTesto(k))+
+      (nv?' <small class="alnome">'+esc(nv)+'</small>':"")+'</button>';
   });
   return h;
+}
+/* Il testo di una voce: quelle di bordo hanno l'etichetta mandata dalla scheda (gia tradotta). */
+function voceTesto(id){
+  var v=voceDi(id);
+  if(v.nome)return v.nome;
+  if(v.bordo&&BDV[id])return BDV[id];
+  return t(v.testo);
+}
+/* Il nome vero della periferica di una voce, solo se la voce mostra un alias (altrimenti ""). */
+function voceNomeVero(id){
+  var v=voceDi(id),real=v?(v.n||BDI[id]||""):"";
+  return real&&aliasDi(real)?real:""
+}
+/* Titolo di una pagina di periferica: alias e nome vero tra parentesi (per textContent). */
+function voceTitolo(id){
+  var nv=voceNomeVero(id);
+  return nv?aliasDi(nv)+" ("+nv+")":voceTesto(id)
+}
+/* Ridisegna solo il sottomenu (quando l'elenco di bordo cambia a pagina aperta). */
+function subRidisegna(){
+  if(typeof cur=="undefined"||!loggedIn())return;
+  var h=subDraw(cur,gOf(cur));
+  $("gsub").innerHTML=h;
+  $("gsub").className="sub gsub"+(h?"":" hide");
 }
 /* La voce con questo id, oppure null. */
 function voceDi(id){
   for(var i=0;i<VOCI.length;i++){
     if(VOCI[i].id==id)return VOCI[i];
   }
-  return null;
+  return POV[id]||null;
+}
+/* Voci dinamiche delle periferiche create a mano: id "p_" + nome. Usano la pagina Periferiche (campo pagina)
+   e aprono la gestione di quella periferica. */
+var POV={};
+function menuCostruisci(L){
+  Object.keys(POV).forEach(function(k){
+    delete TSEC[k];
+    delete TMIN[k]
+  });
+  POV={};
+  var g=[];
+  DEV0.forEach(function(k){
+    g.push(k);
+    if(k!="io")return;
+    L.forEach(function(x){
+      var id="p_"+x[0];
+      POV[id]={id:id,testo:x[1],nome:x[1],gruppo:"dev",ruolo:1,sezione:1,pagina:"io",n:x[0],apri:apriIoDin};
+      TSEC[id]=1;
+      TMIN[id]=1;
+      g.push(id)
+    })
+  });
+  GMAP.dev=g;
+  if(typeof cur!="undefined"&&cur.indexOf("p_")==0&&!POV[cur])show("io")
 }
 /* Schede dentro una voce (modello WAI-ARIA). Nella pagina c'e solo la barra sk_<voce> con i bottoni:
    dopo la barra, ogni elemento fratello e il pannello del bottone con lo stesso numero (sp_<voce><n>).
@@ -88,7 +139,7 @@ function skRuolo(){
     var v=b.id.slice(3);
     var ok=ROLE<1?"button:not(.adm):not(.op)":ROLE<2?"button:not(.adm)":"button";
     var n=b.querySelectorAll(ok).length;
-    b.setAttribute("aria-label",t(voceDi(v).testo));
+    b.setAttribute("aria-label",voceTesto(v));
     b.classList.toggle("hide",n<2);
     if(!b.querySelector(".on").matches(ok))skMostra(v,0)
   })
@@ -114,6 +165,7 @@ function skTasto(e,v){
 }
 /* L'indirizzo mostra #aiuto solo sulla voce Aiuto. */
 function hashAiuto(id){
+  if(id=="help")pagIdDisegna();
   try{
     if(id=="help"&&location.hash!="#aiuto")history.replaceState(null,"","#aiuto");
     if(id!="help"&&location.hash=="#aiuto")history.replaceState(null,"",location.pathname);
@@ -129,9 +181,10 @@ function show(id){
   var g=gOf(id);
   LASTG[g]=id;
 
+  var vc=voceDi(id),pg=vc&&vc.pagina?vc.pagina:id;
   VOCI.forEach(function(v){
     var e=$("t_"+v.id);
-    if(e)e.className=v.id==id?"":"hide";
+    if(e)e.className=v.id==pg?"":"hide";
   });
   GRP.forEach(function(x){
     var e=$("n_"+x[0]);

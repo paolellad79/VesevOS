@@ -1,0 +1,462 @@
+// SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
+// Copyright (C) 2026 Domenico Paolella
+// VesevOS - vos_funzioni.cpp (vedi vos_funzioni.h). L'interprete e in src/third_party/funzioni (MIT, Guan Wenliang).
+#include <math.h>
+#include "../drivers/vos_drv_task.h"
+#include "vos_funzioni.h"
+#include "../devices/vos_io.h"
+#include "../core/vos_common.h"
+#if VOS_WITH_FUNZIONI
+#include "../third_party/funzioni/src/funzioni.h"
+#include <time.h>
+#include <ctype.h>
+#include "esp_heap_caps.h"
+#include "vos_rules.h"
+#include "vos_app_rt.h"
+#include "vos_app.h"
+#include "../core/vos_log.h"
+#include "../core/vos_cpuboost.h"
+#include "../core/vos_time.h"
+#include "../core/vos_sys.h"
+#include "../core/vos_i18n.h"
+#include "../core/vos_files.h"
+#include "../core/vos_util.h"
+#include "../core/vos_parse.h"
+#include "vos_funzioni_int.h"
+#include "vos_func.h"
+#include "../core/vos_config.h"
+#include "../devices/vos_led.h"
+#include "../devices/vos_led2.h"
+#include "vos_btn.h"
+#include "vos_mqtt.h"
+#include "../drivers/vos_drv_time.h"
+
+// ---------- stato dell'esecuzione (una sola alla volta) ----------
+namespace vosfunzioni {
+portMUX_TYPE g_mux = portMUX_INITIALIZER_UNLOCKED;
+volatile bool g_busy = false;       // un'esecuzione e in corso
+static volatile bool g_done = false;       // il task ha finito (risultati pronti)
+static volatile bool g_abandoned = false;  // il chiamante non aspetta piu: il task libera lui il "busy"
+volatile bool g_toErr = false;             // dove va l'uscita: false = out, true = err
+static char*    g_code = NULL;             // testo dello script (copia, liberato dal task dopo la lettura)
+char     g_obuf[FUNZIONI_USCITA_MAX + 1]; size_t g_olen = 0; bool g_otrunc = false;
+char     g_ebuf[FUNZIONI_ERR_BUF];     size_t g_elen = 0;
+static char     g_msg[100];                // messaggio d'errore delle nostre funzioni (letto dopo la fine dello script)
+static uint32_t g_deadline = 0;            // millis() oltre il quale lo script e fermato (comando "vsh <codice>")
+volatile bool g_bg = false;         // script di /sbin in sottofondo (senza scadenza, ma con le pause obbligatorie)
+volatile bool g_stop = false;       // richiesta di fermare lo script
+static uint32_t g_lastYield = 0;           // ultima pausa (sleep) dello script in sottofondo
+char     g_name[25] = "";           // nome dello script in /sbin in corso o ultimo
+uint32_t g_startMs = 0;             // quando e partita l'esecuzione in corso
+static uint32_t g_beats = 0;
+static const char* g_stackTop = NULL;      // cima dello stack del task (per misurare quanto ne usa lo script)
+static bool     g_runOk = false;
+volatile bool g_admin = false;      // lanciato dall'Admin
+volatile bool g_app = false;        // in corso c'e un'APP (file .vab): dopo il codice resta viva e riceve i comandi della pagina
+volatile bool g_appAdmin = false;   // l'app in corso ha who=admin (la avvia solo l'Admin); serve alle funzioni della microSD, non cambia g_admin
+volatile bool g_cmd = false;        // in corso c'e un COMANDO di un driver (vos_funzioni_cmd.cpp): sincrono, con args(), senza il ciclo dell'app
+static char     g_use[80] = "";           // permessi dell'app (use= del manifest)
+// memoria
+size_t   g_used = 0, g_peak = 0;
+// statistiche
+uint32_t g_runs = 0, g_lastMs = 0, g_lastPeak = 0, g_lastLeak = 0; bool g_lastOk = true;
+}  // namespace vosfunzioni
+using namespace vosfunzioni;
+
+// ---------- limiti di tempo e di stack (ogni 64 istruzioni) ----------
+// Il motore delle funzioni chiama se stesso in C quando uno script usa funzioni come map/each con una funzione che richiama se stessa: ogni livello
+// mangia stack del task. Per questo si misura lo stack usato e si ferma lo script prima che finisca (altrimenti la scheda si riavvia).
+// Attenzione: be_raise salta (longjmp) fuori da qui: nessun oggetto C++ con distruttore in questa funzione.
+static void obsHook(bvm* vm, int ev, ...) {
+  if (ev != BE_OBS_VM_HEARTBEAT) return;
+  char probe;
+  if ((size_t)(g_stackTop - &probe) > FUNZIONI_STACK_USO_MAX) be_raise(vm, "stack_error", "troppi livelli di chiamate (stack)");
+  if (g_stop) be_raise(vm, "stopped_error", "script fermato");
+  if (g_bg) { if ((int32_t)(drvMillis() - g_lastYield) > (int32_t)FUNZIONI_RAFFICA_MS) be_raise(vm, "timeout_error", "script senza pause (usa sleep): fermato"); }
+  else if ((int32_t)(drvMillis() - g_deadline) > 0) be_raise(vm, "timeout_error", "script troppo lungo (limite di tempo)");
+  if ((++g_beats & 255) == 0) vTaskDelay(1);               // cede il processore: gli altri task (e il controllo del sistema) non restano fermi
+}
+
+// ---------- coda degli script (azione "script <nome>" delle Automazioni) ----------
+static char g_q[FUNZIONI_CODA_MAX][25]; static char g_qwho[FUNZIONI_CODA_MAX][16]; namespace vosfunzioni { int g_qn = 0; }
+static bool qPop(char* name, char* who) {
+  bool ok = false;
+  portENTER_CRITICAL(&g_mux);
+  if (g_qn > 0) {
+    strcpy(name, g_q[0]); strcpy(who, g_qwho[0]);
+    for (int i = 1; i < g_qn; i++) { strcpy(g_q[i - 1], g_q[i]); strcpy(g_qwho[i - 1], g_qwho[i]); }
+    g_qn--; ok = true;
+  }
+  portEXIT_CRITICAL(&g_mux);
+  return ok;
+}
+void vosfunzioni::qClear() { portENTER_CRITICAL(&g_mux); g_qn = 0; portEXIT_CRITICAL(&g_mux); }
+
+// ---------- funzioni offerte allo script ----------
+// Regola: nelle funzioni che possono dare errore NON restano oggetti con distruttore vivi quando si chiama be_raise (longjmp senza distruttori).
+static bool actDo(const char* arg) {
+  // le azioni led* salvano la configurazione in flash: se uno script le ripete di continuo consuma la memoria. Tetto: 6 al minuto.
+  static uint32_t cfgWin = 0; static int cfgN = 0;
+  if (strncmp(arg, "led", 3) == 0) {
+    uint32_t now = drvMillis();
+    if (cfgN == 0 || now - cfgWin > 60000UL) { cfgWin = now; cfgN = 0; }
+    if (++cfgN > 6) { strncpy(g_msg, "troppe modifiche salvate (max 6 al minuto): per cambiare il LED di continuo usa led(\"RRGGBB\")", sizeof(g_msg) - 1); g_msg[sizeof(g_msg) - 1] = 0; return false; }
+  }
+  const char* ap = arg; while (*ap == ' ' || *ap == '\t') ap++;
+  if (strncmp(ap, "script", 6) == 0 || strncmp(ap, "app", 3) == 0) { strncpy(g_msg, "uno script non puo avviare altri script o app", sizeof(g_msg) - 1); g_msg[sizeof(g_msg) - 1] = 0; return false; }
+  bool ok; ErrBuf e;
+  ok = rulesAction(arg, e, "SCRIPT");
+  if (!ok) { strncpy(g_msg, e.c_str(), sizeof(g_msg) - 1); g_msg[sizeof(g_msg) - 1] = 0; }
+  return ok;
+}
+static int bfAct(bvm* vm) {                                 // act("gpio 4 1") -> "ok" oppure il messaggio d'errore
+  if (be_top(vm) < 1 || !be_isstring(vm, 1)) be_raise(vm, "type_error", "act(\"azione\"): serve un testo");
+  bool ok = actDo(be_tostring(vm, 1));
+  be_pushstring(vm, ok ? "ok" : g_msg);
+  be_return(vm);
+}
+static int bfLog(bvm* vm) {
+  if (be_top(vm) < 1) be_raise(vm, "type_error", "log(testo)");
+  vlog("SCRIPT: %s", be_tostring(vm, 1));
+  be_return_nil(vm);
+}
+static int bfMillis(bvm* vm) { be_pushint(vm, (bint)(drvMillis() & 0x7FFFFFFFUL)); be_return(vm); }
+static int bfTime(bvm* vm) { be_pushint(vm, timeValid() ? (bint)time(NULL) : 0); be_return(vm); }      // secondi dal 1970 (0 = ora non valida)
+static int bfBtn(bvm* vm) { be_pushint(vm, (bint)btnScriptPop()); be_return(vm); }   // btn(): click liberi del tasto fisico (1..3), 0 = nessuno; non aspetta
+static int bfTemp(bvm* vm) { be_pushint(vm, (bint)lroundf(sysCpuTemp())); be_return(vm); }
+// logtail(n): ultime n righe del registro (1-20, di fabbrica 10), al massimo 2000 caratteri. Nelle app serve "logread" in use=: il registro puo contenere indirizzi e nomi.
+static int bfLogtail(bvm* vm) {
+  int n = (be_top(vm) >= 1 && be_isint(vm, 1)) ? (int)be_toint(vm, 1) : 10;
+  if (n < 1) n = 1;
+  if (n > 20) n = 20;
+  static char buf[2001];                                   // nessun oggetto con distruttore vivo quando si chiama be_pushstring (puo saltare via su memoria finita)
+  { std::string s = logGet(n); size_t l = s.size() > 2000 ? 2000 : s.size(); memcpy(buf, s.c_str() + (s.size() - l), l); buf[l] = 0; }
+  be_pushstring(vm, buf);
+  be_return(vm);
+}
+// mqtt("nome", "testo"): pubblica <prefisso>/app/<nome> sul broker. true = inviato, false = non inviato (MQTT non collegato o oltre i 20 messaggi al minuto).
+// Solo sotto app/ : un'app non puo scrivere su cmd (i comandi della scheda) ne su status o state.
+static uint32_t g_mqWin = 0; static int g_mqCnt = 0;
+static int bfMqtt(bvm* vm) {
+  if (be_top(vm) < 2 || !be_isstring(vm, 1) || !be_isstring(vm, 2)) be_raise(vm, "type_error", "mqtt(\"nome\", \"testo\"): servono due testi");
+  const char* t = be_tostring(vm, 1); const char* m = be_tostring(vm, 2);
+  size_t tl = strlen(t); bool okn = tl >= 1 && tl <= 40 && t[0] != '/' && t[tl - 1] != '/' && strlen(m) <= 2048;
+  for (size_t i = 0; okn && i < tl; i++) { char c = t[i]; okn = (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' || c == '-' || (c == '/' && t[i + 1] != '/'); }
+  if (!okn) be_raise(vm, "value_error", "mqtt: nome di 1-40 caratteri (a-z, 0-9, _ - /) e testo fino a 2048");
+  uint32_t now = drvMillis();
+  if (g_mqCnt == 0 || now - g_mqWin > 60000UL) { g_mqWin = now; g_mqCnt = 0; }
+  if (++g_mqCnt > 20) { be_pushbool(vm, false); be_return(vm); }     // oltre il tetto: non inviato (falso), l'app continua
+  char sub[48]; snprintf(sub, sizeof sub, "app/%s", t);          // t ha al massimo 40 caratteri (controllato sopra)
+  bool ok = mqttPublishRel(sub, m);
+  be_pushbool(vm, ok);
+  be_return(vm);
+}
+static int bfSleep(bvm* vm) {
+  int ms = (be_top(vm) >= 1 && be_isint(vm, 1)) ? (int)be_toint(vm, 1) : 0;
+  if (ms <= 0) { vTaskDelay(1); g_lastYield = drvMillis(); }
+  while (ms > 0) {
+    int d = ms > 20 ? 20 : ms;
+    if (d < 10) d = 10;
+    vTaskDelay(pdMS_TO_TICKS(d));
+    ms -= d;
+    if (g_stop) be_raise(vm, "stopped_error", "script fermato");
+    if (g_bg) g_lastYield = drvMillis();                      // la pausa conta come respiro: lo script puo girare a lungo
+    else if ((int32_t)(drvMillis() - g_deadline) > 0) be_raise(vm, "timeout_error", "script troppo lungo (limite di tempo)");
+  }
+  be_return_nil(vm);
+}
+
+// ---------- permessi dell'app (use= del manifest) ----------
+bool vosfunzioni::useHas(const char* w) {                      // permesso presente nel use= dell'app?
+  size_t n = strlen(w); const char* p = g_use;
+  while (*p) {
+    const char* e = strchr(p, ','); size_t l = e ? (size_t)(e - p) : strlen(p);
+    if (l == n && strncmp(p, w, n) == 0) return true;
+    if (!e) break;
+    p = e + 1;
+  }
+  return false;
+}
+// chiama on_set(id, valore) o on_tick(). 0 = bene. Altro = errore (nella pila resta l'eccezione: la pulisce il chiamante).
+static int appCall(bvm* vm, const char* fn, const char* id, bool isNum, long iv, const char* sv) {
+  int base = be_top(vm);
+  if (!be_getglobal(vm, fn) || !be_isfunction(vm, -1)) { be_pop(vm, be_top(vm) - base); return 0; }   // la funzione non c'e: niente da fare
+  int argc = 0;
+  if (id) { be_pushstring(vm, id); argc = 2; if (isNum) be_pushint(vm, (bint)iv); else be_pushstring(vm, sv); }
+  int r = be_pcall(vm, argc);
+  if (r == 0) be_pop(vm, be_top(vm) - base);
+  return r;
+}
+static bool appHas(bvm* vm, const char* fn) {
+  int base = be_top(vm); bool ok = be_getglobal(vm, fn) && be_isfunction(vm, -1); be_pop(vm, be_top(vm) - base); return ok;
+}
+// ciclo dell'app: comandi dalla pagina (on_set) subito, on_tick ogni secondo. Si esce con g_stop o con un errore (che finisce nell'uscita).
+static int appLoop(bvm* vm) {
+  bool hasSet = appHas(vm, "on_set"), hasTick = appHas(vm, "on_tick"), hasBle = useHas("ble") && (appHas(vm, "on_write") || appHas(vm, "on_read"));
+  if (!hasSet && !hasTick && !hasBle) return 0;                          // nessuna funzione: l'app finisce con il suo codice
+  uint32_t lastTick = drvMillis();
+  while (!g_stop) {
+    char id[13], sv[RT_TXT + 1]; bool isNum; long iv;
+    g_lastYield = drvMillis();
+    if (rtPop(id, isNum, iv, sv, sizeof(sv))) {
+      if (hasSet) { int r = appCall(vm, "on_set", id, isNum, iv, sv); if (r != 0) return r; }
+      continue;
+    }
+    if (hasBle) { bool did; int r = funzioniBleSmista(vm, did); if (r != 0) return r; if (did) continue; }   // eventi dal telefono
+    if (hasTick && (int32_t)(drvMillis() - lastTick) >= 1000) {
+      lastTick = drvMillis(); g_lastYield = lastTick;
+      int r = appCall(vm, "on_tick", NULL, false, 0, NULL); if (r != 0) return r;
+    }
+    vTaskDelay(pdMS_TO_TICKS(20));
+  }
+  return 0;
+}
+
+// azzera lo stato di una esecuzione (comune a startRun e al passaggio al prossimo script in coda)
+static void prepGlobals(bool bg, uint32_t maxMs, const char* name, bool app = false, const char* use = "", bool admin = false, bool appAdmin = false, bool cmd = false) {
+  portENTER_CRITICAL(&g_mux); g_olen = 0; g_obuf[0] = 0; g_otrunc = false; g_elen = 0; g_ebuf[0] = 0; g_toErr = false; portEXIT_CRITICAL(&g_mux);
+  g_done = false; g_abandoned = false; g_beats = 0; g_stop = false; g_bg = bg; g_app = app; g_admin = admin; g_appAdmin = appAdmin; g_cmd = cmd;
+  strncpy(g_use, use, sizeof(g_use) - 1); g_use[sizeof(g_use) - 1] = 0;
+  strncpy(g_name, name, sizeof(g_name) - 1); g_name[sizeof(g_name) - 1] = 0;
+  g_deadline = drvMillis() + maxMs; g_lastYield = drvMillis(); g_startMs = drvMillis();
+}
+
+// ---------- script salvati in /sbin (.vsb, o il vecchio .vsc): nome, vecchi script .be di /apps, lettura ----------
+// Nome pulito di uno script: senza spazi ai lati, minuscolo, senza l'estensione .vsb, .vsc o .be. out ha almeno NAME_BUF byte.
+// true = il nome e valido (1-24 caratteri: a-z 0-9 - _). E lo stesso di utilNameOk(cleanName(x)) di prima, ma senza la classe di testo di Arduino.
+#define NAME_BUF 40
+static bool cleanNameTo(const char* in, char* out) {
+  std::string_view v = trimView(in ? in : "");
+  if (v.size() >= NAME_BUF) return false;                  // tolta l'estensione (al massimo 4) resterebbero piu di 24 caratteri
+  size_t n = v.size();
+  for (size_t i = 0; i < n; i++) out[i] = (char)tolower((unsigned char)v[i]);
+  out[n] = 0;
+  size_t ext = progExtLen(std::string_view(out, n), PEXT_SCRIPT);   // .vsb, o il vecchio .vsc
+  if (ext) n -= ext;
+  else if (n >= 3 && strcmp(out + n - 3, ".be") == 0) n -= 3;
+  out[n] = 0;
+  return utilNameOk(out, n);
+}
+
+#define FILE_READ_MAX 32768   // come fsReadText: oltre non legge
+static bool loadScript(const char* n, HeapBuf& code, ErrBuf& err) {   // legge /sbin/<n>.vsb (o il vecchio .vsc; n gia ripulito e valido)
+  char path[64];
+  progPercorsoAvvio(path, sizeof path, SCRIPT_DIR, n, PEXT_SCRIPT);   // memoria interna, poi microSD
+  ErrBuf e;
+  if (!fsReadText(path, code, e)) {
+    if (migrateOld() > 0) fsReadText(path, code, e);                    // forse era un vecchio /apps/<nome>.be
+    if (code.length() == 0) { err = tr("Script non trovato: scrivi 'script list'"); err.append(" ("); err.append(e.c_str()); err.append(")"); return false; }
+  }
+  if (code.length() == 0 || code.length() > FUNZIONI_FILE_MAX) { err = tr("Script vuoto o troppo lungo"); return false; }
+  return true;
+}
+
+// ---------- il task che esegue lo script ----------
+static void runTask(void*) {
+ for (;;) {
+  g_peak = g_used = 0;
+  g_lastYield = drvMillis();
+  char top; g_stackTop = &top;
+  uint32_t t0 = drvMillis();
+  cpuBoost("funzioni", 10);                        // l'avvio di uno script chiede velocita per qualche secondo
+  bvm* vm = be_vm_new();
+  g_runOk = false;
+  if (!vm) { portENTER_CRITICAL(&g_mux); strncpy(g_ebuf, "memoria insufficiente per lo script", sizeof(g_ebuf) - 1); g_elen = strlen(g_ebuf); portEXIT_CRITICAL(&g_mux); }
+  else {
+    be_set_obs_hook(vm, obsHook); funzioniBleInit();
+    if (!g_app) {
+      funzioniRegistraLed(vm, true, true, true, true);
+      be_regfunc(vm, "act", bfAct);       if (funcOn("log")) be_regfunc(vm, "log", bfLog);
+      be_regfunc(vm, "millis", bfMillis); if (funcOn("time")) be_regfunc(vm, "time", bfTime);   be_regfunc(vm, "temp", bfTemp);
+      be_regfunc(vm, "sleep", bfSleep);
+      be_regfunc(vm, "btn", bfBtn);   btnScriptAttach(true);
+      be_regfunc(vm, "logtail", bfLogtail); be_regfunc(vm, "mqtt", bfMqtt);
+      if (funcOn("ble")) funzioniRegistraBle(vm, false, g_admin);
+      if (funcOn("files")) funzioniRegistraFile(vm);
+      funzioniRegistraSd(vm, false, g_admin);
+      funzioniRegistraHw(vm, false, g_admin);
+      funzioniRegistraPwm(vm, false, g_admin);
+      funzioniRegistraContatore(vm, false);
+      funzioniRegistraHttps(vm);
+    } else {                                                   // app: solo cio che il manifest (use=) permette
+      be_regfunc(vm, "millis", bfMillis); be_regfunc(vm, "sleep", bfSleep);
+      if (g_cmd) funzioniRegistraCmd(vm);
+      else { funzioniRegistraDev(vm); funzioniRegistraPwm(vm, true, g_appAdmin); funzioniRegistraContatore(vm, true); }   // un comando ha args(); dev_get/dev_set sono della pagina dell'app
+      funzioniRegistraLed(vm, useHas("led_rgb1"), useHas("led1"), useHas("led"), useHas("led2"));
+      if (useHas("act")) be_regfunc(vm, "act", bfAct);
+      if (useHas("log") && funcOn("log")) be_regfunc(vm, "log", bfLog);
+      if (useHas("time") && funcOn("time")) be_regfunc(vm, "time", bfTime);
+      if (useHas("temp")) be_regfunc(vm, "temp", bfTemp);
+      if (useHas("logread")) be_regfunc(vm, "logtail", bfLogtail);
+      if (useHas("mqtt")) be_regfunc(vm, "mqtt", bfMqtt);
+      if (useHas("https")) funzioniRegistraHttps(vm);
+      if (useHas("ble") && funcOn("ble")) funzioniRegistraBle(vm, true, false);
+      if (useHas("files") && funcOn("files")) {
+        funzioniRegistraFile(vm);
+        if (!g_cmd && appSavesData(g_name) == 1) funzioniRegistraDati(vm, g_name);   // data=1 nel manifest: la cartella dei dati
+      }
+      if (useHas("sd")) funzioniRegistraSd(vm, true, g_appAdmin);
+      funzioniRegistraHw(vm, true, g_appAdmin);
+      if (useHas("btn")) { be_regfunc(vm, "btn", bfBtn); btnScriptAttach(true); }
+    }
+    int r = be_loadstring(vm, g_code);
+    free(g_code); g_code = NULL;
+    if (r == 0) r = be_pcall(vm, 0);
+    if (r == 0 && g_app && !g_cmd) r = appLoop(vm);
+    if (r != 0 && g_app && !g_cmd && g_stop) r = 0;                      // l'app e stata fermata a mano: non e un errore
+    if (r == BE_MALLOC_FAIL) { g_toErr = true; be_writestring("memory_error: memoria esaurita (tetto di memoria dello script)\n"); g_toErr = false; }   // senza memoria non si puo nemmeno stampare l'errore delle funzioni VesevOS
+    else if (r != 0) { g_toErr = true; be_dumpexcept(vm); g_toErr = false; }
+    g_runOk = (r == 0);
+    be_vm_delete(vm);
+  }
+  btnScriptAttach(false);                                  // fine programma: i click liberi tornano a nessuno
+  if (g_app && !g_cmd) funzioniBleTerminato(g_name);                        // il Bluetooth dell'app si spegne (lo fa il ciclo principale)
+  ledScript(-1);                                           // fine script: il LED torna al modo normale
+  g_lastMs = drvMillis() - t0; g_lastPeak = (uint32_t)g_peak; g_lastLeak = (uint32_t)funzioniLiberaTutto();   // dopo be_vm_delete di solito non resta nulla
+  g_lastOk = g_runOk; g_runs++;
+  if (g_bg) {
+    char first[81]; size_t k = 0;                          // prima riga dell'errore, per il registro
+    while (k < sizeof(first) - 1 && g_ebuf[k] && g_ebuf[k] != '\n') { first[k] = g_ebuf[k]; k++; }
+    first[k] = 0;
+    if (g_runOk) vlog("SCRIPT: %s %s finita (%lu ms)", g_app ? "app" : "script", g_name, (unsigned long)g_lastMs);
+    else vlog("SCRIPT: %s %s fermata: %s", g_app ? "app" : "script", g_name, first);
+  }
+  // script in coda (azione "script <nome>" delle Automazioni): se non e stato fermato a mano si passa al prossimo con lo stesso task
+  if (g_bg && !g_stop) {
+    char nm[25], who[16]; bool next = false;
+    while (qPop(nm, who)) {
+      HeapBuf code(FILE_READ_MAX); ErrBuf e;
+      if (!loadScript(nm, code, e)) { vlog("SCRIPT: script %s dalla coda non avviato: %s", nm, e.c_str()); continue; }
+      g_code = (char*)malloc(code.length() + 1);
+      if (!g_code) { vlog("SCRIPT: script %s dalla coda non avviato: memoria", nm); continue; }
+      memcpy(g_code, code.c_str(), code.length() + 1);
+      prepGlobals(true, 0, nm);
+      vlog("SCRIPT: script %s avviato da %s (dalla coda)", nm, who);
+      next = true; break;
+    }
+    if (next) continue;
+  }
+  if (g_abandoned || g_bg) { portENTER_CRITICAL(&g_mux); g_busy = false; portEXIT_CRITICAL(&g_mux); }
+  g_done = true;
+  vTaskDelete(NULL);
+  return;
+ }
+}
+
+// avvia il task (comune a "vsh <codice>" e agli script di /sbin)
+static bool startRun(const char* code, size_t len, bool bg, uint32_t maxMs, const char* name, ErrBuf& err, bool app = false, const char* use = "", bool admin = false, bool appAdmin = false, const CmdCall* call = nullptr) {
+  if (!cfg.funzioniAttive) { err = tr("Il sottosistema vdb e spento: accendilo dai Task"); return false; }
+  if (heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL) < 24000) { err = tr("RAM interna troppo bassa per avviare uno script"); return false; }
+  bool was;
+  portENTER_CRITICAL(&g_mux); was = g_busy; g_busy = true; portEXIT_CRITICAL(&g_mux);
+  if (was) { err = tr("Un altro script e gia in esecuzione"); return false; }
+  g_code = (char*)malloc(len + 1);
+  if (!g_code) { g_busy = false; err = tr("RAM interna troppo bassa per avviare uno script"); return false; }
+  memcpy(g_code, code, len); g_code[len] = 0;
+  if (call) cmdCallSet(*call);                              // gli argomenti del comando: si copiano solo ora che il "busy" e nostro
+  prepGlobals(bg, maxMs, name, app, use, admin, appAdmin, call != nullptr);
+  if (!drvTaskCreate(runTask, "funzioni", FUNZIONI_STACK_DIM, NULL, 1, NULL, DRV_CORE_ANY)) {   // core: automatico (prima: core 1 fisso)
+    free(g_code); g_code = NULL; g_busy = false; err = tr("Non riesco ad avviare lo script"); return false;
+  }
+  return true;
+}
+
+// Aspetta la fine dell'esecuzione partita con startRun (non in sottofondo) e ne prende uscita ed errore.
+static bool waitRun(HeapBuf& out, ErrBuf& err, uint32_t maxMs) {
+  uint32_t t0 = drvMillis();
+  while (!g_done && drvMillis() - t0 < maxMs + 2500UL) vTaskDelay(pdMS_TO_TICKS(10));
+  if (!g_done) {                                           // non risponde: il task liberera da solo il "busy"
+    portENTER_CRITICAL(&g_mux); g_abandoned = true; portEXIT_CRITICAL(&g_mux);
+    if (g_done) g_busy = false;                            // finito proprio adesso
+    err = tr("Lo script non risponde");
+    return false;
+  }
+  out.add(g_obuf, g_olen); if (g_otrunc) out.add("\n...");
+  err = g_ebuf;
+  bool ok = g_runOk;
+  g_busy = false;
+  return ok;
+}
+
+bool funzioniValuta(const char* code, HeapBuf& out, ErrBuf& err, uint32_t maxMs) {
+  out.clear(); err = "";
+  size_t len = code ? strlen(code) : 0;
+  if (len == 0 || len > FUNZIONI_CODICE_MAX) { err = tr("Script vuoto o troppo lungo"); return false; }
+  if (!startRun(code, len, false, maxMs, "", err, false, "", true)) return false;   // "vsh <codice>" lo lancia solo l'Admin
+  return waitRun(out, err, maxMs);
+}
+
+// Comando di un driver (vos_funzioni_cmd.cpp): il codice del driver con i permessi del suo use=, sincrono e con tempo limitato.
+// admin = chi lo lancia e Admin E il sottocomando e dichiarato "admin": solo cosi le funzioni di scrittura della microSD sono presenti.
+bool funzioniEseguiComando(const char* code, const char* use, bool admin, const CmdCall& call, HeapBuf& out, ErrBuf& err, uint32_t maxMs) {
+  out.clear(); err = "";
+  size_t len = code ? strlen(code) : 0;
+  if (len == 0 || len > FUNZIONI_FILE_MAX) { err = tr("Il comando del driver e vuoto o troppo lungo"); return false; }
+  if (!startRun(code, len, false, maxMs, "", err, true, use, false, admin, &call)) return false;
+  return waitRun(out, err, maxMs);
+}
+
+bool funzioniAttive() { return cfg.funzioniAttive; }
+
+bool funzioniInfoEsecuzione(InfoEsecuzioneFunzioni& r) {
+  memset(&r, 0, sizeof r);
+  if (!g_busy) return false;
+  snprintf(r.name, sizeof r.name, "%s", g_name);
+  r.app = g_app && !g_cmd;
+  r.cmd = g_cmd || (!g_bg && !g_app);
+  if (g_app) snprintf(r.use, sizeof r.use, "%s", g_use);
+  r.seconds = (drvMillis() - g_startMs) / 1000;
+  r.memory = (uint32_t)g_used;
+  return true;
+}
+
+bool funzioniNomeValido(const char* nameIn) { char n[NAME_BUF]; return cleanNameTo(nameIn, n); }
+
+bool funzioniAvvia(const char* nameIn, ErrBuf& err) {
+  err = "";
+  char n[NAME_BUF];
+  if (!cleanNameTo(nameIn, n)) { err = tr("Nome script non valido (1-24 caratteri: lettere minuscole, numeri, trattino, sottotrattino)"); return false; }
+  HeapBuf code(FILE_READ_MAX);
+  if (!loadScript(n, code, err)) return false;
+  if (!startRun(code.c_str(), code.length(), true, 0, n, err, false, "", true)) return false;   // avvio diretto: solo Admin (shell, pagina)
+  vlog("SCRIPT: script %s avviato (%u caratteri)", n, (unsigned)code.length());
+  return true;
+}
+
+// Avvio da una regola (o da MQTT / rete schede): parte subito se il motore delle funzioni e libero, altrimenti va in coda (massimo 4, senza doppioni).
+bool funzioniAccoda(const char* nameIn, ErrBuf& err, const char* who) {
+  err = "";
+  char n[NAME_BUF];
+  if (!cleanNameTo(nameIn, n)) { err = tr("Nome script non valido (1-24 caratteri: lettere minuscole, numeri, trattino, sottotrattino)"); return false; }
+  bool busy; portENTER_CRITICAL(&g_mux); busy = g_busy; portEXIT_CRITICAL(&g_mux);
+  if (!busy) {
+    HeapBuf code(FILE_READ_MAX);
+    if (!loadScript(n, code, err)) return false;
+    if (startRun(code.c_str(), code.length(), true, 0, n, err)) { vlog("SCRIPT: script %s avviato da %s (%u caratteri)", n, who, (unsigned)code.length()); return true; }
+    if (!g_busy) return false;                                        // errore vero (RAM, task): non si accoda
+    err = "";                                                         // nel frattempo si e occupato: in coda
+  }
+  bool full = false, dup = false;
+  portENTER_CRITICAL(&g_mux);
+  for (int i = 0; i < g_qn; i++) if (strcmp(n, g_q[i]) == 0) dup = true;
+  if (!dup) {
+    if (g_qn >= FUNZIONI_CODA_MAX) full = true;
+    else { strncpy(g_q[g_qn], n, 24); g_q[g_qn][24] = 0; strncpy(g_qwho[g_qn], who ? who : "?", 15); g_qwho[g_qn][15] = 0; g_qn++; }
+  }
+  portEXIT_CRITICAL(&g_mux);
+  if (dup) { err = tr("Script gia in coda"); return false; }
+  if (full) { err = tr("Coda piena (massimo 4 script in attesa)"); return false; }
+  vlog("SCRIPT: script %s in coda (richiesto da %s)", n, who);
+  return true;
+}
+
+// Avvia il codice di un'app (gia letta e controllata da vos_app.cpp) con i permessi del suo manifest. Torna subito.
+bool funzioniAvviaApp(const char* name, const char* code, const char* use, ErrBuf& err, bool appAdmin) {
+  err = "";
+  size_t len = code ? strlen(code) : 0;
+  if (len == 0 || len > FUNZIONI_FILE_MAX) { err = tr("Script vuoto o troppo lungo"); return false; }
+  if (!startRun(code, len, true, 0, name, err, true, use, false, appAdmin)) return false;
+  vlog("SCRIPT: app %s avviata (%u caratteri)", name, (unsigned)len);
+  return true;
+}
+#endif

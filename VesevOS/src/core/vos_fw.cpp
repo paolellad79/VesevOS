@@ -10,6 +10,7 @@
 #include "vos_hooks.h"
 #include "vos_eventi.h"
 #include "../drivers/vos_drv_wifi.h"
+#include "../drivers/vos_drv_ip6.h"
 #include "../drivers/vos_drv_time.h"
 
 #define TRY_MS (120UL * 1000UL)
@@ -30,6 +31,7 @@ static bool inList(uint32_t ip) {
 bool fwAllow(uint32_t ip, bool ntp) {
   if (cfg.fwMode == 0) return true;
   if (ntp && !cfg.fwNtp) return true;
+  if (drvIp6Finto(ip)) return false;                         // il filtro conosce solo IPv4: con il filtro acceso un client IPv6 non passa
   if ((ip & 0xFFFFFF00UL) == 0xC0A80400UL) return true;      // hotspot 192.168.4.x: sempre (protetto da WPA2 con password unica)
   if (ip == 0x7F000001UL) return true;
   switch (cfg.fwMode) {

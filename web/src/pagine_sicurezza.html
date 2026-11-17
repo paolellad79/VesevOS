@@ -79,7 +79,7 @@
 <section id="t_fw" class="hide">
  <div class="sub" id="sk_fw"><button>Filtro IP</button><button>Ultimi rifiutati</button><button class="adm">Blocco degli accessi</button></div>
  <div class="card"><h3>Filtro IP</h3>
-  <p class="fhint">Decide chi puo parlare con la scheda. L'hotspot della scheda e la seriale USB sono sempre ammessi. Chi e fuori lista non riceve risposta. Una regola nuova vale 2 minuti: se non la confermi torna quella di prima.</p>
+  <p class="fhint">Decide chi puo parlare con la scheda. L'hotspot della scheda e la seriale USB sono sempre ammessi. Chi e fuori lista non riceve risposta. Una regola nuova vale 2 minuti: se non la confermi torna quella di prima. Il filtro conosce solo gli indirizzi IPv4: con il filtro acceso i dispositivi che arrivano in IPv6 non passano.</p>
   <div id="fwyou" class="law"></div>
   <div class="agrid"><div><label for="fw_m">Modo</label><select id="fw_m">
      <option value="0">Spento</option><option value="1">Solo la mia rete</option>
@@ -144,6 +144,8 @@
     onclick="agTab(2)">Recovery</button>
    <button role="tab" id="ag_t3" aria-selected="false" aria-controls="ag_p3" tabindex="-1"
     onclick="agTab(3)">Pacchetti</button>
+   <button role="tab" id="ag_t4" aria-selected="false" aria-controls="ag_p4" tabindex="-1"
+    onclick="agTab(4)">Risorse</button>
   </div>
   <div role="tabpanel" id="ag_p0" aria-labelledby="ag_t0" tabindex="0">
    <div id="ag_stato"></div>
@@ -170,18 +172,29 @@
    <div id="ag_fw"></div>
    <button class="btn hide" id="ag_ins" onclick="agInstalla()">Installa la versione trovata</button>
    <h4>Altre strade</h4>
-   <button class="btn gray" onclick="agOrdine(updFile)">Carica un file dal computer</button>
+   <span id="cf_fw"></span>
    <button class="btn gray" onclick="agOrdine(updNet)">Indirizzo e impronta a mano</button>
    <button class="btn gray" onclick="uFw()">Pagina del recovery con utente e password</button>
   </div>
   <div role="tabpanel" id="ag_p2" aria-labelledby="ag_t2" tabindex="0" class="hide">
    <p class="fhint">Il recovery serve a rimettere a posto la scheda. Non si aggiorna mai da solo.</p>
    <div id="ag_rec"></div>
-   <button class="btn" onclick="uRecUp()">Carica un nuovo recovery</button>
+   <span id="cf_rec"></span>
   </div>
   <div role="tabpanel" id="ag_p3" aria-labelledby="ag_t3" tabindex="0" class="hide">
    <p class="fhint">App e driver installati, con la versione pubblicata nello store. Le versioni nuove si segnalano e basta: li aggiorni tu.</p>
    <div id="ag_pac"></div>
+   <h4>Carica da file</h4>
+   <div id="cf_pac"></div>
+  </div>
+  <div role="tabpanel" id="ag_p4" aria-labelledby="ag_t4" tabindex="0" class="hide">
+   <p class="fhint">Le risorse della scheda (dati comuni, licenze, manuale, tabella radio, pagina) si controllano a ogni avvio con l'elenco SHA256SUMS.</p>
+   <div id="ag_ris"></div>
+   <button class="btn" id="ag_rb" onclick="arScarica()">Scarica e carica di nuovo</button>
+   <div id="ag_rm" class="msg" role="status"></div>
+   <h4>Carica da file</h4>
+   <div id="cf_ris"></div>
+   <p class="law">Il pulsante fa scaricare i file dal tuo browser da GitHub, quindi GitHub vede l'indirizzo IP pubblico della tua rete. La scheda non si collega a internet e accetta un file solo se il suo SHA-256 coincide con l'elenco. Non parte mai da solo.</p>
   </div>
  </div>
 </section>

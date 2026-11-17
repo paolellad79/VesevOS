@@ -3,8 +3,8 @@
 // VesevOS - vos_ble.h
 // Bluetooth (BLE): nel firmware resta SPENTO e INUTILIZZABILE da solo (decisione dell'utente, 26/10/2026).
 // Non ha servizi, canali di testo, annunci, comandi o interruttori propri: ne' nella shell, ne' nella pagina, ne' nella configurazione.
-// Lo accende SOLO un'app Berry con il permesso "ble" nel manifest (use=ble), con le funzioni ble_on, ble_name, ble_adv, ble_service...
-// (vos_berry_ble.cpp). Qui sta la POLITICA e il ciclo di vita; la radio sta in drivers/vos_drv_ble.
+// Lo accende SOLO un'app con il permesso "ble" nel manifest (use=ble), con le funzioni ble_on, ble_name, ble_adv, ble_service...
+// (vos_funzioni_ble.cpp). Qui sta la POLITICA e il ciclo di vita; la radio sta in drivers/vos_drv_ble.
 //
 // REGOLE
 //   - Un solo programma alla volta possiede il Bluetooth (il suo nome e il "proprietario"); un secondo riceve un errore chiaro.
@@ -20,7 +20,7 @@
 #include "vos_ble_types.h"
 
 #if VOS_WITH_BLE
-// ---- per i programmi Berry con il permesso ble (owner = nome del programma in corso) ----
+// ---- per i programmi con il permesso ble (owner = nome del programma in corso) ----
 bool bleAppOn(const char* owner, uint32_t minutes, ErrBuf& err);           // minuti 0 = finche il programma gira
 bool bleAppOff(const char* owner, ErrBuf& err);                            // rilascia e spegne (solo il proprietario)
 bool bleAppName(const char* owner, const char* name, ErrBuf& err);         // 1-20 caratteri (lettere, cifre, spazio . _ -); prima di ble_on

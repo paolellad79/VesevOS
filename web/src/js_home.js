@@ -1,7 +1,7 @@
 /* ===== Home: aggiornamento dei dati, avvisi, schede e widget ===== */
 var PBUSY=0;
 document.addEventListener("visibilitychange",function(){
-  if(!document.hidden&&typeof loggedIn=="function"&&loggedIn())poll()
+  if(!document.hidden&&typeof loggedIn=="function"&&loggedIn()&&PAGINA)poll()
 });
 var RF=3;
 try{
@@ -102,6 +102,8 @@ function alertsCalc(s,hp,pp,fp){
       if(!a.ack)AL.push([a.lv==2?"k":"w",a.text,1])
     });
   agNota(s.agg);
+  arNota(s.ris);
+  langNota(s.lerr);
   evNota(s.evb);
   if(s.hot)AL.push(["k",t("Temperatura CPU troppo alta")]);
   if(hp>=90)AL.push(["k",t("RAM quasi esaurita")]);
@@ -204,8 +206,14 @@ function homeDraw(){
     ws=esc(n.mode)+(n.st==1?" · "+esc(tf("{0} client",n.clients||0)):"")+(n.ip?"<br>"+esc(n.ip):"");
   var rv=s.rev,revs=Math.floor(rv/100)+"."+rv%100,mhz=s.cpuMhz;
   var th=(s.tempHist||[]).map(function(v){return s.tempUnit?v*9/5+32:v});
-  var cx=hlines([[s.cpu0Hist,"#3fa7ff"],[s.cpu1Hist,"#b07cff"]],0,100,34)+
-    hleg([["C0","#3fa7ff",s.cpu0+"%"],["C1","#b07cff",s.cpu1+"%"]])+
+  var cc=s.cpuCore||[],ch=s.cpuCoreHist||[],cl=["#3fa7ff","#b07cff","#ff6b9d","#4cd08a"],
+    cser=[],cleg=[];
+  for(var i=0;i<cc.length;i++){
+    cser.push([ch[i]||[],cl[i%cl.length]]);
+    cleg.push([cc.length>1?"C"+i:"CPU",cl[i%cl.length],cc[i]+"%"]);
+  }
+  var cx=hlines(cser,0,100,34)+
+    hleg(cleg)+
     hlines([[th,"#ff9f43"]],th.length?Math.min.apply(null,th)-2:0,
       th.length?Math.max.apply(null,th)+2:1,26)+
     hleg([[t("Temp."),"#ff9f43",tmp(s.temp,s.tempUnit)]]);
@@ -217,8 +225,8 @@ function homeDraw(){
     hring("CPU",s.cpu+"%",s.cpu,hcol(s.cpu,60,85),"i-chipn","cpu",mhz+" MHz",cx)+
     hring("RAM",hp+"%",hp,hcol(hp,80,92),"i-mem","mem",memTx(s.heapTotal-s.heapFree,s.heapTotal),
       hlines([[s.ramHist,"#3fa7ff"]],0,100,34))+
-    hring("PSRAM",pp+"%",pp,hcol(pp,80,92),"i-mem","mem",
-      memTx(s.psramTotal-s.psramFree,s.psramTotal),hlines([[s.psHist,"#2ecc71"]],0,100,34))+
+    (s.psramTotal>0?hring("PSRAM",pp+"%",pp,hcol(pp,80,92),"i-mem","mem",
+      memTx(s.psramTotal-s.psramFree,s.psramTotal),hlines([[s.psHist,"#2ecc71"]],0,100,34)):"")+
     hring(t("File"),fp+"%",fp,hcol(fp,75,90),"i-disk","file",memTx(s.flashUsed,s.flashTotal),
       hlines([[s.flHist,"#ffb020"]],0,100,34))+hring(t("Wi-Fi"),wt,wp,wc,"i-wifi","wifi",ws,wx)+
     '</section>';
@@ -228,14 +236,19 @@ function homeDraw(){
     '</div><div style="height:8px"></div>'+
     row(t("Chip"),esc(s.chip)+" rev "+revs)+
     row(t("Processore"),tf("{0} core a {1} MHz",s.cores,mhz))+
-    row(t("Memoria"),tf("{0} MB flash · {1} MB PSRAM",Math.round(s.flashChip/1048576),
-      Math.round(s.psramTotal/1048576)))+
+    row(t("Memoria"),s.psramTotal>0?tf("{0} MB flash · {1} MB PSRAM",Math.round(s.flashChip/1048576),
+      Math.round(s.psramTotal/1048576)):tf("{0} MB flash",Math.round(s.flashChip/1048576)))+
     row(t("Acceso da"),esc(s.uptime))+row(t("Ore di vita"),fmtDur(s.lifeSec))+
     row(t("Avvii totali"),s.boots)+row(t("Ultimo reset"),esc(s.reset))+
     row(t("Versione"),esc(s.name+" "+s.version))+
     '<button class="btn" style="margin-top:10px" onclick="identify()">'+
     esc(t("Trova questa scheda"))+'</button><div id="idm" class="msg"></div></section>';
-  $("home").innerHTML=h
+  $("home").innerHTML=h;
+  var dsm=String(s.chip||"").toLowerCase().match(/esp32-[a-z0-9]+/),dsl=$("dsl");
+  if(dsm&&dsl){
+    dsl.href="https://documentation.espressif.com/"+dsm[0]+"_datasheet_en.pdf";
+    dsl.textContent=t("Datasheet")+" "+s.chip+" (Espressif)"
+  }
 }
 var HW=null,HWT=0,HWU=null;
 function hdTick(){

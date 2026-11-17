@@ -1,7 +1,7 @@
 #!/bin/bash
 # Compila un modulo dei driver ELF (.c) in .elf per ESP32-S3 e lo impacchetta nel .vde con il suo testo.
 # Uso: PATH=/usr/bin:$PATH . ~/esp/esp-idf/export.sh ; docs/esempi/driver-elf/build.sh <progetto-mod> <nome>
-#   <progetto-mod> = cartella con CMakeLists.txt, main/ e sdkconfig.defaults del progetto dei moduli (esempio: prova-elf/moduli3/mod, che sta fuori dal repo
+#   <progetto-mod> = cartella con CMakeLists.txt, main/ e sdkconfig.defaults del progetto dei moduli (esempio: build/tests/prova-elf/moduli3/mod, che sta fuori dal repo
 #   e usa il componente elf_loader di Espressif); <nome> = bmp280 oppure sd-spi (cerca <nome>.c e <nome>.vde.txt in questa cartella).
 # Scrive <nome>.elf e <nome>.vde accanto ai sorgenti. Il modulo non usa la libc: solo memcpy, memset, strlen e le funzioni vos_* (vedi vde_util.h).
 set -e

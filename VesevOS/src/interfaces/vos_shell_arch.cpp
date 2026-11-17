@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_shell_arch.cpp
-// Pezzi in comune dei comandi gzip, gunzip, zcat, unzip e tar (vedi vos_shell_arch.h per limiti e protezioni).
+// Pezzi in comune dei comandi unzip, zip e tar (vedi vos_shell_arch.h per limiti e protezioni).
 #include "../core/vos_paths.h"
 #include "vos_shell_arch.h"
 #include "../drivers/vos_drv_console.h"
@@ -59,9 +59,7 @@ void ArchCtx::tooBig(const char* name, size_t max) {
 
 void ArchCtx::failDef(const char* name, DrvDefErr e, const char* sinkWhy) {
   switch (e) {
-    case DDF_NO_PSRAM: fail(name, tr("Serve la PSRAM: questa scheda non ce l'ha")); break;
-    case DDF_NO_MEM:   fail(name, tr("Memoria insufficiente")); break;
-    case DDF_BAD_DATA: fail(name, tr("Dati compressi non validi")); break;
+    case DDF_BAD_DATA: fail(name, tr("Archivio troncato o danneggiato")); break;
     case DDF_SINK:     fail(name, sinkWhy ? sinkWhy : tr("Spazio esaurito")); break;
     case DDF_CANCEL:   fail(name, tr("Interrotto (Ctrl+C)")); stopped_ = true; break;
     case DDF_TIMEOUT:  fail(name, trf("Tempo massimo superato (%u s)", (unsigned)(lim_.maxMs / 1000))); webHint(); stopped_ = true; break;
@@ -86,7 +84,7 @@ const char* shx::archRelName(const char* base, const char* abs, bool& stripped) 
   return abs + 1;
 }
 
-bool shx::archIsSecret(const char* path) { return pathIsSecret(path); }   // una sola regola per archivi, elenchi e Berry (core/vos_paths)
+bool shx::archIsSecret(const char* path) { return pathIsSecret(path); }   // una sola regola per archivi, elenchi e funzioni VesevOS (core/vos_paths)
 
 bool shx::archIsHidden(const char* name) {
   size_t n = strlen(name);
@@ -194,8 +192,7 @@ bool ArchFileOut::finish(ErrBuf& err) {
 
 // Il collegamento con la shell: i comandi di questo gruppo. Il ruolo (solo Admin) lo ha gia deciso la tabella dei ruoli.
 bool shCmdArchive(const Word& c, const char* line, OutSink& o, const ShellSess& ss, uint32_t sess) {
-  if (c == "gzip" || c == "gunzip" || c == "zcat") shGzip(c.c_str(), line, o, ss, sess);
-  else if (c == "unzip") shUnzip(line, o, ss, sess);
+  if (c == "unzip") shUnzip(line, o, ss, sess);
   else if (c == "zip") shZip(line, o, ss, sess);
   else if (c == "tar") shTar(line, o, ss, sess);
   else return false;

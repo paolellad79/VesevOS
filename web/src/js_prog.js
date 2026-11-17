@@ -69,6 +69,7 @@ function fnRole(r){return r>=2?t("Admin"):r==1?t("Operatore"):t("Tutti")}
 function fnLoad(){
   api("/api/func").then(function(r){return r.json()}).then(function(j){
     FN.list=j.list||[];
+    FN.min=!!j.ramMin;
     fnDraw()
   }).catch(function(){})
 }
@@ -85,6 +86,7 @@ function fnDraw(){
       (f.on?"true":"false")+'" aria-label="'+esc(tf("Funzionalita {0}",f.id))+'"'+dis+
       ' onclick="fnSet(\''+f.id+'\','+(f.on?0:1)+')"></button></div>'
   });
+  if(FN.min)h='<div class="msg ko" style="display:block">'+esc(t("Scheda con poca memoria: funzioni ridotte (una sola connessione HTTPS, niente riavvio per la RAM). Bluetooth, MQTT e mesh restano spenti finche non li accendi tu."))+'</div>'+h;
   $("funclist").innerHTML=h
 }
 

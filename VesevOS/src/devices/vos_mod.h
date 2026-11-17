@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_mod.h
 // Driver / schede modulo (.vdb): UN file di testo in /devs che descrive un modulo (rele a 2 canali, pulsante, sensore, microSD...): classe,
-// segnali, icona, schema SVG e, facoltativi, pagina, codice Berry e dati iniziali (il driver completo: vedi interfaces/vos_mod_app.h).
+// segnali, icona, schema SVG e, facoltativi, pagina, codice delle funzioni e dati iniziali (il driver completo: vedi interfaces/vos_mod_app.h).
 // Il firmware controlla il file, propone i pin liberi (l'utente puo cambiarli) e crea le periferiche (vos_io, che controlla i pin).
 // Formato: vedi il manuale (schede modulo .vdb)
 //   [module]   name= title= class= active= pull= power= level= part= author= version= license= warn= khz= use= who=
@@ -16,7 +16,7 @@
 //   Classe i2c: driver=bmp280 addr=0x76|0x77 [freq=100000|400000]; segnali esattamente SDA e poi SCL
 //   Classe sd: segnali esattamente CS, MOSI, SCK, MISO (in questo ordine); khz= facoltativo
 //   [widget]   (facoltativa) title= alt= who=  il riquadro del driver nella Home. I valori vivi li stampa on_widget() nel codice [cmd] (vedi vos_mod_cmd.h)
-//   [page] [code] [data]  (facoltative, insieme) come in una app .vab: controlli, codice Berry (max 8 KB), valori iniziali. Le controlla vos_mod_app
+//   [page] [code] [data]  (facoltative, insieme) come in una app .vab: controlli, codice delle funzioni (max 8 KB), valori iniziali. Le controlla vos_mod_app
 #pragma once
 #include "../core/vos_errbuf.h"
 #include "../core/vos_heapbuf.h"
@@ -24,7 +24,7 @@
 #include "vos_mod_line.h"
 
 #define MOD_DIR        "/devs"
-#define MOD_EXT        ".vdb"      // driver in Berry (dal 1.8.11)
+#define MOD_EXT        ".vdb"      // driver nelle funzioni VesevOS (dal 1.8.11)
 #define MOD_EXT_OLD    ".vdp"      // vecchia estensione: i file gia installati si leggono ancora
 #define MOD_FILE_MAX   16384    // come APP_FILE_MAX: il driver puo portare pagina e codice
 #define MOD_CODE_MAX   8192

@@ -55,4 +55,4 @@ struct FsTmpStat {
   char     firstOrphan[FS_PATH_MAX + 1] = "";   // il primo orfano, per il log
 };
 void fsTmpClean(const char* dir, FsTmpStat& st);   // una cartella. Lenta con tante voci: da un task di fondo, mai dal web server
-void fsTmpCleanKnown(FsTmpStat& st);               // "/", gli script, le app (cartelle in uso, vedi vos_layout.h), "/lang", "/var", "/etc", "/var/backup"
+void fsTmpCleanKnown(FsTmpStat& st);               // "/", gli script, le app (cartelle in uso, vedi vos_layout.h), "/lang", "/var", "/etc", "/var/backup", "/usr/share/vesevos"

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_web_prog.cpp
-// Percorsi del server web per i PROGRAMMI in corso (script, app Berry, app ELF) e per cio che li governa: i sottosistemi vdb e vde (interruttori),
+// Percorsi del server web per i PROGRAMMI in corso (script, app, app ELF) e per cio che li governa: i sottosistemi vdb e vde (interruttori),
 // le Funzionalita (Sistema) e l'avvio automatico (pannello Avvio). Tutto passa dalle funzioni di packages/vos_prog.h e vos_func.h, le stesse
 // della shell. Operatore: legge. Admin: ferma, avvia, riavvia, accende e spegne, concede e toglie.
 #include "vos_web_int.h"

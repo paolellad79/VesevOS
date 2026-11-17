@@ -10,7 +10,14 @@
 #include <stdint.h>
 #include "vos_drv_file.h"
 
+// Gancio chiamato DOPO ogni scrittura riuscita sul file system interno (non sulla microSD): azione 'w' apre in scrittura, 'a' apre per aggiungere,
+// 'r' file tolto, 'n' rinominato (percorso = origine, percorso2 = destinazione), 'm' cartella creata, 'd' cartella tolta. Un posto solo per
+// accorgersi di chi scrive dove (lo usa core/vos_risorse_tocco.cpp). Il gancio deve essere breve e non puo ricorrere a scritture in questa cartella.
+typedef void (*DrvFsScritturaFn)(char azione, const char* percorso, const char* percorso2);
+void   drvFsGancioScrittura(DrvFsScritturaFn fn);
+
 bool   drvFsBegin(bool formatOnFail);
+bool   drvFsFormattatoOra();   // true = a questo avvio il montaggio e fallito e la partizione e stata formattata (dopo un azzeramento)
 VosFile drvFsOpen(const char* path, const char* mode = "r");        // "r" lettura, "w" scrittura (crea/azzera), "a" aggiunge
 bool   drvFsExists(const char* path);
 bool   drvFsRemove(const char* path);

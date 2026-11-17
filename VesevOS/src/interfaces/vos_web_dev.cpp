@@ -3,12 +3,14 @@
 // VesevOS - vos_web_dev.cpp
 // Percorsi del server web: periferiche, pin, LED, automazioni. Aiuti e tipi condivisi: vos_web_int.h.
 #include "vos_web_int.h"
+#include "../core/vos_ramwd.h"
 #include "../packages/vos_prog.h"
 #include "vos_shell_sess.h"
 #include "vos_shell_prompt.h"
 #include "vos_shell_complete.h"
 #include "../core/vos_eventbus.h"
 #include "../devices/vos_io.h"
+#include "../devices/vos_led_nomi.h"
 #include "../devices/vos_mod.h"
 #include "vos_mod_app.h"
 #include "../packages/vos_btn.h"
@@ -61,13 +63,27 @@ static esp_err_t shellTab(Res* s, int role, uint32_t sess, const char* line) {
   return sendBuf(s, !j.oom() && !j.over(), j);
 }
 
+// Il motivo di un alias rifiutato, nella lingua della scheda
+static const char* aliasErrTesto(AliasErr e) {
+  switch (e) {
+    case ALIAS_LUNGO:     return tr("Testo troppo lungo");
+    case ALIAS_SPAZI:     return tr("Niente spazi all'inizio o alla fine");
+    case ALIAS_CARATTERI: return tr("Testo con caratteri non ammessi");
+    case ALIAS_PIENO:     return tr("Troppi alias: toglierne qualcuno");
+    default:              return tr("Periferica sconosciuta");
+  }
+}
+
 void routesDev(PsychicHttpServer* S, bool sec) {
   // ---- periferiche (virtuali e hardware): stesso modo di rispondere per tutte ----
   add(S, sec, "/api/dev", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
     HeapBuf j(DEV_JSON_MAX);
     if (has(r, "id")) {
       bool found = devStatusJson(Pc(r, "id"), c.role, j);
-      if (!found && !j.oom() && !j.over()) return notFound(s);        // sconosciuta o ruolo insufficiente
+      if (!found && !j.oom() && !j.over()) {                          // sconosciuta o ruolo insufficiente
+        const char* old = ledNomeVecchioMsg(Pc(r, "id"));               // nome vecchio dei LED: l'errore dice il nome nuovo
+        return old ? ko(s, old) : notFound(s);
+      }
       return sendBuf(s, found, j);
     }
     return sendBuf(s, devListJson(j), j);
@@ -104,6 +120,29 @@ void routesDev(PsychicHttpServer* S, bool sec) {
     auditf(AUD_INFO, "", tr("periferica %s tolta (%s)"), Pc(r, "n"), WhoText(c).s); return ok(s);
   });
   add(S, sec, "/api/io/rename", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t { ErrBuf e; return ioRename(Pc(r, "n"), Pc(r, "to"), e) ? ok(s) : ko(s, e); });
+  // Alias e descrizione di una periferica (si leggono da GET /api/settings, campo "alias"). Solo Admin; il firmware controlla ogni valore.
+  add(S, sec, "/api/settings", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    const char* n = Pc(r, "n");
+    if (!aliasNomeOk(n) || !(ioHas(n) || devFind(n))) return ko(s, tr("Periferica sconosciuta"));
+    const char* a = has(r, "alias") ? Pc(r, "alias") : nullptr;
+    const char* d = has(r, "descrizione") ? Pc(r, "descrizione") : nullptr;
+    if (!a && !d) return ko(s, tr("Valori non validi"));
+    char oldA[ALIAS_LEN_MAX + 1], oldD[ALIAS_DESCR_MAX + 1];
+    snprintf(oldA, sizeof oldA, "%s", aliasGet(n));
+    snprintf(oldD, sizeof oldD, "%s", aliasDescr(n));
+    AliasErr err = aliasSet(n, a, d);
+    if (err != ALIAS_OK) return ko(s, aliasErrTesto(err));
+    cfgSetOrigin(WhoText(c).s);
+    if (!cfgSave()) {                                               // non salvato: si torna a com'era
+      aliasSet(n, oldA, oldD);
+      return ko(s, tr("Salvataggio della configurazione fallito"));
+    }
+    const char* dup = a ? aliasDuplicato(a, n) : nullptr;           // solo un avviso: l'alias non e obbligato a essere unico
+    char body[ALIAS_NAME_MAX + 24];
+    if (dup) snprintf(body, sizeof body, "{\"ok\":true,\"dup\":\"%s\"}", dup);
+    else snprintf(body, sizeof body, "{\"ok\":true}");
+    return sendText(s, 200, "application/json", body, strlen(body));
+  });
   // Schede modulo (.vdb): elenco e dettagli per chi puo vedere; installare, caricare ed eliminare solo Admin
   add(S, sec, "/api/mods", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
     HeapBuf j(MOD_LIST_JSON_MAX);                                   // il JSON si scrive qui (heap) e si invia senza copiarlo in una String
@@ -116,6 +155,7 @@ void routesDev(PsychicHttpServer* S, bool sec) {
     return sendText(s, 200, "application/json", j.c_str(), j.length());
   });
   add(S, sec, "/api/mod/install", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    RamBusy lavoro;                                    // installazione in corso: niente riavvio per RAM
     HeapBuf out(2048); ErrBuf e;
     if (!modInstallDriver(Pc(r, "name"), Pc(r, "prefix"), Pc(r, "pins"), out, e)) return ko(s, e);
     auditf(AUD_INFO, "", tr("scheda modulo %s installata (%s)"), Pc(r, "name"), WhoText(c).s);
@@ -275,7 +315,10 @@ void routesDev(PsychicHttpServer* S, bool sec) {
     if (pl) cfg.staPass = pass;
     cfg.staDhcp = dhcp; cfg.staEnabled = true;
     bool ntpBack = cfgNtpAfterWifi();
-    cfgSave(); netReconfigure(); if (ntpBack) timeApply(); return ok(s);
+    cfgSave();
+    if (!Pis(r, "later", "1")) netReconfigure();   // later=1 (guida): si salva soltanto; il collegamento parte a fine guida, quando l'hotspot cambia
+    if (ntpBack) timeApply();
+    return ok(s);
   });
   add(S, sec, "/api/wifi/ap", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t { cfg.staEnabled = false; cfgSave(); netReconfigure(); return ok(s); });
 
@@ -283,6 +326,7 @@ void routesDev(PsychicHttpServer* S, bool sec) {
   // il QR stampato da fiducia a chi lo usa); l'amministratore puo nasconderli agli altri (interruttore "apQr").
   add(S, sec, "/api/ap", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
     bool show = cfg.apQr || c.role >= ROLE_ADMIN;
+    if (!cfg.setupDone) cfgEnsureApPass();                              // la guida la mostra: nasce qui (RNG con la radio accesa) e si salva a fine guida
     HeapBuf j(256);                                                     // nome (32) e password (63), anche con tutti i caratteri da proteggere
     j.add("{\"ssid\":\""); j.addJson(cfg.apSsid.c_str());
     j.add("\",\"pass\":\""); if (show) j.addJson(cfg.apPass.c_str());
@@ -362,7 +406,10 @@ void routesDev(PsychicHttpServer* S, bool sec) {
     bool changed = (cfg.hostname != hn);
     cfg.hostname = hn; cfg.domain = dm;
     cfgSave();
-    if (changed) netReconfigure();
+    if (changed) {
+      if (netState() == NET_AP) netApplyServices();   // hotspot acceso: solo il nome mDNS, l'hotspot e i client restano
+      else netReconfigure();
+    }
     return ok(s);
   });
 

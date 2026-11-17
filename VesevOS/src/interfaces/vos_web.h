@@ -6,6 +6,7 @@
 #include "../drivers/vos_drv_string.h"
 
 void webInit();     // registra i percorsi (non avvia il server)
+bool webRotte();    // fine guida: registra i percorsi rimandati (true = tutti registrati o niente da fare)
 void webStart();    // avvia i server (80 e 443): chiamare dopo l'avvio del Wi-Fi
 void webAllowFirstPass();   // dopo il reset con BOOT: 10 minuti per scegliere la password anche dalla rete di casa
 bool webHttpsUp();

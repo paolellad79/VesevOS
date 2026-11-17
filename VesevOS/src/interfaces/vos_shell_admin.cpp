@@ -6,6 +6,7 @@
 #include "vos_shell_ask.h"
 #include "../packages/vos_prog_kind.h"
 #include "../drivers/vos_drv_time.h"
+#include "../drivers/vos_drv_heap.h"
 #include "../core/vos_clamp.h"
 #include "../core/vos_wdset.h"
 #include <stdlib.h>
@@ -137,7 +138,7 @@ bool shCmdAdmin(const Word& c, const Word& a1, const char* line, OutSink& o, int
   else if (c == "legal") {
     o.printf("%s %s - GPL-3.0-or-later / %s\r\n", VOS_NAME, VOS_VERSION, tr("licenza commerciale"));
     o.println(tr("Software di terzi e testi delle licenze: comando license, pagina Informazioni > Note legali."));
-    o.println(tr("Dati salvati sulla scheda: configurazione, utenti (solo impronta della password), registro (150 righe con indirizzi IP), allarmi. Nessun dato va fuori dalla scheda se non attivi tu MQTT o la rete tra schede."));
+    o.println(tr("Dati salvati sulla scheda: configurazione, utenti (solo impronta della password), registro (ultime righe, con indirizzi IP), allarmi. Nessun dato va fuori dalla scheda se non attivi tu MQTT o la rete tra schede."));
     o.println(tr("Cancellare tutto: factory-reset oppure tasto fisico 20 secondi."));
     o.println(tr("Sicurezza: segnala i problemi a paolellad79@gmail.com (risposta entro 7 giorni). Progetto gratuito: gli aggiornamenti non hanno date garantite."));
     o.println(tr("Radio: comando region. Non e consulenza legale."));
@@ -243,21 +244,21 @@ bool shCmdAdmin(const Word& c, const Word& a1, const char* line, OutSink& o, int
     o.print(powerText().c_str());
   }
   else if (c == "reboot") { o.println(tr("Riavvio...")); sysReboot("comando reboot", 300); }
-  else if (c == "script" || c == "vsh" || c == "berry") {
-    // script: elenco, avvio, stop, uscita degli script salvati in /sbin (.vsb).  vsh <codice>: prova al volo ("berry" resta come nome nascosto).
+  else if (c == "script" || c == "vsh") {
+    // script: elenco, avvio, stop, uscita degli script salvati in /sbin (.vsb).  vsh <codice>: prova al volo.
     // (vsh list|run|stop|out funzionano ancora come scorciatoie dei comandi script)
     const char* code = restFrom(line, 1);
     ErrBuf err;
     bool scr = (c == "script");
-    HeapBuf txt(BERRY_TEXT_MAX);                                       // i testi di Berry si scrivono qui (heap), non sullo stack
+    HeapBuf txt(FUNZIONI_TESTO_MAX);                                       // i testi delle funzioni VesevOS si scrivono qui (heap), non sullo stack
     if (!*code) {
-      if (scr) { txt.add(tr("Uso: script list | script run <nome> | script stop | script out")); txt.add('\n'); berryList(txt); }
-      else berryStatusText(txt);
+      if (scr) { txt.add(tr("Uso: script list | script run <nome> | script stop | script out")); txt.add('\n'); funzioniElenca(txt); }
+      else funzioniTestoStato(txt);
       o.print(txt.c_str()); return true;
     }
-    if (a1 == "list" && !strcmp(code, "list")) { berryList(txt); o.print(txt.c_str()); return true; }
-    if (a1 == "out" && !strcmp(code, "out")) { berryOutText(txt); o.print(txt.c_str()); return true; }
-    if (a1 == "stop" && !strcmp(code, "stop")) { if (berryStop(err)) o.println(tr("Script fermato")); else o.println(err.c_str()); return true; }
+    if (a1 == "list" && !strcmp(code, "list")) { funzioniElenca(txt); o.print(txt.c_str()); return true; }
+    if (a1 == "out" && !strcmp(code, "out")) { funzioniTestoUscita(txt); o.print(txt.c_str()); return true; }
+    if (a1 == "stop" && !strcmp(code, "stop")) { if (funzioniFerma(err)) o.println(tr("Script fermato")); else o.println(err.c_str()); return true; }
     if (a1 == "run") {
       Word nm = argAt(line, 2);
       if (nm.empty()) { o.println(tr("Uso: script run <nome>  (file /sbin/<nome>.vsb)")); return true; }
@@ -265,14 +266,14 @@ bool shCmdAdmin(const Word& c, const Word& a1, const char* line, OutSink& o, int
       return true;
     }
     if (scr) { o.println(tr("Uso: script list | script run <nome> | script stop | script out")); return true; }
-    HeapBuf out(BERRY_OUT_MAX + 16);                                   // uscita dello script (con "..." finale se tagliata)
-    bool ok = berryEval(code, out, err);
+    HeapBuf out(FUNZIONI_USCITA_MAX + 16);                                   // uscita dello script (con "..." finale se tagliata)
+    bool ok = funzioniValuta(code, out, err);
     vlog("SCRIPT: script eseguito dalla shell (%u caratteri, %s)", (unsigned)strlen(code), ok ? "ok" : "errore");
     if (out.length()) { o.print(out.c_str()); if (out.c_str()[out.length() - 1] != '\n') o.println(); }
     if (!ok) { if (err.length()) o.println(err.c_str()); else o.println(tr("Errore")); }
   }
   else if (c == "app") {
-    // app: elenco, controllo, avvio, stop, valori e uscita dei file /bin/*.vab (una sola app alla volta, nel motore Berry)
+    // app: elenco, controllo, avvio, stop, valori e uscita dei file /bin/*.vab (una sola app alla volta, nel motore delle funzioni)
     Word nm = argAt(line, 2);
     ErrBuf err;
     if (a1 == "list") { HeapBuf t(APP_TEXT_MAX); appListText(t); o.print(t.c_str()); }
@@ -281,7 +282,7 @@ bool shCmdAdmin(const Word& c, const Word& a1, const char* line, OutSink& o, int
     else if (a1 == "stop" && !nm.empty()) { if (appStop(nm.c_str(), err, 2)) o.println(tr("App fermata")); else o.println(err.c_str()); }
     else if (a1 == "set" && !nm.empty() && !argAt(line, 3).empty()) { if (appSet(nm.c_str(), argAt(line, 3).c_str(), restFrom(line, 4), err, 2)) o.println(tr("Fatto")); else o.println(err.c_str()); }
     else if (a1 == "data" && !nm.empty()) shProgData(PK_APP_B, nm.c_str(), argAt(line, 3).c_str(), o);
-    else if (a1 == "out") { HeapBuf t(BERRY_TEXT_MAX); appRunText(t); o.print(t.c_str()); }
+    else if (a1 == "out") { HeapBuf t(FUNZIONI_TESTO_MAX); appRunText(t); o.print(t.c_str()); }
     else o.println(tr("Uso: app list | app info <nome> | app start <nome> | app stop <nome> | app set <nome> <id> <valore> | app data <nome> [flash|sd] | app out"));
   }
   else if (c == "crash") {
@@ -299,8 +300,11 @@ bool shCmdAdmin(const Word& c, const Word& a1, const char* line, OutSink& o, int
       Word f = argAt(line, 2);
       char from[16], to[16]; ErrBuf err;
       if (f.empty()) { o.println(tr("Uso: recovery update <file.bin> [sha256]  (prima carica il file in Sistema > File)")); return true; }
+      if (!drvPsramPresent() && needConfirm(line, o, tr("Questa scheda non ha PSRAM: il recovery viene scritto direttamente. Se si interrompe, il recovery resta inutilizzabile finche non lo riscrivi. Continuare?"))) return true;
       o.println(tr("Controllo e scrivo il recovery: non spegnere la scheda..."));
-      if (recUpFromFile(f.c_str(), argAt(line, 3).c_str(), "shell", from, to, sizeof from, err)) o.println(trf("Recovery aggiornato: %s -> %s", from[0] ? from : "?", to));
+      Word shaW = argAt(line, 3);
+      if (shaW == "yes") shaW = Word();                                 // "yes" in fondo e la conferma, non l'impronta
+      if (recUpFromFile(f.c_str(), shaW.c_str(), "shell", from, to, sizeof from, err)) o.println(trf("Recovery aggiornato: %s -> %s", from[0] ? from : "?", to));
       else o.println(err.c_str());
       return true;
     }

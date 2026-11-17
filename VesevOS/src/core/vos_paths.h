@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_paths.h
-// UNICA risoluzione dei percorsi, per memoria interna e microSD: usata dalla shell, da Berry e (tramite fsCleanTo) dall'API dei file.
+// UNICA risoluzione dei percorsi, per memoria interna e microSD: usata dalla shell, dalle funzioni VesevOS e (tramite fsCleanTo) dall'API dei file.
 //   - memoria interna: alla radice, con le cartelle di vos_layout.h ("/sbin/a.vsb"; "/scripts/a.vsb" resta valido come scorciatoia)
 //   - microSD: sotto "/media/sd". "/media" e una cartella virtuale (non esiste sulla memoria interna): contiene "sd" se la scheda e montata.
 //   - "/sd" e "/sd/x" restano validi in input come scorciatoia: diventano "/media/sd" e "/media/sd/x". Solo il nome intero: "/sdx" e
@@ -33,5 +33,5 @@ bool pathSdRelOk(const char* rel);
 // File di sistema nascosti a tutti (configurazione, registro di audit, rapporto del crash). Controlla anche la parte sulla microSD.
 bool pathIsSystemFile(const char* clean);
 // Come sopra, piu i file che portano chiavi, certificati o copie di configurazione (.pem .key .crt .der .p12 .vbk, senza badare alle
-// maiuscole). E' la STESSA regola per archivi, elenchi e Berry, su memoria interna e microSD.
+// maiuscole). E' la STESSA regola per archivi, elenchi e funzioni VesevOS, su memoria interna e microSD.
 bool pathIsSecret(const char* clean);

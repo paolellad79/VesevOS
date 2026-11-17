@@ -680,6 +680,16 @@ fieldset legend{padding:0 6px;color:var(--mut)}
 .row span.pill.v{color:var(--act)}
 .row span.pill.k{color:var(--kot)}
 .row span.pill.a{color:var(--okt)}
+
+/* Guida: elenco delle reti Wi-Fi trovate, con spazio tra un pulsante e l'altro */
+#su_sl{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+/* Nome vero accanto all'alias di una periferica (menu, elenchi) */
+.alnome{opacity:.65;font-size:.75em;margin-left:4px}
+.cfr{margin:4px 0 8px;padding-left:20px;font-size:13px}
+.cfr li{margin:2px 0}
+.cfr li.ko{color:var(--kot)}
+.hlp h5{margin:10px 0 2px;font-family:monospace}
+.hlp h5::before{content:attr(data-nome)}
 </style></head>
 <body>
 <a href="#main" class="skip"
@@ -957,8 +967,8 @@ fieldset legend{padding:0 6px;color:var(--mut)}
   <div id="sens_t"></div>
  </div>
 </section>
-<section id="t_led" class="hide">
- <div class="card"><h3>LED</h3>
+<section id="t_led_rgb1" class="hide">
+ <div class="card"><h3 id="l_tit">Periferica di bordo</h3>
   <label for="l_mode">Modo</label><select id="l_mode" onchange="ledShow()">
    <option value="0">Colore = stato del sistema</option>
    <option value="1">Battito (heartbeat) colore scelto</option>
@@ -979,8 +989,29 @@ fieldset legend{padding:0 6px;color:var(--mut)}
    <p class="fhint">I lampi sono al massimo 3 al secondo. Il trigger e i suoi colori li cambia solo l'amministratore. Di fabbrica il modo resta quello di sempre.</p>
   </fieldset>
   <button class="btn" onclick="saveLed()">Salva</button><div id="lm2" class="msg"></div>
+  <div id="al_led_rgb1"></div>
   <p style="color:var(--mut)">Colori di stato: arancio = avvio, blu = AP, giallo = connessione, verde = client collegato, rosso lampeggiante = errore.</p>
   </div>
+</section>
+<section id="t_led1" class="hide">
+ <div class="card"><h3 id="l2_tit">Periferica di bordo</h3>
+  <label for="l2_mode">Modo</label><select id="l2_mode" onchange="led2Show()">
+   <option value="0">Stato del sistema</option>
+   <option value="1">Battito (heartbeat)</option>
+   <option value="2">Acceso fisso</option><option value="3">Spento</option>
+   <option value="4">Lampi: attivita della flash</option>
+   <option value="5">Lampi: pacchetti Wi-Fi</option>
+   <option value="6">Acceso quando il carico della CPU supera la soglia</option></select>
+  <label for="l2_br">Luminosita (0-255)</label><input type="number" id="l2_br" min="0" max="255">
+  <div id="l2_src" class="hide">
+   <div><label for="l2_thr">Soglia di carico della CPU (10-95)</label><input type="number" id="l2_thr"
+    min="10" max="95"></div>
+   <p class="fhint">I lampi sono al massimo 3 al secondo. I lampi e il carico della CPU li cambia solo l'amministratore.</p>
+  </div>
+  <button class="btn" onclick="led2Salva()">Salva</button><div id="l2_m" class="msg"></div>
+  <div id="al_led1"></div>
+  <p style="color:var(--mut)">Questo LED ha un solo colore. Stato del sistema: battito = rete collegata (piu veloce con piu carico), lampeggio lento = connessione o punto di accesso, lampeggio veloce = errore.</p>
+ </div>
 </section>
 <section id="t_pin" class="hide">
  <div class="sub" id="sk_pin"><button>Pin</button><button>Pin sistema</button><button>Inventario</button></div>
@@ -1011,6 +1042,10 @@ fieldset legend{padding:0 6px;color:var(--mut)}
  <div class="sub" id="sk_io"><button>Periferiche</button><button class="adm">Aggiungi</button><button class="adm">Driver</button></div>
  <div>
  <div id="io_main">
+  <div class="card hide" id="bd_card"><h3>Periferiche di bordo</h3>
+   <p class="fhint">Le periferiche gia presenti sulla scheda: funzionano subito, senza driver. Quelle con piu controlli si aprono nella loro pagina.</p>
+   <div id="bd_list"></div><div id="bd_m" class="msg" role="status"></div>
+  </div>
   <div class="card"><h3>Periferiche</h3>
    <p class="fhint">Rele, LED, pin e ingressi con un nome (rele1, led1...). Tocca una periferica per gestirla e provarla. Le app li usano scrivendo il nome in use= e poi dev_set("rele1", 1) o dev_get("in1"). Dopo ogni riavvio le uscite sono spente.</p>
    <div style="overflow-x:auto"><table id="io_tab" class="ftab"></table></div>
@@ -1037,6 +1072,27 @@ fieldset legend{padding:0 6px;color:var(--mut)}
       <option value="up">Ingresso con pull-up</option>
       <option value="down">Ingresso con pull-down</option></select></div>
    </div>
+   <div class="hide" id="io_pwf"><div class="agrid">
+    <div><label for="io_ph">Frequenza (Hz)</label><input type="number" id="io_ph" min="10"
+      max="40000" value="1000" inputmode="numeric"></div>
+    <div><label for="io_pd">Duty (%)</label><input type="number" id="io_pd" min="0" max="100"
+      value="0" inputmode="numeric"></div>
+   </div></div>
+   <div class="hide" id="io_rgf"><div class="agrid">
+    <div><label for="io_ro">Ordine dei byte</label><select id="io_ro"><option value="">Quello della scheda</option>
+      <option value="grb">GRB (WS2812 standard)</option><option value="rgb">RGB</option>
+      <option value="brg">BRG</option><option value="gbr">GBR</option>
+      <option value="rbg">RBG</option><option value="bgr">BGR</option></select></div>
+   </div></div>
+   <div class="hide" id="io_cnf"><div class="agrid">
+    <div><label for="io_cf">Fronte da contare</label><select id="io_cf">
+      <option value="0">Salita</option><option value="1">Discesa</option>
+      <option value="2">Salita e discesa</option></select></div>
+    <div><label for="io_cn">Filtro anti-rimbalzo (ns, 0 = nessuno)</label><input type="number"
+      id="io_cn" min="0" max="10000" value="0" inputmode="numeric"></div>
+    <div><label for="io_cr">Resistenza</label><select id="io_cr"><option value="">Nessuna</option>
+      <option value="up">Pull-up</option><option value="down">Pull-down</option></select></div>
+   </div></div>
    <div class="hide" id="io_sdf"><div class="agrid">
     <div><label for="io_sm">MOSI (dati verso la scheda)</label><input type="number" id="io_sm"
       min="1" inputmode="numeric"></div>
@@ -1068,6 +1124,7 @@ fieldset legend{padding:0 6px;color:var(--mut)}
  <div class="card"><h3>Tasto fisico</h3>
   <p class="fhint">Il tasto fisico (BOOT, GPIO0) della scheda: le pressioni lunghe (2, 8 e 20 secondi) servono al recupero e non si cambiano.</p>
   <div id="dv_btn"></div>
+  <div id="al_btn"></div>
  </div>
 
  <div class="card adm"><h3>Azioni dei click</h3>
@@ -1134,7 +1191,7 @@ fieldset legend{padding:0 6px;color:var(--mut)}
      min="2" max="20" oninput="lcTx()"><div id="lc_txv" class="fhint"></div></div>
   </div>
   <p class="fhint">La potenza non supera mai il limite del paese.</p>
-  <div class="law">La scheda applica i limiti noti del paese scelto (canali e potenza massima) e abbassa la potenza se usi un'antenna esterna. Questo non garantisce la conformita del prodotto finito: dipende anche dall'hardware, dall'antenna, dal montaggio e dalle regole del luogo. Chi installa la scheda ne e responsabile.</div>
+  <div class="law">La scheda applica i limiti noti del paese scelto (canali e potenza massima) e abbassa la potenza in base al guadagno dell'antenna (quella della scheda o l'esterna che indichi). Questo non garantisce la conformita del prodotto finito: dipende anche dall'hardware, dall'antenna, dal montaggio e dalle regole del luogo. Chi installa la scheda ne e responsabile.</div>
   </div>
  <div class="card adm"><button class="btn" onclick="lcSave('lcm3')">Salva</button>
   <div id="lcm3" class="msg"></div></div>
@@ -1234,7 +1291,26 @@ fieldset legend{padding:0 6px;color:var(--mut)}
  </div>
  <div>
  <div class="card"><h3>IPv6</h3>
-  <p class="fhint">IPv6 non e ancora disponibile su questa scheda.</p></div>
+  <p class="fhint">IPv6 e il nuovo sistema di indirizzi di rete, accanto a quello di sempre (IPv4). Vale solo per la Wi-Fi di casa, non per l'hotspot. Di fabbrica e spento.</p>
+  <div id="i6_stato" class="fhint"></div>
+  <table id="i6_tab" class="ftab"></table>
+  <p class="fhint">Il prefisso della rete e /64. Gateway e DNS IPv6 di fabbrica sono automatici: li da il router. Se vuoi, li scrivi a mano nelle impostazioni qui sotto. Gli indirizzi e i DNS IPv4 non vengono toccati.</p></div>
+ <div class="card adm"><h3>Impostazioni IPv6</h3>
+  <div class="tog"><div>IPv6 acceso</div>
+   <button class="sw1" id="i6_on" onclick="this.classList.toggle('on')" aria-label="IPv6 acceso"></button></div>
+  <label for="i6_modo">Indirizzi</label>
+  <select id="i6_modo" onchange="ip6Modo()"><option value="0">Automatico (li da il router)</option>
+   <option value="1">Automatico, piu un indirizzo fisso</option></select>
+  <div id="i6_fx" class="hide"><label for="i6_ind">Indirizzo fisso (prefisso /64)</label>
+   <input id="i6_ind" maxlength="45" autocomplete="off" spellcheck="false" placeholder="es. 2001:db8::10">
+   <p class="fhint">Solo indirizzi globali (iniziano con 2 o 3) o privati (iniziano con fc o fd). L'indirizzo fisso si aggiunge a quelli del router.</p></div>
+  <label for="i6_gw">Gateway IPv6 (vuoto = automatico, dal router)</label>
+  <input id="i6_gw" maxlength="45" autocomplete="off" spellcheck="false" placeholder="es. fe80::1">
+  <p class="fhint">Deve essere raggiungibile subito: un indirizzo che inizia con fe80 (quello del router) oppure della stessa rete /64 della scheda. Se lo scrivi, vale al posto di quello del router.</p>
+  <label for="i6_dns">DNS IPv6 (vuoto = automatico)</label>
+  <input id="i6_dns" maxlength="45" autocomplete="off" spellcheck="false" placeholder="es. 2001:db8::53">
+  <p class="fhint">Si usa solo se i DNS IPv4 non rispondono: non li sostituisce.</p>
+  <button class="btn" onclick="ip6Save()">Salva</button><div id="i6m" class="msg"></div></div>
  </div>
 </section>
 <section id="t_nome" class="hide">
@@ -1318,7 +1394,7 @@ fieldset legend{padding:0 6px;color:var(--mut)}
 <section id="t_ap" class="hide">
  <div class="sub" id="sk_ap"><button>Servizio</button><button>Punto di accesso</button><button class="adm">Nome e password</button><button>DHCP</button><button>DNS</button></div>
  <div class="card"><h3>Servizio Punto di accesso (AP)</h3>
-  <p class="fhint">L'hotspot e la Wi-Fi della scheda: serve per entrare quando la scheda non e collegata alla tua rete. Si accende da solo al primo avvio, dopo un ripristino con il tasto fisico e se la tua Wi-Fi non e configurata.</p>
+  <p class="fhint">L'hotspot e la Wi-Fi della scheda: serve per entrare quando la scheda non e collegata alla tua rete. Finita la guida con la tua Wi-Fi configurata resta spento: lo accendi tu da qui. Si accende da solo se la tua Wi-Fi non e configurata e dopo un ripristino con il tasto fisico (8 secondi).</p>
   <div class="sc" id="sc_ap"></div>
   <div id="apdep">
    <div class="tog adm"><div>Portale automatico (il telefono apre da solo la pagina)</div>
@@ -1478,7 +1554,7 @@ fieldset legend{padding:0 6px;color:var(--mut)}
  <div class="card"><h3>Funzioni disponibili</h3>
   <ul class="scfn">
    <li><code>print(x)</code> <span>scrive nell'uscita</span></li>
-   <li><code>led("RRGGBB")</code> <span>colore del LED (led("auto") torna al modo normale)</span>
+   <li><code>led_rgb1("RRGGBB")</code> <span>colore del LED a colori (led_rgb1("auto") torna al modo normale); led1("on"|"off"|"blink") per il LED monocromatico. I vecchi nomi led() e led2() non valgono piu</span>
    </li>
    <li><code>act("azione")</code> <span>azione delle Automazioni; risponde "ok" o l'errore</span>
    </li>
@@ -1530,12 +1606,12 @@ fieldset legend{padding:0 6px;color:var(--mut)}
  </div>
   <div class="card adm"><h3>Come e fatto un file app</h3>
    <ul class="scfn">
-    <li><code>[manifest]</code> <span>name (uguale al nome del file), title, version, author, use (permessi: led, time, temp, log, logread, act, btn, mqtt, ble, files, gpio:N), who (admin oppure oper)</span>
+    <li><code>[manifest]</code> <span>name (uguale al nome del file), title, version, author, use (permessi: led_rgb1, led1, time, temp, log, logread, act, btn, mqtt, ble, files, gpio:N), who (admin oppure oper)</span>
     </li>
     <li><code>[icon]</code> <span>un solo disegno svg con forme semplici, massimo 2 KB</span></li>
     <li><code>[page]</code> <span>un controllo per riga: switch, slider, color, text, button, chart, con id e label</span>
     </li>
-    <li><code>[code]</code> <span>codice VesevOS, massimo 8 KB. Funzioni: on_set(id, valore) quando tocchi un controllo, on_tick() ogni secondo, dev_get(id), dev_set(id, valore); e led, act, log, time, temp, btn, logtail, mqtt se il manifest le permette (use)</span>
+    <li><code>[code]</code> <span>codice VesevOS, massimo 8 KB. Funzioni: on_set(id, valore) quando tocchi un controllo, on_tick() ogni secondo, dev_get(id), dev_set(id, valore); e led_rgb1, led1, act, log, time, temp, btn, logtail, mqtt se il manifest le permette (use)</span>
     </li>
     <li><code>[data]</code> <span>valori iniziali: chiave=valore (se la chiave e un controllo ne e il valore di partenza)</span>
     </li>
@@ -1592,10 +1668,10 @@ fieldset legend{padding:0 6px;color:var(--mut)}
  <div class="card adm"><h3>Lingue</h3>
   <div id="lglist"></div>
   <label for="lgf"
-   style="display:block;margin-top:12px">Carica un file di lingua (.json)</label><input type="file"
-   id="lgf" accept=".json">
+   style="display:block;margin-top:12px">Carica i file di una lingua (.vld e .vlp)</label><input type="file"
+   id="lgf" accept=".vld,.vlp" multiple>
   <button class="btn" onclick="upLang()">Carica lingua</button><div id="lgm" class="msg"></div>
-  <p style="color:var(--mut)">Italiano e inglese sono dentro il firmware. Per le altre: un file per lingua, con il nome uguale al codice (per esempio es.json). Lo stesso file traduce la pagina e i messaggi della shell.</p>
+  <p style="color:var(--mut)">Italiano e inglese sono dentro il firmware. Per le altre: due file per lingua, con il nome uguale al codice (per esempio es.vld e es.vlp). Il file .vld traduce i messaggi della scheda e della shell, il file .vlp traduce la pagina (è facoltativo: senza, la pagina resta in italiano). Si possono scegliere insieme.</p>
   <div id="lgsp" style="color:var(--mut)"></div></div>
  <div class="card adm">
   <button class="btn" onclick="lcSave()">Salva</button><button class="btn gray"
@@ -1741,7 +1817,7 @@ fieldset legend{padding:0 6px;color:var(--mut)}
    onclick="bReboot()">Riavvia ora</button>
   <div id="bm" class="msg"></div></div>
  <div class="card"><h3>Programmi con avvio automatico</h3>
-  <p style="color:var(--mut)">Partono da soli dopo i servizi, nell'ordine di questo elenco. Di fabbrica non parte nessun programma. Berry esegue un programma alla volta: se ne scegli piu d'uno, quelli dopo il primo partono solo se il precedente finisce entro 10 secondi.</p>
+  <p style="color:var(--mut)">Partono da soli dopo i servizi, nell'ordine di questo elenco. Di fabbrica non parte nessun programma. Le funzioni VesevOS eseguono un programma alla volta: se ne scegli piu d'uno, quelli dopo il primo partono solo se il precedente finisce entro 10 secondi.</p>
   <div id="bpl"></div>
   <div class="frow adm">
    <select id="bpsel" aria-label="Programma da aggiungere"></select><button class="btn gray"
@@ -1800,7 +1876,7 @@ fieldset legend{padding:0 6px;color:var(--mut)}
   <div class="agrid"><div>
     <label for="wd_nm">Minuti senza rete</label><input type="number" id="wd_nm" min="2" max="1440">
    </div>
-   <div><label for="wd_rk">Soglia RAM (KB)</label><input type="number" id="wd_rk" min="8" max="200">
+   <div><label for="wd_rk">Soglia critica RAM (% usata)</label><input type="number" id="wd_rk" min="80" max="99">
    </div>
    <div><label for="wd_ud">Riavvio dopo N giorni accesa (0 = mai)</label><input type="number"
      id="wd_ud" min="0" max="365"></div>
@@ -1927,7 +2003,7 @@ fieldset legend{padding:0 6px;color:var(--mut)}
 <section id="t_fw" class="hide">
  <div class="sub" id="sk_fw"><button>Filtro IP</button><button>Ultimi rifiutati</button><button class="adm">Blocco degli accessi</button></div>
  <div class="card"><h3>Filtro IP</h3>
-  <p class="fhint">Decide chi puo parlare con la scheda. L'hotspot della scheda e la seriale USB sono sempre ammessi. Chi e fuori lista non riceve risposta. Una regola nuova vale 2 minuti: se non la confermi torna quella di prima.</p>
+  <p class="fhint">Decide chi puo parlare con la scheda. L'hotspot della scheda e la seriale USB sono sempre ammessi. Chi e fuori lista non riceve risposta. Una regola nuova vale 2 minuti: se non la confermi torna quella di prima. Il filtro conosce solo gli indirizzi IPv4: con il filtro acceso i dispositivi che arrivano in IPv6 non passano.</p>
   <div id="fwyou" class="law"></div>
   <div class="agrid"><div><label for="fw_m">Modo</label><select id="fw_m">
      <option value="0">Spento</option><option value="1">Solo la mia rete</option>
@@ -1992,6 +2068,8 @@ fieldset legend{padding:0 6px;color:var(--mut)}
     onclick="agTab(2)">Recovery</button>
    <button role="tab" id="ag_t3" aria-selected="false" aria-controls="ag_p3" tabindex="-1"
     onclick="agTab(3)">Pacchetti</button>
+   <button role="tab" id="ag_t4" aria-selected="false" aria-controls="ag_p4" tabindex="-1"
+    onclick="agTab(4)">Risorse</button>
   </div>
   <div role="tabpanel" id="ag_p0" aria-labelledby="ag_t0" tabindex="0">
    <div id="ag_stato"></div>
@@ -2018,18 +2096,29 @@ fieldset legend{padding:0 6px;color:var(--mut)}
    <div id="ag_fw"></div>
    <button class="btn hide" id="ag_ins" onclick="agInstalla()">Installa la versione trovata</button>
    <h4>Altre strade</h4>
-   <button class="btn gray" onclick="agOrdine(updFile)">Carica un file dal computer</button>
+   <span id="cf_fw"></span>
    <button class="btn gray" onclick="agOrdine(updNet)">Indirizzo e impronta a mano</button>
    <button class="btn gray" onclick="uFw()">Pagina del recovery con utente e password</button>
   </div>
   <div role="tabpanel" id="ag_p2" aria-labelledby="ag_t2" tabindex="0" class="hide">
    <p class="fhint">Il recovery serve a rimettere a posto la scheda. Non si aggiorna mai da solo.</p>
    <div id="ag_rec"></div>
-   <button class="btn" onclick="uRecUp()">Carica un nuovo recovery</button>
+   <span id="cf_rec"></span>
   </div>
   <div role="tabpanel" id="ag_p3" aria-labelledby="ag_t3" tabindex="0" class="hide">
    <p class="fhint">App e driver installati, con la versione pubblicata nello store. Le versioni nuove si segnalano e basta: li aggiorni tu.</p>
    <div id="ag_pac"></div>
+   <h4>Carica da file</h4>
+   <div id="cf_pac"></div>
+  </div>
+  <div role="tabpanel" id="ag_p4" aria-labelledby="ag_t4" tabindex="0" class="hide">
+   <p class="fhint">Le risorse della scheda (dati comuni, licenze, manuale, tabella radio, pagina) si controllano a ogni avvio con l'elenco SHA256SUMS.</p>
+   <div id="ag_ris"></div>
+   <button class="btn" id="ag_rb" onclick="arScarica()">Scarica e carica di nuovo</button>
+   <div id="ag_rm" class="msg" role="status"></div>
+   <h4>Carica da file</h4>
+   <div id="cf_ris"></div>
+   <p class="law">Il pulsante fa scaricare i file dal tuo browser da GitHub, quindi GitHub vede l'indirizzo IP pubblico della tua rete. La scheda non si collega a internet e accetta un file solo se il suo SHA-256 coincide con l'elenco. Non parte mai da solo.</p>
   </div>
  </div>
 </section>
@@ -2091,7 +2180,8 @@ fieldset legend{padding:0 6px;color:var(--mut)}
  <div class="card op"><h3>Ultime modifiche</h3><div id="auhist" class="fhint"></div></div>
 </section>
 <section id="t_help" class="hide">
- <div class="card"><h3>Scheda</h3><p><a href="https://www.espressif.com/documentation/esp32-s3_datasheet_en.pdf" target="_blank" rel="noopener">Datasheet ESP32-S3 (Espressif)</a><br><a href="https://documentation.espressif.com/EU%20Declaration%20of%20Conformity%20for%20Espressif%20Modules%20and%20Development%20Boards.pdf" target="_blank" rel="noopener">Dichiarazione di conformità UE (Espressif)</a></p></div>
+ <div class="card"><h3>Scheda</h3><p><a id="dsl" href="https://documentation.espressif.com/esp32-s3_datasheet_en.pdf" target="_blank" rel="noopener">Datasheet</a><br><a href="https://documentation.espressif.com/EU%20Declaration%20of%20Conformity%20for%20Espressif%20Modules%20and%20Development%20Boards.pdf" target="_blank" rel="noopener">Dichiarazione di conformità UE (Espressif)</a></p></div>
+ <p class="fhint" id="pag_id"></p>
  <div class="card hlp"><h3>Aiuto</h3>
   <h4>Primo accesso a una scheda nuova</h4>
   <p>Collega la scheda al computer con il cavo USB e apri il monitor seriale (115200): la scheda scrive il nome della rete Wi-Fi e la sua password. Collegati a quella rete e apri https://192.168.4.1: parte la configurazione guidata.</p>
@@ -2112,35 +2202,58 @@ fieldset legend{padding:0 6px;color:var(--mut)}
   <h4>Terminale</h4>
   <p>Scrivi help per l'elenco dei comandi. Sulla seriale premi 1 o 2 per cambiare lingua.</p>
   <p>Dalla seriale si entra come in una shell classica: nome utente, password e, se l'hai attivato, il codice MFA. Gli errori contano nel blocco degli accessi insieme a quelli del web. Scrivi exit (o premi Ctrl+D) per uscire. Se l'ora della scheda non e sincronizzata, con l'MFA vale solo un codice di recupero.</p>
-  <p>Cartella corrente e percorsi: pwd mostra la cartella corrente, cd la cambia (cd .. sale, cd - torna indietro, cd da solo va alla radice), ls elenca come in una shell classica (ls -l, ls -a, ls -h, ls /sbin). Anche cat, mkdir, rm, mv, cp e write accettano percorsi relativi alla cartella corrente. La cartella corrente e per utente (sulla seriale e unica) e torna alla radice dopo 30 minuti senza comandi.</p>
-  <p>Il prompt e come in una shell classica: utente@hostname:cartella$ . L'utente e quello con cui sei entrato, l'hostname e il nome della scheda (se lo cambi, il prompt cambia al comando dopo). ~ e la radice /, la cartella di casa; fuori dalla radice si vede il percorso (per esempio /sbin). Il simbolo # indica l'amministratore, $ gli altri utenti. Prima di entrare si vede solo hostname>.</p>
-  <p>Il tasto Tab completa come in una shell classica: premi Tab per comandi, sottocomandi, opzioni e percorsi (cd /scr, ls -, cpu ). Se c'e un solo candidato lo completa; se ce ne sono piu scrive la parte comune; un secondo Tab di seguito elenca le possibilita (al massimo 64). Vede solo cio che il tuo ruolo puo usare. I nomi con spazi non si completano. Su riga vuota il Tab non fa niente. Sulla seriale vale lo stesso.</p>
-  <p>Il comando cpu: scrivi cpu per il riepilogo (governor, frequenza, tetto, motivo, temperatura e carico dei due core), cpu info per chip e frequenze (lscpu fa lo stesso), cpu governor e cpu freq per vedere o cambiare la scelta (cambiare e solo per l'Admin), cpu why per il motivo del tetto. fixed vuol dire frequenza fissa (cpu governor fixed 160 oppure cpu freq 160). Le forme vecchie cpu 80, cpu 160, cpu 240, cpu ondemand, cpu conservative, cpu schedutil e cpu auto funzionano ancora. vesevos-cpuinfo mostra riepilogo e informazioni insieme.</p>
-  <p>vesevos-services elenca i servizi con stato, porta e RAM; vesevos-services mqtt status ne mostra uno solo. start, stop e restart (per esempio vesevos-services mqtt restart) sono solo per l'Admin; fermare http, https o ap chiede conferma e vale dal riavvio. I comandi svc, start e kill restano come prima.</p>
-  <p>vesevos-bugreport (solo Admin) scrive a schermo un rapporto per l'assistenza: versione, memoria, rete, servizi, ultimi crash, registro e allarmi. Non invia niente fuori dalla scheda e non include password, chiavi o codici; gli indirizzi IP e MAC sono mascherati. Con -f il rapporto e completo e contiene dati identificativi: non pubblicarlo. Con -n e un numero scegli quante righe di registro mostrare.</p>
-  <p>vesevos-config (per aree) e il fronte unico di configurazione: senza argomenti scrive un riepilogo (sistema, rete, paese e radio, ora, servizi, utenti, LED, CPU, sicurezza), con vesevos-config region mostra i valori di un'area e i comandi che li cambiano. Aree: system, network, region, time, services, users, security, led, cpu. Per cambiare (solo Admin) scrivi il comando dopo l'area, per esempio vesevos-config region country IT: la riga passa dal percorso normale della shell, con gli stessi ruoli, limiti della radio, conferme e domande di password; non c'e nessun altro modo di cambiare le impostazioni. vesevos-config setup avvia la guida. L'Operatore vede solo il riepilogo e le aree in lettura; users e security sono solo per l'Admin. Non mostra mai password, hash o chiavi.</p>
-  <p>vesevos-network scrive un riepilogo di rete in testo: modo (client, hotspot, aereo), nome host e mDNS, IP, maschera, gateway, DNS, canale, segnale, rete Wi-Fi, MAC, DHCP, NTP, traffico, hotspot (nome e client collegati) e servizi di rete aperti con le porte. Non mostra mai le password; il MAC e mascherato, con -f (solo Admin) e intero. vesevos-network scan e vesevos-network ping &lt;indirizzo&gt; sono come wifi scan e ping (solo Admin). I comandi ip, net e wifi restano come prima.</p>
-  <p>vesevos-cleaner (solo Admin) fa una pulizia SICURA. Senza argomenti e una prova a secco: elenca le categorie (tmp = residui .tmp~ di salvataggi interrotti con il file completo accanto, crash = rapporti dei crash, log = registro in RAM, reboots = diario dei riavvii, cache = file di prova dell'autodiagnosi) con le voci e lo spazio che si libera, senza cancellare niente. vesevos-cleaner -y [categoria ...] pulisce dopo conferma (finestra della pagina o y/n dalla seriale) e dice i byte liberati. Non tocca mai configurazione, periferiche, utenti, certificati, script, app, lingue e il registro di audit (quello si svuota solo con audit). Rapporti e registri possono contenere dati identificativi: cancellarli e un tuo diritto.</p>
-  <p>vesevos-drive_manager elenca i volumi: memoria interna (LittleFS) e microSD, con stato (montata, non montata, non presente, formato non supportato), formato, dimensione, usato, libero e frequenza SPI. vesevos-drive_manager mount, unmount e test (solo Admin) sono sd mount, sd unmount e sd test, con gli stessi controlli; unmount chiede conferma se la scheda e in uso. vesevos-drive_manager format microsd FORMATTA (solo Admin) la formatta in FAT32 e CANCELLA TUTTO (anche dal pannello della microSD); funziona anche con una scheda che non si monta; la memoria interna non si formatta. vesevos-led_control e un alias di led (stesso comando, stessi ruoli).</p>
-  <p>vesevos-backup (solo Admin) salva e ripristina la configurazione in /var/backup, sempre cifrata con una frase che scegli tu. Senza argomenti mostra i backup e lo spazio libero. vesevos-backup create [nome] crea il file .vbk (la frase si chiede due volte, senza mostrarla; al massimo 5 backup), restore nome chiede la frase, dice quante righe cambierebbero (mai i valori) e chiede conferma prima di applicare, delete nome cancella dopo conferma. La frase non si scrive mai nella riga e non resta nella cronologia. Il formato e quello del backup con i segreti della pagina Sistema: un file si ripristina anche dall'altra parte. Il backup contiene password e dati identificativi: se perdi la frase non si recupera e decidi tu dove tenerlo.</p>
-  <p>Sicurezza &gt; Eventi di sicurezza (solo Admin) elenca gli ultimi errori di accesso: password o codici MFA sbagliati, indirizzi bloccati, richieste rifiutate. Il registro resta sulla scheda e si azzera al riavvio.</p>
-  <p>Sicurezza &gt; Aggiornamenti (solo Admin) mostra le versioni installate e, se lo chiedi, quelle pubblicate su GitHub. Il controllo automatico e spento di fabbrica: puoi attivarlo per avere una notifica o per far installare il firmware ufficiale a un'ora scelta.</p>
-  <p>vesevos-update (solo Admin) mostra la versione del firmware e del recovery, le partizioni e l'esito dell'ultimo ordine. vesevos-update file riavvia nel recovery e stampa UNA volta l'indirizzo con un codice monouso (15 minuti, legato al tuo computer: non condividerlo) per caricare un file; dalla seriale scrivi l'IP del computer. vesevos-update net indirizzo-https sha256 fa scaricare il file dal recovery da un indirizzo consentito e ne controlla lo SHA-256 (sovrascrive il firmware prima di verificarlo tutto). Chiede sempre conferma; il recovery lavora in HTTP sulla rete locale. Sono gli stessi ordini della pagina Aggiornamento e non cerca niente in rete da solo.</p>
-  <p>Aiuto sui comandi: help elenca i comandi che il tuo ruolo puo usare; help df oppure man df spiegano un comando (uso, opzioni, alias, ruolo minimo, esempi). Dopo help, man e time il Tab completa i nomi dei comandi. I nomi ufficiali sono in inglese; i vecchi nomi italiani (aereo, licenza, locale, niente, trova e gli altri) restano validi come alias nascosti.</p>
-  <p>Comandi di base come in una shell classica: whoami scrive il tuo utente; id scrive uid, gid e gruppo (numeri simulati: uid = 1000 + posto dell'utente, il gruppo e il ruolo); echo [-n] testo scrive il testo senza variabili; df [-h] mostra lo spazio della memoria interna e della microSD se e montata; uname [-a|-s|-n|-r|-v|-m] scrive nome, host, versione, ESP-IDF e chip; exit chiude la sessione sulla seriale.</p>
-  <p>time seguito da un comando lo esegue con il tuo utente e il tuo ruolo e poi scrive quanto e durato (real 0m1.234s, in millisecondi). Non da permessi in piu, non si annida e non misura user e sys. Per l'ora usa date.</p>
-  <p>ping [-c n] [-i secondi] [-W secondi] [-s byte] [-t ttl] host (solo Admin) invia pacchetti ICMP echo a un indirizzo IPv4 o a un nome e scrive le risposte come il ping classico: tempo, TTL, pacchetti persi e minimo/medio/massimo. Limiti contro l'uso come flood o scansione: al massimo 20 pacchetti (predefinito 4), pausa minima 0.2 s (predefinita 1), attesa 0.1-5 s (predefinita 2), dati 16-1024 byte (predefinito 56), durata totale al massimo 30 s dalla seriale (Ctrl+C ferma) e 12 s da questa pagina. Un solo host per volta, solo IPv4; non sono ammessi broadcast, multicast e 127.x. I nomi .local usano mDNS, gli altri il DNS. I tempi hanno la precisione di 1 ms. Funziona anche con time (time ping -c 2 192.168.1.1).</p>
-  <p>gzip [-d] [-c] [-k] [-f] [-1..-9] file... (solo Admin) comprime ogni file in file.gz (formato gzip, leggibile dai programmi gzip comuni) e, come di solito, toglie l'originale se tutto va bene (-k lo tiene, -f sovrascrive); -d decomprime e gunzip fa lo stesso; zcat file.gz e gzip -dc scrivono a schermo solo testo ASCII fino a 16 KB. unzip [-l] [-o] [-d cartella] archivio.zip [file...] elenca o estrae un .zip (store e deflate, CRC32 controllato, niente ZIP64, cifratura o piu volumi; non estrae mai nella radice /; senza -o non sovrascrive). tar -c|-t|-x -f archivio [-C cartella] [-v] [--overwrite] [file...] crea, elenca o estrae archivi tar senza compressione (tar -xf a.tar; per un .tar.gz prima gunzip). Gli archivi stanno nella memoria interna: la microSD non e nell'albero delle cartelle. Protezioni: un nome pericoloso (/ iniziale, .., backslash) fa rifiutare tutto l'archivio, i file protetti non si toccano, al massimo 64 voci, 1 MB per voce, 2 MB in tutto e espansione massima 100 a 1. gzip, gunzip, zcat e i .zip compressi richiedono la PSRAM. Dalla pagina web il tetto e 128 KB e 10 s (per file piu grandi usa la seriale: 1 MB e 120 s, Ctrl+C ferma); una sola operazione alla volta. Per creare archivi usa zip o tar.</p>
-  <p>zip [-r] [-0..-9] [-q] [-f] [-j] archivio.zip file... (solo Admin) crea un archivio .zip nuovo (formato standard, lo leggono anche i comuni programmi unzip; store e deflate, CRC32 nell'intestazione, niente ZIP64 ne' cifratura). -r scende nelle cartelle (3 livelli), -j memorizza solo il nome del file, -q non scrive i nomi, da -0 (senza compressione) a -9, 6 di norma; -f sovrascrive un archivio che c'e gia (senza -f si rifiuta). Non aggiorna archivi esistenti (niente -u, -d, -g). LittleFS non salva la data dei file: le voci portano l'ora di sistema se e valida, altrimenti 1980-01-01 00:00. Non entrano mai i file protetti (configurazione, registro, chiavi, certificati), ne' i nomi nascosti trovati dentro le cartelle, ne' l'archivio stesso; al massimo 64 voci e 1 MB per file; l'archivio deve stare nello spazio libero. Dalla pagina web il tetto e 128 KB e 10 s (per file piu grandi usa la seriale: 1 MB e 120 s, Ctrl+C ferma); una sola operazione alla volta; per comprimere serve la PSRAM.</p>
-  <p><a href="https://github.com/paolellad79/VesevOS" target="_blank"
-    rel="noopener">Manuale completo su GitHub</a></p></div>
+  <h4>Manuale breve dei comandi</h4>
+  <h5 data-nome="man"></h5>
+  <p>Mostra il manuale di un comando: descrizione, uso, opzioni, alias e ruolo minimo.</p>
+  <p>Vedi solo i comandi che il tuo ruolo puo usare. Con 'help' senza nome trovi l'elenco.</p>
+  <h5 data-nome="help"></h5>
+  <p>Senza nome elenca i comandi che il tuo ruolo puo usare, in ordine alfabetico.</p>
+  <p>Con un nome mostra sintassi, descrizione breve, alias e ruolo minimo; 'man' da' di piu.</p>
+  <h5 data-nome="which"></h5>
+  <p>Dice cosa partirebbe scrivendo quel nome, senza avviare niente: un comando interno oppure il percorso del file (script o app).</p>
+  <p>Cerca come 'run'. Un comando interno vince sempre su un file con lo stesso nome. Solo Admin.</p>
+  <h5 data-nome="whoami"></h5>
+  <p>Scrive il nome dell'utente con cui hai fatto login in questa sessione.</p>
+  <p>Senza utente (regole, script, primo avvio senza password) scrive 'sistema'.</p>
+  <h5 data-nome="echo"></h5>
+  <p>Scrive il testo che segue, cosi com'e. Con -n non va a capo alla fine.</p>
+  <p>Solo testo: niente variabili ($NOME), niente apici o jolly, niente redirezione. Per scrivere un file usa 'write'.</p>
+  <h5 data-nome="uname"></h5>
+  <p>Senza opzioni scrive nome, versione e core del sistema. Con le opzioni, come il comando uname classico.</p>
+  <p>-s nome del sistema, -n nome host, -r versione di VesevOS, -v versione di ESP-IDF, -m chip, -a tutto insieme.</p>
+  <h5 data-nome="exit"></h5>
+  <p>Chiude la sessione della seriale: poi serve di nuovo il login. Anche Ctrl+D a riga vuota fa lo stesso. logout e uguale.</p>
+  <p>Dalla pagina web non chiude niente: usa il menu utente e Logout.</p>
+  <h5 data-nome="ls"></h5>
+  <p>Elenca file e cartelle. Senza percorso usa la cartella corrente; i percorsi possono essere relativi.</p>
+  <p>-l formato lungo (senza data), -a anche i nomi nascosti, -h dimensioni in K o M, -1 una voce per riga.</p>
+  <h5 data-nome="cd"></h5>
+  <p>Cambia la cartella corrente. Senza nome torna alla radice (~). '..' sale di un livello, '-' torna alla cartella di prima.</p>
+  <p>I percorsi senza / iniziale partono dalla cartella corrente. La cartella e per sessione e si perde con il logout.</p>
+  <h5 data-nome="cat"></h5>
+  <p>Mostra il contenuto di un file di testo. Il percorso puo essere relativo alla cartella corrente.</p>
+  <p>Non mostra i file binari ne' quelli sopra 32 KB; i file protetti del sistema non si aprono.</p>
+  <h5 data-nome="region"></h5>
+  <p>Mostra o cambia paese, potenza di trasmissione e antenna della radio Wi-Fi. Cambiare e solo per l'Admin.</p>
+  <p>Il paese fissa canali e potenza ammessi dalla legge: la scheda non va oltre. 'locale' e il vecchio nome e resta valido.</p>
+  <h5 data-nome="vesevos-led_control"></h5>
+  <p>Alias di 'led_rgb1': fa esattamente la stessa cosa, con gli stessi argomenti e gli stessi ruoli (lettura all'Operatore, cambi all'Admin tranne cio che le regole usano). Il manuale completo e quello di 'led_rgb1': man led_rgb1.</p>
+  <h5 data-nome="btn"></h5>
+  <p>Mostra o cambia l'azione di 1, 2 o 3 click sul tasto fisico: none (niente), airplane (modo aereo), wps, find (trova la scheda).</p>
+  <p>I vecchi nomi niente, aereo, wps e trova restano validi. Cambiare e solo per l'Admin.</p>
+  <h5 data-nome="diag"></h5>
+  <p>Diagnosi della scheda, solo Admin. Senza argomenti mostra guida, rete, servizi, RAM e flash. "diag codici" elenca i codici dei lampi del LED (classe, pausa, dettaglio); "diag led &lt;classe&gt; &lt;dettaglio&gt;" ne prova uno.</p>
+  <p><a href="https://github.com/paolellad79/VesevOS" target="_blank" rel="noopener">Vai al sito GitHub del progetto per la guida dettagliata e completa</a></p></div>
 </section>
 <section id="t_legal" class="hide">
  <div class="sub" id="sk_legal"><button>Note legali</button><button>Software e dati usati</button><button>Dati salvati sulla scheda</button><button>Software libero e normative</button><button>Sicurezza</button><button>Radio</button></div>
  <div class="card"><h3>Note legali</h3>
   <p>VesevOS e software libero con doppia licenza: GPL-3.0-or-later (gratuita) oppure licenza commerciale (a pagamento, su richiesta). Il programma e fornito senza alcuna garanzia, nei limiti consentiti dalla legge. Non e consulenza legale.</p>
   <div id="licbtn"></div><pre id="licx" class="hide" style="margin-top:10px"></pre></div>
- <div class="card"><h3>Software e dati usati</h3><div style="overflow-x:auto">
+ <div class="card"><h3>Software e dati usati</h3>
+  <p>I testi completi delle licenze e l'elenco del software e dei dati usati (NOTICE e SBOM) sono sul sito del progetto su GitHub. Non e consulenza legale.</p>
+  <p><a href="https://github.com/paolellad79/VesevOS" target="_blank" rel="noopener">Sito del progetto su GitHub</a></p>
+  <div style="overflow-x:auto">
    <table id="sbom" class="ftab"></table></div></div>
  <div class="card"><h3>Dati salvati sulla scheda</h3>
   <p>Configurazione, utenti (solo l'impronta della password, mai la password), registro di 150 righe (con gli indirizzi IP di chi accede), allarmi e ultime modifiche. Tutto resta sulla scheda: niente va fuori se non accendi tu MQTT o la rete tra schede. Il contaore e il numero di avvii non si cancellano: non sono dati personali.</p>
@@ -2262,6 +2375,8 @@ fieldset legend{padding:0 6px;color:var(--mut)}
    gruppo:    gruppo del menu (GRP).
    ruolo:     ruolo minimo; se manca vale 0 (ospite).
    sezione:   titolo nel sottomenu, indice in SECN; se manca, nessun titolo.
+   bordo:     tipo di widget (colore, tasto...) di una periferica di bordo: la voce c'e solo se /api/dev
+              ne manda una con questa pagina (tab) e questo widget; il testo del menu e la sua etichetta.
    apri:      si chiama quando la voce si apre, con il suo id.
    esci:      ferma i timer della voce; si chiama a ogni show() su una voce diversa. */
 var VOCI=[
@@ -2271,17 +2386,18 @@ var VOCI=[
  {id:"mem",testo:"Memoria",gruppo:"dev",sezione:0,apri:apriMemoria},
  {id:"cpu",testo:"Processore",gruppo:"dev",ruolo:1,sezione:0,apri:cpuLoad,esci:fermaProcessore},
  {id:"sens",testo:"Sensori",gruppo:"dev",ruolo:1,sezione:0,apri:sensLoad,esci:fermaSensori},
- {id:"led",testo:"LED",gruppo:"dev",ruolo:1,sezione:1,apri:fillLed},
+ {id:"led_rgb1",testo:"Periferica di bordo",gruppo:"dev",ruolo:1,sezione:1,bordo:"colore",apri:apriLed},
+ {id:"led1",testo:"Periferica di bordo",gruppo:"dev",ruolo:1,sezione:1,bordo:"onoff",apri:apriLed2},
  {id:"pin",testo:"Pin",gruppo:"dev",ruolo:1,sezione:1,apri:loadPins},
  {id:"io",testo:"Periferiche",gruppo:"dev",ruolo:1,sezione:1,apri:apriPeriferiche,esci:ioStop},
- {id:"btn",testo:"Tasto",gruppo:"dev",ruolo:1,sezione:1,apri:apriTasto},
+ {id:"btn",testo:"Periferica di bordo",gruppo:"dev",ruolo:1,sezione:1,bordo:"tasto",apri:apriTasto},
  {id:"rad",testo:"Radio",gruppo:"dev",ruolo:1,sezione:2,apri:apriRadio},
  {id:"usb",testo:"USB",gruppo:"dev",ruolo:1,sezione:2,apri:dvRows},
  {id:"ser",testo:"Seriale",gruppo:"dev",ruolo:2,sezione:2,apri:fillSer},
 
  {id:"wifi",testo:"Wi-Fi",gruppo:"rete",ruolo:1,sezione:4,apri:fillNet},
  {id:"wps",testo:"WPS",gruppo:"rete",ruolo:2,sezione:4,apri:wpsLoad,esci:fermaWps},
- {id:"ip",testo:"IP",gruppo:"rete",ruolo:1,sezione:4,apri:fillNet},
+ {id:"ip",testo:"IP",gruppo:"rete",ruolo:1,sezione:4,apri:apriIp},
  {id:"nome",testo:"Nome",gruppo:"rete",ruolo:1,sezione:4,apri:apriNome},
  {id:"ntp",testo:"NTP",gruppo:"rete",ruolo:1,sezione:4,apri:loadTime},
  {id:"mqtt",testo:"MQTT",gruppo:"rete",ruolo:1,sezione:4,apri:mqLoad},
@@ -2333,9 +2449,30 @@ function apriMemoria(){
 function memDraw(){
   if(S)$("mem_ram").innerHTML=memCard(S)
 }
+/* La pagina del colore: il titolo e l'etichetta mandata dalla scheda. */
+function apriLed(id){
+ $("l_tit").textContent=voceTitolo(id);
+ aliasPannello("al_led_rgb1",BDI[id]);
+ fillLed();
+}
 function apriTasto(id){
  dvRows(id);
+ aliasPannello("al_btn",BDI[id]);
  btnLoad();
+}
+/* Una periferica creata a mano: la sua voce apre la pagina Periferiche sul riquadro di quella periferica. */
+function apriIoDin(id){
+ var n=POV[id].n;
+ IOS.sel="";
+ ioStop();
+ skMostra("io",0);
+ $("io_new").className=ROLE>=2?"card":"card hide";
+ api("/api/io").then(function(r){return r.json()}).then(function(j){
+   IOS.list=j.io||[];
+   IOS.sdp=j.sdp||[];
+   if(ioFind(n))ioOpen(n);
+   else show("io")
+ }).catch(function(){})
 }
 /* Dispositivi > Interfacce > Radio: paese e limiti, stato del modo aereo e MAC da /api/status. */
 function apriRadio(){
@@ -2350,6 +2487,7 @@ function apriRadio(){
 /* Periferiche: la scheda Driver e solo per l'Admin, e si aggiorna con la voce. */
 function apriPeriferiche(){
  ioLoad();
+ bordoLoad();
  if(canSee("drv"))drvLoad();
 }
 function apriPuntoAccesso(){
@@ -2423,12 +2561,108 @@ VOCI.forEach(function(v){
  if(v.sezione!==undefined)TSEC[v.id]=v.sezione;
  if(v.ruolo)TMIN[v.id]=v.ruolo;
 });
+/* Ordine fisso delle voci di Dispositivi: il menu dinamico ci inserisce le periferiche create a mano. */
+var DEV0=GMAP.dev.slice();
 /* Nomi che non sono voci: portano sulla voce e sulla scheda giusta (show). */
 var VIA={temp:["sens"],mdns:["nome",1],http:["web",0],https:["web",1],dhcp:["ap",3],dns:["ap",4],drv:["io",2]};
 /* Driver non e una voce ma una scheda di Periferiche: il suo ruolo minimo resta qui. */
 TMIN.drv=2;
+/* ===== alias e descrizione delle periferiche =====
+   Si leggono da GET /api/settings (campo "alias": nome vero -> {a: alias, d: descrizione}) e si scrivono con POST /api/settings (solo Admin).
+   L'alias e solo un nome MOSTRATO (menu, titoli, elenchi, schema dei pin): il nome vero resta quello dei comandi, delle funzioni e delle regole.
+   Il testo e dell'utente: qui entra sempre in pagina con esc() o textContent. */
+var ALIAS={};
+function aliasLeggi(){
+  return api("/api/settings").then(function(r){return r.json()}).then(function(c){
+    ALIAS=c.alias||{}
+  }).catch(function(){})
+}
+function aliasDi(id){
+  var x=ALIAS[id];
+  return x&&x.a?x.a:""
+}
+function descrDi(id){
+  var x=ALIAS[id];
+  return x&&x.d?x.d:""
+}
+/* Il testo da mostrare: l'alias se c'e, altrimenti l'etichetta di prima. */
+function etichetta(id,label){
+  return aliasDi(id)||label
+}
+/* Lo stesso in HTML (gia con esc), con il nome vero in piccolo accanto all'alias. */
+function etichettaHtml(id,label){
+  var a=aliasDi(id);
+  return a?esc(a)+' <small class="alnome">'+esc(id)+'</small>':esc(label)
+}
+/* Attributo title con la descrizione (vuoto se non c'e). */
+function descrTitle(id){
+  var d=descrDi(id);
+  return d?' title="'+esc(d)+'"':""
+}
+/* Alias e nome vero per un titolo scritto con textContent. */
+function titoloAlias(id,label){
+  var a=aliasDi(id);
+  return a?a+" ("+id+")":label
+}
+function aliasByte(s){
+  return typeof TextEncoder!="undefined"?new TextEncoder().encode(s).length:s.length
+}
+/* Il riquadro "Alias e descrizione" di una periferica, dentro l'elemento box. */
+function aliasPannello(box,id){
+  var e=$(box);
+  if(!e||!/^[a-z0-9_]{1,31}$/.test(id||"")){
+    if(e)e.innerHTML="";
+    return
+  }
+  var adm=ROLE>=2,dis=adm?"":" disabled";
+  e.innerHTML='<h4 style="margin:14px 0 6px">'+esc(t("Alias e descrizione"))+'</h4>'+
+    '<label for="alA_'+id+'">'+esc(t("Alias"))+'</label><input id="alA_'+id+
+    '" maxlength="24" autocomplete="off" spellcheck="false"'+dis+'>'+
+    '<label for="alD_'+id+'">'+esc(t("Descrizione"))+'</label><input id="alD_'+id+
+    '" maxlength="120" autocomplete="off"'+dis+'>'+
+    '<p class="fhint">'+esc(tf(
+      "L'alias si vede nei menu e nei titoli. Comandi, funzioni e regole usano sempre il nome vero: {0}.",
+      id))+'</p>';
+  $("alA_"+id).value=aliasDi(id);
+  $("alD_"+id).value=descrDi(id);
+  if(adm)e.insertAdjacentHTML("beforeend",
+    '<button class="btn" onclick="aliasSalva(\''+id+'\')">'+esc(t("Salva"))+
+    '</button><div id="alM_'+id+'" class="msg" role="status"></div>');
+  else e.insertAdjacentHTML("beforeend",'<p class="fhint">'+
+    esc(t("Alias e descrizione li cambia solo l'amministratore."))+'</p>')
+}
+function aliasSalva(id){
+  var a=$("alA_"+id).value.trim(),d=$("alD_"+id).value.trim(),m="alM_"+id;
+  if(aliasByte(a)>24){
+    msg(m,t("L'alias puo avere al massimo 24 byte (una lettera accentata ne vale 2)"),false);
+    return
+  }
+  if(aliasByte(d)>120){
+    msg(m,t("La descrizione puo avere al massimo 120 byte (una lettera accentata ne vale 2)"),false);
+    return
+  }
+  post("/api/settings",{n:id,alias:a,descrizione:d}).then(function(r){return r.json()}).then(function(j){
+    if(!j.ok){
+      msg(m,j.err,false);
+      return
+    }
+    if(a||d)ALIAS[id]={a:a,d:d};
+    else delete ALIAS[id];
+    $("alA_"+id).value=a;
+    $("alD_"+id).value=d;
+    msg(m,j.dup?tf("Salvato. Attenzione: lo stesso alias e gia usato da {0}",j.dup):t("Salvato"),true);
+    dvList().then(aliasTitoli).catch(function(){})
+  }).catch(function(){})
+}
+/* Dopo un cambio: titoli delle pagine di bordo e della periferica aperta. */
+function aliasTitoli(){
+  if($("l_tit"))$("l_tit").textContent=voceTitolo("led_rgb1");
+  if($("l2_tit"))$("l2_tit").textContent=voceTitolo("led1");
+  var h=$("iod_h"),d=typeof IOS!="undefined"&&IOS.sel?ioFind(IOS.sel):null;
+  if(h&&d)h.textContent=titoloAlias(d.n,d.n)
+}
 (function(){
-  var of=window.fetch.bind(window),act=0,q=[];
+  var of=window.fetch.bind(window),act=0,q=[],lim=2;
   function run(j){
     act++;
     var done=false,rel=function(){
@@ -2448,7 +2682,9 @@ TMIN.drv=2;
       j.rej(e)
     })
   }
-  function nx(){while(act<2&&q.length)run(q.shift())}
+  function nx(){while(act<lim&&q.length)run(q.shift())}
+  /* Richieste in parallelo: 1 durante la guida iniziale (la scheda ha poche connessioni e poca RAM), 2 poi */
+  window.fetchLimite=function(n){lim=n;nx()};
   window.fetch=function(u,o){
     return new Promise(function(res,rej){
       q.push({u:u,o:o,res:res,rej:rej});
@@ -2460,7 +2696,7 @@ var GRP=[["home","Home"],["dev","Dispositivi"],["rete","Rete"],["prog","Programm
   ["sys","Sistema"],["sec","Sicurezza"],["info","Informazioni"]];
 var GICO={home:"i-home",dev:"i-usb",rete:"i-wifi",prog:"i-prog",sys:"i-gear",sec:"i-shield",
   info:"i-info"};
-/* UN solo punto per le estensioni dei file (come core/vos_ext.h): schema v + tipo (s script, a app, d driver) + linguaggio (b Berry, e ELF). Oggi script .vsb, app Berry .vab, app ELF .vae, driver .vdb e .vde. I vecchi nomi (.vsc, .vap, .vel) si leggono ancora e non si scrivono piu */
+/* UN solo punto per le estensioni dei file (come core/vos_ext.h): schema v + tipo (s script, a app, d driver) + linguaggio (b funzioni VesevOS, e ELF). Oggi script .vsb, app .vab, app ELF .vae, driver .vdb e .vde. I vecchi nomi (.vsc, .vap, .vel) si leggono ancora e non si scrivono piu */
 var EXT={s:".vsb",b:".vab",e:".vae",db:".vdb",de:".vde"},EXTOLD={s:".vsc",b:".vap",e:".vel"};
 /* Un file di programma: prima il nome nuovo, se non c'e il vecchio. fn(percorso) torna una promessa con {ok,...} */
 function progTry(dir,n,k,fn){
@@ -2473,7 +2709,7 @@ function extOk(name,k){
   var l=name.toLowerCase();
   return l.slice(-EXT[k].length)==EXT[k]||l.slice(-EXTOLD[k].length)==EXTOLD[k]
 }
-var SECN=["Stato","Comandi","Interfacce","Diagnostica","Protocolli","Servizi"];
+var SECN=["Stato","Periferiche","Interfacce","Diagnostica","Protocolli","Servizi"];
 var LASTG={};
 function gOf(id){
   for(var g in GMAP)if(GMAP[g].indexOf(id)>=0)return g;
@@ -2704,6 +2940,7 @@ function loadDict(code){
     DICT={};
     return Promise.resolve()
   }
+  /* il .vlp e gzip: la scheda lo serve con Content-Encoding gzip e il browser lo apre da solo. Se manca (404) o e rovinato: italiano */
   return fetch("/api/langfile?code="+encodeURIComponent(code)).then(function(r){
     if(!r.ok)throw 0;
     return r.json()
@@ -2718,10 +2955,13 @@ function refreshView(){
   fillLangSel();
   applyStatic();
   if(loggedIn()){
-    buildNav();
-    poll();
-    if(cur=="loc")loadLangs();
-    if(cur=="log")loadLog()
+    if(PAGINA){
+      buildNav();
+      if(ROLE>=1)dvList().catch(function(){});
+      poll();
+      if(cur=="loc")loadLangs();
+      if(cur=="log")loadLog()
+    }
   }else showLoginText()
 }
 
@@ -2909,9 +3149,9 @@ function rClean(x){return String(x).replace(/[|;\n\r]/g," ").replace(/\s+/g," ")
 function aParse(a){
   var w=a.split(" "),k=w[0],v=w.slice(1).join(" ");
   if(k=="led-color")return{k:"color",v:v};
-  if(k=="led")return{k:"ledmode",v:v};
+  if(k=="led_rgb1"||k=="led")return{k:"ledmode",v:v};   /* "led" = nome vecchio: si legge e, al salvataggio, si scrive led_rgb1 */
   if(k=="led-bright")return{k:"bright",v:+v};
-  if(k=="led2")return null;
+  if(k=="led1"||k=="led2")return null;
   if(k=="gpio")return{k:"gpio",p:+w[1],v:+w[2]};
   if(k=="wait")return{k:"wait",v:+v};
   if(k=="note")return{k:"note",v:v};
@@ -2928,7 +3168,7 @@ function aParse(a){
 function aSer(a){
   switch(a.k){
     case"color":return"led-color "+String(a.v).replace("#","").toLowerCase();
-    case"ledmode":return"led "+a.v;
+    case"ledmode":return"led_rgb1 "+a.v;
     case"bright":return"led-bright "+a.v;
     case"gpio":return"gpio "+a.p+" "+a.v;
     case"wait":return"wait "+a.v;
@@ -3637,7 +3877,7 @@ function uFw(){
 
 function uRecUp(){
   api("/api/recovery").then(function(r){return r.json()}).then(function(j){
-    if(!j.present){
+    if(!j.present&&!(j.nops&&j.kb)){
       dlg({title:t("Aggiornare il recovery?"),
         body:'<p style="margin:0">'+
         esc(t("Il recovery non e presente su questa scheda: si installa solo con il cavo USB."))+
@@ -3658,10 +3898,16 @@ function uRecUp(){
       +'<p class="law" style="margin:8px 0 0">'+
       esc(t(
         "Non spegnere la scheda durante l'aggiornamento (pochi secondi). VesevOS continua a funzionare."))+
-      '</p>',ok:t("Aggiorna recovery"),
+      '</p>'+(j.nops?'<p class="law" style="margin:8px 0 0" role="alert">'+esc(t(
+        "Questa scheda non ha PSRAM: il recovery viene scritto direttamente. Se si interrompe, il recovery resta inutilizzabile finche non lo riscrivi. Continuare?"))+
+      '</p><label style="display:block;margin:6px 0"><input type="checkbox" id="rcc"> '+
+      esc(t("Ho capito, voglio continuare"))+'</label>':'')+(j.redo||(!j.present&&j.nops)?'<p class="law" style="margin:8px 0 0" role="alert">'+esc(t(
+        "Il recovery attuale non e valido: va riscritto."))+'</p>':''),
+      ok:t("Aggiorna recovery"),
       onOk:function(){
         var f=$("rcf").files[0],h=$("rcs").value.trim();
         if(!f)return t("Scegli il file");
+        if(j.nops&&!$("rcc").checked)return t("Spunta la casella per continuare");
         if(f.size>j.kb*1024)return t("File troppo grande per lo spazio del recovery");
         if(h&&!/^[0-9a-fA-F]{64}$/.test(h))return t(
           "L'impronta SHA-256 deve avere 64 cifre esadecimali");
@@ -3813,7 +4059,7 @@ function draw(id,a,mn,mx){
 /* ===== Home: aggiornamento dei dati, avvisi, schede e widget ===== */
 var PBUSY=0;
 document.addEventListener("visibilitychange",function(){
-  if(!document.hidden&&typeof loggedIn=="function"&&loggedIn())poll()
+  if(!document.hidden&&typeof loggedIn=="function"&&loggedIn()&&PAGINA)poll()
 });
 var RF=3;
 try{
@@ -3914,6 +4160,8 @@ function alertsCalc(s,hp,pp,fp){
       if(!a.ack)AL.push([a.lv==2?"k":"w",a.text,1])
     });
   agNota(s.agg);
+  arNota(s.ris);
+  langNota(s.lerr);
   evNota(s.evb);
   if(s.hot)AL.push(["k",t("Temperatura CPU troppo alta")]);
   if(hp>=90)AL.push(["k",t("RAM quasi esaurita")]);
@@ -4016,8 +4264,14 @@ function homeDraw(){
     ws=esc(n.mode)+(n.st==1?" · "+esc(tf("{0} client",n.clients||0)):"")+(n.ip?"<br>"+esc(n.ip):"");
   var rv=s.rev,revs=Math.floor(rv/100)+"."+rv%100,mhz=s.cpuMhz;
   var th=(s.tempHist||[]).map(function(v){return s.tempUnit?v*9/5+32:v});
-  var cx=hlines([[s.cpu0Hist,"#3fa7ff"],[s.cpu1Hist,"#b07cff"]],0,100,34)+
-    hleg([["C0","#3fa7ff",s.cpu0+"%"],["C1","#b07cff",s.cpu1+"%"]])+
+  var cc=s.cpuCore||[],ch=s.cpuCoreHist||[],cl=["#3fa7ff","#b07cff","#ff6b9d","#4cd08a"],
+    cser=[],cleg=[];
+  for(var i=0;i<cc.length;i++){
+    cser.push([ch[i]||[],cl[i%cl.length]]);
+    cleg.push([cc.length>1?"C"+i:"CPU",cl[i%cl.length],cc[i]+"%"]);
+  }
+  var cx=hlines(cser,0,100,34)+
+    hleg(cleg)+
     hlines([[th,"#ff9f43"]],th.length?Math.min.apply(null,th)-2:0,
       th.length?Math.max.apply(null,th)+2:1,26)+
     hleg([[t("Temp."),"#ff9f43",tmp(s.temp,s.tempUnit)]]);
@@ -4029,8 +4283,8 @@ function homeDraw(){
     hring("CPU",s.cpu+"%",s.cpu,hcol(s.cpu,60,85),"i-chipn","cpu",mhz+" MHz",cx)+
     hring("RAM",hp+"%",hp,hcol(hp,80,92),"i-mem","mem",memTx(s.heapTotal-s.heapFree,s.heapTotal),
       hlines([[s.ramHist,"#3fa7ff"]],0,100,34))+
-    hring("PSRAM",pp+"%",pp,hcol(pp,80,92),"i-mem","mem",
-      memTx(s.psramTotal-s.psramFree,s.psramTotal),hlines([[s.psHist,"#2ecc71"]],0,100,34))+
+    (s.psramTotal>0?hring("PSRAM",pp+"%",pp,hcol(pp,80,92),"i-mem","mem",
+      memTx(s.psramTotal-s.psramFree,s.psramTotal),hlines([[s.psHist,"#2ecc71"]],0,100,34)):"")+
     hring(t("File"),fp+"%",fp,hcol(fp,75,90),"i-disk","file",memTx(s.flashUsed,s.flashTotal),
       hlines([[s.flHist,"#ffb020"]],0,100,34))+hring(t("Wi-Fi"),wt,wp,wc,"i-wifi","wifi",ws,wx)+
     '</section>';
@@ -4040,14 +4294,19 @@ function homeDraw(){
     '</div><div style="height:8px"></div>'+
     row(t("Chip"),esc(s.chip)+" rev "+revs)+
     row(t("Processore"),tf("{0} core a {1} MHz",s.cores,mhz))+
-    row(t("Memoria"),tf("{0} MB flash · {1} MB PSRAM",Math.round(s.flashChip/1048576),
-      Math.round(s.psramTotal/1048576)))+
+    row(t("Memoria"),s.psramTotal>0?tf("{0} MB flash · {1} MB PSRAM",Math.round(s.flashChip/1048576),
+      Math.round(s.psramTotal/1048576)):tf("{0} MB flash",Math.round(s.flashChip/1048576)))+
     row(t("Acceso da"),esc(s.uptime))+row(t("Ore di vita"),fmtDur(s.lifeSec))+
     row(t("Avvii totali"),s.boots)+row(t("Ultimo reset"),esc(s.reset))+
     row(t("Versione"),esc(s.name+" "+s.version))+
     '<button class="btn" style="margin-top:10px" onclick="identify()">'+
     esc(t("Trova questa scheda"))+'</button><div id="idm" class="msg"></div></section>';
-  $("home").innerHTML=h
+  $("home").innerHTML=h;
+  var dsm=String(s.chip||"").toLowerCase().match(/esp32-[a-z0-9]+/),dsl=$("dsl");
+  if(dsm&&dsl){
+    dsl.href="https://documentation.espressif.com/"+dsm[0]+"_datasheet_en.pdf";
+    dsl.textContent=t("Datasheet")+" "+s.chip+" (Espressif)"
+  }
 }
 var HW=null,HWT=0,HWU=null;
 function hdTick(){
@@ -4348,7 +4607,7 @@ function setFromBrowser(){
       if(j.ok)loadTime()
     })
 }
-/* ===== Avvio: programmi con avvio automatico (script, app Berry, app ELF). Elenco e ordine; solo l'Admin cambia ===== */
+/* ===== Avvio: programmi con avvio automatico (script, app, app ELF). Elenco e ordine; solo l'Admin cambia ===== */
 var BP={list:[],cand:[],max:8};
 function bpLoad(){
   var cs=[];
@@ -4432,6 +4691,246 @@ function bpSave(){
     msg("bpm",t("Salvato"),true)
   }).catch(function(){})
 }
+/* Componente unico "Carica da file" della pagina Sicurezza > Aggiornamenti (solo Amministratore).
+   Lo stesso codice serve le quattro schede; cambia solo la riga della tabella CF_TIPI:
+   - fw e rec: apre il dialogo che c'e gia (firmware: riavvio nel recovery; recovery: scrittura diretta con i suoi controlli). Nessun controllo cambiato.
+   - pac: uno o piu file, il tipo si capisce dall'estensione (.vsb script, .vab e .vae app, .vdb e .vde driver, e i vecchi .vsc .vap .vel .vdp).
+   - ris: uno o piu file di /usr/share/vesevos; SHA256SUMS per primo, poi gli altri. Nome, lunghezza e SHA-256 si controllano QUI
+     contro l'elenco della scheda, poi la scheda li ricontrolla. Un file rifiutato non ferma gli altri.
+   Nessuna rotta nuova: pac usa /api/fs/up e /api/mod/save, ris usa /api/risorse/carica. */
+var CF={busy:{}};
+var CF_TIPI={
+  fw:{
+    az:function(){agOrdine(updFile)},
+    cls:"btn gray",
+    et:function(){return t("Carica un file dal computer")}
+  },
+  rec:{
+    az:function(){uRecUp()},
+    cls:"btn",
+    et:function(){return t("Carica da file")},
+    nota:function(){
+      return t(
+        "Il recovery serve a rimettere a posto la scheda: e l'operazione piu delicata. La scheda controlla tutto il file prima di scriverlo e, se e sbagliato, il recovery attuale resta com'e.")
+    }
+  },
+  pac:{
+    file:true,
+    acc:".vsb,.vab,.vae,.vdb,.vde,.vsc,.vap,.vel,.vdp",
+    cls:"btn",
+    et:function(){return t("Carica da file")},
+    nota:function(){
+      return t(
+        "Scegli uno o piu file: script (.vsb), app (.vab, .vae) o driver (.vdb, .vde). Il tipo si capisce dall'estensione.")
+    },
+    prepara:function(){return Promise.resolve({})},
+    ordina:function(l){return l},
+    controlla:function(f,cx){return cfPacControlla(f,cx)},
+    invia:function(f,cx){return cfPacInvia(f,cx)},
+    dopo:function(){return agPacLista().catch(function(){})}
+  },
+  ris:{
+    file:true,
+    acc:"",
+    cls:"btn",
+    et:function(){return t("Carica da file")},
+    nota:function(){
+      return t(
+        "Scegli uno o piu file di risorse (anche dalla cartella delle risorse sul computer). SHA256SUMS si carica per primo; gli altri si riconoscono dal nome e dallo SHA-256 dell'elenco della scheda.")
+    },
+    prepara:function(){return cfRisPrepara()},
+    ordina:function(l){
+      return l.filter(function(f){return f.name=="SHA256SUMS"}).concat(
+        l.filter(function(f){return f.name!="SHA256SUMS"}))
+    },
+    controlla:function(f,cx){return cfRisControlla(f,cx)},
+    invia:function(f,cx){return cfRisInvia(f,cx)},
+    dopo:function(){
+      return arRileggi().then(function(){return arAttendi(0)}).then(agLoad,function(){})
+    }
+  }
+};
+
+function cfByte(n){return n<1024?n+" B":kb(n)}
+/* il pulsante e il resto si disegnano di nuovo solo se cambia la lingua: i risultati a video restano */
+function cfMonta(k){
+  var c=$("cf_"+k),T=CF_TIPI[k],h;
+  if(!c||c.getAttribute("data-l")==LANG)return;
+  h='<button type="button" class="'+T.cls+'" id="cf_b_'+k+'" data-k="'+k+
+    '" onclick="cfClic(this.dataset.k)">'+esc(T.et())+'</button>';
+  if(T.file)h+='<input type="file" id="cf_f_'+k+'" hidden multiple'+(T.acc?' accept="'+T.acc+'"':'')+
+    ' data-k="'+k+'" aria-label="'+esc(T.et())+'" onchange="cfScelti(this.dataset.k)">';
+  if(T.nota)h+='<p class="fhint" id="cf_n_'+k+'">'+esc(T.nota())+'</p>';
+  if(T.file)h+='<div class="fhint" id="cf_p_'+k+'" role="status"></div>'+
+    '<ul class="cfr" id="cf_r_'+k+'" aria-live="polite" aria-relevant="additions"></ul>';
+  c.innerHTML=h;
+  c.setAttribute("data-l",LANG)
+}
+
+function cfMontaTutti(){["fw","rec","pac","ris"].forEach(cfMonta)}
+
+function cfClic(k){
+  var T=CF_TIPI[k];
+  if(CF.busy[k])return;
+  if(T.az)T.az();
+  else $("cf_f_"+k).click()
+}
+
+function cfScelti(k){
+  var inp=$("cf_f_"+k),l=Array.prototype.slice.call(inp.files);
+  inp.value="";
+  if(l.length)cfEsegui(k,l)
+}
+
+function cfAggiungi(k,nome,ok,m){
+  var li=document.createElement("li"),b=document.createElement("b");
+  b.textContent=nome;
+  li.appendChild(b);
+  li.appendChild(document.createTextNode(": "+(ok?"":t("Rifiutato")+". ")+m));
+  if(!ok)li.className="ko";
+  $("cf_r_"+k).appendChild(li)
+}
+/* un file alla volta, nell'ordine: controlla, invia, scrive l'esito. Un errore di un file non ferma i successivi */
+function cfUno(k,l,cx,i,n){
+  var T=CF_TIPI[k],f;
+  if(i>=l.length)return Promise.resolve(n);
+  f=l[i];
+  $("cf_p_"+k).textContent=tf("Invio di {0} ({1} di {2})...",f.name,i+1,l.length);
+  return T.controlla(f,cx).then(function(e){
+    if(e)throw e;
+    return T.invia(f,cx)
+  }).then(function(m){
+    cfAggiungi(k,f.name,true,m);
+    return 1
+  },function(e){
+    cfAggiungi(k,f.name,false,typeof e=="string"?e:t("Caricamento non riuscito"));
+    return 0
+  }).then(function(v){return cfUno(k,l,cx,i+1,n+v)})
+}
+
+function cfEsegui(k,l){
+  var T=CF_TIPI[k],b=$("cf_b_"+k),r=$("cf_r_"+k),p=$("cf_p_"+k);
+  CF.busy[k]=true;
+  b.disabled=true;
+  b.setAttribute("aria-busy","true");
+  r.innerHTML="";
+  p.textContent=t("Controllo in corso...");
+  T.prepara().then(function(cx){
+    return cfUno(k,T.ordina(l),cx,0,0)
+  }).then(function(n){
+    p.textContent=tf("Caricati {0} file su {1}",n,l.length)
+  },function(e){
+    p.textContent=typeof e=="string"?e:t("Caricamento non riuscito")
+  }).then(function(){
+    return T.dopo()
+  }).then(function(){
+    CF.busy[k]=false;
+    b.disabled=false;
+    b.removeAttribute("aria-busy");
+    b.focus()
+  })
+}
+/* --- pacchetti: la rotta si sceglie dall'estensione (come js_script.js, js_app.js, js_driver.js) --- */
+function cfPacRotta(f){
+  var n=f.name.toLowerCase(),i=n.lastIndexOf("."),e=i<0?"":n.slice(i);
+  if(e==EXT.s||e==EXTOLD.s)return{dir:"/sbin"};
+  if(e==EXT.b||e==EXTOLD.b)return{dir:"/bin"};
+  if(e==EXT.e||e==EXTOLD.e){
+    if(!(AUTH&&AUTH.elf))return{err:t("Le app in codice nativo non sono abilitate su questa scheda")};
+    return{dir:"/bin"}
+  }
+  if(e==EXT.de)return{dir:"/devs"};
+  if(e==EXT.db||e==".vdp"){
+    if(f.size>16384)return{err:t("File troppo grande (massimo 16 KB)")};
+    return{driver:n.slice(0,i)}
+  }
+  return{err:tf("Estensione non ammessa: {0}",e||"-")}
+}
+
+function cfPacControlla(f,cx){
+  var r=cfPacRotta(f);
+  cx.r=r;
+  return Promise.resolve(r.err||(f.size?"":tf("Dimensione non valida: {0}",f.name)))
+}
+
+function cfPacInvia(f,cx){
+  var r=cx.r,fd,p;
+  if(r.driver)p=f.text().then(function(x){return post("/api/mod/save",{name:r.driver,text:x})});
+  else{
+    fd=new FormData();
+    fd.append("file",f);
+    p=api("/api/fs/up?dir="+r.dir,{method:"POST",body:fd})
+  }
+  return p.then(function(x){return x.json()}).then(function(j){
+    if(!j.ok)throw (j.err||t("Errore"));
+    return j.avviso||t("Caricato")
+  },function(){throw t("Caricamento non riuscito")})
+}
+/* --- risorse: l'elenco SHA256SUMS della scheda dice quali nomi sono ammessi, quanto sono grandi e che SHA-256 devono avere --- */
+function cfRisPrepara(){
+  return arRileggi().then(function(){
+    var r=AG.d&&AG.d.ris;
+    if(!r)throw t("La scheda non ha dato l'elenco dei file di risorse");
+    return{ris:r}
+  },function(){throw t("Richiesta non riuscita")})
+}
+
+function cfRisVoce(r,n){
+  var v=null;
+  r.f.forEach(function(x){if(x.n==n)v=x});
+  return v
+}
+/* risposta "" = file buono; altrimenti il motivo del rifiuto (nulla parte verso la scheda) */
+function cfRisControlla(f,cx){
+  var r=cx.ris,n=f.name,v=null,tetto=AR_ELENCO_TETTO;
+  if(n!="SHA256SUMS"){
+    if(r.el!=0)return Promise.resolve(t(
+      "L'elenco SHA256SUMS della scheda non e valido: carica prima SHA256SUMS"));
+    v=cfRisVoce(r,n);
+    if(!v)return Promise.resolve(tf("Nome sconosciuto: {0} non e nell'elenco della scheda",n));
+    tetto=v.t
+  }
+  if(!f.size)return Promise.resolve(tf("Dimensione non valida: {0}",n));
+  if(f.size>tetto)return Promise.resolve(tf("File troppo grande: {0} (massimo {1})",n,cfByte(tetto)));
+  return f.arrayBuffer().then(function(b){
+    var u=new Uint8Array(b);
+    cx.dati=u;
+    if(n=="SHA256SUMS")return arElencoOk(u,r)?"":tf(
+      "Questo SHA256SUMS non e valido (formato o nomi): {0}",n);
+    return hexb(sha256b(u))==v.h?"":tf("SHA-256 diverso dall'elenco della scheda: {0}",n)
+  })
+}
+/* Spazio insufficiente (409): la scheda non da numeri, quindi si legge lo spazio libero della memoria interna e si confronta con la dimensione del file */
+function cfRisSpazio(dim){
+  return api("/api/fs/list?path=/").then(function(r){return r.json()}).then(function(j){
+    var u=j.u||1;
+    return tf("Spazio insufficiente per sostituire il file: servono circa {0}, liberi {1}",
+      cfByte(dim),cfByte(Math.max(0,(j.total-j.used)*u)))
+  }).catch(function(){return t("Spazio insufficiente per sostituire il file")})
+}
+
+function cfRisInvia(f,cx){
+  var fd=new FormData();
+  fd.append("file",new Blob([cx.dati]),f.name);
+  return api("/api/risorse/carica",{method:"POST",body:fd}).then(function(r){
+    return r.json().then(function(j){
+      j.s=r.status;
+      return j
+    })
+  },function(){throw t("Caricamento non riuscito")}).then(function(j){
+    if(j.ok){
+      if(f.name!="SHA256SUMS")return t("Caricato");
+      return arRileggi().then(function(){
+        cx.ris=AG.d.ris;
+        return t("Caricato")
+      },function(){return t("Caricato")})
+    }
+    if(j.s==409||j.code=="state")return cfRisSpazio(f.size).then(function(m){throw m});
+    throw (j.err||t("Errore"))
+  })
+}
+/* i pulsanti ci sono subito (in italiano); agDraw li ridisegna se la lingua cambia */
+cfMontaTutti();
 /* Aggiornamento tramite recovery (solo Amministratore): due strade, file dal computer o rete (GitHub), e l'esito dell'ultimo aggiornamento.
    La scheda scrive un ordine, si riavvia nel recovery e il recovery esegue. Nessuna password passa al recovery. */
 var UPD_CHK=0;
@@ -4592,8 +5091,11 @@ function updWaitBack(){
    Il controllo gira sulla scheda in un suo task: la pagina lo avvia e rilegge lo stato finche non finisce. */
 /* store: elenco pubblicato, letto dal browser e confrontato qui. Si legge solo a controllo acceso o dopo Verifica ora: mai da spento senza richiesta. */
 var AG={d:null,sch:0,tm:0,st:null,pre:false,vec:0,prima:true,pac:null};
-var AG_STORE="https://raw.githubusercontent.com/paolellad79/VesevOS/main/store/index.json",
-  AG_STORE_TETTO=32768,AG_STORE_VOCI=40;
+/* UN solo punto per gli indirizzi delle sorgenti (modello apt: vedi COSE-DA-FARE #repository-configurabile-2026-11-16).
+   Oggi vale un solo valore, la sorgente ufficiale del progetto: base + parte dello store e delle risorse. Nessun altro indirizzo nel codice. */
+var AG_REPO={base:"https://raw.githubusercontent.com/paolellad79/VesevOS/main/",store:"store/index.json",
+  risorse:"risorse/"};
+var AG_STORE=AG_REPO.base+AG_REPO.store,AG_STORE_TETTO=32768,AG_STORE_VOCI=40;
 function agRiga(e,v){return v?row(e,v):""}
 function agQuando(n){return n?new Date(n*1000).toLocaleString():t("mai")}
 function agLoad(){
@@ -4608,6 +5110,8 @@ function agLoad(){
 }
 
 function agDraw(d){
+  cfMontaTutti();
+  arDraw(d);
   $("ag_stato").innerHTML=
     row(t("Firmware installato"),esc(d.fw))+
     row(t("Recovery installato"),d.recOk?esc(d.rec||t("versione sconosciuta")):t("non presente"))
@@ -4661,7 +5165,7 @@ function agScelta(){
 /* le schede seguono il modello WAI-ARIA: solo quella attiva e nella sequenza di Tab, le frecce spostano tra le schede */
 function agTab(i,fuoco){
   AG.sch=i;
-  [0,1,2,3].forEach(function(k){
+  [0,1,2,3,4].forEach(function(k){
     var b=$("ag_t"+k),on=k==i;
     b.className=on?"on":"";
     b.setAttribute("aria-selected",on?"true":"false");
@@ -4675,10 +5179,10 @@ function agTab(i,fuoco){
 
 function agTasto(e){
   var i=AG.sch,k=e.key;
-  if(k=="ArrowRight")i=(i+1)%4;
-  else if(k=="ArrowLeft")i=(i+3)%4;
+  if(k=="ArrowRight")i=(i+1)%5;
+  else if(k=="ArrowLeft")i=(i+4)%5;
   else if(k=="Home")i=0;
-  else if(k=="End")i=3;
+  else if(k=="End")i=4;
   else return;
   e.preventDefault();
   agTab(i,true)
@@ -4850,6 +5354,140 @@ function agNota(n){
   if(n.k==1)AL.push(["i",tf("Aggiornamento disponibile: firmware {0}",n.v),"agg"]);
   else if(n.k==2)AL.push(["i",tf("Aggiornamento installato: {0}",n.v),"agg"]);
   else if(n.k==3)AL.push(["w",t("Aggiornamento non riuscito"),"agg"])
+}
+/* Scheda "Risorse" (Sicurezza > Aggiornamenti, solo Amministratore): stato di ogni file di /usr/share/vesevos e, su clic, nuovo scarico.
+   Come per lo store: lo scarica il BROWSER da GitHub (la scheda non ha bisogno di internet), senza credenziali e senza referrer.
+   Lunghezza e SHA-256 si controllano QUI prima di caricare; la scheda li ricontrolla con il suo elenco SHA256SUMS e rifiuta un file diverso.
+   Stati (come RisStato nel firmware): 0 da controllare, 1 buono, 2 diverso dall'elenco, 3 mancante, 4 non verificabile (elenco non valido). */
+/* identita: DUE righe distinte. Firmware = versione letta dalla scheda (/api/aggiorna, campo fw); Pagina = numero proprio di html.vrs
+   (costante messa da mkweb.py, intero da 1) e prime 8 cifre dello SHA-256 di html.vrs lette dall'elenco della scheda. */
+var PAG_VER="1";
+function pagIdRighe(){
+  var d=(typeof AG!="undefined")?AG.d:null;
+  var f=((d&&d.ris&&d.ris.f)||[]).filter(function(x){return x.n=="html.vrs"})[0];
+  var pag=(f&&f.h)?tf("Pagina: versione {0} (impronta SHA-256 {1})",PAG_VER,f.h.slice(0,8)):tf("Pagina: versione {0}",PAG_VER);
+  return [tf("Firmware: {0}",(d&&d.fw)?d.fw:"?"),pag]
+}
+function pagIdHtml(){
+  return pagIdRighe().map(esc).join("<br>")
+}
+function pagIdDisegna(){
+  var e=$("pag_id");
+  if(!e)return;
+  e.innerHTML=pagIdHtml();
+  if(typeof AG!="undefined"&&!AG.d&&!AG.idCarico){
+    AG.idCarico=true;
+    api("/api/aggiorna").then(function(r){return r.json()}).then(function(d){
+      if(d&&d.fw){AG.d=AG.d||d;e.innerHTML=pagIdHtml()}
+    }).catch(function(){})
+  }
+}
+var AR_BASE=AG_REPO.base+AG_REPO.risorse,AR_ELENCO_TETTO=1024,AR={busy:false};
+function arTesto(s){
+  if(s==1)return t("buono");
+  if(s==2)return t("diverso dall'elenco");
+  if(s==3)return t("mancante");
+  if(s==4)return t("non verificabile");
+  return t("da controllare")
+}
+/* le voci della tabella: prima l'elenco SHA256SUMS, poi ogni file (il loro stato conta solo se l'elenco e buono) */
+function arVoci(d){
+  var r=d&&d.ris,v=[];
+  if(!r)return v;
+  v.push({n:"SHA256SUMS",s:r.el==0?1:(r.el==1?3:2),h:"",t:AR_ELENCO_TETTO,e:true});
+  r.f.forEach(function(f){v.push({n:f.n,s:r.el==0?f.s:4,h:f.h,t:f.t,e:false})});
+  return v
+}
+function arDaScaricare(v){return v.filter(function(x){return x.s==2||x.s==3})}
+function arDraw(d){
+  var v=arVoci(d),h="";
+  if(!$("ag_ris"))return;
+  pagIdDisegna();
+  h='<p class="fhint">'+pagIdHtml()+'</p>';
+  if(v.length){
+    h+='<table class="ftab" aria-label="'+esc(t("Risorse"))+'"><tr><th scope="col">'+esc(t("File"))+
+      '</th><th scope="col">'+esc(t("Stato"))+'</th><th scope="col">'+esc(t("Versione"))+'</th></tr>';
+    v.forEach(function(x){
+      h+='<tr><td>'+esc(x.n)+'</td><td>'+(x.s==2||x.s==3?'<b>'+esc(arTesto(x.s))+'</b>':esc(arTesto(x.s)))+'</td><td>'+(x.n=="html.vrs"?esc(PAG_VER):"")+'</td></tr>'
+    });
+    h+='</table>'
+  }
+  $("ag_ris").innerHTML=h;
+  $("ag_rb").disabled=AR.busy||!arDaScaricare(v).length
+}
+/* l'elenco scaricato: formato di sha256sum, al massimo 16 righe, solo nomi di file che la scheda conosce (nessuna ancora al firmware) */
+function arElencoOk(u,ris){
+  var x,righe,noti=((ris&&ris.f)||[]).map(function(f){return f.n});
+  try{x=new TextDecoder("utf-8",{fatal:true}).decode(u)}catch(e){return false}
+  if(!/^([0-9a-f]{64}  [A-Za-z0-9._-]{1,40}\n){1,16}$/.test(x))return false;
+  righe=x.match(/[^\n]*\n/g);
+  return righe.every(function(r){return noti.indexOf(r.slice(66,-1))>=0})
+}
+/* un file: scarica, controlla lunghezza e SHA-256 contro la riga dell'elenco della scheda, poi lo carica. Errore = testo per l'utente */
+function arUno(fw,x,ris){
+  return fetch(AR_BASE+fw+"/"+x.n,{credentials:"omit",referrerPolicy:"no-referrer",cache:"no-cache"}).then(function(r){
+    if(!r.ok)throw tf("Scarico non riuscito: {0}",x.n);
+    return r.arrayBuffer()
+  }).then(function(b){
+    var u=new Uint8Array(b),fd=new FormData();
+    if(!u.length||u.length>x.t)throw tf("Dimensione non valida: {0}",x.n);
+    if(x.e?!arElencoOk(u,ris):hexb(sha256b(u))!=x.h)throw tf("Il file scaricato non corrisponde all'elenco della scheda: {0}",x.n);
+    fd.append("file",new Blob([u]),x.n);
+    return api("/api/risorse/carica",{method:"POST",body:fd})
+  }).then(function(r){return r.json()}).then(function(j){
+    if(!j.ok)throw (j.err||t("Errore"))
+  })
+}
+function arRileggi(){
+  return api("/api/aggiorna").then(function(r){return r.json()}).then(function(d){AG.d=d})
+}
+/* dopo un caricamento i file grandi si ricontrollano nel ciclo della scheda: si aspetta che non ce ne siano piu "da controllare" (al massimo 12 giri) */
+function arAttendi(n){
+  var daControllare=((AG.d&&AG.d.ris&&AG.d.ris.f)||[]).some(function(f){return f.s==0});
+  if(!daControllare||n>=12)return Promise.resolve();
+  return new Promise(function(ok){setTimeout(ok,1500)}).then(arRileggi).then(function(){return arAttendi(n+1)})
+}
+function arCiclo(fw){
+  var fatti=0,provati={};
+  function giro(){
+    var v=arDaScaricare(arVoci(AG.d)),x=v[0];
+    if(!x)return Promise.resolve(fatti);
+    if(provati[x.n])return Promise.reject(tf("Il file resta diverso dopo il caricamento: {0}",x.n));
+    provati[x.n]=1;
+    return arUno(fw,x,AG.d.ris).then(function(){
+      fatti++;
+      return arRileggi()
+    }).then(function(){return arAttendi(0)}).then(giro)
+  }
+  return giro()
+}
+function arScarica(){
+  var d=AG.d;
+  if(!d||!d.ris||AR.busy)return;
+  if(!/^[0-9a-z.]{1,16}$/.test(d.fw)){
+    msg("ag_rm",t("Versione del firmware non valida"));
+    return
+  }
+  AR.busy=true;
+  $("ag_rb").disabled=true;
+  msg("ag_rm",t("Scarico in corso..."),true);
+  arCiclo(d.fw).then(function(n){
+    msg("ag_rm",tf("File caricati di nuovo: {0}",n),true)
+  },function(e){
+    msg("ag_rm",typeof e=="string"?e:t("Scarico non riuscito"))
+  }).then(function(){
+    AR.busy=false;
+    agLoad()
+  })
+}
+/* la campanella: un file con problema, con il motivo; poi il rimando alla pagina */
+function arNota(n){
+  var m;
+  if(!n||!n.k)return;
+  m=tf("Risorsa {0}: {1}. Scaricala di nuovo o caricala da file: Sicurezza > Aggiornamenti",n.n,
+    n.s==3?t("mancante"):t("diverso dall'elenco"));
+  if(n.k>1)m+=" +"+(n.k-1);
+  AL.push(["w",m,"agg"])
 }
 /* Pagina Eventi di sicurezza (solo Amministratore). I dati stanno nella RAM della scheda: nomi e indirizzi passano sempre da esc(). */
 var EV={d:null};
@@ -5828,6 +6466,62 @@ function pick(i){
   $("w_ssid").value=window._sc[i].ssid;
   $("w_pass").focus()
 }
+/* Pagina Rete > IP > IPv6: elenco degli indirizzi, interruttore e indirizzo fisso (rotta /api/ip6). */
+var IP6={};
+
+function apriIp(){
+  fillNet();
+  ip6Load()
+}
+
+function ip6Tipo(n){
+  return [t("locale"),t("globale"),t("privato"),t("altro")][n]||""
+}
+
+function ip6Modo(){
+  $("i6_fx").classList.toggle("hide",$("i6_modo").value!="1")
+}
+
+function ip6Draw(j){
+  var h="",st=$("i6_stato");
+  IP6=j;
+  if(!j.presente)st.textContent=t("IPv6 non e disponibile in questo firmware.");
+  else if(!j.acceso)st.textContent=t("IPv6 e spento: accendilo dalle impostazioni qui sotto.");
+  else if(!j.collegato)st.textContent=t("La scheda non e collegata alla Wi-Fi di casa: gli indirizzi compaiono dopo il collegamento.");
+  else if(!j.elenco.length)st.textContent=t("IPv6 acceso: attendo gli indirizzi dal router.");
+  else st.textContent=tf("Indirizzi IPv6: {0}",j.elenco.length);
+  if(j.elenco.length)h="<tr><th>"+t("Indirizzo")+"</th><th>"+t("Tipo")+"</th><th>"+t("Stato")+"</th></tr>";
+  j.elenco.forEach(function(a){
+    h+="<tr><td>"+esc(a.a)+"/"+j.prefisso+"</td><td>"+esc(ip6Tipo(a.t))+"</td><td>"+
+      esc(a.p?t("in uso"):t("in verifica"))+"</td></tr>"
+  });
+  $("i6_tab").innerHTML=h;
+  $("i6_on").classList.toggle("on",!!j.acceso);
+  $("i6_modo").value=j.fisso?"1":"0";
+  if(document.activeElement!==$("i6_ind"))$("i6_ind").value=j.ind||"";
+  if(document.activeElement!==$("i6_gw"))$("i6_gw").value=j.gw||"";
+  if(document.activeElement!==$("i6_dns"))$("i6_dns").value=j.dns||"";
+  ip6Modo()
+}
+
+function ip6Load(){
+  api("/api/ip6").then(function(r){return r.json()}).then(ip6Draw).catch(function(){})
+}
+
+function ip6Save(){
+  post("/api/ip6",{acceso:$("i6_on").classList.contains("on")?"1":"0",
+    fisso:$("i6_modo").value,ind:$("i6_ind").value.trim(),gw:$("i6_gw").value.trim(),
+    dns:$("i6_dns").value.trim()})
+    .then(function(r){return r.json()}).then(function(j){
+      if(j.err){
+        msg("i6m",j.err,false);
+        return
+      }
+      msg("i6m",t("Salvato"),true);
+      ip6Draw(j);
+      setTimeout(ip6Load,3000)
+    }).catch(function(){})
+}
 /* ===== Terminale ===== */
 var SH={h:[],i:0,q:[],busy:false,loaded:false,p:"vesevos> ",tabBusy:false,tabT:0,tabLine:null,
   ask:null};
@@ -6277,12 +6971,44 @@ function saveLed(){
     msg("lm2",j.ok?t("Salvato"):j.err,j.ok)
   })
 }
+/* ===== LED1 (LED monocromatico) =====
+   Stessi modi e stessa luminosita (0-255) del LED_RGB1, senza colori. Si legge e si salva con /api/dev (id led1). */
+var L2={thr:70};
+
+/* I modi 4-6 (lampi flash, wifi, carico CPU) li cambia solo l'Admin; gli altri li vedono ma non li toccano. */
+function led2Show(){
+  var m=+$("l2_mode").value,adm=ROLE==2;
+  $("l2_src").className=m>=4?"":"hide";
+  $("l2_thr").disabled=!adm;
+  $("l2_thr").parentNode.className=m==6?"":"hide";
+  Array.prototype.forEach.call($("l2_mode").options,function(o){
+    o.disabled=!adm&&+o.value>=4&&+o.value!=m
+  })
+}
+
+function apriLed2(id){
+  $("l2_tit").textContent=voceTitolo(id);
+  aliasPannello("al_led1",BDI[id]);
+  api("/api/dev?id=led1").then(function(r){return r.json()}).then(function(j){
+    var d=j.data||{};
+    $("l2_mode").value=d.mode;
+    $("l2_thr").value=d.thr;
+    $("l2_br").value=d.br;
+    led2Show()
+  }).catch(function(){})
+}
+
+function led2Salva(){
+  var arg=$("l2_mode").value+","+$("l2_thr").value+","+$("l2_br").value;
+  post("/api/dev/act",{id:"led1",a:"set",arg:arg}).then(function(r){return r.json()}).then(function(j){
+    msg("l2_m",j.mode!==undefined?t("Salvato"):j.err,j.mode!==undefined)
+  }).catch(function(){})
+}
 /* ===== Pin: stato e dati della scheda ===== */
 var PM=[],PSEL=-1,PWARN=false,PTM=null,PT={gpio:-1};
 var PBI=null,PV="f",PNOTE={};
-var PWR={"5V":"#d64545","3V3":"#e08a2c","GND":"#222"};
-/* scheda: tutti i numeri arrivano dal firmware (/api/pins/info, file di scheda); senza risposta niente disegno */
-function brdLay(k){return PBI&&PBI.lay&&PBI.lay[k]?PBI.lay[k].map(String):[]}
+var PWR={"5V":"#d64545","3V3":"#e08a2c","GND":"#222","B+":"#d64545","B-":"#222","BOOST":"#7a6a2a"};
+/* scheda: tutti i numeri arrivano dal firmware (/api/pins/info, file di scheda, tabella "tab"); senza risposta niente disegno */
 function brdIn(k,g){
   var r=PBI&&PBI[k];
   return !!r&&g>=r[0]&&g<=r[1]
@@ -6292,10 +7018,101 @@ function brdMax(){return PBI&&PBI.gmax!=null?PBI.gmax:""}
 function brdLoad(){
   return api("/api/pins/info").then(function(r){return r.json()}).then(function(b){
     PBI=b;
+    pinTabLoad(b&&b.tab);
     var e=$("io_g");
     if(e)e.max=brdMax();
     return b
   }).catch(function(){})
+}
+/* Tabella dei piedini dichiarata nel file di scheda (/api/pins/info, campo "tab"): una riga per piedino o piazzola,
+   [lato, posizione, gpio, tipo, bit]. Da qui nascono il disegno della scheda, i fili, i suggerimenti e le funzioni:
+   nella pagina non ci sono elenchi di pin ne rami per chip. Lati: 0 sinistra, 1 destra, 2 basso (bordo corto),
+   3 retro esterno sinistro, 4 retro destro, 5 retro alto, 6 retro interno sinistro. */
+var PTAB=[],PTIPO=["","5V","3V3","GND","B+","B-","BOOST"];
+var PBIT={adc:1,tocco:2,uart:4,spi:8,jtag:16,usb:32,rtc:64,avvio:128,led:256,tasto:512};
+var PFNOMI=[[1,"ADC"],[2,"Touch"],[4,"UART0"],[8,"SPI"],[16,"JTAG"],[32,"USB"],[64,"RTC"]];
+var PRETRO_DY=20;   // passo delle piazzole del retro
+
+function pinTabLoad(rows){
+  PTAB=(rows||[]).filter(function(r){return r&&r.length>=5}).map(function(r){
+    return {lato:r[0],pos:r[1],g:r[2],tipo:r[3],bit:r[4],lab:r[2]>=0?String(r[2]):PTIPO[r[3]]||"?"}
+  })
+}
+
+function pinTabLato(l){
+  return PTAB.filter(function(r){return r.lato==l}).sort(function(a,c){return a.pos-c.pos})
+}
+
+function pinTabGpio(g){
+  for(var i=0;i<PTAB.length;i++)if(PTAB[i].g==g)return PTAB[i];
+  return null
+}
+
+/* funzioni fisse del pin, dal file di scheda (es. "ADC, Touch, RTC") */
+function pinFnTxt(g){
+  var r=pinTabGpio(g),w=[];
+  if(PBI&&g==PBI.boot)w.push("BOOT");
+  if(PBI&&g==PBI.led)w.push("LED");
+  if(r)PFNOMI.forEach(function(f){
+    if(r.bit&f[0])w.push(f[1])
+  });
+  return w.join(", ")
+}
+
+function pinTabMax(l){
+  var n=0;
+  pinTabLato(l).forEach(function(r){n=Math.max(n,r.pos+1)});
+  return n
+}
+
+/* altezza della scheda: serve a far stare file di pin, bordo in basso e piazzole del retro */
+function pinBoardH(bw,st){
+  var righe=Math.max(pinTabMax(0),pinTabMax(1)),
+    h=Math.max(Math.round(bw*PBR),PY0+(righe-1)*st+20+(pinTabMax(2)?28:0)),
+    rr=Math.max(pinTabMax(3),pinTabMax(4),pinTabMax(6));
+  if(rr)h=Math.max(h,PY0+22+(rr-1)*PRETRO_DY+24);
+  return h
+}
+
+/* Posto di ogni piedino nella vista scelta: {r,x,y,sd,pad}. sd = lato da cui esce il filo (-1 sinistra, 1 destra),
+   pad = piazzola rettangolare (retro). Nel retro i piedini del bordo si vedono specchiati. */
+function pinGeom(fr,bx,top,bw,bh,st){
+  var o=[],mir=fr?1:-1,nb=pinTabMax(2),nt=pinTabMax(5),inn=pinTabMax(6)>0;
+  PTAB.forEach(function(r){
+    var x,y,sd=0,pad=0;
+    if(r.lato<=1){
+      sd=(r.lato?1:-1)*mir;
+      x=sd<0?bx:bx+bw;
+      y=top+PY0+r.pos*st
+    }
+    else if(r.lato==2){
+      x=bx+bw*(fr?(r.pos+1)/(nb+1):1-(r.pos+1)/(nb+1));
+      y=top+bh-16;
+      sd=x<bx+bw/2?-1:1
+    }
+    else{
+      pad=1;
+      if(r.lato==5){
+        x=bx+bw*(r.pos+1)/(nt+1);
+        y=top+PY0
+      }
+      else{
+        x=bx+bw*(r.lato==4?.79:r.lato==6?.36:inn?.21:.28);
+        y=top+PY0+22+r.pos*PRETRO_DY
+      }
+    }
+    o.push({r:r,x:x,y:y,sd:sd,pad:pad,fronte:r.lato<=2})
+  });
+  return o
+}
+
+/* punti di partenza dei fili, solo sul fronte: etichetta -> {dx dal bordo sinistro, y, lato} (il primo pin con quel nome) */
+function pinAnchors(items,bx){
+  var a={};
+  items.forEach(function(it){
+    if(it.fronte&&!a[it.r.lab])a[it.r.lab]={dx:it.x-bx,y:it.y,sd:it.sd}
+  });
+  return a
 }
 /* ===== Script: elenco, avvio/stop, uscita in diretta. Il testo si modifica con l'editor dei file ===== */
 var SC={tm:0,list:[],busy:false,bg:false,name:"",out:null,fsOk:false};
@@ -6512,7 +7329,7 @@ var AI_B=[
   "- i2c: bus I2C (ricerca, lettura, scrittura)",
   "- spi: bus SPI (trasferimento)",
   "- sd: microSD (montaggio, lettura, scrittura, formattazione: solo Admin)",
-  "- led: LED di stato (colore o modo automatico)",
+  "- led_rgb1: LED a colori di stato (colore o modo automatico); led1: LED monocromatico (solo alcune schede)",
   "- btn: tasto BOOT (click, letto con btn())",
   "- adc: lettura analogica",
   "- ble: Bluetooth LE (accensione, spegnimento, notifiche: spegnere e' Admin)",
@@ -6559,7 +7376,7 @@ var AI_D=[
   "#   (di fabbrica sono liberi solo i 3 click; 1 click esce dal modo aereo, 2 click e il WPS).",
   "# Le pressioni lunghe del tasto (2 s, 8 s, 20 s) restano sempre del sistema: servono al recupero.",
   "# ATTENZIONE: il LED bianco e molto forte e scalda. Per questo si spegne da solo dopo MINUTI minuti.",
-  "# La luminosita generale si sceglie in Dispositivi > LED; qui si scala solo il bianco (COLORE).",
+  "# La luminosita generale si sceglie in Dispositivi > LED_RGB1; qui si scala solo il bianco (COLORE).",
   "",
   "var COLORE = \"ffffff\"   # bianco pieno; per meno luce prova \"808080\" o \"404040\"",
   "var MINUTI = 10         # spegnimento automatico (0 = mai)",
@@ -6568,14 +7385,14 @@ var AI_D=[
   "var t0 = 0",
   "",
   "def accendi()",
-  "  led(COLORE)",
+  "  led_rgb1(COLORE)",
   "  acceso = true",
   "  t0 = millis()",
   "  print(\"torcia accesa\")",
   "end",
   "",
   "def spegni(motivo)",
-  "  led(\"auto\")",
+  "  led_rgb1(\"auto\")",
   "  acceso = false",
   "  print(\"torcia spenta (\" + motivo + \")\")",
   "end",
@@ -6706,7 +7523,7 @@ function apTimerStop(){
     AP.tm=0
   }
 }
-/* elenchi: app Berry (/api/apps), app ELF installate (/api/elf, se il firmware le ha) e cio che gira (/api/progs) */
+/* elenchi: app (/api/apps), app ELF installate (/api/elf, se il firmware le ha) e cio che gira (/api/progs) */
 function apLists(){
   var a=api("/api/apps").then(function(r){return r.json()}).then(function(j){
     if(!j.ok){
@@ -6890,7 +7707,7 @@ function apEdit(n){
 
 function apTpl(n){
   return"[manifest]\nnome="+n+"\ntitolo="+n.charAt(0).toUpperCase()+n.slice(1)+
-    "\nversione=1\npermessi=led\nchi=admin\n\n[icon]\n<svg viewBox=\"0 0 24 24\"><path d=\"M5 19l4-9 3 4 3-6 4 11z\" fill=\"none\" stroke=\"#c0392b\" stroke-width=\"2\"/></svg>\n\n[page]\nswitch id=power label=\"Accesa\"\nslider id=lum label=\"Luminosita\" min=0 max=255\ntext id=info label=\"Stato\"\n\n[code]\ndef on_set(id, v)\n  if id == 'power'\n    if v == 1\n      led('ffffff')\n    else\n      led('auto')\n    end\n  end\n  if id == 'lum'\n    dev_set('info', 'Luminosita ' + str(v))\n  end\nend\n\n[data]\npower=0\n"
+    "\nversione=1\npermessi=led_rgb1\nchi=admin\n\n[icon]\n<svg viewBox=\"0 0 24 24\"><path d=\"M5 19l4-9 3 4 3-6 4 11z\" fill=\"none\" stroke=\"#c0392b\" stroke-width=\"2\"/></svg>\n\n[page]\nswitch id=power label=\"Accesa\"\nslider id=lum label=\"Luminosita\" min=0 max=255\ntext id=info label=\"Stato\"\n\n[code]\ndef on_set(id, v)\n  if id == 'power'\n    if v == 1\n      led_rgb1('ffffff')\n    else\n      led_rgb1('auto')\n    end\n  end\n  if id == 'lum'\n    dev_set('info', 'Luminosita ' + str(v))\n  end\nend\n\n[data]\npower=0\n"
 }
 
 function apNew(){
@@ -7100,19 +7917,9 @@ function apSl(id,v,fin){
     if(e)apSend(id,e.value)
   },250)
 }
-/* disegno della scheda (fronte e retro), nostro e originale: proporzioni reali (circa 18 x 24 mm), componenti e piazzole in posizione relativa (u,v da 0 a 1) */
+/* disegno della scheda (fronte e retro), nostro e originale: proporzioni circa 18 x 24 mm, componenti in posizione relativa (u,v da 0 a 1).
+   Solo la sagoma e i componenti comuni (USB, tasti, LED, chip, antenna): piedini e piazzole vengono dalla tabella (js_pin_tab.js). */
 var PY0=22,PBR=1.3;   // y del primo pin dal bordo alto della scheda, rapporto altezza/larghezza
-/* piazzole del retro, viste da sotto con la USB-C in alto: due file sfalsate vicino al centro a sinistra e una colonna a destra */
-var PBPOS={38:[.35,.32],37:[.35,.40],34:[.35,.475],33:[.35,.55],36:[.21,.32],35:[.21,.40],
-  21:[.21,.475],18:[.21,.55],17:[.21,.62],16:[.21,.70],15:[.21,.77],14:[.21,.85],
-  48:[.79,.32],47:[.79,.40],46:[.79,.475],45:[.79,.55],42:[.79,.62],41:[.79,.70],40:[.79,.77],
-  39:[.79,.85]};
-function pinBoardH(bw,rows){return Math.max(Math.round(bw*PBR),PY0+(rows-1)*26+20)}
-function pinPadXY(g,i,side,bx,top,bw,bh){
-  var p=PBPOS[g];
-  return p?[bx+p[0]*bw,top+p[1]*bh]:[bx+(side<0?.3:.7)*bw,top+36+i*26]
-}
-
 function pinBoardArt(fr,bx,top,bw,bh,ink,LED){
   var s='',X=function(u){return bx+u*bw},Y=function(v){return top+v*bh},cx=bx+bw/2;
   s+='<rect x="'+bx+'" y="'+top+'" width="'+bw+'" height="'+bh+'" rx="12" fill="'+
@@ -7144,42 +7951,19 @@ function pinBoardArt(fr,bx,top,bw,bh,ink,LED){
         '" r="1.6" fill="#3a7bd5"/><title>GPIO'+LED+' - LED RGB</title></g><text x="'+(lx-14)+
         '" y="'+(ly0+3)+'" font-size="7" text-anchor="end" fill="'+ink+'">'+LED+'</text>'
     }
-    s+='<circle cx="'+X(.146)+'" cy="'+Y(.054)+'" r="3" fill="#c0392b"/><circle cx="'+X(.84)+
-      '" cy="'+Y(.054)+'" r="3" fill="#3a7bd5"/><text x="'+X(.84)+'" y="'+(Y(.054)+13)+
-      '" font-size="6" text-anchor="middle" fill="'+ink+'">BAT</text>';
-    var h=Math.round(bw*.21),mx=X(.495),my=Y(.6);
+    var h=Math.round(bw*.2),mx=X(.495),my=Y(.57),ay=top+bh-(pinTabMax(2)?60:30);   // l'antenna sale se c'e una fila di pin in basso
     s+='<path d="M'+mx+' '+(my-h)+'L'+(mx+h)+' '+my+'L'+mx+' '+(my+h)+'L'+(mx-h)+' '+my+
       'Z" fill="#2b3644" stroke="#5c6670"/><text x="'+mx+'" y="'+(my+3)+
-      '" font-size="8" text-anchor="middle" fill="'+ink+'">'+esc((PBI&&PBI.chip)||"ESP32-S3")+
+      '" font-size="8" text-anchor="middle" fill="'+ink+'">'+esc((PBI&&PBI.chip)||"")+
       '</text>';
-    s+='<rect x="'+X(.2)+'" y="'+Y(.9)+'" width="'+(bw*.35)+
-      '" height="17" rx="4" fill="#e58fb3"/><path d="M'+(X(.2)+8)+' '+(Y(.9)+13)+
+    s+='<rect x="'+X(.2)+'" y="'+ay+'" width="'+(bw*.35)+
+      '" height="17" rx="4" fill="#e58fb3"/><path d="M'+(X(.2)+8)+' '+(ay+13)+
       'h6v-9h6v9h6v-9h6v9h6v-9h6v9h6v-9h6v9h6" fill="none" stroke="#a24a6f" stroke-width="1.3"/><text x="'+
-      (X(.2)+bw*.175)+'" y="'+(Y(.9)-4)+'" font-size="7" text-anchor="middle" fill="'+ink+'">'+
+      (X(.2)+bw*.175)+'" y="'+(ay-4)+'" font-size="7" text-anchor="middle" fill="'+ink+'">'+
       esc(t("ANTENNA"))+'</text>'
-  }
-  else{
-    [["B-",.40,"#222",28],["B+",.60,"#d64545",28],["BOOST",.80,"#7a6a2a",36]].forEach(function(b){
-      var x=X(b[1]);
-      s+='<rect x="'+(x-b[3]/2)+'" y="'+(Y(.075)-7)+'" width="'+b[3]+'" height="14" rx="3" fill="'+
-        b[2]+'" stroke="#555"/><text x="'+x+'" y="'+(Y(.075)+3)+
-        '" font-size="7" text-anchor="middle" fill="#fff">'+b[0]+'</text>'
-    })
   }
   return s
 }
-/* funzioni scritte sulla foto della scheda: l'ESP32-S3 puo quasi tutto su ogni pin, quindi sono indicative */
-var PFN={1:"UART PWM I2S ADC I2C SPI",2:"UART PWM I2S ADC I2C SPI",3:"UART PWM I2S ADC I2C SPI",
-  4:"UART PWM I2S ADC I2C SPI",5:"UART PWM I2S ADC I2C SPI",6:"UART PWM I2S ADC I2C SPI",
-  7:"UART PWM I2S ADC I2C SPI",8:"SPI I2C ADC I2S PWM UART",9:"SPI I2C ADC I2S PWM UART",
-  10:"SPI I2C ADC I2S PWM UART",11:"SPI I2C ADC I2S PWM UART",12:"SPI I2C ADC I2S PWM UART",
-  13:"SPI I2C ADC I2S PWM UART",14:"UART PWM I2S ADC I2C SPI",15:"UART PWM I2S ADC I2C SPI",
-  16:"UART PWM I2S ADC I2C SPI",17:"GPIO",18:"GPIO",21:"GPIO",33:"UART PWM I2S I2C SPI",
-  34:"UART PWM I2S I2C SPI",35:"SPI I2C I2S PWM UART",36:"SPI I2C I2S PWM UART",
-  37:"UART PWM I2S I2C SPI",38:"UART PWM I2S I2C SPI",39:"SPI I2C I2S PWM UART",
-  40:"SPI I2C I2S PWM UART",41:"SPI I2C I2S PWM UART",42:"SPI I2C I2S PWM UART",43:"UART0 TX",
-  44:"UART0 RX",45:"SPI I2C I2S PWM UART",46:"SPI I2C I2S PWM UART",47:"SPI I2C I2S PWM UART",
-  48:"SPI I2C I2S PWM UART",0:"BOOT"};
 function pinWarnTxt(g){
   var w=[];
   if(!PBI)return"";
@@ -7194,12 +7978,12 @@ function pinWarnTxt(g){
 }
 
 function pinPos(g){
-  var s=String(g);
-  return brdLay("fl").indexOf(s)>=0||brdLay("fr").indexOf(s)>=0?t("bordo")
-    :brdLay("bl").indexOf(s)>=0||brdLay("br").indexOf(s)>=0?t("retro (piazzola)"):""
+  var r=pinTabGpio(g);
+  return !r?"":r.lato<=2?t("bordo"):t("retro (piazzola)")
 }
 
 function loadPins(){
+  aliasLeggi().then(function(){if(PM.length)drawPins()});
   brdLoad().then(function(b){
     if(!b)return;
     $("pinchip").textContent=
@@ -7212,7 +7996,7 @@ function loadPins(){
     PUSE=p;
     var h="<tr><th>GPIO</th><th>"+t("Usato da")+"</th><th>"+t("Descrizione")+"</th></tr>";
     p.forEach(function(x){
-      h+="<tr><td>"+x.gpio+"</td><td>"+esc(x.owner)+"</td><td>"+esc(x.note)+"</td></tr>"
+      h+="<tr><td>"+x.gpio+"</td><td>"+esc(titoloAlias(x.owner,x.owner))+"</td><td>"+esc(x.note)+"</td></tr>"
     });
     $("pintab").innerHTML=h;
     if(PM.length)drawPins()
@@ -7271,15 +8055,14 @@ function pinSchedaDisegno(){
 function drawPins(){
   if(!pinDisegnoAperto())return;
   var e=$("pinsvg");
-  if(!PBI||!PBI.lay){
+  if(!PBI||!PTAB.length){
     e.innerHTML="";
     return
   }
-  var FL=brdLay("fl"),FR=brdLay("fr"),BL=brdLay("bl").map(Number),BR=brdLay("br").map(Number),
-    LED=PBI.led,UA=PBI.uart||[];
-  var W=400,bw=190,top=64,st=26,bh=pinBoardH(bw,Math.max(FL.length,FR.length,1)),s="",ink=pinInk();
-  var fr=PV=="f",L=fr?FL:FR,R=fr?FR:FL,plan=fr?pinSchemaPlan(L,R,top,st,bw):null,
-    bx=plan?plan.bx:105;
+  var LED=PBI.led,UA=PBI.uart||[],W=400,bw=190,top=64,st=26,bh=pinBoardH(bw,st),s="",ink=pinInk(),
+    fr=PV=="f",bx0=105,items=pinGeom(fr,bx0,top,bw,bh,st),
+    plan=fr?pinSchemaPlan(pinAnchors(items,bx0),bw):null,bx=plan?plan.bx:bx0;
+  if(bx!=bx0)items=pinGeom(fr,bx,top,bw,bh,st);
   s+=pinBoardArt(fr,bx,top,bw,bh,ink,LED);
   function col(g,x2,u){
     var nt=PNOTE[g];
@@ -7287,49 +8070,45 @@ function drawPins(){
       :"#3a4352"
   }
   function tip(g,x2,u){
-    return"GPIO"+g+" - "+(PFN[g]||"")+(x2.why?" - "+x2.why:"")+
+    var fn=pinFnTxt(g);
+    return"GPIO"+g+(fn?" - "+fn:"")+(x2.why?" - "+x2.why:"")+
       (u?" - "+u.owner+(u.sig?" ("+u.sig+")":""):"")+(PNOTE[g]?" - "+PNOTE[g]:"")+
       (pinWarnTxt(g)?" - "+pinWarnTxt(g):"")
   }
-  function one(lab,x,y,side){
-    var g=+lab,pw=PWR[lab];
-    if(pw){
-      s+='<circle cx="'+x+'" cy="'+y+'" r="11" fill="'+pw+'" stroke="#555"/><text x="'+x+'" y="'+
-        (y+3)+'" font-size="7.5" text-anchor="middle" fill="#fff">'+lab+'</text>';
+  function one(it){
+    var r=it.r,g=r.g,x=it.x,y=it.y,sd=it.sd;
+    if(g<0){
+      if(it.pad){
+        var pw=Math.max(24,r.lab.length*6+12);
+        s+='<rect x="'+(x-pw/2)+'" y="'+(y-8)+'" width="'+pw+'" height="16" rx="4" fill="'+PWR[r.lab]+
+          '" stroke="#8b98a8"/><text x="'+x+'" y="'+(y+3)+'" font-size="8" font-weight="700" text-anchor="middle" fill="#fff">'+
+          esc(r.lab)+'</text>'
+      }
+      else s+='<circle cx="'+x+'" cy="'+y+'" r="11" fill="'+PWR[r.lab]+'" stroke="#8b98a8"/><text x="'+x+'" y="'+
+        (y+3)+'" font-size="7.5" text-anchor="middle" fill="#fff">'+esc(r.lab)+'</text>';
       return
     }
-    var x2=pinInfo(g)||{g:g,ok:false},u=pinOwner(g),c=col(g,x2,u),nm=g==UA[0]?"TX":g==UA[1]?"RX":"";
+    var x2=pinInfo(g)||{g:g,ok:false},u=pinOwner(g),c=col(g,x2,u),nm=g==UA[0]?"TX":g==UA[1]?"RX":"",
+      ring=r.bit&PBIT.avvio?'<circle cx="'+x+'" cy="'+y+'" r="14.5" fill="none" stroke="#ff8a3d" '+
+        'stroke-width="1.6" stroke-dasharray="3 2"/>':"",
+      st2=' stroke="'+(g==PSEL?"#fff":"#0b0f14")+'" stroke-width="'+(g==PSEL?2.5:1)+'"';
     s+='<g style="cursor:pointer" onclick="pinSel('+g+
-      ')" role="button" tabindex="0" onkeydown="pinKey(event,'+g+')" aria-label="'+esc(tip(g,x2,u))+
-      '"><circle cx="'+x+'" cy="'+y+'" r="11" fill="'+c+'" stroke="'+(g==PSEL?"#fff":"#0b0f14")+
-      '" stroke-width="'+(g==PSEL?2.5:1)+'"/><text x="'+x+'" y="'+(y+3)+
-      '" font-size="8.5" font-weight="700" text-anchor="middle" fill="#fff">'+g+'</text><title>'+
-      esc(tip(g,x2,u))+'</title></g>';
-    if(nm&&fr)s+='<text x="'+(x+(side<0?16:-16))+'" y="'+(y+3)+'" font-size="7" text-anchor="'+
-      (side<0?"start":"end")+'" fill="'+ink+'">'+nm+'</text>';
-    if(plan&&plan.pinBlk[g]){
+      ')" role="button" tabindex="0" onkeydown="pinKey(event,'+g+')" aria-label="'+esc(tip(g,x2,u))+'">'+ring+
+      (it.pad?'<rect x="'+(x-12)+'" y="'+(y-8)+'" width="24" height="16" rx="4" fill="'+c+'"'+st2+'/>'
+        :'<circle cx="'+x+'" cy="'+y+'" r="11" fill="'+c+'"'+st2+'/>')+
+      '<text x="'+x+'" y="'+(y+3)+'" font-size="8.5" font-weight="700" text-anchor="middle" fill="#fff">'+g+
+      '</text><title>'+esc(tip(g,x2,u))+'</title></g>';
+    if(nm&&fr&&sd)s+='<text x="'+(x+(sd<0?16:-16))+'" y="'+(y+3)+'" font-size="7" text-anchor="'+
+      (sd<0?"start":"end")+'" fill="'+ink+'">'+nm+'</text>';
+    if(plan&&plan.pinBlk[g]&&sd){
       var sg=plan.pinSig[g];
-      if(sg)s+='<text x="'+(x+side*14)+'" y="'+(y-3)+'" font-size="7" text-anchor="'+
-        (side<0?"end":"start")+'" fill="'+c+'">'+esc(sg)+'</text>'
+      if(sg)s+='<text x="'+(x+sd*14)+'" y="'+(y-3)+'" font-size="7" text-anchor="'+
+        (sd<0?"end":"start")+'" fill="'+c+'">'+esc(sg)+'</text>'
     }
   }
-  L.forEach(function(l,i){one(l,bx,top+PY0+i*st,-1)});
-  R.forEach(function(l,i){one(l,bx+bw,top+PY0+i*st,1)});
-  if(!fr){
-    [[BL,-1],[BR,1]].forEach(function(cl){
-      cl[0].forEach(function(g,i){
-        var xy=pinPadXY(g,i,cl[1],bx,top,bw,bh),x2=pinInfo(g)||{g:g,ok:false},u=pinOwner(g),
-          c=col(g,x2,u);
-        s+='<g style="cursor:pointer" onclick="pinSel('+g+
-          ')" role="button" tabindex="0" onkeydown="pinKey(event,'+g+')" aria-label="'+
-          esc(tip(g,x2,u))+'"><rect x="'+(xy[0]-12)+'" y="'+(xy[1]-8)+
-          '" width="24" height="16" rx="4" fill="'+c+'" stroke="'+(g==PSEL?"#fff":"#0b0f14")+
-          '" stroke-width="'+(g==PSEL?2.5:1)+'"/><text x="'+xy[0]+'" y="'+(xy[1]+3)+
-          '" font-size="8" font-weight="700" text-anchor="middle" fill="#fff">'+g+'</text><title>'+
-          esc(tip(g,x2,u))+'</title></g>'
-      })
-    })
-  }
+  items.forEach(function(it){
+    if(!it.pad||!fr)one(it)
+  });
   if(plan)s+=pinSchemaSvg(plan);
   var x0=plan?plan.xMin:0,Wd=plan?plan.w:W,ly=Math.max(top+bh,plan?plan.bottom:0)+26;
   [["#2e9e5b",t("provabile")],["#3fa7ff",t("in uso")],["#9b6bd6",t("collegato (tuo nome)")],
@@ -7338,7 +8117,11 @@ function drawPins(){
         '" font-size="8" fill="'+ink+'">'+esc(l[1])+'</text>';
       return lx+23+l[1].length*4.4
     },x0+14);
-  if(!fr){
+  s+='<circle cx="'+(x0+14)+'" cy="'+(ly+14)+'" r="5" fill="none" stroke="#ff8a3d" stroke-width="1.6" '+
+    'stroke-dasharray="3 2"/><text x="'+(x0+23)+'" y="'+(ly+17)+'" font-size="8" fill="'+ink+'">'+
+    esc(t("pin di avvio"))+'</text>';
+  ly+=14;
+  if(!fr&&PTAB.some(function(r){return r.tipo==6})){
     var bt=t(
       "Ponticello BOOST: la corrente di carica passa da 100 a 300 mA. Solo con una batteria oltre 500 mAh."),
       bk=bt.indexOf(". ")+1,bw2=bk>0?[bt.slice(0,bk),bt.slice(bk)]:[bt];
@@ -7360,9 +8143,9 @@ function pinInv(){
     esc(t("Stato"))+"</th><th>"+esc(t("Collegato a"))+"</th></tr>",
     gs=PM.map(function(x){return x.g}).sort(function(a,b){return a-b});
   gs.forEach(function(g){
-    var x=pinInfo(g),u=pinOwner(g),st=u?u.owner:(x.ok?t("libero"):(x.why||t("vietato"))),
+    var x=pinInfo(g),u=pinOwner(g),st=u?titoloAlias(u.owner,u.owner):(x.ok?t("libero"):(x.why||t("vietato"))),
       w=pinWarnTxt(g);
-    h+="<tr><td><b>"+g+"</b></td><td>"+esc(pinPos(g))+"</td><td>"+esc(PFN[g]||"")+
+    h+="<tr><td><b>"+g+"</b></td><td>"+esc(pinPos(g))+"</td><td>"+esc(pinFnTxt(g))+
       (w?'<div class="fhint">'+esc(w)+'</div>':"")+"</td><td>"+esc(st)+"</td><td>"+
       (ROLE>=2?'<input maxlength="24" value="'+esc(PNOTE[g]||"")+'" aria-label="GPIO '+g+
         '" onchange="pinNote('+g+',this)" style="min-width:120px">':esc(PNOTE[g]||""))+"</td></tr>"
@@ -7416,8 +8199,9 @@ function pinPanel(){
     return
   }
   h+='<h3 style="margin-top:10px">GPIO'+PSEL+'</h3>'+pinWho(PSEL);
-  if(PFN[PSEL])h+='<div class="fhint">'+esc(PFN[PSEL])+
-    (pinWarnTxt(PSEL)?" - "+esc(pinWarnTxt(PSEL)):"")+'</div>';
+  var fn=pinFnTxt(PSEL);
+  if(fn||pinWarnTxt(PSEL))h+='<div class="fhint">'+esc(fn)+
+    (pinWarnTxt(PSEL)?(fn?" - ":"")+esc(pinWarnTxt(PSEL)):"")+'</div>';
   if(PNOTE[PSEL])h+='<div class="law">'+
     esc(tf("Segnato come collegato a: {0}. Una prova puo disturbare il circuito.",PNOTE[PSEL]))+
     '</div>';
@@ -7869,6 +8653,8 @@ function showLogin(){
     $("lp").disabled=false
   }
   clearInterval(timer);
+  clearInterval(AU.tm);
+  PAGINA=false;
   $("app").className="hide";
   $("login").className="card";
   document.body.classList.remove("cpo");
@@ -7892,10 +8678,10 @@ function lKey(e){
 function loginOk(j){
   clearInterval(CLK.tm);
   if(j.clean)setTimeout(function(){
-    dlg({title:t("Hotspot e HTTP spenti"),
+    dlg({title:t("Hotspot e DHCP spenti"),
       body:'<p style="margin:0">'+
       esc(t(
-        "Hai raggiunto la scheda dalla rete di casa: l'hotspot, il portale automatico e HTTP sono stati spenti. Per riaccenderli: Rete. Se perdi la Wi-Fi: tasto fisico 8 secondi."))+
+        "Hai raggiunto la scheda dalla rete di casa: l'hotspot, il portale automatico e il DHCP sono stati spenti. Per riaccenderli: Rete. Se perdi la Wi-Fi: tasto fisico 8 secondi."))+
       '</p>',buttons:[["ok",t("OK"),""]],onOk:function(){return""}})
   },800);
   $("lp").value="";
@@ -8019,20 +8805,38 @@ function doMfa(){
 }
 
 function logout(){post("/api/logout",{}).then(showLogin).catch(showLogin)}
+/* La pagina vera (menu, home, aggiornamenti) parte una volta per accesso. Con la guida da fare parte solo a guida chiusa:
+   nella finestra di prima configurazione la scheda ha poca RAM e pochi percorsi, la home non serve. */
+var PAGINA=false;
 function start(){
   $("login").className="hide";
   $("app").className="";
   setRole(AUTH.role===undefined?ROLE:AUTH.role);
   USER=AUTH.user||USER;
-  $("who").textContent=USER?USER+" · "+t(RNAME[ROLE]):"";
+  $("who").textContent=USER?USER+" \u00b7 "+t(RNAME[ROLE]):"";
+  if(!AUTH.setup&&ROLE==2){
+    fetchLimite(1);
+    setupOpen();
+    return
+  }
+  paginaAvvia()
+}
+
+function paginaAvvia(){
+  fetchLimite(2);
+  if(PAGINA){
+    show("sum");
+    return
+  }
+  PAGINA=true;
   buildNav();
+  if(ROLE>=1)dvList().catch(function(){});
   cpApply();
   poll();
   brdLoad();
   rfApply();
   auPoll();
-  if(!AUTH.setup&&ROLE==2)setupOpen();
-  else if(location.hash=="#aiuto")show("help")
+  if(location.hash=="#aiuto")show("help")
 }
 
 function chPass(){
@@ -8144,40 +8948,122 @@ function loadLangs(){
   })
 }
 
+/* file di lingua: <codice>.vld (dizionario del firmware, obbligatorio) e <codice>.vlp (frasi della pagina, gzip, facoltativo) */
+var LF_VLD_MAX=196608,LF_VLP_MAX=131072;   /* come LANG_VLD_MAX e LANG_VLP_MAX del firmware */
+
+/* Raggruppa i file scelti per lingua. Ritorna {err} oppure {lista:[{code,vld,vlp}]} */
+function langGruppi(files){
+  var per={},ord=[],i,m,g;
+  for(i=0;i<files.length;i++){
+    m=files[i].name.match(/^([a-z0-9]{2,8})\.(vld|vlp)$/);
+    if(!m||m[1]=="it")return{err:t("Il nome deve essere come en.vld o en.vlp (codice di 2-8 lettere minuscole)")};
+    if(!per[m[1]]){
+      per[m[1]]={code:m[1],vld:null,vlp:null};
+      ord.push(m[1])
+    }
+    g=per[m[1]];
+    if(g[m[2]])return{err:t("Scegli un solo file .vld e un solo file .vlp per lingua")};
+    g[m[2]]=files[i];
+    if(files[i].size>(m[2]=="vld"?LF_VLD_MAX:LF_VLP_MAX)){
+      return{err:files[i].name+": "+t("File di lingua troppo grande")}
+    }
+  }
+  var lista=ord.map(function(c){return per[c]});
+  for(i=0;i<lista.length;i++){
+    if(!lista[i].vld&&!LANGS.some(function(x){return x.code==lista[i].code})){
+      return{err:lista[i].code+": "+t("Manca il file .vld della lingua")}
+    }
+  }
+  return{lista:lista}
+}
+
+/* Controlla l'inizio del file: "VOSL" nel .vld, intestazione gzip (1f 8b) nel .vlp. Promessa del testo dell'errore ("" = buono) */
+function langInizio(f,n){
+  return f.slice(0,n).arrayBuffer().then(function(b){return new Uint8Array(b)})
+}
+
+function langControlla(g){
+  var p=Promise.resolve("");
+  if(g.vld){
+    p=langInizio(g.vld,4).then(function(b){
+      var ok=b.length==4&&String.fromCharCode(b[0],b[1],b[2],b[3])=="VOSL";
+      return ok?"":g.vld.name+": "+t("File di lingua non valido")
+    })
+  }
+  if(g.vlp){
+    p=p.then(function(e){
+      if(e)return e;
+      return langInizio(g.vlp,2).then(function(b){
+        return b.length==2&&b[0]==0x1f&&b[1]==0x8b?"":g.vlp.name+": "+t("File della pagina non valido")
+      })
+    })
+  }
+  return p
+}
+
+/* Invia i file di una lingua: prima il .vld, poi il .vlp (se il secondo fallisce la lingua funziona lo stesso, in italiano nella pagina) */
+function langInvia(g){
+  var fl=[g.vld,g.vlp].filter(function(f){return f}),i=0;
+  return new Promise(function(ok,ko){
+    (function next(){
+      if(i>=fl.length){
+        ok();
+        return
+      }
+      var f=fl[i++],fd=new FormData();
+      fd.append("file",f,f.name);
+      api("/api/fs/up?dir=/lang",
+        {method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){
+          if(!j.ok){
+            ko(f.name+": "+(j.err||t("Errore")));
+            return
+          }
+          next()
+        }).catch(function(){ko(t("Caricamento non riuscito"))})
+    })()
+  })
+}
+
+/* Controlla e invia i file scelti. Promessa con la lista delle lingue inviate; err = testo del motivo */
+function langCaricaFile(files){
+  var gr=langGruppi(files);
+  if(gr.err)return Promise.reject(gr.err);
+  return Promise.all(gr.lista.map(langControlla)).then(function(es){
+    for(var k=0;k<es.length;k++)if(es[k])return Promise.reject(es[k]);
+    var p=Promise.resolve();
+    gr.lista.forEach(function(g){p=p.then(function(){return langInvia(g)})});
+    return p.then(function(){return gr.lista})
+  })
+}
+
 function upLang(){
-  var f=$("lgf").files[0];
-  if(!f){
+  var fs=[].slice.call($("lgf").files||[]);
+  if(!fs.length){
     msg("lgm",t("Scegli un file"),false);
     return
   }
-  var m=f.name.match(/^([a-z0-9]{2,8})\.json$/);
-  if(!m||m[1]=="it"){
-    msg("lgm",t("Il nome deve essere come en.json (codice di 2-8 lettere minuscole)"),false);
-    return
-  }
-  var code=m[1],fd=new FormData();
-  fd.append("file",f,f.name);
-  api("/api/fs/up?dir=/lang",
-    {method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){
-      if(!j.ok){
-        msg("lgm",j.err,false);
-        return
-      }
-      msg("lgm",t("Lingua caricata"),true);
-      $("lgf").value="";
-      if(code==LANG)setLang(code);
-      else loadLangs()
-    })
+  msg("lgm",t("Carico..."),true);
+  langCaricaFile(fs).then(function(lista){
+    msg("lgm",t("Lingua caricata"),true);
+    $("lgf").value="";
+    var uso=lista.some(function(g){return g.code==LANG});
+    if(uso)setLang(LANG);
+    loadLangs()
+  }).catch(function(e){
+    msg("lgm",String(e),false)
+  })
 }
 
 function delLang(c){
   if(!confirm(tf("Eliminare la lingua {0}?",c)))return;
   var go=function(){
-    post("/api/fs/del",{path:"/lang/"+c+
-      ".json"}).then(function(r){return r.json()}).then(function(j){
-        msg("lgm",j.ok?t("Fatto"):j.err,j.ok);
-        loadLangs()
-      })
+    /* prima il .vlp (facoltativo, puo non esserci), poi il .vld: se qualcosa va storto la lingua resta installata */
+    post("/api/fs/del",{path:"/lang/"+c+".vlp"}).catch(function(){}).then(function(){
+      return post("/api/fs/del",{path:"/lang/"+c+".vld"})
+    }).then(function(r){return r.json()}).then(function(j){
+      msg("lgm",j.ok?t("Fatto"):j.err,j.ok);
+      loadLangs()
+    })
   };
   if(c==LANG){
     post("/api/lang",{code:"it"}).then(function(){
@@ -8189,9 +9075,17 @@ function delLang(c){
     })
   }else go()
 }
+
+/* la campanella: il file della lingua in uso non e valido (la scheda usa l'italiano); ricaricarlo si fa in Sistema > Localizzazione */
+function langNota(n){
+  if(!n||!n.k)return;
+  AL.push(["w",tf("Il file della lingua {0} non e valido: ricaricalo oppure usa l'italiano",n.c),"loc"])
+}
 /* ===== navigazione con ruoli ===== */
 function canSee(id){
   if(AUTH&&AUTH.pk&&AUTH.pk[id]===0)return false;
+  var v=voceDi(id);
+  if(v&&v.bordo&&!BDV[id])return false;
   return ROLE>=(TMIN[id]||0)
 }
 
@@ -8225,17 +9119,66 @@ function subDraw(id,g){
     var sp=ix>0?TSEC[L[ix-1]]:undefined;
     if(sc!==undefined&&sc!==sp)h+='<span class="gsep">'+esc(t(SECN[sc]))+'</span>';
     else if(sc===undefined&&sp!==undefined)h+='<span class="gsep"></span>';
-    h+='<button class="'+(k==id?"on":"")+'" onclick="show(\''+k+'\')">'+esc(t(voceDi(k).testo))+
-      '</button>';
+    var nv=voceNomeVero(k);
+    h+='<button class="'+(k==id?"on":"")+'" onclick="show(\''+k+'\')">'+esc(voceTesto(k))+
+      (nv?' <small class="alnome">'+esc(nv)+'</small>':"")+'</button>';
   });
   return h;
+}
+/* Il testo di una voce: quelle di bordo hanno l'etichetta mandata dalla scheda (gia tradotta). */
+function voceTesto(id){
+  var v=voceDi(id);
+  if(v.nome)return v.nome;
+  if(v.bordo&&BDV[id])return BDV[id];
+  return t(v.testo);
+}
+/* Il nome vero della periferica di una voce, solo se la voce mostra un alias (altrimenti ""). */
+function voceNomeVero(id){
+  var v=voceDi(id),real=v?(v.n||BDI[id]||""):"";
+  return real&&aliasDi(real)?real:""
+}
+/* Titolo di una pagina di periferica: alias e nome vero tra parentesi (per textContent). */
+function voceTitolo(id){
+  var nv=voceNomeVero(id);
+  return nv?aliasDi(nv)+" ("+nv+")":voceTesto(id)
+}
+/* Ridisegna solo il sottomenu (quando l'elenco di bordo cambia a pagina aperta). */
+function subRidisegna(){
+  if(typeof cur=="undefined"||!loggedIn())return;
+  var h=subDraw(cur,gOf(cur));
+  $("gsub").innerHTML=h;
+  $("gsub").className="sub gsub"+(h?"":" hide");
 }
 /* La voce con questo id, oppure null. */
 function voceDi(id){
   for(var i=0;i<VOCI.length;i++){
     if(VOCI[i].id==id)return VOCI[i];
   }
-  return null;
+  return POV[id]||null;
+}
+/* Voci dinamiche delle periferiche create a mano: id "p_" + nome. Usano la pagina Periferiche (campo pagina)
+   e aprono la gestione di quella periferica. */
+var POV={};
+function menuCostruisci(L){
+  Object.keys(POV).forEach(function(k){
+    delete TSEC[k];
+    delete TMIN[k]
+  });
+  POV={};
+  var g=[];
+  DEV0.forEach(function(k){
+    g.push(k);
+    if(k!="io")return;
+    L.forEach(function(x){
+      var id="p_"+x[0];
+      POV[id]={id:id,testo:x[1],nome:x[1],gruppo:"dev",ruolo:1,sezione:1,pagina:"io",n:x[0],apri:apriIoDin};
+      TSEC[id]=1;
+      TMIN[id]=1;
+      g.push(id)
+    })
+  });
+  GMAP.dev=g;
+  if(typeof cur!="undefined"&&cur.indexOf("p_")==0&&!POV[cur])show("io")
 }
 /* Schede dentro una voce (modello WAI-ARIA). Nella pagina c'e solo la barra sk_<voce> con i bottoni:
    dopo la barra, ogni elemento fratello e il pannello del bottone con lo stesso numero (sp_<voce><n>).
@@ -8279,7 +9222,7 @@ function skRuolo(){
     var v=b.id.slice(3);
     var ok=ROLE<1?"button:not(.adm):not(.op)":ROLE<2?"button:not(.adm)":"button";
     var n=b.querySelectorAll(ok).length;
-    b.setAttribute("aria-label",t(voceDi(v).testo));
+    b.setAttribute("aria-label",voceTesto(v));
     b.classList.toggle("hide",n<2);
     if(!b.querySelector(".on").matches(ok))skMostra(v,0)
   })
@@ -8305,6 +9248,7 @@ function skTasto(e,v){
 }
 /* L'indirizzo mostra #aiuto solo sulla voce Aiuto. */
 function hashAiuto(id){
+  if(id=="help")pagIdDisegna();
   try{
     if(id=="help"&&location.hash!="#aiuto")history.replaceState(null,"","#aiuto");
     if(id!="help"&&location.hash=="#aiuto")history.replaceState(null,"",location.pathname);
@@ -8320,9 +9264,10 @@ function show(id){
   var g=gOf(id);
   LASTG[g]=id;
 
+  var vc=voceDi(id),pg=vc&&vc.pagina?vc.pagina:id;
   VOCI.forEach(function(v){
     var e=$("t_"+v.id);
-    if(e)e.className=v.id==id?"":"hide";
+    if(e)e.className=v.id==pg?"":"hide";
   });
   GRP.forEach(function(x){
     var e=$("n_"+x[0]);
@@ -8463,20 +9408,17 @@ function pinIconUri(b){
   else if(s.indexOf("xmlns")<0)s=s.replace("<svg",'<svg xmlns="http://www.w3.org/2000/svg"');
   return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(s)
 }
-/* Dove stanno i blocchi e i fili. L e R sono i pin del fronte (sinistra e destra), top e st la riga del primo pin e il passo. */
-function pinSchemaPlan(L,R,top,st,bw){
-  var side=function(l){return L.indexOf(l)>=0?-1:R.indexOf(l)>=0?1:0},
-    yOf=function(l){
-      var i=L.indexOf(l);
-      if(i<0)i=R.indexOf(l);
-      return i<0?null:top+PY0+i*st
-    },P={blocks:[],pinBlk:{},pinSig:{}},hasL=false,hasR=false;
+/* Dove stanno i blocchi e i fili. A sono i punti di partenza dei fili sul fronte (pinAnchors): etichetta -> {dx, y, sd}. */
+function pinSchemaPlan(A,bw){
+  var side=function(l){return A[l]?A[l].sd:0},
+    yOf=function(l){return A[l]?A[l].y:null},
+    P={blocks:[],pinBlk:{},pinSig:{}},hasL=false,hasR=false;
   pinBlocks().forEach(function(b){
     var rows=[],cnt=[0,0];
     b.pins.forEach(function(k){
       var l=String(k.g),sd=side(l);
       if(!sd)return;
-      rows.push({sig:k.sig,g:k.g,ps:sd,py:yOf(l),color:b.col});
+      rows.push({sig:k.sig,g:k.g,ps:sd,py:yOf(l),dx:A[l].dx,color:b.col});
       cnt[sd<0?0:1]++
     });
     if(!rows.length)return;
@@ -8484,7 +9426,7 @@ function pinSchemaPlan(L,R,top,st,bw){
     if(pk){
       [[pk,"VCC",pk],["GND","GND","GND"]].forEach(function(w){
         var sd=side(w[0]);
-        if(sd)rows.push({sig:w[1],ps:sd,py:yOf(w[0]),color:PWCOL[w[2]],pwr:w[2]})
+        if(sd)rows.push({sig:w[1],ps:sd,py:yOf(w[0]),dx:A[w[0]].dx,color:PWCOL[w[2]],pwr:w[2]})
       })
     }
     rows.sort(function(a,c){return a.py-c.py});
@@ -8531,7 +9473,8 @@ function pinWires(P,bx,bw){
     b.rows.forEach(function(r,i){
       r.ry=b.y+PHEAD+i*PROW+PROW/2;
       r.b=b;
-      r.px=r.ps<0?bx:bx+bw;
+      r.px=r.ps<0?bx:bx+bw;   // bordo della scheda da cui il filo si allontana
+      r.ax=bx+r.dx;           // punto di partenza (i pin in basso partono dal loro posto)
       r.cross=r.ps!=b.side;
       r.ex=b.side<0?b.x+PBW:b.x;
       if(r.cross){
@@ -8548,13 +9491,20 @@ function pinWires(P,bx,bw){
     dn.concat(up).forEach(function(r){r.lx=r.px+sd*(21+(n++)*7)})
   });
   W.forEach(function(r){
-    var x0=r.px+r.ps*11,d;
+    var x0=r.ax+r.ps*11,d;
     if(r.cross)d="M"+x0+" "+r.py+"H"+r.lx+"V"+r.yc+"H"+r.dx+"V"+r.ry+"H"+r.ex;
     else if(r.lx==null)d="M"+x0+" "+r.py+"L"+r.ex+" "+r.ry;
     else d="M"+x0+" "+r.py+"H"+r.lx+"V"+r.ry+"H"+r.ex;
     r.d=d
   });
   P.wires=W
+}
+
+/* Nome del blocco nello schema: l'alias (accorciato se non entra), altrimenti il nome vero. */
+function pinNomeBlocco(n){
+  var a=aliasDi(n);
+  if(!a)return n;
+  return a.length>17?a.slice(0,16)+"\u2026":a
 }
 
 function pinSchemaSvg(P){
@@ -8566,7 +9516,7 @@ function pinSchemaSvg(P){
   P.blocks.forEach(function(b,bi){
     var rs=[],x=b.x,y=b.y;
     b.rows.forEach(function(r){rs.push(r.sig+(r.pwr?"":" GPIO"+r.g))});
-    var lab=tf("Periferica {0}: {1}. Pin: {2}. Premi per aprire la pagina.",b.name,b.title||"",
+    var lab=tf("Periferica {0}: {1}. Pin: {2}. Premi per aprire la pagina.",titoloAlias(b.name,b.name),b.title||"",
       rs.join(", "));
     s+='<g class="pblk" tabindex="0" role="link" aria-label="'+esc(lab)+
       '" style="cursor:pointer" onclick="pinGoBlk('+bi+
@@ -8578,7 +9528,7 @@ function pinSchemaSvg(P){
       '" width="30" height="30" rx="7" fill="#e9eef3"/><image href="'+pinIconUri(b)+'" x="'+(x+10)+
       '" y="'+(y+9)+'" width="26" height="26"/>';
     s+='<text x="'+(x+46)+'" y="'+(y+21)+'" font-size="11" font-weight="700" fill="#e6edf3">'+
-      esc(b.name)+'</text>';
+      esc(pinNomeBlocco(b.name))+'</text>';
     s+='<text x="'+(x+46)+'" y="'+(y+34)+'" font-size="8.5" fill="#aab6c4">'+
       esc((b.title||"").length>27?b.title.slice(0,26)+"…":b.title||"")+'</text>';
     b.rows.forEach(function(r){
@@ -8635,7 +9585,10 @@ function pinWho(g){
 /* ===== periferiche ed Elenco dispositivi (API /api/dev) ===== */
 var DV=[],DVT={btn:"boot"};
 function dvList(){
-  return api("/api/dev").then(function(r){return r.json()}).then(function(j){DV=j.dev||[]})
+  return Promise.all([api("/api/dev").then(function(r){return r.json()}),aliasLeggi()]).then(function(a){
+    DV=a[0].dev||[];
+    bordoVoci()
+  })
 }
 
 function dmLoad(){
@@ -8655,11 +9608,16 @@ function dvSw(on,label,act){
     (on?"true":"false")+'" aria-label="'+esc(label)+'" onclick="'+act+'"></button>'
 }
 
+/* Etichetta di stato di una riga: colore piu parole. */
+function dvPill(d){
+  var cl=d.state==1?"v":d.state==2?"k":"";
+  return'<span class="pill dvp '+cl+'">'+esc(dvStato(d))+'</span>'
+}
+
 function dvRiga(d,box,mm){
-  var cl=d.state==1?"v":d.state==2?"k":"",
-    h='<li><button class="dvn" onclick="show(\''+d.tab+'\')"><span>'+esc(d.label)+
-    '</span><span class="pill dvp '+cl+'">'+esc(dvStato(d))+'</span></button><span class="dvsw">';
-  if(d.sw&&ROLE==2)h+=dvSw(d.state,d.label,"dvSet('"+d.id+"',"+(d.state?0:1)+",'"+box+"','"+mm+"')");
+  var h='<li><button class="dvn"'+descrTitle(d.id)+' onclick="show(\''+bordoTab(d)+'\')"><span>'+
+    etichettaHtml(d.id,d.label)+'</span>'+dvPill(d)+'</button><span class="dvsw">';
+  if(d.sw&&ROLE==2)h+=dvSw(d.state,etichetta(d.id,d.label),"dvSet('"+d.id+"',"+(d.state?0:1)+",'"+box+"','"+mm+"')");
   return h+'</span></li>'
 }
 /* Albero del solo hardware: radice con nome scheda e chip, un ramo per ogni gruppo "cap". */
@@ -8707,8 +9665,8 @@ function sensDraw(){
     api("/api/io").then(function(r){return r.json()})]).then(function(a){
       var R=((a[0].data&&a[0].data.rows)||[]).slice(0,1);
       (a[1].io||[]).forEach(function(d){
-        if(d.c=="i2c")R.push([d.n,ioI2cVal(d)]);
-        if(d.c=="analogico")R.push([d.n,d.v])
+        if(d.c=="i2c")R.push([etichetta(d.n,d.n),ioI2cVal(d)]);
+        if(d.c=="analogico")R.push([etichetta(d.n,d.n),d.v])
       });
       $("sens_t").innerHTML=cpuTab(R)
     }).catch(function(){})
@@ -8791,7 +9749,7 @@ function setCpuPar(){
 /* ===== periferiche a classi (rele, led, pin, ingresso, analogico): API /api/io, schede modulo /api/mods ===== */
 var IOCN={rele:"Rele",led:"LED",pin:"Pin (uscita)",ingresso:"Ingresso",
   analogico:"Analogico (pin 1-10)",sd:"Lettore microSD"},IOS={sel:"",tm:0,list:[],sdp:[]};
-function ioCn(c){return c=="i2c"?t("Sensore I2C (BMP280)"):t(IOCN[c]||c)}
+function ioCn(c){return c=="i2c"?t("Sensore I2C (BMP280)"):c=="contatore"?t("Contatore di impulsi"):c=="led_rgb"?t("LED a colori (WS2812)"):t(IOCN[c]||c)}
 function ioStop(){
   if(IOS.tm){
     clearInterval(IOS.tm);
@@ -8824,13 +9782,17 @@ function ioPins(d){
     ?"CS "+d.g+" · MOSI "+d.g2+" · SCK "+d.g3+" · MISO "+d.g4:String(d.g)
 }
 
-function ioCanSw(d){return d.out&&(ROLE>=2||(ROLE>=1&&d.c!="rele"))}
+function ioCanSw(d){return(d.out||d.c=="led_rgb")&&(ROLE>=2||(ROLE>=1&&d.c!="rele"))}
 function ioLoad(){
   var sel=IOS.sel;
+  dvList().catch(function(){});            // aggiorna anche le voci del menu (periferiche aggiunte o tolte)
   $("io_new").className=ROLE>=2?"card":"card hide";
   api("/api/io").then(function(r){return r.json()}).then(function(j){
     IOS.list=j.io||[];
     IOS.sdp=j.sdp||[];
+    ioPwmOpt(j.pwm);
+    ioCntOpt(j.cnt);
+    ioRgbOpt(j.rgb);
     if(sel&&!ioFind(sel)){
       ioClose();
       return
@@ -8857,14 +9819,16 @@ function ioListDraw(){
   L.forEach(function(d){
     var v;
     if(ioCanSw(d))v='<button class="sw1'+(d.v?" on":"")+'" role="switch" aria-checked="'+
-      (d.v?"true":"false")+'" aria-label="'+esc(d.n)+'" onclick="ioSw(\''+d.n+'\','+(d.v?0:1)+
+      (d.v?"true":"false")+'" aria-label="'+esc(etichetta(d.n,d.n))+'" onclick="ioSw(\''+d.n+'\','+(d.v?0:1)+
       ')"></button>';
     else if(d.c=="analogico")v='<b>'+d.v+'</b>';
     else if(d.c=="i2c")v='<b>'+esc(ioI2cVal(d))+'</b>';
+    else if(d.c=="pwm")v='<b>'+esc(ioPwmVal(d))+'</b>';
+    else if(d.c=="contatore")v='<b>'+esc(ioCntVal(d))+'</b>';
     else if(d.c=="sd")v='<span class="pill dvp '+(d.v?"v":"")+'">'+
       esc(d.v?t("Scheda montata"):t("Scheda non montata"))+'</span>';
     else v='<span class="pill dvp '+(d.v?"v":"")+'">'+esc(d.v?t("acceso"):t("spento"))+'</span>';
-    h+='<tr><td><b>'+esc(d.n)+'</b></td><td>'+esc(ioCn(d.c))+
+    h+='<tr'+descrTitle(d.n)+'><td><b>'+etichettaHtml(d.n,d.n)+'</b></td><td>'+esc(ioCn(d.c))+
       ((d.f&1)?' <span class="fhint">('+esc(t("attivo basso"))+')</span>':"")+'</td><td>'+
       esc(ioPins(d))+'</td><td>'+v+'</td><td><button class="btn gray" onclick="ioOpen(\''+d.n+
       '\')">'+esc(t("Gestisci"))+'</button></td></tr>'
@@ -8884,13 +9848,18 @@ function ioOpen(n){
 function ioClose(){
   IOS.sel="";
   ioStop();
+  if(cur.indexOf("p_")==0){
+    show("io");
+    return
+  }
   $("io_det").className="card hide";
   $("io_main").className="";
   ioLoad()
 }
 
 function ioPoll(){
-  if(cur!="io"||!IOS.sel){
+  var inIo=cur=="io"||cur.indexOf("p_")==0;
+  if(!inIo||!IOS.sel){
     ioStop();
     return
   }
@@ -8911,7 +9880,7 @@ function ioDetDraw(){
     return
   }
   var adm=ROLE>=2,sw=ioCanSw(d),h='';
-  h+='<div class="aphd"><h3 style="margin:0">'+esc(d.n)+
+  h+='<div class="aphd"><h3 style="margin:0" id="iod_h">'+esc(titoloAlias(d.n,d.n))+
     '</h3><button class="btn gray" onclick="ioClose()">'+esc(t("Indietro"))+'</button></div>';
   h+='<table class="ftab" style="margin-top:8px"><tr><td>'+esc(t("Classe"))+'</td><td><b>'+
     esc(ioCn(d.c))+'</b></td></tr><tr><td>GPIO</td><td><b>'+esc(ioPins(d))+'</b></td></tr>';
@@ -8921,7 +9890,8 @@ function ioDetDraw(){
     ' kHz</b></td></tr>';
   if(d.out||d.c=="ingresso")h+='<tr><td>'+esc(t("Livello"))+'</td><td><b>'+
     esc((d.f&1)?t("attivo basso"):t("attivo alto"))+'</b></td></tr>';
-  if(d.c=="ingresso")h+='<tr><td>'+esc(t("Resistenza"))+'</td><td><b>'+
+  if(d.c=="contatore")h+=ioCntRows(d);
+  if(d.c=="ingresso"||d.c=="contatore")h+='<tr><td>'+esc(t("Resistenza"))+'</td><td><b>'+
     esc((d.f&2)?"pull-up":(d.f&4)?"pull-down":t("nessuna"))+'</b></td></tr>';
   h+='<tr><td>'+esc(t("Valore"))+'</td><td id="iod_v"></td></tr></table>';
   h+='<h4 style="margin:14px 0 6px">'+esc(t("Prova"))+'</h4>';
@@ -8941,6 +9911,9 @@ function ioDetDraw(){
         "Il rele si riaccende al massimo una volta al secondo e non lampeggia: si consuma. Spegnere si puo sempre.")
         :t("L'impulso e il lampeggio si spengono da soli."))+'</p>'
   }
+  else if(d.c=="led_rgb")h+=ioRgbDet(d);
+  else if(d.c=="pwm")h+=ioPwmDet(d);
+  else if(d.c=="contatore")h+=ioCntDet(d);
   else if(d.c=="i2c")h+='<p class="fhint">'+
     esc(t(
       "Temperatura e pressione si aggiornano da sole ogni due secondi. Se il sensore non risponde, controlla i fili, l'indirizzo (0x76 o 0x77) e l'alimentazione."))+
@@ -8952,15 +9925,16 @@ function ioDetDraw(){
   else if(d.c=="ingresso")h+='<p class="fhint">'+
     esc(t("Premi il pulsante o attiva il sensore: il valore qui sotto cambia da solo."))+'</p>';
   else h+='<p class="fhint">'+esc(t("Il valore va da 0 a 4095 e si aggiorna da solo."))+'</p>';
-  h+='<div id="iod_m" class="msg" role="status"></div>';
+  h+='<div id="iod_m" class="msg" role="status"></div><div id="al_io"></div>';
   if(adm)h+='<div class="ftb" style="margin-top:14px"><button class="btn gray" onclick="ioRen(\''+
     d.n+'\')">'+esc(t("Rinomina"))+'</button><button class="btn red" onclick="ioDel(\''+d.n+'\')">'+
     esc(t("Togli"))+'</button></div>';
-  if(d.c!="sd")h+='<p class="fhint">'+
+  if(d.c!="sd"&&d.c!="pwm"&&d.c!="contatore")h+='<p class="fhint">'+
     esc(d.c=="i2c"?tf(
       "Nelle app: use={0} e poi dev_get(\"{0}\") per la temperatura (centesimi di grado) e dev_get(\"{0}.p\") per la pressione (pascal).",
       d.n):tf("Nelle app: use={0} e poi dev_set(\"{0}\", 1) o dev_get(\"{0}\").",d.n))+'</p>';
   $("io_det").innerHTML=h;
+  aliasPannello("al_io",d.n);
   ioDetLive()
 }
 
@@ -8968,6 +9942,8 @@ function ioDetLive(){
   var d=ioFind(IOS.sel),e=$("iod_v");
   if(!d||!e)return;
   if(d.c=="i2c")e.innerHTML='<b>'+esc(ioI2cVal(d))+'</b>';
+  else if(d.c=="pwm")e.innerHTML='<b>'+esc(ioPwmVal(d))+'</b>';
+  else if(d.c=="contatore")e.innerHTML='<b>'+esc(ioCntVal(d))+'</b>';
   else if(d.c=="sd")e.innerHTML=
     '<span class="pill dvp '+(d.v?"v":"")+'">'+esc(d.v?t("Scheda montata"):t("Scheda non montata"))+
     '</span>';
@@ -9077,14 +10053,16 @@ function ioPinFn(){
     $("io_c").value="ingresso";
     ioClsChg()
   }
-  f.textContent=g>0&&typeof PFN!="undefined"&&PFN[g]
-    ?tf("Funzioni possibili: {0}",PFN[g].replace(/ /g,", ")):""
+  f.textContent=g>0&&pinFnTxt(g)?tf("Funzioni possibili: {0}",pinFnTxt(g)):""
 }
 
 function ioClsChg(){
-  var s=$("io_c").value=="sd";
+  var s=$("io_c").value=="sd",w=$("io_c").value=="pwm",k=$("io_c").value=="contatore",r=$("io_c").value=="led_rgb";
   $("io_sdf").className=s?"":"hide";
-  $("io_o").parentNode.className=s?"hide":"";
+  $("io_pwf").className=w?"":"hide";
+  $("io_cnf").className=k?"":"hide";
+  $("io_rgf").className=r?"":"hide";
+  $("io_o").parentNode.className=s||w||k||r?"hide":"";
   if(s){
     var D=IOS.sdp,F=["io_g","io_sm","io_sk","io_si"];
     F.forEach(function(i,k){if(!$(i).value&&D[k]!=null)$(i).value=D[k]});
@@ -9094,7 +10072,8 @@ function ioClsChg(){
 
 function ioAdd(){
   var g=$("io_g").value,sd=$("io_c").value=="sd",
-    o=sd?"mosi="+$("io_sm").value+" sck="+$("io_sk").value+" miso="+$("io_si").value+" khz="+
+    pw=$("io_c").value=="pwm",
+    o=$("io_c").value=="led_rgb"?ioRgbOpts():$("io_c").value=="contatore"?ioCntOpts():pw?"hz="+$("io_ph").value+",duty="+$("io_pd").value:sd?"mosi="+$("io_sm").value+" sck="+$("io_sk").value+" miso="+$("io_si").value+" khz="+
     $("io_sf").value:$("io_o").value;
   post("/api/io/add",{cls:$("io_c").value,gpio:g,name:$("io_n").value,
     opt:o}).then(function(r){return r.json()}).then(function(j){
@@ -9136,16 +10115,243 @@ function ioRen(n){
       })
     }})
 }
+/* ===== periferica PWM (classe "pwm"): voce nell'elenco di aggiunta e riquadro di prova; il firmware la offre solo se la include e ci sono canali liberi ===== */
+function ioPwmVal(d){return d.v+"% · "+d.hz+" Hz"}
+
+function ioPwmOpt(free){
+  var c=$("io_c"),o=c.querySelector('option[value="pwm"]');
+  if(free===undefined)return;                       // firmware senza PWM: nessuna voce
+  if(!o){
+    o=new Option("PWM","pwm");
+    c.add(o)
+  }
+  o.disabled=free<1;
+  o.textContent=free<1?t("PWM (canali finiti)"):"PWM";
+  if(o.disabled&&c.value=="pwm"){
+    c.value="rele";
+    ioClsChg()
+  }
+}
+
+function ioPwmDet(d){
+  var h='<label for="pw_d">'+esc(t("Duty"))+' <b id="pw_dv">'+d.v+'%</b></label>'+
+    '<input type="range" id="pw_d" min="0" max="100" value="'+d.v+
+    '" oninput="$(\'pw_dv\').textContent=this.value+\'%\'" onchange="ioPwmSet()">';
+  if(ROLE>=2)h+='<label for="pw_h">'+esc(t("Frequenza (Hz)"))+
+    '</label><input type="number" id="pw_h" min="10" max="40000" value="'+d.hz+
+    '" style="width:7em"> <button class="btn gray" onclick="ioPwmSet()">'+esc(t("Applica"))+'</button>';
+  return h+'<p class="fhint">'+esc(tf(
+    "Dopo il riavvio il PWM riparte spento. Nelle app: use={0} e poi pwm(\"{0}\", 50).",d.n))+'</p>'
+}
+
+function ioPwmSet(){
+  var h=$("pw_h");
+  ioAct("set",$("pw_d").value+(h?","+h.value:""))
+}
+/* ===== periferica contatore di impulsi (classe "contatore"): voce nell'elenco di aggiunta, dati nel dettaglio e pulsante Azzera; il firmware la offre solo se la include e ci sono unita libere ===== */
+function ioCntHz(d){
+  var f=d.mhz/1000;
+  return f.toFixed(f<10?2:1)+" Hz"
+}
+
+function ioCntVal(d){return d.v+" · "+ioCntHz(d)}
+
+function ioCntOpt(free){
+  var c=$("io_c"),o=c.querySelector('option[value="contatore"]');
+  if(free===undefined)return;                       // firmware senza contatore: nessuna voce
+  if(!o){
+    o=new Option("","contatore");
+    c.add(o)
+  }
+  o.disabled=free<1;
+  o.textContent=free<1?t("Contatore di impulsi (unita finite)"):t("Contatore di impulsi");
+  if(o.disabled&&c.value=="contatore"){
+    c.value="rele";
+    ioClsChg()
+  }
+}
+
+function ioCntRows(d){
+  return '<tr><td>'+esc(t("Fronte da contare"))+'</td><td><b>'+
+    esc([t("Salita"),t("Discesa"),t("Salita e discesa")][d.e]||"")+'</b></td></tr><tr><td>'+
+    esc(t("Filtro anti-rimbalzo"))+'</td><td><b>'+(d.ns?d.ns+" ns":esc(t("nessuno")))+'</b></td></tr>'
+}
+
+function ioCntDet(d){
+  var h='';
+  if(ROLE>=1)h+='<div class="ftb"><button class="btn gray" onclick="ioAct(\'reset\',0)">'+
+    esc(t("Azzera"))+'</button></div>';
+  return h+'<p class="fhint">'+esc(tf(
+    "Dopo il riavvio il contatore riparte da 0. Nelle app: use={0} e poi contatore(\"{0}\").",d.n))+'</p>'
+}
+
+function ioCntOpts(){
+  var r=$("io_cr").value;
+  return "fronte="+$("io_cf").value+",filtro="+($("io_cn").value||0)+(r?","+r:"")
+}
+/* ===== periferica LED a colori a mano (classe "led_rgb", WS2812): voce nell'elenco di aggiunta e riquadro di prova; il firmware la offre solo se la include e ci sono canali liberi ===== */
+function ioRgbOpt(free){
+  var c=$("io_c"),o=c.querySelector('option[value="led_rgb"]');
+  if(free===undefined)return;                       // firmware senza LED a colori a mano: nessuna voce
+  if(!o){
+    o=new Option("","led_rgb");
+    c.add(o)
+  }
+  o.disabled=free<1;
+  o.textContent=free<1?t("LED a colori (canali finiti)"):t("LED a colori (WS2812)");
+  if(o.disabled&&c.value=="led_rgb"){
+    c.value="rele";
+    ioClsChg()
+  }
+}
+
+function ioRgbHex(d){return("000000"+d.col.toString(16)).slice(-6)}
+
+function ioRgbOpts(){
+  var o=$("io_ro").value;
+  return o?"ordine="+o:""
+}
+
+function ioRgbDet(d){
+  var h='<div class="ftb"><button class="btn" onclick="ioAct(\'set\',1)">'+esc(t("Accendi"))+
+    '</button><button class="btn gray" onclick="ioAct(\'set\',0)">'+esc(t("Spegni"))+'</button></div>';
+  if(ROLE>=1)h+='<label for="rg_c">'+esc(t("Colore"))+'</label><input type="color" id="rg_c" value="#'+
+    ioRgbHex(d)+'" onchange="ioRgbSet()"><label for="rg_l">'+esc(t("Luminosita"))+
+    ' <b id="rg_lv">'+d.lum+'</b></label><input type="range" id="rg_l" min="0" max="255" value="'+d.lum+
+    '" oninput="$(\'rg_lv\').textContent=this.value" onchange="ioRgbSet()">';
+  if(ROLE>=2)h+='<label for="rg_o">'+esc(t("Ordine dei byte"))+'</label><select id="rg_o" onchange="ioAct(\'ordine\',this.value)">'+
+    ["grb","rgb","brg","gbr","rbg","bgr"].map(function(x){
+      return'<option value="'+x+'"'+(x==d.ord?" selected":"")+'>'+x.toUpperCase()+'</option>'
+    }).join("")+'</select>';
+  return h+'<p class="fhint">'+esc(t(
+    "Il LED torna com'era anche dopo il riavvio. Se i colori sono scambiati (per esempio il rosso diventa verde) cambia l'ordine dei byte."))+'</p>'
+}
+
+function ioRgbSet(){
+  ioAct("colore",$("rg_c").value.slice(1)+","+$("rg_l").value)
+}
+/* ===== periferiche di bordo: disegnate dal JSON di /api/dev =====
+   Il firmware manda, per ogni periferica gia presente sulla scheda, il campo "wid" (colore, onoff, tasto).
+   Qui c'e un disegnatore per ogni tipo di widget: la pagina non conosce ne il chip ne l'elenco dei pezzi. */
+/* Voci di menu di bordo: pagina (tab) -> etichetta, per le sole periferiche che la scheda dichiara
+   con il widget di quella pagina (campo "bordo" in VOCI). Si aggiorna a ogni lettura di /api/dev. */
+var BDV={},BDI={},BDF="";   /* BDV: pagina -> etichetta (alias se c'e); BDI: pagina -> nome vero della periferica */
+function bordoVoci(){
+  var n={},ids={};
+  DV.forEach(function(d){
+    var v=d.kind==1&&d.wid?voceDi(d.tab):null;
+    if(v&&v.bordo==d.wid&&!n[d.tab]){
+      n[d.tab]=etichetta(d.id,d.label);
+      ids[d.tab]=d.id
+    }
+  });
+  var a=menuAggiunte();
+  var f=JSON.stringify([n,a]);
+  BDV=n;
+  BDI=ids;
+  if(f!=BDF){
+    BDF=f;
+    menuCostruisci(a);
+    subRidisegna()
+  }
+}
+
+/* Periferiche create a mano (rele, LED, ingressi...): ognuna ha la sua voce nel menu, dopo Periferiche.
+   Nomi fatti solo di lettere, cifre, trattino e sottolineatura: il nome entra nell'id della voce. */
+function menuAggiunte(){
+  return DV.filter(function(d){
+    return d.kind==1&&d.tab=="io"&&d.wid===undefined&&/^[A-Za-z0-9_-]+$/.test(d.id)
+  }).map(function(d){
+    return[d.id,etichetta(d.id,d.label)]
+  })
+}
+
+function bordoLista(){
+  return DV.filter(function(d){
+    return d.kind==1&&d.wid!==undefined&&canSee(bordoTab(d))
+  })
+}
+
+/* Dove porta la riga: ogni periferica ha la sua voce (quelle a mano: "p_" + nome). */
+function bordoTab(d){
+  return d.wid===undefined&&d.tab=="io"&&POV["p_"+d.id]?"p_"+d.id:d.tab
+}
+
+function bordoLoad(){
+  dvList().then(bordoDraw).catch(function(){})
+}
+
+function bordoDraw(){
+  var h="";
+  bordoLista().forEach(function(d){
+    h+=bordoRiga(d)
+  });
+  $("bd_card").className=h?"card":"card hide";
+  $("bd_list").innerHTML=h?'<ul class="dvl">'+h+'</ul>':""
+}
+
+/* Un disegnatore per tipo di widget; se il tipo non si conosce resta la sola riga di stato. */
+var BDW={colore:bordoApri,tasto:bordoApri,onoff:bordoOnoff};
+function bordoRiga(d){
+  var f=BDW[d.wid]||bordoSolo;
+  return"<li>"+f(d)+"</li>"
+}
+
+/* Colore e tasto: la riga apre la pagina della periferica, dove stanno i suoi controlli. */
+function bordoApri(d){
+  return'<button class="dvn"'+descrTitle(d.id)+' onclick="show(\''+esc(d.tab)+'\')"><span>'+
+    etichettaHtml(d.id,d.label)+'</span>'+dvPill(d)+'</button><span class="dvsw"></span>'
+}
+
+function bordoSolo(d){
+  return'<span class="dvn" style="cursor:default"'+descrTitle(d.id)+'><span>'+
+    etichettaHtml(d.id,d.label)+'</span>'+dvPill(d)+
+    '</span><span class="dvsw"></span>'
+}
+
+/* Acceso/spento: la riga apre la pagina della periferica; l'interruttore e solo dell'Amministratore, come nell'Elenco dispositivi. */
+function bordoOnoff(d){
+  var sw="";
+  if(d.sw&&ROLE==2)sw=dvSw(d.state==1,etichetta(d.id,d.label),"bordoSet('"+esc(d.id)+"',"+(d.state==1?0:1)+")");
+  return'<button class="dvn"'+descrTitle(d.id)+' onclick="show(\''+esc(d.tab)+'\')"><span>'+
+    etichettaHtml(d.id,d.label)+'</span>'+dvPill(d)+'</button><span class="dvsw">'+sw+'</span>'
+}
+
+function bordoSet(id,on){
+  post("/api/dev/set",{id:id,on:on}).then(function(r){return r.json()}).then(function(j){
+    msg("bd_m",j.ok?t("Fatto"):j.err,j.ok);
+    setTimeout(bordoLoad,300)
+  }).catch(function(){})
+}
 /* ===== dati comuni (paesi, mappa) ===== */
 var COMMON=null;
 function commonLoad(){
   if(COMMON)return Promise.resolve(COMMON);
-  return fetch("/api/common").then(function(r){return r.json()}).then(function(j){
+  return fetch("/api/common").then(function(r){
+    if(!r.ok)throw 0;
+    return r.json()
+  }).then(function(j){
     j.by={};
     j.countries.forEach(function(c){j.by[c.cc]=c});
+    return j
+  }).catch(commonVuoti).then(function(j){
     COMMON=j;
     return j
   })
+}
+
+/* dati comuni non disponibili (file mancante o non valido sulla scheda): si mostra solo il paese gia salvato */
+function commonVuoti(){
+  var j={countries:[],regions:[],sbom:[],by:{},vuoto:true};
+  return api("/api/region").then(function(r){return r.json()}).then(function(r){
+    if(r.country){
+      var c={cc:r.country,n:{en:r.country},rg:"xx",ch:r.ch,dbm:r.limit,tz:[[r.tzName||"UTC",r.tz||"UTC0"]],
+        f:{d:r.dateFmt,h:r.timeFmt,s:r.decSep,w:r.weekStart,t:r.tempUnit,l:r.lang}};
+      j.countries.push(c);
+      j.by[c.cc]=c
+    }
+    return j
+  },function(){return j})
 }
 
 function cName(c){
@@ -9855,7 +11061,11 @@ function wdLoad(){
         w.off||"-"))+'</div>':"")+
       (w.stopped?'<div class="msg ko" style="display:block">'+
         esc(t("Riavvii automatici sospesi: troppi in un'ora. Controlla il registro."))+'</div>':"")+
-      (w.last?row(esc(t("Ultimo riavvio automatico")),esc(w.last)):"");
+      (w.last?row(esc(t("Ultimo riavvio automatico")),esc(w.last)):"")+
+      (w.ramUsed>=0?row(esc(t("RAM interna usata")),esc(w.ramUsed+"% - "+
+        [t("normale"),t("segnala"),t("riduci"),t("critico")][w.ramLvl])):"")+
+      (w.ramOff?row(esc(t("Spento per la memoria")),esc(w.ramOff)):"")+
+      (w.ramMin?'<p class="fhint">'+esc(t("Scheda con poca memoria: il watchdog segnala e riduce ma non riavvia per la RAM."))+'</p>':"");
     h+='<table class="ftab"><thead><tr><th>'+esc(t("Servizio"))+'</th><th>'+
       esc(t("Ultimo segno di vita"))+'</th><th>'+esc(t("Limite"))+'</th><th>'+esc(t("Riavvii"))+
       '</th></tr></thead><tbody>';
@@ -9868,7 +11078,7 @@ function wdLoad(){
     $("wd_net").classList.toggle("on",w.net);
     $("wd_ram").classList.toggle("on",w.ram);
     $("wd_nm").value=w.netMin;
-    $("wd_rk").value=w.ramKb;
+    $("wd_rk").value=w.ramPerc;
     $("wd_ud").value=w.upDays;
     $("wd_at").value=w.at>=0?("0"+Math.floor(w.at/60)).slice(-2)+":"+("0"+w.at%60).slice(-2):"";
     wdTimes(w);
@@ -9912,7 +11122,7 @@ function wdSave(){
   [].forEach.call($("wd_days").children,function(b,i){if(b.dataset.on==1)days|=1<<i});
   post("/api/wd",{task:$("wd_task").classList.contains("on")?1:0,
     net:$("wd_net").classList.contains("on")?1:0,ram:$("wd_ram").classList.contains("on")?1:0,
-    netmin:$("wd_nm").value,ramkb:$("wd_rk").value,updays:$("wd_ud").value,
+    netmin:$("wd_nm").value,ramperc:$("wd_rk").value,updays:$("wd_ud").value,
     at:at?+at.slice(0,2)*60+ +at.slice(3,5):-1,days:days,twdt:$("wd_tw").value,
     lim_net:$("wd_l_net").value,lim_monitor:$("wd_l_monitor").value,lim_mesh:$("wd_l_mesh").value,
     lim_mqtt:$("wd_l_mqtt").value,lim_led:$("wd_l_led").value})
@@ -10866,6 +12076,7 @@ function fnRole(r){return r>=2?t("Admin"):r==1?t("Operatore"):t("Tutti")}
 function fnLoad(){
   api("/api/func").then(function(r){return r.json()}).then(function(j){
     FN.list=j.list||[];
+    FN.min=!!j.ramMin;
     fnDraw()
   }).catch(function(){})
 }
@@ -10882,6 +12093,7 @@ function fnDraw(){
       (f.on?"true":"false")+'" aria-label="'+esc(tf("Funzionalita {0}",f.id))+'"'+dis+
       ' onclick="fnSet(\''+f.id+'\','+(f.on?0:1)+')"></button></div>'
   });
+  if(FN.min)h='<div class="msg ko" style="display:block">'+esc(t("Scheda con poca memoria: funzioni ridotte (una sola connessione HTTPS, niente riavvio per la RAM). Bluetooth, MQTT e mesh restano spenti finche non li accendi tu."))+'</div>'+h;
   $("funclist").innerHTML=h
 }
 
@@ -11364,7 +12576,9 @@ function suSteps(){
   return SU.d&&SU.d.ssid?SUSTEPS.filter(function(x){return x!="Ora"}):SUSTEPS
 }
 
-function setupOpen(){
+/* Apre la guida. Se la scheda non risponde (RAM scarsa nella finestra) riprova ogni 3 secondi, senza lasciare la pagina vuota. */
+function setupOpen(n){
+  n=n||0;
   Promise.all([commonLoad(),api("/api/region").then(function(r){return r.json()}),
     api("/api/settings").then(function(r){return r.json()})]).then(function(a){
       var r=a[1],s=a[2];
@@ -11374,7 +12588,19 @@ function setupOpen(){
       SU.i=0;
       $("setup").className="setup";
       setupDraw()
-    }).catch(function(){})
+    }).catch(function(){
+      if(!$("app")||$("app").classList.contains("hide"))return;
+      $("setup").className="setup";
+      $("setup").innerHTML='<div class="sw"><div class="card"><div class="subt" role="status">'+
+        esc(n<10?t("Carico..."):t("La scheda non risponde: riprova tra poco"))+'</div></div></div>';
+      if(n<10)setTimeout(function(){setupOpen(n+1)},3000)
+    })
+}
+
+/* La guida e chiusa (finita, "gia configurata" o "Piu tardi"): parte la pagina vera. */
+function setupFine(){
+  setupClose();
+  paginaAvvia()
 }
 
 function suAlready(){
@@ -11386,8 +12612,7 @@ function suAlready(){
       return post("/api/setup/done",{}).then(function(r){return r.json()}).then(function(j){
         if(!j.ok)return j.err||t("Errore");
         AUTH.setup=true;
-        setupClose();
-        show("sum");
+        setupFine();
         return""
       })
     }})
@@ -11417,10 +12642,10 @@ function setupDraw(){
         '\');setTimeout(setupDraw,400)">'+flagImg(l)+'<span>'+esc(l.name)+'</span></button>'
     });
     h+='</div><div class="suadd"><label for="sulf">'+esc(t("Aggiungi una lingua"))+
-      '</label><input type="file" id="sulf" accept=".json" multiple onchange="suLangUp()">'+
+      '</label><input type="file" id="sulf" accept=".vld,.vlp" multiple onchange="suLangUp()">'+
       '<p class="fhint">'+esc(
         t(
-          "Scegli uno o piu file dalla cartella lang dello ZIP (per esempio en.json). Si possono aggiungere anche dopo, in Sistema > Localizzazione."))+
+          "Scegli i file dalla cartella lang dello ZIP (per esempio en.vld ed en.vlp, anche insieme). Si possono aggiungere anche dopo, in Sistema > Localizzazione."))+
       '</p><div id="sulm" class="msg"></div></div>'
   }
   else if(i==1){
@@ -11447,7 +12672,7 @@ function setupDraw(){
       '</label><input type="number" id="su_g" min="0" max="15" value="'+d.gain+
       '"></div><p class="fhint">'+
       esc(t(
-        "Se non sai, lascia Interna. Con un'antenna esterna la potenza scende da sola per restare nel limite del paese."))+
+        "Se non sai, lascia Interna. La potenza scende da sola per restare nel limite del paese, tenendo conto dell'antenna."))+
       '</p>'
   }
   else if(i==4){
@@ -11493,13 +12718,9 @@ function setupDraw(){
         esc(d.tzn)+" ("+esc(t("si cambia in Sistema > Localizzazione"))+")")+
       row(esc(t("Antenna")),esc(d.ant?tf("esterna, {0} dBi",d.gain):t("interna")))+
       row(esc(t("Rete di casa")),esc(d.ssid||t("nessuna (solo hotspot)")))+
-      '<div class="law">'+esc(
-        t(
-          "MQTT, rete tra schede, server dell'ora e filtro IP restano spenti: li accendi tu quando servono (categorie Rete, Sistema e Sicurezza). Il Bluetooth resta spento finche un programma VesevOS con il permesso ble non lo accende."))+
-      '</div>'+
       (d.ssid?'<div class="law">'+
         esc(tf(
-          "Dopo il salvataggio la scheda si collega a {0}: collega il telefono o il PC a quella rete e apri l'indirizzo che ti mostro. Al primo accesso da quella rete hotspot, portale automatico e HTTP si spengono e restano spenti: li riaccendi tu quando vuoi (Rete). Se il collegamento non riesce, l'hotspot torna da solo.",
+          "Dopo il salvataggio la scheda si collega a {0}: collega il telefono o il PC a quella rete e apri l'indirizzo che ti mostro. L'hotspot, il portale automatico e il DHCP restano spenti: li accendi tu quando vuoi (Rete > Servizi). Se il collegamento non riesce, tieni premuto il tasto fisico per 8 secondi: l'hotspot si riaccende.",
           d.ssid))+'</div>':'<div class="law">'+
         esc(t(
           "Senza Wi-Fi di casa l'hotspot e HTTP restano accesi: sono l'unico modo di entrare. La scheda non ha batteria per l'orologio: se la spegni l'ora va rimessa (Sistema > Ora)."))+
@@ -11507,7 +12728,7 @@ function setupDraw(){
   }
   h+='<div id="sumsg" class="msg"></div><div class="sbt">'+
     (i?'<button class="btn gray" type="button" onclick="suGo(-1)">'+esc(t("Indietro"))+'</button>'
-      :"")+'<button class="btn gray" type="button" onclick="setupClose()">'+esc(t("Piu tardi"))+
+      :"")+'<button class="btn gray" type="button" onclick="setupFine()">'+esc(t("Piu tardi"))+
     '</button><button class="btn gray" type="button" onclick="suAlready()">'+
     esc(t("La scheda e gia configurata"))+'</button><span class="sp"></span>'+
     (i==4
@@ -11713,26 +12934,25 @@ function suFinish(){
         :{epoch:Math.floor(Date.now()/1000)}).then(function(r){return r.json()}):{ok:true}
     }).then(function(j){
       if(j.ok===false)throw j.err;
-      return post("/api/setup/done",{ntp:d.ssid?"1":"0"})
-    }).then(function(r){return r.json()}).then(function(j){
-      if(!j.ok)throw j.err;
-      AUTH.setup=true;
       return d.host!=d.host0?post("/api/system",
         {hostname:d.host,domain:""}).then(function(r){return r.json()}):{ok:true}
     }).then(function(j){
       if(!j.ok)throw j.err;
+      /* La rete di casa si salva PRIMA della fine guida (later=1: solo salvata, il collegamento parte a fine guida):
+         dopo "done" l'hotspot cambia e la richiesta non arriverebbe piu. Senza salvataggio la guida non finisce. */
+      return d.ssid?post("/api/wifi/save",{ssid:d.ssid,pass:d.pass,dhcp:1,cleanup:1,later:1})
+        .then(function(r){return r.json()}).then(function(k){
+          if(k.ok!==true)throw t("Non sono riuscito a salvare la rete di casa: la guida non e finita. Riprova.");
+          return k
+        }):api("/api/ap").then(function(r){return r.json()}).then(function(a){d.ap=a},function(){d.ap=null})
+    }).then(function(){
+      return post("/api/setup/done",{ntp:d.ssid?"1":"0",keep:d.ssid?"1":"0"})
+    }).then(function(r){return r.json()}).then(function(j){
+      if(!j.ok)throw j.err;
+      AUTH.setup=true;
       var u="https://"+d.host+".local"+
         (SV.httpsOn!==false&&SV.httpsPort&&SV.httpsPort!=443?":"+SV.httpsPort:"");
-      if(d.ssid){
-        var ws=function(n){
-          post("/api/wifi/save",{ssid:d.ssid,pass:d.pass,dhcp:1,cleanup:1}).catch(function(){
-            if(n)setTimeout(function(){ws(n-1)},4000)
-          })
-        };
-        setTimeout(function(){ws(1)},d.host!=d.host0?1500:0)
-      }
-      setupClose();
-      show("sum");
+      setupFine();
       dlg({title:t("Configurazione completata"),
         body:d.ssid?'<p style="margin:0 0 8px">'+
         esc(tf(
@@ -11740,11 +12960,14 @@ function suFinish(){
           d.ssid))+'</p><div class="lab"><div class="qrbox" style="max-width:160px">'+qrSvg(u)+
         '</div><div><div class="big">'+esc(u)+'</div></div></div><p class="fhint">'+
         esc(t(
-          "Se non riesce a collegarsi, l'hotspot torna da solo: riconnettiti e controlla la password della Wi-Fi in Rete."))+
-        '</p>':'<p style="margin:0">'+
+          "Se non riesce a collegarsi, l'hotspot resta spento: tieni premuto il tasto fisico per 8 secondi per riaccenderlo, poi controlla la password della Wi-Fi in Rete."))+
+        '</p>':'<p style="margin:0 0 8px">'+
         esc(t(
-          "La scheda e pronta. Puoi collegarla alla rete di casa quando vuoi da Rete > Wi-Fi."))+
-        '</p>',buttons:[["ok",t("OK"),""]],onOk:function(){return""}})
+          "Nessuna Wi-Fi di casa salvata: la scheda si raggiunge solo dal suo hotspot. Tra pochi secondi l'hotspot passa a protetto: collega il telefono o il PC a questa rete con la password e apri l'indirizzo qui sotto."))+
+        '</p>'+(d.ap?'<div class="subt">'+esc(t("Rete Wi-Fi della scheda"))+'</div><div class="big">'+esc(d.ap.ssid)+
+        '</div><div class="subt" style="margin-top:6px">'+esc(t("Password"))+'</div><div class="pw">'+esc(d.ap.pass)+'</div>':'')+
+        '<div class="big" style="margin-top:8px">https://192.168.4.1</div>',
+        buttons:[["ok",t("OK"),""]],onOk:function(){return""}})
     })
     .catch(function(e){msg("sumsg",typeof e=="string"?e:t("Errore"),false)})
 }
@@ -11776,41 +12999,22 @@ authLoad().then(function(j){
 });
 themeApply();
 
-/* guida, passo lingua: carica uno o piu file /lang/<codice>.json e passa alla prima lingua caricata */
+/* guida, passo lingua: carica i file /lang/<codice>.vld (e .vlp) e passa alla prima lingua caricata */
 function suLangUp(){
   var fs=[].slice.call($("sulf").files||[]);
   if(!fs.length)return;
-  var bad=fs.filter(function(f){
-    var m=f.name.match(/^([a-z0-9]{2,8})\.json$/);
-    return!m||m[1]=="it"
-  });
-  if(bad.length){
-    msg("sulm",t("Il nome deve essere come en.json (codice di 2-8 lettere minuscole)"),false);
-    $("sulf").value="";
-    return
-  }
-  var first=fs[0].name.replace(".json",""),i=0;
   msg("sulm",t("Carico..."),true);
-  (function next(){
-    if(i>=fs.length){
-      api("/api/langs").then(function(r){return r.json()}).then(function(l){
-        LANGS=l;
-        fillLangSel();
-        setLang(first);
-        setTimeout(setupDraw,400)
-      });
-      return
-    }
-    var f=fs[i++],fd=new FormData();
-    fd.append("file",f,f.name);
-    api("/api/fs/up?dir=/lang",
-      {method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){
-        if(!j.ok){
-          msg("sulm",f.name+": "+(j.err||t("Errore")),false);
-          return
-        }
-        next()
-      }).catch(function(){msg("sulm",t("Caricamento non riuscito"),false)})
-  })()
+  langCaricaFile(fs).then(function(lista){
+    var first=lista[0].code;
+    return api("/api/langs").then(function(r){return r.json()}).then(function(l){
+      LANGS=l;
+      fillLangSel();
+      setLang(first);
+      setTimeout(setupDraw,400)
+    })
+  }).catch(function(e){
+    msg("sulm",String(e),false);
+    $("sulf").value=""
+  })
 }
 </script></body></html>

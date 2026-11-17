@@ -2,12 +2,31 @@
 var COMMON=null;
 function commonLoad(){
   if(COMMON)return Promise.resolve(COMMON);
-  return fetch("/api/common").then(function(r){return r.json()}).then(function(j){
+  return fetch("/api/common").then(function(r){
+    if(!r.ok)throw 0;
+    return r.json()
+  }).then(function(j){
     j.by={};
     j.countries.forEach(function(c){j.by[c.cc]=c});
+    return j
+  }).catch(commonVuoti).then(function(j){
     COMMON=j;
     return j
   })
+}
+
+/* dati comuni non disponibili (file mancante o non valido sulla scheda): si mostra solo il paese gia salvato */
+function commonVuoti(){
+  var j={countries:[],regions:[],sbom:[],by:{},vuoto:true};
+  return api("/api/region").then(function(r){return r.json()}).then(function(r){
+    if(r.country){
+      var c={cc:r.country,n:{en:r.country},rg:"xx",ch:r.ch,dbm:r.limit,tz:[[r.tzName||"UTC",r.tz||"UTC0"]],
+        f:{d:r.dateFmt,h:r.timeFmt,s:r.decSep,w:r.weekStart,t:r.tempUnit,l:r.lang}};
+      j.countries.push(c);
+      j.by[c.cc]=c
+    }
+    return j
+  },function(){return j})
 }
 
 function cName(c){

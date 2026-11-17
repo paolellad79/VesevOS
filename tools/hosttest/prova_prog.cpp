@@ -110,7 +110,7 @@ int main() {
   CHECK(funcOn("nome-che-non-c-e"));                                  // un id sconosciuto e concesso (non e una funzionalita)
   CHECK(!funcSet(-1, false, e) && !funcSet(kFuncN, true, e));
   CHECK(funcMissing("log sd") && !strcmp(funcMissing("log sd"), "sd"));
-  CHECK(funcMissing("log,sd") && !strcmp(funcMissing("log,sd"), "sd"));   // anche separati da virgola (use= delle app Berry)
+  CHECK(funcMissing("log,sd") && !strcmp(funcMissing("log,sd"), "sd"));   // anche separati da virgola (use= delle app)
   CHECK(funcMissing("log") == nullptr && funcMissing("") == nullptr && funcMissing(nullptr) == nullptr);
   CHECK(funcMissing("sdx") == nullptr);                               // nome intero, non un pezzo
   CHECK(funcSet(funcIndex("sd"), true, e) && funcOn("sd") && cfg.funcOff == 0);

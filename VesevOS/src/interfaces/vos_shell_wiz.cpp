@@ -27,7 +27,7 @@ static void wzAsk(OutSink& o) {
     case WZ_NAME: o.println(trf("3/8 Nome della scheda [%s]:", cfg.hostname.c_str())); break;
     case WZ_ANT: o.println(tr("4/8 Antenna: i = interna, e = esterna [i]:")); break;
     case WZ_ANTG: o.println(tr("Guadagno dell'antenna esterna in dBi (0-15) [0]:")); break;
-    case WZ_AP: o.println(trf("5/8 Hotspot: %s  password: %s", cfg.apSsid.c_str(), apWinIsOpen() ? "aperto" : cfg.apPass.c_str())); o.println(tr("Invio = tieni, n = nuova password casuale:")); break;
+    case WZ_AP: cfgEnsureApPass(); o.println(trf("5/8 Hotspot: %s  password (vale a guida finita): %s", cfg.apSsid.c_str(), cfg.apPass.c_str())); o.println(tr("Invio = tieni, n = nuova password casuale:")); break;
     case WZ_PASS:
       if (authIsSet()) o.println(tr("6/8 Amministratore gia impostato. Invio = tieni, oppure scrivi la nuova password:"));
       else o.println(trf("6/8 Scegli la password dell'amministratore '%s' (almeno 6 caratteri; si vede mentre scrivi: fallo in un luogo sicuro):", cfg.users[authFirstAdmin() < 0 ? 0 : authFirstAdmin()].name.c_str()));
@@ -45,13 +45,18 @@ static void wzFinish(OutSink& o) {
   g_wz = WZ_OFF;
   cfg.ntpOn = g_wzWifi; cfg.ntpAutoOff = !g_wzWifi;   // senza Wi-Fi di casa il server dell'ora non serve (si riaccende se arriva il Wi-Fi)
   if (g_wzWifi) { cfg.staEnabled = true; cfg.staSsid = g_wzSsid; cfg.staPass = g_wzPass; cfg.staDhcp = true; }
+  cfgEnsureApPass();                                 // l'hotspot, quando c'e, ha sempre la sua password
+  cfgSetupServices();                                // con la Wi-Fi di casa: hotspot e portale spenti di fabbrica
   cfg.setupDone = true; ledSetSetup(false);
   cfgSetOrigin("seriale setup"); cfgSave(); timeApply();
-  apWinClose(); netApRefresh();                         // fine guida: hotspot con password
+  apWinClose();                                         // fine guida: l'hotspot passa a protetto dopo 4 secondi (task di rete)
   netApplyServices();                                   // il nome scelto nel passo 3 vale da ora (mDNS)
   o.println(tr("Configurazione finita."));
   o.println(trf("Nome: %s.local   Paese: %s   Lingua: %s", cfg.hostname.c_str(), cfg.country.c_str(), cfg.lang.c_str()));
-  if (g_wzWifi) { o.println(trf("Mi collego a %s: se non riesce l'hotspot torna da solo.", g_wzSsid)); netReconfigure(); }
+  if (g_wzWifi) {
+    o.println(trf("Mi collego a %s. L'hotspot resta spento: lo accendi dalla pagina (Servizi) o tenendo premuto il tasto BOOT per 8 secondi.", g_wzSsid));
+    netReconfigure();
+  }
   else o.println(tr("Senza Wi-Fi di casa: hotspot e HTTP restano accesi, il server dell'ora e spento."));
   wipeBytes(g_wzPass, sizeof g_wzPass);              // la password della Wi-Fi e gia in cfg: la copia della guida non serve piu
   o.println(tr("Per i servizi di rete e le porte: svc. Per tutto il resto: help."));

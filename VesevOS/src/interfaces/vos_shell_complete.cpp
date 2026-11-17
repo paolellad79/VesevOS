@@ -131,7 +131,7 @@ void addCommands(int role, const char* prefix, Cands& c) {
     if ((ci.flags & CMD_HIDDEN) || strncmp(ci.name, prefix, pl) != 0) continue;
     if (canUse(role, Word(ci.name, strlen(ci.name)), none)) c.add(ci.name, false);
   }
-  char words[8][13];                                                    // i comandi dei driver (scritti in Berry)
+  char words[8][13];                                                    // i comandi dei driver (scritti nelle funzioni VesevOS)
   for (int i = 0, n = drvCmdWords(words, 8); i < n; i++)
     if (strncmp(words[i], prefix, pl) == 0 && canUse(role, Word(words[i], strlen(words[i])), none)) c.add(words[i], false);
 }
@@ -252,7 +252,7 @@ bool shellComplete(uint32_t sess, int role, const char* line, size_t room, bool 
   for (size_t i = 0; i < kPathRulesN; i++) {                             // comandi con percorsi
     const PathRule& r = kPathRules[i];
     if (cmd != r.cmd || idx < r.first || idx > r.last) continue;
-    bool opt = (r.opts && word[0] == '-');                                 // ls -l, gzip -d, tar -xf...: opzioni, non percorsi
+    bool opt = (r.opts && word[0] == '-');                                 // ls -l, zip -r, tar -xf...: opzioni, non percorsi
     if (opt) eachWord(r.opts, word, [&](const char* w) { c.add(w, false); });
     else completePath(sess, word, r.dirsOnly, c);
     c.finish(opt ? word : baseOf(word), room);

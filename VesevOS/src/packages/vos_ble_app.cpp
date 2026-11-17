@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_ble_app.cpp
-// STRATO 6 (packages): le operazioni che un programma Berry con il permesso ble puo fare sul Bluetooth (le chiama vos_berry_ble.cpp)
+// STRATO 6 (packages): le operazioni che un programma con il permesso ble puo fare sul Bluetooth (le chiama vos_funzioni_ble.cpp)
 // e la coda degli eventi dal telefono. Il programma e riconosciuto dal nome (owner): solo il proprietario puo toccare il Bluetooth.
 #include "vos_ble_int.h"
 #include "../core/vos_i18n.h"

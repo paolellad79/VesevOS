@@ -3,7 +3,7 @@
 // VesevOS - vos_drv_ble.h
 // STRATO 1 (Driver): l'unico file che conosce la libreria Bluetooth (NimBLE). Offre solo PRIMITIVE generiche:
 //   accendi/spegni, nome, annuncio, UN servizio definito a runtime (fino a 4 caratteristiche), notifica, disconnessione.
-// NON conosce Berry, la configurazione della scheda, la rete o i comandi: chi lo usa gli passa i dati e riceve gli eventi
+// NON conosce funzioni VesevOS, la configurazione della scheda, la rete o i comandi: chi lo usa gli passa i dati e riceve gli eventi
 // tramite puntatori a funzione (BleDrvEvents). Nessun servizio, nessun testo e nessun annuncio sono incorporati.
 //
 // SICUREZZA (sempre attiva, non si puo spegnere):

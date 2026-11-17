@@ -4,7 +4,7 @@
 
 <p align="center">
   <img alt="Licenza" src="https://img.shields.io/badge/licenza-GPL%20v3%20%2B%20commerciale-3fa7ff">
-  <img alt="Scheda" src="https://img.shields.io/badge/scheda-ESP32--S3-37e0b0">
+  <img alt="Scheda" src="https://img.shields.io/badge/scheda-ESP32--S3%20%C2%B7%20ESP32--C6-37e0b0">
   <img alt="ESP-IDF" src="https://img.shields.io/badge/ESP--IDF-5.5-e7352c">
   <img alt="Stato" src="https://img.shields.io/badge/stato-in%20sviluppo-orange">
   <img alt="Lingue" src="https://img.shields.io/badge/lingue-it%20%C2%B7%20en%20%C2%B7%20es%20%C2%B7%20de-blueviolet">
@@ -12,7 +12,7 @@
 
 <p align="center"><a href="README.md"><b>Italiano</b></a> · <a href="README.en.md">English</a></p>
 
-<p align="center"><b>Un piccolo sistema operativo per ESP32-S3: semplice da usare, sicuro per impostazione, utile anche dove internet non c'è.</b></p>
+<p align="center"><b>Trasforma una scheda da pochi euro in un piccolo centro di controllo: semplice da usare, sicuro per impostazione, vivo anche dove internet non c'è. Per ESP32-S3 ed ESP32-C6.</b></p>
 
 ---
 
@@ -30,7 +30,7 @@ rete Wi-Fi, ora, file, LED, pin, shell e tante altre cose, tutto protetto da una
 </p>
 <p align="center"><sub>Schermate della pagina di controllo (con dati di esempio): Home in tema scuro, Automazioni, ordine di avvio con il terminale a pannello, e la versione per telefono.</sub></p>
 
-> **Stato:** in sviluppo (versione 1.8.16). Il progetto cresce a fasi: guarda "Dove stiamo andando".
+> **Stato:** versione 1.8.24c, per ESP32-S3 ed ESP32-C6. Il progetto cresce a fasi: guarda "Dove stiamo andando".
 
 ## Perché si chiama VesevOS
 
@@ -68,15 +68,24 @@ una situazione di emergenza, in silenzio radio quando serve, o comunicando in mo
 | 🌍 | **Per tutti** | Italiano, inglese, spagnolo e tedesco, e si può aggiungere una lingua con un solo file. |
 | 🔋 | **Affidabile e frugale** | Pensato per reggere i blackout e per consumare poco, anche con la batteria. |
 
+## Novità della 1.8.24c
+
+- **Due schede, un solo sistema**: VesevOS ora gira su **ESP32-S3** e su **ESP32-C6** (Wi-Fi 6 e Bluetooth 5). Stessa pagina, stesse funzioni, stesso modo di lavorare: scegli la scheda, il resto lo fa VesevOS.
+- **Più leggero, più veloce**: pagina, manuale, lingue, licenze, dati dei comuni e tabella radio sono ora **file propri sulla scheda** (`/usr/share/vesevos/`), ognuno controllato con SHA-256. Il firmware è più snello e lascia più spazio alle tue idee.
+- **Carica da file, ovunque**: in ogni sezione trovi il pulsante per caricare dal computer firmware, recovery, pacchetti e file di risorse. Un solo gesto, sempre lo stesso.
+- **Aiuto a portata di mano**: la scheda Aiuto ti dà l'essenziale in poche righe; la guida dettagliata e completa è sul sito GitHub del progetto.
+- **La scheda ti parla con il LED**: un piccolo codice a lampi racconta cosa sta succedendo, anche senza schermo e senza computer. Sul LED a un solo colore il battito arriva fino allo spento, per riconoscerlo a colpo d'occhio.
+- **Prima attivazione in un attimo**: alla prima accensione **premi il tasto BOOT e parte l'installazione guidata**. Passo dopo passo scegli lingua, password e rete.
+
 ## Novità della 1.8.16
 
-- **Driver unici**: un solo modo per installare i driver, `.vdb` (Berry) o `.vde` (ELF), dalla pagina Driver o con `vesevos-driver list|info|install|pins|remove`. I pin sono proposti e puoi cambiarli.
-- **Programmi**: script `.vsb`, app Berry `.vab` e app ELF `.vae` stanno nelle pagine Script e App; i programmi in esecuzione compaiono nei **Task** con ferma e riavvia, e hanno l'**avvio automatico** nel pannello Avvio.
+- **Driver unici**: un solo modo per installare i driver, `.vdb` (funzioni VesevOS) o `.vde` (ELF), dalla pagina Driver o con `vesevos-driver list|info|install|pins|remove`. I pin sono proposti e puoi cambiarli.
+- **Programmi**: script `.vsb`, app `.vab` e app ELF `.vae` stanno nelle pagine Script e App; i programmi in esecuzione compaiono nei **Task** con ferma e riavvia, e hanno l'**avvio automatico** nel pannello Avvio.
 - **Funzionalità** (Sistema): un interruttore per gruppo di primitive (log, sd, dev, gpio, i2c, spi, time, files, ble) per decidere cosa possono usare i programmi.
 - **microSD**: si monta da sola, si naviga in `/media/sd` con `cd`, `ls`, `cat`, `cp`, `mv`, `rm`, `mkdir`, si formatta in FAT32 dal pannello o con `vesevos-drive_manager format` (senza bloccare la shell). I programmi si possono avviare anche dalla scheda.
 - **Dati delle app**: le app che salvano dati scelgono tra memoria flash (`/var/lib/<nome>/`) e microSD (`/media/sd/app/<nome>/`).
 - **Pagina Pin**: schema della scheda fronte e retro con i blocchi delle periferiche, le funzioni possibili di ogni pin e il comando `lspin` nella shell.
-- **ELF di serie**: moduli ELF caricabili senza avvisi, con le stesse primitive dei programmi Berry.
+- **ELF di serie**: moduli ELF caricabili senza avvisi, con le stesse primitive dei programmi delle funzioni VesevOS.
 - **Pagina di installazione** in [`flash/`](flash/README.md) con scelta delle parti da scrivere: puoi **conservare** le impostazioni, il contatore dei riavvii e il tempo di vita, oppure fare l'installazione completa.
 - **Sito e pacchetti**: pagina iniziale, elenco di driver, app e script con SHA-256, e pagina Tecnologie e licenze (cartelle `store/`, `aggiorna/`, `licenze/`).
 
@@ -87,7 +96,7 @@ una situazione di emergenza, in silenzio radio quando serve, o comunicando in mo
 - **LED con trigger** (flash, wifi, cpu) e colori scelti da te. Nella pagina LED/QR l'Admin ora e riconosciuto (correzione della 1.8.0b).
 - **Server HTTP minimo** per il redirect verso HTTPS (meno RAM), correzione del panico dopo il cambio del nome host, watchdog piu larghi e modificabili, governor della CPU (ondemand/conservative/schedutil).
 - **Recovery 0.5.1**: il gettone monouso vale anche per l'avvio normale, pagina nuova, messaggi di accesso piu chiari.
-- **Cartella [`firmware/`](firmware/LEGGIMI.md)**: firmware e recovery gia compilati (1.8.16, Recovery 0.5.2, 0.5.1 e 0.5.0, e le versioni precedenti) con SHA-256 e un elenco `indice.json`.
+- **Cartella [`firmware/`](firmware/LEGGIMI.md)**: firmware e recovery gia compilati (1.8.24c per S3 e C6, Recovery 0.5.3, 0.5.2 e 0.5.1, e le versioni precedenti) con SHA-256 e un elenco `indice.json`.
 - **Pagina di prima installazione** in [`flash/`](flash/README.md): scrive la scheda dal browser (Web Serial), controllando ogni file prima di scrivere.
 - Costruito solo con ESP-IDF 5.5, senza Arduino.
 - **Aggiornamento senza cavo e senza scheda SD** (dalla 1.7.45): dal menu utente scegli *Aggiorna tramite recovery*; il recovery controlla che il file sia davvero un firmware VesevOS (intestazione, marchio, dimensione, SHA-256) prima di attivarlo.
@@ -133,7 +142,7 @@ Queste sono idee e progetti, non promesse: l'ordine può cambiare.
 
 ## Requisiti
 
-- Scheda **ESP32-S3 SuperMini** (ESP32-S3FH4R2: 4 MB flash, 2 MB PSRAM).
+- Scheda **ESP32-S3 SuperMini** (ESP32-S3FH4R2: 4 MB flash, 2 MB PSRAM) oppure **ESP32-C6 SuperMini** (4 MB flash).
 - **ESP-IDF 5.5** (VesevOS e ESP-IDF puro; si usa 5.5.5), installato in `~/esp/esp-idf`. Python 3 e rete la prima volta (il gestore dei componenti scarica `mdns`, `esp_littlefs` e `esp-nimble-cpp`).
 - Componenti nel progetto (cartella `idf/components`): **PsychicHttp** 3.1.2 (MIT, copia modificata) e **aj_json** (ArduinoJson 7.x, MIT).
 - Per l'aggiornamento senza cavo: Python 3 ed `esptool` (solo per la prima installazione, vedi la guida).
@@ -165,7 +174,7 @@ Il file `VesevOS/VesevOS.ino` resta solo con un `#error` e non si usa.
 
 Hai tre strade (la prima e quella piu semplice per una scheda nuova):
 
-1. **Pagina di prima installazione** ([`flash/`](flash/README.md), da abilitare con GitHub Pages): collega la scheda con un browser che ha la porta seriale (Web Serial), scegli "Aggiorna e conserva i dati" (scheda gia usata) oppure "Installazione completa" (scheda nuova), puoi anche spuntare le singole parti, e premi Scrivi. Controlla ogni file prima di scrivere.
+1. **Pagina di prima installazione** ([`flash/`](flash/README.md), da abilitare con GitHub Pages): collega la scheda con un browser che ha la porta seriale (Web Serial), scegli "Aggiorna e conserva i dati" (scheda gia usata) oppure "Installazione completa" (scheda nuova; scrive anche i file di VesevOS nello spazio dei file: pagina, manuale, licenze, dati), puoi anche spuntare le singole parti, e premi Scrivi. L'aggiornamento non tocca mai lo spazio dei file. Controlla ogni file prima di scrivere.
 2. **File pronti in [`firmware/`](firmware/LEGGIMI.md)** con `esptool` (recovery a `0x10000`, firmware a `0x110000`) o, su una scheda gia con VesevOS, dal menu *Aggiorna tramite recovery* (file dal computer, oppure URL + SHA-256 da `indice.json`). Controlla sempre lo SHA-256.
 3. **Compilare tu**: prepara ESP-IDF come sopra, compila VesevOS (cartella `idf/`) e il recovery (cartella `idf-recovery/`, stesso comando) e segui la guida [docs/GUIDA-PREPARARE-LA-SCHEDA.md](docs/GUIDA-PREPARARE-LA-SCHEDA.md).
 
@@ -173,9 +182,8 @@ Dopo la prima installazione aggiorni dalla pagina (*Aggiorna tramite recovery*),
 
 ## Primo accesso
 
-1. Apri il monitor seriale (115200) e premi RESET: la scheda scrive il nome della rete (**VesevOS**) e la **sua password**,
-   diversa per ogni scheda (lo chiedono le leggi sulla sicurezza dei dispositivi: UE RED/EN 18031, Cyber Resilience Act; UK PSTI).
-2. Collegati a quella rete e apri `http://192.168.4.1` (di solito si apre da sola).
+1. Accendi la scheda e **premi il tasto BOOT**: parte l'**installazione guidata**.
+2. Collegati alla rete **VesevOS** che la scheda apre per te e apri `http://192.168.4.1` (di solito si apre da sola).
 3. Scegli la password del pannello (minimo 6 caratteri) e segui la configurazione guidata (LED arcobaleno).
 
 **Tasto BOOT** (tieni premuto a scheda accesa, poi lascia): meno di 2 s esce dal modo aereo; 2-7 s (LED azzurro) spegne il filtro IP;
@@ -228,7 +236,7 @@ I sorgenti del firmware usano solo caratteri ASCII.
 L'italiano e dentro il firmware. Per le altre lingue:
 
 1. Apri la pagina, scheda **Sistema > Localizzazione** (carta Lingue).
-2. Scegli il file (`en.json`, `es.json` o `de.json` dalla cartella `lang/`) e premi **Carica lingua**.
+2. Scegli il file (per esempio `en.vld` ed `en.vlp` dalla cartella `lang/`, anche insieme) e premi **Carica lingua**.
 3. Scegli la lingua dal menu in alto a destra. La scheda la ricorda; da shell: `lang en`.
 
 Ogni lingua occupa circa 17 KB della memoria interna. **Per aggiungere una lingua**: copia una

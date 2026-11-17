@@ -2,8 +2,11 @@
    Il controllo gira sulla scheda in un suo task: la pagina lo avvia e rilegge lo stato finche non finisce. */
 /* store: elenco pubblicato, letto dal browser e confrontato qui. Si legge solo a controllo acceso o dopo Verifica ora: mai da spento senza richiesta. */
 var AG={d:null,sch:0,tm:0,st:null,pre:false,vec:0,prima:true,pac:null};
-var AG_STORE="https://raw.githubusercontent.com/paolellad79/VesevOS/main/store/index.json",
-  AG_STORE_TETTO=32768,AG_STORE_VOCI=40;
+/* UN solo punto per gli indirizzi delle sorgenti (modello apt: vedi COSE-DA-FARE #repository-configurabile-2026-11-16).
+   Oggi vale un solo valore, la sorgente ufficiale del progetto: base + parte dello store e delle risorse. Nessun altro indirizzo nel codice. */
+var AG_REPO={base:"https://raw.githubusercontent.com/paolellad79/VesevOS/main/",store:"store/index.json",
+  risorse:"risorse/"};
+var AG_STORE=AG_REPO.base+AG_REPO.store,AG_STORE_TETTO=32768,AG_STORE_VOCI=40;
 function agRiga(e,v){return v?row(e,v):""}
 function agQuando(n){return n?new Date(n*1000).toLocaleString():t("mai")}
 function agLoad(){
@@ -18,6 +21,8 @@ function agLoad(){
 }
 
 function agDraw(d){
+  cfMontaTutti();
+  arDraw(d);
   $("ag_stato").innerHTML=
     row(t("Firmware installato"),esc(d.fw))+
     row(t("Recovery installato"),d.recOk?esc(d.rec||t("versione sconosciuta")):t("non presente"))
@@ -71,7 +76,7 @@ function agScelta(){
 /* le schede seguono il modello WAI-ARIA: solo quella attiva e nella sequenza di Tab, le frecce spostano tra le schede */
 function agTab(i,fuoco){
   AG.sch=i;
-  [0,1,2,3].forEach(function(k){
+  [0,1,2,3,4].forEach(function(k){
     var b=$("ag_t"+k),on=k==i;
     b.className=on?"on":"";
     b.setAttribute("aria-selected",on?"true":"false");
@@ -85,10 +90,10 @@ function agTab(i,fuoco){
 
 function agTasto(e){
   var i=AG.sch,k=e.key;
-  if(k=="ArrowRight")i=(i+1)%4;
-  else if(k=="ArrowLeft")i=(i+3)%4;
+  if(k=="ArrowRight")i=(i+1)%5;
+  else if(k=="ArrowLeft")i=(i+4)%5;
   else if(k=="Home")i=0;
-  else if(k=="End")i=3;
+  else if(k=="End")i=4;
   else return;
   e.preventDefault();
   agTab(i,true)

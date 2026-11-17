@@ -7,7 +7,7 @@
 //   2. un nome senza barre si cerca nella cartella corrente, poi in /bin, in /sbin (solo Admin) e nelle vecchie /apps e /scripts;
 //   3. se manca l'estensione si prova .vsb, .vsc (il vecchio nome), .vab e .vap (il vecchio nome).
 // I comandi interni vincono SEMPRE: il lancio diretto si prova solo se la prima parola non e un comando (vedi shellExecSess).
-// L'avvio vero lo fanno le stesse funzioni di "script run" e "app start" (berryStart, appStart): qui non c'e nessun controllo nuovo ne
+// L'avvio vero lo fanno le stesse funzioni di "script run" e "app start" (funzioniAvvia, appStart): qui non c'e nessun controllo nuovo ne
 // nessun permesso in piu (script solo Admin, app col suo who= e use=). Per ora quelle funzioni leggono solo la cartella dei programmi
 // del loro tipo (script in /sbin, app in /bin) e non hanno argomenti: un file trovato altrove si dice e non si avvia.
 #include "vos_shell_int.h"
@@ -166,7 +166,7 @@ void cmdWhich(const char* line, OutSink& o, const ShellSess& ss, int role) {
 
 bool shStartScript(const char* name, OutSink& o) {
   ErrBuf err;
-  if (!berryStart(name, err)) { o.println(err.c_str()); return false; }
+  if (!funzioniAvvia(name, err)) { o.println(err.c_str()); return false; }
   o.println(trf("Script avviato: %s (script out = uscita, script stop = ferma)", name));
   return true;
 }

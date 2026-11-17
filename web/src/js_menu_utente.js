@@ -60,7 +60,7 @@ function uFw(){
 
 function uRecUp(){
   api("/api/recovery").then(function(r){return r.json()}).then(function(j){
-    if(!j.present){
+    if(!j.present&&!(j.nops&&j.kb)){
       dlg({title:t("Aggiornare il recovery?"),
         body:'<p style="margin:0">'+
         esc(t("Il recovery non e presente su questa scheda: si installa solo con il cavo USB."))+
@@ -81,10 +81,16 @@ function uRecUp(){
       +'<p class="law" style="margin:8px 0 0">'+
       esc(t(
         "Non spegnere la scheda durante l'aggiornamento (pochi secondi). VesevOS continua a funzionare."))+
-      '</p>',ok:t("Aggiorna recovery"),
+      '</p>'+(j.nops?'<p class="law" style="margin:8px 0 0" role="alert">'+esc(t(
+        "Questa scheda non ha PSRAM: il recovery viene scritto direttamente. Se si interrompe, il recovery resta inutilizzabile finche non lo riscrivi. Continuare?"))+
+      '</p><label style="display:block;margin:6px 0"><input type="checkbox" id="rcc"> '+
+      esc(t("Ho capito, voglio continuare"))+'</label>':'')+(j.redo||(!j.present&&j.nops)?'<p class="law" style="margin:8px 0 0" role="alert">'+esc(t(
+        "Il recovery attuale non e valido: va riscritto."))+'</p>':''),
+      ok:t("Aggiorna recovery"),
       onOk:function(){
         var f=$("rcf").files[0],h=$("rcs").value.trim();
         if(!f)return t("Scegli il file");
+        if(j.nops&&!$("rcc").checked)return t("Spunta la casella per continuare");
         if(f.size>j.kb*1024)return t("File troppo grande per lo spazio del recovery");
         if(h&&!/^[0-9a-fA-F]{64}$/.test(h))return t(
           "L'impronta SHA-256 deve avere 64 cifre esadecimali");

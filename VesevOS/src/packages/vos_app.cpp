@@ -4,8 +4,8 @@
 #include "vos_app.h"
 #include "vos_prog_data.h"
 #include "vos_progext.h"
-#if VOS_WITH_BERRY
-#include "vos_berry.h"
+#if VOS_WITH_FUNZIONI
+#include "vos_funzioni.h"
 #include "vos_app_rt.h"
 #include "vos_func.h"
 #include "../core/vos_common.h"
@@ -97,7 +97,7 @@ static bool usePermOk(std::string_view u, char* norm, size_t cap) {
     pos = e + 1;
     if (p.empty()) { if (u.empty()) break; return false; }
     char gp[16];                                                     // "gpio:N" riscritto senza zeri davanti
-    bool ok = (p == "led" || p == "time" || p == "temp" || p == "log" || p == "act" || p == "btn" || p == "mqtt" || p == "logread" || p == "ble" || p == "files" || p == "sd" || p == "https");
+    bool ok = (p == "led_rgb1" || p == "led" || p == "led2" || p == "time" || p == "temp" || p == "log" || p == "act" || p == "btn" || p == "mqtt" || p == "logread" || p == "ble" || p == "files" || p == "sd" || p == "https");
     bool isGpio = p.substr(0, 4) == "gpio";
     if (!ok && p.size() >= 2 && p.size() <= 11 && !isGpio) {          // nome di una periferica a classi (rele1, led1...)
       ok = true;
@@ -390,12 +390,12 @@ bool appStart(const char* nameIn, ErrBuf& err, uint8_t role, const char* who) {
   if (!loadApp(n, *a, err)) { delete a; return false; }
   if (!roleCan(*a, role)) { err = tr("Il tuo ruolo non permette questa operazione"); delete a; return false; }
   char cur[32];
-  if (berryAppRunning(cur, sizeof cur)) { err = !strcmp(n, cur) ? tr("App gia in esecuzione") : tr("Un altro script e gia in esecuzione"); delete a; return false; }
-  if (berryRunning()) { err = tr("Un altro script e gia in esecuzione"); delete a; return false; }
+  if (funzioniAppInEsecuzione(cur, sizeof cur)) { err = !strcmp(n, cur) ? tr("App gia in esecuzione") : tr("Un altro script e gia in esecuzione"); delete a; return false; }
+  if (funzioniInEsecuzione()) { err = tr("Un altro script e gia in esecuzione"); delete a; return false; }
   if (const char* off = funcMissing(a->use)) { err = trf("L'app chiede la funzionalita %s, che e spenta (Sistema > Funzionalita)", off); delete a; return false; }
   if (!progDataReady(PK_APP_B, a->name, err)) { delete a; return false; }   // dati sulla microSD scelta e la scheda non c'e: l'app non parte
   rtInit(*a);
-  if (!berryStartApp(a->name, a->code, a->use, err, !strcmp(a->who, "admin"))) { rtFree(); delete a; return false; }
+  if (!funzioniAvviaApp(a->name, a->code, a->use, err, !strcmp(a->who, "admin"))) { rtFree(); delete a; return false; }
   vlog("APP: %s avviata da %s", a->name, who ? who : "?");
   delete a;
   return true;
@@ -435,12 +435,12 @@ bool appStop(const char* nameIn, ErrBuf& err, uint8_t role) {
   char n[APP_CLEAN_BUF] = "", cur[32];
   cleanAppName(nameIn, n, sizeof n);
   if (!appNameValid(n)) { err = tr("Nome app non valido"); return false; }
-  if (!berryAppRunning(cur, sizeof cur) || strcmp(n, cur)) { err = tr("L'app non e in esecuzione"); return false; }
+  if (!funzioniAppInEsecuzione(cur, sizeof cur) || strcmp(n, cur)) { err = tr("L'app non e in esecuzione"); return false; }
   AppInfo* a = new AppInfo(); ErrBuf e2;
   bool okl = loadApp(n, *a, e2); bool can = !okl || roleCan(*a, role);
   delete a;
   if (!can) { err = tr("Il tuo ruolo non permette questa operazione"); return false; }
-  if (!berryStop(err)) return false;
+  if (!funzioniFerma(err)) return false;
   vlog("APP: %s fermata", n);
   return true;
 }
@@ -455,7 +455,7 @@ bool appSet(const char* nameIn, const char* id, const char* value, ErrBuf& err, 
   delete a;
   if (!okl) { err = e2.c_str(); return false; }
   if (!can) { err = tr("Il tuo ruolo non permette questa operazione"); return false; }
-  if (!berryAppRunning(cur, sizeof cur) || strcmp(n, cur)) { err = tr("L'app non e in esecuzione"); return false; }
+  if (!funzioniAppInEsecuzione(cur, sizeof cur) || strcmp(n, cur)) { err = tr("L'app non e in esecuzione"); return false; }
   return rtSetWeb(id, value, err);
 }
 
@@ -468,16 +468,16 @@ bool appStateJson(const char* nameIn, HeapBuf& out, uint8_t role) {
   delete a;
   if (!okl) return errJson(out, err.c_str(), "error");
   if (!can) return errJson(out, tr("Il tuo ruolo non permette questa operazione"), "forbidden");
-  char cur[32]; bool run = berryAppRunning(cur, sizeof cur) && !strcmp(n, cur);
-  bool mine = berryLastIsApp(n);
-  heapAddf(out, "{\"ok\":true,\"n\":\"%s\",\"run\":%s,\"busy\":%s,", n, run ? "true" : "false", berryRunning() ? "true" : "false");
-  HeapBuf ob(BERRY_STATE_MAX);                                         // uscita dell'app: heap, non stack
-  out.add((mine && berryAppOutJson(ob)) ? ob.c_str() : "\"out\":\"\",\"err\":\"\",\"ms\":0,\"last\":-1");
+  char cur[32]; bool run = funzioniAppInEsecuzione(cur, sizeof cur) && !strcmp(n, cur);
+  bool mine = funzioniUltimaEApp(n);
+  heapAddf(out, "{\"ok\":true,\"n\":\"%s\",\"run\":%s,\"busy\":%s,", n, run ? "true" : "false", funzioniInEsecuzione() ? "true" : "false");
+  HeapBuf ob(FUNZIONI_STATO_MAX);                                         // uscita dell'app: heap, non stack
+  out.add((mine && funzioniUscitaAppJson(ob)) ? ob.c_str() : "\"out\":\"\",\"err\":\"\",\"ms\":0,\"last\":-1");
   out.add(",\"vals\":");
   if (rtLoaded() && rtNameIs(n)) rtValuesJson(out); else out.add("[]");
   out.add('}');
   return !full(out);
 }
 
-void appRunText(HeapBuf& out) { berryOutText(out); }
+void appRunText(HeapBuf& out) { funzioniTestoUscita(out); }
 #endif

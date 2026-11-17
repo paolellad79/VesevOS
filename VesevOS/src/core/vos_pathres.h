@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_pathres.h
-// Normalizzazione dei percorsi di shell e Berry (regole sulla microSD e sulle scorciatoie: vos_paths.h).
+// Normalizzazione dei percorsi di shell e funzioni VesevOS (regole sulla microSD e sulle scorciatoie: vos_paths.h).
 #pragma once
 #include <stddef.h>
 

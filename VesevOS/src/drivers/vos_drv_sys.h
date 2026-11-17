@@ -7,6 +7,9 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <esp_random.h>
+#include <soc/soc_caps.h>
+
+#define DRV_CORES_MAX SOC_CPU_CORES_NUM   // core massimi del chip per cui si compila (1 o 2 oggi)
 
 void drvSysRestart();
 // Numero casuale di 32 bit dal generatore del chip (hardware).

@@ -123,6 +123,8 @@ void bootRun() {
     diaryStage(SV[k].id);
     SV[k].start();
     g_ms[k] = drvMillis() - t0;
+    char fase[10]; snprintf(fase, sizeof fase, "b:%s", SV[k].id);   // una riga di RAM per servizio avviato (traccia dell'avvio)
+    ramTrace(fase);
   }
   char ord[ORDER_BUF]; orderCsv(g_ord, ord, sizeof ord);
   vlog("BOOT: servizi avviati in %lu ms (%s)", (unsigned long)(drvMillis() - t00), ord);

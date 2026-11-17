@@ -1,16 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_shell_arch.h
-// INTERNO ai comandi di compressione e archivi (gzip, gunzip, zcat, unzip, zip, tar): limiti, protezioni e pezzi in comune.
+// INTERNO ai comandi di archivio (unzip, zip, tar): limiti, protezioni e pezzi in comune. Niente compressione (gzip, gunzip, zcat e il
+// deflate di zip/unzip sono stati tolti il 16/11/2026: i comandi sono uguali su S3, C3 e C6, anche senza PSRAM).
 // PROTEZIONI (valgono per tutti):
 //  - zip slip: un nome di una voce con '/' iniziale, '..', '\' o caratteri strani rifiuta TUTTO l'archivio prima di scrivere qualcosa;
 //    il percorso finale passa da shellResolvePath e deve restare dentro la cartella di destinazione (mai la radice "/")
 //  - file protetti (/vesevos.conf, /var/audit.log, /var/crash.txt): non si leggono, non si scrivono, non si sovrascrivono
 //  - zip e tar -c non mettono MAI in un archivio i file protetti (un archivio non deve diventare un modo per portare fuori i segreti)
-//  - zip bomb: al massimo ARCH_MAX_ENTRIES voci, ARCH_MAX_ENTRY byte per voce, ARCH_MAX_TOTAL byte in tutto (e mai oltre lo spazio libero),
-//    rapporto di espansione al massimo ARCH_MAX_RATIO a 1 (sopra ARCH_RATIO_FROM byte espansi)
+//  - archivi troppo grandi: al massimo ARCH_MAX_ENTRIES voci per tar (ZIP_MAX_ENTRIES per zip e unzip), ARCH_MAX_ENTRY byte per voce,
+//    ARCH_MAX_TOTAL byte in tutto (e mai oltre lo spazio libero). Senza deflate non c'e espansione: una voce occupa quanto dichiara.
 //  - scrittura con temporaneo e scambio (FsAtomicWriter): un errore a meta non lascia mezzi file
-//  - una sola operazione alla volta, tetto di tempo, cessione della CPU, Ctrl+C dalla seriale (DrvDefGuard)
+//  - una sola operazione alla volta, tetto di tempo, cessione della CPU, Ctrl+C dalla seriale (DrvDefLock, DrvDefGuard)
 #pragma once
 #include "vos_shell_int.h"
 #include "../core/vos_files_stream.h"
@@ -20,10 +21,8 @@ namespace shx {
 
 const size_t   ARCH_MAX_ENTRY   = 1048576;   // byte di una voce estratta
 const size_t   ARCH_MAX_TOTAL   = 2097152;   // byte espansi in tutto per comando
-const unsigned ARCH_MAX_ENTRIES = 64;        // voci di un archivio
-const unsigned ARCH_MAX_RATIO   = 100;       // espansione massima (espansi : compressi)
-const size_t   ARCH_RATIO_FROM  = 1024;      // il rapporto si controlla solo per voci espanse piu di cosi
-const size_t   ARCH_TEXT_MAX    = 16384;     // gzip -c e zcat: testo a schermo al massimo (poi si rifiuta)
+const unsigned ARCH_MAX_ENTRIES = 64;        // voci di un archivio tar
+const unsigned ZIP_MAX_ENTRIES  = 30;        // voci di un archivio zip (zip e unzip): il blocco Work di zip resta sotto 6 KB (30 x 124 + 2048 + 154 = 5922 byte)
 const size_t   ARCH_NAME_MAX    = 100;       // caratteri del nome di una voce (stesso tetto di un percorso)
 const size_t   ARCH_SPACE_KEEP  = 16384;     // spazio libero da lasciare sempre
 const size_t   ARCH_IO_BUF      = 2048;      // buffer di lavoro per la lettura dei file
@@ -50,7 +49,7 @@ class ArchCtx {
   DrvDefGuard&      guard() { return guard_; }
   // "cmd: nome: motivo" (nome puo essere "")
   void fail(const char* name, const char* why);
-  // Errore del driver (o del sink: sinkWhy e il motivo se e = DDF_SINK). Per tempo scaduto e file troppo grandi aggiunge il consiglio per la web.
+  // Errore della guardia o della scrittura (sinkWhy e il motivo se e = DDF_SINK). Per tempo scaduto e file troppo grandi aggiunge il consiglio per la web.
   void failDef(const char* name, DrvDefErr e, const char* sinkWhy);
   void tooBig(const char* name, size_t max);          // "troppo grande (massimo N KB)" + consiglio
   // Spazio per i dati espansi: min(ARCH_MAX_TOTAL, libero - ARCH_SPACE_KEEP), 0 se non basta

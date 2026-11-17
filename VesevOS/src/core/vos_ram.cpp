@@ -8,12 +8,13 @@
 #include <esp_heap_caps.h>
 #include "../drivers/vos_drv_time.h"
 #include "../drivers/vos_drv_heap.h"
+#include "../boards/vos_board.h"
 
 // Dimensione dello stack con cui nascono i task di VesevOS (tenere uguale a xTaskCreate... nel modulo di ogni task).
 struct StackSize { const char* name; uint16_t bytes; };
 static const StackSize SZ[] = {
-  {"led", 3072}, {"mesh", 6144}, {"mqtt", 6144}, {"net", 6144}, {"rules", 6144},
-  {"monitor", 4608}, {"time", 4096}, {"wd", 6144}, {"selftest", 5120}, {"loopTask", 8192},
+  {"led", VOS_PILA_LED}, {"mesh", 6144}, {"mqtt", 6144}, {"net", 6144}, {"rules", 6144},
+  {"monitor", VOS_PILA_MONITOR}, {"time", VOS_PILA_ORA}, {"wd", VOS_PILA_WD}, {"selftest", 5120}, {"loopTask", VOS_PILA_PRINCIPALE},
 };
 
 static uint16_t stackOf(const char* n) {
@@ -28,7 +29,7 @@ static void heapNow(uint32_t& free_, uint32_t& big, uint32_t& psFree) {
   free_ = in.total_free_bytes; big = in.largest_free_block; psFree = ps.total_free_bytes;
 }
 
-// Margine di ogni testo: ramReport sta sotto 2 KB anche con una ventina di task, ramAudit aggiunge lo storico (14 righe).
+// Margine di ogni testo: ramReport sta sotto 2 KB anche con una ventina di task, ramAudit aggiunge lo storico (40 righe).
 #define RAM_TEXT_MAX 3072
 
 static void reportInto(StrBuf& r) {
@@ -80,23 +81,7 @@ std::string ramDiff() {
 }
 
 
-// ---- Storico delle annotazioni (ram audit) ----
-// Anello fisso di 14 voci: nessun heap. Chi annota: avvio finito, Bluetooth acceso/spento, accesso e uscita dalla pagina.
-struct RamNote { uint32_t sec; char label[10]; uint32_t free_, big, ps; };
-static RamNote g_notes[14];
-static uint8_t g_noteN = 0;                  // quante voci valide (max 14)
-static uint8_t g_noteHead = 0;               // dove scrivere la prossima
-static portMUX_TYPE g_noteMux = portMUX_INITIALIZER_UNLOCKED;
-
-void ramNote(const char* label) {
-  uint32_t f, b, p; heapNow(f, b, p);
-  portENTER_CRITICAL(&g_noteMux);
-  RamNote& n = g_notes[g_noteHead];
-  n.sec = drvMillis() / 1000UL; n.free_ = f; n.big = b; n.ps = p;
-  strncpy(n.label, label ? label : "", sizeof(n.label) - 1); n.label[sizeof(n.label) - 1] = 0;
-  g_noteHead = (g_noteHead + 1) % 14; if (g_noteN < 14) g_noteN++;
-  portEXIT_CRITICAL(&g_noteMux);
-}
+// ---- Storico delle annotazioni (ram audit): l'anello sta in vos_ramstorico.cpp ----
 
 std::string ramAudit() {
   ramNote("audit");                     // ogni audit lascia un segno: cosi la variazione tra due audit e quella vera
@@ -111,14 +96,12 @@ std::string ramAudit() {
   int ts = ramTlsState();
   r.addf(tr("TLS in PSRAM: %s"), ts == 1 ? tr("attivo") : ts < 0 ? tr("non disponibile") : tr("non provato")).add('\n');
   r.add(tr("Storico: secondi, evento, RAM libera, pezzo piu grande, PSRAM, variazione della RAM libera")).add('\n');
-  RamNote c[14]; uint8_t n, head;
-  portENTER_CRITICAL(&g_noteMux);
-  memcpy(c, g_notes, sizeof(c)); n = g_noteN; head = g_noteHead;
-  portEXIT_CRITICAL(&g_noteMux);
+  uint8_t n = ramNoteCount();
   if (!n) r.add(tr("Nessun evento")).add('\n');
   int32_t prev = 0; bool havePrev = false;
   for (uint8_t i = 0; i < n; i++) {
-    const RamNote& x = c[(head + 14 - n + i) % 14];
+    RamNote x;                                       // una voce alla volta: l'elenco intero (1 KB) non sta sulla pila
+    if (!ramNoteGet(i, x)) break;
     r.addf("%6lu  %-9s %4u KB  %4u KB  %5u KB", (unsigned long)x.sec, x.label, (unsigned)(x.free_ / 1024), (unsigned)(x.big / 1024), (unsigned)(x.ps / 1024));
     if (havePrev) r.addf("  %+d KB", (int)(((int32_t)x.free_ - prev) / 1024));
     prev = (int32_t)x.free_; havePrev = true;

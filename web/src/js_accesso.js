@@ -72,6 +72,8 @@ function showLogin(){
     $("lp").disabled=false
   }
   clearInterval(timer);
+  clearInterval(AU.tm);
+  PAGINA=false;
   $("app").className="hide";
   $("login").className="card";
   document.body.classList.remove("cpo");
@@ -95,10 +97,10 @@ function lKey(e){
 function loginOk(j){
   clearInterval(CLK.tm);
   if(j.clean)setTimeout(function(){
-    dlg({title:t("Hotspot e HTTP spenti"),
+    dlg({title:t("Hotspot e DHCP spenti"),
       body:'<p style="margin:0">'+
       esc(t(
-        "Hai raggiunto la scheda dalla rete di casa: l'hotspot, il portale automatico e HTTP sono stati spenti. Per riaccenderli: Rete. Se perdi la Wi-Fi: tasto fisico 8 secondi."))+
+        "Hai raggiunto la scheda dalla rete di casa: l'hotspot, il portale automatico e il DHCP sono stati spenti. Per riaccenderli: Rete. Se perdi la Wi-Fi: tasto fisico 8 secondi."))+
       '</p>',buttons:[["ok",t("OK"),""]],onOk:function(){return""}})
   },800);
   $("lp").value="";
@@ -222,20 +224,38 @@ function doMfa(){
 }
 
 function logout(){post("/api/logout",{}).then(showLogin).catch(showLogin)}
+/* La pagina vera (menu, home, aggiornamenti) parte una volta per accesso. Con la guida da fare parte solo a guida chiusa:
+   nella finestra di prima configurazione la scheda ha poca RAM e pochi percorsi, la home non serve. */
+var PAGINA=false;
 function start(){
   $("login").className="hide";
   $("app").className="";
   setRole(AUTH.role===undefined?ROLE:AUTH.role);
   USER=AUTH.user||USER;
-  $("who").textContent=USER?USER+" · "+t(RNAME[ROLE]):"";
+  $("who").textContent=USER?USER+" \u00b7 "+t(RNAME[ROLE]):"";
+  if(!AUTH.setup&&ROLE==2){
+    fetchLimite(1);
+    setupOpen();
+    return
+  }
+  paginaAvvia()
+}
+
+function paginaAvvia(){
+  fetchLimite(2);
+  if(PAGINA){
+    show("sum");
+    return
+  }
+  PAGINA=true;
   buildNav();
+  if(ROLE>=1)dvList().catch(function(){});
   cpApply();
   poll();
   brdLoad();
   rfApply();
   auPoll();
-  if(!AUTH.setup&&ROLE==2)setupOpen();
-  else if(location.hash=="#aiuto")show("help")
+  if(location.hash=="#aiuto")show("help")
 }
 
 function chPass(){

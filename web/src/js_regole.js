@@ -14,9 +14,9 @@ function rClean(x){return String(x).replace(/[|;\n\r]/g," ").replace(/\s+/g," ")
 function aParse(a){
   var w=a.split(" "),k=w[0],v=w.slice(1).join(" ");
   if(k=="led-color")return{k:"color",v:v};
-  if(k=="led")return{k:"ledmode",v:v};
+  if(k=="led_rgb1"||k=="led")return{k:"ledmode",v:v};   /* "led" = nome vecchio: si legge e, al salvataggio, si scrive led_rgb1 */
   if(k=="led-bright")return{k:"bright",v:+v};
-  if(k=="led2")return null;
+  if(k=="led1"||k=="led2")return null;
   if(k=="gpio")return{k:"gpio",p:+w[1],v:+w[2]};
   if(k=="wait")return{k:"wait",v:+v};
   if(k=="note")return{k:"note",v:v};
@@ -33,7 +33,7 @@ function aParse(a){
 function aSer(a){
   switch(a.k){
     case"color":return"led-color "+String(a.v).replace("#","").toLowerCase();
-    case"ledmode":return"led "+a.v;
+    case"ledmode":return"led_rgb1 "+a.v;
     case"bright":return"led-bright "+a.v;
     case"gpio":return"gpio "+a.p+" "+a.v;
     case"wait":return"wait "+a.v;

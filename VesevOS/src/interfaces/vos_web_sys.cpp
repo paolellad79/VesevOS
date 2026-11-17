@@ -3,10 +3,12 @@
 // VesevOS - vos_web_sys.cpp
 // Percorsi del server web: MQTT, autodiagnosi, ora/NTP, localizzazione. Aiuti e tipi condivisi: vos_web_int.h.
 #include "vos_web_int.h"
+#include "../core/vos_ramwd.h"
 #include "../security/vos_auth.h"
 #include "../core/vos_cpupm.h"
 #include "../packages/vos_drvwidget.h"
 #include "../core/vos_clamp.h"
+#include "../drivers/vos_drv_heap.h"
 
 // statistiche per la pagina
 static esp_err_t statsReply(Res* s) {
@@ -41,6 +43,43 @@ static esp_err_t riavviaDopo(Res* s, const char* motivo) {
   return e;
 }
 
+static void routeRecoveryCarica(PsychicHttpServer* S, bool sec) {
+  // aggiornamento del recovery: il file va in PSRAM, si controlla tutto e solo dopo si scrive; senza PSRAM si scrive a blocchi (vos_recupd). Accesso controllato anche durante l'invio.
+  static ErrBuf s_recErr;
+  PsychicUploadHandler* ru = new PsychicUploadHandler();
+  ru->onUpload([sec](Req* r, const auto& filename, uint64_t index, uint8_t* data, size_t len, bool final) -> esp_err_t {
+    uint32_t ip = ipOf(r);
+    if (!fwAllow(ip, false)) return ESP_FAIL;
+    if (csrfBlocked(r)) return ESP_FAIL;                                       // caricamento partito da un altro sito
+    int u = userOf(r);
+    if (u < 0 || cfg.users[u].role < ROLE_ADMIN) return ESP_FAIL;
+    if (!sec && g_tlsUp && cfg.https) return ESP_FAIL;
+    ramBusyTouch(60);                                                           // caricamento in corso: niente riavvio per RAM
+    if (index == 0) {
+      s_recErr.clear();
+      if (r->contentLength() > drvRecoverySize() + 4096) { s_recErr = tr("File troppo grande per lo spazio del recovery"); return ESP_OK; }   // si capisce subito (es. il firmware)
+      ErrBuf e; if (!recUpBegin(e)) { s_recErr = e.c_str(); return ESP_OK; }
+    }
+    if (!s_recErr.empty()) return ESP_OK;
+    recUpAdd(data, len);                                            // se e troppo grande lo dice recUpFinish
+    return ESP_OK;
+  });
+  ru->onRequest([](Req* r, Res* s) -> esp_err_t {
+    int u = userOf(r);
+    if (u < 0 || cfg.users[u].role < ROLE_ADMIN) { recUpAbort(); return sendJson(s, "{\"ok\":false,\"err\":\"non autorizzato\"}", 401); }
+    if (!s_recErr.empty()) return ko(s, s_recErr);
+    char from[16], to[16], w[64], sha[80]; ErrBuf e;
+    snprintf(w, sizeof w, "web %s %s", cfg.users[u].name.c_str(), IpText(ipOf(r)).s);
+    qparamTo(r, "sha", sha, sizeof sha);
+    if (!recUpFinish(sha, w, from, to, sizeof from, e)) return ko(s, e);
+    HeapBuf j(128);
+    j.add("{\"ok\":true,\"from\":\""); j.addJson(from, strlen(from));
+    j.add("\",\"to\":\""); j.addJson(to, strlen(to)); j.add("\"}");
+    return sendJson(s, j);
+  });
+  S->on("/api/recovery/up", HTTP_POST, ru);
+}
+
 void routesSys(PsychicHttpServer* S, bool sec) {
   // ---- MQTT (servizio spento di fabbrica: la prima volta si avvia a mano) ----
   add(S, sec, "/api/home", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t {      // un solo pezzo per i widget della Home
@@ -51,7 +90,7 @@ void routesSys(PsychicHttpServer* S, bool sec) {
              (int)cfg.pwMode, cfg.statOn ? 1 : 0);
     j.add(t);
     timePubJson(j);                                                                           // pezzo JSON gia pronto dall'ora (comincia con la virgola)
-#if VOS_WITH_DRVCMD && VOS_WITH_BERRY
+#if VOS_WITH_DRVCMD && VOS_WITH_FUNZIONI
     if (c.role >= ROLE_OPER) {                                                              // widget dei driver (la microSD e nel suo driver): solo dati, non per gli ospiti
       j.add(",\"w\":");
       if (!drvWidgetsJson(j, c.role)) return ko(s, tr("Memoria insufficiente"), "off");
@@ -111,8 +150,8 @@ void routesSys(PsychicHttpServer* S, bool sec) {
   });   // chi e collegato e cosa fa
   add(S, sec, "/api/recovery", HTTP_GET, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {      // il recovery c'e? (aggiornamento del firmware)
     bool pr = drvRecoveryPresent();
-    HeapBuf j(160);
-    char t[64]; snprintf(t, sizeof t, "{\"present\":%d,\"kb\":%lu,\"ver\":\"", pr ? 1 : 0, (unsigned long)drvRecoverySizeKB());
+    HeapBuf j(200);
+    char t[96]; snprintf(t, sizeof t, "{\"present\":%d,\"kb\":%lu,\"nops\":%d,\"redo\":%d,\"ver\":\"", pr ? 1 : 0, (unsigned long)drvRecoverySizeKB(), drvPsramPresent() ? 0 : 1, recUpDaRifare() ? 1 : 0);
     j.add(t);
     if (pr) { j.addJson(recVersion()); }
     j.add("\"}");
@@ -135,39 +174,7 @@ void routesSys(PsychicHttpServer* S, bool sec) {
     xTaskCreate(delayedRestart, "rst", 2048, (void*)"recovery dalla pagina", 1, NULL);
     return e;
   });
-  // aggiornamento del recovery: il file va in PSRAM, si controlla tutto e solo dopo si scrive (vos_recupd). Accesso controllato anche durante l'invio.
-  static ErrBuf s_recErr;
-  PsychicUploadHandler* ru = new PsychicUploadHandler();
-  ru->onUpload([sec](Req* r, const auto& filename, uint64_t index, uint8_t* data, size_t len, bool final) -> esp_err_t {
-    uint32_t ip = ipOf(r);
-    if (!fwAllow(ip, false)) return ESP_FAIL;
-    if (csrfBlocked(r)) return ESP_FAIL;                                       // caricamento partito da un altro sito
-    int u = userOf(r);
-    if (u < 0 || cfg.users[u].role < ROLE_ADMIN) return ESP_FAIL;
-    if (!sec && g_tlsUp && cfg.https) return ESP_FAIL;
-    if (index == 0) {
-      s_recErr.clear();
-      if (r->contentLength() > drvRecoverySize() + 4096) { s_recErr = tr("File troppo grande per lo spazio del recovery"); return ESP_OK; }   // si capisce subito (es. il firmware)
-      ErrBuf e; if (!recUpBegin(e)) { s_recErr = e.c_str(); return ESP_OK; }
-    }
-    if (!s_recErr.empty()) return ESP_OK;
-    recUpAdd(data, len);                                            // se e troppo grande lo dice recUpFinish
-    return ESP_OK;
-  });
-  ru->onRequest([](Req* r, Res* s) -> esp_err_t {
-    int u = userOf(r);
-    if (u < 0 || cfg.users[u].role < ROLE_ADMIN) { recUpAbort(); return sendJson(s, "{\"ok\":false,\"err\":\"non autorizzato\"}", 401); }
-    if (!s_recErr.empty()) return ko(s, s_recErr);
-    char from[16], to[16], w[64], sha[80]; ErrBuf e;
-    snprintf(w, sizeof w, "web %s %s", cfg.users[u].name.c_str(), IpText(ipOf(r)).s);
-    qparamTo(r, "sha", sha, sizeof sha);
-    if (!recUpFinish(sha, w, from, to, sizeof from, e)) return ko(s, e);
-    HeapBuf j(128);
-    j.add("{\"ok\":true,\"from\":\""); j.addJson(from, strlen(from));
-    j.add("\",\"to\":\""); j.addJson(to, strlen(to)); j.add("\"}");
-    return sendJson(s, j);
-  });
-  S->on("/api/recovery/up", HTTP_POST, ru);
+  if (rottaSi("/api/recovery/up", HTTP_POST)) routeRecoveryCarica(S, sec);
   add(S, sec, "/api/sleep", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {   // solo Admin (decisione del 23/10/2026: l'Operatore non addormenta la scheda)
     g_sleepSec = has(r, "min") ? (uint32_t)(Pint(r, "min") * 60L) : 0;     // 0 = fino a RESET
     if (g_sleepSec > 7UL * 24 * 3600) return ko(s, tr("Sonno: da 1 minuto a 7 giorni"));

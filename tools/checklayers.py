@@ -94,7 +94,7 @@ SCHEDA = {
   's_mem':   r'0x110000|2424832|\b(?:4|2)\s*MB\s*(?:flash|PSRAM)|\bpsramFound\b|\bgetPsramSize\b',   # flash, PSRAM e partizioni
   's_sys':   r'\bsetCpuFrequencyMhz\b|\btemperatureRead\b|\btemp_sensor\w*|\brgbLedWrite\b',   # CPU, temperatura e LED WS2812
 }
-SCHEDA_GEN = {'vos_license_data.h', 'vos_common_data.h', 'vos_lang_data.h'}
+SCHEDA_GEN = {'vos_license_data.h', 'vos_lang_data.h'}
 def SCHEDA_OK(f, path):
     return (os.sep + 'boards' + os.sep in path or os.sep + 'third_party' + os.sep in path or f in SCHEDA_GEN or (f.startswith('vos_page') and f.endswith('.h')))
 def ARDUINO_OK(f, path):

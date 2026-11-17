@@ -74,6 +74,7 @@ class HeapBuf {
   bool addJson(const char* s) { return addJson(s, strlen(s)); }
 
   void   cutLast() { if (len_) { len_--; p_[len_] = 0; } }   // toglie l'ultimo carattere (es. la } finale di un JSON a cui aggiungere campi)
+  void   release() { free(p_); p_ = nullptr; cap_ = 0; len_ = 0; oom_ = false; over_ = false; }   // svuota E restituisce la memoria
   void   clear() { len_ = 0; oom_ = false; over_ = false; if (p_) p_[0] = 0; }   // svuota (la memoria resta per il riuso)
   const char* c_str() const { return p_ ? p_ : ""; }
   size_t length() const { return len_; }

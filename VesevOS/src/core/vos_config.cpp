@@ -10,9 +10,13 @@
 #include "vos_util.h"
 #include "vos_log.h"
 #include "vos_audit.h"
+#include "vos_primo_avvio_rule.h"
 #include "../drivers/vos_drv_fs.h"
 #include "../drivers/vos_drv_nvs.h"
 #include "vos_config_int.h"
+#include "vos_alias.h"
+#include "vos_ramwd_rule.h"
+#include "../drivers/vos_drv_heap.h"
 
 #include "vos_layout.h"
 
@@ -38,6 +42,7 @@ void cfgDefaults() {
   cfg.staDhcp = true;
   cfg.ip = "192.168.1.50"; cfg.mask = "255.255.255.0";
   cfg.gw = "192.168.1.1"; cfg.dns1 = "192.168.1.1"; cfg.dns2 = "8.8.8.8";
+  cfg.ip6On = false; cfg.ip6Fisso = false; cfg.ip6Ind = ""; cfg.ip6Gw = ""; cfg.ip6Dns = "";
   cfg.authSalt = ""; cfg.authHash = "";     // solo per i file vecchi
   for (int i = 0; i < VOS_MAX_USERS; i++) { cfg.users[i].name = ""; cfg.users[i].salt = ""; cfg.users[i].hash = ""; cfg.users[i].role = ROLE_GUEST; cfg.users[i].on = false; cfg.users[i].mfa = ""; cfg.users[i].mfaOn = false; cfg.users[i].mfaLast = 0; cfg.users[i].rec = ""; }
   cfg.ledMode = LED_STATE;
@@ -46,6 +51,9 @@ void cfgDefaults() {
   cfg.ledPin = VOS_PIN_LED_RGB;
   for (int i = 0; i < LEDSRC_COUNT; i++) cfg.ledSrcColor[i] = kLedSrcDefault[i];
   cfg.ledCpuThr = LED_CPU_THR_DEFAULT;
+  cfg.led2Mode = VOS_HAS_LED_RGB ? LED_OFF : LED_STATE;   // di fabbrica spento (C6: come prima); senza LED RGB (C3) e l'unico LED: dice lo stato
+  cfg.led2CpuThr = LED_CPU_THR_DEFAULT;
+  cfg.led2Brightness = 255;
   cfg.banFails = 5; cfg.banSecs = 60; cfg.powBits = 14; cfg.mfaNoTime = 0;
   cfg.mqttAuto = false; cfg.mqttHost = ""; cfg.mqttUser = ""; cfg.mqttPass = ""; cfg.mqttPrefix = ""; cfg.mqttPort = 1883; cfg.mqttEvery = 30; cfg.mqttHa = true; cfg.mqttTls = false;
   cfg.airOn = 0; cfg.airExit = 0; cfg.airUntil = 0; cfg.airAt = 0;
@@ -61,16 +69,17 @@ void cfgDefaults() {
   cfg.apOn = true; cfg.apCaptive = true; cfg.httpOn = true; cfg.httpPort = 80; cfg.httpsPort = 443;
   cfg.dhcpOn = true; cfg.dhcpLease = 120; cfg.mdnsOn = true;
   cfg.aggModo = 0; cfg.aggFreq = 0; cfg.aggGiorno = 1; cfg.aggOra = 180;
-  cfg.wdTask = true; cfg.wdNet = true; cfg.wdRam = true; cfg.wdNetMin = 10; cfg.wdRamKb = 20; cfg.wdUpDays = 0; cfg.wdAt = -1; cfg.wdDays = 0x7F;
+  cfg.wdTask = true; cfg.wdNet = true; cfg.wdRam = true; cfg.wdNetMin = 10; cfg.wdRamPerc = RAMWD_CRIT_DEF; cfg.wdUpDays = 0; cfg.wdAt = -1; cfg.wdDays = 0x7F;
   cfg.wdTwdt = WD_TWDT_DEF;
   for (int i = 0; i < WD_LIM_N; i++) cfg.wdLim[i] = WD_LIMITS[i].def;
   cfg.sdEnabled = false;
 #if VOS_WITH_ELF
   cfg.elfOn = true;
 #endif
-  cfg.berryOn = true; cfg.funcOff = 0; cfg.bootN = 0; cfg.dataSdN = 0;
+  cfg.funzioniAttive = true; cfg.funcOff = 0; cfg.bootN = 0; cfg.dataSdN = 0;
   for (int i = 0; i < VOS_BOOTPROG_MAX; i++) { cfg.boot[i].kind = 0; cfg.boot[i].name[0] = 0; cfg.dataSd[i].kind = 0; cfg.dataSd[i].name[0] = 0; }
   cfg.sdCs = 10; cfg.sdSck = 12; cfg.sdMiso = 13; cfg.sdMosi = 11;
+  aliasAzzera();                                // alias e descrizioni delle periferiche
 }
 
 
@@ -142,33 +151,52 @@ bool cfgNtpAfterWifi() {
   return true;
 }
 
+// Il registro delle modifiche (diff tra l'ultimo testo salvato e quello nuovo) tiene due copie in RAM. Con la PSRAM i blocchi grandi ci vanno da soli
+// e il diff resta com'e. Senza PSRAM, sulle schede con poca RAM (VOS_RAM_MINIMA) o quando la RAM e al livello "riduci", la copia non si tiene:
+// si salva sempre, ma il registro delle modifiche non confronta (una voce in meno, nessun dato perso).
+static volatile bool g_ramScarsa = false;       // lo dice il watchdog della RAM (vos_ramwd.cpp): livello "riduci" o peggio
+void cfgSetRamScarsa(bool on) { g_ramScarsa = on; }
+static bool diffAmmesso() {
+  if (drvPsramPresent()) return true;
+  return !VOS_RAM_MINIMA && !g_ramScarsa;
+}
+
+void cfgRilasciaCopia() { g_lastPub.release(); }
+
+// Un solo buffer grande alla volta: prima il testo completo (file e impronta), poi, liberato quello, la copia senza password per il diff.
 bool cfgSave() {
   auditFix();                                        // valori fuori regola: corretti prima di salvare
-  HeapBuf s(CFG_TEXT_MAX);
-  if (!cfgExport(s, true)) return saveFail("memoria insufficiente per il testo");
-  layoutEnsureDirs();                                // /etc deve esistere
-  VosFile f = drvFsOpen(CFG_TMP, "w");
-  if (!f) return saveFail("errore apertura tmp");
-  size_t w = f.write((const uint8_t*)s.c_str(), s.length());
-  f.close();
-  if (w != s.length()) { drvFsRemove(CFG_TMP); return saveFail("scrittura incompleta (memoria piena?)"); }
-  if (drvFsExists(CFG_FILE)) {
-    drvFsRemove(CFG_BAK);
-    drvFsRename(CFG_FILE, CFG_BAK);
-  }
-  if (!drvFsRename(CFG_TMP, CFG_FILE)) return saveFail("rename fallito");
-  g_saveOk = true;
-#if VOS_CONF_MIRROR_OLD
-  // Il recovery fino alla 0.5.1 legge solo /vesevos.conf: lo teniamo uguale (una scrittura in piu, a prova di spegnimento).
-  if (!layoutWriteAtomic(VOS_CONF_OLD, (const uint8_t*)s.c_str(), s.length())) vlog("CFG: copia in %s non aggiornata", VOS_CONF_OLD);
-#endif
   char h[HASH_HEX];
-  sha256HexOf(std::string_view(s.c_str(), s.length()), h);
+  {
+    HeapBuf s(CFG_TEXT_MAX);
+    if (!cfgExport(s, true)) return saveFail("memoria insufficiente per il testo");
+    layoutEnsureDirs();                              // /etc deve esistere
+    VosFile f = drvFsOpen(CFG_TMP, "w");
+    if (!f) return saveFail("errore apertura tmp");
+    size_t w = f.write((const uint8_t*)s.c_str(), s.length());
+    f.close();
+    if (w != s.length()) { drvFsRemove(CFG_TMP); return saveFail("scrittura incompleta (memoria piena?)"); }
+    if (drvFsExists(CFG_FILE)) {
+      drvFsRemove(CFG_BAK);
+      drvFsRename(CFG_FILE, CFG_BAK);
+    }
+    if (!drvFsRename(CFG_TMP, CFG_FILE)) return saveFail("rename fallito");
+    g_saveOk = true;
+#if VOS_CONF_MIRROR_OLD
+    // Il recovery fino alla 0.5.1 legge solo /vesevos.conf: lo teniamo uguale (una scrittura in piu, a prova di spegnimento).
+    if (!layoutWriteAtomic(VOS_CONF_OLD, (const uint8_t*)s.c_str(), s.length())) vlog("CFG: copia in %s non aggiornata", VOS_CONF_OLD);
+#endif
+    sha256HexOf(std::string_view(s.c_str(), s.length()), h);
+  }                                                  // il buffer grande e libero qui
   hashSave(h);
-  HeapBuf pub(CFG_TEXT_MAX);
-  if (cfgExport(pub, false)) {
-    if (g_lastPub.length()) auditDiff(g_lastPub.c_str(), pub.c_str(), g_origin);
-    g_lastPub.clear(); g_lastPub.add(pub.c_str(), pub.length());
+  if (diffAmmesso()) {
+    HeapBuf pub(CFG_TEXT_MAX);
+    if (cfgExport(pub, false)) {
+      if (g_lastPub.length()) auditDiff(g_lastPub.c_str(), pub.c_str(), g_origin);
+      g_lastPub.clear(); g_lastPub.add(pub.c_str(), pub.length());
+    }
+  } else {
+    g_lastPub.release();                             // niente copia: la RAM serve a cose piu importanti
   }
   auditRefresh();
   return true;
@@ -196,6 +224,21 @@ FixedStr<16> cfgNewApPass() {
   t[12] = 0;
   p = t;
   return p;
+}
+
+// Fine della guida: hotspot e portale automatico spenti di fabbrica quando c'e la Wi-Fi di casa (decisione dell'utente del 14/11/2026).
+// HTTP (redirect) e mDNS restano accesi su tutte le schede, C3 compresa (decisione dell'utente del 15/11/2026).
+// Si chiama solo dalla fine della guida (pagina e seriale): le schede gia configurate non si toccano.
+bool cfgSetupServices() {
+  bool casa = cfg.staEnabled && !cfg.staSsid.empty();
+  return paServiziFineGuida(casa, cfg.apOn, cfg.apCaptive, cfg.dhcpOn);
+}
+
+// Se la password dell'hotspot manca o e debole ne crea una nuova (senza salvare). true = l'ha cambiata.
+bool cfgEnsureApPass() {
+  if (!cfgApPassWeak(cfg.apPass.c_str())) return false;
+  cfg.apPass = cfgNewApPass().c_str();
+  return true;
 }
 
 bool cfgApPassWeak(const char* p) {
@@ -228,15 +271,17 @@ bool cfgLoad() {
   if ((!cfg.httpOn && !cfg.https) || cfg.httpPort == cfg.httpsPort) { cfgSvcRecover(); vlog("CFG: servizi web non validi, valori di fabbrica"); }
   // guida non finita (primo avvio o reset): hotspot, HTTP, HTTPS e porte standard, cosi si entra sempre
   if (!cfg.setupDone) cfgSvcRecover();
-  // hotspot: mai una password uguale per tutti (leggi UE RED/EN 18031, CRA; Regno Unito PSTI)
-  if (cfgApPassWeak(cfg.apPass.c_str())) {
+  // hotspot: mai una password uguale per tutti (leggi UE RED/EN 18031, CRA; Regno Unito PSTI).
+  // Prima accensione (guida non finita): niente password e niente salvataggio, l'hotspot si accende aperto per 10 minuti dopo il tasto BOOT
+  // (deroga dell'utente del 14/11/2026). La password nasce quando serve: vedi cfgEnsureApPass, chiamata da /api/ap e alla fine della guida.
+  if (cfg.setupDone && cfgApPassWeak(cfg.apPass.c_str())) {
     cfg.apPass = cfgNewApPass().c_str();
     vlog("CFG: nuova password unica per l'hotspot (vedi la schermata di benvenuto sulla seriale)");
     cfgSetOrigin("primo avvio");
     cfgSave();
   }
   g_lastPub.clear();
-  cfgExport(g_lastPub, false);
+  if (diffAmmesso()) cfgExport(g_lastPub, false);
   return found;
 }
 

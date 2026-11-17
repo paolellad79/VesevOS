@@ -16,6 +16,7 @@
 #include "vos_audit.h"
 #include "vos_i18n.h"
 #include "vos_log.h"
+#include "../boards/vos_board.h"
 #include "../drivers/vos_drv_cpu.h"
 #include "../drivers/vos_drv_sys.h"
 #include "../drivers/vos_drv_time.h"
@@ -31,8 +32,8 @@ static const float TEMP_BACK_C    = 70.0f;   // sotto questo valore torna tutto 
 static const uint32_t TEMP_WARN_SEC = 30;    // l'avviso compare dopo tanti secondi sopra TEMP_WARN_C
 static const uint32_t TEMP_HOLD_SEC = 20;    // un livello termico non scende prima di tanti secondi dall'ultimo cambio
 static const uint32_t SENSOR_BAD_SEC = 5;    // letture sbagliate di fila prima di dire "sensore in errore"
-static const uint32_t HTTPS_FLOOR_MHZ = 160; // con HTTPS acceso il TETTO (massimo consentito) non scende sotto questo valore, finche il chip non e a caldo estremo. Il MINIMO resta sempre 80 (decisione utente 23/10: a riposo 80 anche con HTTPS): a 80 MHz la stretta di mano TLS blocca la CPU oltre 5 s (Task watchdog, analisi del 15/10)
-static const uint32_t SAFE_MHZ = 160;        // tetto prudente con il sensore in errore
+static uint32_t httpsFloorMhz() { return drvCpuMid(); } // con HTTPS acceso il TETTO (massimo consentito) non scende sotto questo valore, finche il chip non e a caldo estremo. Il MINIMO resta sempre 80 (decisione utente 23/10: a riposo 80 anche con HTTPS): a 80 MHz la stretta di mano TLS blocca la CPU oltre 5 s (Task watchdog, analisi del 15/10)
+static uint32_t safeMhz() { return drvCpuMid(); }        // tetto prudente con il sensore in errore
 static const uint32_t BOOT_LOCK_MS = 15000;  // nei primi secondi dopo l'avvio nessun cambio di frequenza (resta quella di avvio)
 
 static CpuThermal s_level = THERM_OK;
@@ -51,8 +52,8 @@ static CpuWhy   s_why = CW_START;
 static uint32_t s_changes = 0;
 static volatile bool s_force = false;  // la scelta e cambiata: riapplica anche se il tetto e lo stesso
 
-// un gradino piu in basso: 240 -> 160 -> 80
-static uint32_t stepDown(uint32_t mhz) { return mhz > 160 ? 160 : 80; }
+// un gradino piu in basso (max -> mid -> min)
+static uint32_t stepDown(uint32_t mhz) { return mhz > drvCpuMid() ? drvCpuMid() : drvCpuMin(); }
 
 // Tetto voluto adesso, in base a scelta, governor, caldo e HTTPS. fixed = true se va applicato come frequenza fissa.
 static uint32_t wanted(bool& fixed, CpuWhy& why) {
@@ -60,19 +61,20 @@ static uint32_t wanted(bool& fixed, CpuWhy& why) {
   fixed = choice != 0;
   uint32_t cap = fixed ? choice : s_gov.cap;
   why = fixed ? CW_USER : s_gov.why == GW_BOOST ? CW_BOOST : CW_LOAD;
-  if (choice != 80) {                                    // il 80 fisso scelto dall'utente non si tocca mai
+  if (choice != drvCpuMin()) {                                    // il 80 fisso scelto dall'utente non si tocca mai
     uint32_t t = cap;
     if (s_level == THERM_REDUCED) t = stepDown(cap);
-    else if (s_level == THERM_EXTREME) t = fixed ? 80 : stepDown(stepDown(cap));
+    else if (s_level == THERM_EXTREME) t = fixed ? drvCpuMin() : stepDown(stepDown(cap));
     if (t < cap) why = CW_HOT;
     // HTTPS: finche non e caldo estremo, il TETTO non scende sotto 160 (il minimo di esp_pm resta 80, vedi drvCpuAuto); se la scelta dell'utente era gia piu bassa, resta la sua
-    if (s_httpsOn && s_level != THERM_EXTREME && t < HTTPS_FLOOR_MHZ) {
-      t = cap < HTTPS_FLOOR_MHZ ? cap : HTTPS_FLOOR_MHZ;
-      if (s_level >= THERM_REDUCED && t == HTTPS_FLOOR_MHZ) why = CW_HTTPS;
+    if (s_httpsOn && s_level != THERM_EXTREME && t < httpsFloorMhz()) {
+      t = cap < httpsFloorMhz() ? cap : httpsFloorMhz();
+      if (s_level >= THERM_REDUCED && t == httpsFloorMhz()) why = CW_HTTPS;
     }
     cap = t;
   }
-  if (s_sensorBad && cap > SAFE_MHZ) { cap = SAFE_MHZ; why = CW_SENSOR; }   // senza sensore si va con prudenza
+  if (cap > drvCpuMax()) cap = drvCpuMax();       // scelta salvata oltre il massimo del chip (config copiata da un'altra scheda): ripiega sul massimo
+  if (s_sensorBad && cap > safeMhz()) { cap = safeMhz(); why = CW_SENSOR; }   // senza sensore si va con prudenza
   return cap;
 }
 
@@ -170,7 +172,7 @@ static void thermalTick(float tempC) {
   bool tls = hookWebHttpsUp();
   s_httpsOn = tls;
   static bool warned = false;
-  bool low = tls && cfg.cpuMhz != 0 && cfg.cpuMhz < HTTPS_FLOOR_MHZ;
+  bool low = tls && cfg.cpuMhz != 0 && cfg.cpuMhz < httpsFloorMhz();
   if (low && !warned) { warned = true; vlog("ATTENZIONE: CPU fissa a %u MHz con HTTPS acceso", (unsigned)cfg.cpuMhz); auditEvent(AUD_YELLOW, "cpulow", tr("CPU fissa sotto 160 MHz con HTTPS acceso: la scheda puo bloccarsi e riavviarsi. Scegli un governor (ondemand, conservative, schedutil) o almeno 160 MHz")); }
   else if (!low && warned) { warned = false; auditClear("cpulow"); }
 }
@@ -181,7 +183,7 @@ static void governorTick(int busyPct) {
   CpuGovParams p = {cfg.cpuUp, cfg.cpuDown, cfg.cpuHold};
   CpuGovInput in;
   in.busyPct = (uint32_t)(busyPct < 0 ? 0 : busyPct > 100 ? 100 : busyPct);
-  in.curMhz = drvCpuMaxMhz() ? drvCpuMaxMhz() : 240;     // finche non e stato chiesto nulla la scheda va a 240
+  in.curMhz = drvCpuMaxMhz() ? drvCpuMaxMhz() : drvCpuMax();     // finche non e stato chiesto nulla la scheda va al massimo
   in.boost = cpuBoostActive();
   in.nowSec = s_now;
   cpuGovDecide((CpuGov)cfg.cpuGov, p, s_gov, in);

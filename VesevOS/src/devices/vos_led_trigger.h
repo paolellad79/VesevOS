@@ -15,6 +15,17 @@
 // Chiamata dal task del LED ogni ciclo (circa 20 ms). true = adesso c'e un lampo da mostrare con il colore r,g,b.
 bool ledTrigOverlay(uint32_t nowMs, uint8_t& r, uint8_t& g, uint8_t& b);
 
+// Lampi per un LED qualsiasi: slot 0 = LED1, slot 1 = LED2 (ognuno ricorda i contatori che ha gia visto). mode = LED_FLASH o LED_WIFI.
+// true = adesso c'e un lampo; color (se non nullo) riceve il colore 0xRRGGBB della sorgente (il LED2 non lo usa).
+#define LEDTRIG_SLOTS 2
+bool ledTrigPulse(int slot, uint8_t mode, uint32_t nowMs, uint32_t* color);
+
+// true se il carico della CPU supera la soglia (limitata a 10-95). Per i LED a un solo colore.
+bool ledTrigCpuOver(uint8_t thr);
+
+// Forma del battito (due impulsi ravvicinati), valore 0..1 nel periodo dato. La usano il LED1 e il LED2.
+float ledTrigBeat(uint32_t t, uint32_t period);
+
 // Modo "cpu": porta r,g,b (colore di fondo) verso il colore CPU, piu forte quanto piu il carico supera la soglia. false = sotto la soglia.
 bool ledTrigCpuMix(uint8_t& r, uint8_t& g, uint8_t& b);
 

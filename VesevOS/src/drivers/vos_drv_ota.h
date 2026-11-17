@@ -16,6 +16,15 @@ bool   drvRecoveryRead(uint32_t off, uint8_t* buf, size_t n);   // legge dalla p
 // poi si rilegge tutto e si confronta. Risposta: 0 = fatto, altrimenti uno dei codici REC_W_*.
 enum { REC_W_OK = 0, REC_W_NOPART, REC_W_SIZE, REC_W_RUNNING, REC_W_BOOT, REC_W_ERASE, REC_W_WRITE, REC_W_VERIFY };
 int    drvRecoveryWrite(const uint8_t* d, uint32_t n);
+// Scrittura del recovery A BLOCCHI (schede senza PSRAM): ogni settore da 4 KB si cancella subito prima di scriverlo.
+// Start = controlli prima di toccare la flash (come drvRecoveryWrite); Put(off, d, n): off multiplo di 4096, n al massimo 4096
+// (d nullo o n = 0: cancella soltanto quel settore). Verify = controllo dell'immagine scritta nella partizione, senza caricarla in RAM
+// (len = lunghezza dell'immagine). Codici: REC_W_*.
+int    drvRecoveryBlkStart();
+int    drvRecoveryBlkPut(uint32_t off, const uint8_t* d, uint32_t n);
+bool   drvRecoveryBlkVerify(uint32_t* len);
+bool   drvRecoveryExists();         // esiste la partizione recovery (anche se vuota o rovinata)?
+uint16_t drvImgChipId();            // numero del chip nell'intestazione delle immagini ESP per questa scheda
 uint32_t drvSketchSize();         // byte del programma in esecuzione (controllo dell'immagine: lento, non chiamare in cicli)
 // Partizione di avvio in uso e suo stato, in una riga di testo senza segreti ("app0 @0x20000 (valida)"). "" se non si legge.
 void   drvOtaRunningTo(char* out, size_t n);

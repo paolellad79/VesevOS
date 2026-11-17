@@ -29,6 +29,10 @@ bool ipParse(std::string_view in, uint32_t& out) {
 }
 
 void ipTo(uint32_t ip, char* out, size_t n) {
+  if ((ip & 0xF0000000UL) == 0xF0000000UL) {          // client IPv6: indirizzo finto della sua rete /64
+    snprintf(out, n, "v6:%07x", (unsigned)(ip & 0x0FFFFFFFUL));
+    return;
+  }
   snprintf(out, n, "%u.%u.%u.%u", (unsigned)((ip >> 24) & 255), (unsigned)((ip >> 16) & 255), (unsigned)((ip >> 8) & 255), (unsigned)(ip & 255));
 }
 

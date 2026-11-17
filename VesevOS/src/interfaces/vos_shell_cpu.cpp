@@ -17,6 +17,7 @@
 // "fixed" e il nome del governor che tiene una frequenza fissa (in una shell classica sarebbe "userspace"): e una scelta nostra. Nella config non esiste
 // un governor "fixed": fisso vuol dire cfg.cpuMhz diverso da zero, come prima.
 // Chi puo fare cosa lo decide la tabella dei ruoli (vos_shell_roles.cpp): qui si controlla solo il ruolo per le forme che CAMBIANO qualcosa.
+#include <stdio.h>
 #include "vos_shell_int.h"
 #include "../core/vos_cpupm.h"
 #include "../core/vos_cpugov.h"
@@ -45,7 +46,7 @@ void cpuSummary(OutSink& o) {
   char t[64];
   tempLine(t, sizeof t);
   o.println(trf("Temperatura:  %s", t));
-  o.println(trf("Carico:       core 0 %d%%, core 1 %d%%", sysCpuCorePercent(0), sysCpuCorePercent(1)));
+  for (int c = 0; c < (int)drvChipCores(); c++) o.println(trf("Carico core %d: %d%%", c, sysCpuCorePercent(c)));
 }
 
 // ---- cpu why ----
@@ -57,11 +58,24 @@ void cpuWhyLines(OutSink& o) {
   if (cpuBoostActive()) o.println(trf("Prenotazione attiva: %s", cpuBoostWho()));
 }
 
+// Frequenze valide del chip in testo ("80 160 240"), lette dal driver.
+static void levelsText(char* buf, size_t size) {
+  uint32_t lv[8];
+  int n = drvCpuLevels(lv, 8);
+  size_t used = 0;
+  buf[0] = 0;
+  for (int i = 0; i < n && used + 6 < size; i++) {
+    used += (size_t)snprintf(buf + used, size - used, i ? " %u" : "%u", (unsigned)lv[i]);
+  }
+}
+
 // ---- cpu info [-v] (come lscpu) ----
 void cpuInfo(OutSink& o, bool verbose) {
   unsigned rev = (unsigned)drvChipRevision();
   o.println(trf("Chip:          %s rev %u.%u, %u core", drvChipModel(), rev / 100, rev % 100, (unsigned)drvChipCores()));
-  o.println(tr("Frequenze:    80 160 240 MHz"));
+  char lv[32];
+  levelsText(lv, sizeof lv);
+  o.println(trf("Frequenze:    %s MHz", lv));
   o.println(tr("Governor:     fixed ondemand conservative schedutil"));
   o.println(trf("Attuale:      %u MHz (tetto %u, scelta %s)", (unsigned)drvCpuMhz(), (unsigned)cpuPmLimitMhz(), cpuChoiceName()));
   if (drvPsramTotal()) o.println(trf("Memoria:      PSRAM %u KB, flash %u KB", (unsigned)(drvPsramTotal() / 1024), (unsigned)(drvFlashSize() / 1024)));
@@ -110,7 +124,9 @@ void cpuGovernor(const char* line, OutSink& o, int role) {
 void cpuFreq(const char* line, OutSink& o, int role) {
   Word a2 = argAt(line, 2);
   if (a2.empty()) {
-    o.println(trf("Frequenza:    %u MHz   Tetto: %u MHz   Ammesse: 80 160 240 MHz", (unsigned)drvCpuMhz(), (unsigned)cpuPmLimitMhz()));
+    char lv[32];
+    levelsText(lv, sizeof lv);
+    o.println(trf("Frequenza:    %u MHz   Tetto: %u MHz   Ammesse: %s MHz", (unsigned)drvCpuMhz(), (unsigned)cpuPmLimitMhz(), lv));
     return;
   }
   if (role != ROLE_ADMIN) { o.println(tr("Serve il livello Admin")); return; }

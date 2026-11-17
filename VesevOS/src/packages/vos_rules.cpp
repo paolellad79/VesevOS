@@ -4,7 +4,7 @@
 #include "vos_rules.h"
 #include "../drivers/vos_drv_task.h"
 #include "vos_mqtt.h"
-#include "vos_berry.h"
+#include "vos_funzioni.h"
 #include "vos_app.h"
 #include "../core/vos_hooks.h"
 #include "../core/vos_i18n.h"
@@ -16,6 +16,8 @@
 #include "../core/vos_sys.h"
 #include "../core/vos_time.h"
 #include "../devices/vos_pins.h"
+#include "../devices/vos_led2.h"
+#include "../devices/vos_led_nomi.h"
 #include "../drivers/vos_drv_fs.h"
 #include <time.h>
 #include <new>
@@ -31,6 +33,7 @@
 #include "../drivers/vos_drv_time.h"
 
 namespace vosrules { Rule* g_r = nullptr; }           // tabella delle regole: esiste solo se c'e almeno una regola (con 0 regole non occupa RAM)
+static bool  g_loading = false;       // sto leggendo il file delle regole all'avvio: i nomi vecchi dei LED si accettano (errore chiaro all'uso)
 static bool  g_taskUp = false;        // il task "rules" parte solo quando serve
 namespace vosrules { int   g_n = 0; }
 namespace vosrules { Run   g_run[MAX_RUNS]; }
@@ -45,114 +48,16 @@ static bool pinMine(int g) { return g >= 0 && g < 64 && ((g_mine >> g) & 1); }
 // ---------- utilita (lavorano su viste del testo: non copiano) ----------
 using std::string_view;
 
-static bool hhmm(string_view s, uint16_t& out) {
-  if (s.size() != 5 || s[2] != ':') return false;
-  const int pos[4] = {0, 1, 3, 4};
-  for (int p : pos) if (!isdigit((unsigned char)s[p])) return false;
-  int h = (s[0] - '0') * 10 + (s[1] - '0'), m = (s[3] - '0') * 10 + (s[4] - '0');
-  if (h > 23 || m > 59) return false;
-  out = h * 60 + m;
-  return true;
-}
-
-static bool dmaskParse(string_view s, uint8_t& out) {
-  if (s.size() != 7) return false;
-  uint8_t m = 0;
-  for (int i = 0; i < 7; i++) {
-    if (s[i] == '1') m |= (1 << i);
-    else if (s[i] != '0') return false;
-  }
-  out = m;
-  return true;
-}
-
-// parola numero idx (separate da spazi); vista vuota se non c'e
-static string_view word(string_view s, int idx) {
-  size_t i = 0;
-  int n = 0;
-  while (i < s.size()) {
-    while (i < s.size() && s[i] == ' ') i++;
-    if (i >= s.size()) break;
-    size_t j = i;
-    while (j < s.size() && s[j] != ' ') j++;
-    if (n == idx) return s.substr(i, j - i);
-    n++; i = j;
-  }
-  return string_view();
-}
-
-// tutto il testo dalla parola numero idx in poi
-static string_view restOf(string_view s, int idx) {
-  size_t i = 0;
-  int n = 0;
-  while (i < s.size()) {
-    while (i < s.size() && s[i] == ' ') i++;
-    if (i >= s.size()) break;
-    if (n == idx) return s.substr(i);
-    while (i < s.size() && s[i] != ' ') i++;
-    n++;
-  }
-  return string_view();
-}
-
-// campo numero idx di una riga (campi separati da '|')
-static string_view field(string_view line, int idx) {
-  size_t p = 0;
-  for (int k = 0; k < idx; k++) {
-    p = line.find('|', p);
-    if (p == string_view::npos) return string_view();
-    p++;
-  }
-  size_t e = line.find('|', p);
-  return line.substr(p, e == string_view::npos ? string_view::npos : e - p);
-}
-
-static int fieldCount(string_view line) {
-  int c = 1;
-  for (char ch : line) if (ch == '|') c++;
-  return c;
-}
-
-// n-esima azione (separate da ';'), senza spazi ai lati
-static string_view actAt(string_view acts, int n) {
-  size_t p = 0;
-  for (int k = 0; k < n; k++) {
-    p = acts.find(';', p);
-    if (p == string_view::npos) return string_view();
-    p++;
-  }
-  size_t e = acts.find(';', p);
-  return trimView(acts.substr(p, e == string_view::npos ? string_view::npos : e - p));
-}
-
-static int actCount(string_view acts) {
-  if (acts.empty()) return 0;
-  int c = 1;
-  for (char ch : acts) if (ch == ';') c++;
-  return c;
-}
-
-static bool hex6ok(string_view s) {
-  if (s.size() != 6) return false;
-  for (char ch : s) if (!isxdigit((unsigned char)ch)) return false;
-  return true;
-}
-
-// Copia una parola in un buffer con lo zero finale (per le funzioni che vogliono un const char*). Se non ci sta si taglia:
-// i nomi validi sono piu corti, quindi un nome tagliato resta non valido.
-static void wordTo(char* out, size_t cap, string_view w) {
-  size_t n = w.size() < cap - 1 ? w.size() : cap - 1;
-  memcpy(out, w.data(), n);
-  out[n] = 0;
-}
-
 // ---------- controllo di una azione ----------
 static bool actionCheck(string_view a, ErrBuf& err) {
   string_view w = word(a, 0), a1 = word(a, 1), a2 = word(a, 2);
   if (w == "led-color") { if (!hex6ok(a1)) { err = tr("Colore non valido (6 cifre esadecimali)"); return false; } }
-  else if (w == "led") { if (!(a1 == "state" || a1 == "heartbeat" || a1 == "fixed" || a1 == "off")) { err = tr("Azione LED non valida"); return false; } }
+  else if ((w == "led" || w == "led2") && ledNomeVecchioMsg(std::string(w).c_str())) {   // nomi vecchi: non si salvano piu; quelli gia salvati restano e danno errore all'uso
+    if (!g_loading) { err = ledNomeVecchioMsg(std::string(w).c_str()); return false; }
+  }
+  else if (w == "led_rgb1") { if (!(a1 == "state" || a1 == "heartbeat" || a1 == "fixed" || a1 == "off")) { err = tr("Azione LED non valida"); return false; } }
   else if (w == "led-bright") { long v = viewToLong(a1); if (a1.empty() || v < 0 || v > 255) { err = tr("Luminosita da 0 a 255"); return false; } }
-  else if (w == "led2") { }   // LED aggiuntivo tolto nella 1.7.0: azione vecchia accettata e ignorata
+  else if (w == "led1") { if (!(a1 == "on" || a1 == "off" || a1 == "blink" || (a1 == "brightness" && !a2.empty() && viewToLong(a2) >= 0 && viewToLong(a2) <= 255))) { err = tr("Uso: led1 on|off|blink|brightness 0-255"); return false; } }
   else if (w == "gpio") {
     int g = (int)viewToLong(a1);
     if (a1.empty() || !(a2 == "0" || a2 == "1")) { err = tr("Uso: gpio <pin> 0|1"); return false; }
@@ -166,7 +71,7 @@ static bool actionCheck(string_view a, ErrBuf& err) {
   else if (w == "note") { if (restOf(a, 1).empty()) { err = tr("Manca il testo della nota"); return false; } }
   else if (w == "reboot") { }
   else if (w == "mqtt") { if (a1.size() < 1 || a1.size() > 60) { err = tr("Uso: mqtt <argomento> <testo>"); return false; } }
-  else if (w == "script") { char nm[32]; wordTo(nm, sizeof nm, a1); if (!berryNameValid(nm)) { err = tr("Nome script non valido (1-24 caratteri: lettere minuscole, numeri, trattino, sottotrattino)"); return false; } }
+  else if (w == "script") { char nm[32]; wordTo(nm, sizeof nm, a1); if (!funzioniNomeValido(nm)) { err = tr("Nome script non valido (1-24 caratteri: lettere minuscole, numeri, trattino, sottotrattino)"); return false; } }
   else if (w == "app") { if (!utilNameOk(a1.data(), a1.size())) { err = tr("Nome app non valido"); return false; } }
   else if (w == "appstop") { }
   else if (w == "ntp") { if (a1 != "sync") { err = tr("Azione non ammessa"); return false; } }
@@ -278,8 +183,11 @@ static void load(bool boot) {
   bool readOk = rulesText(text);
   Rule* tmp = new (std::nothrow) Rule[MAX_RULES]();       // appoggio temporaneo (>= 256 byte: va in PSRAM), liberato a fine funzione
   int n = 0; ErrBuf err;
+  g_loading = true;
+  bool parsedOk = tmp && readOk && parseAll(string_view(text.c_str(), text.length()), tmp, n, err);
+  g_loading = false;
   if (!tmp || !readOk) { vlog("RULES: memoria insufficiente"); }
-  else if (!parseAll(string_view(text.c_str(), text.length()), tmp, n, err)) { vlog("RULES: file non valido (%s)", err.c_str()); n = 0; }
+  else if (!parsedOk) { vlog("RULES: file non valido (%s)", err.c_str()); n = 0; }
   xSemaphoreTake(g_mx, portMAX_DELAY);
   for (int i = 0; i < MAX_RUNS; i++) g_run[i].act = false;
   if (n > 0 && !g_r) { g_r = new (std::nothrow) Rule[MAX_RULES](); if (!g_r) { vlog("RULES: memoria insufficiente"); n = 0; } }
@@ -339,7 +247,11 @@ static void doGpio(int g, int v, const char* rn) {
 static uint32_t doAction(string_view a, const char* rn) {
   string_view w = word(a, 0);
   if (w == "wait") return (uint32_t)viewToLong(word(a, 1)) * 1000UL;
-  if (w == "led2") return 0;   // tolto nella 1.7.0
+  if (w == "led1") { if (!led2Apply(std::string(word(a, 1)).c_str(), std::string(word(a, 2)).c_str())) vlog("RULES %s: led1 non disponibile", rn); return 0; }
+  if (w == "led" || w == "led2") {                    // nomi vecchi gia salvati nelle regole: non valgono piu, il registro dice il nome nuovo
+    const char* msg = ledNomeVecchioMsg(std::string(w).c_str());
+    if (msg) { vlog("RULES %s: %s", rn, msg); return 0; }
+  }
   if (w == "note") { string_view t = restOf(a, 1); vlog("RULES %s: %.*s", rn, (int)t.size(), t.data()); return 0; }
   if (w == "gpio") { doGpio((int)viewToLong(word(a, 1)), (int)viewToLong(word(a, 2)), rn); return 0; }
   if (w == "mqtt") {
@@ -351,9 +263,9 @@ static uint32_t doAction(string_view a, const char* rn) {
   }
   char name[32];
   wordTo(name, sizeof name, word(a, 1));
-  if (w == "script") { ErrBuf e; if (!berryQueue(name, e, rn)) vlog("RULES %s: script %s non avviato: %s", rn, name, e.c_str()); return 0; }
+  if (w == "script") { ErrBuf e; if (!funzioniAccoda(name, e, rn)) vlog("RULES %s: script %s non avviato: %s", rn, name, e.c_str()); return 0; }
   if (w == "app") { ErrBuf e; if (!appStart(name, e, 2, rn)) vlog("RULES %s: app %s non avviata: %s", rn, name, e.c_str()); return 0; }
-  if (w == "appstop") { char cur[32]; ErrBuf e; if (berryAppRunning(cur, sizeof cur) && !appStop(cur, e, 2)) vlog("RULES %s: app %s non fermata: %s", rn, cur, e.c_str()); return 0; }
+  if (w == "appstop") { char cur[32]; ErrBuf e; if (funzioniAppInEsecuzione(cur, sizeof cur) && !appStop(cur, e, 2)) vlog("RULES %s: app %s non fermata: %s", rn, cur, e.c_str()); return 0; }
   if (w == "reboot") {
     if (drvMillis() < 60000UL) { vlog("RULES %s: riavvio ignorato (meno di 60 s dall'avvio)", rn); return 0; }
     vlog("RULES %s: riavvio", rn);

@@ -63,6 +63,8 @@ GET   /api/io  operatore
 POST  /api/io/add  admin
 POST  /api/io/del  admin
 POST  /api/io/rename  admin
+GET   /api/ip6  operatore
+POST  /api/ip6  admin
 POST  /api/lang  admin
 GET   /api/langfile  pubblico
 GET   /api/langs  pubblico
@@ -120,8 +122,8 @@ POST  /api/region  admin
 GET   /api/rules  operatore
 POST  /api/rules  operatore
 POST  /api/rules/run  operatore
-GET   /api/script/api  operatore
 GET   /api/script  admin
+GET   /api/script/api  operatore
 POST  /api/script/run  admin
 POST  /api/script/stop  admin
 GET   /api/selftest  admin
@@ -131,6 +133,7 @@ GET   /api/serial  admin
 POST  /api/serial  admin
 POST  /api/serialauth  admin
 GET   /api/settings  ospite
+POST  /api/settings  admin
 POST  /api/setup/done  admin
 POST  /api/shell  operatore
 POST  /api/sleep  admin

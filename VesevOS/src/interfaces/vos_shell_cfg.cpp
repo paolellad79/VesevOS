@@ -44,7 +44,7 @@ const Area kAreas[] = {
   {"services", "svc vesevos-services",              ""},
   {"users",    "user passwd",                       ""},
   {"security", "serial-auth serial firewall unban", ""},
-  {"led",      "led",                               "led"},
+  {"led",      "led_rgb1",                          "led_rgb1"},   // l'area si chiama ancora "led": inoltra al comando del LED a colori
   {"cpu",      "cpu",                               "cpu"},
 };
 

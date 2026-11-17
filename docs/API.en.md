@@ -24,15 +24,15 @@ API version: **1** (`apiVersion` field in `/api/status` and `/api/common`). It c
 
 - **Limits:** body up to 48 KB; file list 200 items, network scan 40 networks (beyond: `more:true`). Dates in Unix seconds (UTC), durations in seconds, sizes in bytes.
 - **Parameters:** `application/x-www-form-urlencoded`. API rule 12: an invalid value must change nothing.
-- **File upload** (`multipart/form-data`, admin only, not in the table): `POST /api/fs/up?dir=` (file in internal memory; a package replacing an installed one is checked first, and `avviso` in the answer reports a lower version); `POST /api/recovery/up?sha=` (new recovery: all of it goes to PSRAM, it is checked and only then written; answers `{"ok":true,"from":"0.4.3","to":"0.4.4"}`; `sha` optional).
+- **File upload** (`multipart/form-data`, admin only, not in the table): `POST /api/fs/up?dir=` (file in internal memory; a package replacing an installed one is checked first, and `avviso` in the answer reports a lower version); `POST /api/recovery/up?sha=` (new recovery: all of it goes to PSRAM, it is checked and only then written; answers `{"ok":true,"from":"0.4.3","to":"0.4.4"}`; `sha` optional); `POST /api/risorse/carica` (a page `.vrs` file: header, id, 256 KB cap, length and SHA-256 are checked before replacing the installed one, which stays untouched if the new one is not valid; or a single file of `/usr/share/vesevos` whose name is in the board's `SHA256SUMS` list (the name comes from the list, not from the sender), accepted only if its SHA-256 matches its line, with a 64 KB cap and an atomic write; or `SHA256SUMS` itself, only with the firmware id; without room for two copies the file is refused; answers `{"ok":true}` or `{"ok":false,"err":...,"code":...}`).
 - The **Parameters** and **Errors** columns are read from the code (indicative: the errors listed are those the route gives explicitly, besides the general ones above).
 
-## Routes (176)
+## Routes (179)
 
 | Method | Path | Level | What it does | Parameters | Errors |
 |---|---|---|---|---|---|
-| GET | `/` | public | The web page (gzip) | - | - |
-| GET | `/api/aggiorna` | admin | Updates page (Admin only): installed versions, check settings, result, published version found | - | `off` |
+| GET | `/` | public | The web page (from the /usr/share/vesevos/html.vrs file, gzip); if the file is missing or not valid, or if the language file in use is in error, the emergency page | - | - |
+| GET | `/api/aggiorna` | admin | Updates page (Admin only): installed versions, check settings, result, published version found and the state of the files in /usr/share/vesevos (ris: el, f[n, s, h, t]) | - | `off` |
 | POST | `/api/aggiorna/imposta` | admin | Check settings (modo, freq, giorno, ora in minutes). confirm=1 is needed when leaving off. Admin only | `confirm` | `bad_request`, `error` |
 | POST | `/api/aggiorna/installa` | admin | Installs the version found (confirm=1): official and higher only; order to the recovery and restart. Admin only | `confirm` | `bad_request`, `state` |
 | GET | `/api/aggiorna/pacchetti` | admin | Installed apps and drivers with their declared version; the page compares them with the store. Admin only | - | `off` |
@@ -60,13 +60,13 @@ API version: **1** (`apiVersion` field in `/api/status` and `/api/common`). It c
 | GET | `/api/btn` | operator | BOOT button: act (action of 1, 2 and 3 clicks: 0 free (for scripts), 1 leave airplane mode, 2 WPS, 3 find the board), opt (possible actions with name), wpsClicks (clicks that start WPS, 0 = none), wpsOn (WPS allowed), free (per gesture: free for scripts), script (a script is reading the clicks), test (test seconds left, 0 = off), down, heldMs, seq, last (last gesture understood in test) | - | - |
 | POST | `/api/btn` | admin | 0 (prova di 60 s: il tasto non fa niente); ritorna lo stato / BOOT button (Admin only): c1, c2, c3 = action (0-3) for 1, 2, 3 clicks; test=1/0 (60 s test: the button does nothing); returns the state | `test` | `error` |
 | GET | `/api/casuale` | guest | 32 random bytes from the chip generator (rnd, hex); the page mixes them with its own for the Maximum password. Not cached, not logged | - | - |
-| GET | `/api/common` | public | Common data (countries, radio rules, libraries, apiVersion), cached 24 h | - | - |
+| GET | `/api/common` | public | Common data (countries, radio rules, libraries, apiVersion), cached 24 h; read from the file /usr/share/vesevos/comuni.json.gz (checked with SHA256SUMS): 503 if it is missing or not valid | - | - |
 | GET | `/api/config/download` | admin | Download the prepared configuration | - | `error` |
 | POST | `/api/config/export` | admin | Prepare the configuration to download (acc, pw) | `acc`, `pw` | `error` |
 | POST | `/api/config/restore` | admin | Restore configuration from a file (t = text, pw = passphrase) | `pw`, `t` | `error`, `toobig` |
 | POST | `/api/cpu` | admin | CPU mode (auto or fixed) | `down`, `gov`, `hold`, `mode`, `up` | `error` |
 | GET | `/api/crash` | operator | Reports of the last crashes (reason, task, PC, backtrace), text | - | - |
-| GET | `/api/dev` | operator | Device Manager list, or one device (id) | `id` | - |
+| GET | `/api/dev` | operator | Device Manager list, or one device (id) | `id` | `error` |
 | POST | `/api/dev/act` | operator | Device action (a, arg) | `a`, `arg`, `id` | `error` |
 | POST | `/api/dev/set` | admin | Turn a device on or off | `id`, `on` | `error` |
 | GET | `/api/elf` | operator | ELF apps: installed .vae files with file check and state, permissions they ask for (u), disabled feature they ask for (m), running modules and last finished ones | - | `error` |
@@ -96,11 +96,13 @@ API version: **1** (`apiVersion` field in `/api/status` and `/api/common`). It c
 | POST | `/api/io/add` | admin | Creates a device (cls class, gpio pin, name optional, opt inv/up/down; for the microSD cls=sd, gpio=CS and opt "mosi=N sck=N miso=N khz=N", khz 400 to 20000). The pin is checked; replies with the name | `cls`, `gpio`, `name`, `opt` | `error` |
 | POST | `/api/io/del` | admin | Removes a device (n name): the output is switched off and the pin is freed | `n` | `error` |
 | POST | `/api/io/rename` | admin | Renames a device (n name, to new name) | `n`, `to` | `error` |
+| GET | `/api/ip6` | operator | Home Wi-Fi IPv6 (Operator): presente (firmware has IPv6), acceso (on), fisso (mode with one extra fixed address), ind (fixed address), collegato (connected), prefisso (always 64), elenco (a = address, t = 0 local / 1 global / 2 private / 3 other, p = in use), gw and dns = IPv6 gateway and DNS typed by hand (empty = automatic, from the router) | - | `off` |
+| POST | `/api/ip6` | admin | 1, fisso=0/1, ind (indirizzo fisso, solo globale 2000::/3 o privato fc00::/7, prefisso /64), gw (gateway: fe80::/10 oppure della stessa /64 della scheda; vuoto = automatico), dns (DNS di riserva, globale o privato; vuoto = automatico); salva nella configurazione, applica entro un secondo e ritorna lo stato come il GET / IPv6 (Admin only): acceso=0/1 (on), fisso=0/1 (fixed), ind (fixed address, global 2000::/3 or private fc00::/7 only, prefix /64), gw (gateway: fe80::/10 or in the board's /64; empty = automatic), dns (fallback DNS, global or private; empty = automatic); saves to the configuration, applies within a second and returns the status like GET | `acceso`, `dns`, `fisso`, `gw`, `ind` | `error`, `off` |
 | POST | `/api/lang` | admin | Board language | - | `error` |
-| GET | `/api/langfile` | public | Language file download | `code` | - |
+| GET | `/api/langfile` | public | Page phrases of a language (.vlp file, gzip) | `code` | - |
 | GET | `/api/langs` | public | Available languages | - | `error` |
 | POST | `/api/led` | operator | LED colour, mode, brightness | `br`, `color`, `mode`, `thr` | `error` |
-| GET | `/api/license` | public | Licence text (id) or list | `id` | - |
+| GET | `/api/license` | public | Licence text (id) or list; notice and gpl3 are in the firmware, apache2, mit and bsd3 in the /usr/share/vesevos files (if the file is missing or not valid the text is a message) | `id` | - |
 | GET | `/api/log` | guest | Log (text) | - | - |
 | POST | `/api/log/clear` | admin | Clear the log | - | - |
 | GET | `/api/log/level` | guest | Log level | - | - |
@@ -147,14 +149,14 @@ API version: **1** (`apiVersion` field in `/api/status` and `/api/common`). It c
 | POST | `/api/progs` | admin | b/e, name; start usa i permessi che il programma chiede) / One program: act=stop (name), start or restart (k s/b/e, name; start uses the permissions the program asks for) | - | - |
 | POST | `/api/reboot` | operator | Reboot the board | - | - |
 | GET | `/api/recovery` | admin | Tells whether the recovery is present and its version (present 0/1, kb, ver) | - | - |
-| POST | `/api/recovery` | admin | Reboots into the recovery to upload a new firmware (answers with ip) | - | `error`, `state` |
+| POST | `/api/recovery` | admin | Reboots into the recovery to upload a new firmware (answers with ip) | - | `state` |
 | GET | `/api/region` | guest | Country, time zone, language, radio | - | `error` |
 | POST | `/api/region` | admin | Change country, zone, formats, antenna, power | `antenna`, `country`, `datefmt`, `decsep`, `gain`, `ntp`, `tempunit`, `timefmt`, `txpower`, `tz`, `tzname`, `weekstart` | `error` |
 | GET | `/api/rules` | operator | Automation text | - | `off` |
 | POST | `/api/rules` | operator | Save automations | `text` | `error` |
 | POST | `/api/rules/run` | operator | Run a rule (i) | `i` | `error` |
 | GET | `/api/script` | admin | Scripts: list of /scripts (n, s = bytes), running (busy, name), last output (out, err), limit max | - | `error` |
-| GET | `/api/script/api` | operator | Berry functions of the board: scheda, funzioni (n = name, g = group, r = role op/admin) | - | `error` |
+| GET | `/api/script/api` | operator | VesevOS functions of the board: scheda, funzioni (n = name, g = group, r = role op/admin) | - | `error` |
 | POST | `/api/script/run` | admin | Start a script from /scripts in the background (name) | `name` | `error`, `state` |
 | POST | `/api/script/stop` | admin | Stop the running script | - | `state` |
 | GET | `/api/selftest` | admin | Selftest state | - | `off` |
@@ -163,7 +165,8 @@ API version: **1** (`apiVersion` field in `/api/status` and `/api/common`). It c
 | GET | `/api/serial` | admin | Serial settings | - | `error` |
 | POST | `/api/serial` | admin | Change a setting (k, v) | `k`, `v` | `error` |
 | POST | `/api/serialauth` | admin | Serial password on/off | `on` | - |
-| GET | `/api/settings` | guest | General settings (for the page) | - | `off` |
+| GET | `/api/settings` | guest | General settings (for the page); the alias field gives, for each device with an alias or description, real name -> {a alias, d description} | - | `off` |
+| POST | `/api/settings` | admin | Alias and description of a device (n real name, alias, descrizione; a missing field is kept, empty removes it; alias max 24 bytes, description max 120 bytes, UTF-8 without control characters or < > " \). Reply carries dup = another device with the same alias (warning only). Admin only | `alias`, `descrizione`, `n` | `error` |
 | POST | `/api/setup/done` | admin | Finish the guide (ntp) | `ntp` | - |
 | POST | `/api/shell` | operator | Run a shell command (c) | `c`, `pw`, `tab` | `error` |
 | POST | `/api/sleep` | admin | Put the board to sleep for min minutes | `min` | `error` |
@@ -197,10 +200,10 @@ API version: **1** (`apiVersion` field in `/api/status` and `/api/common`). It c
 | GET | `/api/vde` | operator | ELF drivers (.vde) in /devs: state, bus, signals, assigned pins, power (pw), warning (w), icon (ic, only when installed) and whether the file is valid | - | `error` |
 | POST | `/api/vde` | admin | ELF drivers: act=install (name, optional pins "21,22": otherwise the firmware's proposals), pins (name, pins: other pins for an installed driver), del (name, removes pins and file) | - | `error` |
 | GET | `/api/wd` | operator | Watchdog rules and state | - | `error` |
-| POST | `/api/wd` | admin | Save watchdog rules | `at`, `days`, `defaults`, `net`, `netmin`, `ram`, `ramkb`, `task`, `twdt`, `updays` | `error` |
+| POST | `/api/wd` | admin | Save watchdog rules | `at`, `days`, `defaults`, `net`, `netmin`, `ram`, `ramperc`, `task`, `twdt`, `updays` | `error` |
 | GET | `/api/who` | admin | Who is connected from the web and what they are doing (user, role, ip, via http/https, since when, last action) | - | `off` |
 | POST | `/api/wifi/ap` | admin | Hotspot only (home Wi-Fi off) | - | - |
-| POST | `/api/wifi/save` | admin | Save the home Wi-Fi | `cleanup`, `d1`, `d2`, `dhcp`, `gw`, `ip`, `mask`, `pass`, `ssid` | `error` |
+| POST | `/api/wifi/save` | admin | Save the home Wi-Fi | `cleanup`, `d1`, `d2`, `dhcp`, `gw`, `ip`, `later`, `mask`, `pass`, `ssid` | `error` |
 | GET | `/api/wifi/scan` | operator | Scan result (max 40, more:true if cut) | - | `off` |
 | POST | `/api/wifi/scan` | operator | Start a scan | - | - |
 | GET | `/api/wifi/test` | admin | Last connection test result | - | - |

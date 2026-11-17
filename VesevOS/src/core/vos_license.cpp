@@ -5,14 +5,24 @@
 #include <strings.h>
 #include "vos_strbuf.h"
 #include "vos_license_data.h"   // GENERATO: LIC_DOCS[] e LIC_COUNT (incluso solo qui: un'unica copia in flash)
+#include "vos_risorse_file.h"
 
 int         licCount() { return LIC_COUNT; }
 const char* licId(int i)    { return (i >= 0 && i < LIC_COUNT) ? LIC_DOCS[i].id : ""; }
 const char* licTitle(int i) { return (i >= 0 && i < LIC_COUNT) ? LIC_DOCS[i].title : ""; }
-const char* licText(int i)  { return (i >= 0 && i < LIC_COUNT) ? LIC_DOCS[i].text : ""; }
+const char* licText(int i)  { return (i >= 0 && i < LIC_COUNT && LIC_DOCS[i].text) ? LIC_DOCS[i].text : ""; }
 size_t      licSize(int i)  { return (i >= 0 && i < LIC_COUNT) ? LIC_DOCS[i].size : 0; }
 
 size_t      licZ(int i)     { return (i >= 0 && i < LIC_COUNT) ? LIC_DOCS[i].zsize : 0; }
+
+// Le licenze minori stanno in un file di /usr/share/vesevos (nel firmware restano note legali e GPL-3.0): id del documento -> file.
+int licFile(int i) {
+  if (i < 0 || i >= LIC_COUNT || LIC_DOCS[i].text) return -1;
+  if (!strcmp(LIC_DOCS[i].id, "apache2")) return RF_LIC_APACHE2;
+  if (!strcmp(LIC_DOCS[i].id, "mit")) return RF_LIC_MIT;
+  if (!strcmp(LIC_DOCS[i].id, "bsd3")) return RF_LIC_BSD3;
+  return -1;
+}
 
 int licFind(const char* id) {
   if (!id) return -1;

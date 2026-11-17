@@ -116,20 +116,17 @@ function pinIconUri(b){
   else if(s.indexOf("xmlns")<0)s=s.replace("<svg",'<svg xmlns="http://www.w3.org/2000/svg"');
   return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(s)
 }
-/* Dove stanno i blocchi e i fili. L e R sono i pin del fronte (sinistra e destra), top e st la riga del primo pin e il passo. */
-function pinSchemaPlan(L,R,top,st,bw){
-  var side=function(l){return L.indexOf(l)>=0?-1:R.indexOf(l)>=0?1:0},
-    yOf=function(l){
-      var i=L.indexOf(l);
-      if(i<0)i=R.indexOf(l);
-      return i<0?null:top+PY0+i*st
-    },P={blocks:[],pinBlk:{},pinSig:{}},hasL=false,hasR=false;
+/* Dove stanno i blocchi e i fili. A sono i punti di partenza dei fili sul fronte (pinAnchors): etichetta -> {dx, y, sd}. */
+function pinSchemaPlan(A,bw){
+  var side=function(l){return A[l]?A[l].sd:0},
+    yOf=function(l){return A[l]?A[l].y:null},
+    P={blocks:[],pinBlk:{},pinSig:{}},hasL=false,hasR=false;
   pinBlocks().forEach(function(b){
     var rows=[],cnt=[0,0];
     b.pins.forEach(function(k){
       var l=String(k.g),sd=side(l);
       if(!sd)return;
-      rows.push({sig:k.sig,g:k.g,ps:sd,py:yOf(l),color:b.col});
+      rows.push({sig:k.sig,g:k.g,ps:sd,py:yOf(l),dx:A[l].dx,color:b.col});
       cnt[sd<0?0:1]++
     });
     if(!rows.length)return;
@@ -137,7 +134,7 @@ function pinSchemaPlan(L,R,top,st,bw){
     if(pk){
       [[pk,"VCC",pk],["GND","GND","GND"]].forEach(function(w){
         var sd=side(w[0]);
-        if(sd)rows.push({sig:w[1],ps:sd,py:yOf(w[0]),color:PWCOL[w[2]],pwr:w[2]})
+        if(sd)rows.push({sig:w[1],ps:sd,py:yOf(w[0]),dx:A[w[0]].dx,color:PWCOL[w[2]],pwr:w[2]})
       })
     }
     rows.sort(function(a,c){return a.py-c.py});
@@ -184,7 +181,8 @@ function pinWires(P,bx,bw){
     b.rows.forEach(function(r,i){
       r.ry=b.y+PHEAD+i*PROW+PROW/2;
       r.b=b;
-      r.px=r.ps<0?bx:bx+bw;
+      r.px=r.ps<0?bx:bx+bw;   // bordo della scheda da cui il filo si allontana
+      r.ax=bx+r.dx;           // punto di partenza (i pin in basso partono dal loro posto)
       r.cross=r.ps!=b.side;
       r.ex=b.side<0?b.x+PBW:b.x;
       if(r.cross){
@@ -201,13 +199,20 @@ function pinWires(P,bx,bw){
     dn.concat(up).forEach(function(r){r.lx=r.px+sd*(21+(n++)*7)})
   });
   W.forEach(function(r){
-    var x0=r.px+r.ps*11,d;
+    var x0=r.ax+r.ps*11,d;
     if(r.cross)d="M"+x0+" "+r.py+"H"+r.lx+"V"+r.yc+"H"+r.dx+"V"+r.ry+"H"+r.ex;
     else if(r.lx==null)d="M"+x0+" "+r.py+"L"+r.ex+" "+r.ry;
     else d="M"+x0+" "+r.py+"H"+r.lx+"V"+r.ry+"H"+r.ex;
     r.d=d
   });
   P.wires=W
+}
+
+/* Nome del blocco nello schema: l'alias (accorciato se non entra), altrimenti il nome vero. */
+function pinNomeBlocco(n){
+  var a=aliasDi(n);
+  if(!a)return n;
+  return a.length>17?a.slice(0,16)+"\u2026":a
 }
 
 function pinSchemaSvg(P){
@@ -219,7 +224,7 @@ function pinSchemaSvg(P){
   P.blocks.forEach(function(b,bi){
     var rs=[],x=b.x,y=b.y;
     b.rows.forEach(function(r){rs.push(r.sig+(r.pwr?"":" GPIO"+r.g))});
-    var lab=tf("Periferica {0}: {1}. Pin: {2}. Premi per aprire la pagina.",b.name,b.title||"",
+    var lab=tf("Periferica {0}: {1}. Pin: {2}. Premi per aprire la pagina.",titoloAlias(b.name,b.name),b.title||"",
       rs.join(", "));
     s+='<g class="pblk" tabindex="0" role="link" aria-label="'+esc(lab)+
       '" style="cursor:pointer" onclick="pinGoBlk('+bi+
@@ -231,7 +236,7 @@ function pinSchemaSvg(P){
       '" width="30" height="30" rx="7" fill="#e9eef3"/><image href="'+pinIconUri(b)+'" x="'+(x+10)+
       '" y="'+(y+9)+'" width="26" height="26"/>';
     s+='<text x="'+(x+46)+'" y="'+(y+21)+'" font-size="11" font-weight="700" fill="#e6edf3">'+
-      esc(b.name)+'</text>';
+      esc(pinNomeBlocco(b.name))+'</text>';
     s+='<text x="'+(x+46)+'" y="'+(y+34)+'" font-size="8.5" fill="#aab6c4">'+
       esc((b.title||"").length>27?b.title.slice(0,26)+"…":b.title||"")+'</text>';
     b.rows.forEach(function(r){

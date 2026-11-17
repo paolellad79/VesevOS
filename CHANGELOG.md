@@ -1,5 +1,15 @@
 # Cronologia delle versioni
 
+## 1.8.24c (rilasciata il 17/11/2026) - Due schede, un solo sistema
+
+- Nuova scheda: VesevOS gira ora anche su **ESP32-C6**, oltre che su ESP32-S3.
+- Firmware piu snello: pagina, manuale, lingue, licenze, dati dei comuni e tabella radio sono file propri in `/usr/share/vesevos/`, ognuno controllato con SHA-256.
+- Pulsante "Carica da file" in ogni sezione: firmware, recovery, pacchetti e file di risorse.
+- Scheda Aiuto breve, con rimando alla guida completa sul sito del progetto.
+- Diagnostica con il LED: codici a lampi per dire cosa sta succedendo; battito del LED a un solo colore fino allo spento.
+- Prima attivazione: premendo il tasto BOOT parte l'installazione guidata.
+- Lingue lette direttamente dai file, senza decompressione.
+
 ## 1.8.21a (rilasciata il 07/11/2026) - Script con assistente, Store, sicurezza web
 
 - Pagina Script: nuova scheda AI con una copia del prompt pronto da usare.
@@ -33,7 +43,7 @@
 - Testi senza nomi di terzi: tolti "Debian", "Linux" e "GNU" da guida, man, messaggi e commenti (solo testi, nessun cambio di comportamento).
 
 ## 1.7.70h (inclusa nella 1.8.0b) - Avvisi del compilatore sul nostro codice
-- Tolto `-w` dal componente main: ora il compilatore mostra gli avvisi standard di ESP-IDF (`-Wall -Wextra`, in piu `-Wsign-compare`) sul codice nostro. Berry (`third_party/`) resta senza avvisi; PsychicHttp e ArduinoJson sono componenti a parte. Gli avvisi NON fermano la build (`-Werror=all` di ESP-IDF cambiato in `-Wall`).
+- Tolto `-w` dal componente main: ora il compilatore mostra gli avvisi standard di ESP-IDF (`-Wall -Wextra`, in piu `-Wsign-compare`) sul codice nostro. funzioni VesevOS (`third_party/`) resta senza avvisi; PsychicHttp e ArduinoJson sono componenti a parte. Gli avvisi NON fermano la build (`-Werror=all` di ESP-IDF cambiato in `-Wall`).
 - Corretti 26 avvisi: istruzioni su una riga che sembravano dentro l'`if` (13, divise su due righe), confronto int/unsigned in `vos_imgcheck.h`, `++` su variabile `volatile` (`vos_drv_wifi.cpp`).
 - Tre buffer allargati perche potevano tagliare il testo: `host[80]` -> 96 in `vos_redirect_plan.cpp` (nome 32 + dominio 60: con nomi lunghi il redirect puntava a un nome tagliato), `js[96]` -> 128 in `vos_mod.cpp`, `u[96]` -> 128 in `vos_web_upd.cpp`. Il resto del comportamento non cambia. Nota: `docs/progetto/nota-warning-2026-10-23.md`. NON provato su scheda.
 
@@ -49,7 +59,7 @@
 - La scelta si fa all'avvio dei server; un cambio dopo vale al riavvio (`pending` in `/api/svc`, campo nuovo `httpMin`, riga nella pagina Rete). HTTPS parte prima di HTTP. Nota: `docs/progetto/nota-redirect-http-https-2026-10-22.md`, registro SIC-016. NON provato su scheda.
 
 ## 1.7.70d (inclusa nella 1.8.0b) - Arduino tolto dalle note legali
-- Note legali (NOTICE.txt e comando `license`) per la build ESP-IDF pura: tolti core Arduino-ESP32, obblighi LGPL e il testo `lgpl21` (restano notice, gpl3, apache2, mit, bsd3). Elenco componenti veri: ESP-IDF 5.5.5, Mbed TLS, lwIP, FreeRTOS, NimBLE, esp-nimble-cpp, mdns, esp_littlefs, LittleFS, bundle certificati (licenza da verificare), PsychicHttp (copia modificata), ArduinoJson, Berry, posix_tz_db (da verificare). Il nome ArduinoJson resta.
+- Note legali (NOTICE.txt e comando `license`) per la build ESP-IDF pura: tolti core Arduino-ESP32, obblighi LGPL e il testo `lgpl21` (restano notice, gpl3, apache2, mit, bsd3). Elenco componenti veri: ESP-IDF 5.5.5, Mbed TLS, lwIP, FreeRTOS, NimBLE, esp-nimble-cpp, mdns, esp_littlefs, LittleFS, bundle certificati (licenza da verificare), PsychicHttp (copia modificata), ArduinoJson, funzioni VesevOS, posix_tz_db (da verificare). Il nome ArduinoJson resta.
 - SBOM.spdx.json rifatto (17 componenti, versione 1.7.70d) e lista SBOM della pagina (`tools/mkcommon.py`). COMMERCIAL.md senza kit LGPL. README.md e README.en.md: compilazione con ESP-IDF 5.5.
 - Messaggio "Non e un programma VesevOS valido" (era "...Arduino-ESP32..."); enum `IMG_ARDUINO` diventa `IMG_APPDESC`. Cancellata la vecchia cartella `VesevOS/build` (build di arduino-cli). Valutazione preliminare, non e consulenza legale. NON provato su scheda.
 
@@ -62,7 +72,7 @@
 - CPU: confermato che con HTTPS acceso il pavimento di 160 MHz riguarda solo il TETTO; il minimo di `esp_pm` resta 80 (a riposo la CPU scende a 80). Corretti commenti e testi (it/en/es/de) che parlavano di "minimo 160". Regola termica invariata.
 
 ## 1.7.70a (inclusa nella 1.8.0b) - Task a core automatico
-- Tutti i task creati da VesevOS (net, wd, monitor, time, rules, tmpclean, server UDP, loopTask, berry, mqtt, mesh, led, selftest) nascono senza core fisso (`DRV_CORE_ANY`): li assegna FreeRTOS. Accanto a ogni creazione c'e il commento col core di prima; per tornare indietro basta riscrivere quel numero. I task di ESP-IDF (Wi-Fi, BLE, lwIP, httpd, esp_timer) non cambiano. Nota: `docs/progetto/nota-task-automatici-2026-10-22.md`. NON provato su scheda.
+- Tutti i task creati da VesevOS (net, wd, monitor, time, rules, tmpclean, server UDP, loopTask, funzioni, mqtt, mesh, led, selftest) nascono senza core fisso (`DRV_CORE_ANY`): li assegna FreeRTOS. Accanto a ogni creazione c'e il commento col core di prima; per tornare indietro basta riscrivere quel numero. I task di ESP-IDF (Wi-Fi, BLE, lwIP, httpd, esp_timer) non cambiano. Nota: `docs/progetto/nota-task-automatici-2026-10-22.md`. NON provato su scheda.
 - Il monitor chiama il governor della CPU tramite tre ganci (`cpuTick`, `cpuApplyMode`, `cpuStatus` in `core/vos_hooks.h`): chiude il ciclo tra moduli lasciato da `vos_cpupm`.
 
 ## 1.7.70 (inclusa nella 1.8.0b) - Governor della CPU
@@ -71,7 +81,7 @@
 - Parametri (solo Admin; gli altri li leggono): salita 50-95 (80), discesa 5-50 (20, sempre 10 sotto la salita), attesa 2-120 s (10).
 - Il caldo resta sopra ogni governor. Con HTTPS acceso il tetto non scende sotto 160 MHz fino a 90 C (a 80 C solo avviso giallo); a 90 C scende a 80 con allarme rosso.
 - Nei primi 15 secondi dopo l'avvio nessun cambio di frequenza. Un solo punto cambia la frequenza: il monitor (un cambio al massimo ogni 2 s).
-- Prenotazioni `cpuBoost` (scansione Wi-Fi, avvio script Berry) alzano il tetto a 240 per qualche secondo con i governor. TLS e OTA rimandati.
+- Prenotazioni `cpuBoost` (scansione Wi-Fi, avvio script) alzano il tetto a 240 per qualche secondo con i governor. TLS e OTA rimandati.
 - Shell: `cpu [80|160|240|ondemand|conservative|schedutil|why]`, `cpu set up|down|hold <n>`. API: `/api/cpu` accetta `gov` (e il vecchio `mode`), `up`, `down`, `hold`; `/api/status` aggiunge `cpuGov`, `cpuWhy`, `cpuUp`, `cpuDown`, `cpuHold`, `cpuChanges`.
 - Pagina: selettore con le 6 voci, parametri, voce Processore con governor, tetto e motivo; testo termico corretto.
 
@@ -92,7 +102,7 @@
 ## 1.7.67 (inclusa nella 1.8.0b) - IDF puro e unificazione
 - **ESP-IDF puro**, senza Arduino: nessun simbolo Arduino nel binario.
 - **PSRAM corretta**: SPIRAM_BOOT_INIT attivo, la PSRAM torna visibile (prima psramTotal era 0).
-- **BLE dormiente**: impostazione `ble` spenta di fabbrica; `ble on|off|status` e funzioni Berry.
+- **BLE dormiente**: impostazione `ble` spenta di fabbrica; `ble on|off|status` e funzioni VesevOS.
 - **Voce "Processore"**: temperatura unita al processore (C/F), 3 livelli di avviso.
 - **Redirect HTTP -> HTTPS** (`svc redirect on|off`, spento di fabbrica).
 - **Watchdog**: tolto il rumore `task_wdt: task not found`.
@@ -131,11 +141,11 @@
 - Nessun cambio di comportamento visibile.
 - Controllo legale: non applicabile (riorganizzazione interna, nessuna funzione, dato o servizio nuovo).
 
-## 1.7.64a (ottobre 2026) - Compila anche con Berry spento
+## 1.7.64a (ottobre 2026) - Compila anche con le funzioni VesevOS spento
 
-- `vos_rules.cpp` usava `appNameValid` (package app/Berry): con `VOS_WITH_BERRY=0` il collegamento falliva. Ora usa `utilNameOk` (stessa regola: 1-24 caratteri a-z 0-9 - _), nessun cambio di comportamento.
-- `tools/stub/compila.sh`: variabile facoltativa `VOS_EXTRA` per provare i package spenti (esempio `VOS_EXTRA="-DVOS_WITH_BERRY=0" tools/stub/compila.sh`). Attenzione: gli stub controllano solo la sintassi, i simboli mancanti si vedono solo con la compilazione vera.
-- Provato con compilazione vera: Berry spento (2.124.291 byte) e Berry + BLE + MQTT + ESP-NOW + MFA spenti insieme (1.766.287 byte).
+- `vos_rules.cpp` usava `appNameValid` (package app/funzioni VesevOS): con `VOS_WITH_FUNZIONI=0` il collegamento falliva. Ora usa `utilNameOk` (stessa regola: 1-24 caratteri a-z 0-9 - _), nessun cambio di comportamento.
+- `tools/stub/compila.sh`: variabile facoltativa `VOS_EXTRA` per provare i package spenti (esempio `VOS_EXTRA="-DVOS_WITH_FUNZIONI=0" tools/stub/compila.sh`). Attenzione: gli stub controllano solo la sintassi, i simboli mancanti si vedono solo con la compilazione vera.
+- Provato con compilazione vera: funzioni VesevOS spento (2.124.291 byte) e funzioni VesevOS + BLE + MQTT + ESP-NOW + MFA spenti insieme (1.766.287 byte).
 - Controllo legale: non applicabile (correzione di compilazione).
 
 ## 1.7.64 (ottobre 2026) - Il nucleo non include piu i livelli alti
@@ -164,17 +174,17 @@
 - **Device Manager**: le periferiche virtuali dei package (MQTT, ESP-NOW, Bluetooth, MFA, statistiche) passano da `devices/vos_dev.cpp` a `packages/vos_dev_pkg.cpp` e si iscrivono con `devSetVirtual()`. Stesso elenco, stesso ordine.
 - **Riavvio unico**: nuovo `sysReboot(motivo, attesa)` in `core/vos_wd` e driver `drivers/vos_drv_sys` (unico `ESP.restart()`). Ci passano pagina (riavvio, recovery, fabbrica), shell (`reboot`, `factory-reset`, `recovery now`), regole (`reboot`), tasto BOOT (20 s e 8 s) e watchdog (`wdReboot`, che in piu conta per l'antiloop). Il motivo va nel diario dei riavvii come ultima riga ("Riavvio: ..."). Novita visibile solo li.
 - **NVS**: `Preferences` solo nel driver `drivers/vos_drv_nvs.h` (`DrvNvs`, stessi nomi, composizione). Toccati vos_wd, vos_boot, vos_sys, vos_config, vos_tls, vos_drv_ota; tolti 2 include inutili (config import/export). Stesse chiavi, stessi namespace.
-- **Doppioni**: `hexOf` (crypt, recupd, mfa), il nome valido di script e schede (`utilNameOk`, era in berry e mod) e l'errore "Riga N:" (`utilLineErr`, era in app e mod) ora sono in `vos_util`.
-- **checklayers**: nuove famiglie `nvs` e `restart` (0 fuori dai driver) e controllo `strati` (include verso l'alto da core/devices/net/security/drivers/boards: deve restare 0, senza debito). Corretto lo scanner: un `/*` dentro un commento di riga (es. `/apps/*.be`) nascondeva il codice seguente. Il debito String vero sale cosi da 2199 a 2429 (+230 righe che lo scanner non vedeva in vos_app, vos_mod, vos_berry_scripts e vos_shell_admin; nessuna String nuova). Base riscritta.
+- **Doppioni**: `hexOf` (crypt, recupd, mfa), il nome valido di script e schede (`utilNameOk`, era in funzioni e mod) e l'errore "Riga N:" (`utilLineErr`, era in app e mod) ora sono in `vos_util`.
+- **checklayers**: nuove famiglie `nvs` e `restart` (0 fuori dai driver) e controllo `strati` (include verso l'alto da core/devices/net/security/drivers/boards: deve restare 0, senza debito). Corretto lo scanner: un `/*` dentro un commento di riga (es. `/apps/*.be`) nascondeva il codice seguente. Il debito String vero sale cosi da 2199 a 2429 (+230 righe che lo scanner non vedeva in vos_app, vos_mod, vos_funzioni_scripts e vos_shell_admin; nessuna String nuova). Base riscritta.
 - Prove: `test_util` (hexOf, utilNameOk, utilLineErr), `test_wps` usa il gancio del tasto BOOT.
 - Controllo legale: non applicabile per radio, privacy, licenze, marchi, export, IA e accessibilita (nessuna funzione, dato o libreria nuova). Cybersecurity: il riavvio passa da un solo punto e lascia traccia nel diario (aiuta l'analisi, in linea con lo spirito di EN 18031/CRA sulla registrazione degli eventi; norme che potrebbero essere cambiate, valutazione non legale). Nessun dato personale nel motivo (solo testi fissi e nomi delle regole).
 
 ## 1.7.62e (ottobre 2026) - File sorgente sotto le 500 righe
-- `vos_berry.cpp` (631 righe) diviso in 3: `vos_berry.cpp` (esecuzione, funzioni dello script, script salvati, avvio: 467), `vos_berry_mem.cpp` (memoria con tetto e uscita print: 90), `vos_berry_scripts.cpp` (elenco, stato, uscita, stop: 123). Stato comune in `vos_berry_int.h` (spazio dei nomi `vosberry`).
+- `vos_funzioni.cpp` (631 righe) diviso in 3: `vos_funzioni.cpp` (esecuzione, funzioni dello script, script salvati, avvio: 467), `vos_funzioni_mem.cpp` (memoria con tetto e uscita print: 90), `vos_funzioni_scripts.cpp` (elenco, stato, uscita, stop: 123). Stato comune in `vos_funzioni_int.h` (spazio dei nomi `vosfunzioni`).
 - `vos_rules.cpp` (505 righe) diviso: testo delle regole e stato per la pagina in `vos_rules_state.cpp` (33); tipi e stato comuni in `vos_rules_int.h` (spazio dei nomi `vosrules`). `vos_rules.cpp` ora 447.
 - Solo codice spostato: **nessun cambio di comportamento**. Nessun sorgente (firmware e pagina, esclusi i file generati e `third_party`) supera piu 500 righe.
 - Debito "Arduino" di `checklayers` non aumentato (String 2207 -> 2205, time 167, include 51): tra i file si condividono solo dati e funzioni senza String. Base `tools/layers_baseline.json` riscritta perche il codice ha cambiato file.
-- Prove: `test_berry` include anche i 2 file nuovi.
+- Prove: `test_funzioni` include anche i 2 file nuovi.
 - Controllo legale: non applicabile (nessuna funzione nuova, nessun dato, nessuna libreria).
 
 ## 1.7.62d (ottobre 2026) - Avvisi ADC2 anche su GPIO 17 e 18
@@ -230,10 +240,10 @@
 
 ## 1.7.60 (ottobre 2026) - Script e app: registro e MQTT
 
-- Nuova funzione Berry **`logtail(n)`**: ultime n righe del registro (1-20, massimo 2000 caratteri). Nelle app serve il permesso nuovo **`logread`** in `use=`.
-- Nuova funzione Berry **`mqtt("nome", "testo")`**: pubblica su `<prefisso>/app/<nome>` (vero/falso). Nelle app serve `mqtt` in `use=` (il permesso c'era gia ma non faceva nulla). Tetto 20 messaggi al minuto (oltre il tetto restituisce falso e l'app continua); scrive solo sotto `app/`, quindi un'app non puo mandare comandi alla scheda (`cmd`) ne falsificare `status` e `state`.
+- Nuova funzione funzioni VesevOS **`logtail(n)`**: ultime n righe del registro (1-20, massimo 2000 caratteri). Nelle app serve il permesso nuovo **`logread`** in `use=`.
+- Nuova funzione funzioni VesevOS **`mqtt("nome", "testo")`**: pubblica su `<prefisso>/app/<nome>` (vero/falso). Nelle app serve `mqtt` in `use=` (il permesso c'era gia ma non faceva nulla). Tetto 20 messaggi al minuto (oltre il tetto restituisce falso e l'app continua); scrive solo sotto `app/`, quindi un'app non puo mandare comandi alla scheda (`cmd`) ne falsificare `status` e `state`.
 - Esempio: `docs/esempi/app/logmqtt.vap`. Manuale: capitolo 26. SMTP (email diretta) escluso di proposito: l'inoltro lo fa il broker.
-- Prove: `test_berry` 205 (nomi non validi, tetto, permessi nelle app). Provata sulla scheda .38 con un broker finto: logtail, mqtt (falso senza broker, vero con broker), tetto 20 al minuto, app d'esempio. Non provata: MQTT con TLS reale.
+- Prove: `test_funzioni` 205 (nomi non validi, tetto, permessi nelle app). Provata sulla scheda .38 con un broker finto: logtail, mqtt (falso senza broker, vero con broker), tetto 20 al minuto, app d'esempio. Non provata: MQTT con TLS reale.
 - **Controllo legale**: privacy (il registro puo contenere IP e nomi: serve il permesso `logread`, lo da l'Admin installando l'app; nessun invio parte da solo, MQTT e spento di fabbrica); cybersecurity (argomento limitato a `app/`, tetto di invii, nessuna credenziale nuova); licenze, marchi, radio, export, IA: non applicabile. Le norme (GDPR, CRA) possono essere cambiate: non e consulenza legale.
 
 ## 1.7.59 (ottobre 2026) - Chi e collegato (who)
@@ -278,7 +288,7 @@
 
 ## 1.7.56b (ottobre 2026) - Il tasto BOOT per gli script
 
-- Un gesto del tasto (1, 2 o 3 click) messo su **Libero** (di fabbrica il 3 click) e dato agli script: la nuova funzione Berry `btn()` torna 1, 2 o 3 (0 = nessun click, non aspetta). Vale per gli script di /scripts e per le app con `btn` in `use=`.
+- Un gesto del tasto (1, 2 o 3 click) messo su **Libero** (di fabbrica il 3 click) e dato agli script: la nuova funzione funzioni VesevOS `btn()` torna 1, 2 o 3 (0 = nessun click, non aspetta). Vale per gli script di /scripts e per le app con `btn` in `use=`.
 - Senza uno script in esecuzione i click liberi si perdono (nessun click vecchio arriva dopo). Coda di 3 click. In modo prova non arrivano allo script.
 - Nella pagina del tasto: elenco dei gesti liberi. `GET /api/btn` ha `free` e `script`.
 
@@ -297,14 +307,14 @@
 - Pulsante *Collega con WPS* nel passo Wi-Fi della guida. Comando seriale `wps`. Rotte `GET/POST /api/wps`. Package `VOS_WITH_WPS` (mettere 0 se il link non trova il WPS nelle librerie).
 - Nuovi: `net/vos_wps.*`, `drivers/vos_drv_wps.*`, `tools/hosttest/test_wps.cpp` (50 prove), `tools/webtest/wps.js` (9 passi), stub `esp_wps.h`. Testi it/en/es/de, manuale cap. 25, KNOWN_ISSUES F11.
 
-## 1.7.47 - 1.7.55 (ottobre 2026) - Berry, app, periferiche, schede modulo
+## 1.7.47 - 1.7.55 (ottobre 2026) - funzioni VesevOS, app, periferiche, schede modulo
 
 Riassunto riunito (le voci singole non furono scritte allora).
-- 1.7.47-1.7.49a: interprete **Berry** (MIT) per gli script `.vsc` in `/scripts` (sostituisce l'idea Lua, scartata il 10/10); comando `script`; funzioni `led()`, `act()`, `time()`, `temp()`, `log()`, `sleep()`.
+- 1.7.47-1.7.49a: interprete **funzioni VesevOS** (MIT) per gli script `.vsc` in `/scripts` (sostituisce l'idea Lua, scartata il 10/10); comando `script`; funzioni `led()`, `act()`, `time()`, `temp()`, `log()`, `sleep()`.
 - 1.7.50-1.7.52: pagina Script, app `.vap` (un file solo con manifest e permessi `use=`), pagina Dispositivi.
-- 1.7.53: esecuzione delle app (un solo motore Berry), menu nuovi a due livelli, Device Manager.
+- 1.7.53: esecuzione delle app (un solo motore delle funzioni), menu nuovi a due livelli, Device Manager.
 - 1.7.54: periferiche e pin (`vos_io`). 1.7.55: schede modulo `.vdp` (`vos_mod`, cartella `docs/devs`).
-- Controllo legale: Berry MIT (compatibile con GPL-3.0 e licenza commerciale), copyright indicato in NOTICE.txt.
+- Controllo legale: funzioni VesevOS MIT (compatibile con GPL-3.0 e licenza commerciale), copyright indicato in NOTICE.txt.
 
 ## 1.7.46 (ottobre 2026) - Servizi: dopo Ferma la pagina dice che manca Applica
 

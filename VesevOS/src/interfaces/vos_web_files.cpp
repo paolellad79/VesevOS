@@ -3,16 +3,89 @@
 // VesevOS - vos_web_files.cpp
 // Percorsi del server web: rete tra schede, Bluetooth, file. Aiuti e tipi condivisi: vos_web_int.h.
 #include "vos_web_int.h"
+#include "../core/vos_ramwd.h"
 #include "../packages/vos_pacchetto_nome.h"
+#include "../core/vos_i18n_carico.h"
 
 // Il percorso definitivo di un pacchetto che ne sostituisce uno installato; intanto si scrive in "<percorso>.tmp~". Vuoto negli altri casi.
 static char g_upFinale[sizeof g_upPath];
+
+// Un file di lingua in /lang (LANGF_VLD o LANGF_VLP): si scrive in "<percorso>.tmp~", si controlla e poi prende il posto del vecchio.
+static int  g_upLang = LANGF_FUORI;
+static char g_upLangCode[LANG_CODE_BUF];
 
 // {"ok":true,"key":"..."} (con ok = true) oppure {"key":"..."}: la chiave della rete tra schede (64 cifre esadecimali, niente da proteggere)
 static esp_err_t keyJson(Res* s, bool withOk = true) {
   char j[112];
   snprintf(j, sizeof j, withOk ? "{\"ok\":true,\"key\":\"%s\"}" : "{\"key\":\"%s\"}", cfg.meshKey.c_str());
   return sendJson(s, j);
+}
+
+static void routeCaricamento(PsychicHttpServer* S, bool sec) {
+  // caricamento file: controllo d'accesso fatto anche durante l'invio dei dati
+  PsychicUploadHandler* up = new PsychicUploadHandler();
+  up->onUpload([sec](Req* r, const auto& filename, uint64_t index, uint8_t* data, size_t len, bool final) -> esp_err_t {
+    uint32_t ip = ipOf(r);
+    if (!fwAllow(ip, false)) return ESP_FAIL;
+    if (csrfBlocked(r)) return ESP_FAIL;                                       // caricamento partito da un altro sito
+    int u = userOf(r);
+    if (u < 0 || cfg.users[u].role < ROLE_ADMIN) return ESP_FAIL;
+    if (!sec && g_tlsUp && cfg.https) return ESP_FAIL;
+    ramBusyTouch(60);                                                           // caricamento in corso: niente riavvio per RAM
+    if (index == 0) {
+      g_upOk = false; g_upErr.clear(); g_upFinale[0] = 0; g_upLang = LANGF_FUORI;
+      char dir[FS_PATH_MAX + 1], raw[2 * FS_PATH_MAX + 2], p[FS_PATH_MAX + 1];   // p: fsCleanTo vuole almeno FS_PATH_MAX + 1 byte, altrimenti rifiuta sempre
+      qparamTo(r, "dir", dir, sizeof dir);
+      if (!dir[0]) snprintf(dir, sizeof dir, "/");
+      const char* name = textOf(filename);
+      const char* sl = strrchr(name, '/'); if (sl) name = sl + 1;               // solo il nome, senza cartelle
+      snprintf(raw, sizeof raw, "%s/%s", strcmp(dir, "/") == 0 ? "" : dir, name);
+      if (!fsCleanTo(raw, p, sizeof p) || fsProtected(p)) { g_upErr = tr("Nome o percorso non valido"); return ESP_OK; }
+      if (g_upFile) g_upFile.close();
+      g_upLang = langFileKind(p, g_upLangCode, sizeof g_upLangCode);
+      if (g_upLang == LANGF_NO) { g_upLang = LANGF_FUORI; g_upErr = tr("In /lang si caricano solo file .vld e .vlp"); return ESP_OK; }
+      if (const char* full = fsRoomFor(p)) { g_upErr = full; return ESP_OK; }      // cartella piena (FS_DIR_MAX voci)
+      char* ls = strrchr(p, '/');                                                // cartella che contiene il file: si crea se manca
+      if (ls && ls != p) {
+        *ls = 0;
+        if (!drvFsExists(p)) { if (const char* full = fsRoomFor(p)) { g_upErr = full; return ESP_OK; } drvFsMkdir(p); }
+        *ls = '/';
+      }
+      if (g_upLang != LANGF_FUORI || pacchettoDaProteggere(p)) snprintf(g_upFinale, sizeof g_upFinale, "%s", p);    // quello installato resta intatto fino al controllo
+      snprintf(g_upPath, sizeof g_upPath, g_upFinale[0] ? "%s.tmp~" : "%s", p);
+      g_upFile = drvFsOpen(g_upPath, "w");
+      if (!g_upFile) { g_upErr = tr("Impossibile creare il file"); return ESP_OK; }
+    }
+    if (g_upFile) {
+      if (g_upLang != LANGF_FUORI && index + len > langFileMax(g_upLang)) {
+        g_upErr = tr("File di lingua troppo grande"); g_upFile.close(); drvFsRemove(g_upPath); return ESP_OK;
+      }
+      if (g_upFile.write(data, len) != len) { g_upErr = tr("Spazio esaurito"); g_upFile.close(); drvFsRemove(g_upPath); return ESP_OK; }
+      if (final) { g_upFile.close(); g_upOk = true; vlog("FILE: caricato %s", g_upPath); }
+    }
+    return ESP_OK;
+  });
+  up->onRequest([](Req* r, Res* s) -> esp_err_t {
+    int u = userOf(r);
+    if (u < 0 || cfg.users[u].role < ROLE_ADMIN) return sendJson(s, "{\"ok\":false,\"err\":\"non autorizzato\"}", 401);
+    if (g_upOk && g_upLang != LANGF_FUORI) {
+      ErrBuf e;
+      g_upOk = false;
+      if (!langFileCaricato(g_upPath, g_upFinale, g_upLang, g_upLangCode, e)) return ko(s, e);
+      return ok(s);
+    }
+    if (g_upOk) {
+      ErrBuf e, avviso;
+      if (!pacchettoCaricato(g_upPath, g_upFinale[0] ? g_upFinale : g_upPath, e, avviso)) { g_upOk = false; return ko(s, e); }
+      return okAvviso(s, avviso);
+    }
+    if (g_upFinale[0]) {                                                         // caricamento interrotto: il temporaneo non serve piu
+      if (g_upFile) g_upFile.close();
+      drvFsRemove(g_upPath);
+    }
+    return ko(s, g_upErr.empty() ? tr("Caricamento non riuscito") : g_upErr.c_str());
+  });
+  S->on("/api/fs/up", HTTP_POST, up);
 }
 
 void routesFiles(PsychicHttpServer* S, bool sec) {
@@ -79,61 +152,10 @@ void routesFiles(PsychicHttpServer* S, bool sec) {
     return sendText(s, 200, "application/json", j.c_str(), j.length());
   });
 
-  // caricamento file: controllo d'accesso fatto anche durante l'invio dei dati
-  PsychicUploadHandler* up = new PsychicUploadHandler();
-  up->onUpload([sec](Req* r, const auto& filename, uint64_t index, uint8_t* data, size_t len, bool final) -> esp_err_t {
-    uint32_t ip = ipOf(r);
-    if (!fwAllow(ip, false)) return ESP_FAIL;
-    if (csrfBlocked(r)) return ESP_FAIL;                                       // caricamento partito da un altro sito
-    int u = userOf(r);
-    if (u < 0 || cfg.users[u].role < ROLE_ADMIN) return ESP_FAIL;
-    if (!sec && g_tlsUp && cfg.https) return ESP_FAIL;
-    if (index == 0) {
-      g_upOk = false; g_upErr.clear(); g_upFinale[0] = 0;
-      char dir[FS_PATH_MAX + 1], raw[2 * FS_PATH_MAX + 2], p[FS_PATH_MAX + 1];   // p: fsCleanTo vuole almeno FS_PATH_MAX + 1 byte, altrimenti rifiuta sempre
-      qparamTo(r, "dir", dir, sizeof dir);
-      if (!dir[0]) snprintf(dir, sizeof dir, "/");
-      const char* name = textOf(filename);
-      const char* sl = strrchr(name, '/'); if (sl) name = sl + 1;               // solo il nome, senza cartelle
-      snprintf(raw, sizeof raw, "%s/%s", strcmp(dir, "/") == 0 ? "" : dir, name);
-      if (!fsCleanTo(raw, p, sizeof p) || fsProtected(p)) { g_upErr = tr("Nome o percorso non valido"); return ESP_OK; }
-      if (g_upFile) g_upFile.close();
-      if (const char* full = fsRoomFor(p)) { g_upErr = full; return ESP_OK; }      // cartella piena (FS_DIR_MAX voci)
-      char* ls = strrchr(p, '/');                                                // cartella che contiene il file: si crea se manca
-      if (ls && ls != p) {
-        *ls = 0;
-        if (!drvFsExists(p)) { if (const char* full = fsRoomFor(p)) { g_upErr = full; return ESP_OK; } drvFsMkdir(p); }
-        *ls = '/';
-      }
-      if (pacchettoDaProteggere(p)) snprintf(g_upFinale, sizeof g_upFinale, "%s", p);    // quello installato resta intatto fino al controllo
-      snprintf(g_upPath, sizeof g_upPath, g_upFinale[0] ? "%s.tmp~" : "%s", p);
-      g_upFile = drvFsOpen(g_upPath, "w");
-      if (!g_upFile) { g_upErr = tr("Impossibile creare il file"); return ESP_OK; }
-    }
-    if (g_upFile) {
-      if (g_upFile.write(data, len) != len) { g_upErr = tr("Spazio esaurito"); g_upFile.close(); drvFsRemove(g_upPath); return ESP_OK; }
-      if (final) { g_upFile.close(); g_upOk = true; vlog("FILE: caricato %s", g_upPath); }
-    }
-    return ESP_OK;
-  });
-  up->onRequest([](Req* r, Res* s) -> esp_err_t {
-    int u = userOf(r);
-    if (u < 0 || cfg.users[u].role < ROLE_ADMIN) return sendJson(s, "{\"ok\":false,\"err\":\"non autorizzato\"}", 401);
-    if (g_upOk) {
-      ErrBuf e, avviso;
-      if (!pacchettoCaricato(g_upPath, g_upFinale[0] ? g_upFinale : g_upPath, e, avviso)) { g_upOk = false; return ko(s, e); }
-      return okAvviso(s, avviso);
-    }
-    if (g_upFinale[0]) {                                                         // caricamento interrotto: il temporaneo non serve piu
-      if (g_upFile) g_upFile.close();
-      drvFsRemove(g_upPath);
-    }
-    return ko(s, g_upErr.empty() ? tr("Caricamento non riuscito") : g_upErr.c_str());
-  });
-  S->on("/api/fs/up", HTTP_POST, up);
+  if (rottaSi("/api/fs/up", HTTP_POST)) routeCaricamento(S, sec);
 
   // Portale automatico: in modo AP ogni indirizzo sconosciuto (controlli di Android, iPhone, Windows...) porta alla pagina.
-  S->onNotFound([](Req* r, Res* s) -> esp_err_t {
+  if (g_rotteModo != ROTTE_RESTANTI) S->onNotFound([](Req* r, Res* s) -> esp_err_t {
     uint32_t ip = ipOf(r);
     if (!fwAllow(ip, false)) { fwNoteRejected(ip); return ESP_FAIL; }
     return notFound(s);

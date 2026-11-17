@@ -4,6 +4,7 @@
 // Percorsi del server web: accesso, MFA, utenti. Aiuti e tipi condivisi: vos_web_int.h.
 #include "vos_web_int.h"
 #include "../core/vos_ram.h"
+#include "../core/vos_risorse_avviso.h"
 #include "../net/vos_net.h"
 #include "../net/vos_traffic.h"
 #include "../drivers/vos_drv_time.h"
@@ -183,7 +184,7 @@ void routesAuth(PsychicHttpServer* S, bool sec) {
     trafficJson(traf, sizeof(traf));
     j.cutLast();                                    // toglie la } finale per aggiungere net e traffico
     j.add(",\"net\":"); netStatusJson(j); j.add(','); j.add(traf);
-    if (c.role >= ROLE_ADMIN) { j.add(",\"agg\":"); aggiornaNotaJson(j); j.addf(",\"evb\":%lu", (unsigned long)eventiBlocchiNuovi()); }
+    if (c.role >= ROLE_ADMIN) { j.add(",\"agg\":"); aggiornaNotaJson(j); j.add(",\"ris\":"); risorseNotaJson(j); j.add(",\"lerr\":"); langErroreJson(j); j.addf(",\"evb\":%lu", (unsigned long)eventiBlocchiNuovi()); }
     j.add('}');
     if (j.oom() || j.over()) return ko(s, tr("Memoria insufficiente"), "off");
     return sendText(s, 200, "application/json", j.c_str(), j.length()); });

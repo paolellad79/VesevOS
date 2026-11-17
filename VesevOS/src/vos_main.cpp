@@ -17,11 +17,15 @@
 #include "vos_wire.h"
 #include "drivers/vos_drv_fs.h"
 #include "core/vos_ram.h"
+#include "core/vos_risorse_file.h"
+#include "core/vos_risorse_avviso.h"
+#include "core/vos_risorse_tocco.h"
 #include "core/vos_common.h"
 #include "core/vos_log.h"
 #include "core/vos_tmpclean.h"
 #include "core/vos_diario.h"
 #include "core/vos_crash.h"
+#include "core/vos_diag.h"
 #include "core/vos_serial.h"
 #include "devices/vos_pins.h"
 #include "devices/vos_io.h"
@@ -49,7 +53,7 @@
 #include "core/vos_wd.h"
 #include "core/vos_wdset.h"
 #include "packages/vos_ble.h"
-#include "packages/vos_berry.h"
+#include "packages/vos_funzioni.h"
 #include "packages/vos_prog.h"
 #include "packages/vos_elf.h"
 #include "drivers/vos_drv_gpio.h"
@@ -59,11 +63,12 @@
 #include "drivers/vos_drv_heap.h"
 #include "drivers/vos_drv_sys.h"
 #include "core/vos_apwin.h"
+#include "core/vos_primo_avvio.h"
 #include "net/vos_net.h"
 
 // Task principale: valori scelti per fare come il core Arduino (vedi la nota in cima al file).
 static const char*    MAIN_TASK_NAME  = "loopTask";
-static const uint32_t MAIN_TASK_STACK = 8192;     // byte
+static const uint32_t MAIN_TASK_STACK = VOS_PILA_PRINCIPALE;     // byte (8192; C3: ridotto, vedi boards/)
 static const int      MAIN_TASK_PRIO  = 1;
 static const int      MAIN_TASK_CORE  = DRV_CORE_ANY;   // core: automatico (prima: core 1 fisso)
 
@@ -86,8 +91,9 @@ static void bootButton() {
   ledSetHold(0);
   if (held >= 2000) btnLongRelease();
   if (btnTestActive()) { if (held >= 2000) btnTestLong(held); else if (held >= 50) btnClick(); return; }   // modo prova: niente azioni
-  if (!cfg.setupDone && held >= 50 && held < 2000) {   // prima configurazione: una pressione apre la finestra del hotspot
-    apWinOpen(); netApRefresh(); vlog("SETUP: finestra hotspot aperta (10 minuti)");
+  if (!cfg.setupDone && held >= 50 && held < 2000) {   // prima configurazione: una pressione accende l'hotspot aperto per 10 minuti (lo fa il task di rete)
+    if (primoAvvioPressione()) vlog("SETUP: tasto BOOT premuto: la rete si accende (hotspot aperto, 10 minuti)");
+    else vlog("SETUP: tasto BOOT premuto: finestra dell'hotspot rinnovata (10 minuti)");
     return;
   }
   cfgSetOrigin("tasto BOOT");
@@ -128,7 +134,8 @@ static void vosSetup() {
   drvConSetTxTimeoutMs(10);                       // attesa massima 10 ms a scrittura (era 100): se il PC non legge, loop non si ferma per secondi; con 0 si perdevano pezzi di testo
   drvDelayMs(300);
   logInit();
-  if (!g_nvsOk) vlog("NVS: non parte (memoria dei dati di sistema)");
+  ramTrace("log");
+  if (!g_nvsOk) { vlog("NVS: non parte (memoria dei dati di sistema)"); diagSegnala(DC_AVVIO, 1); }
   if (drvNvsEraseReason() != 0) vlog("ATTENZIONE: NVS cancellata e rifatta all'avvio (codice 0x%x): contatori e dati di sistema azzerati", (unsigned)drvNvsEraseReason());
   if (VOS_PSRAM_MALLOC && drvPsramTotal() > 0) { drvExtmemEnable(256); g_extmem = true; ramTlsToPsram(); }
   drvLogOff("esp-tls-mbedtls");                     // un browser che non si fida del certificato non riempie la seriale di errori ogni 30 s
@@ -140,39 +147,54 @@ static void vosSetup() {
   pinClaim(VOS_PIN_BOOT, "Sistema", "Tasto fisico (click = azioni scelte, 2 s = filtro IP, 8 s = password, 20 s = fabbrica)", true);
 
   diaryStage("fs");
-  if (!drvFsBegin(true)) { vlog("FS: LittleFS non parte"); }
+  if (!drvFsBegin(true)) { vlog("FS: LittleFS non parte"); diagSegnala(DC_AVVIO, 3); }
+  else if (drvFsFormattatoOra()) vlog("FS: formattato (il montaggio era fallito: partizione vuota o rovinata)");
+  ramTrace("fs");
+  risToccoInit();                                  // avviso in audit se qualcuno scrive dentro /usr/share/vesevos (vedi core/vos_risorse_tocco.h)
+  {                                                // file di /usr/share/vesevos: l'elenco SHA256SUMS deve essere ben formato (ogni file si controlla alla prima richiesta)
+    RisEsito re = risElencoAvvio();
+    if (re == RIS_OK) vlog("RISORSE: elenco SHA256SUMS controllato (formato buono)");
+    else vlog("RISORSE: elenco SHA256SUMS non valido o mancante (%s): i servizi che usano i file usano il ripiego", risCodice(re));
+  }
   powerBegin();
   diaryStage("cfg");
   if (const char* lay = layoutInit()) vlog("%s", lay);   // cartelle di sistema e copia della configurazione in /etc (prima di leggerla)
   if (!cfgLoad()) { vlog("CFG: nessun file, uso i valori iniziali"); cfgSave(); }
+  ramTrace("cfg");
+  primoAvvioInit(cfg.setupDone);                   // guida non finita = prima accensione: radio spenta in attesa del tasto BOOT
   logSetLevel(cfg.logLevel);
   wdSetInit();                                     // tempo salvato del Task watchdog (gia dopo la lettura della config)
   serialApply();                                   // velocita, attesa di scrittura
   setenv("TZ", cfg.tz.c_str(), 1); tzset();         // il fuso subito: cosi le righe del registro hanno l'ora locale fin dall'inizio
   vlog("%s %s in avvio", VOS_NAME, VOS_VERSION);
   crashBoot();                                      // se il riavvio viene da un crash: log e /crash.txt
+  diagBoot();                                       // causa dell'ultimo riavvio come codice per i lampi del LED
 
   diaryStage("io");
   ioInit();                                        // periferiche a classi (rele, led, pin...): uscite spente
+  ramTrace("io");
 #if VOS_WITH_ELF
   drvresInit();                                    // pin dei driver ELF (.vde): dopo ioInit, cosi i pin gia dati alle periferiche non si toccano
 #endif
   diaryStage("lang");
   langInit();
+  ramTrace("lingua");
   // La PSRAM parte presto (SPIRAM_BOOT_INIT); qui si dice solo se c'e: senza avviso un guasto passerebbe inosservato.
   if (drvPsramTotal() > 0) vlog("%s", trf("PSRAM: %lu KB", (unsigned long)(drvPsramTotal() / 1024)).c_str());
   else vlog("%s", tr("PSRAM non trovata: uso solo la RAM interna"));
   auditInit();                                     // controllo della configurazione (allarmi)
+  ramTrace("audit");
   updOutcomeBoot();                                // esito di un aggiornamento fatto dal recovery (registro e audit), poi lo cancella
   bleServiceInit();                                // servizi iscritti nel registro (vos_service) prima dell'avvio
-  berryServiceInit();                              // sottosistema vdb (Berry): acceso di fabbrica, si spegne dai Task
+  funzioniServizioInit();                              // sottosistema vdb (funzioni VesevOS): acceso di fabbrica, si spegne dai Task
 #if VOS_WITH_ELF
   elfServiceInit();                                // sottosistema vde (moduli ELF): acceso di fabbrica (interruttore salvato in /vesevos.conf)
 #endif
   bootRun();   // sys, led, net, time, web, rules, mqtt, mesh, wd: nell'ordine scelto (con le dipendenze)
+  ramTrace("servizi");
   progBootStart();                                 // i programmi con avvio automatico (di fabbrica nessuno), dopo i servizi
   diaryStage("avviato");
-  ramNote("avviato");
+  ramTrace("avviato");
 #if VOS_WITH_SD
   if (sdConfigured()) sdAutoStart();               // la microSD configurata si monta da sola appena risponde (task di fondo, priorita bassa); senza microSD il task (6 KB di stack) non nasce
 #endif
@@ -180,7 +202,7 @@ static void vosSetup() {
   tmpCleanStart();                                 // tra 30 s toglie i .tmp~ lasciati da un taglio di corrente (task di fondo, una volta)
   diaryInit();                                     // dopo sysInit: contatore avvii pronto; scrive la riga AVVIO e, se anomalo, i dettagli
   ledSetSetup(!cfg.setupDone);                     // arcobaleno lento finche la prima configurazione non e finita
-  vlog("Pronto. Guida di configurazione: %s", cfg.setupDone ? "finita" : "NON finita (hotspot e HTTP forzati accesi)");   // la rete la dicono le righe NET: seguenti
+  vlog("Pronto. Guida di configurazione: %s", cfg.setupDone ? "finita" : "NON finita (radio spenta: premi il tasto BOOT per accendere l'hotspot aperto per 10 minuti)");   // la rete la dicono le righe NET: seguenti
 }
 
 static void vosLoop() {
@@ -195,6 +217,8 @@ static void vosLoop() {
   diaryStage("L:stable"); bootStable();
   diaryStage("L:serial"); serialTick();
   diaryStage("L:agg");    aggiornaTick();
+  diaryStage("L:ris");    risorseTick();
+  diaryStage("L:lang");   langTick();
   diaryStage("L:wdt");    drvLoopWdtFeed();
   drvDelayMs(10);
 }

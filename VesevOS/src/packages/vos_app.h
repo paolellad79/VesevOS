@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_app.h
-// App (.vab): UN file di testo in /apps con manifest, icona, pagina (controlli dichiarati), codice Berry e dati iniziali.
+// App (.vab): UN file di testo in /apps con manifest, icona, pagina (controlli dichiarati), codice delle funzioni e dati iniziali.
 // 1.7.52: lettura e controllo del file. 1.7.53: ESECUZIONE (start/stop/set), pagina generica con i controlli dichiarati.
 // Formato: vedi il manuale (app .vab)
 //   [manifest]  name= title= version= author= use= who= autostart= (allowed|required|never: puo partire da solo all'avvio?) data= (1 = l'app salva dati: la
 //               pagina App lascia scegliere dove, flash o microSD; senza, nessuna scelta)
 //   [icon]      un solo <svg> (max 2 KB, solo forme semplici: niente script, collegamenti, immagini, stili)
 //   [page]      una riga per controllo:  switch|slider|color|text|button|chart id=... label="..." [min= max= points=]
-//   [code]      codice Berry (max 8 KB) fino alla prossima sezione
+//   [code]      codice delle funzioni (max 8 KB) fino alla prossima sezione
 //   [data]      chiave=valore (valori iniziali)
 #pragma once
 #include <string_view>
@@ -17,15 +17,15 @@
 #include "../core/vos_common.h"
 #include "../core/vos_layout.h"
 #include "../core/vos_ext.h"
-#include "vos_berry.h"
+#include "vos_funzioni.h"
 
 // Tetti dei testi e dei JSON (oltre: errore, mai testo troncato in silenzio)
 #define APP_TEXT_MAX   4096     // testi della shell (app list, app info)
 #define APP_INFO_MAX   16384    // JSON di una app (icona fino a 2 KB, 12 controlli)
 #define APP_LIST_MAX   65536    // JSON dell'elenco (fino a 12 app con icona)
-#define APP_STATE_MAX  45056    // JSON dello stato: uscita (BERRY_STATE_MAX) + valori dei controlli e dei grafici
+#define APP_STATE_MAX  45056    // JSON dello stato: uscita (FUNZIONI_STATO_MAX) + valori dei controlli e dei grafici
 
-#if VOS_WITH_BERRY
+#if VOS_WITH_FUNZIONI
 #define APP_DIR        layoutPath(LAY_APPS)   // /bin (prima della copia /apps, vedi core/vos_layout.h)
 #define APP_EXT        VOS_EXT_APP_B       // da core/vos_ext.h
 #define APP_FILE_MAX   16384
@@ -56,7 +56,7 @@ void   appListText(HeapBuf& out);                                  // comando "a
 void   appInfoText(const char* name, HeapBuf& out);                // comando "app info <nome>"
 bool   appListJson(HeapBuf& out, uint8_t role = 2);                // GET /api/apps (operatore: solo le app valide con who=oper)
 bool   appInfoJson(const char* name, HeapBuf& out, uint8_t role = 2);   // GET /api/app?name= (operatore: solo se who=oper)
-// ---- esecuzione (1.7.53): una sola app alla volta, nello stesso motore Berry degli script (si escludono a vicenda) ----
+// ---- esecuzione (1.7.53): una sola app alla volta, nello stesso motore delle funzioni degli script (si escludono a vicenda) ----
 // role: 1 = operatore, 2 = admin. L'operatore vede e usa solo le app con who=oper.
 bool   appStart(const char* name, ErrBuf& err, uint8_t role, const char* who);
 bool   appStop(const char* name, ErrBuf& err, uint8_t role);

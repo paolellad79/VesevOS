@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Genera: VesevOS/src/core/vos_license_data.h (testi legali nel firmware, solo ASCII) e NOTICE.txt (copia leggibile).
+# Genera: VesevOS/src/core/vos_license_data.h (testi legali nel firmware, solo ASCII: note legali e GPL-3.0; per le licenze minori Apache/MIT/BSD
+# solo titolo e misure), i file gzip delle licenze minori in ../build/risorse/origine/ (li prende tools/mkrisorse.py) e NOTICE.txt (copia leggibile).
 # Il nome del titolare sta in tools/owner.json. Con --headers aggiorna anche la riga Copyright
 # in testa ai sorgenti (solo se il nome e stato impostato).
 # Uso: python3 tools/mklicense.py [--headers]
@@ -41,7 +42,15 @@ def cstr(t, step=7000):
 h = ['// VesevOS - vos_license_data.h (GENERATO da tools/mklicense.py, solo ASCII)', '#pragma once', '#include "../drivers/vos_drv_string.h"', '']
 # note legali: testo semplice (si legge anche dalla seriale). Le licenze lunghe: gzip (la pagina le riceve compresse, circa 50 KB di flash in meno).
 ZS = {}
+MINORI = ('apache2', 'mit', 'bsd3')      # fuori dal firmware: file gzip in /usr/share/vesevos (li scrive tools/mkrisorse.py da ../build/risorse/origine)
+ORIGINE = os.path.join(os.path.dirname(ROOT), 'build', 'risorse', 'origine')
+os.makedirs(ORIGINE, exist_ok=True)
 for i, (id_, title, text) in enumerate(DOCS):
+    if id_ in MINORI:
+        z = gzip.compress(text.encode('ascii'), 9, mtime=0)
+        ZS[i] = len(z)
+        open(os.path.join(ORIGINE, 'licenza-%s.txt.gz' % id_), 'wb').write(z)
+        continue
     if id_ == 'notice':
         h.append('static const char LIC_TEXT_%d[] PROGMEM =\n%s;' % (i, cstr(text)))
         ZS[i] = 0
@@ -56,7 +65,8 @@ h.append('')
 h.append('struct LicDoc { const char* id; const char* title; const char* text; size_t size; size_t zsize; };')
 h.append('static const LicDoc LIC_DOCS[] = {')
 for i, (id_, title, text) in enumerate(DOCS):
-    h.append('  { "%s", "%s", (const char*)LIC_TEXT_%d, %d, %d },' % (id_, title, i, len(text.encode('ascii')), ZS[i]))
+    testo = 'nullptr' if id_ in MINORI else '(const char*)LIC_TEXT_%d' % i      # le licenze minori stanno in un file: qui solo titolo e misure
+    h.append('  { "%s", "%s", %s, %d, %d },' % (id_, title, testo, len(text.encode('ascii')), ZS[i]))
 h.append('};')
 h.append('#define LIC_COUNT %d' % len(DOCS))
 open(os.path.join(ROOT, 'VesevOS', 'src', 'core', 'vos_license_data.h'), 'w', newline='\n', encoding='ascii').write('\n'.join(h) + '\n')

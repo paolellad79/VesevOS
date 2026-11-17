@@ -1,6 +1,6 @@
 {
  "cicli": {
-  "vos_app,vos_app_rt,vos_berry,vos_berry_int,vos_mqtt,vos_rules,vos_rules_int": 1,
+  "vos_app,vos_app_rt,vos_funzioni,vos_funzioni_int,vos_mqtt,vos_rules,vos_rules_int": 1,
   "vos_audit,vos_config,vos_diario,vos_fw,vos_i18n,vos_log,vos_region,vos_serial,vos_sys,vos_time,vos_util,vos_wd": 1,
   "vos_ble,vos_stats": 1,
   "vos_dev,vos_io": 1,
@@ -8,9 +8,9 @@
   "vos_shell,vos_shell_int,vos_web,vos_web_int": 1
  },
  "e_idf": {
-  "vos_berry.cpp": 1,
-  "vos_berry_mem.cpp": 1,
-  "vos_berry_scripts.cpp": 1,
+  "vos_funzioni.cpp": 1,
+  "vos_funzioni_mem.cpp": 1,
+  "vos_funzioni_scripts.cpp": 1,
   "vos_crash.cpp": 1,
   "vos_crypt.cpp": 1,
   "vos_dev.cpp": 1,
@@ -30,8 +30,8 @@
  "f_rtos": {
   "vos_app_rt.cpp": 1,
   "vos_auth.cpp": 1,
-  "vos_berry.cpp": 5,
-  "vos_berry_scripts.cpp": 1,
+  "vos_funzioni.cpp": 5,
+  "vos_funzioni_scripts.cpp": 1,
   "vos_io.cpp": 1,
   "vos_led.cpp": 11,
   "vos_mesh.cpp": 5,

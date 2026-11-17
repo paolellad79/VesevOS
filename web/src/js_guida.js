@@ -5,7 +5,9 @@ function suSteps(){
   return SU.d&&SU.d.ssid?SUSTEPS.filter(function(x){return x!="Ora"}):SUSTEPS
 }
 
-function setupOpen(){
+/* Apre la guida. Se la scheda non risponde (RAM scarsa nella finestra) riprova ogni 3 secondi, senza lasciare la pagina vuota. */
+function setupOpen(n){
+  n=n||0;
   Promise.all([commonLoad(),api("/api/region").then(function(r){return r.json()}),
     api("/api/settings").then(function(r){return r.json()})]).then(function(a){
       var r=a[1],s=a[2];
@@ -15,7 +17,19 @@ function setupOpen(){
       SU.i=0;
       $("setup").className="setup";
       setupDraw()
-    }).catch(function(){})
+    }).catch(function(){
+      if(!$("app")||$("app").classList.contains("hide"))return;
+      $("setup").className="setup";
+      $("setup").innerHTML='<div class="sw"><div class="card"><div class="subt" role="status">'+
+        esc(n<10?t("Carico..."):t("La scheda non risponde: riprova tra poco"))+'</div></div></div>';
+      if(n<10)setTimeout(function(){setupOpen(n+1)},3000)
+    })
+}
+
+/* La guida e chiusa (finita, "gia configurata" o "Piu tardi"): parte la pagina vera. */
+function setupFine(){
+  setupClose();
+  paginaAvvia()
 }
 
 function suAlready(){
@@ -27,8 +41,7 @@ function suAlready(){
       return post("/api/setup/done",{}).then(function(r){return r.json()}).then(function(j){
         if(!j.ok)return j.err||t("Errore");
         AUTH.setup=true;
-        setupClose();
-        show("sum");
+        setupFine();
         return""
       })
     }})
@@ -58,10 +71,10 @@ function setupDraw(){
         '\');setTimeout(setupDraw,400)">'+flagImg(l)+'<span>'+esc(l.name)+'</span></button>'
     });
     h+='</div><div class="suadd"><label for="sulf">'+esc(t("Aggiungi una lingua"))+
-      '</label><input type="file" id="sulf" accept=".json" multiple onchange="suLangUp()">'+
+      '</label><input type="file" id="sulf" accept=".vld,.vlp" multiple onchange="suLangUp()">'+
       '<p class="fhint">'+esc(
         t(
-          "Scegli uno o piu file dalla cartella lang dello ZIP (per esempio en.json). Si possono aggiungere anche dopo, in Sistema > Localizzazione."))+
+          "Scegli i file dalla cartella lang dello ZIP (per esempio en.vld ed en.vlp, anche insieme). Si possono aggiungere anche dopo, in Sistema > Localizzazione."))+
       '</p><div id="sulm" class="msg"></div></div>'
   }
   else if(i==1){
@@ -88,7 +101,7 @@ function setupDraw(){
       '</label><input type="number" id="su_g" min="0" max="15" value="'+d.gain+
       '"></div><p class="fhint">'+
       esc(t(
-        "Se non sai, lascia Interna. Con un'antenna esterna la potenza scende da sola per restare nel limite del paese."))+
+        "Se non sai, lascia Interna. La potenza scende da sola per restare nel limite del paese, tenendo conto dell'antenna."))+
       '</p>'
   }
   else if(i==4){
@@ -134,13 +147,9 @@ function setupDraw(){
         esc(d.tzn)+" ("+esc(t("si cambia in Sistema > Localizzazione"))+")")+
       row(esc(t("Antenna")),esc(d.ant?tf("esterna, {0} dBi",d.gain):t("interna")))+
       row(esc(t("Rete di casa")),esc(d.ssid||t("nessuna (solo hotspot)")))+
-      '<div class="law">'+esc(
-        t(
-          "MQTT, rete tra schede, server dell'ora e filtro IP restano spenti: li accendi tu quando servono (categorie Rete, Sistema e Sicurezza). Il Bluetooth resta spento finche un programma VesevOS con il permesso ble non lo accende."))+
-      '</div>'+
       (d.ssid?'<div class="law">'+
         esc(tf(
-          "Dopo il salvataggio la scheda si collega a {0}: collega il telefono o il PC a quella rete e apri l'indirizzo che ti mostro. Al primo accesso da quella rete hotspot, portale automatico e HTTP si spengono e restano spenti: li riaccendi tu quando vuoi (Rete). Se il collegamento non riesce, l'hotspot torna da solo.",
+          "Dopo il salvataggio la scheda si collega a {0}: collega il telefono o il PC a quella rete e apri l'indirizzo che ti mostro. L'hotspot, il portale automatico e il DHCP restano spenti: li accendi tu quando vuoi (Rete > Servizi). Se il collegamento non riesce, tieni premuto il tasto fisico per 8 secondi: l'hotspot si riaccende.",
           d.ssid))+'</div>':'<div class="law">'+
         esc(t(
           "Senza Wi-Fi di casa l'hotspot e HTTP restano accesi: sono l'unico modo di entrare. La scheda non ha batteria per l'orologio: se la spegni l'ora va rimessa (Sistema > Ora)."))+
@@ -148,7 +157,7 @@ function setupDraw(){
   }
   h+='<div id="sumsg" class="msg"></div><div class="sbt">'+
     (i?'<button class="btn gray" type="button" onclick="suGo(-1)">'+esc(t("Indietro"))+'</button>'
-      :"")+'<button class="btn gray" type="button" onclick="setupClose()">'+esc(t("Piu tardi"))+
+      :"")+'<button class="btn gray" type="button" onclick="setupFine()">'+esc(t("Piu tardi"))+
     '</button><button class="btn gray" type="button" onclick="suAlready()">'+
     esc(t("La scheda e gia configurata"))+'</button><span class="sp"></span>'+
     (i==4
@@ -354,26 +363,25 @@ function suFinish(){
         :{epoch:Math.floor(Date.now()/1000)}).then(function(r){return r.json()}):{ok:true}
     }).then(function(j){
       if(j.ok===false)throw j.err;
-      return post("/api/setup/done",{ntp:d.ssid?"1":"0"})
-    }).then(function(r){return r.json()}).then(function(j){
-      if(!j.ok)throw j.err;
-      AUTH.setup=true;
       return d.host!=d.host0?post("/api/system",
         {hostname:d.host,domain:""}).then(function(r){return r.json()}):{ok:true}
     }).then(function(j){
       if(!j.ok)throw j.err;
+      /* La rete di casa si salva PRIMA della fine guida (later=1: solo salvata, il collegamento parte a fine guida):
+         dopo "done" l'hotspot cambia e la richiesta non arriverebbe piu. Senza salvataggio la guida non finisce. */
+      return d.ssid?post("/api/wifi/save",{ssid:d.ssid,pass:d.pass,dhcp:1,cleanup:1,later:1})
+        .then(function(r){return r.json()}).then(function(k){
+          if(k.ok!==true)throw t("Non sono riuscito a salvare la rete di casa: la guida non e finita. Riprova.");
+          return k
+        }):api("/api/ap").then(function(r){return r.json()}).then(function(a){d.ap=a},function(){d.ap=null})
+    }).then(function(){
+      return post("/api/setup/done",{ntp:d.ssid?"1":"0",keep:d.ssid?"1":"0"})
+    }).then(function(r){return r.json()}).then(function(j){
+      if(!j.ok)throw j.err;
+      AUTH.setup=true;
       var u="https://"+d.host+".local"+
         (SV.httpsOn!==false&&SV.httpsPort&&SV.httpsPort!=443?":"+SV.httpsPort:"");
-      if(d.ssid){
-        var ws=function(n){
-          post("/api/wifi/save",{ssid:d.ssid,pass:d.pass,dhcp:1,cleanup:1}).catch(function(){
-            if(n)setTimeout(function(){ws(n-1)},4000)
-          })
-        };
-        setTimeout(function(){ws(1)},d.host!=d.host0?1500:0)
-      }
-      setupClose();
-      show("sum");
+      setupFine();
       dlg({title:t("Configurazione completata"),
         body:d.ssid?'<p style="margin:0 0 8px">'+
         esc(tf(
@@ -381,11 +389,14 @@ function suFinish(){
           d.ssid))+'</p><div class="lab"><div class="qrbox" style="max-width:160px">'+qrSvg(u)+
         '</div><div><div class="big">'+esc(u)+'</div></div></div><p class="fhint">'+
         esc(t(
-          "Se non riesce a collegarsi, l'hotspot torna da solo: riconnettiti e controlla la password della Wi-Fi in Rete."))+
-        '</p>':'<p style="margin:0">'+
+          "Se non riesce a collegarsi, l'hotspot resta spento: tieni premuto il tasto fisico per 8 secondi per riaccenderlo, poi controlla la password della Wi-Fi in Rete."))+
+        '</p>':'<p style="margin:0 0 8px">'+
         esc(t(
-          "La scheda e pronta. Puoi collegarla alla rete di casa quando vuoi da Rete > Wi-Fi."))+
-        '</p>',buttons:[["ok",t("OK"),""]],onOk:function(){return""}})
+          "Nessuna Wi-Fi di casa salvata: la scheda si raggiunge solo dal suo hotspot. Tra pochi secondi l'hotspot passa a protetto: collega il telefono o il PC a questa rete con la password e apri l'indirizzo qui sotto."))+
+        '</p>'+(d.ap?'<div class="subt">'+esc(t("Rete Wi-Fi della scheda"))+'</div><div class="big">'+esc(d.ap.ssid)+
+        '</div><div class="subt" style="margin-top:6px">'+esc(t("Password"))+'</div><div class="pw">'+esc(d.ap.pass)+'</div>':'')+
+        '<div class="big" style="margin-top:8px">https://192.168.4.1</div>',
+        buttons:[["ok",t("OK"),""]],onOk:function(){return""}})
     })
     .catch(function(e){msg("sumsg",typeof e=="string"?e:t("Errore"),false)})
 }
@@ -417,40 +428,21 @@ authLoad().then(function(j){
 });
 themeApply();
 
-/* guida, passo lingua: carica uno o piu file /lang/<codice>.json e passa alla prima lingua caricata */
+/* guida, passo lingua: carica i file /lang/<codice>.vld (e .vlp) e passa alla prima lingua caricata */
 function suLangUp(){
   var fs=[].slice.call($("sulf").files||[]);
   if(!fs.length)return;
-  var bad=fs.filter(function(f){
-    var m=f.name.match(/^([a-z0-9]{2,8})\.json$/);
-    return!m||m[1]=="it"
-  });
-  if(bad.length){
-    msg("sulm",t("Il nome deve essere come en.json (codice di 2-8 lettere minuscole)"),false);
-    $("sulf").value="";
-    return
-  }
-  var first=fs[0].name.replace(".json",""),i=0;
   msg("sulm",t("Carico..."),true);
-  (function next(){
-    if(i>=fs.length){
-      api("/api/langs").then(function(r){return r.json()}).then(function(l){
-        LANGS=l;
-        fillLangSel();
-        setLang(first);
-        setTimeout(setupDraw,400)
-      });
-      return
-    }
-    var f=fs[i++],fd=new FormData();
-    fd.append("file",f,f.name);
-    api("/api/fs/up?dir=/lang",
-      {method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){
-        if(!j.ok){
-          msg("sulm",f.name+": "+(j.err||t("Errore")),false);
-          return
-        }
-        next()
-      }).catch(function(){msg("sulm",t("Caricamento non riuscito"),false)})
-  })()
+  langCaricaFile(fs).then(function(lista){
+    var first=lista[0].code;
+    return api("/api/langs").then(function(r){return r.json()}).then(function(l){
+      LANGS=l;
+      fillLangSel();
+      setLang(first);
+      setTimeout(setupDraw,400)
+    })
+  }).catch(function(e){
+    msg("sulm",String(e),false);
+    $("sulf").value=""
+  })
 }

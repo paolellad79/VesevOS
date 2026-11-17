@@ -1,5 +1,5 @@
 (function(){
-  var of=window.fetch.bind(window),act=0,q=[];
+  var of=window.fetch.bind(window),act=0,q=[],lim=2;
   function run(j){
     act++;
     var done=false,rel=function(){
@@ -19,7 +19,9 @@
       j.rej(e)
     })
   }
-  function nx(){while(act<2&&q.length)run(q.shift())}
+  function nx(){while(act<lim&&q.length)run(q.shift())}
+  /* Richieste in parallelo: 1 durante la guida iniziale (la scheda ha poche connessioni e poca RAM), 2 poi */
+  window.fetchLimite=function(n){lim=n;nx()};
   window.fetch=function(u,o){
     return new Promise(function(res,rej){
       q.push({u:u,o:o,res:res,rej:rej});
@@ -31,7 +33,7 @@ var GRP=[["home","Home"],["dev","Dispositivi"],["rete","Rete"],["prog","Programm
   ["sys","Sistema"],["sec","Sicurezza"],["info","Informazioni"]];
 var GICO={home:"i-home",dev:"i-usb",rete:"i-wifi",prog:"i-prog",sys:"i-gear",sec:"i-shield",
   info:"i-info"};
-/* UN solo punto per le estensioni dei file (come core/vos_ext.h): schema v + tipo (s script, a app, d driver) + linguaggio (b Berry, e ELF). Oggi script .vsb, app Berry .vab, app ELF .vae, driver .vdb e .vde. I vecchi nomi (.vsc, .vap, .vel) si leggono ancora e non si scrivono piu */
+/* UN solo punto per le estensioni dei file (come core/vos_ext.h): schema v + tipo (s script, a app, d driver) + linguaggio (b funzioni VesevOS, e ELF). Oggi script .vsb, app .vab, app ELF .vae, driver .vdb e .vde. I vecchi nomi (.vsc, .vap, .vel) si leggono ancora e non si scrivono piu */
 var EXT={s:".vsb",b:".vab",e:".vae",db:".vdb",de:".vde"},EXTOLD={s:".vsc",b:".vap",e:".vel"};
 /* Un file di programma: prima il nome nuovo, se non c'e il vecchio. fn(percorso) torna una promessa con {ok,...} */
 function progTry(dir,n,k,fn){
@@ -44,7 +46,7 @@ function extOk(name,k){
   var l=name.toLowerCase();
   return l.slice(-EXT[k].length)==EXT[k]||l.slice(-EXTOLD[k].length)==EXTOLD[k]
 }
-var SECN=["Stato","Comandi","Interfacce","Diagnostica","Protocolli","Servizi"];
+var SECN=["Stato","Periferiche","Interfacce","Diagnostica","Protocolli","Servizi"];
 var LASTG={};
 function gOf(id){
   for(var g in GMAP)if(GMAP[g].indexOf(id)>=0)return g;
@@ -275,6 +277,7 @@ function loadDict(code){
     DICT={};
     return Promise.resolve()
   }
+  /* il .vlp e gzip: la scheda lo serve con Content-Encoding gzip e il browser lo apre da solo. Se manca (404) o e rovinato: italiano */
   return fetch("/api/langfile?code="+encodeURIComponent(code)).then(function(r){
     if(!r.ok)throw 0;
     return r.json()
@@ -289,10 +292,13 @@ function refreshView(){
   fillLangSel();
   applyStatic();
   if(loggedIn()){
-    buildNav();
-    poll();
-    if(cur=="loc")loadLangs();
-    if(cur=="log")loadLog()
+    if(PAGINA){
+      buildNav();
+      if(ROLE>=1)dvList().catch(function(){});
+      poll();
+      if(cur=="loc")loadLangs();
+      if(cur=="log")loadLog()
+    }
   }else showLoginText()
 }
 

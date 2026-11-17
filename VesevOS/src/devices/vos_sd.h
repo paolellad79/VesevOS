@@ -3,7 +3,7 @@
 // VesevOS - vos_sd.h
 // Vista della periferica "sd" di io.cfg (modulo SPI a 3,3 V, FAT/FAT32; pin e frequenza si scelgono quando si installa il driver): si monta e si smonta a richiesta (mai nell'avvio),
 // si guarda lo stato, si fa una prova di scrittura/lettura e si leggono/scrivono file piccoli. Sono PRIMITIVE: i comandi e la pagina di gestione stanno nel driver (docs/progetto/regole-driver.md),
-// scritti in Berry (packages/vos_berry_sd.cpp). Hardware solo da drivers/vos_drv_sd.
+// scritti nelle funzioni VesevOS (packages/vos_funzioni_sd.cpp). Hardware solo da drivers/vos_drv_sd.
 // Scritto SENZA Arduino (niente String, niente millis): testo in buffer di char con lunghezza, cosi non aggiunge debito a checklayers.
 // Con VOS_WITH_SD = 0 non esiste nulla di tutto questo.
 #pragma once
@@ -57,7 +57,7 @@ bool   sdInUse();                                               // un'operazione
 void   sdOpEnter();                                             // uso interno delle primitive dei file: conta le operazioni in corso
 void   sdOpLeave();
 bool   sdSpaceKb(uint32_t& totalKb, uint32_t& usedKb);          // dimensione e usato del volume in KB (per df); false se non e montata
-// File a byte (per Berry, vos_sd_io.cpp). Il percorso e quello della scheda ("/dir/file", senza /media/sd) e passa da sdPathOk; la radice "/"
+// File a byte (per le funzioni VesevOS, vos_sd_io.cpp). Il percorso e quello della scheda ("/dir/file", senza /media/sd) e passa da sdPathOk; la radice "/"
 // non si scrive e non si cancella. Ogni chiamata conta come azione in corso (sdOpEnter/Leave): chi smonta la vede. Blocchi di al massimo SD_IO_MAX byte.
 #define SD_IO_MAX 1024
 int    sdReadAt(const char* path, uint32_t off, uint8_t* buf, size_t n, char* err, size_t en);        // byte letti (0 = oltre la fine), -1 = errore

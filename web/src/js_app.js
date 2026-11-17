@@ -23,7 +23,7 @@ function apTimerStop(){
     AP.tm=0
   }
 }
-/* elenchi: app Berry (/api/apps), app ELF installate (/api/elf, se il firmware le ha) e cio che gira (/api/progs) */
+/* elenchi: app (/api/apps), app ELF installate (/api/elf, se il firmware le ha) e cio che gira (/api/progs) */
 function apLists(){
   var a=api("/api/apps").then(function(r){return r.json()}).then(function(j){
     if(!j.ok){
@@ -207,7 +207,7 @@ function apEdit(n){
 
 function apTpl(n){
   return"[manifest]\nnome="+n+"\ntitolo="+n.charAt(0).toUpperCase()+n.slice(1)+
-    "\nversione=1\npermessi=led\nchi=admin\n\n[icon]\n<svg viewBox=\"0 0 24 24\"><path d=\"M5 19l4-9 3 4 3-6 4 11z\" fill=\"none\" stroke=\"#c0392b\" stroke-width=\"2\"/></svg>\n\n[page]\nswitch id=power label=\"Accesa\"\nslider id=lum label=\"Luminosita\" min=0 max=255\ntext id=info label=\"Stato\"\n\n[code]\ndef on_set(id, v)\n  if id == 'power'\n    if v == 1\n      led('ffffff')\n    else\n      led('auto')\n    end\n  end\n  if id == 'lum'\n    dev_set('info', 'Luminosita ' + str(v))\n  end\nend\n\n[data]\npower=0\n"
+    "\nversione=1\npermessi=led_rgb1\nchi=admin\n\n[icon]\n<svg viewBox=\"0 0 24 24\"><path d=\"M5 19l4-9 3 4 3-6 4 11z\" fill=\"none\" stroke=\"#c0392b\" stroke-width=\"2\"/></svg>\n\n[page]\nswitch id=power label=\"Accesa\"\nslider id=lum label=\"Luminosita\" min=0 max=255\ntext id=info label=\"Stato\"\n\n[code]\ndef on_set(id, v)\n  if id == 'power'\n    if v == 1\n      led_rgb1('ffffff')\n    else\n      led_rgb1('auto')\n    end\n  end\n  if id == 'lum'\n    dev_set('info', 'Luminosita ' + str(v))\n  end\nend\n\n[data]\npower=0\n"
 }
 
 function apNew(){

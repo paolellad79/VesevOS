@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_drvwidget.cpp (vedi vos_drvwidget.h): elenco, valori in cache e JSON dei widget dei driver.
 #include "vos_drvwidget.h"
-#if VOS_WITH_DRVCMD && VOS_WITH_BERRY
+#if VOS_WITH_DRVCMD && VOS_WITH_FUNZIONI
 #include <stdio.h>
 #include <string.h>
 #include "../core/vos_lock.h"
@@ -56,8 +56,8 @@ bool runWidget(const char* driver, ModWidgetVals& vals) {
   CmdCall* call = new CmdCall();
   memset(call, 0, sizeof *call);
   snprintf(call->sub, sizeof call->sub, "widget");
-  HeapBuf out(BERRY_OUT_MAX + 64);
-  bool ok = berryRunCommand(code.c_str(), use, false, *call, out, e, DRVW_RUN_MS);   // admin = false: il widget legge e basta
+  HeapBuf out(FUNZIONI_USCITA_MAX + 64);
+  bool ok = funzioniEseguiComando(code.c_str(), use, false, *call, out, e, DRVW_RUN_MS);   // admin = false: il widget legge e basta
   delete call;
   if (!ok) return false;
   modWidgetParseOut(out.c_str(), vals);
@@ -65,7 +65,7 @@ bool runWidget(const char* driver, ModWidgetVals& vals) {
 }
 
 #if VOS_WITH_ELF
-// Driver in ELF: i valori li da' il firmware (source=) o il modulo (argv[1] = "widget"); niente interprete Berry, quindi mai "occupato".
+// Driver in ELF: i valori li da' il firmware (source=) o il modulo (argv[1] = "widget"); niente interprete delle funzioni, quindi mai "occupato".
 void refreshElf(int i, const char* driver, const char* source) {
   uint32_t now = drvMillis();
   {
@@ -90,7 +90,7 @@ void refreshIfStale(int i, const char* driver) {
     g_running = true;
   }
   ModWidgetVals v;
-  bool ok = !berryRunning() && runWidget(driver, v);        // Berry occupato: si tiene il valore vecchio
+  bool ok = !funzioniInEsecuzione() && runWidget(driver, v);        // Il motore delle funzioni occupato: si tiene il valore vecchio
   VosLock L(mx());
   g_running = false;
   if (ok && g_valid && i < g_n) { g_slot[i].vals = v; g_slot[i].have = true; g_slot[i].at = drvMillis(); }

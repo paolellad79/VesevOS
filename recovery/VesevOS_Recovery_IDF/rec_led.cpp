@@ -41,7 +41,7 @@ static void writePixel(uint8_t r, uint8_t g, uint8_t b) {
 void recLedStart(int pin, int brightness) {
   g_pin = pin;
   g_bright = brightness;
-  g_on = true;
+  g_on = pin >= 0;                  // pin -1: scheda senza LED RGB (C3), niente da pilotare
 }
 
 void recLedSet(int state) {

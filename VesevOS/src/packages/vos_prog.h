@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_prog.h
-// STRATO 6 (packages): i PROGRAMMI dell'utente, tutti insieme: script (.vsb), app Berry (.vab) e app ELF (.vae). Un solo modo di elencare quelli
-// in corso (per i Task, "ps" e la pagina), di fermarli, di riavviarli e di avviarli; piu i due SOTTOSISTEMI (vdb = Berry, vde = ELF) con il loro
+// STRATO 6 (packages): i PROGRAMMI dell'utente, tutti insieme: script (.vsb), app (.vab) e app ELF (.vae). Un solo modo di elencare quelli
+// in corso (per i Task, "ps" e la pagina), di fermarli, di riavviarli e di avviarli; piu i due SOTTOSISTEMI (vdb = funzioni VesevOS, vde = ELF) con il loro
 // interruttore e l'AVVIO AUTOMATICO (programmi che partono da soli dopo i servizi, nell'ordine scelto dall'utente nel pannello Avvio).
-// Le estensioni stanno in core/vos_ext.h. Berry esegue un programma alla volta (un solo interprete); l'ELF fino a VOS_ELF_RUN_MAX insieme.
+// Le estensioni stanno in core/vos_ext.h. Il motore delle funzioni esegue un programma alla volta (un solo interprete); l'ELF fino a VOS_ELF_RUN_MAX insieme.
 #pragma once
 #include <stdint.h>
 #include "../core/vos_common.h"
@@ -19,10 +19,10 @@
 struct ProgRun {
   uint8_t  kind;
   char     name[25];
-  int      id;               // numero del processo ELF; 0 per Berry
+  int      id;               // numero del processo ELF; 0 per le funzioni VesevOS
   bool     active;           // in corso (false = finito, solo ELF: gli ultimi quattro)
   uint32_t seconds;          // da quanto gira (o quanto e girato)
-  uint32_t memory;           // memoria in uso (Berry) o stimata (ELF), byte
+  uint32_t memory;           // memoria in uso (funzioni VesevOS) o stimata (ELF), byte
   int      result;           // ELF finito: valore restituito
   uint8_t  how;              // ELF finito: 0 normale, 1 fermato, 2 scaduto
   char     use[PROG_USE_MAX];   // gruppi di primitive concessi ("log sd")
@@ -39,7 +39,7 @@ bool  progJson(HeapBuf& out);                                       // "subs":[.
 int   progUsaFunzionalita(const char* id);                          // programmi in corso che usano il gruppo di funzioni (per vos_func.cpp)
 void  progFermaFunzionalita(const char* id);                        // ferma quelli che lo usano
 
-// Sottosistemi: vdb (Berry) e vde (ELF). L'interruttore e il servizio nel registro (vos_service): vedi vos_berry_svc.cpp e vos_elf_svc.cpp.
+// Sottosistemi: vdb (funzioni VesevOS) e vde (ELF). L'interruttore e il servizio nel registro (vos_service): vedi vos_funzioni_svc.cpp e vos_elf_svc.cpp.
 struct ProgSub { const char* id; bool on; int running; uint32_t memory; };
 int   progSubs(ProgSub* out, int max);
 // Nome accettato nei comandi: "vdb", "vde" (e "elf" come sinonimo di vde). nullptr se non e un sottosistema; altrimenti l'id del servizio.

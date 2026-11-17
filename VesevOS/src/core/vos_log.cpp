@@ -5,16 +5,18 @@
 #include "vos_serial.h"
 #include "vos_util.h"
 #include "vos_diario.h"
+#include "vos_ramstorico.h"
 #include <stdarg.h>
 #include <time.h>
 #include "../drivers/vos_drv_time.h"
 #include "../drivers/vos_drv_heap.h"
 #include "../core/vos_clamp.h"
+#include "../boards/vos_board.h"
 
-#define LOG_LINES 150
+#define LOG_LINES VOS_LOG_RIGHE   // 150 (C3: 40), vedi boards/vos_board.h
 #define LOG_LEN   120
 
-// il registro (18 KB) sta nella PSRAM se c'e: cosi la RAM interna resta libera per Wi-Fi e connessioni cifrate
+// il registro (18 KB, C3: 4,8 KB) sta nella PSRAM se c'e: cosi la RAM interna resta libera per Wi-Fi e connessioni cifrate
 static char     (*g_lines)[LOG_LEN] = nullptr;
 static uint16_t g_head = 0;
 static uint16_t g_count = 0;
@@ -106,4 +108,9 @@ void logClear() {
   g_head = 0; g_count = 0;
   xSemaphoreGive(g_mx);
   vlog("LOG: registro svuotato");
+}
+
+void ramTrace(const char* fase) {
+  ramNote(fase);
+  vlog("RAM: %s libera %u KB blocco massimo %u KB", fase ? fase : "-", (unsigned)(drvHeapFree() / 1024), (unsigned)(drvHeapMaxBlock() / 1024));
 }

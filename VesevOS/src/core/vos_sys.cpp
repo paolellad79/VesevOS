@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_sys.cpp
+#include "../boards/vos_board.h"
 #include <math.h>
 #include "../drivers/vos_drv_task.h"
 #include "vos_hooks.h"
@@ -33,12 +34,13 @@
 
 #define HIST 60
 
-static volatile uint32_t g_idle[2] = {0, 0};
-static uint32_t g_maxIdle[2] = {1, 1};
-static volatile int g_cpu = 0, g_cpu0 = 0, g_cpu1 = 0;
+static volatile uint32_t g_idle[DRV_CORES_MAX];     // conteggio del gancio di riposo, un contatore per core
+static uint32_t g_maxIdle[DRV_CORES_MAX];
+static volatile int g_cpu = 0;                      // media sui core presenti
+static volatile int g_cpuCore[DRV_CORES_MAX];       // carico di ogni core presente
 static float g_temp = 0;
 static uint8_t g_cpuH[HIST], g_cpuHn = 0;
-static uint8_t g_c0H[HIST], g_c1H[HIST], g_ramH[HIST], g_psH[HIST], g_flH[HIST];   // storie per i grafici della Home (percentuali)
+static uint8_t g_coreH[DRV_CORES_MAX][HIST], g_ramH[HIST], g_psH[HIST], g_flH[HIST];   // storie per i grafici della Home (percentuali)
 static uint8_t g_flPct = 0;                // percentuale file in flash, riletta ogni 30 s (la lettura costa)
 static int16_t g_tempH[HIST];            // gradi interi
 static uint8_t g_tempHn = 0;
@@ -50,13 +52,17 @@ static char g_topName[16] = "";      // task piu attivo (non IDLE), aggiornato o
 static int  g_topPct = 0;
 static bool g_hot = false;      // allarme temperatura
 
-static bool idle0() { g_idle[0] = g_idle[0] + 1; return false; }
-static bool idle1() { g_idle[1] = g_idle[1] + 1; return false; }
+// Gancio di riposo: uno solo per tutti i core, conta sul core che lo esegue.
+static bool idleHook() { int c = (int)xPortGetCoreID(); if (c < DRV_CORES_MAX) g_idle[c] = g_idle[c] + 1; return false; }
+
+// Numero di core del chip, limitato a quanti ne sa gestire il programma.
+static int coreCount() { int n = (int)drvChipCores(); return n < 1 ? 1 : n > DRV_CORES_MAX ? DRV_CORES_MAX : n; }
 
 static void resetNameTo(int r, char* out, size_t n) {
   const char* t = nullptr;
   switch (r) {
     case 1:  t = tr("Accensione"); break;
+    case 2:  t = tr("Reset da pin esterno"); break;
     case 3:  t = tr("Reset software"); break;
     case 4:  t = tr("Crash (panic)"); break;
     case 5:  t = tr("Interrupt watchdog"); break;
@@ -64,8 +70,12 @@ static void resetNameTo(int r, char* out, size_t n) {
     case 7:  t = tr("Altro watchdog"); break;
     case 8:  t = tr("Uscita da deep sleep"); break;
     case 9:  t = tr("Brownout (poca tensione)"); break;
+    case 10: t = tr("Reset da SDIO"); break;
     case 11: t = tr("USB (apertura monitor seriale)"); break;
     case 12: t = tr("Reset da JTAG"); break;
+    case 13: t = tr("Errore eFuse"); break;
+    case 14: t = tr("Disturbo di alimentazione (power glitch)"); break;
+    case 15: t = tr("Blocco della CPU"); break;
     default: snprintf(out, n, tr("Sconosciuto (%d)"), r); return;
   }
   snprintf(out, n, "%s", t);
@@ -85,26 +95,31 @@ void sysLifeSave() { lifeSave(); }
 
 static void monitorTask(void*);
 static void monitorStart() {
-  drvTaskCreate(monitorTask, "monitor", 4608, NULL, 1, NULL, DRV_CORE_ANY);   // core: automatico (prima: core 0 fisso)
+  drvTaskCreate(monitorTask, "monitor", VOS_PILA_MONITOR, NULL, 1, NULL, DRV_CORE_ANY);   // core: automatico (prima: core 0 fisso)
 }
 
 // Carico vero per core dal tempo che i task IDLE0/IDLE1 NON hanno girato (stessa fonte del Task manager).
 // La taratura a conteggio sbagliava dopo i cambi di frequenza (mostrava 100% con la scheda quasi ferma).
-static bool idleRunTimeLoad(int& l0, int& l1) {
+static bool idleRunTimeLoad(int* load, int nc) {
 #if (configUSE_TRACE_FACILITY == 1) && (configGENERATE_RUN_TIME_STATS == 1)
-  static uint32_t pTot = 0, pI0 = 0, pI1 = 0; static bool have = false;
+  static uint32_t pTot = 0, pIdle[DRV_CORES_MAX]; static bool have = false;
   UBaseType_t n = uxTaskGetNumberOfTasks();
   TaskStatus_t* a = (TaskStatus_t*)malloc((n + 2) * sizeof(TaskStatus_t));
   if (!a) return false;
   uint32_t tot = 0;
   n = uxTaskGetSystemState(a, n + 2, &tot);
-  uint32_t i0 = 0, i1 = 0; bool f0 = false, f1 = false;
+  uint32_t idle[DRV_CORES_MAX]; bool found[DRV_CORES_MAX];
+  for (int c = 0; c < DRV_CORES_MAX; c++) { idle[c] = 0; found[c] = false; }
   static uint32_t pnum[40], prt[40]; static int pcnt = 0;           // tempo di esecuzione precedente per numero di task
   static uint32_t nnum[40], nrt[40]; int ncnt = 0, bestPct = 0; const char* best = nullptr;
   uint32_t dtAll = tot > pTot ? tot - pTot : 0;
   for (UBaseType_t i = 0; i < n; i++) {
-    if (strcmp(a[i].pcTaskName, "IDLE0") == 0) { i0 = a[i].ulRunTimeCounter; f0 = true; }
-    else if (strcmp(a[i].pcTaskName, "IDLE1") == 0) { i1 = a[i].ulRunTimeCounter; f1 = true; }
+    int core = -1;
+    for (int c = 0; c < nc; c++) {
+      char nm[8]; snprintf(nm, sizeof nm, "IDLE%d", c);
+      if (strcmp(a[i].pcTaskName, nm) == 0) { core = c; break; }
+    }
+    if (core >= 0) { idle[core] = a[i].ulRunTimeCounter; found[core] = true; }
     else if (ncnt < 40) {
       uint32_t id = a[i].xTaskNumber, rt = a[i].ulRunTimeCounter, old = rt;
       for (int k = 0; k < pcnt; k++) if (pnum[k] == id) { old = prt[k]; break; }
@@ -116,42 +131,46 @@ static bool idleRunTimeLoad(int& l0, int& l1) {
   else { g_topName[0] = 0; g_topPct = 0; }
   memcpy(pnum, nnum, ncnt * sizeof(uint32_t)); memcpy(prt, nrt, ncnt * sizeof(uint32_t)); pcnt = ncnt;
   free(a);
+  bool all = true;
+  for (int c = 0; c < nc; c++) all = all && found[c];
   bool ok = false;
-  if (have && f0 && f1 && tot > pTot) {
+  if (have && all && tot > pTot) {
     uint32_t dt = tot - pTot;
-    int a0 = (int)(100ULL * (i0 - pI0) / dt), a1 = (int)(100ULL * (i1 - pI1) / dt);
-    l0 = vosClamp(100 - a0, 0, 100); l1 = vosClamp(100 - a1, 0, 100); ok = true;
+    for (int c = 0; c < nc; c++) load[c] = vosClamp(100 - (int)(100ULL * (idle[c] - pIdle[c]) / dt), 0, 100);
+    ok = true;
   }
-  pTot = tot; pI0 = i0; pI1 = i1; have = f0 && f1;
+  pTot = tot; have = all;
+  for (int c = 0; c < nc; c++) pIdle[c] = idle[c];
   return ok;
 #else
-  (void)l0; (void)l1; return false;
+  (void)load; (void)nc; return false;
 #endif
 }
 static void monitorTask(void*) {
-  uint32_t last[2] = {0, 0};
+  uint32_t last[DRV_CORES_MAX];
+  for (int c = 0; c < DRV_CORES_MAX; c++) last[c] = 0;
+  const int nc = coreCount();
   wdWatch("monitor", wdLimit("monitor"));          // base 60 s
   for (;;) {
     vTaskDelay(pdMS_TO_TICKS(1000));
     wdBeat("monitor");
     auditTick();
     uint32_t mhz = drvCpuMhz();
-    uint32_t d0 = g_idle[0] - last[0], d1 = g_idle[1] - last[1];
-    last[0] = g_idle[0]; last[1] = g_idle[1];
-    {
+    int load[DRV_CORES_MAX];
+    for (int c = 0; c < nc; c++) {
       // conteggi riportati a 240 MHz. Con il gestore di energia la frequenza cambia anche dentro il secondo: e una stima (la misura buona e quella di FreeRTOS)
-      uint32_t n0 = (uint32_t)((uint64_t)d0 * 240 / mhz), n1 = (uint32_t)((uint64_t)d1 * 240 / mhz);
-      if (n0 > g_maxIdle[0]) g_maxIdle[0] = n0;
-      if (n1 > g_maxIdle[1]) g_maxIdle[1] = n1;
-      uint64_t e0 = (uint64_t)g_maxIdle[0] * mhz / 240, e1 = (uint64_t)g_maxIdle[1] * mhz / 240;
-      if (e0 == 0) e0 = 1;
-      if (e1 == 0) e1 = 1;
-      int l0 = 100 - (int)(100ULL * d0 / e0);
-      int l1 = 100 - (int)(100ULL * d1 / e1);
-      { int m0, m1; if (idleRunTimeLoad(m0, m1)) { l0 = m0; l1 = m1; } }   // se ci sono le statistiche di FreeRTOS, valgono piu della taratura a conteggio
-      g_cpu0 = vosClamp(l0, 0, 100); g_cpu1 = vosClamp(l1, 0, 100);
-      g_cpu = vosClamp((l0 + l1) / 2, 0, 100);
+      uint32_t d = g_idle[c] - last[c];
+      last[c] = g_idle[c];
+      uint32_t n240 = (uint32_t)((uint64_t)d * 240 / mhz);
+      if (n240 > g_maxIdle[c]) g_maxIdle[c] = n240;
+      uint64_t e = (uint64_t)g_maxIdle[c] * mhz / 240;
+      if (e == 0) e = 1;
+      load[c] = 100 - (int)(100ULL * d / e);
     }
+    { int m[DRV_CORES_MAX]; if (idleRunTimeLoad(m, nc)) for (int c = 0; c < nc; c++) load[c] = m[c]; }   // se ci sono le statistiche di FreeRTOS, valgono piu della taratura a conteggio
+    int sum = 0;
+    for (int c = 0; c < nc; c++) { g_cpuCore[c] = vosClamp(load[c], 0, 100); sum += g_cpuCore[c]; }
+    g_cpu = vosClamp(sum / nc, 0, 100);
     g_temp = drvTempC();
     { static uint32_t ftick = 0; ftick++;                      // ogni 10 s: la RAM e a pezzi troppo piccoli? (avviso in pagina, spento con un po' di margine)
       if (ftick % 10 == 0 && ftick > 30) {
@@ -163,11 +182,11 @@ static void monitorTask(void*) {
     { static uint32_t dtick = 0; dtick++;
       diaryTick(dtick, drvHeapMinFree(), g_topName, g_topPct, mhz);
       if (dtick <= 15 || dtick % 10 == 0) { char st[20]; wdStalest(st, sizeof(st)); diaryExtra(drvHeapMaxBlock(), serStallCount(), st); }                       // istantanea per il diario dei riavvii (in RTC ogni 10 s)
-      if (dtick % 60 == 0) vlogl(LG_DBG, "TOP: task piu attivo %s %d%%, CPU %d%% (core %d%% e %d%%), %u MHz, %d C, RAM libera %u KB, minima %u KB",
-                                 g_topName[0] ? g_topName : "-", g_topPct, g_cpu, g_cpu0, g_cpu1, (unsigned)mhz, (int)g_temp, (unsigned)(drvHeapFree() / 1024), (unsigned)(drvHeapMinFree() / 1024)); }
+      if (dtick % 60 == 0) vlogl(LG_DBG, "TOP: task piu attivo %s %d%%, CPU %d%% (media dei core), %u MHz, %d C, RAM libera %u KB, minima %u KB",
+                                 g_topName[0] ? g_topName : "-", g_topPct, g_cpu, (unsigned)mhz, (int)g_temp, (unsigned)(drvHeapFree() / 1024), (unsigned)(drvHeapMinFree() / 1024)); }
     { static uint32_t lifeTick = 0; if (++lifeTick >= 600) { lifeTick = 0; lifeSave(); } }   // ogni 10 minuti
     // caldo: livelli, riduzione del massimo della CPU e allarme (soglie e regole in vos_cpupm.cpp)
-    g_hot = hookCpuTick(g_temp, g_cpu0 > g_cpu1 ? g_cpu0 : g_cpu1) >= 2;   // governor + caldo (gancio verso vos_cpupm): il solo punto che cambia la frequenza; 2 = THERM_REDUCED o peggio
+    g_hot = hookCpuTick(g_temp, sysCpuMaxCorePercent()) >= 2;   // governor + caldo (gancio verso vos_cpupm): il solo punto che cambia la frequenza; 2 = THERM_REDUCED o peggio
     { // Spazio usato della memoria interna. Il calcolo vero scorre tutto il file system: con tante voci dura piu di 5 s (Task watchdog), quindi lo fa
       // solo qui, di rado (mai nei primi 20 s) e a priorita da idle. Il controllo "monitor" aspetta di piu mentre dura. Gli altri leggono il valore ricordato.
       uint32_t nowS = drvMillis() / 1000;
@@ -186,12 +205,12 @@ static void monitorTask(void*) {
     uint8_t rp = ht ? (uint8_t)vosClamp((int)(100 - 100ULL * drvHeapFree() / ht), 0, 100) : 0;
     uint8_t pp = pt ? (uint8_t)vosClamp((int)(100 - 100ULL * drvPsramFree() / pt), 0, 100) : 0;
     if (g_cpuHn >= HIST) {
-      memmove(g_cpuH, g_cpuH + 1, HIST - 1); memmove(g_c0H, g_c0H + 1, HIST - 1); memmove(g_c1H, g_c1H + 1, HIST - 1);
+      memmove(g_cpuH, g_cpuH + 1, HIST - 1); for (int c = 0; c < coreCount(); c++) memmove(g_coreH[c], g_coreH[c] + 1, HIST - 1);
       memmove(g_ramH, g_ramH + 1, HIST - 1); memmove(g_psH, g_psH + 1, HIST - 1); memmove(g_flH, g_flH + 1, HIST - 1);
       memmove(g_tempH, g_tempH + 1, (HIST - 1) * sizeof(int16_t));
       g_cpuHn = HIST - 1;
     }
-    g_cpuH[g_cpuHn] = g_cpu; g_c0H[g_cpuHn] = g_cpu0; g_c1H[g_cpuHn] = g_cpu1;
+    g_cpuH[g_cpuHn] = g_cpu; for (int c = 0; c < coreCount(); c++) g_coreH[c][g_cpuHn] = g_cpuCore[c];
     g_ramH[g_cpuHn] = rp; g_psH[g_cpuHn] = pp; g_flH[g_cpuHn] = g_flPct;
     g_tempH[g_cpuHn] = (int16_t)lroundf(g_temp);
     g_cpuHn++; g_tempHn = g_cpuHn;
@@ -210,15 +229,19 @@ void sysInit() {
   g_lifeSaved = 0;
   p.end();
   resetNameTo((int)esp_reset_reason(), g_reset, sizeof(g_reset));
-  esp_register_freertos_idle_hook_for_cpu(idle0, 0);
-  esp_register_freertos_idle_hook_for_cpu(idle1, 1);
+  for (int c = 0; c < coreCount(); c++) { g_maxIdle[c] = 1; esp_register_freertos_idle_hook_for_cpu(idleHook, c); }
   g_temp = drvTempC();
   sysTaskRegister("monitor", monitorStart);
   monitorStart();
 }
 
 int sysCpuPercent() { return g_cpu; }
-int sysCpuCorePercent(int core) { return core == 0 ? g_cpu0 : core == 1 ? g_cpu1 : 0; }
+int sysCpuCorePercent(int core) { return core >= 0 && core < coreCount() ? g_cpuCore[core] : 0; }
+int sysCpuMaxCorePercent() {            // regola unica per il governor: vale il core piu carico
+  int m = 0;
+  for (int c = 0; c < coreCount(); c++) if (g_cpuCore[c] > m) m = g_cpuCore[c];
+  return m;
+}
 float sysCpuTemp() { return g_temp; }
 uint64_t sysUptimeSec() { return (uint64_t)(esp_timer_get_time() / 1000000ULL); }
 uint32_t sysBootCount() { return g_boot; }
@@ -267,7 +290,9 @@ bool sysStatusJson(HeapBuf& j) {
   ok = ok && addFmt(j, "\",\"rev\":%d,\"cores\":%d,\"flashChip\":%lu,", (int)drvChipRevision(), (int)drvChipCores(), (unsigned long)drvFlashSize());
   ok = ok && j.add("\"idf\":\"") && j.addJson(idf, strlen(idf));
   ok = ok && j.add("\",\"reset\":\"") && j.addJson(g_reset, strlen(g_reset)) && j.add("\",");
-  ok = ok && addFmt(j, "\"cpu\":%d,\"cpu0\":%d,\"cpu1\":%d,", (int)g_cpu, (int)g_cpu0, (int)g_cpu1);
+  ok = ok && addFmt(j, "\"cpu\":%d,\"cpuCore\":[", (int)g_cpu);
+  for (int c = 0; c < coreCount() && ok; c++) ok = (c ? j.add(',') : true) && j.addUint((uint32_t)g_cpuCore[c]);
+  ok = ok && j.add("],");
   ok = ok && addFmt(j, "\"temp\":%.1f,\"tempUnit\":%d,\"hot\":%s,", (double)g_temp, (int)cfg.tempUnit, g_hot ? "true" : "false");
   { char cp[320]; int cn = hookCpuStatus(cp, sizeof cp); ok = ok && cn >= 0 && j.add(cp, (size_t)cn); }   // campi cpuMhz...cpuChanges, scritti da vos_cpupm
   ok = ok && addFmt(j, "\"heapFree\":%lu,\"heapTotal\":%lu,", (unsigned long)drvHeapFree(), (unsigned long)drvHeapTotal());
@@ -279,7 +304,9 @@ bool sysStatusJson(HeapBuf& j) {
                       (unsigned long)m.sramNominal, (unsigned long)m.fixedTotal, a, d, b, r, (unsigned long)m.heapUsed, (unsigned long)m.heapMin, (unsigned long)m.heapMaxBlock, (unsigned long)m.flashSize); }
   ok = ok && addFmt(j, "\"flashUsed\":%lu,\"flashTotal\":%lu,\"mqtt\":%d,", (unsigned long)flashU, (unsigned long)flashT, mqtt);
   ok = ok && j.add("\"cpuHist\":") && sysCpuHistoryJson(j);
-  ok = ok && j.add(",\"cpu0Hist\":") && histJson(j, g_c0H, g_cpuHn) && j.add(",\"cpu1Hist\":") && histJson(j, g_c1H, g_cpuHn);
+  ok = ok && j.add(",\"cpuCoreHist\":[");
+  for (int c = 0; c < coreCount() && ok; c++) ok = (c ? j.add(',') : true) && histJson(j, g_coreH[c], g_cpuHn);
+  ok = ok && j.add(']');
   ok = ok && j.add(",\"ramHist\":") && histJson(j, g_ramH, g_cpuHn) && j.add(",\"psHist\":") && histJson(j, g_psH, g_cpuHn);
   ok = ok && j.add(",\"flHist\":") && histJson(j, g_flH, g_cpuHn) && j.add(",\"tempHist\":") && sysTempHistoryJson(j);
   return ok && j.add('}');

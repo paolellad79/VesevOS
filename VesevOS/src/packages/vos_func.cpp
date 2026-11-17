@@ -80,6 +80,6 @@ bool funcJson(HeapBuf& out) {
     out.add("\",\"d\":\""); out.addJson(funcDesc(i));
     out.addf("\",\"rr\":%d,\"rw\":%d,\"on\":%s,\"u\":%d}", (int)kInfo[i].rr, (int)kInfo[i].rw, funcOnIdx(i) ? "true" : "false", funcUsers(i));
   }
-  out.add("]}");
+  out.addf("],\"ramMin\":%s}", VOS_RAM_MINIMA ? "true" : "false");   // scheda con poca memoria: la pagina avvisa
   return !(out.oom() || out.over());
 }

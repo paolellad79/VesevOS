@@ -5,6 +5,8 @@
    gruppo:    gruppo del menu (GRP).
    ruolo:     ruolo minimo; se manca vale 0 (ospite).
    sezione:   titolo nel sottomenu, indice in SECN; se manca, nessun titolo.
+   bordo:     tipo di widget (colore, tasto...) di una periferica di bordo: la voce c'e solo se /api/dev
+              ne manda una con questa pagina (tab) e questo widget; il testo del menu e la sua etichetta.
    apri:      si chiama quando la voce si apre, con il suo id.
    esci:      ferma i timer della voce; si chiama a ogni show() su una voce diversa. */
 var VOCI=[
@@ -14,17 +16,18 @@ var VOCI=[
  {id:"mem",testo:"Memoria",gruppo:"dev",sezione:0,apri:apriMemoria},
  {id:"cpu",testo:"Processore",gruppo:"dev",ruolo:1,sezione:0,apri:cpuLoad,esci:fermaProcessore},
  {id:"sens",testo:"Sensori",gruppo:"dev",ruolo:1,sezione:0,apri:sensLoad,esci:fermaSensori},
- {id:"led",testo:"LED",gruppo:"dev",ruolo:1,sezione:1,apri:fillLed},
+ {id:"led_rgb1",testo:"Periferica di bordo",gruppo:"dev",ruolo:1,sezione:1,bordo:"colore",apri:apriLed},
+ {id:"led1",testo:"Periferica di bordo",gruppo:"dev",ruolo:1,sezione:1,bordo:"onoff",apri:apriLed2},
  {id:"pin",testo:"Pin",gruppo:"dev",ruolo:1,sezione:1,apri:loadPins},
  {id:"io",testo:"Periferiche",gruppo:"dev",ruolo:1,sezione:1,apri:apriPeriferiche,esci:ioStop},
- {id:"btn",testo:"Tasto",gruppo:"dev",ruolo:1,sezione:1,apri:apriTasto},
+ {id:"btn",testo:"Periferica di bordo",gruppo:"dev",ruolo:1,sezione:1,bordo:"tasto",apri:apriTasto},
  {id:"rad",testo:"Radio",gruppo:"dev",ruolo:1,sezione:2,apri:apriRadio},
  {id:"usb",testo:"USB",gruppo:"dev",ruolo:1,sezione:2,apri:dvRows},
  {id:"ser",testo:"Seriale",gruppo:"dev",ruolo:2,sezione:2,apri:fillSer},
 
  {id:"wifi",testo:"Wi-Fi",gruppo:"rete",ruolo:1,sezione:4,apri:fillNet},
  {id:"wps",testo:"WPS",gruppo:"rete",ruolo:2,sezione:4,apri:wpsLoad,esci:fermaWps},
- {id:"ip",testo:"IP",gruppo:"rete",ruolo:1,sezione:4,apri:fillNet},
+ {id:"ip",testo:"IP",gruppo:"rete",ruolo:1,sezione:4,apri:apriIp},
  {id:"nome",testo:"Nome",gruppo:"rete",ruolo:1,sezione:4,apri:apriNome},
  {id:"ntp",testo:"NTP",gruppo:"rete",ruolo:1,sezione:4,apri:loadTime},
  {id:"mqtt",testo:"MQTT",gruppo:"rete",ruolo:1,sezione:4,apri:mqLoad},
@@ -76,9 +79,30 @@ function apriMemoria(){
 function memDraw(){
   if(S)$("mem_ram").innerHTML=memCard(S)
 }
+/* La pagina del colore: il titolo e l'etichetta mandata dalla scheda. */
+function apriLed(id){
+ $("l_tit").textContent=voceTitolo(id);
+ aliasPannello("al_led_rgb1",BDI[id]);
+ fillLed();
+}
 function apriTasto(id){
  dvRows(id);
+ aliasPannello("al_btn",BDI[id]);
  btnLoad();
+}
+/* Una periferica creata a mano: la sua voce apre la pagina Periferiche sul riquadro di quella periferica. */
+function apriIoDin(id){
+ var n=POV[id].n;
+ IOS.sel="";
+ ioStop();
+ skMostra("io",0);
+ $("io_new").className=ROLE>=2?"card":"card hide";
+ api("/api/io").then(function(r){return r.json()}).then(function(j){
+   IOS.list=j.io||[];
+   IOS.sdp=j.sdp||[];
+   if(ioFind(n))ioOpen(n);
+   else show("io")
+ }).catch(function(){})
 }
 /* Dispositivi > Interfacce > Radio: paese e limiti, stato del modo aereo e MAC da /api/status. */
 function apriRadio(){
@@ -93,6 +117,7 @@ function apriRadio(){
 /* Periferiche: la scheda Driver e solo per l'Admin, e si aggiorna con la voce. */
 function apriPeriferiche(){
  ioLoad();
+ bordoLoad();
  if(canSee("drv"))drvLoad();
 }
 function apriPuntoAccesso(){
@@ -166,6 +191,8 @@ VOCI.forEach(function(v){
  if(v.sezione!==undefined)TSEC[v.id]=v.sezione;
  if(v.ruolo)TMIN[v.id]=v.ruolo;
 });
+/* Ordine fisso delle voci di Dispositivi: il menu dinamico ci inserisce le periferiche create a mano. */
+var DEV0=GMAP.dev.slice();
 /* Nomi che non sono voci: portano sulla voce e sulla scheda giusta (show). */
 var VIA={temp:["sens"],mdns:["nome",1],http:["web",0],https:["web",1],dhcp:["ap",3],dns:["ap",4],drv:["io",2]};
 /* Driver non e una voce ma una scheda di Periferiche: il suo ruolo minimo resta qui. */

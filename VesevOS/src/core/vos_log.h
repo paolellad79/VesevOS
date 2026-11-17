@@ -14,3 +14,4 @@ int    logLevel();
 std::string logGet(int maxLines);      // ultime righe, separate da \n (un solo blocco di memoria, calcolato prima)
 int    logCount();                     // quante righe ci sono nel registro in RAM (0..150)
 void   logClear();                     // svuota il registro in RAM
+void   ramTrace(const char* fase);     // traccia dell'avvio: annota la RAM (vos_ramstorico.h) e scrive "RAM: <fase> libera X KB blocco massimo Y KB" (solo numeri)

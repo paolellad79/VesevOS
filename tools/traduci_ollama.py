@@ -27,7 +27,7 @@ bad = json.load(open(REV, encoding='utf-8')) if os.path.exists(REV) else {}
 
 SYSTEM = ('You translate UI texts of an embedded firmware (ESP32 web page and command line) from Italian into %s. Technical, neutral tone. '
  'Rules: keep EXACTLY the same placeholders ({0} {1} %%s %%d %%u %%lu %%x %%-24s etc.), the same HTML tags, the same line breaks, '
- 'shell commands, file names, paths, option names and numbers. Do not translate the product and technical names: VesevOS, ESP32, Wi-Fi, BLE, MQTT, ELF, Berry, SHA-256, GPIO, I2C, SPI, microSD, FAT32, LED, USB, TLS, HTTP, NTP, mDNS. '
+ 'shell commands, file names, paths, option names and numbers. Do not translate the product and technical names: VesevOS, ESP32, Wi-Fi, BLE, MQTT, ELF, funzioni VesevOS, SHA-256, GPIO, I2C, SPI, microSD, FAT32, LED, USB, TLS, HTTP, NTP, mDNS. '
  'Use this glossary (Italian -> Chinese): %s. '
  'Input is a JSON array of Italian strings. Output ONLY a JSON array of the same length with the translations, in the same order. No explanations.'
  % (NAMES[code], json.dumps(gloss, ensure_ascii=False)))

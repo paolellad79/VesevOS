@@ -19,12 +19,19 @@ static inline uint32_t imgLe32(const uint8_t* p) { return (uint32_t)p[0] | ((uin
 // Struttura dell'immagine: intestazione ESP32-S3 / Arduino, segmenti, somma di controllo. IMG_OK = va bene, altrimenti il motivo
 // (il testo tradotto lo sceglie chi chiama). hashOff = dove inizia l'impronta SHA-256 aggiunta (0 = nessuna impronta).
 enum { IMG_OK = 0, IMG_SMALL, IMG_MAGIC, IMG_CHIP, IMG_APPDESC, IMG_BIG, IMG_SEGS, IMG_SHORT, IMG_SUM, IMG_TAIL };
-static inline int imgCheck(const uint8_t* d, uint32_t n, uint32_t maxSize, uint32_t& hashOff) {
-  hashOff = 0;
+// Solo l'inizio (primi IMG_HDR byte): marchio, chip (chipId = numero del chip nell'intestazione ESP), descrizione programma.
+// Serve a rifiutare un file sbagliato prima di scrivere qualsiasi cosa (aggiornamento del recovery a blocchi).
+static inline int imgHeadCheck(const uint8_t* d, uint32_t n, uint16_t chipId = 0x0009) {
   if (n < IMG_HDR) return IMG_SMALL;
   if (d[0] != 0xE9) return IMG_MAGIC;
-  if ((uint16_t)(d[12] | (d[13] << 8)) != 0x0009) return IMG_CHIP;
+  if ((uint16_t)(d[12] | (d[13] << 8)) != chipId) return IMG_CHIP;
   if (imgLe32(d + 32) != 0xABCD5432UL) return IMG_APPDESC;
+  return IMG_OK;
+}
+static inline int imgCheck(const uint8_t* d, uint32_t n, uint32_t maxSize, uint32_t& hashOff, uint16_t chipId = 0x0009) {
+  hashOff = 0;
+  int h = imgHeadCheck(d, n, chipId);
+  if (h != IMG_OK) return h;
   if (n > maxSize) return IMG_BIG;
   uint8_t segs = d[1];
   if (segs == 0 || segs > 16) return IMG_SEGS;

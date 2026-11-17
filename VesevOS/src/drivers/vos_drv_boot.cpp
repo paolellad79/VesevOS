@@ -27,6 +27,10 @@ bool drvPlatformInit() {
   return e == ESP_OK;
 }
 
+int drvResetReason() {
+  return (int)esp_reset_reason();
+}
+
 bool drvResetWasCrash() {
   esp_reset_reason_t r = esp_reset_reason();
   return r == ESP_RST_PANIC || r == ESP_RST_INT_WDT || r == ESP_RST_TASK_WDT || r == ESP_RST_WDT;

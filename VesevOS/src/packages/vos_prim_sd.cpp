@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_prim_sd.cpp
-// STRATO 6 (packages): gruppo "sd" del registro delle primitive (vedi vos_prim.h). Stessi nomi e stessa semantica delle funzioni Berry
-// (vos_berry_sd.cpp, vos_berry_files.cpp), con firme in C semplice. ELF: simboli vos_sd_status, vos_sd_read, vos_sd_write, vos_sd_mount,
+// STRATO 6 (packages): gruppo "sd" del registro delle primitive (vedi vos_prim.h). Stessi nomi e stessa semantica delle funzioni VesevOS
+// (vos_funzioni_sd.cpp, vos_funzioni_files.cpp), con firme in C semplice. ELF: simboli vos_sd_status, vos_sd_read, vos_sd_write, vos_sd_mount,
 // vos_sd_eject, vos_sd_format, vos_sd_rm, vos_sd_mkdir, vos_listdir. I file veri li tocca devices/vos_sd_io.cpp.
 //
-// DIFFERENZE DA BERRY (scelte piu sicure, documentate in piano-integrazione-elf.md, sezione 4.2)
-//   - Gli errori sono codici negativi VOS_PRIM_E_* (Berry alza un'eccezione o torna nil).
+// DIFFERENZE DA FUNZIONI (scelte piu sicure, documentate in piano-integrazione-elf.md, sezione 4.2)
+//   - Gli errori sono codici negativi VOS_PRIM_E_* (funzioni VesevOS alza un'eccezione o torna nil).
 //   - Chiavi, certificati e copie .vbk (pathIsSecret) e file di sistema NON si leggono ne si toccano MAI, nemmeno se chi lancia e l'Admin
-//     (Berry li lascia leggere all'Admin). Un file nascosto si comporta come se non esistesse.
-//   - listdir sta qui (in Berry e nel gruppo files), vede SOLO la microSD, e mostra al massimo LS_PAGINA voci per chiamata.
+//     (funzioni VesevOS li lascia leggere all'Admin). Un file nascosto si comporta come se non esistesse.
+//   - listdir sta qui (nelle funzioni VesevOS e nel gruppo files), vede SOLO la microSD, e mostra al massimo LS_PAGINA voci per chiamata.
 //   - sd_status non restituisce una mappa ma 4 numeri e, se serve, il tipo di file system in un buffer del modulo.
 // PERMESSI (decisi dal risolutore al caricamento): sd_status, sd_read e listdir da Operatore in su; il resto solo se chi lancia e l'Admin.
 // REGOLE: percorso copiato con tetto, pathResolve (".." risolto), deve stare sotto /media/sd, poi sdPathOk. Blocchi di al massimo SD_IO_MAX byte.
@@ -109,7 +109,7 @@ int primSdMount() {
   return VOS_PRIM_E_IO;
 }
 
-// Smonta come sd_eject di Berry: senza conferma, ma rifiuta se la scheda e in uso.
+// Smonta come sd_eject delle funzioni VesevOS: senza conferma, ma rifiuta se la scheda e in uso.
 int primSdEject() {
   if (sdInUse()) return VOS_PRIM_E_OCCUPATO;
   char err[SD_ERR_MAX];
@@ -118,7 +118,7 @@ int primSdEject() {
   return VOS_PRIM_E_IO;
 }
 
-// Avvia la formattazione della microSD in FAT32 (CANCELLA TUTTO): serve la parola di conferma, come sd_format("FORMATTA") di Berry.
+// Avvia la formattazione della microSD in FAT32 (CANCELLA TUTTO): serve la parola di conferma, come sd_format("FORMATTA") delle funzioni VesevOS.
 // Torna subito (0 = avviata, task a parte); la fine si vede dallo stato della scheda.
 int primSdFormat(const char* parola) {
   if (!parola || strcmp(parola, SD_FORMAT_WORD)) return VOS_PRIM_E_ARG;

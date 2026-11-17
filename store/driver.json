@@ -26,10 +26,10 @@
       "id": "driver-sd-spi-vdb",
       "nome": "sd-spi",
       "descrizione": {
-        "it": "Lettore di microSD (SPI) come driver Berry: pagina con prova a 9 passi, widget della Home, comandi sd e formattazione.",
-        "en": "microSD reader (SPI) as a Berry driver: page with a 9-step test, Home widget, sd commands and formatting.",
-        "es": "Lector de microSD (SPI) como controlador Berry: pagina con prueba de 9 pasos, widget de Inicio, comandos sd y formateo.",
-        "de": "microSD-Leser (SPI) als Berry-Treiber: Seite mit 9-Schritte-Test, Start-Widget, sd-Befehle und Formatieren."
+        "it": "Lettore di microSD (SPI) come driver di funzioni VesevOS: pagina con prova a 9 passi, widget della Home, comandi sd e formattazione.",
+        "en": "microSD reader (SPI) as a VesevOS functions driver: page with a 9-step test, Home widget, sd commands and formatting.",
+        "es": "Lector de microSD (SPI) como controlador de funciones VesevOS: pagina con prueba de 9 pasos, widget de Inicio, comandos sd y formateo.",
+        "de": "microSD-Leser (SPI) als VesevOS-Funktionen-Treiber: Seite mit 9-Schritte-Test, Start-Widget, sd-Befehle und Formatieren."
       },
       "versione": "1.0",
       "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/store/drivers/sd-spi-vdb/sd-spi.vdb",

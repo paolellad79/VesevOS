@@ -37,6 +37,9 @@ bool        drvWifiApStart(const char* ssid, const char* pass, int channel, uint
 bool        drvWifiApRetune(const char* ssid, const char* pass, int channel);                                           // cambia canale senza spegnere
 uint32_t    drvWifiApIp();
 int         drvWifiApClients();
+// Un dispositivo entra o esce dall'hotspot. Chiamata dal task degli eventi: solo copiare i dati e uscire.
+typedef void (*DrvWifiApClientFn)(bool entrato, const uint8_t mac[6], int aid, int motivo);
+void        drvWifiOnApClient(DrvWifiApClientFn f);
 
 // radio: paese, potenza, risparmio energia
 // Imposta il paese (cc "01" = prudente), limita i canali se maxCh e' 11 (o meno) e la potenza (dBm).

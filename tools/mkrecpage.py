@@ -82,11 +82,14 @@ for a, b in [
     ('var TOK="",CODE=false;', 'var TOK="",CODE=false,GR=(location.hash.match(/^#g=([0-9a-f]{32})$/)||[])[1]||"";if(GR)history.replaceState(null,"",location.pathname);'),
     ('x.setRequestHeader("X-T",TOK);', 'if(TOK)x.setRequestHeader("X-T",TOK);else if(GR)x.setRequestHeader("X-G",GR);'),
     ('$("info").textContent="Firmware attuale: "', '$("info").textContent=(GR&&!TOK?"Permesso di VesevOS attivo. ":"")+"Firmware attuale: "'),
-    ('MAX=j.max||0;', 'MAX=j.max||0;'),
+    ('MAX=j.max||0;', 'MAX=j.max||0;CHIP=j.chipId||0;CHIPN=j.chipName||"";'),
+    # Il chip lo dichiara la scheda (/api/info); senza il dato resta il solo controllo dell'intestazione e decide il server.
+    ('var MAX=0,', 'var MAX=0,CHIP=0,CHIPN="",'),
+    ('if((v[12]|(v[13]<<8))!==9)return "Firmware per un altro tipo di chip (serve ESP32-S3)";', 'if(CHIP&&(v[12]|(v[13]<<8))!==CHIP)return "Firmware per un altro tipo di chip (serve "+CHIPN+")";'),
     ('function info(){post("/api/info",{}).then(function(j){if(j.ok){', 'function info(){post("/api/info",{}).then(function(j){if(!j.ok&&GR&&!TOK){GR="";$("a").hidden=false;$("b").hidden=true;msg("lm",j.err||"Il link di VesevOS non e valido: entra con la password",false)}if(j.ok){'),
     ('fetch("/api/ver").then(', 'if(GR){$("a").hidden=true;$("b").hidden=false;info()}\nfetch("/api/ver").then('),
     ('function boot(){post("/api/boot",{}).then(function(j){msg("um",j.ok?"VesevOS riparte (circa 10 secondi).":(j.err||"Errore"),!!j.ok)})}',
-     'function boot(){post("/api/boot",{}).then(function(j){msg("um",j.ok?"VesevOS riparte (circa 10 secondi).":(j.err||"Non riesco ad avviare VesevOS"),!!j.ok)}).catch(function(){msg("um","Collegamento interrotto: riprova",false)})}'),
+     'function boot(){post("/api/boot",{}).then(function(j){msg("um",j.ok?"VesevOS riparte (circa 10 secondi).":(j.err||"Non riesco ad avviare VesevOS"),!!j.ok)}).catch(function(){msg("um","Collegamento interrotto: se VesevOS sta ripartendo e normale, attendi 10 secondi e ricarica la pagina",true)})}'),
 ]:
     assert a in idf_html, a
     idf_html = idf_html.replace(a, b)

@@ -2,10 +2,10 @@
   "spdxVersion": "SPDX-2.3",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "name": "VesevOS-1.8.21a",
-  "documentNamespace": "https://github.com/paolellad79/VesevOS/spdx/1.8.21a",
+  "name": "VesevOS-1.8.24c",
+  "documentNamespace": "https://github.com/paolellad79/VesevOS/spdx/1.8.24c",
   "creationInfo": {
-    "created": "2026-11-07T00:00:00Z",
+    "created": "2026-11-17T00:00:00Z",
     "creators": [
       "Person: Domenico Paolella",
       "Tool: tools/mkcommon.py (elenco base) + modifica a mano del 07/11/2026"
@@ -27,7 +27,7 @@
     {
       "SPDXID": "SPDXRef-Package-0",
       "name": "VesevOS",
-      "versionInfo": "1.8.21a",
+      "versionInfo": "1.8.24c",
       "downloadLocation": "https://github.com/paolellad79/VesevOS",
       "licenseConcluded": "GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial",
       "licenseDeclared": "GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial",

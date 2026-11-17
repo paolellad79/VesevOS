@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_drvcmd.cpp (vedi vos_drvcmd.h): registro dei comandi dei driver e loro esecuzione.
 #include "vos_drvcmd.h"
-#if VOS_WITH_DRVCMD && VOS_WITH_BERRY
+#if VOS_WITH_DRVCMD && VOS_WITH_FUNZIONI
 #include <stdio.h>
 #include <string.h>
 #include "../core/vos_i18n.h"
@@ -77,7 +77,7 @@ int drvCmdWords(char (*out)[13], int mx_) {
 // e a comando finito la riavvia. "Occupato" resta solo per un altro script o per l'app di un altro driver (un comando alla volta).
 // Costo: lo stato dell'app si azzera (per esempio una prova a 9 passi in corso si interrompe).
 bool drvCmdRun(const DrvCmd& c, const CmdCall& call, bool callerAdmin, HeapBuf& out, ErrBuf& err) {
-  if (!berryCmdArgsOk(call, err)) return false;
+  if (!funzioniArgomentiOk(call, err)) return false;
 #if VOS_WITH_ELF
   if (vdeEsiste(c.driver)) {                                 // driver in ELF: lo stesso registro, un altro motore
     const char* parole[CMD_ARGS_MAX];
@@ -91,13 +91,13 @@ bool drvCmdRun(const DrvCmd& c, const CmdCall& call, bool callerAdmin, HeapBuf& 
   if (code.oom() || code.over()) { err = tr("Memoria insufficiente"); return false; }
   bool admin = callerAdmin && c.admin;                       // nessun diritto in piu: scrivere sulla microSD solo se il sottocomando e "admin" e chi lancia e Admin
   char cur[32]; bool paused = false;
-  if (berryAppRunning(cur, sizeof cur) && !strcmp(cur, c.driver)) {
+  if (funzioniAppInEsecuzione(cur, sizeof cur) && !strcmp(cur, c.driver)) {
     ErrBuf es;
-    if (!berryStop(es)) { err = es.c_str(); return false; }
+    if (!funzioniFerma(es)) { err = es.c_str(); return false; }
     paused = true;
   }
   vlog("CMD: %s %s %s (%s)", c.driver, c.cmd, c.sub, callerAdmin ? "admin" : "oper");   // mai gli argomenti: possono contenere percorsi o testi
-  bool ok = berryRunCommand(code.c_str(), use, admin, call, out, err);
+  bool ok = funzioniEseguiComando(code.c_str(), use, admin, call, out, err);
   if (paused) {
     ErrBuf er;
     if (!appStart(c.driver, er, ROLE_ADMIN, "comando")) vlog("APP: %s non riavviata dopo il comando: %s", c.driver, er.c_str());   // era gia in esecuzione: si ripristina con gli stessi diritti di prima

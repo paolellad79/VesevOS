@@ -4,10 +4,15 @@
 #   ../psychic  = https://github.com/hoeken/PsychicHttp (v3.1.2)
 #   ../aj       = https://github.com/bblanchon/ArduinoJson (v7)
 #   ../mbed     = https://github.com/Mbed-TLS/mbedtls (v3.6, cartella include)
-# Uso: tools/stub/compila.sh     (dalla cartella del repo). Package spenti: VOS_EXTRA="-DVOS_WITH_BERRY=0 -DVOS_WITH_BLE=0" tools/stub/compila.sh
+# Uso: tools/stub/compila.sh     (dalla cartella del repo). Package spenti: VOS_EXTRA="-DVOS_WITH_FUNZIONI=0 -DVOS_WITH_BLE=0" tools/stub/compila.sh
 R=$(cd "$(dirname "$0")/../.." && pwd); L=$(dirname "$R")
+# Risorse (pagina, dati comuni, licenze minori, manuale e tabella radio stanno in /usr/share/vesevos, non nel firmware). Si rigenerano i file in
+# ../build/risorse/usr-share-vesevos e si rileggono (SHA256SUMS, html.vrs); serve prima: mkweb, mklang, mkcommon, mkpage, mklicense.
+# Nessun id risorse nel firmware (16/11/2026).
+python3 "$R/tools/mkrisorse.py" > /dev/null && python3 "$R/tools/verificarisorse.py" --cartella "$L"/build/risorse/usr-share-vesevos | tail -1 || exit 1
 cd "$R/VesevOS"; O=$(mktemp -d); fail=0
-for f in $(find . -name "*.cpp" | sed "s|^\./||"); do   # il punto di ingresso e src/vos_main.cpp
+# vos_drv_elf.cpp non si prova qui: con sdkconfig.h dello stub (S3) ha VOS_WITH_ELF=1 e include esp_elf.h, che c'e solo in IDF.
+for f in $(find . -name "*.cpp" | sed "s|^\./||" | grep -v "drivers/vos_drv_elf.cpp"); do   # il punto di ingresso e src/vos_main.cpp
   out=$(g++ -std=gnu++17 -x c++ -c -w -DARDUINO=10800 -DESP32 $VOS_EXTRA -I"$R/tools/stub" -I"$L/psychic/src" -I"$L/aj/src" -I"$L/mbed/include" "$f" -o "$O/$(basename "$f").o" 2>&1 | grep -E "error|fatal" | head -6)
   if [ -n "$out" ]; then echo "== $f"; echo "$out"; fail=1; fi
 done

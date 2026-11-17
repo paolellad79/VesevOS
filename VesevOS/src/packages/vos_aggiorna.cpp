@@ -6,6 +6,7 @@
 #include <string.h>
 #include <time.h>
 #include "../core/vos_common.h"
+#include "../core/vos_ramwd.h"
 #include "../core/vos_config.h"
 #include "../core/vos_audit.h"
 #include "../core/vos_i18n.h"
@@ -13,6 +14,7 @@
 #include "../core/vos_log.h"
 #include "../core/vos_pacchetto.h"
 #include "../core/vos_recupd.h"
+#include "../core/vos_risorse_avviso.h"
 #include "../core/vos_sys.h"
 #include "../core/vos_time.h"
 #include "../core/vos_updorder.h"
@@ -182,7 +184,8 @@ bool tentativiRimasti(const AggDisponibile& d) {
   Tentativi t;
   leggiTentativi(t);
   if (aggTentativoAmmesso(t.ver, t.fatti, d.ver)) return true;
-  const char* motivo = tr("Installazione fermata: si aspetta una versione nuova");
+  char motivo[128];                                  // copia: il puntatore di tr() non vale a lungo, e qui si aspetta un blocco
+  snprintf(motivo, sizeof motivo, "%s", tr("Installazione fermata: si aspetta una versione nuova"));
   {
     VosLock l(s_blocco);
     snprintf(s_motivo, sizeof s_motivo, "%s", motivo);
@@ -325,6 +328,7 @@ bool aggiornaVerifica(ErrBuf& err) {
 }
 
 bool aggiornaInstalla(char* versione, size_t cap, ErrBuf& err) {
+  RamBusy lavoro;                                    // aggiornamento in corso: niente riavvio per RAM
   AggDisponibile* d = new AggDisponibile();
   bool trovato;
   {
@@ -360,6 +364,8 @@ bool aggiornaStatoJson(HeapBuf& j) {
   campo(j, "data", s_trovato ? s_disp.data : "");
   campo(j, "chi", s_trovato ? s_disp.chi : "");
   campo(j, "verRec", s_trovato ? s_disp.verRec : "");
+  j.add(",\"ris\":");
+  risorseJson(j);                                            // file di /usr/share/vesevos: nome, stato, SHA-256 della riga dell'elenco, tetto
   return j.add('}');
 }
 

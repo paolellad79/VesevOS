@@ -52,19 +52,19 @@ bool fsListBuild(std::string_view path, HeapBuf& j) {
   j.add("]}"); return true; }
 
 
-// ---- finti per vos_drvwidget.cpp: tempo, Berry occupato e uscita di on_widget() li comanda la prova ----
+// ---- finti per vos_drvwidget.cpp: tempo, il motore delle funzioni occupato e uscita di on_widget() li comanda la prova ----
 long long g_fake_us = 1000000;
-static bool g_berryBusy = false, g_berryOk = true, g_lastAdmin = true; static int g_berryRuns = 0; static std::string g_berryOut, g_lastCode;
-bool berryRunning() { return g_berryBusy; }
-bool berryRunCommand(const char* code, const char*, bool admin, const CmdCall&, HeapBuf& out, ErrBuf& err, uint32_t) {
-  g_berryRuns++; g_lastAdmin = admin; g_lastCode = code;
-  if (!g_berryOk) { err = "errore"; return false; }
-  out.add(g_berryOut.c_str()); return true; }
+static bool g_funzioniOccupato = false, g_funzioniOk = true, g_lastAdmin = true; static int g_funzioniEsecuzioni = 0; static std::string g_funzioniUscita, g_lastCode;
+bool funzioniInEsecuzione() { return g_funzioniOccupato; }
+bool funzioniEseguiComando(const char* code, const char*, bool admin, const CmdCall&, HeapBuf& out, ErrBuf& err, uint32_t) {
+  g_funzioniEsecuzioni++; g_lastAdmin = admin; g_lastCode = code;
+  if (!g_funzioniOk) { err = "errore"; return false; }
+  out.add(g_funzioniUscita.c_str()); return true; }
 // ---- finti per vos_drvcmd.cpp (app del driver messa in pausa): l'app "sd-spi" gira, il comando la ferma e la riavvia ----
 static char g_appName[32] = ""; static int g_stops = 0, g_starts = 0; static bool g_stopOk = true; static uint8_t g_startRole = 0; static std::string g_startWho;
-bool berryCmdArgsOk(const CmdCall&, ErrBuf&) { return true; }
-bool berryAppRunning(char* name, size_t n) { if (!g_appName[0]) return false; snprintf(name, n, "%s", g_appName); return true; }
-bool berryStop(ErrBuf& err) { g_stops++; if (!g_stopOk) { err = "non si ferma"; return false; } g_appName[0] = 0; return true; }
+bool funzioniArgomentiOk(const CmdCall&, ErrBuf&) { return true; }
+bool funzioniAppInEsecuzione(char* name, size_t n) { if (!g_appName[0]) return false; snprintf(name, n, "%s", g_appName); return true; }
+bool funzioniFerma(ErrBuf& err) { g_stops++; if (!g_stopOk) { err = "non si ferma"; return false; } g_appName[0] = 0; return true; }
 bool appStart(const char* name, ErrBuf&, uint8_t role, const char* who) { g_starts++; g_startRole = role; g_startWho = who ? who : ""; snprintf(g_appName, sizeof g_appName, "%s", name); return true; }
 
 static std::string readAll(const std::string& p) { std::ifstream in(p); std::stringstream ss; ss << in.rdbuf(); return ss.str(); }
@@ -132,7 +132,7 @@ int main() {
     CHECK(strstr(use, "sd") && strstr(use, "files"));
     CHECK(strstr(code.c_str(), "def on_cmd(sub, args)") && strstr(code.c_str(), "def sdpath(a)") && strstr(code.c_str(), "def on_widget()"));
     CHECK(!strstr(code.c_str(), "dev_set") && !strstr(code.c_str(), "[data]") && !strstr(code.c_str(), "stato=-") && !strstr(code.c_str(), "[commands]"));   // niente pagina, niente dati
-    const char* outp = getenv("VDP_CMD_OUT");                                                            // il codice estratto dal vero modCmdCode, per provarlo in Berry
+    const char* outp = getenv("VDP_CMD_OUT");                                                            // il codice estratto dal vero modCmdCode, per provarlo nelle funzioni VesevOS
     if (outp) { FILE* f = fopen(outp, "w"); fputs(code.c_str(), f); fclose(f); }
     CHECK(!modCmdCode("nonesiste", code, use, sizeof use, e)); }
 
@@ -141,34 +141,34 @@ int main() {
   { ErrBuf e; CHECK(modSave("sd-spi", std::string_view(good), e)); drvCmdRefresh();
     DrvCmd d; CHECK(drvCmdFind("sd", "status", d) && !strcmp(d.driver, "sd-spi"));
     CmdCall* call = new CmdCall(); memset(call, 0, sizeof *call); snprintf(call->sub, sizeof call->sub, "status");
-    HeapBuf out(512); ErrBuf er; g_berryOut = "microSD: montata\n"; g_berryOk = true; int runs0 = g_berryRuns;
+    HeapBuf out(512); ErrBuf er; g_funzioniUscita = "microSD: montata\n"; g_funzioniOk = true; int runs0 = g_funzioniEsecuzioni;
     snprintf(g_appName, sizeof g_appName, "sd-spi");                                                    // l'app della pagina del driver e aperta
-    CHECK(drvCmdRun(d, *call, true, out, er) && g_stops == 1 && g_starts == 1 && g_startRole == 2 && g_startWho == "comando" && !strcmp(g_appName, "sd-spi") && g_berryRuns == runs0 + 1);   // fermata, comando, riavviata
+    CHECK(drvCmdRun(d, *call, true, out, er) && g_stops == 1 && g_starts == 1 && g_startRole == 2 && g_startWho == "comando" && !strcmp(g_appName, "sd-spi") && g_funzioniEsecuzioni == runs0 + 1);   // fermata, comando, riavviata
     snprintf(g_appName, sizeof g_appName, "altra"); int s0 = g_stops, a0 = g_starts;
     CHECK(drvCmdRun(d, *call, true, out, er) && g_stops == s0 && g_starts == a0 && !strcmp(g_appName, "altra"));                 // un'app di altro nome non si tocca (poi il VERO avvio dira "occupato")
     g_appName[0] = 0; s0 = g_stops; a0 = g_starts;
     CHECK(drvCmdRun(d, *call, true, out, er) && g_stops == s0 && g_starts == a0);                       // niente app: nessuna pausa
-    snprintf(g_appName, sizeof g_appName, "sd-spi"); g_stopOk = false; s0 = g_stops; runs0 = g_berryRuns;
-    CHECK(!drvCmdRun(d, *call, true, out, er) && g_berryRuns == runs0 && !strcmp(er.c_str(), "non si ferma")); g_stopOk = true;   // se l'app non si ferma il comando non parte
+    snprintf(g_appName, sizeof g_appName, "sd-spi"); g_stopOk = false; s0 = g_stops; runs0 = g_funzioniEsecuzioni;
+    CHECK(!drvCmdRun(d, *call, true, out, er) && g_funzioniEsecuzioni == runs0 && !strcmp(er.c_str(), "non si ferma")); g_stopOk = true;   // se l'app non si ferma il comando non parte
     g_appName[0] = 0; delete call; }
 
-  // ---- widget in cache: JSON, ruoli, Berry occupato, validita 10 secondi ----
-  { HeapBuf j(DRVW_JSON_MAX); drvWidgetRefresh(); g_berryRuns = 0;
-    g_berryOut = "st=ok\nv=Montata\ns=FAT32, 7421 MB liberi su 7421 MB, 1000 kHz\n";
-    CHECK(drvWidgetsJson(j, 0) && !strcmp(j.c_str(), "[]") && g_berryRuns == 0);                          // gli ospiti non vedono niente e on_widget non parte
-    j.clear(); CHECK(drvWidgetsJson(j, 1) && g_berryRuns == 1 && !g_lastAdmin && strstr(g_lastCode.c_str(), "on_widget()"));   // l'operatore si; senza diritti di scrittura
+  // ---- widget in cache: JSON, ruoli, il motore delle funzioni occupato, validita 10 secondi ----
+  { HeapBuf j(DRVW_JSON_MAX); drvWidgetRefresh(); g_funzioniEsecuzioni = 0;
+    g_funzioniUscita = "st=ok\nv=Montata\ns=FAT32, 7421 MB liberi su 7421 MB, 1000 kHz\n";
+    CHECK(drvWidgetsJson(j, 0) && !strcmp(j.c_str(), "[]") && g_funzioniEsecuzioni == 0);                          // gli ospiti non vedono niente e on_widget non parte
+    j.clear(); CHECK(drvWidgetsJson(j, 1) && g_funzioniEsecuzioni == 1 && !g_lastAdmin && strstr(g_lastCode.c_str(), "on_widget()"));   // l'operatore si; senza diritti di scrittura
     std::string s = j.c_str();
     CHECK(s[0] == '[' && s.back() == ']' && s.find("\"d\":\"sd-spi\"") != std::string::npos && s.find("\"t\":\"Scheda microSD\"") != std::string::npos && s.find("\"st\":\"ok\"") != std::string::npos && s.find("\"v\":\"Montata\"") != std::string::npos && s.find("viewBox=\\\"0 0 24 24") != std::string::npos);   // le virgolette dell'icona sono protette
     CHECK(s.find("\"i\":\"<svg") != std::string::npos);                                               // icona del driver (testo dentro virgolette JSON)
-    j.clear(); g_fake_us += 5000000; CHECK(drvWidgetsJson(j, 2) && g_berryRuns == 1);                   // dopo 5 s la cache vale ancora: on_widget non riparte
-    g_berryOut = "st=off\nv=Non montata\ns=0 MB liberi su 0 MB, 1000 kHz\n";
-    j.clear(); g_fake_us += 6000000; CHECK(drvWidgetsJson(j, 2) && g_berryRuns == 2 && strstr(j.c_str(), "Non montata") && strstr(j.c_str(), "\"st\":\"off\""));   // dopo 11 s si rilegge
-    g_berryBusy = true; g_berryOut = "st=ok\nv=Cambiato\n";
-    j.clear(); g_fake_us += 20000000; CHECK(drvWidgetsJson(j, 1) && g_berryRuns == 2 && strstr(j.c_str(), "Non montata"));      // Berry occupato: resta l'ultimo valore noto
-    g_berryBusy = false; g_berryOk = false;
-    j.clear(); g_fake_us += 20000000; CHECK(drvWidgetsJson(j, 1) && g_berryRuns == 3 && strstr(j.c_str(), "Non montata"));       // errore di on_widget: resta l'ultimo valore noto
-    g_berryOk = true; drvWidgetRefresh();                                                                 // driver ricaricato: si rilegge da zero
-    g_berryOut = "st=ok\nv=Nuovo\n"; j.clear(); CHECK(drvWidgetsJson(j, 1) && strstr(j.c_str(), "Nuovo"));
+    j.clear(); g_fake_us += 5000000; CHECK(drvWidgetsJson(j, 2) && g_funzioniEsecuzioni == 1);                   // dopo 5 s la cache vale ancora: on_widget non riparte
+    g_funzioniUscita = "st=off\nv=Non montata\ns=0 MB liberi su 0 MB, 1000 kHz\n";
+    j.clear(); g_fake_us += 6000000; CHECK(drvWidgetsJson(j, 2) && g_funzioniEsecuzioni == 2 && strstr(j.c_str(), "Non montata") && strstr(j.c_str(), "\"st\":\"off\""));   // dopo 11 s si rilegge
+    g_funzioniOccupato = true; g_funzioniUscita = "st=ok\nv=Cambiato\n";
+    j.clear(); g_fake_us += 20000000; CHECK(drvWidgetsJson(j, 1) && g_funzioniEsecuzioni == 2 && strstr(j.c_str(), "Non montata"));      // Il motore delle funzioni occupato: resta l'ultimo valore noto
+    g_funzioniOccupato = false; g_funzioniOk = false;
+    j.clear(); g_fake_us += 20000000; CHECK(drvWidgetsJson(j, 1) && g_funzioniEsecuzioni == 3 && strstr(j.c_str(), "Non montata"));       // errore di on_widget: resta l'ultimo valore noto
+    g_funzioniOk = true; drvWidgetRefresh();                                                                 // driver ricaricato: si rilegge da zero
+    g_funzioniUscita = "st=ok\nv=Nuovo\n"; j.clear(); CHECK(drvWidgetsJson(j, 1) && strstr(j.c_str(), "Nuovo"));
     // driver solo per l'Admin: l'operatore non lo vede
     { std::string t = replace(good, "who=oper\n\n[commands]", "who=admin\n\n[commands]"); ErrBuf e; CHECK(modSave("sd-spi", std::string_view(t), e)); drvWidgetRefresh();
       g_fake_us += 20000000; j.clear(); CHECK(drvWidgetsJson(j, 1) && !strcmp(j.c_str(), "[]")); j.clear(); CHECK(drvWidgetsJson(j, 2) && strstr(j.c_str(), "sd-spi")); }

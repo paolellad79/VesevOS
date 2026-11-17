@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_time.cpp
+#include "../boards/vos_board.h"
 #include <math.h>
 #include "../drivers/vos_drv_task.h"
 #include "vos_time.h"
@@ -199,7 +200,7 @@ static void timeTask(void*) {
 }
 
 static void timeStart() {
-  drvTaskCreate(timeTask, "time", 4096, NULL, 1, NULL, DRV_CORE_ANY);   // core: automatico (prima: core 0 fisso)
+  drvTaskCreate(timeTask, "time", VOS_PILA_ORA, NULL, 1, NULL, DRV_CORE_ANY);   // core: automatico (prima: core 0 fisso)
 }
 
 void timeInit() {

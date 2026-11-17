@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_prim_files.cpp
 // STRATO 6 (packages): gruppo "files" del registro delle primitive: la CARTELLA DEI DATI dell'app (ELF: vos_data_dir, vos_data_write, vos_data_read,
-// vos_data_rm; Berry: data_dir, data_write, data_read, data_rm, vedi vos_berry_data.cpp). Il lavoro vero sta in vos_prog_data.cpp: dove stanno i
+// vos_data_rm; funzioni VesevOS: data_dir, data_write, data_read, data_rm, vedi vos_funzioni_data.cpp). Il lavoro vero sta in vos_prog_data.cpp: dove stanno i
 // dati (flash o microSD) lo sceglie l'utente dalla pagina App, l'app non lo sa e non lo decide. L'app tocca SOLO la sua cartella, con nomi di
 // file semplici (nessun sotto-percorso). Un driver (.vde) non e un'app: non ha cartella dei dati.
 #include "vos_prim.h"

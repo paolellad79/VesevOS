@@ -7,6 +7,8 @@
 #include "../core/vos_parse.h"
 #include "../core/vos_clamp.h"
 #include "../core/vos_wdset.h"
+#include "../core/vos_ramwd_rule.h"
+#include "../net/vos_net_ip6.h"
 
 // stato del WPS per la pagina
 static esp_err_t wpsReply(Res* s) {
@@ -34,10 +36,16 @@ void routesNet(PsychicHttpServer* S, bool sec) {
   // ---- prima configurazione ----
   add(S, sec, "/api/setup/done", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
     if (has(r, "ntp")) { cfg.ntpOn = Pis(r, "ntp", "1"); cfg.ntpAutoOff = !cfg.ntpOn; timeApply(); }     // senza Wi-Fi di casa: server dell'ora spento
+    cfgEnsureApPass();                              // l'hotspot, quando c'e, ha sempre la sua password
+    if (cfgSetupServices()) vlog("SETUP: Wi-Fi di casa configurata, hotspot e portale automatico restano spenti");   // l'utente li accende da Servizi
+    // Ordine voluto: 1) la risposta parte e finisce; 2) il ritardo di 4 s comincia da qui (apWinClose); 3) solo dopo si scrive
+    // cfg.setupDone. Se setupDone fosse scritto prima, il task di rete vedrebbe la guida finita e cambierebbe hotspot, DNS e HTTP
+    // mentre la risposta e ancora in viaggio (prova 1.8.23e: risposta persa).
+    esp_err_t sent = ok(s);
+    apWinClose();                                   // l'hotspot passa a protetto 4 secondi dopo (dal task di rete)
     cfg.setupDone = true; cfgSave(); ledSetSetup(false);
-    apWinClose(); netApRefresh();
     vlog("SETUP: prima configurazione completata");
-    return ok(s);
+    return sent;
   });
 
   // ---- controllo della configurazione (allarmi) e registro delle modifiche ----
@@ -99,7 +107,7 @@ void routesNet(PsychicHttpServer* S, bool sec) {
     if (!wdCheck(wc, werr)) return ko(s, werr.c_str());
     cfg.wdTask = Pis(r, "task", "1"); cfg.wdNet = Pis(r, "net", "1"); cfg.wdRam = Pis(r, "ram", "1");
     cfg.wdNetMin = vosClamp((int)Pint(r, "netmin"), 2, 1440);
-    cfg.wdRamKb = vosClamp((int)Pint(r, "ramkb"), 8, 200);
+    cfg.wdRamPerc = ramWdClampCrit((int)Pint(r, "ramperc"));
     cfg.wdUpDays = vosClamp((int)Pint(r, "updays"), 0, 365);
     cfg.wdAt = vosClamp((int)Pint(r, "at"), -1, 1439);
     cfg.wdDays = Pint(r, "days") & 0x7F;
@@ -150,6 +158,29 @@ void routesNet(PsychicHttpServer* S, bool sec) {
     if (pin || strcmp(go, "pbc") == 0) { if (!wpsStart(pin, who, e)) return ko(s, e, "state"); }
     else if (Pis(r, "stop", "1")) wpsStop();
     return wpsReply(s);
+  });
+
+  // ---- IPv6 della Wi-Fi di casa: lettura, interruttore e un indirizzo fisso in piu (gateway e DNS arrivano dal router) ----
+  add(S, sec, "/api/ip6", HTTP_GET, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    HeapBuf j(NET6_JSON_MAX);
+    if (!net6Json(j, netState() == NET_CLIENT_OK)) return ko(s, tr("Memoria insufficiente"), "off");
+    return sendJson(s, j);
+  });
+  add(S, sec, "/api/ip6", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    ErrBuf e;
+    bool acceso = has(r, "acceso") ? Pis(r, "acceso", "1") : cfg.ip6On;
+    bool fisso = has(r, "fisso") ? Pis(r, "fisso", "1") : cfg.ip6Fisso;
+    const char* ind = has(r, "ind") ? Pc(r, "ind") : cfg.ip6Ind.c_str();
+    const char* gw = has(r, "gw") ? Pc(r, "gw") : cfg.ip6Gw.c_str();
+    const char* dns = has(r, "dns") ? Pc(r, "dns") : cfg.ip6Dns.c_str();
+    if (strlen(ind) > 45) return ko(s, tr("Indirizzo IPv6 non valido"));
+    if (strlen(gw) > 45) return ko(s, tr("Gateway IPv6 non valido"));
+    if (strlen(dns) > 45) return ko(s, tr("DNS IPv6 non valido"));
+    cfgSetOriginf("web admin %s", IpText(c.ip).s);
+    if (!net6Salva(acceso, fisso, ind, gw, dns, e)) return ko(s, e);
+    HeapBuf j(NET6_JSON_MAX);
+    if (!net6Json(j, netState() == NET_CLIENT_OK)) return ko(s, tr("Memoria insufficiente"), "off");
+    return sendJson(s, j);
   });
 
   // ---- HTTPS ----

@@ -8,7 +8,7 @@
 #if VOS_WITH_BLE
 namespace vosble {
 enum Phase : uint8_t { IDLE = 0, WANT = 1, UP = 2 };   // WANT = richiesto, lo avvia bleTick
-extern VosMutex g_mx;                                   // tutte le funzioni pubbliche lo prendono (task Berry, ciclo principale)
+extern VosMutex g_mx;                                   // tutte le funzioni pubbliche lo prendono (task funzioni VesevOS, ciclo principale)
 extern Phase    g_phase;
 extern char     g_owner[BLE_OWNER_MAX + 1];             // "" = libero
 extern char     g_name[BLE_NAME_MAX + 1];               // nome da annunciare

@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include "vos_config_int.h"
 #include "vos_func_ids.h"
+#include "vos_alias.h"
 
 // Scrive le righe "\toption chiave 'valore'" in un HeapBuf. Se manca la memoria o si supera il tetto l'HeapBuf lo ricorda
 // (oom()/over()): cfgExport lo controlla una volta sola alla fine.
@@ -42,6 +43,9 @@ bool cfgExport(HeapBuf& out, bool withSecrets) {
   Out s(out);
   auto secret = [&](const char* v) { return withSecrets ? v : ""; };    // senza segreti il valore resta vuoto
   s.raw("# VesevOS config\n");
+  s.raw("# ATTENZIONE - NON MODIFICARE A MANO QUESTO FILE: lo riscrive il firmware.\n");
+  s.raw("# Contiene anche Wi-Fi, paese e radio: il paese fissa canali e potenza ammessi per legge.\n");
+  s.raw("# Una modifica a mano puo violare le norme radio. Usare la pagina web o la shell.\n");
   s.raw("config system 'system'\n");
   s.opt("hostname", cfg.hostname.c_str());
   s.opt("domain", cfg.domain.c_str());
@@ -97,6 +101,11 @@ bool cfgExport(HeapBuf& out, bool withSecrets) {
   s.flag("dhcp", cfg.staDhcp);
   s.opt("ip", cfg.ip.c_str()); s.opt("mask", cfg.mask.c_str()); s.opt("gw", cfg.gw.c_str());
   s.opt("dns1", cfg.dns1.c_str()); s.opt("dns2", cfg.dns2.c_str());
+  s.flag("ip6on", cfg.ip6On);
+  s.flag("ip6fisso", cfg.ip6Fisso);
+  s.opt("ip6ind", cfg.ip6Ind.c_str());
+  s.opt("ip6gw", cfg.ip6Gw.c_str());
+  s.opt("ip6dns", cfg.ip6Dns.c_str());
   s.section("auth", "auth");
   s.flag("serial", cfg.serialAuth);
   s.flag("apqr", cfg.apQr);
@@ -130,7 +139,7 @@ bool cfgExport(HeapBuf& out, bool withSecrets) {
     fwRuleText(cfg.fw[i], rule, sizeof rule);
     s.opt(key, rule);
   }
-  s.section("led", "led");
+  s.section("led_rgb1", "led_rgb1");   // LED RGB di bordo (prima: sezione "led", ancora letta in import)
   s.num("mode", cfg.ledMode);
   s.unum("color", cfg.ledColor);
   s.num("brightness", cfg.ledBrightness);
@@ -139,6 +148,14 @@ bool cfgExport(HeapBuf& out, bool withSecrets) {
   for (int i = 0; i < LEDSRC_COUNT; i++)
     if (cfg.ledSrcColor[i] != kLedSrcDefault[i]) s.unum(kLedSrcKey[i], cfg.ledSrcColor[i]);
   if (cfg.ledCpuThr != LED_CPU_THR_DEFAULT) s.num("cputhr", cfg.ledCpuThr);
+  // LED1 (monocromatico di bordo; prima: sezione "led2", ancora letta in import): la sezione compare solo se diversa dal predefinito
+  // (spento, soglia 70), cosi chi non lo usa ottiene lo stesso file di prima
+  if (cfg.led2Mode != LED_OFF || cfg.led2CpuThr != LED_CPU_THR_DEFAULT || cfg.led2Brightness != 255) {
+    s.section("led1", "led1");
+    s.num("mode", cfg.led2Mode);
+    s.num("cputhr", cfg.led2CpuThr);
+    s.num("brightness", cfg.led2Brightness);
+  }
   s.section("mqtt", "mqtt");
   s.flag("auto", cfg.mqttAuto);
   s.opt("host", cfg.mqttHost.c_str());
@@ -181,7 +198,7 @@ bool cfgExport(HeapBuf& out, bool withSecrets) {
   s.flag("net", cfg.wdNet);
   s.flag("ram", cfg.wdRam);
   s.num("netmin", cfg.wdNetMin);
-  s.num("ramkb", cfg.wdRamKb);
+  s.num("ramperc", cfg.wdRamPerc);
   s.num("updays", cfg.wdUpDays);
   s.num("at", cfg.wdAt);
   s.num("days", cfg.wdDays);
@@ -199,24 +216,28 @@ bool cfgExport(HeapBuf& out, bool withSecrets) {
     snprintf(key, sizeof key, "n%d", i);
     s.opt(key, cfg.pinNote[i].c_str());
   }
+  if (aliasConta() > 0) {                                          // alias e descrizioni: la sezione compare solo se ce ne sono
+    s.section("alias", "alias");
+    aliasEsporta([](void* ctx, const char* k, const char* v) { ((Out*)ctx)->opt(k, v); }, &s);
+  }
 #if VOS_WITH_ELF
   s.section("elf", "elf");
   s.flag("enabled", cfg.elfOn);
 #endif
   s.section("vdb", "vdb");
-  s.flag("enabled", cfg.berryOn);
+  s.flag("enabled", cfg.funzioniAttive);
   s.section("func", "func");
   { char off[64] = ""; size_t n = 0;                              // Funzionalita tolte: "sd,gpio"
     for (int i = 0; i < kFuncN; i++) if (cfg.funcOff & (1u << i)) n += snprintf(off + n, sizeof off - n, "%s%s", n ? "," : "", kFuncId[i]);
     s.opt("off", off); }
-  s.section("progboot", "progboot");                               // programmi con avvio automatico: p1=s:nome (s script, b app Berry, e app ELF)
+  s.section("progboot", "progboot");                               // programmi con avvio automatico: p1=s:nome (s script, b app, e app ELF)
   for (int i = 0; i < cfg.bootN; i++) {
     char key[8], val[40];
     snprintf(key, sizeof key, "p%d", i + 1);
     snprintf(val, sizeof val, "%c:%s", cfg.boot[i].kind == 0 ? 's' : cfg.boot[i].kind == 1 ? 'b' : 'e', cfg.boot[i].name);
     s.opt(key, val);
   }
-  s.section("progdata", "progdata");                               // app che salvano i dati sulla microSD: s1=b:nome (b app Berry, e app ELF); le altre usano la flash
+  s.section("progdata", "progdata");                               // app che salvano i dati sulla microSD: s1=b:nome (b app, e app ELF); le altre usano la flash
   for (int i = 0; i < cfg.dataSdN; i++) {
     char key[8], val[40];
     snprintf(key, sizeof key, "s%d", i + 1);

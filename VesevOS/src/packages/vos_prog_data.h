@@ -3,11 +3,11 @@
 // VesevOS - vos_prog_data.h
 // STRATO 6 (packages): DOVE le app tengono i propri dati. Decisione dell'utente del 31/10/2026 (docs/progetto/decisioni-sd-file-app-2026-10-31.md):
 //   - dove salva un'app lo sceglie l'UTENTE (non l'app): memoria flash oppure microSD, dalla pagina App, solo per le app che salvano dati
-//     (app Berry con data=1 nel manifest; app ELF che importano le primitive vos_data_*);
+//     (app con data=1 nel manifest; app ELF che importano le primitive vos_data_*);
 //   - cartelle: flash /var/lib/<nome>/ (come Debian), microSD /media/sd/app/<nome>/; senza microSD la scelta e la flash;
 //   - se la microSD sparisce mentre l'app e configurata su SD, l'app si FERMA (registro, allarme, evento): niente ritorno alla flash da sola;
 //   - l'app vede e tocca SOLO la sua cartella: file con nome semplice (a-z A-Z 0-9 _ . -), nessun sotto-percorso (primitive data_*).
-// Le primitive (Berry: vos_berry_data.cpp; ELF: vos_prim_files.cpp) sono sottili: il lavoro vero e qui, uguale per tutti i linguaggi.
+// Le primitive (funzioni VesevOS: vos_funzioni_data.cpp; ELF: vos_prim_files.cpp) sono sottili: il lavoro vero e qui, uguale per tutti i linguaggi.
 // Questo modulo non conosce ne le app ne i programmi in corso (sarebbe un ciclo): chi controlla e chi ferma sta in vos_prog_where.h.
 #pragma once
 #include <stdint.h>

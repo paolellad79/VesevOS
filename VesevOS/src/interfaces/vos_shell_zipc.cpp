@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_shell_zipc.cpp
-// Comando zip in stile shell classica: zip [-r] [-0..-9] [-q] [-f] [-j] archivio.zip file...   CREA un archivio .zip nuovo da file e cartelle di LittleFS.
+// Comando zip in stile shell classica: zip [-r] [-0] [-q] [-f] [-j] archivio.zip file...   CREA un archivio .zip nuovo da file e cartelle di LittleFS.
 // (La lettura e l'estrazione sono in vos_shell_zip.cpp, il comando unzip.)
-// FORMATO scritto (leggibile da unzip e dagli altri programmi): ZIP standard versione 2.0, metodi 0 (store, con -0 e per i file vuoti) e 8 (deflate,
-// livelli 1-9 come gzip, 6 di norma). Per ogni voce un'intestazione locale con CRC32 e dimensioni scritti TORNANDO INDIETRO nel file (seek) dopo i dati:
+// FORMATO scritto (leggibile da unzip e dagli altri programmi): ZIP standard versione 2.0, SOLO metodo 0 (store, senza compressione: decisione
+// del 16/11/2026, uguale su S3, C3 e C6 senza PSRAM; -0 e accettato e non cambia nulla, -1..-9 sono rifiutati con un messaggio). Per ogni voce un'intestazione locale con CRC32 e dimensioni scritti TORNANDO INDIETRO nel file (seek) dopo i dati:
 // nessun "data descriptor". In fondo la directory centrale e la fine della directory. Nomi solo ASCII (bit 11 dei flag a zero), niente extra, niente
 // commenti, niente ZIP64, niente cifratura. Permessi fissi (0644 file, 0755 cartelle), creato "su Unix" (i nomi usano '/').
 // DATA E ORA: LittleFS non salva la data dei file. Tutte le voci portano l'ora di sistema del momento in cui si crea l'archivio, se e valida
@@ -16,10 +16,10 @@
 // PROTEZIONI: i file protetti (fsProtected, chiavi, certificati, copie di configurazione: archIsSecret) non entrano MAI: nominati a mano fanno fallire
 // il comando, trovati scendendo nelle cartelle si saltano con un avviso. I nomi nascosti (.xxx, .tmp~) si saltano scendendo nelle cartelle e si
 // includono solo se li scrivi per nome. L'archivio non entra mai in se stesso. Nomi relativi (mai '/' iniziale, mai ".."), solo caratteri ammessi.
-// TETTI: ingresso totale e file come gli altri comandi (vos_shell_arch.h: 128 KB dalla pagina web, 1 MB dalla seriale, 1 MB per file), al massimo 64 voci,
+// TETTI: ingresso totale e file come gli altri comandi (vos_shell_arch.h: 128 KB dalla pagina web, 1 MB dalla seriale, 1 MB per file), al massimo 30 voci (ZIP_MAX_ENTRIES),
 // archivio finale entro lo spazio libero meno 16 KB: se non ci sta si interrompe e il temporaneo sparisce.
 // SCRITTURA: in "archivio.zip.tmp~" e scambio alla fine (FsAtomicWriter): un errore o Ctrl+C non lascia un archivio a meta.
-// Il compressore (circa 168 KB di PSRAM) si prende per ogni file compresso e si rilascia subito.
+// MEMORIA: il blocco Work sull'heap e di 5922 byte (30 voci x 124 + buffer di 2048 + intestazione 154), non servono la PSRAM ne altro.
 #include "vos_shell_arch.h"
 
 using namespace shx;
@@ -28,17 +28,16 @@ namespace {
 
 const uint32_t kSigLoc = 0x04034b50, kSigCen = 0x02014b50, kSigEocd = 0x06054b50;
 const size_t   kLocLen = 30, kCenLen = 46, kEocdLen = 22;
-const uint16_t kVersion = 20;                         // 2.0: serve per deflate e cartelle
+const uint16_t kVersion = 20;                         // 2.0: serve per le cartelle
 const uint16_t kMadeBy = (3 << 8) | 20;               // creato su Unix, versione 2.0: i permessi stanno negli attributi
 const uint32_t kAttrFile = 0x81A4u << 16;             // regular file 0644
 const uint32_t kAttrDir = (0x41EDu << 16) | 0x10;     // cartella 0755 e il bit "cartella" del DOS
-const size_t   kExtraRoom = 32768;                    // oltre ai dati: intestazioni e directory centrale (64 voci con nomi di 100 caratteri: circa 16 KB)
+const size_t   kExtraRoom = 32768;                    // oltre ai dati: intestazioni e directory centrale (30 voci con nomi di 100 caratteri: circa 8 KB)
 
-static_assert(ARCH_MAX_ENTRIES == 64, "il testo dell'errore dice 64: aggiornalo (e lang_src.json)");
+static_assert(ZIP_MAX_ENTRIES == 30, "il testo dell'errore dice 30: aggiornalo (e lang_src.json)");
 
 struct Opts {
   bool recurse = false, quiet = false, force = false, junk = false;
-  int  level = 6;                                     // 0 = store
   Word archive;
   int  operands = 0;                                  // quante parole dopo l'archivio
 };
@@ -52,10 +51,11 @@ struct Entry {
 
 // Memoria di lavoro, sull'heap (lo stack del server web e piccolo)
 struct Work {
-  Entry   ent[ARCH_MAX_ENTRIES];
+  Entry   ent[ZIP_MAX_ENTRIES];
   ArchIo  io;
   uint8_t hb[kCenLen + ARCH_NAME_MAX + 8];            // un'intestazione (locale o centrale) con il suo nome
 };
+static_assert(sizeof(Work) < 6144, "il blocco di lavoro di zip deve restare sotto 6 KB (la C3 ha circa 12 KB liberi)");
 
 struct Build {
   Build(ArchCtx& ctx, Work& work, const Opts& o, const char* archivePath) : c(ctx), w(work), op(o), archive(archivePath) {
@@ -79,7 +79,7 @@ bool stop(Build& b, const char* name, const char* why) {
   return false;
 }
 
-// Errore del compressore o della scrittura (spazio finito, tempo, Ctrl+C...)
+// Errore della scrittura o della guardia (spazio finito, tempo, Ctrl+C...)
 bool stopDef(Build& b, const char* name, DrvDefErr e) {
   b.c.failDef(name, e, b.out.why());
   b.fatal = true;
@@ -159,11 +159,10 @@ bool patchSizes(Build& b, const Entry& e) {
   return true;
 }
 
-// "  adding: nome (deflated 45%)" come il comando zip classico (le righe di programma restano in inglese, come quelle di unzip)
+// "  adding: nome (stored 0%)" come il comando zip classico (le righe di programma restano in inglese, come quelle di unzip)
 void say(Build& b, const Entry& e) {
   if (b.op.quiet) return;
-  int pct = e.usize ? (int)(((int64_t)e.usize - (int64_t)e.csize) * 100 / (int64_t)e.usize) : 0;
-  b.c.out().printf("  adding: %s (%s %d%%)\r\n", e.name, e.method == 0 ? "stored" : "deflated", pct);
+  b.c.out().printf("  adding: %s (stored 0%%)\r\n", e.name);
 }
 
 // ---------- voci ----------
@@ -180,31 +179,23 @@ bool addFile(Build& b, VosFile& f, const char* name) {
   if (size > ARCH_MAX_ENTRY) { b.c.tooBig(name, ARCH_MAX_ENTRY); b.fatal = true; return false; }
   b.inBytes += size;
   if (b.inBytes > b.c.lim().maxIn) { b.c.tooBig(name, b.c.lim().maxIn); b.fatal = true; return false; }
-  uint16_t method = (b.op.level == 0 || size == 0) ? 0 : 8;       // un file vuoto non si comprime (come fa il comando classico)
-  Entry* e = beginEntry(b, name, false, method);
+  Entry* e = beginEntry(b, name, false, 0);
   if (!e) return false;
 
-  DrvDeflate def;                                                  // la PSRAM del compressore si libera all'uscita da questa funzione
   DrvDefErr de = DDF_OK;
-  if (method == 8) de = def.open(b.op.level, ArchFileOut::sink, &b.out);
   uint32_t crc = 0;
   size_t read = 0, n;
   while (de == DDF_OK && (n = f.read(b.w.io.b, sizeof b.w.io.b)) > 0) {
     read += n;
     if (read > size) break;                                        // il file e cresciuto mentre lo leggevo
-    if (method == 8) {
-      de = def.push(b.w.io.b, n, &b.c.guard());
-    } else {
-      crc = drvCrc32(crc, b.w.io.b, n);
-      de = b.out.put(b.w.io.b, n) ? b.c.guard().tick(n) : DDF_SINK;
-    }
+    crc = drvCrc32(crc, b.w.io.b, n);
+    de = b.out.put(b.w.io.b, n) ? b.c.guard().tick(n) : DDF_SINK;
   }
-  if (de == DDF_OK && method == 8) de = def.finish(&b.c.guard());
   if (de != DDF_OK) return stopDef(b, name, de);
   if (read != size) return stop(b, name, tr("Il file e cambiato durante la lettura"));
   e->usize = (uint32_t)size;
-  e->crc = method == 8 ? def.crc() : crc;
-  e->csize = method == 8 ? (uint32_t)def.outBytes() : (uint32_t)size;
+  e->crc = crc;
+  e->csize = (uint32_t)size;
   if (!patchSizes(b, *e)) return false;
   say(b, *e);
   return true;
@@ -235,7 +226,7 @@ bool isDuplicate(const Build& b, const char* name) {
   return false;
 }
 
-bool tooMany(Build& b) { return stop(b, "", tr("Troppe voci (massimo 64)")); }
+bool tooMany(Build& b) { return stop(b, "", tr("Troppe voci (massimo 30)")); }
 
 // Aggiunge abs (file o cartella) con il nome rel. named: l'ha scritto l'utente (non l'ho trovato scendendo). rel vuoto = la cartella corrente
 // stessa: non ha una voce, se ne aggiungono solo i figli. Ritorna false solo per un errore che ferma tutto.
@@ -260,7 +251,7 @@ bool addTree(Build& b, const char* abs, const char* rel, unsigned depth, bool na
     if (!rel[0]) return stop(b, abs, tr("Percorso non valido"));
     if (!storedName(b, abs, rel, false, name)) { b.c.fail(rel, tr("Nome non ammesso, saltato")); return true; }
     if (isDuplicate(b, name)) { b.c.fail(rel, tr("Nome gia presente nell'archivio, saltato")); return true; }
-    if (b.count >= ARCH_MAX_ENTRIES) return tooMany(b);
+    if (b.count >= ZIP_MAX_ENTRIES) return tooMany(b);
     return addFile(b, f, name);
   }
 
@@ -268,7 +259,7 @@ bool addTree(Build& b, const char* abs, const char* rel, unsigned depth, bool na
   if (rel[0] && !b.op.junk) {                                      // con -j le cartelle non entrano
     if (!storedName(b, abs, rel, true, name)) { b.c.fail(rel, tr("Nome non ammesso, saltato")); return true; }
     if (!isDuplicate(b, name)) {
-      if (b.count >= ARCH_MAX_ENTRIES) return tooMany(b);
+      if (b.count >= ZIP_MAX_ENTRIES) return tooMany(b);
       if (!addDir(b, name)) return false;
     }
   }
@@ -323,7 +314,8 @@ bool parseArgs(const char* line, OutSink& o, Opts& op) {
       else if (*p == 'q') op.quiet = true;
       else if (*p == 'f') op.force = true;
       else if (*p == 'j') op.junk = true;
-      else if (*p >= '0' && *p <= '9') op.level = *p - '0';
+      else if (*p == '0') continue;                                      // -0: senza compressione, e l'unico modo
+      else if (*p >= '1' && *p <= '9') { o.println(trf("%s: %s", "zip", tr("Compressione non disponibile: i file si archiviano senza compressione (-0)"))); return false; }
       else if (*p == 'u' || *p == 'd' || *p == 'g') { o.println(trf("%s: %s", "zip", tr("Aggiornare o togliere voci di un archivio che c'e gia non e supportato: ricrealo con -f"))); return false; }
       else { o.println(trf("%s: opzione non valida -- '%c'", "zip", *p)); cmdUsage(o, "zip"); return false; }
     }

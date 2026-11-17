@@ -1,6 +1,6 @@
 # sd-spi (vdb)
 
-Lettore di microSD (SPI) come driver Berry: pagina con prova a 9 passi, widget della Home, comandi sd e formattazione.
+Lettore di microSD (SPI) come driver di funzioni VesevOS: pagina con prova a 9 passi, widget della Home, comandi sd e formattazione.
 
 - Tipo: driver
 - Autore: Domenico Paolella

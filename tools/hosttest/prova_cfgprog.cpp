@@ -51,9 +51,9 @@ static std::string esporta() {
 int main() {
   cfgDefaults();
   // 1. valori di fabbrica
-  CHECK(cfg.berryOn && cfg.elfOn && cfg.funcOff == 0 && cfg.bootN == 0);
+  CHECK(cfg.funzioniAttive && cfg.elfOn && cfg.funcOff == 0 && cfg.bootN == 0);
   // 2. andata e ritorno
-  cfg.berryOn = false;
+  cfg.funzioniAttive = false;
   cfg.elfOn = false;
   cfg.funcOff = (uint16_t)((1u << funcIndex("sd")) | (1u << funcIndex("gpio")));
   cfg.bootN = 2;
@@ -66,12 +66,12 @@ int main() {
   cfgDefaults();
   ErrBuf e;
   CHECK(cfgImport(t.c_str(), t.size(), e));
-  CHECK(!cfg.berryOn && !cfg.elfOn);
+  CHECK(!cfg.funzioniAttive && !cfg.elfOn);
   CHECK(cfg.funcOff == (uint16_t)((1u << funcIndex("sd")) | (1u << funcIndex("gpio"))));
   CHECK(cfg.bootN == 2 && cfg.boot[0].kind == 0 && !strcmp(cfg.boot[0].name, "lampeggio") && cfg.boot[1].kind == 2 && !strcmp(cfg.boot[1].name, "sensore"));
   // 3. importare di nuovo lo stesso testo SOSTITUISCE l'elenco (non lo allunga)
   CHECK(cfgImport(t.c_str(), t.size(), e) && cfg.bootN == 2);
-  // 4. app Berry e id sconosciuti
+  // 4. app e id sconosciuti
   std::string u = "config func 'func'\n\toption off 'ble,nonesiste,,time'\nconfig progboot 'progboot'\n\toption p1 'b:app1'\n";
   CHECK(cfgImport(u.c_str(), u.size(), e));
   CHECK(cfg.funcOff == (uint16_t)((1u << funcIndex("ble")) | (1u << funcIndex("time"))));
@@ -91,7 +91,7 @@ int main() {
   cfgDefaults();
   std::string old = "config system 'system'\n\toption hostname 'vesevos9'\n";
   CHECK(cfgImport(old.c_str(), old.size(), e));
-  CHECK(cfg.berryOn && cfg.elfOn && cfg.funcOff == 0 && cfg.bootN == 0);
+  CHECK(cfg.funzioniAttive && cfg.elfOn && cfg.funcOff == 0 && cfg.bootN == 0);
   // 8. app che salvano sulla microSD (sezione progdata): di fabbrica nessuna, andata e ritorno, sostituisce l'elenco, voci storte ignorate, massimo 8
   CHECK(cfg.dataSdN == 0);
   cfg.dataSdN = 2;

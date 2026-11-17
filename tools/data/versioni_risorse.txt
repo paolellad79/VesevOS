@@ -1,0 +1,12 @@
+# Versioni PROPRIE dei file di risorse (decisione del 16/11/2026: le risorse non seguono la versione del firmware).
+# REGOLA (16/11/2026): la versione e un NUMERO INTERO, come `"versione": "1"` nello store.
+#   - parte da 1 (la prima versione pubblicata di un file e la 1);
+#   - 0 e riservato a "versione non dichiarata o sconosciuta" (mai scritto qui);
+#   - niente lettere, niente punti, niente numero del firmware (non e 1.8.24 ne 1.8.24b);
+#   - si alza a mano di 1 SOLO quando cambia il contenuto del file.
+# Chiave=valore, una per riga. Letto da tools/versioni_risorse.py (rifiuta valori che non sono solo cifre, >= 1).
+# pagina = versione della pagina web (mostrata in Informazioni e nella scheda Risorse); radio e manuale = riga "versione=" dentro il file.
+# comuni.json.gz e licenze: nessun numero (non ne hanno oggi, non inventato).
+pagina=1
+radio=1
+manuale=1

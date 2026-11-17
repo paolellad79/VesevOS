@@ -1,11 +1,12 @@
 // VesevOS Recovery - impostazioni lette (in sola lettura) dal file /etc/vesevos.conf di VesevOS (o /vesevos.conf, il posto di prima), nella partizione LittleFS "spiffs".
 #pragma once
 #include <string>
+#include "rec_version.h"
 
 struct RecUser { std::string name, salt, hash; int role = 0; bool on = false; };
 
 struct RecCfg {
-  int ledPin = 48, ledBr = 80;                  // LED RGB integrato (WS2812), come in VesevOS
+  int ledPin = REC_LED_PIN, ledBr = 80;                  // LED RGB integrato (WS2812), come in VesevOS
   std::string host = "vesevos", ssid, pass, ip, mask, gw, dns1, dns2, country;
   bool staOn = false, dhcp = true;
   RecUser users[8];

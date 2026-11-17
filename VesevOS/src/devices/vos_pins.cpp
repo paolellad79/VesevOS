@@ -84,11 +84,14 @@ static volatile int g_rqPin = -1, g_rqAct = TA_NONE, g_rqPull = 0;
 // quali GPIO esistono lo dice il file di scheda (boards/)
 static bool pinExists(int g) { return VOS_GPIO_EXISTS(g); }
 
+[[maybe_unused]] static void pinBlockKeys() { tr("LED RGB della scheda"); tr("LED della scheda"); tr("Tasto fisico"); }   // chiavi per le traduzioni
+
 const char* pinTestBlock(int g) {
   if (!pinExists(g)) return tr("Pin inesistente su questa scheda");
   if (g == VOS_PIN_USB_DM || g == VOS_PIN_USB_DP) return tr("USB: serve al collegamento con il PC");
-  if (g == VOS_PIN_LED_RGB) return tr("LED RGB della scheda");
-  if (g == VOS_PIN_BOOT) return tr("Tasto fisico");
+  // periferiche di bordo (LED, tasto...): le elenca il file di scheda
+#define NOTA_BORDO(id, etichetta, colore, gruppo, tab, funzione, widget, pin, nota) if (g == (pin)) return tr(nota);
+  VOS_BOARD_PERIF(NOTA_BORDO)
   if (VOS_GPIO_STRAP(g)) return tr("Pin di avvio: meglio non toccarlo");
   if (pinIsUsed(g) && g != g_tPin) return tr("Gia usato dal sistema");
   // (se l'utente lo ha segnato come collegato a qualcosa, la prova e permessa ma la pagina avvisa)
@@ -206,6 +209,58 @@ bool pinNoteSet(int g, std::string_view name, ErrBuf& err) {
   return true;
 }
 
+// ---- tabella dei piedini (file di scheda): la pagina disegna lo schema da qui ----
+struct RigaPiedino {
+  int8_t lato;
+  int8_t pos;
+  int8_t gpio;    // -1 se non e un GPIO (alimentazione, batteria, ponticello)
+  int8_t tipo;
+  uint16_t bit;
+};
+#define RIGA_PIEDINO(l, p, g, t, b) { l, p, g, t, b },
+static constexpr RigaPiedino kPiedini[] = { VOS_BOARD_PINS(RIGA_PIEDINO) };
+static constexpr int kNumPiedini = (int)(sizeof(kPiedini) / sizeof(kPiedini[0]));
+
+static constexpr bool eUnLed(int g) {
+#if defined(VOS_PIN_LED2)
+  if (g == VOS_PIN_LED2) return true;
+#endif
+  return g == VOS_PIN_LED_RGB;
+}
+
+// Controllo alla compilazione: la tabella non puo contraddire il resto del file di scheda.
+static constexpr bool piedinoCoerente(const RigaPiedino& r) {
+  if (r.lato < 0 || r.lato > 6 || r.pos < 0 || r.tipo < 0 || r.tipo > 6) return false;
+  if (r.gpio < 0) return r.tipo != VOS_PT_GPIO && r.bit == 0;
+  if (r.tipo != VOS_PT_GPIO || !VOS_GPIO_EXISTS(r.gpio)) return false;
+  if (((r.bit & VOS_PF_AVVIO) != 0) != (bool)VOS_GPIO_STRAP(r.gpio)) return false;
+  if (((r.bit & VOS_PF_LED) != 0) != eUnLed(r.gpio)) return false;
+  return ((r.bit & VOS_PF_TASTO) != 0) == (r.gpio == VOS_PIN_BOOT);
+}
+
+static constexpr bool tabellaCoerente() {
+  for (int i = 0; i < kNumPiedini; i++) {
+    if (!piedinoCoerente(kPiedini[i])) return false;
+    for (int k = i + 1; k < kNumPiedini; k++) {
+      bool stessoGpio = kPiedini[i].gpio >= 0 && kPiedini[i].gpio == kPiedini[k].gpio;
+      bool stessoPosto = kPiedini[i].lato == kPiedini[k].lato && kPiedini[i].pos == kPiedini[k].pos;
+      if (stessoGpio || stessoPosto) return false;
+    }
+  }
+  return true;
+}
+static_assert(tabellaCoerente(), "VOS_BOARD_PINS: riga non valida, GPIO o posto doppio, o in contrasto con avvio/LED/tasto");
+
+// Una riga per piedino: [lato, posizione, gpio, tipo, bit]
+static bool piedinoJson(HeapBuf& j) {
+  j.add('[');
+  for (int i = 0; i < kNumPiedini; i++) {
+    const RigaPiedino& r = kPiedini[i];
+    j.addf(i ? ",[%d,%d,%d,%d,%u]" : "[%d,%d,%d,%d,%u]", r.lato, r.pos, r.gpio, r.tipo, (unsigned)r.bit);
+  }
+  return j.add(']');
+}
+
 bool pinBoardJson(HeapBuf& j) {
   int valid = 0, out = 0;
   for (int g = 0; g < SOC_GPIO_PIN_COUNT; g++) {
@@ -225,5 +280,6 @@ bool pinBoardJson(HeapBuf& j) {
     j.addf(first ? "%d" : ",%d", g);
     first = false;
   }
-  return j.add("],\"lay\":" VOS_BOARD_LAYOUT "}");
+  if (!j.add("],\"tab\":")) return false;
+  return piedinoJson(j) && j.add('}');
 }

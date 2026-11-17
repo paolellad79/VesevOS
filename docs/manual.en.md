@@ -22,9 +22,9 @@ The first time it starts, every VesevOS board makes up its own Wi-Fi password, d
 ### Method 1 (recommended): USB cable and serial monitor
 1. Prepare the board with the guide [PREPARE-THE-BOARD.md](PREPARE-THE-BOARD.md) (recovery + VesevOS).
 2. Open Tools > Serial Monitor at 115200 and press RESET on the board.
-3. Read the welcome screen: network name (`VesevOS`), password (e.g. `k7mpq4xtr9ab`: 12 characters, lowercase letters and digits only, no symbols) and address `https://192.168.4.1`.
+3. Read the welcome screen: at the first start the radio is off. Press the BOOT button once (short press): for 10 minutes the `VesevOS` network is on, open and without a password, with the single address `https://192.168.4.1`.
    Press `2` (no Enter) for English, `1` for Italian.
-4. Join the `VesevOS` network with that password from a phone or PC. The page opens by itself; otherwise open `https://192.168.4.1`.
+4. Join the `VesevOS` network from a phone or PC and the guide usually opens by itself (automatic portal); if not, type `https://192.168.4.1` by hand. When the guide is finished the network gets a random password, different for every board (12 characters, lowercase letters and digits).
 5. **Choose the panel password** (at least 6 characters). There is no factory password: you choose it and only you know it.
 6. The **guided setup** starts (the LED shows a rainbow until you finish). Steps: language, country (list with search), board name, antenna,
    **home Wi-Fi or hotspot** (the board tries to connect at once and tells you), **time** (only without home Wi-Fi), finish. See chapter 12.
@@ -67,10 +67,11 @@ the one in the page (Network > Web > HTTPS) or on the serial, then continue. Fro
 ## 5. Country, radio and localization
 System > Localization: country (list with search), language, time zone (the time server is chosen in Network > NTP), date and time formats,
 decimal separator, first day of the week, C/F degrees, antenna and power.
+- **Damaged language file**: if the language file in use is replaced, deleted or damaged, the board switches to Italian and the page opens in emergency mode with a warning. You can upload the language's `.vld` and `.vlp` files again or press "Use Italian". If the page is already open, a notice appears in the bell; the serial shell shows a "Lingua:" line at startup.
 - **The country sets the Wi-Fi channels and the maximum power** according to the rules the board knows: it never exceeds them.
   Without a country the safest rules apply (channels 1-11).
 - The **Radio** item (Devices > Interfaces) has the **Airplane mode** and **Wi-Fi + BLE** tabs; the latter has two blocks: **Settings** (antenna, gain, power: you choose them) and **Information** (channels, country limit, maximum power, rules: calculated by the board, read-only).
-- External antenna: enter its gain (dBi) and the power drops by itself to stay within the limit.
+- The country limit is an EIRP (it includes the antenna): the power at the chip drops by the antenna gain, always. With the board antenna (CrossAir CA-C03, 4.3 dBi) the cap in Europe is 15 dBm at the chip; with an external antenna enter its gain (dBi) and that one is used, not the sum. Without a chosen country: channels 1-11 and 15 dBm at the chip.
 - **Choosing the country does not by itself guarantee that the finished product is compliant**: that also depends on the hardware, the antenna, the installation and the local rules. Whoever installs the board is responsible.
 
 ## 6. Services (off by default)
@@ -140,9 +141,9 @@ rules cannot be exceeded; (3) no identical passwords.
 **End of the guided setup**
 - **Home Wi-Fi or hotspot** step: pick the network and password, press Next: the board tries to connect at once (up to 20 seconds) and tells you if it worked.
 - **Time** step (only if you skip the Wi-Fi): the NTP service turns off and you are asked for time zone, date and time (preset from this device). With home Wi-Fi the time comes from the Internet (NTP) and this step does not appear. Note: **the board has no clock battery**, if you power it off the time is lost.
-- At the end, with the home Wi-Fi, the page shows the new address (with QR). Connect your phone to that network and open it: **at the first
-  login from there** hotspot, automatic portal and HTTP turn off by themselves. If the board cannot connect, the hotspot comes back by itself
-  and a warning appears on Home. Without home Wi-Fi nothing turns off (except NTP).
+- At the end, with the home Wi-Fi, the page shows the new address (with QR). Connect your phone to that network and open it: hotspot, automatic portal
+  and DHCP **stay off** (you turn them on from Network > Services); HTTP (only a redirect to HTTPS) stays on. If the board cannot
+  connect, hold the BOOT button for 8 seconds: the hotspot turns back on. Without home Wi-Fi nothing turns off (except NTP).
 - **Login page**: shows the board's date, time and time zone and warns if the time differs from your device.
 
 ## 13. Setup from the serial line only
@@ -189,6 +190,7 @@ Administration > Self-test (Admin only). Press **Start diagnosis**: 16 tests one
 
 ## 18. Log and reboot journal (new in 1.7.8)
 Security > Log, Log tab (the Reboot journal tab is next to it): each line has the level [E] error, [W] warning, [I] info, [D] detail. **Show up to** only filters the view; **Record up to** (Admin) decides what is written (factory: Info; Detail only to hunt a problem). Below, the **Reboot journal**: last 20 boots with reason, how long the board was on, minimum RAM and busiest task; it survives power-off. Serial: `log level [0-3]`, `reboots [clear]`. The journal is in the Self-test report (the last serious line only with "real names").
+- **LED flash codes (new in 1.8.24)**: after a restart caused by a fault (crash, watchdog, low voltage) the LED flashes a two-group code: first the **class** (1 to 9 flashes), a pause, then the **detail** (1 to 5 flashes), then a longer pause before it repeats; it runs for 3 rounds. Short flash = 3 per second. Three LONG flashes = unknown code. Example: 3 flashes, pause, 1 flash = D301 = task watchdog. A lasting error (NVS or file system not starting) flashes one round every 60 seconds. A fatal or critical fault flashes even when the LED is switched off in the settings; other codes follow that choice. Where: S3 on the colour LED (red, orange or yellow); C3 on the blue LED; C6 on the simple LED (GPIO15), while the colour LED stays for the normal status. On the C3 and C6 the code of the most serious faults also flashes inside the crash, before the restart (about 4 seconds at most). Admin commands: `diag codici` (last code and list), `diag led <class> <detail>` (try a code). The code also appears in the reboot journal as `[D301]`. Core dump to flash is off: the crash report (`crash` command) and the journal remain. To check by eye: which LED level means on or off on C3 and C6.
 
 ## 19. Configurable serial port (new in 1.7.9)
 Devices > Interfaces > Serial > **Serial port (USB cable)** (Admin only) or, from the serial port itself, the `serial` command. Changes apply at once and stay after a restart.
@@ -268,10 +270,12 @@ The board holds two programs: **VesevOS** and the **recovery** (small, used only
 
 ## 27. What is new in 1.8.0 and 1.8.0b (summary)
 - **Serial login**: the shell asks for user, password and MFA code; roles for each subcommand; the password stays out of the history. After too many errors the same lock as on the web page applies.
-- **Commands**: `pwd`, `cd`, `ls`, prompt `user@hostname:folder$`, Tab, `man <command>`, `whoami`, `id`, `df`, `uname`, `time`, `ping`, `gzip`/`gunzip`/`zcat`, `zip`/`unzip`, `tar`, `cpu` (governor: 80/160/240/ondemand/conservative/schedutil), and the `vesevos-*` commands (cpuinfo, services, bugreport, config, network, led_control, cleaner, drive_manager, backup, update).
+- **Command manual (16/11/2026, source, not yet built)**: `man <command>` reads the description and the examples from the file `/usr/share/vesevos/manuale.txt` (checked with `SHA256SUMS`); the short entries (up to 300 bytes) are there, for the long ones `man` shows the address of the full text on GitHub (`aiuto/<command>.md`, needs internet). If the file is missing `man` says so and still shows name, usage, subcommands, aliases and role.
+- **Commands**: `pwd`, `cd`, `ls`, prompt `user@hostname:folder$`, Tab, `man <command>`, `whoami`, `id`, `df`, `uname`, `time`, `ping`, `zip`/`unzip` (archives without compression), `tar`, `cpu` (governor: 80/160/240/ondemand/conservative/schedutil), and the `vesevos-*` commands (cpuinfo, services, bugreport, config, network, led_control, cleaner, drive_manager, backup, update).
 - **Security**: `suspend`, `poweroff` and `/api/sleep` for Admin only, with confirmation. `locale country/tx/antenna`, `wifi set/off`, `date set` and `audit ack` are forbidden to the Operator.
 - **LED**: triggers `none/state/heartbeat/flash/wifi/cpu/default-on`, colors and CPU threshold.
 - **Network**: with the HTTP->HTTPS redirect on and HTTPS active, the HTTP port is served by a small server that only answers the redirect (less RAM; takes effect when the servers restart).
+- **Resource files (16/11/2026, source, not yet built)**: after start-up the board checks every file in `/usr/share/vesevos` against `SHA256SUMS`. If one is different or missing it warns the administrator (log, audit, bell, shell welcome) and the service of that file uses its fallback. In *Security > Updates > Resources* you see the state of each one; the *Download and upload again* button makes your browser download the files from GitHub (`risorse/<version>/`; it starts only when you press it, GitHub sees your network's public IP address) and upload them to the board, which accepts a file only if its SHA-256 matches its line in the list. From 1.8.24a the firmware no longer has a fixed identifier for the resources: the list is checked for format and known names, and in *Information* and in the *Resources* tab you find the page version and the first 8 digits of its SHA-256. If there is no room to keep two copies the upload is refused. The *Load from file* button (16/11/2026, source) loads one or more files chosen from your computer: SHA256SUMS first, the others are recognised from the board's list; name, length and SHA-256 are checked at once in the page and a wrong file does not stop the others. The same *Load from file* button is in the Recovery tab (same dialog as before, the most delicate operation) and the Packages tab (scripts, apps and drivers, the type is recognised from the extension); the Firmware tab keeps *Load a file from the computer*.
 - **Updates**: *Update via recovery* menu (Admin only); ready files, SHA-256 and `indice.json` in the repository's `firmware/` folder; first install from the browser with the `flash/` page (NOT TESTED with a real board). There is no digital signature: SHA-256 tells you the file is not corrupted, not who made it.
 - This is a summary: details and the tests still to be done are in the CHANGELOG and in `docs/KNOWN_ISSUES.en.md`.
 

@@ -7,7 +7,11 @@
 #include <driver/gpio.h>
 #include "vos_drv_gpio.h"
 
+#if SOC_SPI_PERIPH_NUM > 2
 static const spi_host_device_t HOST = SPI3_HOST;
+#else
+static const spi_host_device_t HOST = SPI2_HOST;  // C6: solo SPI2
+#endif
 static spi_device_handle_t g_dev = nullptr;
 static bool g_bus = false;
 static int  g_cs = -1, g_mosi = -1, g_miso = -1, g_sck = -1;

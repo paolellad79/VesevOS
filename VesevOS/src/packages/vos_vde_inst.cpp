@@ -64,8 +64,8 @@ bool nomeSd(char* out, size_t cap) {
   return false;
 }
 
-// C'e gia un driver Berry con questo nome? Un nome vale per un solo driver, .vdb o .vde.
-bool esisteBerry(const char* nome) {
+// C'e gia un driver con questo nome? Un nome vale per un solo driver, .vdb o .vde.
+bool esisteDriverFunzioni(const char* nome) {
   char p[64];
   snprintf(p, sizeof p, "%s/%s%s", VDE_DIR, nome, VOS_EXT_DRV_B);
   if (drvFsExists(p)) return true;
@@ -105,7 +105,7 @@ bool vdeLeggi(const char* nome, VdeInfo& v, uint8_t** elf, ErrBuf& err) {
 
 bool vdeSalva(const char* nome, const uint8_t* file, size_t len, ErrBuf& err) {
   if (!utilNameOk(nome, strlen(nome))) { err = tr("Nome non valido"); return false; }
-  if (esisteBerry(nome)) { err = tr("Esiste gia un driver con questo nome"); return false; }
+  if (esisteDriverFunzioni(nome)) { err = tr("Esiste gia un driver con questo nome"); return false; }
   VdeInfo* v = new VdeInfo();
   bool ok = vdeParse(file, len, nome, *v, nullptr, err);
   delete v;
@@ -166,7 +166,7 @@ bool vdeInstalla(const char* nome, const char* pinsCsv, ErrBuf& err) {
   VdeInfo* v = new VdeInfo();
   bool ok = vdeLeggi(nome, *v, nullptr, err);
   if (!ok) { delete v; return false; }
-  if (esisteBerry(nome)) { err = tr("Esiste gia un driver con questo nome"); delete v; return false; }
+  if (esisteDriverFunzioni(nome)) { err = tr("Esiste gia un driver con questo nome"); delete v; return false; }
   char gia[16];
   if (v->bus == VB_SD && nomeSd(gia, sizeof gia)) { err.setf(tr("La microSD e gia configurata come %s: toglila prima (pagina Periferiche) o dai altri pin a quel driver"), gia); delete v; return false; }
   int pin[VDE_SIG_MAX] = {0}, n = segnali(v->bus, v->nsig);
@@ -238,7 +238,7 @@ bool vdeElencoJson(HeapBuf& out) {
   for (int i = 0; ok && i < n; i++) {
     ErrBuf e;
     bool buono = vdeLeggi(nomi[i], *v, nullptr, e);
-    if (buono && esisteBerry(nomi[i])) { buono = false; e = tr("Esiste gia un driver con questo nome"); }   // un nome vale per un solo driver
+    if (buono && esisteDriverFunzioni(nomi[i])) { buono = false; e = tr("Esiste gia un driver con questo nome"); }   // un nome vale per un solo driver
     if (i) ok = out.add(',');
     ok = ok && heapAddf(out, "{\"n\":\"%s\",\"t\":\"", nomi[i]);
     ok = ok && out.addJson(buono ? v->title : nomi[i]);

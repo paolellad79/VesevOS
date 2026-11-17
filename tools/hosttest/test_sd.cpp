@@ -120,7 +120,7 @@ int main() {
     g_sd.failWrite = true; CHECK(!sdProve(o, sizeof o, e, sizeof e) && has(e, "scrivere")); g_sd.failWrite = false;
     g_sd.corrupt = true;   CHECK(!sdProve(o, sizeof o, e, sizeof e) && has(e, "coincidono")); g_sd.corrupt = false; }
 
-  // ---- primitive dei file (le usa Berry: sd_read, sd_write, sd_rm, sd_mkdir) ----
+  // ---- primitive dei file (le usa funzioni VesevOS: sd_read, sd_write, sd_rm, sd_mkdir) ----
   { uint8_t buf[16]; char e[SD_ERR_MAX];
     CHECK(sdWriteBytes("/a.txt", (const uint8_t*)"ciao", 4, false, e, sizeof e) && g_sd.files["/a.txt"] == "ciao");
     CHECK(sdWriteBytes("/a.txt", (const uint8_t*)"!", 1, true, e, sizeof e) && g_sd.files["/a.txt"] == "ciao!");

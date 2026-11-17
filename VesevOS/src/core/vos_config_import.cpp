@@ -13,6 +13,9 @@
 #include "vos_config_int.h"
 #include "vos_func_ids.h"
 #include "vos_cpugov.h"
+#include "vos_alias.h"
+#include "vos_ramwd_rule.h"
+#include "../drivers/vos_drv_heap.h"
 
 using std::string_view;
 
@@ -45,7 +48,16 @@ bool cfgParseRange(string_view txt, uint32_t& a, uint32_t& b) {
 }
 
 
+// Sezioni [led] e [led2] = nomi vecchi (ora [led_rgb1] e [led1]): si leggono ancora, con un avviso una volta sola; al prossimo salvataggio si scrivono i nuovi
+static void avvisoSezioneVecchia() {
+  static bool detto = false;
+  if (detto) return;
+  detto = true;
+  vlog("%s", tr("Configurazione: le sezioni [led] e [led2] hanno nomi vecchi: lette lo stesso, al prossimo salvataggio diventano [led_rgb1] e [led1]"));
+}
+
 // Applica una chiave. sec = nome sezione, k = chiave, v = valore (con lo zero finale subito dopo la fine della vista)
+static bool s_ramPercVisto = false;   // il file ha gia la riga "ramperc": vale piu della vecchia "ramkb"
 bool g_cfgHadSetupKey = false;      // il file ha la riga "setup" (scritta dalla 1.7.1 in poi)
 static void applyKey(string_view sec, string_view k, string_view v) {
   if (sec == "system") {
@@ -72,6 +84,9 @@ static void applyKey(string_view sec, string_view k, string_view v) {
     else if (k == "lang") { if (langCodeValid(v)) cfg.lang = v; }
     else if (k == "setup") { cfg.setupDone = (v == "1"); g_cfgHadSetupKey = true; }
     else if (k == "https") cfg.https = (v != "0");
+  }
+  else if (sec == "alias") {
+    aliasImportaChiave(k, v);                          // "<nome>.alias" e "<nome>.descrizione"; valori non validi ignorati
   }
   else if (sec == "pins") {
     if (k.size() >= 2 && k[0] == 'n') { int g = viewToLong(k.substr(1)); if (g >= 0 && g < VOS_GPIO_COUNT && v.size() <= 24) cfg.pinNote[g] = v; }
@@ -107,6 +122,11 @@ static void applyKey(string_view sec, string_view k, string_view v) {
     else if (k == "ip") cfg.ip.set(v); else if (k == "mask") cfg.mask.set(v);
     else if (k == "gw") cfg.gw.set(v); else if (k == "dns1") cfg.dns1.set(v);
     else if (k == "dns2") cfg.dns2.set(v);
+    else if (k == "ip6on") cfg.ip6On = (v == "1");
+    else if (k == "ip6fisso") cfg.ip6Fisso = (v == "1");
+    else if (k == "ip6ind") cfg.ip6Ind.set(v);
+    else if (k == "ip6gw") cfg.ip6Gw.set(v);
+    else if (k == "ip6dns") cfg.ip6Dns.set(v);
   } else if (sec == "auth") {
     if (k == "salt" && !v.empty()) cfg.authSalt.set(v);          // file vecchi (1.7.0)
     else if (k == "hash" && !v.empty()) cfg.authHash.set(v);
@@ -142,7 +162,8 @@ static void applyKey(string_view sec, string_view k, string_view v) {
       if (p2 != string_view::npos) fwRuleSetName(r, v.data() + p2 + 1, v.size() - p2 - 1);
       cfg.fw[cfg.fwN++] = r;
     }
-  } else if (sec == "led") {
+  } else if (sec == "led_rgb1" || sec == "led") {          // "led" = nome vecchio, ancora letto
+    if (sec == "led") avvisoSezioneVecchia();
     if (k == "mode") cfg.ledMode = clampL(viewToLong(v), 0, LED_MODE_COUNT - 1);
     else if (k == "color") cfg.ledColor = (uint32_t)strtoul(v.data(), NULL, 10) & 0xFFFFFF;
     else if (k == "brightness") cfg.ledBrightness = clampL(viewToLong(v), 0, 255);
@@ -152,8 +173,12 @@ static void applyKey(string_view sec, string_view k, string_view v) {
       for (int i = 0; i < LEDSRC_COUNT; i++)
         if (k == kLedSrcKey[i]) cfg.ledSrcColor[i] = (uint32_t)strtoul(v.data(), NULL, 10) & 0xFFFFFF;
     }
-  } else if (sec == "led2") {
-    // LED aggiuntivo tolto nella 1.7.0: la sezione dei file vecchi si ignora
+  } else if (sec == "led1" || sec == "led2") {          // "led2" = nome vecchio, ancora letto
+    if (sec == "led2") avvisoSezioneVecchia();
+    // LED2 (un solo colore): modo e soglia CPU. Le chiavi dei file vecchi (prima della 1.7.0) si ignorano
+    if (k == "mode") cfg.led2Mode = clampL(viewToLong(v), 0, LED_MODE_COUNT - 1);
+    else if (k == "cputhr") cfg.led2CpuThr = clampL(viewToLong(v), 10, 95);
+    else if (k == "brightness") cfg.led2Brightness = clampL(viewToLong(v), 0, 255);
   } else if (sec == "mqtt") {
     if (k == "auto") cfg.mqttAuto = (v == "1");
     else if (k == "host") cfg.mqttHost.set(v);
@@ -198,7 +223,8 @@ static void applyKey(string_view sec, string_view k, string_view v) {
     else if (k == "net") cfg.wdNet = (v != "0");
     else if (k == "ram") cfg.wdRam = (v != "0");
     else if (k == "netmin") cfg.wdNetMin = clampL(viewToLong(v), 2, 1440);
-    else if (k == "ramkb") cfg.wdRamKb = clampL(viewToLong(v), 8, 200);
+    else if (k == "ramperc") { cfg.wdRamPerc = ramWdClampCrit((int)viewToLong(v)); s_ramPercVisto = true; }
+    else if (k == "ramkb") { if (!s_ramPercVisto) cfg.wdRamPerc = ramPercDaKb((uint32_t)clampL(viewToLong(v), 0, 4096), drvHeapTotal()); }   // file vecchio: KB liberi -> % usata equivalente
     else if (k == "updays") cfg.wdUpDays = clampL(viewToLong(v), 0, 365);
     else if (k == "at") cfg.wdAt = clampL(viewToLong(v), -1, 1439);
     else if (k == "days") cfg.wdDays = viewToLong(v) & 0x7F;
@@ -215,7 +241,7 @@ static void applyKey(string_view sec, string_view k, string_view v) {
     if (k == "enabled") cfg.elfOn = (v == "1");
 #endif
   } else if (sec == "vdb") {
-    if (k == "enabled") cfg.berryOn = (v == "1");
+    if (k == "enabled") cfg.funzioniAttive = (v == "1");
   } else if (sec == "func") {
     if (k == "off") {                                              // "sd,gpio": id sconosciuti ignorati
       cfg.funcOff = 0;
@@ -285,7 +311,8 @@ bool cfgImport(const char* text, size_t len, ErrBuf& err) {
   char val[CFG_VAL_MAX], tmp[32];
   int ln = 0, applied = 0;
   size_t i = 0;
-  bool fwSeen = false, bootSeen = false, dataSeen = false, tooLong;
+  s_ramPercVisto = false;
+  bool fwSeen = false, bootSeen = false, dataSeen = false, aliasSeen = false, tooLong;
   string_view all(text, len);
   while (i <= len) {
     size_t e = all.find('\n', i);
@@ -304,6 +331,7 @@ bool cfgImport(const char* text, size_t len, ErrBuf& err) {
       if (!strcmp(sec, "firewall") && !fwSeen) { fwSeen = true; cfg.fwN = 0; }   // la lista delle regole si sostituisce
       if (!strcmp(sec, "progboot") && !bootSeen) { bootSeen = true; cfg.bootN = 0; }   // anche quella dei programmi con avvio automatico
       if (!strcmp(sec, "progdata") && !dataSeen) { dataSeen = true; cfg.dataSdN = 0; }   // e quella delle app che salvano sulla microSD
+      if (!strcmp(sec, "alias") && !aliasSeen) { aliasSeen = true; aliasImportaInizio(); }   // la lista degli alias si sostituisce
       continue;
     }
     if (t.substr(0, 7) == "option ") {

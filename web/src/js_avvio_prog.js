@@ -1,4 +1,4 @@
-/* ===== Avvio: programmi con avvio automatico (script, app Berry, app ELF). Elenco e ordine; solo l'Admin cambia ===== */
+/* ===== Avvio: programmi con avvio automatico (script, app, app ELF). Elenco e ordine; solo l'Admin cambia ===== */
 var BP={list:[],cand:[],max:8};
 function bpLoad(){
   var cs=[];

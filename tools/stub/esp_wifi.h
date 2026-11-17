@@ -39,9 +39,11 @@ typedef struct { uint8_t bssid[6]; uint8_t ssid[33]; uint8_t primary; int8_t rss
 typedef struct { uint8_t* ssid; uint8_t* bssid; uint8_t channel; bool show_hidden; wifi_scan_type_t scan_type;
                  union { struct { uint32_t min; uint32_t max; } active; uint32_t passive; } scan_time; } wifi_scan_config_t;
 typedef struct { uint8_t reason; } wifi_event_sta_disconnected_t;
+typedef struct { uint8_t mac[6]; uint8_t aid; bool is_mesh_child; } wifi_event_ap_staconnected_t;
+typedef struct { uint8_t mac[6]; uint8_t aid; bool is_mesh_child; uint16_t reason; } wifi_event_ap_stadisconnected_t;
 typedef struct { uint8_t pin_code[8]; } wifi_event_sta_wps_er_pin_t;
 typedef struct { int num; } wifi_sta_list_t;
-typedef enum { WIFI_EVENT_STA_START, WIFI_EVENT_STA_STOP, WIFI_EVENT_STA_CONNECTED, WIFI_EVENT_STA_DISCONNECTED, WIFI_EVENT_AP_START, WIFI_EVENT_AP_STOP,
+typedef enum { WIFI_EVENT_STA_START, WIFI_EVENT_STA_STOP, WIFI_EVENT_STA_CONNECTED, WIFI_EVENT_STA_DISCONNECTED, WIFI_EVENT_AP_START, WIFI_EVENT_AP_STOP, WIFI_EVENT_AP_STACONNECTED, WIFI_EVENT_AP_STADISCONNECTED,
                WIFI_EVENT_STA_WPS_ER_SUCCESS, WIFI_EVENT_STA_WPS_ER_FAILED, WIFI_EVENT_STA_WPS_ER_TIMEOUT, WIFI_EVENT_STA_WPS_ER_PIN } wifi_event_t;
 enum { WIFI_REASON_UNSPECIFIED = 1, WIFI_REASON_AUTH_EXPIRE = 2, WIFI_REASON_AUTH_LEAVE = 3, WIFI_REASON_ASSOC_EXPIRE = 4, WIFI_REASON_ASSOC_TOOMANY = 5,
        WIFI_REASON_NOT_AUTHED = 6, WIFI_REASON_NOT_ASSOCED = 7, WIFI_REASON_ASSOC_LEAVE = 8, WIFI_REASON_ASSOC_NOT_AUTHED = 9,

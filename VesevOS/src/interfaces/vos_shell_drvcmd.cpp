@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_shell_drvcmd.cpp
-// I comandi dei DRIVER nella shell (esempio: "sd ls /"). Il firmware non li conosce: sono dichiarati nel file del driver ([commands]) e scritti in Berry
+// I comandi dei DRIVER nella shell (esempio: "sd ls /"). Il firmware non li conosce: sono dichiarati nel file del driver ([commands]) e scritti nelle funzioni VesevOS
 // ([cmd]); qui la shell li cerca nel registro (packages/vos_drvcmd.cpp), controlla il ruolo e passa le parole come lista di argomenti.
 // I comandi interni vincono SEMPRE (questa funzione si prova dopo di loro). Un driver non puo dare piu diritti di chi lancia il comando.
 //   <comando> <sotto> [parole...]     ogni parola e un argomento; con "testo" nella dichiarazione: la prima parola e un argomento
@@ -78,7 +78,7 @@ bool shDriverCmd(const Word& c, const char* line, OutSink& o, int role) {
   CmdCall* call = new CmdCall();
   memset(call, 0, sizeof *call);
   snprintf(call->sub, sizeof call->sub, "%s", d.sub);
-  HeapBuf out(BERRY_OUT_MAX + 64); ErrBuf err;
+  HeapBuf out(FUNZIONI_USCITA_MAX + 64); ErrBuf err;
   if (buildArgs(line, d, *call, o)) {
     if (drvCmdRun(d, *call, role >= ROLE_ADMIN, out, err)) { if (out.length()) o.println(out.c_str()); }
     else { if (out.length()) o.println(out.c_str()); o.println(err.c_str()); }

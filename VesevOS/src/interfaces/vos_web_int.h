@@ -5,10 +5,12 @@
 // Non includerlo da altri moduli: l'interfaccia pubblica e vos_web.h.
 #pragma once
 #include "vos_web.h"
+#include "vos_web_rotte.h"
 #include "../core/vos_i18n.h"
 #include "../core/vos_license.h"
-#include "vos_page.h"
+#include "../core/vos_risorse.h"
 #include "../core/vos_config.h"
+#include "../core/vos_alias.h"
 #include "../security/vos_auth.h"
 #include "../core/vos_sys.h"
 #include "../net/vos_net.h"
@@ -78,6 +80,10 @@ extern ErrBuf g_upErr;     // motivo del rifiuto del caricamento (vuoto = nessun
 extern char   g_upPath[160];   // file in caricamento
 extern volatile uint32_t g_lastReq;
 extern volatile uint32_t g_sleepSec;
+extern RotteModo g_rotteModo;   // quali percorsi registra add() adesso (vos_web_rotte.h)
+extern int g_rotteConta;        // percorsi messi in tabella nel giro in corso
+int         rotteInTabella();   // voci nella tabella dei percorsi (vos_web_smista.cpp)
+bool        rottaSi(const char* path, int method);   // questo percorso va registrato nel modo corrente?
 
 uint32_t    ipOf(Req* r);
 // Psychic con Arduino da' String/IPAddress, senza Arduino std::string/esp_ip4_addr_t: questi aiuti accettano tutti e due (stesso codice per le due build)
@@ -104,17 +110,21 @@ esp_err_t   ko(Res* s, const char* e, const char* code = "error");   // codice H
 inline esp_err_t ko(Res* s, const ErrBuf& e, const char* code = "error") { return ko(s, e.c_str(), code); }
 esp_err_t   notFound(Res* s);
 esp_err_t   sendFile(Res* s, const char* fsPath, const char* contentType, bool download);   // un file della memoria interna (vos_web_sendfile.cpp)
+bool        sendRisFile(Res* s, RisFile rf, const char* contentType, bool gzip, const char* cache, esp_err_t& err);   // un file di /usr/share/vesevos controllato con SHA256SUMS; false = manca o non e valido (vos_web_sendfile.cpp)
 void        tokenTo(Req* r, char* out, size_t cap);             // cookie di sessione in out ("" se manca)
 bool        csrfBlocked(Req* r);                                // true = richiesta partita da un altro sito (CSRF): da rifiutare
 int         userOf(Req* r);                                     // utente della sessione di questa richiesta, -1 se non c'e
 void        whoTo(const Ctx& c, char* out, size_t n);           // "web <utente> <ip>" per il registro
 void        add(PsychicHttpServer* srv, bool secure, const char* path, int method, uint8_t lvl, Handler h);   // registra con livello di accesso
 std::string svcJson(int role);   // role: i dettagli dei moduli ELF (solo con VOS_WITH_ELF) li vede solo l'Admin
-#define SETTINGS_JSON_MAX 2048
+#define SETTINGS_JSON_MAX ALIAS_JSON_MAX   // impostazioni di base (circa 1 KB) + alias e descrizioni delle periferiche
 bool        settingsJson(HeapBuf& out);                         // false = manca la memoria o supera il tetto
 void        delayedRestart(void*);
 void        delayedSleep(void*);
-esp_err_t   sendPage(Res* s);
+esp_err_t   sendPage(Res* s);                                     // "/": la pagina da /usr/share/vesevos/html.vrs, altrimenti quella di emergenza (vos_web_pagina.cpp)
+void        paginaEsitoAzzera();                                  // dopo un caricamento .vrs riuscito: il prossimo "/" ricontrolla il file per intero
+esp_err_t   sendEmergenza(Res* s, bool lingua = false);                // pagina di emergenza (vos_web_emergenza.cpp); lingua = file di lingua in errore
+void        routeRisorse(PsychicHttpServer* S, bool sec);         // POST /api/risorse/carica, solo Admin (vos_web_risorse.cpp)
 #define COOKIE_ATTRS "; Path=/; HttpOnly; SameSite=Strict"   // + "; Secure" sotto HTTPS
 esp_err_t   loginDone(Res* s, Ctx& c, int idx);
 

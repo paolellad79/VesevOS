@@ -13,3 +13,7 @@ esp_err_t gpio_config(const gpio_config_t*);
 esp_err_t gpio_set_level(gpio_num_t, uint32_t);
 int gpio_get_level(gpio_num_t);
 esp_err_t gpio_reset_pin(gpio_num_t);
+esp_err_t gpio_pullup_en(gpio_num_t);
+esp_err_t gpio_pullup_dis(gpio_num_t);
+esp_err_t gpio_pulldown_en(gpio_num_t);
+esp_err_t gpio_pulldown_dis(gpio_num_t);

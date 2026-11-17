@@ -126,7 +126,8 @@ static esp_err_t hInfo(httpd_req_t* r) {
   std::string a;
   if (app0Valid(n, sizeof n, v, sizeof v)) a = app0Fw() ? std::string(n) + " " + v : "NON e VesevOS (manca il marchio)";
   const esp_partition_t* p = recApp0();
-  return recSendJson(r, 200, "{\"ok\":true,\"app\":\"" + a + "\",\"max\":" + std::to_string(p ? (unsigned long)p->size : 0UL) + "}");
+  return recSendJson(r, 200, "{\"ok\":true,\"app\":\"" + a + "\",\"max\":" + std::to_string(p ? (unsigned long)p->size : 0UL) +
+                           ",\"chipId\":" + std::to_string((unsigned)REC_CHIP_ID) + ",\"chipName\":\"" REC_CHIP_NAME "\"}");
 }
 
 static esp_err_t hBoot(httpd_req_t* r) {

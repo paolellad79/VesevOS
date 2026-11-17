@@ -42,7 +42,7 @@
 #include "vos_web.h"
 #include "../packages/vos_power.h"
 #include "../packages/vos_stats.h"
-#include "../packages/vos_berry.h"
+#include "../packages/vos_funzioni.h"
 #include "../packages/vos_app.h"
 #include "../packages/vos_selftest.h"
 #include "../packages/vos_benchsha.h"
@@ -71,8 +71,7 @@ using namespace shx;
 bool shCmdFiles(const Word& c, const Word& a1, const char* line, OutSink& o, int role, ShellSess& ss);  // vos_shell_files.cpp: pwd cd ls cat mkdir rm mv cp write (cartella corrente della sessione)
 void shLs(const char* line, OutSink& o, const ShellSess& ss);                                       // vos_shell_ls.cpp   : comando "ls" (stile shell classica)
 void shPing(const char* line, OutSink& o, uint32_t sess);                          // vos_shell_ping.cpp : comando "ping" (solo Admin; il tetto di durata dipende dalla sessione)
-bool shCmdArchive(const Word& c, const char* line, OutSink& o, const ShellSess& ss, uint32_t sess);   // vos_shell_arch.cpp: gzip gunzip zcat unzip zip tar (compressione e archivi, solo Admin)
-void shGzip(const char* cmd, const char* line, OutSink& o, const ShellSess& ss, uint32_t sess);       // vos_shell_gzip.cpp : gzip, gunzip, zcat
+bool shCmdArchive(const Word& c, const char* line, OutSink& o, const ShellSess& ss, uint32_t sess);   // vos_shell_arch.cpp: unzip zip tar (archivi, solo Admin)
 void shUnzip(const char* line, OutSink& o, const ShellSess& ss, uint32_t sess);                       // vos_shell_zip.cpp  : unzip (elenco ed estrazione)
 void shZip(const char* line, OutSink& o, const ShellSess& ss, uint32_t sess);                         // vos_shell_zipc.cpp : zip (crea archivi .zip)
 void shTar(const char* line, OutSink& o, const ShellSess& ss, uint32_t sess);                         // vos_shell_tar.cpp  : tar -t, -x (e -c con vos_shell_tarc.cpp)
@@ -106,5 +105,5 @@ void shElf(const char* line, OutSink& o, int role, uint32_t sess);              
 bool shCmdVesevos(const Word& c, const Word& a1, const char* line, OutSink& o, int role, uint32_t sess); // vos_shell_services.cpp: dispatch dei vesevos-* (services, bugreport, config, network)
 bool shCmdLed(const Word& c, const Word& a1, const char* line, OutSink& o, int role);     // vos_shell_led.cpp  : led, led-color, led-bright (modo, trigger, colori)
 bool shCmdNet(const Word& c, const Word& a1, const char* line, OutSink& o, int role);     // vos_shell_net.cpp  : wifi ... pins (rete, LED, pin, periferiche)
-bool shDriverCmd(const Word& c, const char* line, OutSink& o, int role);          // vos_shell_drvcmd.cpp: comandi dei driver (scritti in Berry, dichiarati nel file del driver)
+bool shDriverCmd(const Word& c, const char* line, OutSink& o, int role);          // vos_shell_drvcmd.cpp: comandi dei driver (scritti nelle funzioni VesevOS, dichiarati nel file del driver)
 bool shCmdAdmin(const Word& c, const Word& a1, const char* line, OutSink& o, int role);   // vos_shell_admin.cpp: config ... reboot (utenti, sicurezza, servizi)

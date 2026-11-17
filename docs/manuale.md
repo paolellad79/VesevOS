@@ -22,9 +22,9 @@ Ogni scheda VesevOS, la prima volta che si accende, inventa da sola una password
 ### Metodo 1 (consigliato): cavo USB e monitor seriale
 1. Prepara la scheda con la guida [GUIDA-PREPARARE-LA-SCHEDA.md](GUIDA-PREPARARE-LA-SCHEDA.md) (recovery + VesevOS).
 2. Apri Strumenti > Monitor seriale, velocita 115200, e premi RESET sulla scheda.
-3. Leggi la schermata di benvenuto: nome della rete (`VesevOS`), password (es. `k7mpq4xtr9ab`: 12 caratteri, tutti minuscoli e numeri, senza simboli) e indirizzo `https://192.168.4.1`.
+3. Leggi la schermata di benvenuto: alla prima accensione la radio e spenta. Premi una volta il tasto BOOT (pressione breve): per 10 minuti si accende la rete `VesevOS`, aperta e senza password, con il solo indirizzo `https://192.168.4.1`.
    Vuoi l'inglese? Premi `2` (senza Invio). Per tornare all'italiano premi `1`.
-4. Collegati con telefono o PC alla rete `VesevOS` con quella password. La pagina si apre da sola; altrimenti apri `https://192.168.4.1`.
+4. Collegati con telefono o PC alla rete `VesevOS` e di solito la guida si apre da sola (portale automatico); se non succede scrivi a mano `https://192.168.4.1`. A guida finita la rete avra una password casuale diversa per ogni scheda (12 caratteri, minuscoli e numeri).
 5. **Scegli la password del pannello** (almeno 6 caratteri). Non esiste una password di fabbrica: la scegli tu e la conosci solo tu.
 6. Parte la **configurazione guidata** (il LED fa l'arcobaleno finche non hai finito). I passi: lingua, paese (elenco con ricerca), nome della
    scheda, antenna, **Wi-Fi di casa o hotspot** (la scheda prova subito a collegarsi e te lo dice), **ora** (solo se non c'e Wi-Fi di casa), fine. Vedi il capitolo 12.
@@ -67,10 +67,11 @@ della pagina (Rete > Web > HTTPS) o della seriale, poi prosegui. Anche dall'hots
 ## 5. Paese, radio e localizzazione
 Sistema > Localizzazione: paese (elenco con ricerca), lingua, fuso orario (il server dell'ora si sceglie in Rete > NTP), formati di data e ora,
 separatore dei decimali, primo giorno della settimana, gradi C/F, antenna e potenza.
+- **File di lingua rovinato**: se il file della lingua in uso viene sostituito, cancellato o rovinato, la scheda passa all'italiano e la pagina si apre in modalita di emergenza con un avviso. Puoi caricare di nuovo i file `.vld` e `.vlp` della lingua oppure premere "Usa l'italiano". Se la pagina e gia aperta, compare un avviso nella campanella; nella seriale c'e una riga "Lingua:" all'avvio della shell.
 - **Il paese decide i canali Wi-Fi e la potenza massima** secondo le regole che la scheda conosce: non li supera.
   Senza paese valgono le regole piu prudenti (canali 1-11).
 - La voce **Radio** (Dispositivi > Interfacce) ha le schede **Modo aereo** e **Wi-Fi + BLE**; quest'ultima ha due blocchi: **Impostazioni** (antenna, guadagno, potenza: le scegli tu) e **Informazioni** (canali, limite del paese, potenza massima, regole: calcolate dalla scheda, non si modificano).
-- Antenna esterna: indica il guadagno (dBi) e la potenza scende da sola per restare nel limite.
+- Il limite del paese e un EIRP (comprende l'antenna): la potenza al chip scende di quanto vale il guadagno dell'antenna, sempre. Con l'antenna della scheda (CrossAir CA-C03, 4,3 dBi) il tetto in Europa e 15 dBm al chip; con un'antenna esterna indica il suo guadagno (dBi) e vale quello, non la somma. Senza paese scelto: canali 1-11 e 15 dBm al chip.
 - **Scegliere il paese non garantisce da solo la conformita del prodotto finito**: dipende anche dall'hardware, dall'antenna, dal montaggio e dalle regole del luogo. Chi installa la scheda ne e responsabile.
 
 ## 6. Servizi (spenti di fabbrica)
@@ -140,9 +141,9 @@ del paese non si superano; (3) niente password uguali per tutti.
 **Fine della configurazione guidata**
 - Passo **Wi-Fi di casa o hotspot**: scegli la rete e la password, premi Avanti: la scheda prova subito a collegarsi (fino a 20 secondi) e ti dice se ha funzionato.
 - Passo **Ora** (solo se salti la Wi-Fi): il servizio NTP si spegne e ti chiede fuso orario, data e ora (preimpostati da questo dispositivo). Con la Wi-Fi di casa l'ora arriva da Internet (NTP) e il passo non compare. Attenzione: **la scheda non ha una batteria per l'orologio**, se la spegni l'ora si perde.
-- A fine guida, con la Wi-Fi di casa, la pagina mostra il nuovo indirizzo (con QR). Collega il telefono a quella rete e aprilo: **al primo
-  accesso da li** si spengono da soli hotspot, portale automatico e HTTP. Se la scheda non riesce a collegarsi, l'hotspot torna da solo
-  e in Home compare l'avviso. Senza Wi-Fi di casa niente si spegne (tranne NTP).
+- A fine guida, con la Wi-Fi di casa, la pagina mostra il nuovo indirizzo (con QR). Collega il telefono a quella rete e aprilo: hotspot e portale
+  automatico e il DHCP **restano spenti** (li accendi tu da Rete > Servizi); HTTP (solo rimando a HTTPS) resta acceso. Se la scheda non
+  riesce a collegarsi, tieni premuto il tasto BOOT per 8 secondi: l'hotspot si riaccende. Senza Wi-Fi di casa niente si spegne (tranne NTP).
 - **Pagina di accesso**: mostra data, ora e fuso della scheda e avvisa se l'ora e diversa da quella del tuo dispositivo.
 
 ## 13. Configurazione solo da seriale
@@ -190,6 +191,7 @@ Amministrazione > Autotest (solo Admin). Premi **Avvia la diagnosi**: 16 prove u
 
 ## 18. Log e diario dei riavvii (novita 1.7.8)
 Sicurezza > Log, scheda Registro (la scheda Diario dei riavvii sta accanto): ogni riga ha il livello [E] errore, [W] attenzione, [I] info, [D] dettaglio. **Mostra fino a** filtra solo la vista; **Registra fino a** (Admin) decide cosa viene scritto (di fabbrica Info; Dettaglio solo per cercare un problema). Sotto, il **Diario dei riavvii**: ultimi 20 avvii con motivo, da quanto era accesa la scheda, RAM minima e task piu attivo; resta anche dopo lo spegnimento. Seriale: `log level [0-3]`, `reboots [clear]`. Il diario e nel report dell'Autotest (l'ultima riga grave solo con "nomi reali").
+- **Codici dei lampi del LED (novita 1.8.24)**: dopo un riavvio per un guasto (crash, watchdog, tensione bassa) il LED lampeggia un codice di due gruppi: prima la **classe** (da 1 a 9 lampi), una pausa, poi il **dettaglio** (da 1 a 5 lampi), e ricomincia dopo una pausa piu lunga; si ripete per 3 giri. Lampo corto = 3 al secondo. Tre lampi LUNGHI = codice sconosciuto. Esempio: 3 lampi, pausa, 1 lampo = D301 = task watchdog. Un errore che dura (NVS o file system che non partono) lampeggia un giro ogni 60 secondi. Un guasto fatale o critico lampeggia anche con il LED spento dalle impostazioni; gli altri codici rispettano la scelta. Dove: S3 sul LED a colori (rosso, arancio o giallo); C3 sul LED blu; C6 sul LED semplice (GPIO15), mentre il LED a colori resta per lo stato normale. Sulla C3 e sulla C6 il codice dei guasti piu gravi lampeggia anche dentro il crash, prima del riavvio (per circa 4 secondi al massimo). Comandi per l'Admin: `diag codici` (ultimo codice ed elenco), `diag led <classe> <dettaglio>` (prova un codice). Il codice compare anche nel diario dei riavvii come `[D301]`. Il core dump su flash e spento: restano il rapporto del crash (comando `crash`) e il diario. Da provare a vista: il senso acceso/spento del LED di C3 e C6.
 
 ## 19. Seriale configurabile (novita 1.7.9)
 Dispositivi > Interfacce > Seriale > **Seriale (cavo USB)** (solo Admin) oppure, dalla seriale stessa, il comando `serial`. Valgono subito e restano dopo il riavvio.
@@ -269,10 +271,12 @@ Sulla scheda ci sono due programmi: **VesevOS** e il **recovery** (piccolo, serv
 
 ## 27. Novita della 1.8.0 e 1.8.0b (riassunto)
 - **Seriale con accesso**: la shell chiede utente, password e codice MFA; ruoli per ogni sottocomando; la password non resta nella cronologia. Dopo troppi errori scatta lo stesso blocco della pagina web.
-- **Comandi**: `pwd`, `cd`, `ls`, prompt `utente@hostname:cartella$`, Tab, `man <comando>`, `whoami`, `id`, `df`, `uname`, `time`, `ping`, `gzip`/`gunzip`/`zcat`, `zip`/`unzip`, `tar`, `cpu` (governor: 80/160/240/ondemand/conservative/schedutil), e i comandi `vesevos-*` (cpuinfo, services, bugreport, config, network, led_control, cleaner, drive_manager, backup, update).
+- **Manuale dei comandi (16/11/2026, sorgente, non ancora compilato)**: `man <comando>` legge la descrizione e gli esempi dal file `/usr/share/vesevos/manuale.txt` (controllato con `SHA256SUMS`); le voci brevi (fino a 300 byte) sono li, per le lunghe `man` mostra l'indirizzo del testo completo su GitHub (`aiuto/<comando>.md`, serve internet). Se il file manca `man` lo dice e mostra comunque nome, uso, sottocomandi, alias e ruolo.
+- **Comandi**: `pwd`, `cd`, `ls`, prompt `utente@hostname:cartella$`, Tab, `man <comando>`, `whoami`, `id`, `df`, `uname`, `time`, `ping`, `zip`/`unzip` (archivi senza compressione), `tar`, `cpu` (governor: 80/160/240/ondemand/conservative/schedutil), e i comandi `vesevos-*` (cpuinfo, services, bugreport, config, network, led_control, cleaner, drive_manager, backup, update).
 - **Sicurezza**: `suspend`, `poweroff` e `/api/sleep` solo per l'Admin, con conferma. `locale country/tx/antenna`, `wifi set/off`, `date set` e `audit ack` sono vietati all'Operatore.
 - **LED**: trigger `none/state/heartbeat/flash/wifi/cpu/default-on`, colori e soglia della CPU.
 - **Rete**: con il redirect HTTP->HTTPS acceso e HTTPS attivo, la porta HTTP e servita da un piccolo server che risponde solo il redirect (meno RAM; vale al riavvio dei server).
+- **File di risorse (16/11/2026, sorgente, non ancora compilato)**: dopo l'avvio la scheda controlla ogni file di `/usr/share/vesevos` con `SHA256SUMS`. Se uno e diverso o manca avvisa l'amministratore (registro, audit, campanella, benvenuto della shell) e il servizio di quel file usa il ripiego. In *Sicurezza > Aggiornamenti > Risorse* vedi lo stato di ciascuno; il pulsante *Scarica e carica di nuovo* scarica dal tuo browser i file da GitHub (`risorse/<versione>/`; parte solo se lo premi, GitHub vede l'indirizzo IP pubblico della tua rete) e li carica sulla scheda, che li accetta solo se lo SHA-256 coincide con la sua riga dell'elenco. Dalla 1.8.24a il firmware non ha piu un identificativo fisso delle risorse: l'elenco si controlla per formato e per nomi conosciuti, e in *Informazioni* e nella scheda *Risorse* trovi la versione della pagina e le prime 8 cifre del suo SHA-256. Se manca lo spazio per tenere due copie il caricamento e rifiutato. Il pulsante *Carica da file* (16/11/2026, sorgente) carica uno o piu file scelti dal tuo computer: SHA256SUMS per primo, gli altri si riconoscono dall'elenco della scheda; nome, lunghezza e SHA-256 si controllano subito nella pagina e un file sbagliato non ferma gli altri. Lo stesso pulsante *Carica da file* c'e nelle schede Recovery (stesso dialogo di prima, e l'operazione piu delicata) e Pacchetti (script, app e driver, il tipo si capisce dall'estensione); in Firmware resta *Carica un file dal computer*.
 - **Aggiornamenti**: menu *Aggiorna tramite recovery* (solo Admin); file pronti, SHA-256 e `indice.json` nella cartella `firmware/` del repository; prima installazione dal browser con la pagina `flash/` (NON PROVATA con una scheda reale). Non c'e una firma digitale: lo SHA-256 dice che il file non e rotto, non chi lo ha fatto.
 - Questa e una sintesi: i dettagli e le prove ancora da fare sono nel CHANGELOG e in `docs/KNOWN_ISSUES.md`.
 

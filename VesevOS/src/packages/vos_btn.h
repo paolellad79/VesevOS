@@ -20,9 +20,9 @@ uint8_t btnAction(int clicks);  // azione scelta per 1..3 click
 bool   btnSetAction(int clicks, int act, ErrBuf& err);
 int    btnWpsClicks();          // con quanti click parte il WPS (0 = nessuno)
 const char* btnActName(int act);
-// Click LIBERI: un gesto con l'azione "Libero" non fa niente di suo; se un programma (script o app Berry) e in esecuzione e li chiede
+// Click LIBERI: un gesto con l'azione "Libero" non fa niente di suo; se un programma (script o app) e in esecuzione e li chiede
 // con btn(), i click vanno a lui. Senza programma in esecuzione si perdono (niente click vecchi che arrivano dopo).
-void   btnScriptAttach(bool on);       // dal task Berry: un programma prende (o lascia) i click liberi
+void   btnScriptAttach(bool on);       // dal task funzioni VesevOS: un programma prende (o lascia) i click liberi
 int    btnScriptPop();                 // il click libero piu vecchio (1..3), 0 = nessuno. Non aspetta.
 bool   btnScriptFree(int clicks);      // questo gesto e libero per i programmi?
 

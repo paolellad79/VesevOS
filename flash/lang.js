@@ -22,7 +22,7 @@ export const TESTI = {
     avviso4: 'Non scollegare il cavo e non chiudere la pagina durante la scrittura.',
     scelta_t: '1. Scegli cosa installare',
     pacchetto: 'Preimpostazione',
-    tipo_completa: 'Installazione completa - cancella impostazioni e contatori (scheda nuova)',
+    tipo_completa: 'Installazione completa - cancella impostazioni, contatori e spazio dei file (scheda nuova)',
     tipo_solo_firmware: 'Solo firmware',
     tipo_solo_recovery: 'Solo recovery',
     versione: 'versione {0}',
@@ -35,6 +35,7 @@ export const TESTI = {
     tipo_otadata: 'Selezione del programma da avviare',
     tipo_recovery: 'Recovery',
     tipo_firmware: 'Firmware VesevOS',
+    tipo_risorse: 'File di VesevOS (pagina, manuale, licenze, dati)',
     c_scarico: 'Scaricato',
     c_byte: 'Primo byte valido',
     c_marchio: 'Marchio VesevOS',
@@ -80,7 +81,7 @@ export const TESTI = {
     footer_lib: 'Strumenti inclusi: esptool-js 0.5.7 (licenza Apache-2.0) con pako 2.1.0 (MIT AND Zlib).',
     privacy: 'Privacy: questa pagina non invia dati a nessuno, non usa cookie ne tracker e non carica file dal tuo computer. Il sito che la ospita (GitHub Pages) vede comunque il tuo indirizzo IP e le richieste di pagina, secondo le sue regole.',
     tipo_aggiorna: 'Aggiorna e conserva i dati (scheda gia usata)',
-    sc_intro: 'Scegli quali parti scrivere nella tabella qui sotto. Lo spazio dei file (configurazione e utenti) non viene mai toccato.',
+    sc_intro: 'Scegli quali parti scrivere nella tabella qui sotto. Lo spazio dei file (configurazione e utenti) viene scritto solo nell\'installazione completa, mai in un aggiornamento.',
     sc_col: 'Scrivi',
     sc_azione: 'Azione',
     az_scrivi: 'Si scrive',
@@ -90,7 +91,8 @@ export const TESTI = {
     sc_nessuna: 'Seleziona almeno una parte da scrivere.',
     sc_nvs: 'Attenzione: la memoria impostazioni verra cancellata. Si perdono contatore dei riavvii, tempo di vita e impostazioni Wi-Fi.',
     sc_tabella: 'Attenzione: la tabella delle partizioni cambia ma recovery e firmware non vengono scritti insieme. La scheda potrebbe non avviarsi.',
-    sc_otadata: 'Attenzione: la selezione del programma da avviare viene riscritta senza il firmware. Se il firmware sulla scheda non e valido, non parte.'
+    sc_otadata: 'Attenzione: la selezione del programma da avviare viene riscritta senza il firmware. Se il firmware sulla scheda non e valido, non parte.',
+    sc_risorse: 'Attenzione: lo spazio dei file viene sovrascritto. Si perdono configurazione, utenti, programmi e lingue caricate. Va bene solo per una scheda nuova.'
   },
   en: {
     salta: 'Skip to content',
@@ -107,7 +109,7 @@ export const TESTI = {
     avviso4: 'Do not unplug the cable and do not close the page while writing.',
     scelta_t: '1. Choose what to install',
     pacchetto: 'Preset',
-    tipo_completa: 'Full installation - erases settings and counters (new board)',
+    tipo_completa: 'Full installation - erases settings, counters and the file space (new board)',
     tipo_solo_firmware: 'Firmware only',
     tipo_solo_recovery: 'Recovery only',
     versione: 'version {0}',
@@ -120,6 +122,7 @@ export const TESTI = {
     tipo_otadata: 'Selection of the program to start',
     tipo_recovery: 'Recovery',
     tipo_firmware: 'VesevOS firmware',
+    tipo_risorse: 'VesevOS files (page, manual, licenses, data)',
     c_scarico: 'Downloaded',
     c_byte: 'Valid first byte',
     c_marchio: 'VesevOS mark',
@@ -165,7 +168,7 @@ export const TESTI = {
     footer_lib: 'Tools included: esptool-js 0.5.7 (Apache-2.0 license) with pako 2.1.0 (MIT AND Zlib).',
     privacy: 'Privacy: this page sends no data to anyone, uses no cookies or trackers and does not upload files from your computer. The site that hosts it (GitHub Pages) still sees your IP address and page requests, under its own rules.',
     tipo_aggiorna: 'Update and keep data (board already used)',
-    sc_intro: 'Choose which parts to write in the table below. The file space (configuration and users) is never touched.',
+    sc_intro: 'Choose which parts to write in the table below. The file space (configuration and users) is written only by the full installation, never by an update.',
     sc_col: 'Write',
     sc_azione: 'Action',
     az_scrivi: 'Written',
@@ -175,7 +178,8 @@ export const TESTI = {
     sc_nessuna: 'Select at least one part to write.',
     sc_nvs: 'Warning: the settings memory will be erased. The restart counter, uptime and Wi-Fi settings are lost.',
     sc_tabella: 'Warning: the partition table changes but recovery and firmware are not written together with it. The board may not start.',
-    sc_otadata: 'Warning: the boot selection is rewritten without the firmware. If the firmware on the board is not valid, it will not start.'
+    sc_otadata: 'Warning: the boot selection is rewritten without the firmware. If the firmware on the board is not valid, it will not start.',
+    sc_risorse: 'Warning: the file space is overwritten. Configuration, users, programs and loaded languages are lost. Only suitable for a new board.'
   },
   es: {
     salta: 'Ir al contenido',
@@ -192,7 +196,7 @@ export const TESTI = {
     avviso4: 'No desconectes el cable ni cierres la pagina durante la escritura.',
     scelta_t: '1. Elige que instalar',
     pacchetto: 'Preajuste',
-    tipo_completa: 'Instalacion completa - borra ajustes y contadores (placa nueva)',
+    tipo_completa: 'Instalacion completa - borra ajustes, contadores y el espacio de archivos (placa nueva)',
     tipo_solo_firmware: 'Solo firmware',
     tipo_solo_recovery: 'Solo recovery',
     versione: 'version {0}',
@@ -205,6 +209,7 @@ export const TESTI = {
     tipo_otadata: 'Seleccion del programa a arrancar',
     tipo_recovery: 'Recovery',
     tipo_firmware: 'Firmware VesevOS',
+    tipo_risorse: 'Archivos de VesevOS (pagina, manual, licencias, datos)',
     c_scarico: 'Descargado',
     c_byte: 'Primer byte valido',
     c_marchio: 'Marca VesevOS',
@@ -250,7 +255,7 @@ export const TESTI = {
     footer_lib: 'Herramientas incluidas: esptool-js 0.5.7 (licencia Apache-2.0) con pako 2.1.0 (MIT AND Zlib).',
     privacy: 'Privacidad: esta pagina no envia datos a nadie, no usa cookies ni rastreadores y no sube archivos de tu ordenador. El sitio que la aloja (GitHub Pages) ve igualmente tu direccion IP y las peticiones de pagina, segun sus propias reglas.',
     tipo_aggiorna: 'Actualizar y conservar los datos (placa ya usada)',
-    sc_intro: 'Elige que partes escribir en la tabla de abajo. El espacio de archivos (configuracion y usuarios) nunca se toca.',
+    sc_intro: 'Elige que partes escribir en la tabla de abajo. El espacio de archivos (configuracion y usuarios) solo lo escribe la instalacion completa, nunca una actualizacion.',
     sc_col: 'Escribir',
     sc_azione: 'Accion',
     az_scrivi: 'Se escribe',
@@ -260,7 +265,8 @@ export const TESTI = {
     sc_nessuna: 'Selecciona al menos una parte para escribir.',
     sc_nvs: 'Atencion: la memoria de ajustes se borrara. Se pierden el contador de reinicios, el tiempo de vida y los ajustes Wi-Fi.',
     sc_tabella: 'Atencion: la tabla de particiones cambia pero recovery y firmware no se escriben a la vez. La placa podria no arrancar.',
-    sc_otadata: 'Atencion: la seleccion del programa de arranque se reescribe sin el firmware. Si el firmware de la placa no es valido, no arrancara.'
+    sc_otadata: 'Atencion: la seleccion del programa de arranque se reescribe sin el firmware. Si el firmware de la placa no es valido, no arrancara.',
+    sc_risorse: 'Atencion: el espacio de archivos se sobrescribe. Se pierden configuracion, usuarios, programas e idiomas cargados. Solo para una placa nueva.'
   },
   de: {
     salta: 'Zum Inhalt',
@@ -277,7 +283,7 @@ export const TESTI = {
     avviso4: 'Kabel nicht abziehen und Seite nicht schliessen, solange geschrieben wird.',
     scelta_t: '1. Waehle, was installiert wird',
     pacchetto: 'Voreinstellung',
-    tipo_completa: 'Vollstaendige Installation - loescht Einstellungen und Zaehler (neue Platine)',
+    tipo_completa: 'Vollstaendige Installation - loescht Einstellungen, Zaehler und den Dateibereich (neue Platine)',
     tipo_solo_firmware: 'Nur Firmware',
     tipo_solo_recovery: 'Nur Recovery',
     versione: 'Version {0}',
@@ -290,6 +296,7 @@ export const TESTI = {
     tipo_otadata: 'Auswahl des zu startenden Programms',
     tipo_recovery: 'Recovery',
     tipo_firmware: 'VesevOS-Firmware',
+    tipo_risorse: 'VesevOS-Dateien (Seite, Handbuch, Lizenzen, Daten)',
     c_scarico: 'Geladen',
     c_byte: 'Erstes Byte gueltig',
     c_marchio: 'VesevOS-Kennzeichen',
@@ -335,7 +342,7 @@ export const TESTI = {
     footer_lib: 'Enthaltene Werkzeuge: esptool-js 0.5.7 (Lizenz Apache-2.0) mit pako 2.1.0 (MIT AND Zlib).',
     privacy: 'Datenschutz: Diese Seite sendet keine Daten an Dritte, nutzt keine Cookies oder Tracker und laedt keine Dateien von deinem Computer hoch. Der Anbieter der Seite (GitHub Pages) sieht trotzdem deine IP-Adresse und die Seitenaufrufe, nach seinen eigenen Regeln.',
     tipo_aggiorna: 'Aktualisieren und Daten behalten (Platine schon benutzt)',
-    sc_intro: 'Waehle in der Tabelle unten, welche Teile geschrieben werden. Der Dateibereich (Konfiguration und Benutzer) wird nie beruehrt.',
+    sc_intro: 'Waehle in der Tabelle unten, welche Teile geschrieben werden. Der Dateibereich (Konfiguration und Benutzer) wird nur von der vollstaendigen Installation geschrieben, nie von einer Aktualisierung.',
     sc_col: 'Schreiben',
     sc_azione: 'Aktion',
     az_scrivi: 'Wird geschrieben',
@@ -345,7 +352,8 @@ export const TESTI = {
     sc_nessuna: 'Waehle mindestens einen Teil zum Schreiben.',
     sc_nvs: 'Achtung: Der Einstellungsspeicher wird geloescht. Neustartzaehler, Laufzeit und WLAN-Einstellungen gehen verloren.',
     sc_tabella: 'Achtung: Die Partitionstabelle aendert sich, aber Recovery und Firmware werden nicht mitgeschrieben. Die Platine startet moeglicherweise nicht.',
-    sc_otadata: 'Achtung: Die Startauswahl wird ohne Firmware neu geschrieben. Ist die Firmware auf der Platine ungueltig, startet sie nicht.'
+    sc_otadata: 'Achtung: Die Startauswahl wird ohne Firmware neu geschrieben. Ist die Firmware auf der Platine ungueltig, startet sie nicht.',
+    sc_risorse: 'Achtung: Der Dateibereich wird ueberschrieben. Konfiguration, Benutzer, Programme und geladene Sprachen gehen verloren. Nur fuer eine neue Platine.'
   }
 };
 

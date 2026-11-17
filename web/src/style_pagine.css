@@ -292,3 +292,13 @@ fieldset legend{padding:0 6px;color:var(--mut)}
 .row span.pill.v{color:var(--act)}
 .row span.pill.k{color:var(--kot)}
 .row span.pill.a{color:var(--okt)}
+
+/* Guida: elenco delle reti Wi-Fi trovate, con spazio tra un pulsante e l'altro */
+#su_sl{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+/* Nome vero accanto all'alias di una periferica (menu, elenchi) */
+.alnome{opacity:.65;font-size:.75em;margin-left:4px}
+.cfr{margin:4px 0 8px;padding-left:20px;font-size:13px}
+.cfr li{margin:2px 0}
+.cfr li.ko{color:var(--kot)}
+.hlp h5{margin:10px 0 2px;font-family:monospace}
+.hlp h5::before{content:attr(data-nome)}

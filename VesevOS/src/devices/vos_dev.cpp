@@ -17,6 +17,8 @@
 #include "../drivers/vos_drv_console.h"
 #include "../drivers/vos_drv_wifi.h"
 #include "vos_led.h"
+#include "vos_led2.h"
+#include "vos_led_nomi.h"
 #include "vos_pins.h"
 #include "vos_io.h"
 #include "../core/vos_region.h"
@@ -35,7 +37,8 @@
   tr("Messaggi"); tr("Radio"); tr("Sicurezza"); tr("Misure"); tr("Ingressi e uscite"); tr("Luce"); tr("Pulsante");
   tr("Interfacce"); tr("Sensori"); tr("Risorse");
   tr("Bluetooth"); tr("ESP-NOW"); tr("Statistiche"); tr("MFA (due passaggi)");
-  tr("Pin (GPIO)"); tr("LED di stato"); tr("Tasto fisico"); tr("USB"); tr("Temperatura del chip"); tr("Memoria"); tr("Processore");
+  tr("Pin (GPIO)"); tr("LED1"); tr("LED_RGB1"); tr("Tasto fisico");
+  tr("blu"); tr("rosso"); tr("verde"); tr("giallo"); tr("bianco");   // colori dei LED monocromatici (campo "colore" della tabella di scheda) tr("USB"); tr("Temperatura del chip"); tr("Memoria"); tr("Processore");
 }
 
 // ---- righe "etichetta / valore" per le schede dell'hardware ----
@@ -131,6 +134,49 @@ static bool act_led(const char* act, const char* arg, int role, HeapBuf& out, Er
   err = tr("Azione non valida"); return false;
 }
 
+// LED2: solo sulle schede che lo hanno nella tabella di bordo (le altre non lo usano). Come il LED1: modo e soglia si salvano in cfg.
+// Acceso/spento dall'interruttore = modo "stato" / "none". Un comando manuale (on, off, blink) vale al posto del modo, senza salvare.
+[[maybe_unused]] static int  st_led2() {
+  if (led2Mode() != LED2_AUTO) return led2Mode() == LED2_OFF ? 0 : 1;
+  return cfg.led2Mode == LED_OFF ? 0 : 1;
+}
+[[maybe_unused]] static bool set_led2(bool on, ErrBuf& err) {
+  if (!led2Present()) { err = tr("Valori non validi"); return false; }
+  if (on && cfg.led2Mode == LED_OFF) cfg.led2Mode = LED_STATE;
+  else if (!on) cfg.led2Mode = LED_OFF;
+  led2Set(LED2_AUTO);
+  cfgSetOrigin("periferiche"); cfgSave(); return true;
+}
+[[maybe_unused]] static bool js_led2(HeapBuf& out) {
+  return out.addf("{\"mode\":%d,\"thr\":%d,\"br\":%d,\"manual\":\"%s\"}", (int)cfg.led2Mode, (int)cfg.led2CpuThr, (int)cfg.led2Brightness, led2ModeName(led2Mode()));
+}
+// set: "on" | "off" | "blink" | "auto" (manuale, non salva) oppure "modo[,soglia[,luminosita]]" con il modo in numero (0-6, come il LED1; si salva).
+// I modi flash, wifi, cpu e la soglia li cambia solo l'Admin; la luminosita (0-255) anche l'Operatore, come per il LED1.
+[[maybe_unused]] static bool act_led2(const char* act, const char* arg, int role, HeapBuf& out, ErrBuf& err) {
+  if (role < ROLE_OPER) { err = tr("Il tuo ruolo non permette questo comando"); return false; }
+  if (strcmp(act, "set") || !arg || !led2Present()) { err = tr("Azione non valida"); return false; }
+  if (arg[0] < '0' || arg[0] > '9') {
+    if (!led2SetName(arg)) { err = tr("Azione non valida"); return false; }
+    return js_led2(out);
+  }
+  std::string_view thr, br;
+  std::string_view m = splitFirst(arg, thr);
+  thr = splitFirst(thr, br);
+  int mode = (int)viewToLong(m);
+  if (mode < 0 || mode >= LED_MODE_COUNT) { err = tr("Valori non validi"); return false; }
+  long newThr = thr.empty() ? cfg.led2CpuThr : viewToLong(thr);
+  long newBr = br.empty() ? cfg.led2Brightness : viewToLong(br);
+  if (newThr < 10 || newThr > 95 || newBr < 0 || newBr > 255) { err = tr("Valori non validi"); return false; }
+  bool changesAdmin = (mode >= LED_FLASH && mode != cfg.led2Mode) || newThr != cfg.led2CpuThr;
+  if (changesAdmin && role < ROLE_ADMIN) { err = tr("Il tuo ruolo non permette questo comando"); return false; }
+  cfg.led2Mode = mode;
+  cfg.led2CpuThr = (uint8_t)newThr;
+  cfg.led2Brightness = (uint8_t)newBr;
+  led2Set(LED2_AUTO);
+  cfgSetOrigin("periferiche"); cfgSave();
+  return js_led2(out);
+}
+
 static bool js_boot(HeapBuf& out) {
   Rows r(out);
   r.add(tr("Premuto adesso"), yn(!drvGpioRead(VOS_PIN_BOOT)));
@@ -164,7 +210,6 @@ static bool js_mem(HeapBuf& out) {
   r.addf(tr("Minimo raggiunto"), "%lu KB", kb(heap_caps_get_minimum_free_size(caps)));
   size_t tp = heap_caps_get_total_size(MALLOC_CAP_SPIRAM);
   if (tp) r.addf(tr("PSRAM libera"), "%lu KB / %lu KB", kb(heap_caps_get_free_size(MALLOC_CAP_SPIRAM)), kb(tp));
-  else r.add(tr("PSRAM libera"), tr("assente"));
   r.addf(tr("Flash del chip"), "%lu KB", kb(drvFlashSize()));
   r.addf(tr("Programma"), "%lu KB / %lu KB", kb(drvSketchSize()), kb(drvSketchSize() + drvFreeSketchSpace()));
   r.addf(tr("File (LittleFS)"), "%lu KB / %lu KB", kb(drvFsUsed()), kb(drvFsTotal()));
@@ -207,10 +252,17 @@ static bool js_rad(HeapBuf& out) {
 }
 
 // ================= la tabella =================
+// Le periferiche di bordo (LED, tasto...) vengono dalla tabella VOS_BOARD_PERIF del file di scheda: una riga per voce.
+// Ogni "funzione" della tabella sceglie qui le quattro operazioni (stato, accendi, dettagli, azioni).
+#define OPS_LEDRGB   st_led,  set_led,  js_led,  act_led
+#define OPS_LEDONOFF st_led2, set_led2, js_led2, act_led2
+#define OPS_TASTO    st_one,  nullptr,  js_boot, nullptr
+#define RIGA_BORDO(id, etichetta, colore, gruppo, tab, funzione, widget, pin, nota) \
+  { id, etichetta, gruppo, DEV_HW, tab, ROLE_GUEST, OPS_##funzione, pin, widget, colore },
+
 static const DevOps DEVS[] = {
   { "pin",  "Pin (GPIO)",        "Ingressi e uscite", DEV_HW, "pin",  ROLE_GUEST, st_one, nullptr, pinsJson,    act_pin },
-  { "led",  "LED di stato",      "Luce",       DEV_HW,   "led",  ROLE_GUEST, st_led,  set_led,  js_led,         act_led },
-  { "boot", "Tasto fisico",        "Pulsante",   DEV_HW,   "btn", ROLE_GUEST, st_one,  nullptr,  js_boot,        nullptr },
+  VOS_BOARD_PERIF(RIGA_BORDO)
   { "usb",  "USB",               "Interfacce", DEV_HW,   "usb",  ROLE_GUEST, st_one,  nullptr,  js_usb,         nullptr },
   { "temp", "Temperatura del chip", "Sensori", DEV_HW,   "sens",  ROLE_GUEST, st_one,  nullptr,  js_temp,        nullptr },
   { "mem",  "Memoria",           "Risorse",    DEV_HW,   "mem",  ROLE_GUEST, st_one,  nullptr,  js_mem,         nullptr },
@@ -232,16 +284,26 @@ const DevOps* devFind(const char* id) {
   return nullptr;
 }
 
+// Etichetta mostrata: nome tradotto, piu il colore tra parentesi se la periferica di bordo ha il campo "colore" (es. "LED1 (blu)")
+static void labelOf(const DevOps& d, char* out, size_t cap) {
+  if (d.colore && d.colore[0]) snprintf(out, cap, "%s (%s)", tr(d.label), tr(d.colore));
+  else snprintf(out, cap, "%s", tr(d.label));
+}
+
 bool devListJson(HeapBuf& j) {
   j.add("{\"dev\":[");
   for (int i = 0; i < NDEV; i++) {
     const DevOps& d = *devAt(i);
     if (i) j.add(',');
+    char lab[64];
+    labelOf(d, lab, sizeof lab);
     j.addf("{\"id\":\"%s\",\"label\":\"", d.id);
-    j.addJson(tr(d.label));
+    j.addJson(lab);
     j.add("\",\"cap\":\"");
     j.addJson(tr(d.cap));
-    j.addf("\",\"kind\":%d,\"tab\":\"%s\",\"state\":%d,\"sw\":%d,\"act\":%d}", (int)d.kind, d.tab, d.state(), d.set ? 1 : 0, d.act ? 1 : 0);
+    j.addf("\",\"kind\":%d,\"tab\":\"%s\",\"state\":%d,\"sw\":%d,\"act\":%d", (int)d.kind, d.tab, d.state(), d.set ? 1 : 0, d.act ? 1 : 0);
+    if (d.pin >= 0) j.addf(",\"pin\":%d,\"wid\":\"%s\"", d.pin, d.wid ? d.wid : "");   // solo periferiche di bordo
+    j.add('}');
   }
   for (int k = 0; k < ioCount(); k++) {                 // periferiche create dall'utente (classi)
     const char* n = ioNameAt(k);
@@ -260,8 +322,10 @@ bool devListText(HeapBuf& t) {
   for (int i = 0; i < NDEV; i++) {
     const DevOps& d = *devAt(i);
     int s = d.state();
-    t.addf("%-6s%s %s  %s%s%s%s\n", d.id, d.kind == DEV_HW ? tr("hardware ") : tr("virtuale "),
-           s == 1 ? tr("acceso") : s == 2 ? tr("con problema") : tr("spento"), tr(d.label),
+    char lab[64];
+    labelOf(d, lab, sizeof lab);
+    t.addf("%-9s%s %s  %s%s%s%s\n", d.id, d.kind == DEV_HW ? tr("hardware ") : tr("virtuale "),
+           s == 1 ? tr("acceso") : s == 2 ? tr("con problema") : tr("spento"), lab,
            d.set ? "" : " (", d.set ? "" : tr("solo stato"), d.set ? "" : ")");
   }
   for (int k = 0; k < ioCount(); k++) {
@@ -273,7 +337,7 @@ bool devListText(HeapBuf& t) {
       if (ioGet(n, tv, e)) snprintf(st, sizeof st, "%.1f C", tv / 100.0f);
       else snprintf(st, sizeof st, "%s", tr("non risponde"));
     }
-    t.addf("%-6s%s %s  %s (%s)\n", n, tr("hardware "), st, n, tr(ioClassName(n)));
+    t.addf("%-9s%s %s  %s (%s)\n", n, tr("hardware "), st, n, tr(ioClassName(n)));
   }
   return !t.oom() && !t.over();
 }
@@ -287,8 +351,10 @@ bool devStatusJson(const char* id, int role, HeapBuf& j) {
   }
   const DevOps* d = devFind(id);
   if (!d || role < d->jsonRole) return false;
+  char lab[64];
+  labelOf(*d, lab, sizeof lab);
   j.addf("{\"id\":\"%s\",\"label\":\"", d->id);
-  j.addJson(tr(d->label));
+  j.addJson(lab);
   j.addf("\",\"kind\":%d,\"state\":%d,\"sw\":%d,\"data\":", (int)d->kind, d->state(), d->set ? 1 : 0);
   if (d->json) d->json(j); else j.add("{}");
   return j.add('}');
@@ -300,7 +366,7 @@ static bool addValue(HeapBuf& out, int v) { return out.addf("{\"v\":%d}", v); }
 bool devSet(const char* id, bool on, ErrBuf& err) {
   if (ioHas(id)) return ioSet(id, on ? 1 : 0, ROLE_ADMIN, err);       // chi arriva qui e gia Admin (percorso e shell)
   const DevOps* d = devFind(id);
-  if (!d) { err = tr("Periferica sconosciuta"); return false; }
+  if (!d) { const char* old = ledNomeVecchioMsg(id); err = old ? old : tr("Periferica sconosciuta"); return false; }
   if (!d->set) { err = tr("Questa periferica non si accende o si spegne da qui"); return false; }
   bool ok = d->set(on, err);
   if (ok) vlog("PERIFERICHE: %s %s", d->id, on ? "acceso" : "spento");
@@ -309,6 +375,15 @@ bool devSet(const char* id, bool on, ErrBuf& err) {
 
 bool devAct(const char* id, const char* a, const char* arg, int role, HeapBuf& out, ErrBuf& err) {
   if (ioHas(id)) {
+#if VOS_WITH_PWM
+    if (!strcmp(ioClassName(id), "pwm")) return ioPwmAct(id, a, arg, role, out, err);
+#endif
+#if VOS_WITH_CONTATORE
+    if (!strcmp(ioClassName(id), "contatore")) return ioCntAct(id, a, out, role, err);
+#endif
+#if VOS_WITH_LED_RGB_A_MANO
+    if (!strcmp(ioClassName(id), "led_rgb") && (!strcmp(a, "colore") || !strcmp(a, "ordine"))) return ioLedAct(id, a, arg, role, out, err);   // acceso/spento: i percorsi generici qui sotto
+#endif
     if (!strcmp(a, "get")) { int v = 0; if (!ioGet(id, v, err)) return false; return addValue(out, v); }
     if (!strcmp(a, "set") || !strcmp(a, "toggle")) {
       int v = 0;
@@ -321,7 +396,7 @@ bool devAct(const char* id, const char* a, const char* arg, int role, HeapBuf& o
     err = tr("Azione non valida"); return false;
   }
   const DevOps* d = devFind(id);
-  if (!d) { err = tr("Periferica sconosciuta"); return false; }
+  if (!d) { const char* old = ledNomeVecchioMsg(id); err = old ? old : tr("Periferica sconosciuta"); return false; }
   if (!d->act) { err = tr("Questa periferica non ha azioni"); return false; }
   return d->act(a, arg, role, out, err);
 }

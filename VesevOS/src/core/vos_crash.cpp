@@ -10,6 +10,7 @@
 #include "vos_layout.h"
 #include "../drivers/vos_drv_fs.h"
 #include "../drivers/vos_drv_panic.h"
+#include "vos_diag_rule.h"
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <esp_system.h>
@@ -23,7 +24,7 @@
 #define CRASH_FILE  layoutPath(LAY_CRASH)    // /var/crash.txt (prima della copia /crash.txt)
 #define CRASH_KEEP  5
 
-struct CrashRtc { uint32_t magic, chk; int32_t core; uint32_t pc, n; uint32_t bt[CRASH_BT]; uint8_t corrupt, more, pad0, pad1; char reason[48]; char task[16]; char ver[16]; };
+struct CrashRtc { uint32_t magic, chk; int32_t core; uint32_t pc, n; uint32_t bt[CRASH_BT]; uint8_t corrupt, more, diagClasse, diagDett; char reason[48]; char task[16]; char ver[16]; };
 RTC_NOINIT_ATTR static CrashRtc r_crash;
 static CrashRtc g_prev;
 static bool g_prevOk = false, g_pending = false;
@@ -37,6 +38,24 @@ static uint32_t chkOf(const CrashRtc& c) {
 
 static void cpy(char* d, size_t n, const char* s) { size_t i = 0; if (s) for (; s[i] && i + 1 < n; i++) d[i] = (s[i] >= 32 && s[i] < 127) ? s[i] : '_'; d[i] = 0; }
 
+// Un giro compatto del codice sul LED, DENTRO il panico (solo C3 e C6, vedi vos_board.h). Al massimo DIAG_PANICO_MAX_MS (circa 4 s) per le classi 2-4:
+// ben sotto i 10 s del watchdog RTC che il gestore del panico arma prima di chiamarci. Niente memoria, log, task o timer: solo il GPIO e l'attesa a cicli.
+static void ledPanico(DiagCodice dc) {
+#if VOS_LED_DIAG_PANICO
+  int n = diagNumPassi(dc);
+  if (dc.classe < DC_CPU || dc.classe > DC_MEMORIA) n = 0;     // solo le classi 2, 3, 4 (CPU, watchdog, memoria): sono quelle del panico
+  for (int i = 0; i < n; i++) {
+    DiagPasso p = diagPasso(dc, i, false);
+    drvPanicLed(true);
+    drvPanicAttendiMs(p.acceso);
+    drvPanicLed(false);
+    drvPanicAttendiMs(p.spento);
+  }
+#else
+  (void)dc;
+#endif
+}
+
 // Chiamato DENTRO il crash: niente memoria dinamica, niente file, niente blocchi. Solo copie nella memoria RTC.
 static void onPanic(const DrvPanicInfo* info) {
   if (!info) return;
@@ -47,10 +66,14 @@ static void onPanic(const DrvPanicInfo* info) {
   for (uint32_t i = 0; i < r_crash.n; i++) r_crash.bt[i] = info->backtrace[i];
   r_crash.corrupt = info->backtraceCorrupt; r_crash.more = info->backtraceContinues || info->backtraceLen > CRASH_BT;
   cpy(r_crash.reason, sizeof(r_crash.reason), info->reason);
+  DiagCodice dc = diagDaPanico(info->tipo, info->reason, info->segni, info->dettagli);     // classe e dettaglio per il LED (stesso posto dei due byte che prima erano vuoti)
+  r_crash.diagClasse = dc.classe;
+  r_crash.diagDett = dc.dett;
   TaskHandle_t t = xTaskGetCurrentTaskHandle();
   cpy(r_crash.task, sizeof(r_crash.task), t ? pcTaskGetName(t) : "");
   cpy(r_crash.ver, sizeof(r_crash.ver), VOS_VERSION);
   r_crash.magic = CRASH_MAGIC; r_crash.chk = chkOf(r_crash);
+  ledPanico(dc);
 }
 
 void crashEarly() {
@@ -62,6 +85,12 @@ void crashEarly() {
 }
 
 void crashInstall() { drvPanicHook(onPanic); }
+
+// Codice (classe, dettaglio) che il gancio aveva salvato prima dell'ultimo riavvio; 0,0 se non c'e un rapporto valido.
+void crashPrevDiag(uint8_t* classe, uint8_t* dett) {
+  *classe = g_prevOk ? g_prev.diagClasse : 0;
+  *dett = g_prevOk ? g_prev.diagDett : 0;
+}
 
 // Un rapporto sta in meno di 400 byte (data, versione, motivo, riga del task, 16 indirizzi): un solo blocco di heap, liberato subito.
 static std::string reportOf(const CrashRtc& c) {

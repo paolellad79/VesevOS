@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_drvcmd.h
-// Registro dei COMANDI dei driver (sezioni [commands] e [cmd] dei file /devs/*.vdb, vedi devices/vos_mod_cmd.h) e loro esecuzione in Berry.
+// Registro dei COMANDI dei driver (sezioni [commands] e [cmd] dei file /devs/*.vdb, vedi devices/vos_mod_cmd.h) e loro esecuzione nelle funzioni VesevOS.
 // Il firmware non conosce nessun comando di periferica (esempio: "sd" e nel driver microSD): la shell lo chiede qui.
 // Il registro si rilegge da /devs alla prima richiesta dopo ogni caricamento o eliminazione di un driver (drvCmdRefresh).
 // Si esclude con VOS_WITH_DRVCMD (boards/vos_packages.h): senza, nessun driver porta comandi.
@@ -9,7 +9,7 @@
 #include "../core/vos_common.h"
 #include "../core/vos_errbuf.h"
 #include "../core/vos_heapbuf.h"
-#include "vos_berry.h"
+#include "vos_funzioni.h"
 
 struct DrvCmd {
   char driver[25];              // il nome del driver (file /devs/<driver>.vdb)
@@ -19,7 +19,7 @@ struct DrvCmd {
   bool rest;                    // l'ultimo argomento e il resto della riga
 };
 
-#if VOS_WITH_DRVCMD && VOS_WITH_BERRY
+#if VOS_WITH_DRVCMD && VOS_WITH_FUNZIONI
 #define DRVCMD_MAX 24           // sottocomandi in tutto, di tutti i driver
 void drvCmdRefresh();                                                  // un driver e stato caricato o tolto: alla prossima richiesta si rilegge
 bool drvCmdHas(const char* cmd);                                       // c'e un driver con questa parola di comando?

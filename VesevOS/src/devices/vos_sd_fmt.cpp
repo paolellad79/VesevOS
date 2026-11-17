@@ -11,6 +11,7 @@
 #include <string.h>
 #include "vos_sd_buf.h"
 #include "../core/vos_audit.h"
+#include "../core/vos_ramwd.h"
 #include "../core/vos_i18n.h"
 #include "../core/vos_log.h"
 #include "../drivers/vos_drv_task.h"
@@ -44,6 +45,7 @@ void sdFormatInfo(SdFmtInfo& f) {
 
 // Il lavoro: formatta, scrive come e finita (registro, allarme se fallisce) e libera il posto per la prossima.
 static void sdFormatTask(void*) {
+  ramBusyInc();                                      // formattazione: niente riavvio per RAM (a mano e non con RamBusy: vTaskDelete non torna)
   char err[SD_ERR_MAX];
   err[0] = 0;
   bool ok = sdFormat(err, sizeof err);
@@ -60,6 +62,7 @@ static void sdFormatTask(void*) {
   }
   vlog("SD: formattazione %s dopo %u s", ok ? "finita" : "non riuscita", (unsigned)secs);
   g_run = 0;
+  ramBusyDec();
   vTaskDelete(nullptr);
 }
 

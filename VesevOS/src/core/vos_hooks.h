@@ -15,6 +15,7 @@ struct VosHooks {
   void (*webInit)();                                // avvio: registra i percorsi della pagina
   void (*webStart)();                               // rete pronta: avvia i server
   bool (*webHttpsUp)();
+  bool (*webRotte)();                               // fine guida: registra i percorsi rimandati; true = fatto (o niente da fare)
   void (*webTrimIdle)();                            // RAM a pezzi e pagina ferma: chiude i collegamenti HTTPS fermi
   void (*rulesInit)();
   void (*mqttInit)();
@@ -46,6 +47,7 @@ inline VosHooks g_hooks = {};
 
 inline void hookCall(void (*f)()) { if (f) f(); }
 inline bool hookWebHttpsUp() { return g_hooks.webHttpsUp && g_hooks.webHttpsUp(); }
+inline bool hookWebRotte() { return !g_hooks.webRotte || g_hooks.webRotte(); }
 inline bool hookMfaOn(int u) { return g_hooks.mfaOn && g_hooks.mfaOn(u); }
 inline bool hookMqttPublish(const char* sub, const char* msg) { return g_hooks.mqttPublish && g_hooks.mqttPublish(sub, msg); }
 inline NetState hookNetState() { return g_hooks.netState ? g_hooks.netState() : NET_BOOT; }

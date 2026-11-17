@@ -23,7 +23,7 @@ struct VosUser {
   FixedStr<137> rec;             // codici di recupero: hash corti separati da virgola (8 x 17)
 };
 
-// Programma con avvio automatico: kind 0 script, 1 app Berry, 2 app ELF (come in packages/vos_prog.h).
+// Programma con avvio automatico: kind 0 script, 1 app, 2 app ELF (come in packages/vos_prog.h).
 #define VOS_BOOTPROG_MAX 8
 #define VOS_BOOTPROG_NAME 24
 struct BootProg {
@@ -75,6 +75,10 @@ struct VosConfig {
   FixedStr<65> staPass;          // max 63
   bool   staDhcp;
   FixedStr<20> ip, mask, gw, dns1, dns2;   // indirizzi IPv4 in testo
+  bool   ip6On;                  // IPv6 sulla Wi-Fi di casa (di fabbrica spento)
+  bool   ip6Fisso;               // true = oltre agli indirizzi del router, un indirizzo fisso (ip6Ind, prefisso /64)
+  FixedStr<40> ip6Ind;           // indirizzo IPv6 fisso in testo
+  FixedStr<40> ip6Gw, ip6Dns;    // gateway e DNS IPv6 a mano (vuoto = automatico, dal router)
   FixedStr<65> authSalt, authHash;     // SOLO per leggere i file vecchi (1.7.0): diventano l'utente "admin"
   VosUser users[VOS_MAX_USERS];
   FixedStr<25> pinNote[VOS_GPIO_COUNT];            // inventario pin: "collegato a ..." scritto dall'utente (indice = GPIO)
@@ -92,6 +96,9 @@ struct VosConfig {
   uint8_t  ledPin;
   uint32_t ledSrcColor[LEDSRC_COUNT];   // colori per sorgente dei trigger flash, wifi e cpu (0xRRGGBB)
   uint8_t  ledCpuThr;            // soglia di carico CPU (percento) oltre la quale il trigger cpu cambia colore
+  uint8_t  led2Mode;             // LED2 (un solo colore): stesso elenco dei modi del LED1 (LedMode), senza colori
+  uint8_t  led2CpuThr;           // LED2: soglia di carico CPU (percento) del modo cpu
+  uint8_t  led2Brightness;       // LED2: luminosita 0..255 (PWM), di fabbrica 255 = come prima che l'avesse
   bool   ntpOn, ntpServe;        // client NTP, server NTP per altri dispositivi
   bool   ntpAutoOff;             // NTP spento DALLA GUIDA (nessun Wi-Fi): si riaccende da solo quando arriva il Wi-Fi
   uint32_t ntpEvery;             // minuti tra due sincronizzazioni NTP (0 = solo all'avvio)
@@ -111,17 +118,17 @@ struct VosConfig {
   uint8_t  cpuGov;               // governor quando cpuMhz = 0: 0 ondemand, 1 conservative, 2 schedutil (vedi vos_cpugov.h)
   uint8_t  cpuUp, cpuDown;       // soglie di salita e discesa (%) dei governor
   uint16_t cpuHold;              // secondi minimi prima di scendere
-  FixedStr<16> lang;                // codice lingua: "it" (predefinita), "en" (interna) o file /lang/<codice>.json
+  FixedStr<16> lang;                // codice lingua: "it" (predefinita), "en" (interna) o file /lang/<codice>.vld
   bool   sdEnabled;
 #if VOS_WITH_ELF
   bool   elfOn;                  // sottosistema vde (ELF): di fabbrica ACCESO dal 31/10/2026; solo Admin lo cambia (dai Task); codice nativo senza protezione di memoria
 #endif
-  bool   berryOn;                // sottosistema vdb (Berry): di fabbrica acceso; spento = nessuno script, app o comando di driver parte
+  bool   funzioniAttive;                // sottosistema vdb (funzioni VesevOS): di fabbrica acceso; spento = nessuno script, app o comando di driver parte
   uint16_t funcOff;              // Funzionalita tolte dall'utente (Sistema > Funzionalita): un bit per id di vos_func_ids.h; 0 = tutte concesse
   uint8_t  bootN;                // programmi con avvio automatico (di fabbrica nessuno)
   BootProg boot[VOS_BOOTPROG_MAX];   // l'ordine e l'ordine di avvio, dopo i servizi
   uint8_t  dataSdN;              // app che salvano i dati sulla microSD (scelta dell'utente; le altre usano la flash)
-  BootProg dataSd[VOS_BOOTPROG_MAX];   // kind 1 app Berry, 2 app ELF (come boot)
+  BootProg dataSd[VOS_BOOTPROG_MAX];   // kind 1 app, 2 app ELF (come boot)
   uint8_t sdCs, sdSck, sdMiso, sdMosi;
   // Filtro IP
   uint8_t fwMode;                // 0 spento, 1 solo la mia rete, 2 lista consentita, 3 lista bloccati
@@ -145,7 +152,7 @@ struct VosConfig {
   // Watchdog
   bool    wdTask, wdNet, wdRam;  // controlli: task bloccati, rete assente, RAM bassa
   uint16_t wdNetMin;             // minuti senza rete prima del riavvio
-  uint16_t wdRamKb;              // soglia RAM libera
+  uint8_t  wdRamPerc;            // soglia CRITICA: % di RAM interna USATA (di fabbrica 93; limiti 80-99). Prima era wdRamKb (KB liberi)
   uint16_t wdUpDays;             // riavvio dopo N giorni di accensione (0 = mai)
   int16_t  wdAt;                 // riavvio programmato: minuti dalla mezzanotte (-1 = spento)
   uint8_t  wdTwdt;               // Task watchdog di ESP-IDF, secondi (5-60)
@@ -168,6 +175,8 @@ bool   cfgSave();                       // salvataggio sicuro (.tmp/.bak) + cont
 bool   cfgExport(HeapBuf& out, bool withSecrets);    // testo OpenWrt in coda a out; false se manca la memoria o si supera il tetto
 bool   cfgImport(const char* text, size_t len, ErrBuf& err);   // ripristino: chiavi assenti restano
 void   cfgFactoryReset();
+void   cfgSetRamScarsa(bool on);         // il watchdog della RAM avvisa: RAM scarsa (il registro delle modifiche non tiene copie)
+void   cfgRilasciaCopia();             // libera la copia in RAM del registro delle modifiche (RAM scarsa)
 bool   cfgLastSaveOk();                // l'ultimo salvataggio della configurazione e riuscito?
 bool   cfgSvcRecover();                 // riporta hotspot, HTTP, HTTPS e porte ai valori di fabbrica (true se qualcosa e cambiato)
 const char* cfgSvcCheck(bool apOn, bool httpOn, int httpPort, bool httpsOn, int httpsPort);   // nullptr = ok, altrimenti il motivo del rifiuto (testo tradotto)
@@ -177,4 +186,6 @@ void   cfgSetOriginf(const char* fmt, ...) __attribute__((format(printf, 1, 2)))
 bool   cfgFileChanged();                // il file e stato cambiato fuori dal pannello?
 FixedStr<16> cfgNewApPass();            // password casuale per l'hotspot (12 caratteri a gruppi)
 bool   cfgApPassWeak(const char* p);  // vuota, troppo corta o di fabbrica
+bool   cfgSetupServices();            // fine guida: con la Wi-Fi di casa configurata spegne hotspot, portale e DHCP (senza salvare)
+bool   cfgEnsureApPass();             // se manca o e debole ne crea una (senza salvare); true = cambiata
 bool   cfgParseRange(std::string_view txt, uint32_t& a, uint32_t& b);   // "1.2.3.4", "1.2.3.4-1.2.3.9", "1.2.3.0/24"

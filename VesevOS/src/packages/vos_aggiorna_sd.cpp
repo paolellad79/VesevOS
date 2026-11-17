@@ -8,6 +8,7 @@
 #include <string.h>
 #include <strings.h>
 #include "../core/vos_common.h"
+#include "../core/vos_ramwd.h"
 #include "../core/vos_i18n.h"
 #include "../core/vos_log.h"
 #include "../core/vos_updorder.h"
@@ -78,6 +79,7 @@ void aggSdPulisci() {
 }
 
 AggSdEsito aggSdPrepara(const AggDisponibile& d, ErrBuf& err) {
+  RamBusy lavoro;                               // copia dell'aggiornamento sulla microSD: niente riavvio per RAM
   uint32_t totaleKb = 0, usatoKb = 0;
   if (!sdUp() || !sdSpaceKb(totaleKb, usatoKb)) return AGG_SD_ASSENTE;
   int pin[5];

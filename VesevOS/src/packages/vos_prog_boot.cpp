@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_prog_boot.cpp (vedi vos_prog.h): i programmi con AVVIO AUTOMATICO. L'elenco sta in cfg.boot (l'ordine e l'ordine di avvio);
 // le app con autostart=required partono sempre, davanti agli altri; quelle con autostart=never non si possono scegliere.
-// Partono dopo i servizi, da un task che sparisce quando ha finito. Berry ha un solo interprete: se un programma Berry e gia in corso, il
+// Partono dopo i servizi, da un task che sparisce quando ha finito. Il motore delle funzioni ha un solo interprete: se un programma e gia in corso, il
 // successivo aspetta fino a 10 s e poi salta (con una riga nel registro): non e un errore, e il limite dichiarato.
 #include "vos_prog.h"
 #include "vos_progext.h"
@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "vos_app.h"
-#include "vos_berry.h"
+#include "vos_funzioni.h"
 #include "vos_func.h"
 #include "../core/vos_config.h"
 #include "../core/vos_ext.h"
@@ -27,7 +27,7 @@
 namespace {
 
 const uint32_t kAttesaAvvioMs = 8000;      // dopo l'avvio dei servizi: rete e pagina hanno il tempo di partire
-const uint32_t kAttesaBerryMs = 10000;     // un solo interprete: quanto si aspetta che il programma Berry precedente finisca
+const uint32_t kAttesaFunzioniMs = 10000;     // un solo interprete: quanto si aspetta che il programma precedente finisca
 
 bool esiste(uint8_t kind, const char* name) {
   char path[96];
@@ -36,7 +36,7 @@ bool esiste(uint8_t kind, const char* name) {
   return drvFsExists(path);
 }
 
-// 0 permesso, 1 obbligatorio, 2 vietato (solo le app Berry ne hanno una scritta nel file).
+// 0 permesso, 1 obbligatorio, 2 vietato (solo le app ne hanno una scritta nel file).
 int regola(uint8_t kind, const char* name) {
   if (kind != PK_APP_B) return 0;
   int r = appAutostart(name);
@@ -87,9 +87,9 @@ void taskAvvio(void*) {
       vlog("AVVIO: %s%s non partito: %s", b[i].name, progExt(b[i].kind), b[i].rule == 2 ? "vietato dal suo file" : "file non trovato");
       continue;
     }
-    if (b[i].kind != PK_APP_E) {                                   // Berry: un solo programma alla volta
-      for (uint32_t t = 0; berryRunning() && t < kAttesaBerryMs; t += 200) drvDelayMs(200);
-      if (berryRunning()) { vlog("AVVIO: %s non partito: un altro programma Berry e gia in corso", b[i].name); continue; }
+    if (b[i].kind != PK_APP_E) {                                   // funzioni VesevOS: un solo programma alla volta
+      for (uint32_t t = 0; funzioniInEsecuzione() && t < kAttesaFunzioniMs; t += 200) drvDelayMs(200);
+      if (funzioniInEsecuzione()) { vlog("AVVIO: %s non partito: un altro programma e gia in corso", b[i].name); continue; }
     }
     ErrBuf e;
     if (progStart(b[i].kind, b[i].name, ROLE_ADMIN, "avvio automatico", e)) vlog("AVVIO: %s%s partito", b[i].name, progExt(b[i].kind));

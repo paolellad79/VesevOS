@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Genera il file unico dei dati comuni "common" (paesi + mappa + regole radio + elenco librerie)
-# e VesevOS/src/core/vos_common_data.h (blocco compresso servito dalla pagina + tabella radio per il firmware).
+# e i due file grezzi in ../build/risorse/origine/: comuni.json.gz (servito alla pagina) e radio.txt (tabella radio per il firmware).
+# Da qui mkrisorse.py li mette in /usr/share/vesevos/ (non sono piu dentro il firmware).
 #
 # Uso normale (non serve internet):        python3 tools/mkcommon.py
 # Rigenerare i dati sorgente (una volta):   python3 tools/mkcommon.py --sources <ne_110m.geojson> <ne_50m.geojson> <zone.tab> <iso3166.tab> <zones.json>
@@ -10,11 +11,14 @@
 #   zone.tab, iso3166.tab = IANA tz database (pubblico dominio)       https://github.com/eggert/tz
 #   zones.json = posix_tz_db (licenza MIT)                            https://github.com/nayarsystems/posix_tz_db
 # Non e consulenza legale: le regole radio sono semplificate e prudenti; vanno ricontrollate prima della vendita.
-import os, sys, json, gzip, math
+import os, sys, re, json, gzip, math
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from versioni_risorse import versione_risorsa
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, 'tools', 'data', 'common_src.json')
-OUT = os.path.join(ROOT, 'VesevOS', 'src', 'core', 'vos_common_data.h')
+ORIGINE = os.path.join(os.path.dirname(ROOT), 'build', 'risorse', 'origine')   # dati grezzi per tools/mkrisorse.py
+RADIO_DATA = '2026-11-16'     # data delle regole radio di questo file: si cambia a mano quando cambiano CH11/DBM30 (non e la data di oggi: il file deve uscire uguale ogni volta)
 BUDGET = 100 * 1024          # massimo compresso
 
 # ---------- regole radio 2,4 GHz (semplificate, prudenti) ----------
@@ -60,7 +64,7 @@ LANG = {'IT': 'it', 'SM': 'it', 'VA': 'it', 'CH': 'it', 'ES': 'es', 'MX': 'es', 
 
 # ---------- elenco del software usato (SBOM semplice) ----------
 SBOM = [
-    ['VesevOS', '1.8.14', 'GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial', 'https://github.com/paolellad79/VesevOS'],
+    ['VesevOS', '-', 'GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial', 'https://github.com/paolellad79/VesevOS'],
     ['ESP-IDF (esp_wifi, esp_now, esp-mqtt, esp_http_server, esp_https_server, esp-tls, NVS)', '5.5.5', 'Apache-2.0', 'https://github.com/espressif/esp-idf'],
     ['Mbed TLS (in ESP-IDF; Apache-2.0 OR GPL-2.0-or-later, scelta Apache-2.0)', 'ESP-IDF 5.5.5', 'Apache-2.0', 'https://github.com/Mbed-TLS/mbedtls'],
     ['FreeRTOS Kernel', 'ESP-IDF 5.5.5', 'MIT', 'https://www.freertos.org'],
@@ -68,7 +72,8 @@ SBOM = [
     ['esp_littlefs (joltwallet/littlefs)', '1.22.3', 'MIT', 'https://github.com/joltwallet/esp_littlefs'],
     ['LittleFS', '2.x (in esp_littlefs)', 'BSD-3-Clause', 'https://github.com/littlefs-project/littlefs'],
     ['espressif/mdns', '1.14.0', 'Apache-2.0', 'https://github.com/espressif/esp-protocols'],
-    ['esp-nimble-cpp (h2zero)', '2.5.0', 'Apache-2.0', 'https://github.com/h2zero/esp-nimble-cpp'],
+    ['esp-nimble-cpp (h2zero)', '2.5.0 (S3), 2.6.0 (C3)', 'Apache-2.0', 'https://github.com/h2zero/esp-nimble-cpp'],
+    ['elf_loader (Espressif, copia nostra con due modifiche; solo su S3)', '2.0.0', 'Apache-2.0', 'https://components.espressif.com/components/espressif/elf_loader'],
     ['NimBLE (Apache Mynewt)', 'ESP-IDF 5.5.5', 'Apache-2.0', 'https://github.com/apache/mynewt-nimble'],
     ['Certificate bundle di ESP-IDF (dati CA Mozilla; licenza da verificare)', 'ESP-IDF 5.5.5', 'MPL-2.0', 'https://curl.se/docs/caextract.html'],
     ['PsychicHttp (copia modificata)', '3.1.2', 'MIT', 'https://github.com/hoeken/PsychicHttp'],
@@ -169,23 +174,22 @@ def build():
     gz = gzip.compress(raw, 9, mtime=0)
     if len(gz) > BUDGET:
         print('ERRORE: common compresso %d byte > budget %d' % (len(gz), BUDGET)); sys.exit(1)
-    lines = []
-    for i in range(0, len(gz), 24):
-        lines.append(','.join('0x%02x' % b for b in gz[i:i + 24]))
-    h = ['// VesevOS - vos_common_data.h (GENERATO da tools/mkcommon.py, non modificare a mano)',
-         '// Dati: Natural Earth (pubblico dominio), IANA tz (pubblico dominio), posix_tz_db (MIT).',
-         '#pragma once', '#include "../drivers/vos_drv_string.h"', '',
-         'struct VosCountryRadio { char cc[3]; uint8_t ch; uint8_t dbm; };',
-         'static const VosCountryRadio VOS_COUNTRIES[] = {']
-    h.append(',\n'.join('  {"%s", %d, %d}' % t for t in table))
-    h.append('};')
-    h.append('static const int VOS_COUNTRY_N = %d;' % len(table))
-    h.append('static const size_t COMMON_GZ_LEN = %d;' % len(gz))
-    h.append('static const uint8_t COMMON_GZ[] PROGMEM = {')
-    h.append(',\n'.join(lines))
-    h.append('};')
-    open(OUT, 'w', encoding='ascii', newline='\n').write('\n'.join(h) + '\n')
-    print('ok common: %d paesi, %d byte (compresso %d byte, budget %d)' % (len(cl), len(raw), len(gz), BUDGET))
+    os.makedirs(ORIGINE, exist_ok=True)
+    open(os.path.join(ORIGINE, 'comuni.json.gz'), 'wb').write(gz)
+    open(os.path.join(ORIGINE, 'radio.txt'), 'w', encoding='ascii', newline='\n').write(testo_radio(table))
+    print('ok common: %d paesi, %d byte (compresso %d byte, budget %d), scritto in %s' % (len(cl), len(raw), len(gz), BUDGET, ORIGINE))
+
+def testo_radio(table):
+    """Tabella radio dei paesi come testo (file radio.txt sulla scheda): una riga per paese 'CC canali dBm', commenti con #."""
+    righe = ['# ATTENZIONE - NON MODIFICARE QUESTO FILE.',
+             '# Canali e potenza di ogni paese sono limiti di legge: cambiarli puo violare le norme radio.',
+             '# Per questioni legali: chi modifica questo file ne risponde. Un file modificato puo essere rifiutato dalla scheda,',
+             '# che allora usa valori prudenti (canali 1-11).',
+             '# VesevOS: tabella radio 2,4 GHz dei paesi (generata da tools/mkcommon.py, non modificare a mano)',
+             '# data_regole=%s versione=%s' % (RADIO_DATA, versione_risorsa('radio')),
+             '# Una riga per paese: codice ISO a due lettere, canali massimi, limite in dBm EIRP. Non e consulenza legale: valori prudenti.']
+    righe += ['%s %d %d' % t for t in table]
+    return '\n'.join(righe) + '\n'
 
 if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1] == '--sources':

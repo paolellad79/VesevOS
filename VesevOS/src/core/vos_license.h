@@ -8,9 +8,10 @@
 int         licCount();
 const char* licId(int i);            // "notice", "gpl3", "apache2", "mit", "bsd3"
 const char* licTitle(int i);
-const char* licText(int i);          // testo in flash, terminato da 0
+const char* licText(int i);          // testo in flash, terminato da 0 ("" per le licenze minori: stanno in un file, vedi licFile)
 size_t      licSize(int i);              // lunghezza del testo originale
 size_t      licZ(int i);                 // se > 0 il testo in flash e compresso (gzip) e questa e la sua lunghezza
+int         licFile(int i);              // licenza minore (Apache, MIT, BSD): il valore RisFile del suo file in /usr/share/vesevos; -1 se il testo e nel firmware
 int         licFind(const char* id);     // -1 se non esiste (maiuscole e minuscole uguali)
 #define LIC_JSON_MAX 1024                // capacita che basta per l'elenco dei documenti (la prova sul computer lo controlla)
 size_t      licListJson(char* out, size_t cap);   // [{"id":..,"title":..,"size":..}]; ritorna i caratteri scritti, tronca se non ci sta

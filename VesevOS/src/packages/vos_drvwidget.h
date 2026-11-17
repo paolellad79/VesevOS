@@ -6,18 +6,18 @@
 //
 // COME FUNZIONA
 //   - L'elenco dei widget (titolo, icona, testo alternativo, chi lo vede) si legge da /devs alla prima richiesta e dopo ogni caricamento o eliminazione di un driver.
-//   - I valori vivi li produce on_widget() in Berry, SENZA diritti di scrittura. Il risultato resta in cache 10 secondi.
-//   - La Home non si blocca: on_widget() parte solo se la cache e vecchia E Berry e libero, con un tempo massimo corto (600 ms);
-//     se Berry e occupato (un comando, uno script, la pagina del driver aperta) si mostra l'ultimo valore noto. Un comando alla volta (D3).
+//   - I valori vivi li produce on_widget() nelle funzioni VesevOS, SENZA diritti di scrittura. Il risultato resta in cache 10 secondi.
+//   - La Home non si blocca: on_widget() parte solo se la cache e vecchia E il motore delle funzioni e libero, con un tempo massimo corto (600 ms);
+//     se il motore delle funzioni e occupato (un comando, uno script, la pagina del driver aperta) si mostra l'ultimo valore noto. Un comando alla volta (D3).
 // Si esclude con VOS_WITH_DRVCMD (boards/vos_packages.h).
 #pragma once
 #include "../core/vos_common.h"
 #include "../core/vos_heapbuf.h"
-#include "vos_berry.h"
+#include "vos_funzioni.h"
 
 #define DRVW_JSON_MAX   8192     // tetto del pezzo JSON (2 widget con icona da 2 KB e sequenze di escape)
 
-#if VOS_WITH_DRVCMD && VOS_WITH_BERRY
+#if VOS_WITH_DRVCMD && VOS_WITH_FUNZIONI
 #define DRVW_MAX        2        // widget di driver nella Home (ognuno tiene ~2,3 KB di heap)
 #define DRVW_CACHE_MS   10000UL  // validita dei valori
 #define DRVW_RUN_MS     600UL    // tempo massimo di on_widget()

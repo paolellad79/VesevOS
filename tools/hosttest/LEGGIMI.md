@@ -21,4 +21,4 @@ Le funzioni `isAlphaNumeric` ecc. nel finto `Arduino.h` erano sempre vere: corre
 Prove che NON usano Arduino (script `.sh`, compilano i file veri con pochi finti; ognuna si lancia da sola)
 - `prova_prog.sh`: Funzionalita (`vos_func`), gruppi di primitive che un'app ELF chiede (`vos_elf_use`, su un ELF costruito a mano) e blocco delle funzionalita tolte nel registro (`vos_prim`).
 - `prova_cfgprog.sh`: configurazione di sottosistemi (vdb, vde), Funzionalita tolte e programmi con avvio automatico: valori di fabbrica, esporta/importa, id sconosciuti, elenco troppo lungo, file vecchio.
-- `prova_sdreg.sh`, `prova_berryhw.sh`: funzioni Berry `sd_*` e `gpio_*`, `i2c_*`, `spi_*` (permessi, ruolo e funzionalita tolta). Altre: `prova_prim.sh`, `prova_elfrun.sh`, `prova_vde.sh`, `prova_hw.sh`, `prova_sdauto.sh`, `prova_drvres.sh`, `prova_vdp_cmd.sh`, `prova_wrap.sh`.
+- `prova_sdreg.sh`, `prova_funzionihw.sh`: funzioni VesevOS `sd_*` e `gpio_*`, `i2c_*`, `spi_*` (permessi, ruolo e funzionalita tolta). Altre: `prova_prim.sh`, `prova_elfrun.sh`, `prova_vde.sh`, `prova_hw.sh`, `prova_sdauto.sh`, `prova_drvres.sh`, `prova_vdp_cmd.sh`, `prova_wrap.sh`.

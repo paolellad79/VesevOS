@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_progext.h
-// STRATO 6 (packages): le estensioni dei programmi (script, app Berry, app ELF) con il loro nome vecchio. Il nome nuovo si scrive, il
+// STRATO 6 (packages): le estensioni dei programmi (script, app, app ELF) con il loro nome vecchio. Il nome nuovo si scrive, il
 // vecchio si legge ancora; se esistono tutti e due vale il nuovo. I nomi stanno in core/vos_ext.h (un solo punto).
 #pragma once
 #include <stddef.h>

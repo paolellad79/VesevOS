@@ -3,6 +3,7 @@
 // VesevOS - vos_net.cpp
 #include "vos_net.h"
 #include "../core/vos_apwin.h"
+#include "../core/vos_primo_avvio.h"
 #include "../drivers/vos_drv_task.h"
 #include "../core/vos_eventbus.h"
 #include "../core/vos_i18n.h"
@@ -16,6 +17,8 @@
 #include "../core/vos_fw.h"
 #include "../core/vos_wd.h"
 #include "vos_wps.h"
+#include "vos_net_ip6.h"
+#include "vos_net_mdns.h"
 #include "../drivers/vos_drv_wifi.h"
 #include "../drivers/vos_drv_mdns.h"
 #include "../drivers/vos_drv_dhcp.h"
@@ -52,7 +55,7 @@ bool netOnAp(uint32_t ip) { return (ip & 0xFFFFFF00UL) == 0xC0A80400UL; }
 
 // ---- portale automatico (captive portal): in modo AP ogni nome DNS punta alla scheda ----
 static void dnsStart() {
-  if (dnsCaptiveRunning()) return;
+  if (dnsCaptiveRunning()) return;                         // anche in prima accensione: il telefono apre la guida da solo (decisione dell'utente del 15/11/2026)
   static const uint8_t apIp[4] = { 192, 168, 4, 1 };
   if (dnsCaptiveStart(apIp)) vlog("NET: portale automatico attivo");
 }
@@ -61,7 +64,6 @@ bool netCaptive() { return dnsCaptiveRunning(); }
 
 // ---- servizi dell'hotspot e nome in rete: acceso/spento da Servizi ----
 static volatile bool g_svcReq = false;
-static bool g_mdnsRun = false;
 void netApplyServices() { g_svcReq = true; }
 
 static esp_netif_t* apNetif() { return esp_netif_get_handle_from_ifkey("WIFI_AP_DEF"); }
@@ -80,16 +82,6 @@ static void dhcpApply() {                            // solo con l'hotspot acces
   uint32_t lease = cfg.dhcpLease;                    // minuti
   esp_netif_dhcps_option(ap, ESP_NETIF_OP_SET, ESP_NETIF_IP_ADDRESS_LEASE_TIME, &lease, sizeof(lease));
   esp_netif_dhcps_start(ap);
-}
-static void mdnsStop() { drvMdnsEnd(); g_mdnsRun = false; }   // PRIMA di spegnere o rifare la radio: mDNS tiene i puntatori alle interfacce di rete (DEF-18)
-static void mdnsApply() {
-  mdnsStop();
-  if (!cfg.mdnsOn) { vlog("NET: mDNS spento"); return; }
-  if (drvMdnsBegin(cfg.hostname.c_str())) {
-    g_mdnsRun = true;
-    if (cfg.httpOn) drvMdnsAddService("http", "tcp", cfg.httpPort);
-    if (cfg.https) drvMdnsAddService("https", "tcp", cfg.httpsPort);
-  }
 }
 
 // ---- modalita aereo ----
@@ -153,7 +145,7 @@ static void airEnter() {
   wpsAbort();
   hookCall(g_hooks.radiosOff);        // ESP-NOW e Bluetooth
   dnsStop();
-  mdnsStop();
+  netMdnsStop();
   drvWifiDisconnect(true, false);
   drvWifiSetMode(DW_OFF);
   setState(NET_AIR);
@@ -175,7 +167,7 @@ static void jStr(HeapBuf& o, const char* key, const char* v) {
 }
 
 bool netStatusJson(HeapBuf& j) {
-  const char* mode = (g_state == NET_AIR) ? tr("Modo aereo") : (g_state == NET_AP) ? "AP" : (g_state == NET_CLIENT_OK) ? "Client"
+  const char* mode = (g_state == NET_ATTESA) ? tr("In attesa del tasto") : (g_state == NET_AIR) ? tr("Modo aereo") : (g_state == NET_AP) ? "AP" : (g_state == NET_CLIENT_OK) ? "Client"
                    : (g_state == NET_CLIENT_TRY) ? tr("Connessione...") : tr("Avvio");
   char ipb[16], mac1[20], mac2[20];
   netIpTo(ipb, sizeof ipb); netMacTo(false, mac1, sizeof mac1); netMacTo(true, mac2, sizeof mac2);
@@ -206,7 +198,7 @@ bool netStatusJson(HeapBuf& j) {
   jBool(j, "staFail", g_staFail && cfg.staEnabled);
   jBool(j, "apOn", cfg.apOn);
   jBool(j, "dhcpRun", g_state == NET_AP && dhcpRunning());
-  jBool(j, "mdnsRun", g_mdnsRun);
+  jBool(j, "mdnsRun", netMdnsRun());
   jBool(j, "captive", dnsCaptiveRunning());
   jBool(j, "air", cfg.airOn);
   jNum(j, "airExit", cfg.airExit);
@@ -251,16 +243,21 @@ bool netScanJson(HeapBuf& out) {
 static bool apAllowed() { return cfg.apOn || !cfg.staEnabled || !cfg.staSsid.length(); }
 
 static void startAp() {
-  mdnsStop();                                         // la radio puo spegnersi qui sotto: mDNS va fermato prima
+  netMdnsStop();                                         // la radio puo spegnersi qui sotto: mDNS va fermato prima
   drvWifiDisconnect(true, false);
+  ramTrace("pre-wifi");
   drvWifiSetMode(DW_AP);
+  ramTrace("wifi-su");                                // dopo esp_wifi_init e esp_wifi_start (il driver sta sotto il nucleo: la misura si fa da qui)
   regionApplyRadio();                                 // paese e potenza PRIMA di trasmettere
+  if (!apWinIsOpen() && cfgApPassWeak(cfg.apPass.c_str())) cfg.apPass = cfgNewApPass().c_str();   // mai un hotspot senza password fuori dalla finestra (la scheda e gia in uso)
   int ch = g_apCh ? g_apCh : cfg.meshCh;
   if (!regionChannelOk(ch)) ch = 1;
   drvWifiApStart(cfg.apSsid.c_str(), apWinIsOpen() ? "" : cfg.apPass.c_str(), ch, 0xC0A80401, 0xC0A80401, 0xFFFFFF00);   // 192.168.4.1 / 255.255.255.0   // sempre con password (WPA2), unica per ogni scheda
   setState(NET_AP);
-  vlog("NET: AP '%s' su 192.168.4.1 (canale %d)", cfg.apSsid.c_str(), ch);
+  vlog("NET: AP '%s' su 192.168.4.1 (canale %d)%s", cfg.apSsid.c_str(), ch, apWinIsOpen() ? ", APERTO (finestra del tasto BOOT)" : "");
+  ramTrace("ap-su");
   if (!dhcpWanted()) dhcpApply(); else if (cfg.dhcpLease != 120) dhcpApply();   // di fabbrica: DHCP gia acceso, 120 minuti
+  ramTrace("dhcp");
   if (cfg.apCaptive && cfg.httpOn && cfg.httpPort == 80) dnsStart();   // il portale automatico serve solo con HTTP sulla porta 80
 }
 
@@ -278,7 +275,7 @@ static bool applyStaticIp() {
 
 static bool tryClient() {
   dnsStop();
-  mdnsStop();                                         // il cambio di rete spegne la radio e distrugge le interfacce: mDNS va fermato prima
+  netMdnsStop();                                         // il cambio di rete spegne la radio e distrugge le interfacce: mDNS va fermato prima
   setState(NET_CLIENT_TRY);
   drvWifiDisconnect(true, false);
   drvDelayMs(200);
@@ -361,6 +358,38 @@ static void doTest() {
   drvWifiSetMode(DW_AP);
 }
 
+// ---- prima accensione (vos_primo_avvio): radio spenta in attesa del tasto BOOT ----
+static void standbyEnter() {
+  wpsAbort();
+  dnsStop();
+  netMdnsStop();
+  drvWifiDisconnect(true, false);
+  drvWifiSetMode(DW_OFF);                            // all'avvio la radio non e mai partita: qui non fa niente (e non costa RAM)
+  setState(NET_ATTESA);
+  ramTrace("attesa");
+}
+
+// La guida e finita mentre la radio era accesa (finestra del tasto): si passa al comportamento normale senza spegnere l'hotspot.
+// Ordine (decisione dell'utente del 14/11/2026): 1) percorsi rimandati della pagina; 2) hotspot protetto e DNS del portale; 3) mDNS; 4) HTTP.
+// Il DNS, l'mDNS e l'HTTP costano circa 22 KB: se partissero prima i percorsi non entrerebbero piu (prova 1.8.23e).
+static bool g_fineGuidaPend = false;
+static void primoAvvioFinito() {
+  vlog("SETUP: guida finita: prima i percorsi della pagina, poi DNS del portale, mDNS e HTTP");
+  g_fineGuidaPend = true;
+}
+static void fineGuidaPasso() {
+  if (!g_fineGuidaPend) return;
+  if (!hookWebRotte()) return;                       // RAM scarsa: niente DNS, mDNS e HTTP, si riprova al prossimo giro (1 s)
+  g_fineGuidaPend = false;
+  if (g_state == NET_AP) {
+    if (!apAllowed()) g_reconf = true;               // hotspot spento di fabbrica (Wi-Fi di casa configurata): si passa al client
+    else if (!g_reconf) netApRefresh();              // l'hotspot torna con la password (se la guida non l'ha gia fatto)
+    if (cfg.apCaptive && cfg.httpOn && cfg.httpPort == 80) dnsStart();
+  }
+  netMdnsApply();
+  hookCall(g_hooks.webStart);                        // adesso parte anche il redirect HTTP
+}
+
 static void netTask(void*) {
   int fails = 0;
   if (cfg.airOn && cfg.airExit == 0) netAirplaneOff("nuovo avvio");   // "al prossimo avvio"
@@ -368,7 +397,26 @@ static void netTask(void*) {
   for (;;) {
     wdBeat("net");
     fwTick();
-    if (apWinTick()) netApRefresh();                 // finestra del BOOT scaduta: hotspot torna con la password
+    netClientiLog();                                 // entrate e uscite dei dispositivi dall'hotspot
+    PaEvento pe = primoAvvioPasso(cfg.setupDone, primoAvvioFinestra() ? drvWifiApClients() : 0);   // con un client collegato la finestra non scade
+    if (pe == PAE_SCADUTA) { vlog("SETUP: finestra hotspot chiusa (10 minuti): radio spenta, premi il tasto BOOT per riaprirla"); standbyEnter(); }
+    if (pe == PAE_FINITA && g_state != NET_ATTESA) primoAvvioFinito();
+    fineGuidaPasso();                                // (anche i giri dopo, finche la RAM non basta per i percorsi)
+    if (primoAvvioAttesa()) {                        // prima accensione: la rete e spenta di proposito, niente tentativi ne riavvii
+      if (g_state != NET_ATTESA) standbyEnter();
+      drvDelayMs(1000);
+      continue;
+    }
+    if (g_state == NET_ATTESA) {                     // si esce dall'attesa: tasto premuto (finestra) oppure guida finita da seriale
+      setState(NET_BOOT);
+      if (primoAvvioFinestra()) {
+        vlog("SETUP: tasto BOOT premuto, accendo l'hotspot aperto per 10 minuti (HTTPS, portale automatico e redirect HTTP)");
+        g_reconf = false; fails = 0;
+        startAp();
+        hookCall(g_hooks.webStart);                  // HTTPS parte solo adesso (prima la RAM resta libera)
+        ramTrace("finestra");
+      } else g_reconf = true;                        // guida finita con la radio spenta: avvio normale
+    }
     if (g_apChReq) {                                 // cambio canale dell'hotspot senza spegnere il Wi-Fi (la rete schede resta accesa)
       g_apChReq = false;
       if (g_state == NET_AP) { drvWifiApRetune(cfg.apSsid.c_str(), apWinIsOpen() ? "" : cfg.apPass.c_str(), g_apCh); vlog("NET: hotspot sul canale %d", (int)g_apCh); }
@@ -385,7 +433,7 @@ static void netTask(void*) {
       if (cfg.staEnabled && cfg.staSsid.length()) {
         if (!tryClient() && apAllowed()) startAp();     // se fallisce torna AP (se il servizio AP e acceso)
       } else startAp();
-      mdnsApply();
+      netMdnsApply();
       hookCall(g_hooks.webStart);                       // il server parte solo ora che la rete e pronta
     }
     if (g_svcReq) {                                  // DHCP, portale automatico e mDNS: si applicano subito, senza riavvio
@@ -394,9 +442,11 @@ static void netTask(void*) {
         dhcpApply();
         if (cfg.apCaptive && cfg.httpOn && cfg.httpPort == 80) dnsStart(); else dnsStop();
       }
-      mdnsApply();
+      netMdnsApply();
     }
+    netMdnsRiprova();                                // mDNS non partito: nuovi tentativi (pochi, con attese crescenti)
     wpsTick();                                       // WPS: avvio, attesa, esito (solo qui si tocca il Wi-Fi)
+    net6Tick(g_state == NET_CLIENT_OK);                                      // IPv6: acceso/spento e indirizzo fisso
     if (wpsActive()) {                               // durante il WPS niente scansioni, prove o recuperi di rete
       vTaskDelay(pdMS_TO_TICKS(1000));
       continue;
@@ -413,7 +463,7 @@ static void netTask(void*) {
         fails = 0;
         if (apAllowed()) { vlog("NET: troppi tentativi, torno in AP"); startAp(); }
         else { vlog("NET: Wi-Fi assente, il servizio AP e spento: riprovo"); tryClient(); }   // scelta dell'utente: recupero con BOOT 8 s
-        mdnsApply();                                 // startAp e tryClient fermano mDNS: si riaccende sulla rete di adesso
+        netMdnsApply();                                 // startAp e tryClient fermano mDNS: si riaccende sulla rete di adesso
       }
     } else fails = 0;
     vTaskDelay(pdMS_TO_TICKS(1000));
@@ -421,7 +471,7 @@ static void netTask(void*) {
 }
 
 // Wi-Fi come servizio (sola lettura nel registro): non si ferma da qui (si perderebbe la pagina); per spegnerlo c'e il modo aereo.
-static int  svcState() { NetState n = netState(); return n == NET_CLIENT_OK || n == NET_AP ? SVC_ON : n == NET_AIR ? SVC_OFF : SVC_STARTING; }
+static int  svcState() { NetState n = netState(); return n == NET_CLIENT_OK || n == NET_AP ? SVC_ON : (n == NET_AIR || n == NET_ATTESA) ? SVC_OFF : SVC_STARTING; }
 static bool svcBegin(ErrBuf& err) { (void)err; netReconfigure(); return true; }
 static void svcStop() {}
 static const ServiceOps NET_OPS = { "wifi", "Wi-Fi", "Rete", "net", ROLE_OPER, ROLE_ADMIN,
@@ -430,6 +480,7 @@ static const ServiceOps NET_OPS = { "wifi", "Wi-Fi", "Rete", "net", ROLE_OPER, R
 void netInit() {
   serviceRegister(&NET_OPS);
   wpsInit();
+  netClientiInit();
   g_reconf = true;
   if (!cfg.apOn && cfg.dhcpOn && cfg.staEnabled && cfg.staSsid.length()) {     // schede configurate prima della 1.7.18: hotspot spento ma DHCP rimasto acceso
     cfg.dhcpOn = false; cfgSetOrigin("DHCP segue hotspot"); cfgSave(); vlog("NET: hotspot spento, spengo anche il DHCP");

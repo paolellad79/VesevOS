@@ -6,8 +6,11 @@ Valutazione e avvisi: questo testo NON e consulenza legale; le norme citate potr
 ## Cosa c'e
 | Cartella | Contenuto |
 |---|---|
+| `1.8.24c/` | firmware VesevOS 1.8.24c per ESP32-S3 e ESP32-C6 (`.bin` + `.sha256`) |
+| `risorse/1.8.24c/` | immagine dei file di VesevOS (pagina, manuale, lingue, licenze) |
 | `1.8.16/` | firmware VesevOS 1.8.16 (`.bin` + `.sha256`) |
 | `1.8.0b/` | firmware VesevOS 1.8.0b (`.bin` + `.sha256`) |
+| `recovery/0.5.3/` | Recovery 0.5.3 per ESP32-S3 (`.bin`) |
 | `recovery/0.5.2/` | Recovery 0.5.2 (`.bin` + `.sha256`) |
 | `recovery/0.5.1/` | Recovery 0.5.1 (`.bin` + `.sha256`) |
 | `recovery/0.5.0/` | Recovery 0.5.0 (`.bin` + `.sha256`) |
@@ -27,16 +30,16 @@ NON dice chi lo ha fatto. Scarica solo da questo repository, controlla l'indiriz
 
 ## Controllare lo SHA-256 prima di usare un file
 Dalla cartella del file:
-- macOS: `shasum -a 256 VesevOS-1.8.16.bin`
-- Altri sistemi: `sha256sum VesevOS-1.8.16.bin`
-- Controllo automatico: `sha256sum -c VesevOS-1.8.16.bin.sha256` (su macOS: `shasum -a 256 -c VesevOS-1.8.16.bin.sha256`)
+- macOS: `shasum -a 256 VesevOS-S3-1.8.24c.bin`
+- Altri sistemi: `sha256sum VesevOS-S3-1.8.24c.bin`
+- Controllo automatico: `sha256sum -c VesevOS-S3-1.8.24c.bin.sha256` (su macOS: `shasum -a 256 -c VesevOS-S3-1.8.24c.bin.sha256`)
 Il numero deve essere uguale a quello del file `.sha256` e a quello di `indice.json`. Se e diverso, NON usare il file.
 
 ## Come caricare
 Prima di tutto: fai un BACKUP dei dati della scheda (pagina Sistema, oppure copia dei file). Una scheda usata ha password, Wi-Fi e chiavi.
 
 ### A) Scheda nuova: prima installazione dalla pagina
-- Apri la pagina `flash/` (GitHub Pages, vedi `README.md`), con un browser che ha la porta seriale (Web Serial), collega la scheda e scegli "Aggiorna e conserva i dati" (scheda gia usata) oppure "Installazione completa" (scheda nuova). Puoi anche spuntare le singole parti da scrivere.
+- Apri la pagina `flash/` (GitHub Pages, vedi `README.md`), con un browser che ha la porta seriale (Web Serial), collega la scheda e scegli "Aggiorna e conserva i dati" (scheda gia usata) oppure "Installazione completa" (scheda nuova: scrive anche i file di VesevOS nello spazio dei file). Puoi anche spuntare le singole parti da scrivere. L'aggiornamento non tocca mai lo spazio dei file.
 - La pagina controlla ogni file (marchio, dimensione, SHA-256) prima di scrivere.
 
 ### B) Scheda gia con VesevOS: aggiornamento dal recovery
@@ -50,7 +53,8 @@ Gli indirizzi sono questi (tabella della scheda):
 - Recovery: `0x10000` (massimo 1 MiB)
 - Firmware: `0x110000` (massimo 2.424.832 byte)
 Esempio (installa prima esptool, vedi la guida `docs/GUIDA-PREPARARE-LA-SCHEDA.md`):
-`esptool.py --chip esp32s3 write_flash 0x110000 VesevOS-1.8.16.bin`
+`esptool.py --chip esp32s3 write_flash 0x110000 VesevOS-S3-1.8.24c.bin`
+Per la ESP32-C6: `esptool.py --chip esp32c6 write_flash 0x110000 VesevOS-C6-1.8.24c.bin`
 Non cancellare tutta la memoria se vuoi tenere le impostazioni. Per una scheda nuova servono anche bootloader (0x0), tabella (0x8000), nvs (0x9000) e otadata (0xe000): usa la pagina `flash/`.
 
 ### D) Ripristino

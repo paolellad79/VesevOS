@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_wd.cpp
+#include "../boards/vos_board.h"
 #include "vos_wd.h"
 #include "../drivers/vos_drv_task.h"
 #include "vos_wd_rule.h"
+#include "vos_ramwd.h"
 #include "vos_config.h"
 #include "vos_sys.h"
 #include "vos_log.h"
@@ -27,7 +29,7 @@
 struct Watch { const char* name; uint16_t to; uint32_t last; uint8_t restarts; bool used; };
 static Watch g_w[WD_N];
 static char g_reason[64];          // motivo dell'ultimo riavvio automatico (letto all'avvio; si tronca se piu lungo)
-static uint32_t g_netLost = 0, g_ramLow = 0;
+static uint32_t g_netLost = 0;
 static bool g_stopAuto = false;    // antiloop: troppi riavvii, il watchdog non riavvia piu
 static bool g_degraded = false;    // modalita ridotta: servizi opzionali spenti, la scheda resta raggiungibile
 static char g_degOff[48];          // cosa e stato spento ("mqtt", "mesh, ble"...; tre nomi brevi bastano)
@@ -147,6 +149,7 @@ static void wdTask(void*) {
   for (;;) {
     vTaskDelay(pdMS_TO_TICKS(1000));
     tick++;
+    if (tick == 10) ramTrace("t+10s"); else if (tick == 30) ramTrace("t+30s"); else if (tick == 60) ramTrace("t+60s"); else if (tick == 150) ramTrace("t+150s");   // traccia dell'avvio
     uint32_t now = drvMillis();
     // 1) servizi bloccati: prima si prova a riavviare il servizio, poi la scheda
     if (cfg.wdTask) {
@@ -171,11 +174,8 @@ static void wdTask(void*) {
       else if (!g_netLost) g_netLost = now ? now : 1;
       else if (now - g_netLost > (uint32_t)cfg.wdNetMin * 60000UL) { g_netLost = 0; act(trf("rete assente da %u minuti", (unsigned)cfg.wdNetMin).c_str()); }
     } else g_netLost = 0;
-    // 3) RAM bassa per 60 secondi
-    if (cfg.wdRam) {
-      if (drvHeapFree() < (uint32_t)cfg.wdRamKb * 1024UL) { if (!g_ramLow) g_ramLow = now ? now : 1; else if (now - g_ramLow > 60000UL) { g_ramLow = 0; act(trf("RAM libera sotto %u KB", (unsigned)cfg.wdRamKb).c_str()); } }
-      else g_ramLow = 0;
-    }
+    // 3) RAM interna usata oltre la soglia critica, in percentuale (livelli, passi e condizioni: vos_ramwd.cpp). Mai riavvio durante la guida o i lavori lunghi
+    if (ramWdTick()) act(trf("RAM usata oltre il %u%%", (unsigned)cfg.wdRamPerc).c_str());
     // 4) dopo N giorni di accensione
     if (cfg.wdUpDays && sysUptimeSec() > (uint64_t)cfg.wdUpDays * 86400ULL) wdReboot(trf("acceso da %u giorni", (unsigned)cfg.wdUpDays).c_str());
     // 5) orario programmato (serve l'ora valida); non nei primi 2 minuti dopo un riavvio
@@ -191,7 +191,8 @@ static void wdTask(void*) {
 }
 
 static void wdStart() {
-  drvTaskCreate(wdTask, "wd", 6144, NULL, 3, NULL, DRV_CORE_ANY);   // core: automatico (prima: core 0 fisso)
+  drvTaskCreate(wdTask, "wd", VOS_PILA_WD, NULL, 3, NULL, DRV_CORE_ANY);   // core: automatico (prima: core 0 fisso)
+  ramTrace("wd-task");
 }
 
 void wdInit() {
@@ -205,11 +206,12 @@ void wdInit() {
 }
 
 bool wdJson(HeapBuf& j) {
-  bool ok = j.addf("{\"task\":%s,\"net\":%s,\"ram\":%s,\"netMin\":%d,\"ramKb\":%d,\"upDays\":%d,\"at\":%d,\"days\":%d,\"stopped\":%s,\"degraded\":%s,\"off\":\"",
+  bool ok = j.addf("{\"task\":%s,\"net\":%s,\"ram\":%s,\"netMin\":%d,\"ramPerc\":%d,\"upDays\":%d,\"at\":%d,\"days\":%d,\"stopped\":%s,\"degraded\":%s,\"off\":\"",
                    cfg.wdTask ? "true" : "false", cfg.wdNet ? "true" : "false", cfg.wdRam ? "true" : "false",
-                   (int)cfg.wdNetMin, (int)cfg.wdRamKb, (int)cfg.wdUpDays, (int)cfg.wdAt, (int)cfg.wdDays,
+                   (int)cfg.wdNetMin, (int)cfg.wdRamPerc, (int)cfg.wdUpDays, (int)cfg.wdAt, (int)cfg.wdDays,
                    g_stopAuto ? "true" : "false", g_degraded ? "true" : "false") &&
-            j.addJson(g_degOff) && j.add("\",\"last\":\"") && j.addJson(g_reason) && j.add("\",\"watch\":[");
+            j.addJson(g_degOff) && j.addf("\",\"ramLvl\":%d,\"ramUsed\":%d,\"ramMin\":%s,\"ramOff\":\"", (int)ramWdLevel(), ramWdUsed(), VOS_RAM_MINIMA ? "true" : "false") &&
+            j.addJson(ramWdOff()) && j.add("\",\"last\":\"") && j.addJson(g_reason) && j.add("\",\"watch\":[");
   bool first = true;
   for (int i = 0; ok && i < WD_N; i++) {
     if (!g_w[i].used) continue;
@@ -232,7 +234,11 @@ bool wdJson(HeapBuf& j) {
 std::string wdText() {
   StrText t(2048);
   StrBuf& s = t.buf();
-  s.addf(tr("Watchdog: task %s, rete %s (%u min), RAM %s (%u KB)"), cfg.wdTask ? "si" : "no", cfg.wdNet ? "si" : "no", (unsigned)cfg.wdNetMin, cfg.wdRam ? "si" : "no", (unsigned)cfg.wdRamKb).add('\n');
+  s.addf(tr("Watchdog: task %s, rete %s (%u min), RAM %s (critico oltre il %u%% usata)"), cfg.wdTask ? "si" : "no", cfg.wdNet ? "si" : "no", (unsigned)cfg.wdNetMin, cfg.wdRam ? "si" : "no", (unsigned)cfg.wdRamPerc).add('\n');
+  { int lv = (int)ramWdLevel();
+    s.addf(tr("RAM interna usata: %d%% (livello %d su 3: 0 normale, 1 segnala, 2 riduci, 3 critico)"), ramWdUsed() < 0 ? 0 : ramWdUsed(), lv);
+    if (ramWdOff()[0]) s.addf(tr("; spenti per la memoria: %s"), ramWdOff());
+    s.add('\n'); }
   s.addf(tr("Task watchdog: %u s (da %u a %u), watchdog di interruzione: %u ms (solo compilazione)"), (unsigned)drvTwdtSec(), (unsigned)WD_TWDT_MIN, (unsigned)WD_TWDT_MAX, (unsigned)drvIntWdtMs()).add('\n');
   for (int i = 0; i < WD_N; i++) if (g_w[i].used) s.addf(tr("  %-8s ultimo segno di vita %lu s fa (limite %u s)"), g_w[i].name, (unsigned long)((drvMillis() - g_w[i].last) / 1000), g_w[i].to).add('\n');
   if (g_reason[0]) s.addf(tr("Ultimo riavvio automatico: %s"), g_reason).add('\n');

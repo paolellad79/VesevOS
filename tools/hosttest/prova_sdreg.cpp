@@ -1,4 +1,4 @@
-// VesevOS - prova sul computer: la REGISTRAZIONE VERA delle funzioni sd_* (packages/vos_berry_sd.cpp) con il codice [cmd] vero del driver microSD.
+// VesevOS - prova sul computer: la REGISTRAZIONE VERA delle funzioni sd_* (packages/vos_funzioni_sd.cpp) con il codice [cmd] vero del driver microSD.
 // Un sottocomando di sola lettura (status) lanciato senza permesso di scrittura deve COMPILARE; sd_write da non-Admin deve dare "permesso negato".
 // Il codice [cmd] arriva da prova_vdp_cmd.sh (file cmd.be, estratto dal vero modCmdCode). Uso: prova_sdreg.sh
 #include <stdio.h>
@@ -6,15 +6,15 @@
 #include <string.h>
 #include <stdarg.h>
 #include <string>
-#include "berry.h"
-#include "vos_berry_int.h"
+#include "funzioni.h"
+#include "vos_funzioni_int.h"
 #include "vos_sd.h"
 #include "vos_paths.h"
 #include "vos_pathres.h"
 #include "vos_log.h"
 #include "vos_i18n.h"
 
-namespace vosberry { volatile bool g_stop = false; }
+namespace vosfunzioni { volatile bool g_stop = false; }
 
 // ---- finti: microSD "montata" in memoria, percorsi semplici ----
 static std::string g_last;                        // ultima scrittura (percorso)
@@ -40,17 +40,17 @@ bool pathIsSecret(const char*) { return false; }
 void vlog(const char*, ...) {}
 const char* tr(const char* it) { return it; }
 extern "C" {
-void* vos_berry_malloc(size_t n) { return malloc(n); }
-void vos_berry_free(void* p) { free(p); }
-void* vos_berry_realloc(void* p, size_t n) { return realloc(p, n); }
-void vos_berry_write(const char* b, size_t l) { fwrite(b, 1, l, stdout); }
+void* vos_funzioni_alloca(size_t n) { return malloc(n); }
+void vos_funzioni_libera(void* p) { free(p); }
+void* vos_funzioni_rialloca(void* p, size_t n) { return realloc(p, n); }
+void vos_funzioni_scrivi(const char* b, size_t l) { fwrite(b, 1, l, stdout); }
 }
 
-// Aiuti di vos_berry_files.cpp (stesso codice): mappa grezza -> oggetto "map".
-void berryPutInt(bvm* vm, const char* k, long v) { be_pushstring(vm, k); be_pushint(vm, (bint)v); be_data_insert(vm, -3); be_pop(vm, 2); }
-void berryPutBool(bvm* vm, const char* k, bool v) { be_pushstring(vm, k); be_pushbool(vm, v); be_data_insert(vm, -3); be_pop(vm, 2); }
-void berryPutText(bvm* vm, const char* k, const char* v) { be_pushstring(vm, k); be_pushstring(vm, v); be_data_insert(vm, -3); be_pop(vm, 2); }
-void berryWrap(bvm* vm, const char* cls) { be_getbuiltin(vm, cls); be_pushvalue(vm, -2); be_call(vm, 1); be_moveto(vm, -2, -3); be_pop(vm, 2); }
+// Aiuti di vos_funzioni_files.cpp (stesso codice): mappa grezza -> oggetto "map".
+void funzioniMettiInt(bvm* vm, const char* k, long v) { be_pushstring(vm, k); be_pushint(vm, (bint)v); be_data_insert(vm, -3); be_pop(vm, 2); }
+void funzioniMettiBool(bvm* vm, const char* k, bool v) { be_pushstring(vm, k); be_pushbool(vm, v); be_data_insert(vm, -3); be_pop(vm, 2); }
+void funzioniMettiTesto(bvm* vm, const char* k, const char* v) { be_pushstring(vm, k); be_pushstring(vm, v); be_data_insert(vm, -3); be_pop(vm, 2); }
+void funzioniAvvolgi(bvm* vm, const char* cls) { be_getbuiltin(vm, cls); be_pushvalue(vm, -2); be_call(vm, 1); be_moveto(vm, -2, -3); be_pop(vm, 2); }
 
 static std::string readAll(const char* path) {
   std::string s; FILE* f = fopen(path, "rb"); if (!f) return s;
@@ -60,16 +60,16 @@ static std::string readAll(const char* path) {
 
 // Funzionalita tolta dall'utente (vos_func.cpp): qui un interruttore finto, la prova vera della logica e prova_prog.
 static bool g_funcOff = false;
-void berryNeedFunc(bvm* vm, const char* g) {
+void funzioniRichiedeFunz(bvm* vm, const char* g) {
   if (!g_funcOff) return;
   char m[64]; snprintf(m, sizeof m, "funzionalita %s spenta (Sistema > Funzionalita)", g);
   be_raise(vm, "permission_error", m);
 }
 
-// Esegue codice Berry con le funzioni sd_* registrate come fa il firmware; admin = chi lancia puo scrivere. Torna 0 = bene.
+// Esegue codice delle funzioni con le funzioni sd_* registrate come fa il firmware; admin = chi lancia puo scrivere. Torna 0 = bene.
 static int run(const std::string& code, bool admin, const char* what) {
   bvm* vm = be_vm_new();
-  berrySdRegister(vm, true, admin);
+  funzioniRegistraSd(vm, true, admin);
   int r = be_loadstring(vm, code.c_str());
   if (!r) r = be_pcall(vm, 0);
   if (r) { printf("[%s] ", what); be_dumpexcept(vm); }
@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
   if (argc < 2) return 2;
   std::string cmd = readAll(argv[1]);                       // codice [cmd] vero del driver
   if (cmd.empty()) { printf("KO: manca %s\n", argv[1]); return 2; }
-  // listdir non e di vos_berry_sd.cpp: lo mette un finto in Berry davanti al codice.
+  // listdir non e di vos_funzioni_sd.cpp: lo mette un finto nelle funzioni VesevOS davanti al codice.
   std::string pre = "def listdir(p, i) return {'items': [], 'more': false, 'next': 0} end\n";
   int bad = 0;
   // 1) sottocomando di sola lettura senza permesso di scrittura: il codice deve compilare e girare

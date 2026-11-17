@@ -142,7 +142,7 @@ static bool hasAdmin() {
 // Valori vietati: si correggono sempre (anche se arrivano da un file ripristinato o modificato a mano)
 void auditFix() {
   AudLock L;
-  if (cfgApPassWeak(cfg.apPass.c_str())) {
+  if (cfg.setupDone && cfgApPassWeak(cfg.apPass.c_str())) {   // prima della fine della guida l'hotspot e aperto solo nella finestra del tasto BOOT: la password nasce a fine guida
     cfg.apPass = cfgNewApPass().c_str();
     auditEvent(AUD_RED, "appass", tr("Password dell'hotspot debole o uguale per tutti: sostituita con una nuova (vedi seriale o Rete > Punto di accesso)"));
   }
@@ -165,7 +165,7 @@ void auditFix() {
 void auditRefresh() {
   AudLock L;
   cond(!cfgLastSaveOk(), AUD_RED, "saveerr", tr("Salvataggio della configurazione fallito: le modifiche si perdono al riavvio (memoria piena?)"));
-  cond(!cfg.setupDone, AUD_YELLOW, "setupnd", tr("Guida di configurazione non finita: hotspot e HTTP restano forzati accesi a ogni avvio"));
+  cond(!cfg.setupDone, AUD_YELLOW, "setupnd", tr("Guida di configurazione non finita: a ogni avvio la radio resta spenta finche non premi il tasto BOOT (poi 10 minuti di hotspot aperto)"));
   cond(cfg.setupDone && !hasAdmin(), AUD_RED, "noadmin", tr("Nessun amministratore attivo: tieni premuto il tasto fisico 8 s per crearlo di nuovo"));
   cond(!cfg.country.length(), AUD_YELLOW, "nocountry", tr("Paese non scelto: radio con regole prudenti (canali 1-11). Sceglilo in Sistema > Localizzazione"));
   cond(!cfg.serialAuth, AUD_YELLOW, "serial", tr("Seriale senza password: chi collega il cavo USB entra senza password"));
@@ -196,6 +196,7 @@ static void sectionOf(const char* txt, size_t pos, char* out, size_t cap) {
 void auditDiff(const char* o, const char* n, const char* origin) {
   AudLock L;
   int shown = 0;
+  bool aliasCambiati = false;                       // alias e descrizioni sono testo dell'utente: nel registro solo "cambiati", mai il testo
   size_t nl = strlen(n);
   for (size_t i = 0; i < nl; ) {
     const char* e = strchr(n + i, '\n'); if (!e) e = n + nl;
@@ -204,6 +205,7 @@ void auditDiff(const char* o, const char* n, const char* origin) {
     if (ln && strncmp(line, "\toption ", 8) == 0 && !hasText(o, line, ln)) {
       char sec[64], k[64], v[160];
       sectionOf(n, i, sec, sizeof sec);
+      if (!strcmp(sec, "alias")) { aliasCambiati = true; i += ln + 1; continue; }
       const char* rest = line + 8; size_t rl = ln - 8;
       const char* sp = (const char*)memchr(rest, ' ', rl);
       if (sp && sp > rest) {
@@ -219,6 +221,7 @@ void auditDiff(const char* o, const char* n, const char* origin) {
     i += ln + 1;
   }
   if (shown > 6) auditEvent(AUD_INFO, "", trf("... e altre %d modifiche (%s)", shown - 6, origin).c_str());
+  if (aliasCambiati) auditEvent(AUD_INFO, "", trf("alias cambiati (%s)", origin).c_str());
 }
 
 void auditTick() {

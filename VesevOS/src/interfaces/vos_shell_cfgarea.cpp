@@ -87,10 +87,10 @@ void areaLed(OutSink& o) {
   repRow(h, TRK("Luminosita"), br);
   repRow(h, TRK("Soglia CPU"), thr);
   repHead(h, TRK("Comandi che cambiano"));
-  repCmd(h, "led trigger <nome>", TRK("che cosa accende il LED"));
-  repCmd(h, "led color [sorgente] RRGGBB", TRK("colore (fisso o per sorgente)"));
-  repCmd(h, "led brightness <0-255>", TRK("luminosita"));
-  repCmd(h, "led threshold <10-95>", TRK("soglia di carico del trigger cpu"));
+  repCmd(h, "led_rgb1 trigger <nome>", TRK("che cosa accende il LED"));
+  repCmd(h, "led_rgb1 color [sorgente] RRGGBB", TRK("colore (fisso o per sorgente)"));
+  repCmd(h, "led_rgb1 brightness <0-255>", TRK("luminosita"));
+  repCmd(h, "led_rgb1 threshold <10-95>", TRK("soglia di carico del trigger cpu"));
   tailNote(h);
   repFlush(o, h);
 }

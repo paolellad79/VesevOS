@@ -162,6 +162,7 @@ static void tNet() {
   NetState ns = netState(); uint8_t st = SELF_OK;
   char db[224]; StrBuf d(db, sizeof db);
   if (ns == NET_AIR) { rep(SELF_WARN, tr("Modo aereo: radio spenta")); return; }
+  if (ns == NET_ATTESA) { rep(SELF_WARN, tr("Prima accensione: radio spenta, premi il tasto BOOT per accendere l'hotspot")); return; }
   d.addf(tr("Stato %d, modo Wi-Fi %d"), (int)ns, (int)drvWifiMode());
   if (ns == NET_CLIENT_OK) {
     int rs = drvWifiRssi(); char ipm[20], ip[16]; netIpTo(ip, sizeof ip);

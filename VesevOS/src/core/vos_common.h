@@ -11,7 +11,7 @@
 #ifndef VOS_PSRAM_MALLOC
 #define VOS_PSRAM_MALLOC 1
 #endif
-#define VOS_VERSION "1.8.21a"
+#define VOS_VERSION "1.8.24c"
 #define VOS_API_VERSION 1                       // cambia solo per rotture dell'API (regole API 15)
 #define VOS_GITHUB   "https://github.com/paolellad79/VesevOS"
 
@@ -27,7 +27,8 @@ enum NetState : uint8_t {
   NET_AP,
   NET_CLIENT_TRY,
   NET_CLIENT_OK,
-  NET_AIR          // modalita aereo: radio spenta
+  NET_AIR,         // modalita aereo: radio spenta
+  NET_ATTESA       // prima accensione: radio spenta in attesa del tasto BOOT (vos_primo_avvio)
 };
 
 // Modalita del LED

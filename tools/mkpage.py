@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-# Genera VesevOS/src/interfaces/vos_page.h dalla pagina web/index.html: pagina COMPRESSA (gzip) in un array di byte.
-# Prima del gzip toglie commenti e spazi inutili dal solo JavaScript (tools/compattajs.py); index.html resta leggibile.
-# Il browser la riceve con "Content-Encoding: gzip". Il file .h contiene solo numeri (ASCII):
-# i caratteri speciali della pagina (accenti, simboli) restano UTF-8 veri, senza conversioni in &#...;
+# Genera la pagina COMPRESSA (gzip) da web/index.html e la scrive in ../build/risorse/origine/pagina.gz.
+# Dal passo 5 del piano (15/11/2026) la pagina NON e piu incorporata nel firmware: tools/mkrisorse.py la prende da qui e produce
+# /usr/share/vesevos/html.vrs (file della memoria interna). Niente piu vos_page.h ne id nel firmware.
+# Prima della compressione toglie commenti e spazi inutili dal solo JavaScript (tools/compattajs.py); index.html resta leggibile.
+# Il browser la riceve con "Content-Encoding: gzip". I caratteri speciali della pagina (accenti, simboli) restano UTF-8 veri.
 # Uso: python3 tools/mkpage.py     (esce con errore e non scrive nulla se il JS non si puo compattare)
+# Poi: python3 tools/mkrisorse.py  (genera i .vrs)
 import gzip
 import os
 import sys
@@ -21,8 +23,7 @@ except ErroreLettura as e:
 raw = compatta.encode('utf-8')
 gz = gzip.compress(raw, 9, mtime=0)
 senza = gzip.compress(pagina.encode('utf-8'), 9, mtime=0)
-lines = [','.join('0x%02x' % b for b in gz[i:i + 24]) for i in range(0, len(gz), 24)]
-h = ('// VesevOS - vos_page.h (GENERATO da tools/mkpage.py, non modificare a mano)\n#pragma once\n#include "../drivers/vos_drv_string.h"\n'
-     'static const size_t INDEX_GZ_LEN = %d;\nstatic const uint8_t INDEX_GZ[] PROGMEM = {\n%s\n};\n') % (len(gz), ',\n'.join(lines))
-open(os.path.join(ROOT, 'VesevOS', 'src', 'interfaces', 'vos_page.h'), 'w', encoding='ascii', newline='\n').write(h)
-print('ok pagina: %d byte, compressa %d byte (senza compattare il JS %d)' % (len(raw), len(gz), len(senza)))
+dest = os.path.join(os.path.dirname(ROOT), 'build', 'risorse', 'origine')
+os.makedirs(dest, exist_ok=True)
+open(os.path.join(dest, 'pagina.gz'), 'wb').write(gz)
+print('ok pagina: %d byte, compressa %d byte (senza compattare il JS %d), scritta in %s' % (len(raw), len(gz), len(senza), os.path.join(dest, 'pagina.gz')))

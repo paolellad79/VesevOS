@@ -4,6 +4,7 @@
 #pragma once
 #include "vos_rules.h"
 #include <string>
+#include <string_view>
 #include <time.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
@@ -46,5 +47,16 @@ extern int   g_n;
 extern Run   g_run[MAX_RUNS];
 extern SemaphoreHandle_t g_mx;
 void ensureMx();
+// utilita sul testo (vos_rules_testo.cpp)
+bool hhmm(std::string_view s, uint16_t& out);
+bool dmaskParse(std::string_view s, uint8_t& out);
+std::string_view word(std::string_view s, int idx);
+std::string_view restOf(std::string_view s, int idx);
+std::string_view field(std::string_view line, int idx);
+int  fieldCount(std::string_view line);
+std::string_view actAt(std::string_view acts, int n);
+int  actCount(std::string_view acts);
+bool hex6ok(std::string_view s);
+void wordTo(char* out, size_t cap, std::string_view w);
 }
 using namespace vosrules;

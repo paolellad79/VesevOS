@@ -41,8 +41,12 @@ int redirectPlan(uint32_t ip, bool methodOk, const char* path, const char* query
   if (!*path) path = "/";
   if (*path != '/' || !cleanUri(path) || !cleanUri(query)) { *text = tr("Richiesta non valida"); return 400; }
   char host[96], port[8] = "";      // nome (32) + "." + dominio (60) + zero: prima 80 poteva tagliarlo
-  if (suHotspot) snprintf(host, sizeof host, "192.168.4.1");
-  else targetHost(host, sizeof host);
+  if (suHotspot) {
+    // Dall'hotspot: con il portale automatico acceso ogni nome punta alla scheda, quindi basta il nome senza estensione
+    // (decisione dell'utente del 15/11/2026); con il portale spento il nome non si risolverebbe e resta l'indirizzo IP.
+    if (netCaptive() && cfg.hostname.length()) snprintf(host, sizeof host, "%.32s", cfg.hostname.c_str());
+    else snprintf(host, sizeof host, "192.168.4.1");
+  } else targetHost(host, sizeof host);
   if (cfg.httpsPort != 443) snprintf(port, sizeof port, ":%u", (unsigned)cfg.httpsPort);
   int n = snprintf(url, cap, "https://%s%s%s%s%s", host, port, path, *query ? "?" : "", query);
   if (n < 0 || n >= (int)cap) { *text = tr("Indirizzo troppo lungo"); return 414; }

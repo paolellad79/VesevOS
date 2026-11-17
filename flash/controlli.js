@@ -12,11 +12,16 @@ export const REGOLE = {
   nvs:        { indirizzo: 0x9000,   max: 0x5000, esatta: 0x5000 },
   otadata:    { indirizzo: 0xe000,   max: 0x2000, esatta: 0x2000 },
   recovery:   { indirizzo: 0x10000,  max: 1048576 },    // 1 MiB
-  firmware:   { indirizzo: 0x110000, max: 2424832 }
+  firmware:   { indirizzo: 0x110000, max: 2424832 },
+  // immagine corta del file system (LittleFS) con i file di /usr/share/vesevos: SOLO installazione nuova, mai un aggiornamento.
+  // Si scrive all'inizio della partizione dei file (0x360000, grande 0xA0000); la scheda la estende da sola al primo avvio.
+  risorse:    { indirizzo: 0x360000, max: 0xA0000, blocco: 0x1000, minimo: 8 * 0x1000 }
 };
 
 const MARCHIO_FW = '{FW:VesevOS}';
 const MARCHIO_REC = 'VesevOS Recovery';
+const MAGIC_LFS = 'littlefs';          // nome scritto da LittleFS nel superblocco (dal byte 8 di ciascuno dei due blocchi iniziali)
+const VERSIONE_LFS = 0x00020001;       // formato su disco 2.1 (LFS_DISK_VERSION di LittleFS 2.11)
 
 // Cerca un testo ASCII dentro i byte, senza creare stringhe enormi.
 export function contiene(byte, testo) {
@@ -36,6 +41,22 @@ export async function sha256Hex(byte) {
   return Array.from(new Uint8Array(h), (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
+// Controlla che l'immagine del file system abbia un superblocco LittleFS valido: nome, versione 2.x, blocco da 4096 byte
+// e numero di blocchi uguale alla lunghezza del file (l'immagine e corta: la scheda la estende al primo avvio).
+function superblocco(byte, blocco) {
+  for (let b = 0; b < 2; b++) {
+    const base = b * blocco;
+    if (byte.length < base + 32) continue;
+    let nome = '';
+    for (let i = 0; i < MAGIC_LFS.length; i++) nome += String.fromCharCode(byte[base + 8 + i]);
+    if (nome !== MAGIC_LFS) continue;
+    const v = new DataView(byte.buffer, byte.byteOffset + base, 32);
+    const versione = v.getUint32(20, true), dimBlocco = v.getUint32(24, true), nBlocchi = v.getUint32(28, true);
+    if ((versione >>> 16) === (VERSIONE_LFS >>> 16) && dimBlocco === blocco && nBlocchi * blocco === byte.length) return true;
+  }
+  return false;
+}
+
 // Controlla una parte. Restituisce { c_byte, c_marchio, c_dim, c_sha, errore }.
 // Ogni c_* e true / false; errore e { chiave, args } del primo controllo fallito.
 export async function controllaParte(id, parte, byte) {
@@ -53,6 +74,9 @@ export async function controllaParte(id, parte, byte) {
   } else if (parte.tipo === 'tabella') {
     r.c_byte = byte.length >= 2 && byte[0] === 0xAA && byte[1] === 0x50;
     if (!r.c_byte) guasto('err_contenuto');
+  } else if (parte.tipo === 'risorse') {
+    r.c_byte = superblocco(byte, regola.blocco);
+    if (!r.c_byte) guasto('err_contenuto');
   } else if (parte.tipo === 'nvs') {
     r.c_byte = byte.every((b) => b === 0xFF);       // memoria vuota: nessun dato personale
     if (!r.c_byte) guasto('err_contenuto');
@@ -69,13 +93,18 @@ export async function controllaParte(id, parte, byte) {
     r.c_marchio = contiene(byte, MARCHIO_REC);
     if (!r.c_marchio) guasto('err_marchio');
     else if (contiene(byte, MARCHIO_FW)) { r.c_marchio = false; guasto('err_marchio_extra'); }
+  } else if (parte.tipo === 'risorse') {
+    // dentro devono esserci l'elenco SHA256SUMS, la pagina html.vrs e il marchio dei file di risorse (VOSR)
+    r.c_marchio = contiene(byte, 'SHA256SUMS') && contiene(byte, 'html.vrs') && contiene(byte, 'VOSR');
+    if (!r.c_marchio) guasto('err_marchio');
   } else {
     r.c_marchio = true;                              // non applicabile
   }
 
   // (c) dimensione nello spazio previsto (e uguale a quella dell'elenco)
   r.c_dim = byte.length > 0 && byte.length <= regola.max && byte.length === parte.dimensione &&
-            (!regola.esatta || byte.length === regola.esatta);
+            (!regola.esatta || byte.length === regola.esatta) &&
+            (!regola.blocco || (byte.length % regola.blocco === 0 && byte.length >= regola.minimo));
   if (!r.c_dim) guasto('err_dim', byte.length, regola.max);
 
   // (d) SHA-256 uguale a quello dell'elenco

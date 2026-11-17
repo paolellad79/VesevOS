@@ -39,7 +39,7 @@ const RoleRule kRoles[] = {
   {"legal", "*", OPE}, {"license", "*", OPE},
   {"pin", "*", OPE}, {"pins", "*", OPE}, {"lspin", "*", OPE}, {"rules", "*", OPE}, {"reboot", "*", OPE},
   // --- usati dalle regole (vedi sopra) ---
-  {"led", "*", OPE}, {"led-color", "*", OPE}, {"led-bright", "*", OPE}, {"airplane", "*", OPE},   // led trigger/threshold/color <sorgente>: il comando chiede Admin per CAMBIARE (lettura: Operatore)
+  {"pwm", "*", OPE}, {"contatore", "*", OPE}, {"led", "*", OPE}, {"led2", "*", OPE}, {"led_rgb1", "*", OPE}, {"led1", "*", OPE}, {"led-color", "*", OPE}, {"led-bright", "*", OPE}, {"airplane", "*", OPE},   // led trigger/threshold/color <sorgente>: il comando chiede Admin per CAMBIARE (lettura: Operatore)
   {"ntp", "", OPE}, {"ntp", "sync", OPE}, {"ntp", "*", ADM},
   // --- con sottocomandi: la lettura all'Operatore, le modifiche all'Admin ---
   {"wifi", "set", ADM}, {"wifi", "off", ADM}, {"wifi", "scan", ADM}, {"wifi", "*", OPE},   // cambiare la rete di casa puo isolare la scheda; scan = wifi-scan (solo Admin, come prima)
@@ -51,7 +51,7 @@ const RoleRule kRoles[] = {
   {"vesevos-services", "*", OPE},                                          // elenco e status: lettura; start/stop/restart: il comando chiede Admin
   {"vesevos-config", "setup", ADM}, {"vesevos-config", "users", ADM}, {"vesevos-config", "security", ADM}, {"vesevos-config", "*", OPE},   // riepilogo e dettagli in lettura: Operatore; users, security e setup: Admin. Cambiare: solo Admin (controllato nel comando), poi la riga inoltrata ripassa da questa tabella
   {"vesevos-network", "-f", ADM}, {"vesevos-network", "scan", ADM}, {"vesevos-network", "ping", ADM}, {"vesevos-network", "*", OPE},   // riepilogo: lettura; scan e ping sono "wifi scan" e "ping" (Admin, come oggi); -f = MAC intero
-  {"vesevos-led_control", "*", OPE},                                       // alias VISIBILE di "led": nella lista di help; l'esecuzione usa la riga di "led" (canonicalName lo cambia prima)
+  {"vesevos-led_control", "*", OPE},                                       // alias VISIBILE di "led_rgb1": nella lista di help; l'esecuzione usa la riga di "led_rgb1" (canonicalName lo cambia prima)
   {"vesevos-drive_manager", "mount", ADM}, {"vesevos-drive_manager", "unmount", ADM}, {"vesevos-drive_manager", "test", ADM}, {"vesevos-drive_manager", "format", ADM}, {"vesevos-drive_manager", "*", OPE},   // elenco e status: lettura; mount/unmount/test inoltrano a "sd" (solo Admin)
   {"vesevos-cleaner", "*", ADM},                                           // pulizia: solo Admin (cancella rapporti e registri)
   {"vesevos-bugreport", "*", ADM},                                         // rapporto per l'assistenza: solo Admin
@@ -73,7 +73,7 @@ const RoleRule kRoles[] = {
   // --- solo Admin (elenco per chiarezza: lo sarebbero anche senza riga) ---
   {"suspend", "*", ADM}, {"sleep", "*", ADM}, {"poweroff", "*", ADM},      // sonno profondo / spegnimento
   {"ping", "*", ADM},                                                      // solo Admin: genera traffico di rete verso indirizzi scelti dall'utente (rischio di sondare/inondare); con limiti di conteggio, intervallo e durata
-  {"gzip", "*", ADM}, {"gunzip", "*", ADM}, {"zcat", "*", ADM}, {"unzip", "*", ADM}, {"zip", "*", ADM}, {"tar", "*", ADM},   // solo Admin come i comandi sui file: scrivono e tolgono file, usano la PSRAM e tempo di CPU (tetti in vos_shell_arch.h)
+  {"unzip", "*", ADM}, {"zip", "*", ADM}, {"tar", "*", ADM},   // solo Admin come i comandi sui file: scrivono e tolgono file e usano tempo di CPU (tetti in vos_shell_arch.h)
   {"run", "*", ADM}, {"which", "*", ADM},                                  // avviano e cercano programmi (.vsb, .vab): stessi permessi di "script run" e "app start"; il lancio diretto del solo nome passa da qui con ADM
   {"factory-reset", "*", ADM}, {"crash", "*", ADM}, {"passwd", "*", ADM}, {"user", "*", ADM},
 };

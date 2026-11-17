@@ -33,6 +33,7 @@ static volatile bool             s_apUp = false;        // hotspot partito
 static volatile bool             s_want = false;        // e stata chiesta una connessione e non e stata annullata
 static volatile bool             s_first = true;        // primo errore dopo la richiesta: si riprova sempre
 static volatile uint8_t          s_tries = 0;           // tentativi falliti di fila
+static DrvWifiApClientFn         s_apClientFn = nullptr; // chi vuole sapere dei dispositivi che entrano o escono dall'hotspot
 
 // numeri IP: ESP-IDF li tiene con il primo numero nel byte piu basso, noi con il primo numero in alto
 static uint32_t toNum(uint32_t espAddr) { return __builtin_bswap32(espAddr); }
@@ -81,6 +82,12 @@ static void onEvent(void*, esp_event_base_t base, int32_t id, void* data) {
       case WIFI_EVENT_STA_DISCONNECTED: onStaDisconnected(data ? ((wifi_event_sta_disconnected_t*)data)->reason : 0); break;
       case WIFI_EVENT_AP_START:         s_apUp = true; break;
       case WIFI_EVENT_AP_STOP:          s_apUp = false; break;
+      case WIFI_EVENT_AP_STACONNECTED:
+        if (s_apClientFn && data) { const wifi_event_ap_staconnected_t* e = (const wifi_event_ap_staconnected_t*)data; s_apClientFn(true, e->mac, e->aid, 0); }
+        break;
+      case WIFI_EVENT_AP_STADISCONNECTED:
+        if (s_apClientFn && data) { const wifi_event_ap_stadisconnected_t* e = (const wifi_event_ap_stadisconnected_t*)data; s_apClientFn(false, e->mac, e->aid, e->reason); }
+        break;
       default: break;
     }
   } else if (base == IP_EVENT) {
@@ -318,6 +325,7 @@ bool drvWifiApRetune(const char* ssid, const char* pass, int channel) {
   return apConfig(ssid, pass, channel);
 }
 uint32_t drvWifiApIp() { return ipInfo(s_apIf, 0); }
+void drvWifiOnApClient(DrvWifiApClientFn f) { s_apClientFn = f; }
 int drvWifiApClients() {
   wifi_sta_list_t l;
   return (s_started && esp_wifi_ap_get_sta_list(&l) == ESP_OK) ? l.num : 0;

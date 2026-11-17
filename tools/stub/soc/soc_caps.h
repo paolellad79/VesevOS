@@ -1,2 +1,8 @@
 #pragma once
 #define SOC_ADC_PERIPH_NUM 2
+#define SOC_CPU_CORES_NUM 2
+#define SOC_LEDC_TIMER_NUM 4
+#define SOC_LEDC_CHANNEL_NUM 8
+#define SOC_PCNT_SUPPORTED 1
+#define SOC_PCNT_UNITS_PER_GROUP 4
+#define SOC_RMT_TX_CANDIDATES_PER_GROUP 4   /* S3 (soc_caps.h IDF 5.5.5); C6, C3, H2: 2 */

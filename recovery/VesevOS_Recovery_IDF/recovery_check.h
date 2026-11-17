@@ -4,6 +4,7 @@
 #pragma once
 #include <stdint.h>
 #include <stddef.h>
+#include "rec_version.h"
 
 #define RC_HDR 48
 #define RC_MARK_LEN 12
@@ -38,7 +39,7 @@ inline const char* rcHeaderErr(const RecCheck& c) {
   if (c.nh < RC_HDR) return "File troppo piccolo: non e un firmware";
   if (c.hdr[0] != 0xE9) return "Non e un firmware (intestazione errata)";
   uint16_t chip = (uint16_t)(c.hdr[12] | (c.hdr[13] << 8));
-  if (chip != 0x0009) return "Firmware per un altro tipo di chip (serve ESP32-S3)";
+  if (chip != REC_CHIP_ID) return "Firmware per un altro tipo di chip (serve " REC_CHIP_NAME ")";
   uint32_t dm = (uint32_t)c.hdr[32] | ((uint32_t)c.hdr[33] << 8) | ((uint32_t)c.hdr[34] << 16) | ((uint32_t)c.hdr[35] << 24);
   if (dm != 0xABCD5432UL) return "Non e un firmware ESP32 valido";
   return nullptr;

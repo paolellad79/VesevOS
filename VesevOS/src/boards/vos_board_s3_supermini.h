@@ -14,6 +14,17 @@
 #define VOS_PSRAM_MB      2
 #define VOS_SRAM_KB       512           // SRAM interna nominale del chip (ESP32-S3); la mappa della RAM (drvMemMap) parte da qui
 
+// ---- antenna (dato dell'utente, 16/11/2026: CrossAir CA-C03 su tutte le SuperMini) ----
+// Guadagno di picco dell'antenna della scheda in decimi di dBi (43 = 4,3 dBi; scheda del produttore). Serve a calcolare l'EIRP:
+// il limite del paese comprende l'antenna, quindi la potenza al chip e il limite meno questo guadagno (core/vos_region_calc.h).
+// Se la scheda ha un'antenna esterna scelta dall'utente vale il guadagno indicato da lui, non la somma.
+#define VOS_ANTENNA_DECIMI_DBI  43
+
+// ---- frequenza della CPU (limite e gradini per esp_pm; usati da core/vos_cpugov e drivers/vos_drv_cpu) ----
+#define VOS_CPU_MHZ_MIN    80           // gradino basso (a riposo)
+#define VOS_CPU_MHZ_MID    160          // gradino di mezzo
+#define VOS_CPU_MHZ_MAX    240          // massimo del chip (S3)
+
 // ---- cosa c'e sulla scheda ----
 #define VOS_HAS_PSRAM        1
 #define VOS_HAS_USB_NATIVE   1
@@ -26,6 +37,16 @@
 #define VOS_LED_TYPE      "WS2812"
 #define VOS_PIN_BOOT       0            // tasto fisico
 
+// ---- periferiche di bordo: gia presenti sulla scheda, subito disponibili, senza driver (fonte unica) ----
+// Una riga per voce: X(id, etichetta, colore, gruppo, scheda della pagina, funzione, widget, pin, nota del pin).
+// id = classe + numero con trattino basso (decisione del 13/11/2026): "led_rgb1" (LED a colori), "led1" (LED monocromatico); ogni classe ha la sua numerazione.
+// colore: campo del LED monocromatico mostrato nell'etichetta ("LED1 (blu)"); "" = nessuno (i LED a colori non lo hanno).
+// funzione: LEDRGB (colore e modo), LEDONOFF (spento, acceso, lampeggia), TASTO (sola lettura).
+// widget: come la pagina disegna la voce ("colore", "onoff", "tasto"). Servono ai file devices/vos_dev.cpp e devices/vos_pins.cpp.
+#define VOS_BOARD_PERIF(X) \
+  X("led_rgb1", "LED_RGB1",     "",     "Luce",     "led_rgb1", LEDRGB, "colore", VOS_PIN_LED_RGB, "LED RGB della scheda") \
+  X("boot",     "Tasto fisico", "",     "Pulsante", "btn",      TASTO,  "tasto",  VOS_PIN_BOOT,    "Tasto fisico")
+
 // ---- GPIO ----
 // S3: i GPIO 22-25 non esistono, 26-32 sono flash/PSRAM; 33-37 sono liberi con PSRAM quad (SuperMini 2 MB)
 #define VOS_GPIO_MAX       48           // numero piu alto
@@ -33,7 +54,7 @@
 #define VOS_GPIO_EXISTS(g) (((g) >= 0 && (g) <= 21) || ((g) >= 33 && (g) <= 48))
 #define VOS_PIN_USB_DM    19            // USB D- (nativa)
 #define VOS_PIN_USB_DP    20            // USB D+ (nativa)
-#define VOS_GPIO_STRAP(g)  ((g) == 3 || (g) == 45 || (g) == 46)   // pin di avvio: meglio non toccarli
+#define VOS_GPIO_STRAP(g)  ((g) == 0 || (g) == 3 || (g) == 45 || (g) == 46)   // pin di avvio: meglio non toccarli (datasheet S3, tab. 3-1)
 
 // ---- analogico e I2C ----
 #define VOS_ADC_FIRST      1            // ADC1 (gli altri disturbano il Wi-Fi)
@@ -74,11 +95,64 @@
 #define VOS_ELF_RAM_MAX_MODULE 131072   // tetto di RAM per un modulo (byte)
 #define VOS_ELF_FILE_MAX       131072   // tetto della dimensione del file ELF (byte)
 
-// ---- disegno della scheda nella pagina (JSON) ----
-// fl/fr = file di piedini sinistra/destra viste dal fronte, dall'alto verso il basso (numero = GPIO, testo = alimentazione);
-// bl/br = piazzole del retro, colonna sinistra/destra viste da sotto. Ogni GPIO esistente va in una sola lista oppure in nessuna (solo inventario).
-#define VOS_BOARD_LAYOUT  "{\"fl\":[43,44,1,2,3,4,5,6,7],\"fr\":[\"5V\",\"GND\",\"3V3\",13,12,11,10,9,8]," \
-                          "\"bl\":[38,37,34,33,21,18,17,16,15,14],\"br\":[36,35,48,47,46,45,42,41,40,39]}"
+// ---- PWM dell'utente (package VOS_WITH_PWM): 1 = dentro il firmware di fabbrica (decisione dell'utente 13/11: su tutte le schede con LEDC) ----
+#define VOS_BOARD_PWM 1
+// ---- Contatore di impulsi dell'utente (package VOS_WITH_CONTATORE): il chip ha PCNT (4 unita), codice ~8-9 KB stimati.
+// ACCESO (decisione dell'utente 13/11/2026: "Aggiungi il contatore"): dopo la 1.8.22 il margine di app0 e 143.248 byte.
+#define VOS_BOARD_CONTATORE 1
+// ---- LED a colori WS2812 a mano (classe "led_rgb", package VOS_WITH_LED_RGB_A_MANO): l'S3 ha 4 canali RMT di trasmissione, 1 e del LED di bordo (SOC_RMT_TX_CANDIDATES_PER_GROUP, soc_caps.h IDF 5.5.5) ----
+#define VOS_BOARD_LED_RGB_MANO 1
+
+// ---- tabella dei piedini: da qui la pagina disegna lo schema della scheda (tab Pin) ----
+// Una riga per piedino o piazzola: X(lato, posizione, gpio, tipo, bit). Significato dei campi: vedi vos_board.h.
+// Fonte dei numeri: datasheet ESP32-S3 (tabelle dei pin e delle funzioni analogiche) e pinout della SuperMini di terza parte.
+// DA VERIFICARE A VISTA sulla scheda: ordine dei piedini lungo i lati, 7 e 8 sul bordo corto, posizione delle piazzole del retro.
+//   Sinistra (dall'alto): 43 44 1 2 3 4 5 6. Destra: 5V GND 3V3 13 12 11 10 9. Basso: 7 8.
+//   Retro (da sotto): colonna esterna sinistra 36 35 21 18 17 16 15 14, interna 38 37 34 33, destra 48 47 46 45 42 41 40 39.
+// Funzioni: ADC1 = GPIO1-10, ADC2 = GPIO11-20, tocco = GPIO1-14, RTC = GPIO0-21, SPI = 9-14, JTAG = 39-42, UART0 = 43/44.
+// Avvio (strapping) = 0, 3, 45, 46: il GPIO0 e il tasto BOOT e non sta sul bordo.
+#define VOS_BOARD_PINS(X) \
+  X(VOS_PL_SIN, 0, 43, VOS_PT_GPIO, VOS_PF_UART | VOS_PF_RISERVATO) \
+  X(VOS_PL_SIN, 1, 44, VOS_PT_GPIO, VOS_PF_UART | VOS_PF_RISERVATO) \
+  X(VOS_PL_SIN, 2,  1, VOS_PT_GPIO, VOS_PF_ADC | VOS_PF_TOCCO | VOS_PF_RTC) \
+  X(VOS_PL_SIN, 3,  2, VOS_PT_GPIO, VOS_PF_ADC | VOS_PF_TOCCO | VOS_PF_RTC) \
+  X(VOS_PL_SIN, 4,  3, VOS_PT_GPIO, VOS_PF_ADC | VOS_PF_TOCCO | VOS_PF_RTC | VOS_PF_AVVIO) \
+  X(VOS_PL_SIN, 5,  4, VOS_PT_GPIO, VOS_PF_ADC | VOS_PF_TOCCO | VOS_PF_RTC) \
+  X(VOS_PL_SIN, 6,  5, VOS_PT_GPIO, VOS_PF_ADC | VOS_PF_TOCCO | VOS_PF_RTC) \
+  X(VOS_PL_SIN, 7,  6, VOS_PT_GPIO, VOS_PF_ADC | VOS_PF_TOCCO | VOS_PF_RTC) \
+  X(VOS_PL_DES, 0, -1, VOS_PT_5V, 0) \
+  X(VOS_PL_DES, 1, -1, VOS_PT_GND, 0) \
+  X(VOS_PL_DES, 2, -1, VOS_PT_3V3, 0) \
+  X(VOS_PL_DES, 3, 13, VOS_PT_GPIO, VOS_PF_ADC | VOS_PF_TOCCO | VOS_PF_RTC | VOS_PF_SPI) \
+  X(VOS_PL_DES, 4, 12, VOS_PT_GPIO, VOS_PF_ADC | VOS_PF_TOCCO | VOS_PF_RTC | VOS_PF_SPI) \
+  X(VOS_PL_DES, 5, 11, VOS_PT_GPIO, VOS_PF_ADC | VOS_PF_TOCCO | VOS_PF_RTC | VOS_PF_SPI) \
+  X(VOS_PL_DES, 6, 10, VOS_PT_GPIO, VOS_PF_ADC | VOS_PF_TOCCO | VOS_PF_RTC | VOS_PF_SPI) \
+  X(VOS_PL_DES, 7,  9, VOS_PT_GPIO, VOS_PF_ADC | VOS_PF_TOCCO | VOS_PF_RTC | VOS_PF_SPI) \
+  X(VOS_PL_BASSO, 0, 7, VOS_PT_GPIO, VOS_PF_ADC | VOS_PF_TOCCO | VOS_PF_RTC) \
+  X(VOS_PL_BASSO, 1, 8, VOS_PT_GPIO, VOS_PF_ADC | VOS_PF_TOCCO | VOS_PF_RTC) \
+  X(VOS_PL_RETRO_SIN, 0, 36, VOS_PT_GPIO, 0) \
+  X(VOS_PL_RETRO_SIN, 1, 35, VOS_PT_GPIO, 0) \
+  X(VOS_PL_RETRO_SIN, 2, 21, VOS_PT_GPIO, VOS_PF_RTC) \
+  X(VOS_PL_RETRO_SIN, 3, 18, VOS_PT_GPIO, VOS_PF_ADC | VOS_PF_RTC) \
+  X(VOS_PL_RETRO_SIN, 4, 17, VOS_PT_GPIO, VOS_PF_ADC | VOS_PF_RTC) \
+  X(VOS_PL_RETRO_SIN, 5, 16, VOS_PT_GPIO, VOS_PF_ADC | VOS_PF_RTC) \
+  X(VOS_PL_RETRO_SIN, 6, 15, VOS_PT_GPIO, VOS_PF_ADC | VOS_PF_RTC) \
+  X(VOS_PL_RETRO_SIN, 7, 14, VOS_PT_GPIO, VOS_PF_ADC | VOS_PF_TOCCO | VOS_PF_RTC | VOS_PF_SPI) \
+  X(VOS_PL_RETRO_INT, 0, 38, VOS_PT_GPIO, 0) \
+  X(VOS_PL_RETRO_INT, 1, 37, VOS_PT_GPIO, 0) \
+  X(VOS_PL_RETRO_INT, 2, 34, VOS_PT_GPIO, 0) \
+  X(VOS_PL_RETRO_INT, 3, 33, VOS_PT_GPIO, 0) \
+  X(VOS_PL_RETRO_DES, 0, 48, VOS_PT_GPIO, VOS_PF_LED) \
+  X(VOS_PL_RETRO_DES, 1, 47, VOS_PT_GPIO, 0) \
+  X(VOS_PL_RETRO_DES, 2, 46, VOS_PT_GPIO, VOS_PF_AVVIO) \
+  X(VOS_PL_RETRO_DES, 3, 45, VOS_PT_GPIO, VOS_PF_AVVIO) \
+  X(VOS_PL_RETRO_DES, 4, 42, VOS_PT_GPIO, VOS_PF_JTAG) \
+  X(VOS_PL_RETRO_DES, 5, 41, VOS_PT_GPIO, VOS_PF_JTAG) \
+  X(VOS_PL_RETRO_DES, 6, 40, VOS_PT_GPIO, VOS_PF_JTAG) \
+  X(VOS_PL_RETRO_DES, 7, 39, VOS_PT_GPIO, VOS_PF_JTAG) \
+  X(VOS_PL_RETRO_ALTO, 0, -1, VOS_PT_BATT_MENO, 0) \
+  X(VOS_PL_RETRO_ALTO, 1, -1, VOS_PT_BATT_PIU, 0) \
+  X(VOS_PL_RETRO_ALTO, 2, -1, VOS_PT_BOOST, 0)
 
 // ---- pin consigliati, in ordine: prima quelli comodi del bordo, per ultimi quelli meno usati ----
 #define VOS_GPIO_SUGGEST      {1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 21, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 47}

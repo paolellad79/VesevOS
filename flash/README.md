@@ -13,7 +13,8 @@ Licenza: GPL-3.0-or-later (licenza commerciale alternativa: vedi `COMMERCIAL.md`
   (c) dimensione nello slot (firmware al massimo 2.424.832 byte, recovery al massimo 1.048.576 byte, bootloader 32 KiB, ecc.),
   (d) SHA-256 (con `crypto.subtle`) uguale a quello dell'elenco.
 - Per ogni parte c'e una casella (Scrivi / Non si tocca; per le impostazioni "Si conserva" o "SI CANCELLA") e due preimpostazioni: "Aggiorna e conserva i dati" (scheda gia usata) e "Installazione completa". Avvisi chiari per le combinazioni che richiedono attenzione; se non scegli niente il tasto Scrivi resta disattivato.
-- Si scrivono SOLO i file scaricati da `bin/` e da `../firmware/` e presenti in `firmware.json`. Non c'e scelta di file dal disco.
+- Si scrivono SOLO i file scaricati da `bin/` e da `../firmware/` e presenti in `firmware.json`.
+- Immagine dei file di VesevOS (tipo `risorse`, `../firmware/risorse/<versione>/VesevOS-Risorse-<versione>.bin`): un file system LittleFS corto con `/usr/share/vesevos/` (pagina, manuale, licenze, dati comuni, tabella radio, elenco `SHA256SUMS`). Si scrive a 0x360000 SOLO nell'installazione completa (scheda nuova), mai in un aggiornamento: l'aggiornamento non tocca lo spazio dei file. Al primo avvio la scheda estende da sola il file system a tutta la partizione. Controlli nel browser: superblocco LittleFS (nome, versione, blocco da 4096, numero di blocchi = lunghezza), marchio dei file di risorse, lunghezza a blocchi interi (minimo 8, massimo 0xA0000), SHA-256. Generata da `tools/mkimmaginerisorse.py` del repo; i file devono coincidere con le righe di `SHA256SUMS` (il firmware non ha un id delle risorse dal 16/11/2026). Non c'e scelta di file dal disco.
 - Indirizzi e dimensioni massime stanno nel codice (`controlli.js`), non nell'elenco: un elenco sbagliato non puo mettere un file nel posto sbagliato.
 - Se il browser non ha la porta seriale: la pagina mostra solo "Browser non compatibile".
 - Lingue it/en/es/de (testi in `lang.js`), tema automatico/chiaro/scuro e accessibilita come nella pagina della scheda (`../assets/sito.css`, `sito.js`), barra di avanzamento, registro delle fasi con `aria-live`.
@@ -30,27 +31,29 @@ Licenza: GPL-3.0-or-later (licenza commerciale alternativa: vedi `COMMERCIAL.md`
 | `lang.js` | testi in 4 lingue |
 | `firmware.json` | elenco dei file ufficiali con SHA-256 (coerente con `../firmware/indice.json`, il suo "gemello" per i programmi: sono DUE file da tenere uguali) |
 | `bin/` | solo i file della prima installazione: bootloader, tabella delle partizioni, nvs vuota, otadata |
-| `../firmware/` | recovery e firmware: la pagina scarica questi, NON ci sono copie in `bin/` |
+| `../firmware/` | recovery, firmware e immagine dei file (`risorse/<versione>/`): la pagina scarica questi, NON ci sono copie in `bin/` |
 | `vendor/` | `esptool-js` 0.5.7 (bundle) e la sua licenza Apache-2.0 |
 
 ## Pacchetti
-La scheda ha la tabella: `nvs` 0x9000 (20 KiB), `otadata` 0xe000 (8 KiB), recovery 0x10000 (max 1 MiB), `app0` 0x110000 (max 2.424.832 byte), spazio file 0x360000.
+La scheda ha la tabella: `nvs` 0x9000 (20 KiB), `otadata` 0xe000 (8 KiB), recovery 0x10000 (max 1 MiB), `app0` 0x110000 (max 2.424.832 byte), spazio file 0x360000 (0xA0000, uguale in tutte le tabelle del progetto dalla 1.8.23i).
 
 Preimpostazioni (le caselle si possono cambiare una per una):
 - **Aggiorna e conserva i dati (scheda gia usata)**, scelta predefinita. Scrive 4 file: bootloader, tabella, recovery e firmware. Non tocca `nvs` (impostazioni, Wi-Fi, contatore dei riavvii, tempo di vita) ne `otadata`.
-- **Installazione completa - cancella impostazioni e contatori (scheda nuova)**. Scrive 6 file:
+- **Installazione completa - cancella impostazioni, contatori e spazio dei file (scheda nuova)**. Scrive 7 file:
   | Indirizzo | File | Note |
   |---|---|---|
   | 0x0 | `bin/bootloader-1.8.16.bin` | dal build del firmware (con memoria RTC riservata) |
   | 0x8000 | `bin/partition-table-1.8.16.bin` | uguale nei build di firmware e recovery |
   | 0x9000 | `bin/nvs-vuoto.bin` | 20 KiB di 0xFF: NIENTE dati di nessuna scheda |
   | 0xe000 | `bin/otadata-app0.bin` | primo avvio direttamente su `app0` (stesso contenuto che ha una scheda in uso, solo numero di sequenza e CRC) |
-  | 0x10000 | `../firmware/recovery/0.5.2/VesevOS-Recovery-0.5.2.bin` | recovery |
-  | 0x110000 | `../firmware/1.8.16/VesevOS-1.8.16.bin` | firmware |
+  | 0x10000 | `../firmware/recovery/0.5.3/VesevOS-Recovery-S3-0.5.3.bin` | recovery |
+  | 0x110000 | `../firmware/1.8.24c/VesevOS-S3-1.8.24c.bin` | firmware |
+  | 0x360000 | `../firmware/risorse/1.8.24/VesevOS-Risorse-1.8.24.bin` | immagine corta dei file di VesevOS (LittleFS, 63 blocchi = 252 KiB; la scheda la estende al primo avvio) |
 - **Solo firmware** (0x110000) e **Solo recovery** (0x10000): per recuperare una scheda con tabella e avvio gia buoni.
 - Scelta fatta: file separati, uno per parte, ognuno con il suo SHA-256 e i suoi controlli, al posto di una immagine unica da 4 MB.
   Motivi: si riusano i binari ufficiali senza copie "fuse"; ogni controllo (marchio, slot) e chiaro; niente 4 MB quasi tutti vuoti; il file con i dati di una scheda non esiste.
-- NON si scrive MAI: lo spazio file (0x360000, LittleFS). Una scheda usata tiene quindi `/vesevos.conf` e utenti; una scheda nuova non ha nulla.
+- Lo spazio file (0x360000, LittleFS) si scrive SOLO con l'installazione completa (immagine dei file di VesevOS, senza configurazione, utenti o segreti). Gli aggiornamenti e le preimpostazioni "Solo firmware" e "Solo recovery" non lo toccano: una scheda usata tiene `/vesevos.conf`, utenti, lingue e programmi. Se spunti a mano l'immagine su una scheda usata la pagina avvisa che si perde tutto lo spazio dei file.
+- Questa pagina installa solo l'ESP32-S3 (il controllo del chip e in `scrittura.js`); le altre schede si installano da USB con gli strumenti del progetto.
   La memoria `nvs` si cancella solo se scegli quella voce o l'installazione completa.
 - Mai usare un backup (`backup-*.bin`) come origine: contiene dati personali (Wi-Fi, utenti, chiavi, certificati).
 
@@ -65,6 +68,7 @@ Nota: se pubblichi solo la cartella `flash/` altrove, i percorsi `../firmware/` 
 
 ## Come aggiornare `firmware.json` e gli SHA (nuova versione)
 1. Metti i nuovi binari in `../firmware/<versione>/` (con il `.sha256`) e aggiorna `../firmware/indice.json`. Per una installazione completa servono anche bootloader e tabella dello stesso build, in `bin/`.
+   Immagine dei file di VesevOS (solo installazione completa): dopo `tools/mkrisorse.py` lancia `python3 tools/mkimmaginerisorse.py` (dal repo), copia `VesevOS-Risorse-<versione>.bin` e il suo `.sha256` in `../firmware/risorse/<versione>/` e aggiorna la parte `risorse-<versione>` e il pacchetto `completa` in `firmware.json`. Il generatore si ferma se i file non coincidono con `SHA256SUMS` o se l'id non e quello del firmware; `tools/mkzip-github.py` controlla che `firmware.json` descriva proprio quell'immagine.
 2. Calcola gli SHA-256 e le dimensioni: `shasum -a 256 <file>` e `ls -l`. Devono coincidere con i file `.sha256` accanto ai binari.
 3. In `firmware.json`: aggiungi le voci in `parti` (tipo, file, indirizzo, dimensione, sha256) e un nuovo pacchetto in `pacchetti`.
    Le voci vecchie possono restare: il downgrade e possibile (decisione del 22/10/2026, da rivedere prima del rilascio ufficiale).
@@ -84,8 +88,9 @@ Script rapido per rigenerare dimensioni e SHA: vedi il comando in fondo a questo
 ## Controlli consigliati
 Se vuoi rifare le prove, usa prima una scheda di prova e tieni il backup a portata di mano:
 1. Collegamento e reset automatico su tutti i sistemi operativi, con un browser che supporta la porta seriale: scheda in uso, scheda spenta e scheda che non parte.
-2. Installazione completa su scheda nuova, poi avvio: la scheda deve partire su VesevOS 1.8.16; recovery raggiungibile.
+2. Installazione completa su scheda nuova, poi avvio: la scheda deve partire su VesevOS 1.8.24c; recovery raggiungibile.
 3. "Aggiorna e conserva i dati" su una scheda gia usata: impostazioni, contatore dei riavvii e tempo di vita devono restare. Poi solo firmware e solo recovery.
+3b. Installazione completa su una scheda NUOVA (solo con una scheda di prova e il via del proprietario): dopo il primo avvio `ls /usr/share/vesevos` deve mostrare gli 8 file e il controllo SHA256SUMS dell'avvio non deve dare avvisi; la prima apertura della pagina deve funzionare senza pagina di emergenza. NON ancora provato su scheda.
 4. Rifiuti: file modificato di 1 byte, elenco con SHA sbagliato, firmware messo come recovery, sito non raggiungibile, pagina aperta da disco.
 5. Browser senza porta seriale: deve comparire solo "Browser non compatibile".
 6. Lettori di schermo e tastiera; telefono (la porta seriale su telefono spesso non esiste: atteso "Browser non compatibile").

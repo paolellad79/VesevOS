@@ -1,7 +1,10 @@
 /* ===== periferiche ed Elenco dispositivi (API /api/dev) ===== */
 var DV=[],DVT={btn:"boot"};
 function dvList(){
-  return api("/api/dev").then(function(r){return r.json()}).then(function(j){DV=j.dev||[]})
+  return Promise.all([api("/api/dev").then(function(r){return r.json()}),aliasLeggi()]).then(function(a){
+    DV=a[0].dev||[];
+    bordoVoci()
+  })
 }
 
 function dmLoad(){
@@ -21,11 +24,16 @@ function dvSw(on,label,act){
     (on?"true":"false")+'" aria-label="'+esc(label)+'" onclick="'+act+'"></button>'
 }
 
+/* Etichetta di stato di una riga: colore piu parole. */
+function dvPill(d){
+  var cl=d.state==1?"v":d.state==2?"k":"";
+  return'<span class="pill dvp '+cl+'">'+esc(dvStato(d))+'</span>'
+}
+
 function dvRiga(d,box,mm){
-  var cl=d.state==1?"v":d.state==2?"k":"",
-    h='<li><button class="dvn" onclick="show(\''+d.tab+'\')"><span>'+esc(d.label)+
-    '</span><span class="pill dvp '+cl+'">'+esc(dvStato(d))+'</span></button><span class="dvsw">';
-  if(d.sw&&ROLE==2)h+=dvSw(d.state,d.label,"dvSet('"+d.id+"',"+(d.state?0:1)+",'"+box+"','"+mm+"')");
+  var h='<li><button class="dvn"'+descrTitle(d.id)+' onclick="show(\''+bordoTab(d)+'\')"><span>'+
+    etichettaHtml(d.id,d.label)+'</span>'+dvPill(d)+'</button><span class="dvsw">';
+  if(d.sw&&ROLE==2)h+=dvSw(d.state,etichetta(d.id,d.label),"dvSet('"+d.id+"',"+(d.state?0:1)+",'"+box+"','"+mm+"')");
   return h+'</span></li>'
 }
 /* Albero del solo hardware: radice con nome scheda e chip, un ramo per ogni gruppo "cap". */
@@ -73,8 +81,8 @@ function sensDraw(){
     api("/api/io").then(function(r){return r.json()})]).then(function(a){
       var R=((a[0].data&&a[0].data.rows)||[]).slice(0,1);
       (a[1].io||[]).forEach(function(d){
-        if(d.c=="i2c")R.push([d.n,ioI2cVal(d)]);
-        if(d.c=="analogico")R.push([d.n,d.v])
+        if(d.c=="i2c")R.push([etichetta(d.n,d.n),ioI2cVal(d)]);
+        if(d.c=="analogico")R.push([etichetta(d.n,d.n),d.v])
       });
       $("sens_t").innerHTML=cpuTab(R)
     }).catch(function(){})

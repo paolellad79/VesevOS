@@ -6,7 +6,7 @@
 //   vesevos-services                       elenco (tutti i ruoli)
 //   vesevos-services <servizio> [status]   stato di uno (con i dettagli dove ci sono)
 //   vesevos-services <servizio> start|stop|restart   solo Admin
-//   vesevos-services vdb start|stop        interruttore del sottosistema Berry (script, app, comandi dei driver); acceso di fabbrica
+//   vesevos-services vdb start|stop        interruttore del sottosistema delle funzioni (script, app, comandi dei driver); acceso di fabbrica
 //   vesevos-services vde start|stop        (solo con VOS_WITH_ELF) interruttore del sottosistema ELF ("elf" resta valido come sinonimo); acceso di fabbrica
 //
 // Nessun servizio nuovo e nessuna logica nuova: le azioni passano dalle stesse funzioni che usano gia i comandi mqtt, mesh, ntp e svc
@@ -37,7 +37,7 @@ const Row kRows[] = {
   {"mqtt", S_MQTT, true, false},  {"mesh", S_MESH, true, false},
   {"ntp", S_NTP, true, false},    {"rules", S_RULES, false, false}, {"script", S_SCRIPT, false, false},
   {"wd", S_WD, false, false},
-#if VOS_WITH_BERRY
+#if VOS_WITH_FUNZIONI
   {"vdb", S_VDB, true, false},
 #endif
 #if VOS_WITH_ELF
@@ -52,7 +52,7 @@ const char* registryId(Sid s) {
     case S_WPS:  return "wps";
     case S_MQTT: return "mqtt";
     case S_MESH: return "mesh";
-#if VOS_WITH_BERRY
+#if VOS_WITH_FUNZIONI
     case S_VDB:  return "vdb";
 #endif
 #if VOS_WITH_ELF
@@ -78,7 +78,7 @@ int stateOf(Sid s) {
     case S_MDNS:     return cfg.mdnsOn ? SVC_ON : SVC_OFF;
     case S_NTP:      return cfg.ntpOn ? SVC_ON : SVC_OFF;
     case S_RULES:    return sysTaskRunning("rules") ? SVC_ON : SVC_OFF;
-    case S_SCRIPT:   return berryRunning() ? SVC_ON : SVC_OFF;
+    case S_SCRIPT:   return funzioniInEsecuzione() ? SVC_ON : SVC_OFF;
     case S_WD:       return sysTaskRunning("wd") ? SVC_ON : SVC_OFF;
     default:         return SVC_OFF;
   }
@@ -124,7 +124,7 @@ void printRow(OutSink& o, const Row& r) {
 void svcList(OutSink& o) {
   o.println(tr("Servizio   Stato         Porta  RAM"));
   for (const Row& r : kRows) if (present(r.id)) printRow(o, r);
-  o.println(tr("Cambiare (solo Admin): vesevos-services <servizio> start|stop|restart. Di sola lettura: wifi, wps, rules, script, wd. vdb e vde sono i sottosistemi Berry ed ELF: spegnerli ferma i loro programmi."));
+  o.println(tr("Cambiare (solo Admin): vesevos-services <servizio> start|stop|restart. Di sola lettura: wifi, wps, rules, script, wd. vdb e vde sono i sottosistemi delle funzioni VesevOS e degli ELF: spegnerli ferma i loro programmi."));
   o.println(tr("http, https e ap: la modifica vale dal riavvio. Task e altri servizi: ps, start, kill."));
 }
 
@@ -147,7 +147,7 @@ void svcAct(OutSink& o, int role, const Row& r, int what) {
   char old[48];
   switch (r.id) {
     case S_MQTT: case S_MESH:
-#if VOS_WITH_BERRY
+#if VOS_WITH_FUNZIONI
     case S_VDB:
 #endif
 #if VOS_WITH_ELF

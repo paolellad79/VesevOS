@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_prim_dev.cpp
-// STRATO 6 (packages): gruppo "dev" del registro delle primitive (vedi vos_prim.h). Stessi nomi e semantica di dev_get e dev_set di Berry
-// (vos_berry_dev.cpp) per le periferiche a classi di devices/vos_io. ELF: simboli vos_dev_get, vos_dev_set, vos_dev_list.
+// STRATO 6 (packages): gruppo "dev" del registro delle primitive (vedi vos_prim.h). Stessi nomi e semantica di dev_get e dev_set delle funzioni VesevOS
+// (vos_funzioni_dev.cpp) per le periferiche a classi di devices/vos_io. ELF: simboli vos_dev_get, vos_dev_set, vos_dev_list.
 //
 // REGOLE
 //   - Il modulo NON sceglie ne applica pin: lavora solo su periferiche GIA configurate dall'utente (regola 6 dei driver). Nessuna
 //     primitiva aggiunge, toglie o rinomina periferiche.
-//   - Come in Berry, oltre al gruppo "dev" serve il NOME della periferica in use= (use=dev,rele1): "bmp1.p" si autorizza con "bmp1".
+//   - Come nelle funzioni VesevOS, oltre al gruppo "dev" serve il NOME della periferica in use= (use=dev,rele1): "bmp1.p" si autorizza con "bmp1".
 //   - dev_set solo se chi lancia e l'Admin (ruolo minimo alla registrazione); i limiti di ioSet (minimo 1 s tra due cambi del rele) restano.
-// DIFFERENZE DA BERRY (scelte piu sicure, vedi piano-integrazione-elf.md, sezione 4.2)
-//   - Berry usa dev_get/dev_set anche per i controlli e i dati dell'app (rtGet/rtSetApp): un modulo ELF non ha un'app, quindi qui solo
+// DIFFERENZE DA FUNZIONI (scelte piu sicure, vedi piano-integrazione-elf.md, sezione 4.2)
+//   - Il motore delle funzioni usa dev_get/dev_set anche per i controlli e i dati dell'app (rtGet/rtSetApp): un modulo ELF non ha un'app, quindi qui solo
 //     periferiche. Il valore e sempre un intero (niente testo).
-//   - dev_list esiste solo per ELF (in Berry l'app conosce i nomi dal manifest): elenca SOLO le periferiche concesse in use=.
+//   - dev_list esiste solo per ELF (nelle funzioni VesevOS l'app conosce i nomi dal manifest): elenca SOLO le periferiche concesse in use=.
 #include "vos_prim.h"
 
 #if VOS_WITH_ELF

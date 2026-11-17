@@ -6,7 +6,7 @@
 // (contiene "sd" se la scheda e montata), "/media/sd/..." e la microSD. Non apre il contenuto dei file e non scrive niente.
 // Chi chiama passa il ruolo (ROLE_GUEST / ROLE_OPER / ROLE_ADMIN di core/vos_common.h): i file di sistema non si vedono MAI; chiavi,
 // certificati e copie .vbk (core/vos_paths: pathIsSecret) li vede solo l'Admin. Una voce nascosta si comporta come se non esistesse.
-// Usato da Berry (listdir, stat). Nessun tipo del chip e nessun String.
+// Usato dalle funzioni VesevOS (listdir, stat). Nessun tipo del chip e nessun String.
 #pragma once
 #include <stdint.h>
 #include <stddef.h>

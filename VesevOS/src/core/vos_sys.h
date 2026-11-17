@@ -15,7 +15,8 @@ void     sysApplyCpuMode();         // applica il modo CPU (auto/fisso) della co
 void     sysInit();                 // idle hook, task monitor, boot counter
 void     sysSleep();                // sonno profondo: LED e Wi-Fi spenti, si riaccende solo con RESET
 int      sysCpuPercent();           // 0..100
-int      sysCpuCorePercent(int core);   // carico del core 0 o 1 (0..100; altro numero = 0)
+int      sysCpuCorePercent(int core);   // carico di un core (0..100; core inesistente = 0)
+int      sysCpuMaxCorePercent();        // il carico del core piu carico (per il governor)
 float    sysCpuTemp();              // gradi C (sensore interno del chip)
 uint64_t sysUptimeSec();            // dall'avvio del sistema
 uint32_t sysBootCount();

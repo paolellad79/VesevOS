@@ -2,10 +2,10 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_hw.h
 // STRATO 6 (packages): accesso ai pin, al bus I2C e al bus SPI dei DRIVER ELF (.vde), indipendente dal linguaggio. Una sola scrittura, due
-// collegamenti: ELF (vos_prim_hw.cpp, simboli vos_gpio_read...) e Berry (vos_berry_hw.cpp, gpio_read...). Stessi nomi, stessi numeri di ritorno.
+// collegamenti: ELF (vos_prim_hw.cpp, simboli vos_gpio_read...) e funzioni VesevOS (vos_funzioni_hw.cpp, gpio_read...). Stessi nomi, stessi numeri di ritorno.
 // REGOLE
 //   - Si lavora solo sul driver NOMINATO (istanza di devices/vos_drvres): usa solo i pin che l'utente gli ha dato; mai pin a scelta del modulo.
-//   - Qui NON si controllano ruolo e use=: lo fa chi collega (il registro delle primitive, o Berry).
+//   - Qui NON si controllano ruolo e use=: lo fa chi collega (il registro delle primitive, o funzioni VesevOS).
 //   - Il bus I2C e uno solo e appartiene all'ultimo driver che lo usa; se esiste il sensore I2C delle periferiche a classi il bus e suo e si risponde "occupato".
 //   - Ritorno: 0 o un numero >= 0 = riuscito; negativo = errore (stessi valori di VOS_PRIM_E_* in vos_prim.h).
 #pragma once

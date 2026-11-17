@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "aggiornato": "2026-11-01",
- "note": "Elenco dei file ufficiali. La pagina scrive SOLO i file elencati qui, dopo aver controllato lo SHA-256. Recovery e firmware sono gli stessi file di ../firmware/ (stessi SHA-256 di ../firmware/indice.json). 'channel' e 'publisher' sono scritte non firmate.",
+ "aggiornato": "2026-11-17",
+ "note": "Elenco dei file ufficiali. La pagina scrive SOLO i file elencati qui, dopo aver controllato lo SHA-256. Recovery e firmware sono gli stessi file di ../firmware/ (stessi SHA-256 di ../firmware/indice.json). 'channel' e 'publisher' sono scritte non firmate. 'risorse' e l'immagine corta del file system (file di /usr/share/vesevos): solo nel pacchetto 'completa' (scheda nuova), mai negli aggiornamenti.",
  "parti": {
   "bootloader-1.8.16": {
    "tipo": "bootloader",
@@ -31,62 +31,70 @@
    "dimensione": 8192,
    "sha256": "8ba3b110139f45443d4f268d1a3373ef99a1718b71d51664531b83ee2d4b91a3"
   },
-  "recovery-0.5.2": {
+  "recovery-0.5.3": {
    "tipo": "recovery",
-   "file": "../firmware/recovery/0.5.2/VesevOS-Recovery-0.5.2.bin",
+   "file": "../firmware/recovery/0.5.3/VesevOS-Recovery-S3-0.5.3.bin",
    "indirizzo": 65536,
-   "dimensione": 873296,
-   "sha256": "3dc32d0161075caea5144defe0f0b5bc30f363274d91451e7bfd42161cb9508c"
+   "dimensione": 957824,
+   "sha256": "0944640a7918a01cc2ad1b1844d10657e5f93ab5f5152566e737905b1fa6d93f"
   },
-  "firmware-1.8.16": {
+  "firmware-1.8.24c": {
    "tipo": "firmware",
-   "file": "../firmware/1.8.16/VesevOS-1.8.16.bin",
+   "file": "../firmware/1.8.24c/VesevOS-S3-1.8.24c.bin",
    "indirizzo": 1114112,
-   "dimensione": 2380880,
-   "sha256": "2bce5a99e14c54912d8772f966cf4d7ecc77d420c910c604ddaf96d56962cf22"
+   "dimensione": 2094224,
+   "sha256": "e13a319239687780dc6cdaaf30a68140b10e2a6ef38c173c8095ed419c7e2319"
+  },
+  "risorse-1.8.24c": {
+   "tipo": "risorse",
+   "file": "../firmware/risorse/1.8.24c/VesevOS-Risorse-1.8.24c.bin",
+   "indirizzo": 3538944,
+   "dimensione": 258048,
+   "sha256": "4ef0924ec5abff52d0c9ed2bd23e32fcb176be0a0ed12d447312665741b33911"
   }
  },
  "pacchetti": [
   {
-   "id": "aggiorna-1.8.16",
+   "id": "aggiorna-1.8.24c",
    "tipo": "aggiorna",
-   "versione": "1.8.16",
-   "recovery": "0.5.2",
+   "versione": "1.8.24c",
+   "recovery": "0.5.3",
    "parti": [
     "bootloader-1.8.16",
     "tabella-1.8.16",
-    "recovery-0.5.2",
-    "firmware-1.8.16"
+    "recovery-0.5.3",
+    "firmware-1.8.24c"
    ]
   },
   {
-   "id": "completa-1.8.16",
+   "id": "completa-1.8.24c",
    "tipo": "completa",
-   "versione": "1.8.16",
-   "recovery": "0.5.2",
+   "versione": "1.8.24c",
+   "recovery": "0.5.3",
    "parti": [
     "bootloader-1.8.16",
     "tabella-1.8.16",
     "nvs-vuoto",
     "otadata-app0",
-    "recovery-0.5.2",
-    "firmware-1.8.16"
+    "recovery-0.5.3",
+    "firmware-1.8.24c",
+    "risorse-1.8.24c"
    ]
   },
   {
-   "id": "solo-firmware-1.8.16",
+   "id": "solo-firmware-1.8.24c",
    "tipo": "solo-firmware",
-   "versione": "1.8.16",
+   "versione": "1.8.24c",
    "parti": [
-    "firmware-1.8.16"
+    "firmware-1.8.24c"
    ]
   },
   {
-   "id": "solo-recovery-0.5.2",
+   "id": "solo-recovery-0.5.3",
    "tipo": "solo-recovery",
-   "versione": "0.5.2",
+   "versione": "0.5.3",
    "parti": [
-    "recovery-0.5.2"
+    "recovery-0.5.3"
    ]
   }
  ]

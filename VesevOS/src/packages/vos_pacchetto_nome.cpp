@@ -101,7 +101,7 @@ char* leggiTutto(const char* percorso, size_t tetto, const char* troppoGrande, s
   return b;
 }
 
-// Il controllo vero dei file Berry si fa all'avvio dello script: qui si esclude un file vuoto o binario.
+// Il controllo vero dei file funzioni VesevOS si fa all'avvio dello script: qui si esclude un file vuoto o binario.
 bool scriptValido(const char* percorso, ErrBuf& err) {
   size_t n = 0;
   char* b = leggiTutto(percorso, fsTextMax(), tr("Testo troppo lungo (max 32 KB)"), n, err);
@@ -112,7 +112,7 @@ bool scriptValido(const char* percorso, ErrBuf& err) {
   return ok;
 }
 
-bool driverBerryValido(const char* percorso, const char* nome, ErrBuf& err) {
+bool driverFunzioniValido(const char* percorso, const char* nome, ErrBuf& err) {
   size_t n = 0;
   char* b = leggiTutto(percorso, MOD_FILE_MAX, tr("File troppo grande (massimo 16 KB)"), n, err);
   if (!b) return false;
@@ -123,8 +123,8 @@ bool driverBerryValido(const char* percorso, const char* nome, ErrBuf& err) {
   return ok;
 }
 
-#if VOS_WITH_BERRY
-bool appBerryValida(const char* percorso, const char* nome, ErrBuf& err) {
+#if VOS_WITH_FUNZIONI
+bool appFunzioniValida(const char* percorso, const char* nome, ErrBuf& err) {
   size_t n = 0;
   char* b = leggiTutto(percorso, APP_FILE_MAX, tr("File troppo grande (massimo 16 KB)"), n, err);
   if (!b) return false;
@@ -157,9 +157,9 @@ bool appElfValida(const char* percorso, ErrBuf& err) {
 // Una funzione spenta a compilazione non ha il suo controllo: quei file non si possono comunque usare.
 bool pacchettoValido(const char* percorso, const char* nome, const char* ext, ErrBuf& err) {
   if (!strcmp(ext, VOS_EXT_SCRIPT)) return scriptValido(percorso, err);
-  if (!strcmp(ext, VOS_EXT_DRV_B)) return driverBerryValido(percorso, nome, err);
-#if VOS_WITH_BERRY
-  if (!strcmp(ext, VOS_EXT_APP_B)) return appBerryValida(percorso, nome, err);
+  if (!strcmp(ext, VOS_EXT_DRV_B)) return driverFunzioniValido(percorso, nome, err);
+#if VOS_WITH_FUNZIONI
+  if (!strcmp(ext, VOS_EXT_APP_B)) return appFunzioniValida(percorso, nome, err);
 #endif
 #if VOS_WITH_ELF
   if (!strcmp(ext, VOS_EXT_DRV_E)) return driverElfValido(percorso, nome, err);

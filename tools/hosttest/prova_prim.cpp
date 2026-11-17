@@ -1,7 +1,7 @@
 // VesevOS - prova sul computer del REGISTRO DELLE PRIMITIVE (packages/vos_prim*.cpp), gruppi sd e dev. Senza Arduino ne scheda.
 // Compila i file veri del firmware (vos_prim, vos_prim_sd, vos_prim_dev, vos_pathres, vos_paths, vos_sd_path) con -DVOS_WITH_ELF=1 e metta
 // al posto dell'hardware un finto: microSD in RAM (sd*), volume (volList), periferiche (io*). La lancia prova_prim.sh.
-// Prova: nomi uguali a Berry, permessi per ruolo / use= / api, rifiuti (percorsi con "..", fuori dalla microSD, segreti, file di sistema,
+// Prova: nomi uguali a funzioni VesevOS, permessi per ruolo / use= / api, rifiuti (percorsi con "..", fuori dalla microSD, segreti, file di sistema,
 // blocchi oltre 1024, buffer piccoli, argomenti nulli), microSD assente, periferiche non concesse, contesto di esecuzione.
 // NON prova: il collegamento ELF vero (risolutore + caricatore), che serve la scheda.
 #include <stdio.h>
@@ -138,7 +138,7 @@ int main() {
   CHECK(vos_prim_conta() == 3 + 2 + 9 + 3 + 3 + 3 + 1 + 2 + 4);    // base (con print), log, sd, dev, gpio, i2c, spi, time, files
   CHECK(vos_prim_registra("x", nullptr, 1) < 0);
 
-  // nomi, gruppi e ruoli minimi come in Berry (lettura: Operatore; scrittura: Admin)
+  // nomi, gruppi e ruoli minimi come nelle funzioni VesevOS (lettura: Operatore; scrittura: Admin)
   F_status sd_status = P<F_status>("sd_status", "sd", ROLE_OPER);
   F_read sd_read = P<F_read>("sd_read", "sd", ROLE_OPER);
   F_ls listdir = P<F_ls>("listdir", "sd", ROLE_OPER);

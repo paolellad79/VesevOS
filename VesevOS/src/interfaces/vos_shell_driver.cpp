@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_shell_driver.cpp
-// Comando "vesevos-driver": UNA sola famiglia di comandi per i driver delle periferiche, sia .vdb (Berry) sia .vde (ELF).
+// Comando "vesevos-driver": UNA sola famiglia di comandi per i driver delle periferiche, sia .vdb (funzioni VesevOS) sia .vde (ELF).
 // Il tipo si capisce dall'estensione del file o dal nome (un nome vale per un solo driver). Le regole dei driver sono le stesse:
 // i pin li sceglie e li applica chi scrive il comando, il controllo (vietati, gia usati, doppi) e quello unico del registro dei pin.
 //

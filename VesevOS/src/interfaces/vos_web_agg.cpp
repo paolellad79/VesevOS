@@ -20,7 +20,7 @@ bool leggiScelta(Req* r, uint8_t& modo, uint8_t& freq, uint8_t& giorno, uint16_t
 
 void routesAgg(PsychicHttpServer* S, bool sec) {
   add(S, sec, "/api/aggiorna", HTTP_GET, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
-    HeapBuf j(1024);
+    HeapBuf j(2560);
     if (!aggiornaStatoJson(j) || j.oom() || j.over()) return ko(s, tr("Memoria insufficiente"), "off");
     aggiornaNotaVista();
     return sendJson(s, j);

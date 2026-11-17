@@ -355,7 +355,7 @@ static bool target(const char* to, uint8_t* mac, ErrBuf& err) {
 
 bool meshSendCmd(const char* to, const char* cmd, ErrBuf& err) {
   if (!meshReady()) { err = tr("Rete schede spenta"); return false; }
-  if (!meshCmdAllowed(cmd)) { err = tr("Azione non ammessa (solo led, led-color, led-bright, gpio, note, reboot, ntp sync)"); return false; }
+  if (!meshCmdAllowed(cmd)) { err = tr("Azione non ammessa (solo led_rgb1, led1, led-color, led-bright, gpio, note, reboot, ntp sync)"); return false; }
   uint8_t mac[6];
   if (!strcmp(to, "*") || !target(to, mac, err)) { if (err.empty()) err = tr("Indica una scheda (i comandi vanno a una sola scheda)"); return false; }
   return send(T_CMD, mac, cmd, strlen(cmd));

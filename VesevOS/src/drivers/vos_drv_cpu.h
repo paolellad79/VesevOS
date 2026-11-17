@@ -3,10 +3,13 @@
 // VesevOS - vos_drv_cpu.h
 // STRATO 1 (driver): frequenza della CPU con il gestore di energia di ESP-IDF (esp_pm, scala la frequenza da solo).
 // Due modi: AUTOMATICO (80 MHz a riposo, sale fino al massimo sotto carico) e FISSO (minimo = massimo).
-// Le sole frequenze ammesse sono 80, 160 e 240 MHz.
+// Le frequenze ammesse le dice il CHIP (rtc_clk_cpu_freq_mhz_to_config di soc/rtc.h, la stessa funzione con cui esp_pm_configure
+// controlla i valori), provando 80, 120, 160, 240. Calcolo una volta sola. Se nessuna risulta valida si ripiega sui macro del file di
+// scheda (VOS_CPU_MHZ_MIN/MID/MAX).
 #pragma once
 #include <stdint.h>
 #include <soc/rtc.h>
+#include "../boards/vos_board.h"
 
 // Frequenza di questo istante in MHz (con l'automatico cambia da sola).
 inline uint32_t drvCpuMhz() {
@@ -15,8 +18,16 @@ inline uint32_t drvCpuMhz() {
   return conf.freq_mhz;
 }
 
-// true se il valore e uno dei tre ammessi.
-inline bool drvCpuMhzValid(uint32_t mhz) { return mhz == 80 || mhz == 160 || mhz == 240; }
+// Frequenze valide per il chip, in ordine crescente. Copia al massimo maxOut valori e restituisce quanti ce ne sono.
+int drvCpuLevels(uint32_t* out, int maxOut);
+
+// Gradino piu basso, piu alto e di mezzo (il valido piu vicino a 160) tra quelli validi.
+uint32_t drvCpuMin();
+uint32_t drvCpuMax();
+uint32_t drvCpuMid();
+
+// true se il valore e una delle frequenze valide del chip.
+bool drvCpuMhzValid(uint32_t mhz);
 
 // true se il firmware e costruito con il gestore di energia (CONFIG_PM_ENABLE). Se no, i cambi qui sotto rispondono false.
 bool drvCpuPmReady();

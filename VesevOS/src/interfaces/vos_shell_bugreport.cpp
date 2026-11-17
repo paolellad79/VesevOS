@@ -135,6 +135,7 @@ const char* netStateText(NetState s) {
     case NET_CLIENT_TRY: return tr("collegamento in corso");
     case NET_CLIENT_OK:  return tr("collegata alla Wi-Fi di casa");
     case NET_AIR:        return tr("modo aereo");
+    case NET_ATTESA:     return tr("in attesa del tasto BOOT");
   }
   return tr("avvio");
 }

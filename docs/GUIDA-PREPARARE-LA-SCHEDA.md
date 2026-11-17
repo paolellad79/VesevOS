@@ -25,7 +25,7 @@ VesevOS usa ESP-IDF: non serve nessun IDE e non esiste un pulsante "Carica". I f
 | `0x8000` | tabella delle partizioni (`partition_table/partition-table.bin` della stessa cartella) | - |
 | `0x10000` | recovery (`VesevOS-Recovery-0.5.1.bin`) | 1.048.576 byte |
 | `0x110000` | firmware (`VesevOS-<versione>.bin`) | 2.424.832 byte |
-| `0x360000` | `spiffs` (i file di configurazione): **non si scrive**, la crea il firmware | - |
+| `0x360000` | `spiffs` (i file): fino alla 1.8.23 **non si scrive**, la crea il firmware. Dalla 1.8.24, su una scheda NUOVA, si scrive l'immagine corta `firmware/risorse/<versione>/VesevOS-Risorse-<versione>.bin` (63 blocchi; la scheda la estende da sola); mai su un aggiornamento. Gli script `recovery/installa.sh` e `carica-tutto.sh` NON la scrivono ancora | 0xA0000 |
 
 La tabella delle partizioni e descritta in `idf-recovery/partitions.csv` (il progetto di compilazione del recovery, accanto al repository, oggi non pubblicato); il file pronto e `flash/bin/partition-table-1.8.0.bin`.
 Il recovery 0.5.1 pesa 873.200 byte, il firmware 1.8.0b 2.212.400 byte: entrambi entrano.
@@ -66,9 +66,9 @@ Se vedi *"no sync reply"*: chiudi il monitor seriale, ripeti il passo 3.4 e rila
 
 ## Passo 6 - Primo avvio di VesevOS
 1. Apri il Monitor seriale (115200) e premi RESET sulla scheda. All'avvio il recovery aspetta 3 secondi, poi parte VesevOS.
-2. Leggi la schermata di benvenuto: rete Wi-Fi `VesevOS`, password casuale (12 caratteri) e indirizzo `http://192.168.4.1`.
-3. Collegati a quella rete con telefono o PC, apri la pagina e **scegli la password del pannello** (almeno 6 caratteri).
-4. Segui la **configurazione guidata** (lingua, paese, nome, antenna, Wi-Fi di casa, ora). Dettagli: manuale, capitolo 1.
+2. Leggi la schermata di benvenuto. Alla prima accensione la radio e spenta: premi una volta il tasto BOOT e per 10 minuti la rete `VesevOS` e accesa, aperta e senza password.
+3. Collegati a quella rete con telefono o PC, scrivi a mano `https://192.168.4.1` e **scegli la password del pannello** (almeno 6 caratteri).
+4. Segui la **configurazione guidata** (lingua, paese, nome, antenna, Wi-Fi di casa, ora). Dettagli: manuale, capitolo 1. A guida finita, con la Wi-Fi di casa configurata, la rete `VesevOS` resta spenta: la riaccendi da Rete > Servizi oppure con il tasto BOOT premuto 8 secondi (con la sua password, diversa per ogni scheda).
 
 ## Passo 7 - Aggiornare in futuro (senza cavo)
 1. Compila la nuova versione, oppure prendi il file pronto da `firmware/` e controlla il suo SHA-256 (vedi `firmware/LEGGIMI.md`).

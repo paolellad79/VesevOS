@@ -31,3 +31,15 @@ esp_err_t esp_netif_set_ip_info(esp_netif_t* esp_netif, const esp_netif_ip_info_
 esp_err_t esp_netif_get_ip_info(esp_netif_t* esp_netif, esp_netif_ip_info_t* ip_info);
 esp_err_t esp_netif_set_dns_info(esp_netif_t* esp_netif, esp_netif_dns_type_t type, esp_netif_dns_info_t* dns);
 esp_err_t esp_netif_get_dns_info(esp_netif_t* esp_netif, esp_netif_dns_type_t type, esp_netif_dns_info_t* dns);
+
+// --- IPv6 (solo con CONFIG_LWIP_IPV6, come in esp_netif.h di IDF 5.5) ---
+#if CONFIG_LWIP_IPV6
+typedef struct { uint32_t addr[4]; uint8_t zone; } esp_ip6_addr_t;
+esp_err_t esp_netif_create_ip6_linklocal(esp_netif_t* esp_netif);
+int esp_netif_get_all_ip6(esp_netif_t* esp_netif, esp_ip6_addr_t if_ip6[]);
+int esp_netif_get_all_preferred_ip6(esp_netif_t* esp_netif, esp_ip6_addr_t if_ip6[]);
+esp_err_t esp_netif_add_ip6_address(esp_netif_t* esp_netif, const esp_ip6_addr_t addr, bool preferred);
+esp_err_t esp_netif_remove_ip6_address(esp_netif_t* esp_netif, const esp_ip6_addr_t* addr);
+esp_err_t esp_netif_str_to_ip6(const char* src, esp_ip6_addr_t* dst);
+#endif
+int esp_netif_get_netif_impl_index(esp_netif_t* esp_netif);

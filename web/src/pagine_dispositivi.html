@@ -32,8 +32,8 @@
   <div id="sens_t"></div>
  </div>
 </section>
-<section id="t_led" class="hide">
- <div class="card"><h3>LED</h3>
+<section id="t_led_rgb1" class="hide">
+ <div class="card"><h3 id="l_tit">Periferica di bordo</h3>
   <label for="l_mode">Modo</label><select id="l_mode" onchange="ledShow()">
    <option value="0">Colore = stato del sistema</option>
    <option value="1">Battito (heartbeat) colore scelto</option>
@@ -54,8 +54,29 @@
    <p class="fhint">I lampi sono al massimo 3 al secondo. Il trigger e i suoi colori li cambia solo l'amministratore. Di fabbrica il modo resta quello di sempre.</p>
   </fieldset>
   <button class="btn" onclick="saveLed()">Salva</button><div id="lm2" class="msg"></div>
+  <div id="al_led_rgb1"></div>
   <p style="color:var(--mut)">Colori di stato: arancio = avvio, blu = AP, giallo = connessione, verde = client collegato, rosso lampeggiante = errore.</p>
   </div>
+</section>
+<section id="t_led1" class="hide">
+ <div class="card"><h3 id="l2_tit">Periferica di bordo</h3>
+  <label for="l2_mode">Modo</label><select id="l2_mode" onchange="led2Show()">
+   <option value="0">Stato del sistema</option>
+   <option value="1">Battito (heartbeat)</option>
+   <option value="2">Acceso fisso</option><option value="3">Spento</option>
+   <option value="4">Lampi: attivita della flash</option>
+   <option value="5">Lampi: pacchetti Wi-Fi</option>
+   <option value="6">Acceso quando il carico della CPU supera la soglia</option></select>
+  <label for="l2_br">Luminosita (0-255)</label><input type="number" id="l2_br" min="0" max="255">
+  <div id="l2_src" class="hide">
+   <div><label for="l2_thr">Soglia di carico della CPU (10-95)</label><input type="number" id="l2_thr"
+    min="10" max="95"></div>
+   <p class="fhint">I lampi sono al massimo 3 al secondo. I lampi e il carico della CPU li cambia solo l'amministratore.</p>
+  </div>
+  <button class="btn" onclick="led2Salva()">Salva</button><div id="l2_m" class="msg"></div>
+  <div id="al_led1"></div>
+  <p style="color:var(--mut)">Questo LED ha un solo colore. Stato del sistema: battito = rete collegata (piu veloce con piu carico), lampeggio lento = connessione o punto di accesso, lampeggio veloce = errore.</p>
+ </div>
 </section>
 <section id="t_pin" class="hide">
  <div class="sub" id="sk_pin"><button>Pin</button><button>Pin sistema</button><button>Inventario</button></div>
@@ -86,6 +107,10 @@
  <div class="sub" id="sk_io"><button>Periferiche</button><button class="adm">Aggiungi</button><button class="adm">Driver</button></div>
  <div>
  <div id="io_main">
+  <div class="card hide" id="bd_card"><h3>Periferiche di bordo</h3>
+   <p class="fhint">Le periferiche gia presenti sulla scheda: funzionano subito, senza driver. Quelle con piu controlli si aprono nella loro pagina.</p>
+   <div id="bd_list"></div><div id="bd_m" class="msg" role="status"></div>
+  </div>
   <div class="card"><h3>Periferiche</h3>
    <p class="fhint">Rele, LED, pin e ingressi con un nome (rele1, led1...). Tocca una periferica per gestirla e provarla. Le app li usano scrivendo il nome in use= e poi dev_set("rele1", 1) o dev_get("in1"). Dopo ogni riavvio le uscite sono spente.</p>
    <div style="overflow-x:auto"><table id="io_tab" class="ftab"></table></div>
@@ -112,6 +137,27 @@
       <option value="up">Ingresso con pull-up</option>
       <option value="down">Ingresso con pull-down</option></select></div>
    </div>
+   <div class="hide" id="io_pwf"><div class="agrid">
+    <div><label for="io_ph">Frequenza (Hz)</label><input type="number" id="io_ph" min="10"
+      max="40000" value="1000" inputmode="numeric"></div>
+    <div><label for="io_pd">Duty (%)</label><input type="number" id="io_pd" min="0" max="100"
+      value="0" inputmode="numeric"></div>
+   </div></div>
+   <div class="hide" id="io_rgf"><div class="agrid">
+    <div><label for="io_ro">Ordine dei byte</label><select id="io_ro"><option value="">Quello della scheda</option>
+      <option value="grb">GRB (WS2812 standard)</option><option value="rgb">RGB</option>
+      <option value="brg">BRG</option><option value="gbr">GBR</option>
+      <option value="rbg">RBG</option><option value="bgr">BGR</option></select></div>
+   </div></div>
+   <div class="hide" id="io_cnf"><div class="agrid">
+    <div><label for="io_cf">Fronte da contare</label><select id="io_cf">
+      <option value="0">Salita</option><option value="1">Discesa</option>
+      <option value="2">Salita e discesa</option></select></div>
+    <div><label for="io_cn">Filtro anti-rimbalzo (ns, 0 = nessuno)</label><input type="number"
+      id="io_cn" min="0" max="10000" value="0" inputmode="numeric"></div>
+    <div><label for="io_cr">Resistenza</label><select id="io_cr"><option value="">Nessuna</option>
+      <option value="up">Pull-up</option><option value="down">Pull-down</option></select></div>
+   </div></div>
    <div class="hide" id="io_sdf"><div class="agrid">
     <div><label for="io_sm">MOSI (dati verso la scheda)</label><input type="number" id="io_sm"
       min="1" inputmode="numeric"></div>
@@ -143,6 +189,7 @@
  <div class="card"><h3>Tasto fisico</h3>
   <p class="fhint">Il tasto fisico (BOOT, GPIO0) della scheda: le pressioni lunghe (2, 8 e 20 secondi) servono al recupero e non si cambiano.</p>
   <div id="dv_btn"></div>
+  <div id="al_btn"></div>
  </div>
 
  <div class="card adm"><h3>Azioni dei click</h3>
@@ -209,7 +256,7 @@
      min="2" max="20" oninput="lcTx()"><div id="lc_txv" class="fhint"></div></div>
   </div>
   <p class="fhint">La potenza non supera mai il limite del paese.</p>
-  <div class="law">La scheda applica i limiti noti del paese scelto (canali e potenza massima) e abbassa la potenza se usi un'antenna esterna. Questo non garantisce la conformita del prodotto finito: dipende anche dall'hardware, dall'antenna, dal montaggio e dalle regole del luogo. Chi installa la scheda ne e responsabile.</div>
+  <div class="law">La scheda applica i limiti noti del paese scelto (canali e potenza massima) e abbassa la potenza in base al guadagno dell'antenna (quella della scheda o l'esterna che indichi). Questo non garantisce la conformita del prodotto finito: dipende anche dall'hardware, dall'antenna, dal montaggio e dalle regole del luogo. Chi installa la scheda ne e responsabile.</div>
   </div>
  <div class="card adm"><button class="btn" onclick="lcSave('lcm3')">Salva</button>
   <div id="lcm3" class="msg"></div></div>

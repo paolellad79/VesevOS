@@ -17,7 +17,7 @@ static uint32_t g_last = 0;
 static uint32_t g_testUntil = 0, g_downSince = 0, g_seq = 0;
 static bool     g_down = false;
 #define BTN_Q 4
-static volatile uint8_t g_q[BTN_Q];                 // coda dei click liberi (chi scrive: loop; chi legge: task Berry)
+static volatile uint8_t g_q[BTN_Q];                 // coda dei click liberi (chi scrive: loop; chi legge: task funzioni VesevOS)
 static volatile uint8_t g_qh = 0, g_qt = 0;
 static volatile bool    g_script = false;
 static char     g_lastTxt[96];                      // ultima nota del modo prova (si tronca se piu lunga)

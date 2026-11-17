@@ -30,6 +30,7 @@ inline uint32_t drvHeapMaxBlock() { return heap_caps_get_largest_free_block(MALL
 // PSRAM: 0 se la scheda non ne ha
 inline uint32_t drvPsramTotal()   { return heap_caps_get_total_size(MALLOC_CAP_SPIRAM); }
 inline uint32_t drvPsramFree()    { return heap_caps_get_free_size(MALLOC_CAP_SPIRAM); }
+inline bool     drvPsramPresent() { return drvPsramTotal() > 0; }   // la scheda ha la PSRAM?
 
 // Da ora in poi i blocchi di memoria di almeno `limit` byte (malloc, new) vanno in PSRAM e lasciano libera la RAM interna.
 // Solo con la PSRAM presente (drvPsramTotal() > 0).

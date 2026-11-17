@@ -7,9 +7,11 @@
 // Gli indirizzi si traducono in file e riga con il .elf della stessa versione:  xtensa-esp32s3-elf-addr2line -pfiaC -e VesevOS.elf <indirizzi>
 #pragma once
 #include <string>
+#include <stdint.h>
 
 void   crashEarly();      // primissima cosa nel setup: legge (e azzera) il rapporto lasciato nella memoria RTC
 void   crashInstall();    // installa il gestore dei crash
+void   crashPrevDiag(uint8_t* classe, uint8_t* dett);   // codice per il LED salvato dal gancio nel crash precedente (0,0 = nessuno)
 void   crashBoot();       // dopo file system e log: scrive il rapporto del crash precedente (se c'e)
 std::string crashText();       // rapporti salvati (dal piu recente)
 bool   crashClear();

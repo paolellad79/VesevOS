@@ -5,7 +5,7 @@
 #include "vos_prog_data.h"
 #include <stdio.h>
 #include <string.h>
-#include "vos_berry.h"
+#include "vos_funzioni.h"
 #include "vos_app.h"
 #include "vos_func.h"
 #include "../core/vos_config.h"
@@ -28,8 +28,8 @@ static char kindChar(uint8_t kind) { return kind == PK_SCRIPT ? 's' : kind == PK
 
 int progRunning(ProgRun* out, int max, bool conFiniti) {
   int n = 0;
-  BerryRunInfo b;
-  if (n < max && berryRunInfo(b) && !b.cmd) {                       // i comandi dei driver e "berry <testo>" non sono programmi dell'utente
+  InfoEsecuzioneFunzioni b;
+  if (n < max && funzioniInfoEsecuzione(b) && !b.cmd) {                       // i comandi dei driver e "vsh <testo>" non sono programmi dell'utente
     ProgRun& r = out[n++];
     memset(&r, 0, sizeof r);
     r.kind = b.app ? PK_APP_B : PK_SCRIPT;
@@ -65,9 +65,9 @@ int progRunning(ProgRun* out, int max, bool conFiniti) {
 bool progStop(const char* nomeOId, ErrBuf& err) {
   err = "";
   if (!nomeOId || !nomeOId[0]) { err = tr("Serve il nome del programma"); return false; }
-  BerryRunInfo b;
-  if (berryRunInfo(b) && !b.cmd && !strcmp(b.name, nomeOId)) {
-    if (!berryStop(err)) return false;
+  InfoEsecuzioneFunzioni b;
+  if (funzioniInfoEsecuzione(b) && !b.cmd && !strcmp(b.name, nomeOId)) {
+    if (!funzioniFerma(err)) return false;
     vlog("PROG: %s fermato", nomeOId);
     return true;
   }
@@ -116,7 +116,7 @@ bool progStart(uint8_t kind, const char* name, int role, const char* who, ErrBuf
   switch (kind) {
     case PK_SCRIPT:
       if (role < ROLE_ADMIN) { err = tr("Serve il livello Admin"); return false; }
-      if (!berryStart(name, err)) return false;
+      if (!funzioniAvvia(name, err)) return false;
       vlog("PROG: script %s avviato da %s", name, who ? who : "?");
       return true;
     case PK_APP_B:
@@ -140,8 +140,8 @@ bool progStart(uint8_t kind, const char* name, int role, const char* who, ErrBuf
 bool progRestart(uint8_t kind, const char* name, int role, ErrBuf& err) {
   ErrBuf e;
   progStop(name, e);                                        // se non girava, riavviare vuol dire avviare
-  for (int i = 0; i < 10; i++) {                           // Berry: aspetta che l'interprete sia libero
-    if (kind == PK_APP_E || !berryRunning()) break;
+  for (int i = 0; i < 10; i++) {                           // funzioni VesevOS: aspetta che l'interprete sia libero
+    if (kind == PK_APP_E || !funzioniInEsecuzione()) break;
     drvDelayMs(100);
   }
   return progStart(kind, name, role, "riavvio", err);
@@ -161,8 +161,8 @@ static bool inUso(const char* use, const char* gruppo) {
 
 int progUsaFunzionalita(const char* id) {
   int n = 0;
-  BerryRunInfo b;
-  if (berryRunInfo(b) && b.app && inUso(b.use, id)) n++;
+  InfoEsecuzioneFunzioni b;
+  if (funzioniInfoEsecuzione(b) && b.app && inUso(b.use, id)) n++;
 #if VOS_WITH_ELF
   n += vos_elf_conta_uso(id);
 #endif
@@ -170,9 +170,9 @@ int progUsaFunzionalita(const char* id) {
 }
 
 void progFermaFunzionalita(const char* id) {
-  BerryRunInfo b;
+  InfoEsecuzioneFunzioni b;
   ErrBuf e;
-  if (berryRunInfo(b) && b.app && inUso(b.use, id)) berryStop(e);
+  if (funzioniInfoEsecuzione(b) && b.app && inUso(b.use, id)) funzioniFerma(e);
 #if VOS_WITH_ELF
   if (vos_elf_ferma_uso(id)) vos_elf_ferma_aspetta();
 #endif
@@ -183,9 +183,9 @@ int progSubs(ProgSub* out, int max) {
   int n = 0;
   ProgRun r[PROG_RUN_MAX];
   int nr = progRunning(r, PROG_RUN_MAX, false);
-#if VOS_WITH_BERRY
+#if VOS_WITH_FUNZIONI
   if (n < max) {
-    out[n] = { "vdb", cfg.berryOn, 0, 0 };
+    out[n] = { "vdb", cfg.funzioniAttive, 0, 0 };
     for (int i = 0; i < nr; i++) if (r[i].kind != PK_APP_E) { out[n].running++; out[n].memory += r[i].memory; }
     n++;
   }

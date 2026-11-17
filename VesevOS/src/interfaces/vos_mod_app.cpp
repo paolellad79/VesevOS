@@ -27,7 +27,7 @@ static bool hasCode(std::string_view vdp) {
   return false;
 }
 
-#if VOS_WITH_BERRY
+#if VOS_WITH_FUNZIONI
 
 #define MARK "# driver:"                                  // prima riga del file generato
 
@@ -111,7 +111,7 @@ void modAppRemove(const char* name) {
 }
 
 static bool modAppExists(const char* name) { char p[64]; appPath(name, p, sizeof p); return generated(p); }
-#else   // senza Berry un driver con [code] non si puo installare; senza [code] funziona come una scheda modulo
+#else   // senza funzioni VesevOS un driver con [code] non si puo installare; senza [code] funziona come una scheda modulo
 bool modAppCheck(const char*, std::string_view vdp, ErrBuf& err) { if (!hasCode(vdp)) return true; err = tr("Questo firmware e senza script"); return false; }
 bool modAppInstall(const char* name, ErrBuf& err) {
   HeapBuf text(fsTextMax()); ErrBuf e;

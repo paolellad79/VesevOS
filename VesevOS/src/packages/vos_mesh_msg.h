@@ -45,7 +45,7 @@ inline void meshCopy(char* dst, size_t cap, std::string_view v) {
 inline bool meshCmdAllowed(std::string_view c) {
   size_t sp = c.find(' ');
   std::string_view w = (sp != std::string_view::npos && sp > 0) ? c.substr(0, sp) : c;
-  return w == "led" || w == "led-color" || w == "led-bright" || w == "gpio" || w == "note" || w == "reboot" || w == "ntp";
+  return w == "led_rgb1" || w == "led1" || w == "led-color" || w == "led-bright" || w == "gpio" || w == "note" || w == "reboot" || w == "ntp";
 }
 
 inline void meshMacStr(const uint8_t* m, char out[18]) {

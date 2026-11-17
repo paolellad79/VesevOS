@@ -1,15 +1,3 @@
-/* funzioni scritte sulla foto della scheda: l'ESP32-S3 puo quasi tutto su ogni pin, quindi sono indicative */
-var PFN={1:"UART PWM I2S ADC I2C SPI",2:"UART PWM I2S ADC I2C SPI",3:"UART PWM I2S ADC I2C SPI",
-  4:"UART PWM I2S ADC I2C SPI",5:"UART PWM I2S ADC I2C SPI",6:"UART PWM I2S ADC I2C SPI",
-  7:"UART PWM I2S ADC I2C SPI",8:"SPI I2C ADC I2S PWM UART",9:"SPI I2C ADC I2S PWM UART",
-  10:"SPI I2C ADC I2S PWM UART",11:"SPI I2C ADC I2S PWM UART",12:"SPI I2C ADC I2S PWM UART",
-  13:"SPI I2C ADC I2S PWM UART",14:"UART PWM I2S ADC I2C SPI",15:"UART PWM I2S ADC I2C SPI",
-  16:"UART PWM I2S ADC I2C SPI",17:"GPIO",18:"GPIO",21:"GPIO",33:"UART PWM I2S I2C SPI",
-  34:"UART PWM I2S I2C SPI",35:"SPI I2C I2S PWM UART",36:"SPI I2C I2S PWM UART",
-  37:"UART PWM I2S I2C SPI",38:"UART PWM I2S I2C SPI",39:"SPI I2C I2S PWM UART",
-  40:"SPI I2C I2S PWM UART",41:"SPI I2C I2S PWM UART",42:"SPI I2C I2S PWM UART",43:"UART0 TX",
-  44:"UART0 RX",45:"SPI I2C I2S PWM UART",46:"SPI I2C I2S PWM UART",47:"SPI I2C I2S PWM UART",
-  48:"SPI I2C I2S PWM UART",0:"BOOT"};
 function pinWarnTxt(g){
   var w=[];
   if(!PBI)return"";
@@ -24,12 +12,12 @@ function pinWarnTxt(g){
 }
 
 function pinPos(g){
-  var s=String(g);
-  return brdLay("fl").indexOf(s)>=0||brdLay("fr").indexOf(s)>=0?t("bordo")
-    :brdLay("bl").indexOf(s)>=0||brdLay("br").indexOf(s)>=0?t("retro (piazzola)"):""
+  var r=pinTabGpio(g);
+  return !r?"":r.lato<=2?t("bordo"):t("retro (piazzola)")
 }
 
 function loadPins(){
+  aliasLeggi().then(function(){if(PM.length)drawPins()});
   brdLoad().then(function(b){
     if(!b)return;
     $("pinchip").textContent=
@@ -42,7 +30,7 @@ function loadPins(){
     PUSE=p;
     var h="<tr><th>GPIO</th><th>"+t("Usato da")+"</th><th>"+t("Descrizione")+"</th></tr>";
     p.forEach(function(x){
-      h+="<tr><td>"+x.gpio+"</td><td>"+esc(x.owner)+"</td><td>"+esc(x.note)+"</td></tr>"
+      h+="<tr><td>"+x.gpio+"</td><td>"+esc(titoloAlias(x.owner,x.owner))+"</td><td>"+esc(x.note)+"</td></tr>"
     });
     $("pintab").innerHTML=h;
     if(PM.length)drawPins()
@@ -101,15 +89,14 @@ function pinSchedaDisegno(){
 function drawPins(){
   if(!pinDisegnoAperto())return;
   var e=$("pinsvg");
-  if(!PBI||!PBI.lay){
+  if(!PBI||!PTAB.length){
     e.innerHTML="";
     return
   }
-  var FL=brdLay("fl"),FR=brdLay("fr"),BL=brdLay("bl").map(Number),BR=brdLay("br").map(Number),
-    LED=PBI.led,UA=PBI.uart||[];
-  var W=400,bw=190,top=64,st=26,bh=pinBoardH(bw,Math.max(FL.length,FR.length,1)),s="",ink=pinInk();
-  var fr=PV=="f",L=fr?FL:FR,R=fr?FR:FL,plan=fr?pinSchemaPlan(L,R,top,st,bw):null,
-    bx=plan?plan.bx:105;
+  var LED=PBI.led,UA=PBI.uart||[],W=400,bw=190,top=64,st=26,bh=pinBoardH(bw,st),s="",ink=pinInk(),
+    fr=PV=="f",bx0=105,items=pinGeom(fr,bx0,top,bw,bh,st),
+    plan=fr?pinSchemaPlan(pinAnchors(items,bx0),bw):null,bx=plan?plan.bx:bx0;
+  if(bx!=bx0)items=pinGeom(fr,bx,top,bw,bh,st);
   s+=pinBoardArt(fr,bx,top,bw,bh,ink,LED);
   function col(g,x2,u){
     var nt=PNOTE[g];
@@ -117,49 +104,45 @@ function drawPins(){
       :"#3a4352"
   }
   function tip(g,x2,u){
-    return"GPIO"+g+" - "+(PFN[g]||"")+(x2.why?" - "+x2.why:"")+
+    var fn=pinFnTxt(g);
+    return"GPIO"+g+(fn?" - "+fn:"")+(x2.why?" - "+x2.why:"")+
       (u?" - "+u.owner+(u.sig?" ("+u.sig+")":""):"")+(PNOTE[g]?" - "+PNOTE[g]:"")+
       (pinWarnTxt(g)?" - "+pinWarnTxt(g):"")
   }
-  function one(lab,x,y,side){
-    var g=+lab,pw=PWR[lab];
-    if(pw){
-      s+='<circle cx="'+x+'" cy="'+y+'" r="11" fill="'+pw+'" stroke="#555"/><text x="'+x+'" y="'+
-        (y+3)+'" font-size="7.5" text-anchor="middle" fill="#fff">'+lab+'</text>';
+  function one(it){
+    var r=it.r,g=r.g,x=it.x,y=it.y,sd=it.sd;
+    if(g<0){
+      if(it.pad){
+        var pw=Math.max(24,r.lab.length*6+12);
+        s+='<rect x="'+(x-pw/2)+'" y="'+(y-8)+'" width="'+pw+'" height="16" rx="4" fill="'+PWR[r.lab]+
+          '" stroke="#8b98a8"/><text x="'+x+'" y="'+(y+3)+'" font-size="8" font-weight="700" text-anchor="middle" fill="#fff">'+
+          esc(r.lab)+'</text>'
+      }
+      else s+='<circle cx="'+x+'" cy="'+y+'" r="11" fill="'+PWR[r.lab]+'" stroke="#8b98a8"/><text x="'+x+'" y="'+
+        (y+3)+'" font-size="7.5" text-anchor="middle" fill="#fff">'+esc(r.lab)+'</text>';
       return
     }
-    var x2=pinInfo(g)||{g:g,ok:false},u=pinOwner(g),c=col(g,x2,u),nm=g==UA[0]?"TX":g==UA[1]?"RX":"";
+    var x2=pinInfo(g)||{g:g,ok:false},u=pinOwner(g),c=col(g,x2,u),nm=g==UA[0]?"TX":g==UA[1]?"RX":"",
+      ring=r.bit&PBIT.avvio?'<circle cx="'+x+'" cy="'+y+'" r="14.5" fill="none" stroke="#ff8a3d" '+
+        'stroke-width="1.6" stroke-dasharray="3 2"/>':"",
+      st2=' stroke="'+(g==PSEL?"#fff":"#0b0f14")+'" stroke-width="'+(g==PSEL?2.5:1)+'"';
     s+='<g style="cursor:pointer" onclick="pinSel('+g+
-      ')" role="button" tabindex="0" onkeydown="pinKey(event,'+g+')" aria-label="'+esc(tip(g,x2,u))+
-      '"><circle cx="'+x+'" cy="'+y+'" r="11" fill="'+c+'" stroke="'+(g==PSEL?"#fff":"#0b0f14")+
-      '" stroke-width="'+(g==PSEL?2.5:1)+'"/><text x="'+x+'" y="'+(y+3)+
-      '" font-size="8.5" font-weight="700" text-anchor="middle" fill="#fff">'+g+'</text><title>'+
-      esc(tip(g,x2,u))+'</title></g>';
-    if(nm&&fr)s+='<text x="'+(x+(side<0?16:-16))+'" y="'+(y+3)+'" font-size="7" text-anchor="'+
-      (side<0?"start":"end")+'" fill="'+ink+'">'+nm+'</text>';
-    if(plan&&plan.pinBlk[g]){
+      ')" role="button" tabindex="0" onkeydown="pinKey(event,'+g+')" aria-label="'+esc(tip(g,x2,u))+'">'+ring+
+      (it.pad?'<rect x="'+(x-12)+'" y="'+(y-8)+'" width="24" height="16" rx="4" fill="'+c+'"'+st2+'/>'
+        :'<circle cx="'+x+'" cy="'+y+'" r="11" fill="'+c+'"'+st2+'/>')+
+      '<text x="'+x+'" y="'+(y+3)+'" font-size="8.5" font-weight="700" text-anchor="middle" fill="#fff">'+g+
+      '</text><title>'+esc(tip(g,x2,u))+'</title></g>';
+    if(nm&&fr&&sd)s+='<text x="'+(x+(sd<0?16:-16))+'" y="'+(y+3)+'" font-size="7" text-anchor="'+
+      (sd<0?"start":"end")+'" fill="'+ink+'">'+nm+'</text>';
+    if(plan&&plan.pinBlk[g]&&sd){
       var sg=plan.pinSig[g];
-      if(sg)s+='<text x="'+(x+side*14)+'" y="'+(y-3)+'" font-size="7" text-anchor="'+
-        (side<0?"end":"start")+'" fill="'+c+'">'+esc(sg)+'</text>'
+      if(sg)s+='<text x="'+(x+sd*14)+'" y="'+(y-3)+'" font-size="7" text-anchor="'+
+        (sd<0?"end":"start")+'" fill="'+c+'">'+esc(sg)+'</text>'
     }
   }
-  L.forEach(function(l,i){one(l,bx,top+PY0+i*st,-1)});
-  R.forEach(function(l,i){one(l,bx+bw,top+PY0+i*st,1)});
-  if(!fr){
-    [[BL,-1],[BR,1]].forEach(function(cl){
-      cl[0].forEach(function(g,i){
-        var xy=pinPadXY(g,i,cl[1],bx,top,bw,bh),x2=pinInfo(g)||{g:g,ok:false},u=pinOwner(g),
-          c=col(g,x2,u);
-        s+='<g style="cursor:pointer" onclick="pinSel('+g+
-          ')" role="button" tabindex="0" onkeydown="pinKey(event,'+g+')" aria-label="'+
-          esc(tip(g,x2,u))+'"><rect x="'+(xy[0]-12)+'" y="'+(xy[1]-8)+
-          '" width="24" height="16" rx="4" fill="'+c+'" stroke="'+(g==PSEL?"#fff":"#0b0f14")+
-          '" stroke-width="'+(g==PSEL?2.5:1)+'"/><text x="'+xy[0]+'" y="'+(xy[1]+3)+
-          '" font-size="8" font-weight="700" text-anchor="middle" fill="#fff">'+g+'</text><title>'+
-          esc(tip(g,x2,u))+'</title></g>'
-      })
-    })
-  }
+  items.forEach(function(it){
+    if(!it.pad||!fr)one(it)
+  });
   if(plan)s+=pinSchemaSvg(plan);
   var x0=plan?plan.xMin:0,Wd=plan?plan.w:W,ly=Math.max(top+bh,plan?plan.bottom:0)+26;
   [["#2e9e5b",t("provabile")],["#3fa7ff",t("in uso")],["#9b6bd6",t("collegato (tuo nome)")],
@@ -168,7 +151,11 @@ function drawPins(){
         '" font-size="8" fill="'+ink+'">'+esc(l[1])+'</text>';
       return lx+23+l[1].length*4.4
     },x0+14);
-  if(!fr){
+  s+='<circle cx="'+(x0+14)+'" cy="'+(ly+14)+'" r="5" fill="none" stroke="#ff8a3d" stroke-width="1.6" '+
+    'stroke-dasharray="3 2"/><text x="'+(x0+23)+'" y="'+(ly+17)+'" font-size="8" fill="'+ink+'">'+
+    esc(t("pin di avvio"))+'</text>';
+  ly+=14;
+  if(!fr&&PTAB.some(function(r){return r.tipo==6})){
     var bt=t(
       "Ponticello BOOST: la corrente di carica passa da 100 a 300 mA. Solo con una batteria oltre 500 mAh."),
       bk=bt.indexOf(". ")+1,bw2=bk>0?[bt.slice(0,bk),bt.slice(bk)]:[bt];
@@ -190,9 +177,9 @@ function pinInv(){
     esc(t("Stato"))+"</th><th>"+esc(t("Collegato a"))+"</th></tr>",
     gs=PM.map(function(x){return x.g}).sort(function(a,b){return a-b});
   gs.forEach(function(g){
-    var x=pinInfo(g),u=pinOwner(g),st=u?u.owner:(x.ok?t("libero"):(x.why||t("vietato"))),
+    var x=pinInfo(g),u=pinOwner(g),st=u?titoloAlias(u.owner,u.owner):(x.ok?t("libero"):(x.why||t("vietato"))),
       w=pinWarnTxt(g);
-    h+="<tr><td><b>"+g+"</b></td><td>"+esc(pinPos(g))+"</td><td>"+esc(PFN[g]||"")+
+    h+="<tr><td><b>"+g+"</b></td><td>"+esc(pinPos(g))+"</td><td>"+esc(pinFnTxt(g))+
       (w?'<div class="fhint">'+esc(w)+'</div>':"")+"</td><td>"+esc(st)+"</td><td>"+
       (ROLE>=2?'<input maxlength="24" value="'+esc(PNOTE[g]||"")+'" aria-label="GPIO '+g+
         '" onchange="pinNote('+g+',this)" style="min-width:120px">':esc(PNOTE[g]||""))+"</td></tr>"
@@ -246,8 +233,9 @@ function pinPanel(){
     return
   }
   h+='<h3 style="margin-top:10px">GPIO'+PSEL+'</h3>'+pinWho(PSEL);
-  if(PFN[PSEL])h+='<div class="fhint">'+esc(PFN[PSEL])+
-    (pinWarnTxt(PSEL)?" - "+esc(pinWarnTxt(PSEL)):"")+'</div>';
+  var fn=pinFnTxt(PSEL);
+  if(fn||pinWarnTxt(PSEL))h+='<div class="fhint">'+esc(fn)+
+    (pinWarnTxt(PSEL)?(fn?" - ":"")+esc(pinWarnTxt(PSEL)):"")+'</div>';
   if(PNOTE[PSEL])h+='<div class="law">'+
     esc(tf("Segnato come collegato a: {0}. Una prova puo disturbare il circuito.",PNOTE[PSEL]))+
     '</div>';

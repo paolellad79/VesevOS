@@ -35,7 +35,7 @@
  <div class="card"><h3>Funzioni disponibili</h3>
   <ul class="scfn">
    <li><code>print(x)</code> <span>scrive nell'uscita</span></li>
-   <li><code>led("RRGGBB")</code> <span>colore del LED (led("auto") torna al modo normale)</span>
+   <li><code>led_rgb1("RRGGBB")</code> <span>colore del LED a colori (led_rgb1("auto") torna al modo normale); led1("on"|"off"|"blink") per il LED monocromatico. I vecchi nomi led() e led2() non valgono piu</span>
    </li>
    <li><code>act("azione")</code> <span>azione delle Automazioni; risponde "ok" o l'errore</span>
    </li>
@@ -87,12 +87,12 @@
  </div>
   <div class="card adm"><h3>Come e fatto un file app</h3>
    <ul class="scfn">
-    <li><code>[manifest]</code> <span>name (uguale al nome del file), title, version, author, use (permessi: led, time, temp, log, logread, act, btn, mqtt, ble, files, gpio:N), who (admin oppure oper)</span>
+    <li><code>[manifest]</code> <span>name (uguale al nome del file), title, version, author, use (permessi: led_rgb1, led1, time, temp, log, logread, act, btn, mqtt, ble, files, gpio:N), who (admin oppure oper)</span>
     </li>
     <li><code>[icon]</code> <span>un solo disegno svg con forme semplici, massimo 2 KB</span></li>
     <li><code>[page]</code> <span>un controllo per riga: switch, slider, color, text, button, chart, con id e label</span>
     </li>
-    <li><code>[code]</code> <span>codice VesevOS, massimo 8 KB. Funzioni: on_set(id, valore) quando tocchi un controllo, on_tick() ogni secondo, dev_get(id), dev_set(id, valore); e led, act, log, time, temp, btn, logtail, mqtt se il manifest le permette (use)</span>
+    <li><code>[code]</code> <span>codice VesevOS, massimo 8 KB. Funzioni: on_set(id, valore) quando tocchi un controllo, on_tick() ogni secondo, dev_get(id), dev_set(id, valore); e led_rgb1, led1, act, log, time, temp, btn, logtail, mqtt se il manifest le permette (use)</span>
     </li>
     <li><code>[data]</code> <span>valori iniziali: chiave=valore (se la chiave e un controllo ne e il valore di partenza)</span>
     </li>

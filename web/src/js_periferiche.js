@@ -1,7 +1,7 @@
 /* ===== periferiche a classi (rele, led, pin, ingresso, analogico): API /api/io, schede modulo /api/mods ===== */
 var IOCN={rele:"Rele",led:"LED",pin:"Pin (uscita)",ingresso:"Ingresso",
   analogico:"Analogico (pin 1-10)",sd:"Lettore microSD"},IOS={sel:"",tm:0,list:[],sdp:[]};
-function ioCn(c){return c=="i2c"?t("Sensore I2C (BMP280)"):t(IOCN[c]||c)}
+function ioCn(c){return c=="i2c"?t("Sensore I2C (BMP280)"):c=="contatore"?t("Contatore di impulsi"):c=="led_rgb"?t("LED a colori (WS2812)"):t(IOCN[c]||c)}
 function ioStop(){
   if(IOS.tm){
     clearInterval(IOS.tm);
@@ -34,13 +34,17 @@ function ioPins(d){
     ?"CS "+d.g+" · MOSI "+d.g2+" · SCK "+d.g3+" · MISO "+d.g4:String(d.g)
 }
 
-function ioCanSw(d){return d.out&&(ROLE>=2||(ROLE>=1&&d.c!="rele"))}
+function ioCanSw(d){return(d.out||d.c=="led_rgb")&&(ROLE>=2||(ROLE>=1&&d.c!="rele"))}
 function ioLoad(){
   var sel=IOS.sel;
+  dvList().catch(function(){});            // aggiorna anche le voci del menu (periferiche aggiunte o tolte)
   $("io_new").className=ROLE>=2?"card":"card hide";
   api("/api/io").then(function(r){return r.json()}).then(function(j){
     IOS.list=j.io||[];
     IOS.sdp=j.sdp||[];
+    ioPwmOpt(j.pwm);
+    ioCntOpt(j.cnt);
+    ioRgbOpt(j.rgb);
     if(sel&&!ioFind(sel)){
       ioClose();
       return
@@ -67,14 +71,16 @@ function ioListDraw(){
   L.forEach(function(d){
     var v;
     if(ioCanSw(d))v='<button class="sw1'+(d.v?" on":"")+'" role="switch" aria-checked="'+
-      (d.v?"true":"false")+'" aria-label="'+esc(d.n)+'" onclick="ioSw(\''+d.n+'\','+(d.v?0:1)+
+      (d.v?"true":"false")+'" aria-label="'+esc(etichetta(d.n,d.n))+'" onclick="ioSw(\''+d.n+'\','+(d.v?0:1)+
       ')"></button>';
     else if(d.c=="analogico")v='<b>'+d.v+'</b>';
     else if(d.c=="i2c")v='<b>'+esc(ioI2cVal(d))+'</b>';
+    else if(d.c=="pwm")v='<b>'+esc(ioPwmVal(d))+'</b>';
+    else if(d.c=="contatore")v='<b>'+esc(ioCntVal(d))+'</b>';
     else if(d.c=="sd")v='<span class="pill dvp '+(d.v?"v":"")+'">'+
       esc(d.v?t("Scheda montata"):t("Scheda non montata"))+'</span>';
     else v='<span class="pill dvp '+(d.v?"v":"")+'">'+esc(d.v?t("acceso"):t("spento"))+'</span>';
-    h+='<tr><td><b>'+esc(d.n)+'</b></td><td>'+esc(ioCn(d.c))+
+    h+='<tr'+descrTitle(d.n)+'><td><b>'+etichettaHtml(d.n,d.n)+'</b></td><td>'+esc(ioCn(d.c))+
       ((d.f&1)?' <span class="fhint">('+esc(t("attivo basso"))+')</span>':"")+'</td><td>'+
       esc(ioPins(d))+'</td><td>'+v+'</td><td><button class="btn gray" onclick="ioOpen(\''+d.n+
       '\')">'+esc(t("Gestisci"))+'</button></td></tr>'
@@ -94,13 +100,18 @@ function ioOpen(n){
 function ioClose(){
   IOS.sel="";
   ioStop();
+  if(cur.indexOf("p_")==0){
+    show("io");
+    return
+  }
   $("io_det").className="card hide";
   $("io_main").className="";
   ioLoad()
 }
 
 function ioPoll(){
-  if(cur!="io"||!IOS.sel){
+  var inIo=cur=="io"||cur.indexOf("p_")==0;
+  if(!inIo||!IOS.sel){
     ioStop();
     return
   }
@@ -121,7 +132,7 @@ function ioDetDraw(){
     return
   }
   var adm=ROLE>=2,sw=ioCanSw(d),h='';
-  h+='<div class="aphd"><h3 style="margin:0">'+esc(d.n)+
+  h+='<div class="aphd"><h3 style="margin:0" id="iod_h">'+esc(titoloAlias(d.n,d.n))+
     '</h3><button class="btn gray" onclick="ioClose()">'+esc(t("Indietro"))+'</button></div>';
   h+='<table class="ftab" style="margin-top:8px"><tr><td>'+esc(t("Classe"))+'</td><td><b>'+
     esc(ioCn(d.c))+'</b></td></tr><tr><td>GPIO</td><td><b>'+esc(ioPins(d))+'</b></td></tr>';
@@ -131,7 +142,8 @@ function ioDetDraw(){
     ' kHz</b></td></tr>';
   if(d.out||d.c=="ingresso")h+='<tr><td>'+esc(t("Livello"))+'</td><td><b>'+
     esc((d.f&1)?t("attivo basso"):t("attivo alto"))+'</b></td></tr>';
-  if(d.c=="ingresso")h+='<tr><td>'+esc(t("Resistenza"))+'</td><td><b>'+
+  if(d.c=="contatore")h+=ioCntRows(d);
+  if(d.c=="ingresso"||d.c=="contatore")h+='<tr><td>'+esc(t("Resistenza"))+'</td><td><b>'+
     esc((d.f&2)?"pull-up":(d.f&4)?"pull-down":t("nessuna"))+'</b></td></tr>';
   h+='<tr><td>'+esc(t("Valore"))+'</td><td id="iod_v"></td></tr></table>';
   h+='<h4 style="margin:14px 0 6px">'+esc(t("Prova"))+'</h4>';
@@ -151,6 +163,9 @@ function ioDetDraw(){
         "Il rele si riaccende al massimo una volta al secondo e non lampeggia: si consuma. Spegnere si puo sempre.")
         :t("L'impulso e il lampeggio si spengono da soli."))+'</p>'
   }
+  else if(d.c=="led_rgb")h+=ioRgbDet(d);
+  else if(d.c=="pwm")h+=ioPwmDet(d);
+  else if(d.c=="contatore")h+=ioCntDet(d);
   else if(d.c=="i2c")h+='<p class="fhint">'+
     esc(t(
       "Temperatura e pressione si aggiornano da sole ogni due secondi. Se il sensore non risponde, controlla i fili, l'indirizzo (0x76 o 0x77) e l'alimentazione."))+
@@ -162,15 +177,16 @@ function ioDetDraw(){
   else if(d.c=="ingresso")h+='<p class="fhint">'+
     esc(t("Premi il pulsante o attiva il sensore: il valore qui sotto cambia da solo."))+'</p>';
   else h+='<p class="fhint">'+esc(t("Il valore va da 0 a 4095 e si aggiorna da solo."))+'</p>';
-  h+='<div id="iod_m" class="msg" role="status"></div>';
+  h+='<div id="iod_m" class="msg" role="status"></div><div id="al_io"></div>';
   if(adm)h+='<div class="ftb" style="margin-top:14px"><button class="btn gray" onclick="ioRen(\''+
     d.n+'\')">'+esc(t("Rinomina"))+'</button><button class="btn red" onclick="ioDel(\''+d.n+'\')">'+
     esc(t("Togli"))+'</button></div>';
-  if(d.c!="sd")h+='<p class="fhint">'+
+  if(d.c!="sd"&&d.c!="pwm"&&d.c!="contatore")h+='<p class="fhint">'+
     esc(d.c=="i2c"?tf(
       "Nelle app: use={0} e poi dev_get(\"{0}\") per la temperatura (centesimi di grado) e dev_get(\"{0}.p\") per la pressione (pascal).",
       d.n):tf("Nelle app: use={0} e poi dev_set(\"{0}\", 1) o dev_get(\"{0}\").",d.n))+'</p>';
   $("io_det").innerHTML=h;
+  aliasPannello("al_io",d.n);
   ioDetLive()
 }
 
@@ -178,6 +194,8 @@ function ioDetLive(){
   var d=ioFind(IOS.sel),e=$("iod_v");
   if(!d||!e)return;
   if(d.c=="i2c")e.innerHTML='<b>'+esc(ioI2cVal(d))+'</b>';
+  else if(d.c=="pwm")e.innerHTML='<b>'+esc(ioPwmVal(d))+'</b>';
+  else if(d.c=="contatore")e.innerHTML='<b>'+esc(ioCntVal(d))+'</b>';
   else if(d.c=="sd")e.innerHTML=
     '<span class="pill dvp '+(d.v?"v":"")+'">'+esc(d.v?t("Scheda montata"):t("Scheda non montata"))+
     '</span>';
@@ -287,14 +305,16 @@ function ioPinFn(){
     $("io_c").value="ingresso";
     ioClsChg()
   }
-  f.textContent=g>0&&typeof PFN!="undefined"&&PFN[g]
-    ?tf("Funzioni possibili: {0}",PFN[g].replace(/ /g,", ")):""
+  f.textContent=g>0&&pinFnTxt(g)?tf("Funzioni possibili: {0}",pinFnTxt(g)):""
 }
 
 function ioClsChg(){
-  var s=$("io_c").value=="sd";
+  var s=$("io_c").value=="sd",w=$("io_c").value=="pwm",k=$("io_c").value=="contatore",r=$("io_c").value=="led_rgb";
   $("io_sdf").className=s?"":"hide";
-  $("io_o").parentNode.className=s?"hide":"";
+  $("io_pwf").className=w?"":"hide";
+  $("io_cnf").className=k?"":"hide";
+  $("io_rgf").className=r?"":"hide";
+  $("io_o").parentNode.className=s||w||k||r?"hide":"";
   if(s){
     var D=IOS.sdp,F=["io_g","io_sm","io_sk","io_si"];
     F.forEach(function(i,k){if(!$(i).value&&D[k]!=null)$(i).value=D[k]});
@@ -304,7 +324,8 @@ function ioClsChg(){
 
 function ioAdd(){
   var g=$("io_g").value,sd=$("io_c").value=="sd",
-    o=sd?"mosi="+$("io_sm").value+" sck="+$("io_sk").value+" miso="+$("io_si").value+" khz="+
+    pw=$("io_c").value=="pwm",
+    o=$("io_c").value=="led_rgb"?ioRgbOpts():$("io_c").value=="contatore"?ioCntOpts():pw?"hz="+$("io_ph").value+",duty="+$("io_pd").value:sd?"mosi="+$("io_sm").value+" sck="+$("io_sk").value+" miso="+$("io_si").value+" khz="+
     $("io_sf").value:$("io_o").value;
   post("/api/io/add",{cls:$("io_c").value,gpio:g,name:$("io_n").value,
     opt:o}).then(function(r){return r.json()}).then(function(j){

@@ -21,6 +21,9 @@ struct DevOps {
   bool (*set)(bool on, ErrBuf& err);                 // nullptr = non si accende/spegne da qui
   bool (*json)(HeapBuf& out);                        // dettagli (JSON) in out; false = manca la memoria
   bool (*act)(const char* a, const char* arg, int role, HeapBuf& out, ErrBuf& err);   // azioni (nullptr = nessuna)
+  int pin = -1;          // periferiche di bordo: GPIO della scheda (-1 = nessuno, non si emette nel JSON)
+  const char* wid = nullptr;   // periferiche di bordo: tipo di widget ("colore", "onoff", "tasto")
+  const char* colore = nullptr;   // periferiche di bordo: colore del LED monocromatico ("blu"...), mostrato nell'etichetta; ""/nullptr = nessuno
 };
 
 void           devSetVirtual(const DevOps* list, int n);   // periferiche virtuali dei package (le iscrive packages/vos_dev_pkg), in testa all'elenco
@@ -29,7 +32,7 @@ const DevOps*  devAt(int i);
 const DevOps*  devFind(const char* id);
 // I JSON e i testi si scrivono in un HeapBuf del chiamante (false = manca la memoria o supera il tetto).
 #define DEV_JSON_MAX 16384
-bool           devListJson(HeapBuf& out);              // {"dev":[{id,label,cap,kind,tab,state,sw,act}]}
+bool           devListJson(HeapBuf& out);              // {"dev":[{id,label,cap,kind,tab,state,sw,act[,pin,wid]}]}  (pin e wid solo per le periferiche di bordo)
 bool           devListText(HeapBuf& out);              // per la shell
 bool           devStatusJson(const char* id, int role, HeapBuf& out);   // dettagli; false se non esiste, ruolo insufficiente (out vuoto) o memoria finita (out.oom()/over())
 bool           devOffId(const char* id);                  // spegne la periferica (per il watchdog); false se non c'e o non si spegne

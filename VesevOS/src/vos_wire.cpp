@@ -30,6 +30,7 @@ static int cpuTickW(float tempC, int busyPct) { cpuPmTick(tempC, busyPct); retur
 void vosWire() {
   g_hooks.webInit      = webInit;
   g_hooks.webStart     = webStart;
+  g_hooks.webRotte     = webRotte;
   g_hooks.webHttpsUp   = webHttpsUp;
   g_hooks.webTrimIdle  = webTrimIdle;
   g_hooks.rulesInit    = rulesInit;

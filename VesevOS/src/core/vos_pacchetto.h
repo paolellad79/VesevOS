@@ -4,7 +4,7 @@
 // Quello che un pacchetto (app, driver, script) dichiara di se stesso: nome, versione, autore, descrizione.
 // Regola del 05/11/2026: le chiavi si scrivono in italiano (nome=, titolo=, versione=...), le vecchie inglesi si leggono ancora.
 // Se nel file ci sono entrambe vale l'ultima riga; solo per il nome devono coincidere, altrimenti il file e rifiutato.
-// Il file distribuito si chiama <nome>-<versione>.<est> (Berry) o <nome>-<CPU>-<versione>.<est> (ELF); sulla scheda resta il nome corto.
+// Il file distribuito si chiama <nome>-<versione>.<est> (funzioni VesevOS) o <nome>-<CPU>-<versione>.<est> (ELF); sulla scheda resta il nome corto.
 #pragma once
 #include <stddef.h>
 #include <string_view>

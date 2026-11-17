@@ -43,6 +43,9 @@ bool drvFsVfsPath(const char* path, char* out, size_t outSize) {
   return n > 0 && (size_t)n < outSize;
 }
 
+static bool g_formattato = false;
+bool drvFsFormattatoOra() { return g_formattato; }
+
 bool drvFsBegin(bool formatOnFail) {
   if (esp_littlefs_mounted(FS_LABEL)) return true;
   esp_vfs_littlefs_conf_t conf = {};
@@ -51,8 +54,20 @@ bool drvFsBegin(bool formatOnFail) {
   conf.format_if_mount_failed = false;       // il formato lo decidiamo noi sotto, solo se serve
   conf.grow_on_mount = true;                 // come faceva Arduino
   esp_err_t err = esp_vfs_littlefs_register(&conf);
-  if (err == ESP_FAIL && formatOnFail && esp_littlefs_format(FS_LABEL) == ESP_OK) err = esp_vfs_littlefs_register(&conf);
+  if (err == ESP_FAIL && formatOnFail && esp_littlefs_format(FS_LABEL) == ESP_OK) {
+    g_formattato = true;                     // il montaggio e fallito (partizione azzerata o rovinata): formattata e rimontata
+    err = esp_vfs_littlefs_register(&conf);
+  }
   return err == ESP_OK;
+}
+
+static DrvFsScritturaFn g_gancio = nullptr;
+
+void drvFsGancioScrittura(DrvFsScritturaFn fn) { g_gancio = fn; }
+
+static void avvisaScrittura(char azione, const char* p, const char* p2 = nullptr) {
+  DrvFsScritturaFn f = g_gancio;
+  if (f && !isSdPath(p)) f(azione, p, p2);
 }
 
 VosFile drvFsOpen(const char* path, const char* mode) {
@@ -60,7 +75,9 @@ VosFile drvFsOpen(const char* path, const char* mode) {
   if (!mode) mode = "r";
   if (!drvFsVfsPath(path, full, sizeof full)) return VosFile();
   if (mode[0] != 'r' && !isSdPath(path)) g_used.touch();
-  return VosFile::openPath(full, path, mode);
+  VosFile f = VosFile::openPath(full, path, mode);
+  if (mode[0] != 'r' && f) avvisaScrittura(mode[0] == 'a' ? 'a' : 'w', path);
+  return f;
 }
 
 bool drvFsExists(const char* path) {
@@ -72,13 +89,17 @@ bool drvFsExists(const char* path) {
 bool drvFsRemove(const char* path) {
   char full[FS_FULL_MAX];
   if (!isSdPath(path)) g_used.touch();
-  return drvFsVfsPath(path, full, sizeof full) && unlink(full) == 0;
+  bool ok = drvFsVfsPath(path, full, sizeof full) && unlink(full) == 0;
+  if (ok) avvisaScrittura('r', path);
+  return ok;
 }
 
 bool drvFsRename(const char* from, const char* to) {
   char a[FS_FULL_MAX], b[FS_FULL_MAX];
   if (!isSdPath(from)) g_used.touch();
-  return drvFsVfsPath(from, a, sizeof a) && drvFsVfsPath(to, b, sizeof b) && rename(a, b) == 0;
+  bool ok = drvFsVfsPath(from, a, sizeof a) && drvFsVfsPath(to, b, sizeof b) && rename(a, b) == 0;
+  if (ok) avvisaScrittura('n', from, to);
+  return ok;
 }
 
 // Se la cartella esiste gia e' un successo (come prima); se il nome e' di un file, no.
@@ -88,13 +109,17 @@ bool drvFsMkdir(const char* path) {
   if (!isSdPath(path)) g_used.touch();
   if (!drvFsVfsPath(path, full, sizeof full)) return false;
   if (stat(full, &st) == 0) return S_ISDIR(st.st_mode);
-  return mkdir(full, 0777) == 0;
+  bool ok = mkdir(full, 0777) == 0;
+  if (ok) avvisaScrittura('m', path);
+  return ok;
 }
 
 bool drvFsRmdir(const char* path) {
   char full[FS_FULL_MAX];
   if (!isSdPath(path)) g_used.touch();
-  return drvFsVfsPath(path, full, sizeof full) && rmdir(full) == 0;
+  bool ok = drvFsVfsPath(path, full, sizeof full) && rmdir(full) == 0;
+  if (ok) avvisaScrittura('d', path);
+  return ok;
 }
 
 size_t drvFsUsed() { return g_used.used; }   // l'ultimo valore ricordato: non scorre mai il file system (vedi drvFsUsedRefresh)

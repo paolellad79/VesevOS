@@ -1,8 +1,50 @@
 {
  "schema_version": 1,
- "updated": "2026-11-01",
+ "updated": "2026-11-17",
  "description": "Elenco dei firmware VesevOS pubblicati. 'official' e 'publisher' sono scritte non firmate: lo SHA-256 dice solo che il file non e rotto.",
  "items": [
+  {
+   "id": "firmware-S3-1.8.24c",
+   "type": "firmware",
+   "version": "1.8.24c",
+   "channel": "official",
+   "publisher": "Domenico Paolella",
+   "date": "2026-11-17",
+   "size": 2094224,
+   "sha256": "e13a319239687780dc6cdaaf30a68140b10e2a6ef38c173c8095ed419c7e2319",
+   "file": "1.8.24c/VesevOS-S3-1.8.24c.bin",
+   "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/1.8.24c/VesevOS-S3-1.8.24c.bin",
+   "board": "ESP32-S3",
+   "notes": "Pagina di controllo piu leggera e veloce: la pagina, il manuale, le lingue e le licenze vivono ora in file propri sulla scheda, controllati con SHA-256. Carica da file in ogni sezione, aiuto breve nella pagina, diagnostica con il LED, battito del LED a un colore fino allo spento. Alla prima attivazione basta premere il tasto BOOT: parte l'installazione guidata."
+  },
+  {
+   "id": "firmware-C6-1.8.24c",
+   "type": "firmware",
+   "version": "1.8.24c",
+   "channel": "official",
+   "publisher": "Domenico Paolella",
+   "date": "2026-11-17",
+   "size": 2417408,
+   "sha256": "7cd125ece11d824e35c55fccd09fd1ad14d9e4e9e71d2e86af9f74020701cfe2",
+   "file": "1.8.24c/VesevOS-C6-1.8.24c.bin",
+   "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/1.8.24c/VesevOS-C6-1.8.24c.bin",
+   "board": "ESP32-C6",
+   "notes": "Prima versione pubblica per ESP32-C6: stesse funzioni della S3 in una scheda con Wi-Fi 6 e BLE 5, con pagina, manuale e lingue in file propri sulla scheda. Alla prima attivazione basta premere il tasto BOOT: parte l'installazione guidata."
+  },
+  {
+   "id": "recovery-0.5.3",
+   "type": "recovery",
+   "version": "0.5.3",
+   "channel": "official",
+   "publisher": "Domenico Paolella",
+   "date": "2026-11-05",
+   "size": 957824,
+   "sha256": "0944640a7918a01cc2ad1b1844d10657e5f93ab5f5152566e737905b1fa6d93f",
+   "file": "recovery/0.5.3/VesevOS-Recovery-S3-0.5.3.bin",
+   "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/recovery/0.5.3/VesevOS-Recovery-S3-0.5.3.bin",
+   "board": "ESP32-S3",
+   "notes": "Recovery con installazione dalla microSD e pagina di caricamento."
+  },
   {
    "id": "firmware-1.8.16",
    "type": "firmware",

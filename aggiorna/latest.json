@@ -1,22 +1,22 @@
 {
  "schema": 1,
- "updated": "2026-11-01",
+ "updated": "2026-11-17",
  "description": "Ultime versioni pubblicate. 'channel' e 'publisher' sono scritte non firmate: lo SHA-256 dice solo che il file non e rotto.",
  "firmware": {
-  "version": "1.8.16",
+  "version": "1.8.24c",
   "channel": "official",
   "publisher": "Domenico Paolella",
-  "date": "2026-10-31",
-  "size": 2380880,
-  "sha256": "2bce5a99e14c54912d8772f966cf4d7ecc77d420c910c604ddaf96d56962cf22",
-  "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/1.8.16/VesevOS-1.8.16.bin",
-  "recovery": "0.5.2"
+  "date": "2026-11-17",
+  "size": 2094224,
+  "sha256": "e13a319239687780dc6cdaaf30a68140b10e2a6ef38c173c8095ed419c7e2319",
+  "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/1.8.24c/VesevOS-S3-1.8.24c.bin",
+  "recovery": "0.5.3"
  },
  "recovery": {
-  "version": "0.5.2",
-  "size": 873296,
-  "sha256": "3dc32d0161075caea5144defe0f0b5bc30f363274d91451e7bfd42161cb9508c",
-  "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/recovery/0.5.2/VesevOS-Recovery-0.5.2.bin"
+  "version": "0.5.3",
+  "size": 957824,
+  "sha256": "0944640a7918a01cc2ad1b1844d10657e5f93ab5f5152566e737905b1fa6d93f",
+  "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/recovery/0.5.3/VesevOS-Recovery-S3-0.5.3.bin"
  },
  "indice": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/indice.json",
  "store": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/store/index.json"

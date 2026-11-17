@@ -66,9 +66,9 @@ If you see *"no sync reply"*: close the serial monitor, repeat step 3.4 and run 
 
 ## Step 6 - First start of VesevOS
 1. Open the Serial Monitor (115200) and press RESET on the board. At start the recovery waits 3 seconds, then VesevOS starts.
-2. Read the welcome screen: Wi-Fi network `VesevOS`, random password (12 characters) and address `http://192.168.4.1`.
-3. Join that network with a phone or PC, open the page and **choose the panel password** (at least 6 characters).
-4. Follow the **guided setup** (language, country, name, antenna, home Wi-Fi, time). Details: manual, chapter 1.
+2. Read the welcome screen. At the first start the radio is off: press the BOOT button once and for 10 minutes the `VesevOS` network is on, open and without a password.
+3. Join that network with a phone or PC, type `https://192.168.4.1` by hand and **choose the panel password** (at least 6 characters).
+4. Follow the **guided setup** (language, country, name, antenna, home Wi-Fi, time). Details: manual, chapter 1. When the guide is finished with your home Wi-Fi configured, the `VesevOS` network stays off: turn it back on from Network > Services or by holding the BOOT button for 8 seconds (it has its own password, different for every board).
 
 ## Step 7 - Updating later (no cable)
 1. Build the new version, or take the ready file from `firmware/` and check its SHA-256 (see `firmware/LEGGIMI.md`, in Italian).

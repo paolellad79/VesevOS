@@ -20,7 +20,7 @@
 //   tmpclean   core/vos_tmpclean.cpp     0
 //   ntp, dns   drivers/vos_drv_udp.cpp   0   (il server UDP: un solo punto per i due)
 //   loopTask   vos_main.cpp              1   (drvMainTaskStart, drivers/vos_drv_boot.cpp)
-//   berry      packages/vos_berry.cpp    1
+//   funzioni   packages/vos_funzioni.cpp 1
 //   mqtt       packages/vos_mqtt.cpp     1
 //   mesh       packages/vos_mesh.cpp     1
 //   meshst     packages/vos_mesh.cpp     1   (la lambda che avvia la mesh dopo il Wi-Fi)

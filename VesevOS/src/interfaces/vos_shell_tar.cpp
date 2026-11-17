@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_shell_tar.cpp
 // Comando tar in stile shell classica: tar -c|-t|-x [-v] [-f archivio] [-C cartella] [--overwrite] [file...]  (anche unito: tar -xf a.tar, tar xvf a.tar)
-// Solo il CONTENITORE ustar, senza compressione (per .tar.gz: gunzip e poi tar). File e cartelle; niente collegamenti ne' file speciali ne' formati
+// Solo il CONTENITORE ustar, senza compressione (i .tar.gz non si aprono: decomprimili sul computer). File e cartelle; niente collegamenti ne' file speciali ne' formati
 // pax/estesi. L'archivio deve stare su LittleFS (-f e obbligatorio: la shell non ha uno standard input/output per i dati).
 // Lettura: PRIMA si controlla tutto l'archivio (somme di controllo, nomi, tipi, dimensioni), POI si estrae, esattamente come unzip (vos_shell_zip.cpp):
 // stesse protezioni contro zip slip (nomi con '/' iniziale, '..', '\'), stessi file protetti, stessi tetti di voci e di dimensione. tar non comprime, quindi

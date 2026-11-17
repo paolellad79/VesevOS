@@ -11,7 +11,11 @@
 #include "vos_web_csrf.h"
 #include "vos_http_redirect_srv.h"
 #include "../core/vos_ram.h"
+#include "../core/vos_risorse_tocco.h"
+#include "../core/vos_primo_avvio.h"
+#include "../core/vos_apwin.h"
 #include "../drivers/vos_drv_time.h"
+#include "../drivers/vos_drv_ip6.h"
 #include "../drivers/vos_drv_heap.h"
 
 namespace webx {
@@ -29,7 +33,7 @@ char g_upPath[160];
 volatile uint32_t g_lastReq = 0;                       // ultima richiesta dalla pagina (per non dormire mentre la usi)
 
 uint32_t ipOf(Req* r) {
-  return ipNum(r->client()->remoteIP());
+  return drvSockPeer(r->client()->socket());   // IPv6 nativo: indirizzo finto (vedi drivers/vos_drv_ip6.h); prima si leggevano gli ultimi 4 byte, aggirabili dal filtro IP
 }
 
 const char* Pc(Req* r, const char* name) {
@@ -116,32 +120,19 @@ bool csrfBlocked(Req* r) {
   if (!lastLog || drvMillis() - lastLog > 10000) { lastLog = drvMillis() | 1; vlog("WEB: richiesta di un altro sito rifiutata (%s)", r->pathCStr()); }
   return true;
 }
-int userOf(Req* r) { char tk[AUTH_TOKEN_BUF]; tokenTo(r, tk, sizeof tk); return authSessionUser(tk); }
+int userOf(Req* r) {
+  char tk[AUTH_TOKEN_BUF];
+  tokenTo(r, tk, sizeof tk);
+  int u = authSessionUser(tk);
+  if (u >= 0) risAttore(cfg.users[u].name.c_str());          // chi scrive, per l'avviso su /usr/share/vesevos (core/vos_risorse_tocco.h)
+  return u;
+}
 
 void whoTo(const Ctx& c, char* out, size_t n) {
   snprintf(out, n, "web %s %s", c.user >= 0 ? cfg.users[c.user].name.c_str() : "-", IpText(c.ip).s);
 }
 
-// Registra un percorso con livello di accesso. secure = server HTTPS.
-
-void add(PsychicHttpServer* srv, bool secure, const char* path, int method, uint8_t lvl, Handler h) {
-  srv->on(path, method, [h, lvl, secure, method](Req* r, Res* s) -> esp_err_t {
-    Ctx c; c.ip = ipOf(r); c.user = -1; c.role = 0; c.secure = secure;
-    g_lastReq = drvMillis();
-    if (!fwAllow(c.ip, false)) { fwNoteRejected(c.ip); return ESP_FAIL; }     // chiude senza rispondere
-    if (method != HTTP_GET && csrfBlocked(r)) return sendJson(s, "{\"ok\":false,\"err\":\"richiesta da un altro sito\",\"code\":\"csrf\"}", 403);   // POST e simili: solo dalla nostra pagina
-    if (lvl > L_PUB) {
-      char tk[AUTH_TOKEN_BUF]; tokenTo(r, tk, sizeof tk);
-      int u = authSessionUser(tk);
-      if (u < 0) { authNoteDenied(c.ip); return sendJson(s, "{\"ok\":false,\"err\":\"non autorizzato\",\"code\":\"unauthorized\"}", 401); }
-      c.user = u; c.role = cfg.users[u].role;
-      authSessionNote(tk, c.ip, secure, method == HTTP_POST, r->pathCStr());   // per "chi e collegato" (who)
-      if (c.role + 1 < lvl) return ko(s, tr("Il tuo ruolo non permette questa operazione"), "forbidden");   // HTTP 403
-    }
-    if (method == HTTP_POST) { char w[96]; whoTo(c, w, sizeof w); cfgSetOrigin(w); }
-    return h(r, s, c);
-  });
-}
+// add(), la tabella dei percorsi e lo smistamento delle richieste stanno in vos_web_smista.cpp.
 
 // Testo corto di dimensione nota (< 400 byte): un solo blocco, consegnato come std::string
 #if VOS_WITH_ELF
@@ -183,18 +174,14 @@ bool settingsJson(HeapBuf& j) {
   jsonNum(j, "ledMode", cfg.ledMode); jsonNum(j, "ledColor", cfg.ledColor); jsonNum(j, "ledBrightness", cfg.ledBrightness);
   for (int i = 0; i < LEDSRC_COUNT; i++) { char key[12]; snprintf(key, sizeof key, "ledSrc%d", i); jsonNum(j, key, cfg.ledSrcColor[i]); }
   jsonNum(j, "ledCpuThr", cfg.ledCpuThr);
-  return j.add('}');
+  j.add(",\"alias\":");                                  // nome vero -> {a: alias, d: descrizione} di ogni periferica (decisione B del 13/11/2026)
+  aliasJson(j);
+  return j.add('}') && !j.oom() && !j.over();
 }
 
 void delayedRestart(void* why) { vTaskDelay(pdMS_TO_TICKS(800)); sysReboot(why ? (const char*)why : "pagina", 0); }   // why = testo fisso (letterale)
 volatile uint32_t g_sleepSec = 0;
 void delayedSleep(void*) { vTaskDelay(pdMS_TO_TICKS(800)); if (g_sleepSec) powerSleepNow(g_sleepSec); else sysSleep(); }
-
-esp_err_t sendPage(Res* s) {
-  s->addHeader("Content-Encoding", "gzip");
-  s->addHeader("Cache-Control", "no-store");
-  return s->send(200, "text/html; charset=utf-8", INDEX_GZ, INDEX_GZ_LEN);
-}
 
 
 // dopo password (e codice MFA) giusti: sessione, cookie, pulizia di fine guida
@@ -208,9 +195,9 @@ esp_err_t loginDone(Res* s, Ctx& c, int idx) {
     // la scheda e stata raggiunta dalla rete di casa: si spengono le cose servite solo all'hotspot
     g_cleanArm = false;
     cfg.apOn = false; cfg.apCaptive = false; cfg.dhcpOn = false;     // il DHCP serve solo all'hotspot: spento con lui (niente secondo DHCP sulla rete di casa)
-    if (cfg.https && g_tlsUp) cfg.httpOn = false;       // mai chiusi fuori: HTTP si spegne solo se HTTPS funziona
+    // HTTP (solo redirect verso HTTPS) resta acceso: decisione dell'utente 15/11/2026
     cfgSetOriginf("fine guida %s", IpText(c.ip).s); cfgSave(); cleaned = true;
-    vlog("SETUP: raggiunta dalla rete di casa, spenti hotspot, DHCP e HTTP");
+    vlog("SETUP: raggiunta dalla rete di casa, spenti hotspot e DHCP");
   }
   if (cfg.users[idx].mfaOn) cfgSave();                  // il contatore MFA non deve tornare indietro
   char ck[160];
@@ -231,7 +218,10 @@ uint32_t webIdleSec() { return (drvMillis() - g_lastReq) / 1000; }
 
 // RAM a pezzi e nessuno usa la pagina da 20 s: si chiudono i collegamenti HTTPS rimasti aperti (ognuno tiene circa 40 KB).
 // Il browser li riapre da solo quando serve. Chiamata dal monitor ogni 10 s.
+static void webRegistraRotteRestanti();
+
 void webTrimIdle() {
+  webRegistraRotteRestanti();                        // riprova se la RAM non bastava (solo dopo che il task di rete ha dato il via)
   if (!g_https || !g_tlsUp || !g_https->server) return;
   if (webIdleSec() < 20 || drvHeapMaxBlock() >= 60000) return;
   int fds[8]; size_t n = 8;
@@ -242,14 +232,13 @@ void webTrimIdle() {
 
 // ---------------- tutti i percorsi (registrati su entrambi i server) ----------------
 static void routesCore(PsychicHttpServer* S, bool sec) {
-  add(S, sec, "/", HTTP_GET, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendPage(s); });
+  add(S, sec, "/", HTTP_GET, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendPage(s); });   // la pagina da /usr/share/vesevos/html.vrs, o quella di emergenza se il file manca o non e valido (vos_web_pagina.cpp)
 
   // dati comuni (paesi, mappa, regole radio, elenco librerie): pubblici, uguali per tutti, conservati dal browser
   add(S, sec, "/api/common", HTTP_GET, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
-    size_t n; const uint8_t* gz = regionCommonGz(n);
-    s->addHeader("Content-Encoding", "gzip");
-    s->addHeader("Cache-Control", "public, max-age=86400");
-    return s->send(200, "application/json", gz, n);
+    esp_err_t err = ESP_OK;
+    if (sendRisFile(s, RF_COMUNI, "application/json", true, "public, max-age=86400", err)) return err;
+    return sendText(s, 503, "text/plain; charset=utf-8", tr("Dati comuni non disponibili: il file manca o non e valido"));   // la pagina mostra solo il paese salvato
   });
 
   add(S, sec, "/api/auth", HTTP_GET, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
@@ -267,7 +256,7 @@ static void routesCore(PsychicHttpServer* S, bool sec) {
 #endif
     char pk[160];
     snprintf(pk, sizeof pk, ",\"pk\":{\"ble\":%d,\"mqtt\":%d,\"mesh\":%d,\"mfa\":%d,\"stat\":%d,\"wps\":%d,\"script\":%d,\"app\":%d},\"hp\":%u,\"sp\":%u",
-             VOS_WITH_BLE, VOS_WITH_MQTT, VOS_WITH_MESH, VOS_WITH_MFA, VOS_WITH_STATS, VOS_WITH_WPS, VOS_WITH_BERRY, VOS_WITH_BERRY, (unsigned)g_runHttpPort, (unsigned)g_runHttpsPort);
+             VOS_WITH_BLE, VOS_WITH_MQTT, VOS_WITH_MESH, VOS_WITH_MFA, VOS_WITH_STATS, VOS_WITH_WPS, VOS_WITH_FUNZIONI, VOS_WITH_FUNZIONI, (unsigned)g_runHttpPort, (unsigned)g_runHttpsPort);
     j.add(pk);
     timePubJson(j);                                                   // pezzo JSON gia pronto dall'ora (comincia con la virgola)
     if (!authIsSet()) { int a = authFirstAdmin(); jsonStr(j, "first", a >= 0 ? cfg.users[a].name.c_str() : "admin"); }
@@ -286,7 +275,13 @@ static void routesCore(PsychicHttpServer* S, bool sec) {
     }
     int li = licFind(Pc(r, "id"));
     if (li < 0) return notFound(s);
-    if (licZ(li)) { s->addHeader("Content-Encoding", "gzip"); return s->send(200, "text/plain; charset=utf-8", (const uint8_t*)licText(li), licZ(li)); }   // licenze lunghe: compresse, il browser le apre
+    int rf = licFile(li);                                                // licenza minore: sta in un file di /usr/share/vesevos (gzip)
+    if (rf >= 0) {
+      esp_err_t err = ESP_OK;
+      if (sendRisFile(s, (RisFile)rf, "text/plain; charset=utf-8", true, nullptr, err)) return err;
+      return sendText(s, 200, "text/plain; charset=utf-8", tr("Il testo di questa licenza sta in un file della scheda che manca o non e valido. Le note legali complete restano disponibili (id notice) e nel file LICENSE del progetto."));
+    }
+    if (licZ(li)) { s->addHeader("Content-Encoding", "gzip"); return s->send(200, "text/plain; charset=utf-8", (const uint8_t*)licText(li), licZ(li)); }   // GPL-3.0: compressa, il browser la apre
     return s->send(200, "text/plain; charset=utf-8", (const uint8_t*)licText(li), licSize(li));
   });
 
@@ -294,10 +289,11 @@ static void routesCore(PsychicHttpServer* S, bool sec) {
   add(S, sec, "/api/langs", HTTP_GET, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t { HeapBuf j(LANG_JSON_MAX); return langListJson(j) ? sendJson(s, j) : ko(s, tr("Memoria insufficiente")); });
   add(S, sec, "/api/langfile", HTTP_GET, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
     const char* code = Pc(r, "code");
-    char path[48];                                                      // "/lang/" + codice (max 8 caratteri) + ".json"
+    char path[48];                                                      // "/lang/" + codice (max 8 caratteri) + ".vlp"
     if (strlen(code) > LANG_CODE_BUF - 1 || strcmp(code, "it") == 0 || !langCodeValid(code)) return notFound(s);
-    snprintf(path, sizeof path, "/lang/%s.json", code);
+    snprintf(path, sizeof path, "/lang/%s.vlp", code);                  // frasi della pagina: contenuto gzip, lo apre il browser
     if (!drvFsExists(path)) return notFound(s);
+    s->addHeader("Content-Encoding", "gzip");
     return sendFile(s, path, "application/json; charset=utf-8", false);
   });
   add(S, sec, "/api/lang", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
@@ -328,6 +324,7 @@ static void routes(PsychicHttpServer* S, bool sec) {
   routesUpd(S, sec);
   routesAgg(S, sec);
   routesEventi(S, sec);
+  if (rottaSi("/api/risorse/carica", HTTP_POST)) routeRisorse(S, sec);
 }
 
 void webInit() {
@@ -353,26 +350,98 @@ static void startHttpRedirect(uint16_t port) {
   }
 }
 
-// Avvia i server solo quando la rete e gia inizializzata (chiamata dal task di rete)
-void webStart() {
-  static bool started = false;
-  if (started) return;
-  started = true;
-  // HTTPS per primo: la scelta del server HTTP dipende dal suo esito (g_tlsUp)
-  if (cfg.https && tlsEnsure()) {
-    g_https = new PsychicHttpsServer(cfg.httpsPort);
-    g_https->ssl_config.httpd.max_open_sockets = 2;      // ogni connessione cifrata usa circa 40 KB di RAM
-    g_https->ssl_config.httpd.lru_purge_enable = true;   // finiti i collegamenti chiude il piu vecchio invece di rifiutare il nuovo
-    g_https->maxRequestBodySize = 48 * 1024;
-    g_https->maxUploadSize = 4UL * 1024 * 1024;
-    g_https->setCertificate(tlsCertPem(), tlsKeyPem());
-    routes(g_https, true);
-    g_tlsUp = g_https->start() == ESP_OK;
-    if (g_tlsUp) { g_runHttpsPort = cfg.httpsPort; vlog("WEB: HTTPS avviato sulla porta %u (impronta %.23s...)", (unsigned)cfg.httpsPort, tlsFingerprint()); }
-    else { vlog("WEB: HTTPS non partito, resta solo HTTP"); auditEvent(AUD_YELLOW, "httpsfail", tr("HTTPS non partito (memoria?): la pagina resta senza cifratura")); }
+// Diagnostica delle connessioni HTTPS: una riga per apertura e una per chiusura, con quante sono aperte e la RAM, senza IP.
+// Usa le funzioni utente di PsychicHttp (non tocca open_fn e close_fn, che sono suoi). Una chiusura senza apertura
+// (riga "psychic: No client record") e una stretta di mano TLS fallita.
+static unsigned connContate() {
+  int fds[8];
+  size_t n = 8;
+  if (!g_https) return 0;
+  if (httpd_get_client_list(g_https->server, &n, fds) != ESP_OK) return 0;
+  return (unsigned)n;
+}
+
+static void connAperta(PsychicClient* c) {
+  vlog("WEB: connessione aperta fd %d, aperte %u, RAM libera %u KB, blocco %u KB", c->socket(), connContate(),
+       (unsigned)(drvHeapFree() / 1024), (unsigned)(drvHeapMaxBlock() / 1024));
+  ramNote("tls-conn");
+}
+
+static void connChiusa(PsychicClient* c) {
+  unsigned n = connContate();               // la sessione che si chiude e ancora nell'elenco
+  vlog("WEB: connessione chiusa fd %d, aperte %u", c->socket(), n ? n - 1 : 0);
+}
+
+// Server HTTPS: parte una volta sola (la scelta del server HTTP dipende dal suo esito, g_tlsUp)
+static void startHttps() {
+  ramTrace("web-pre");
+  if (!(cfg.https && tlsEnsure())) return;
+  ramTrace("tls-ok");
+  g_https = new PsychicHttpsServer(cfg.httpsPort);
+  // Due connessioni sono il minimo che la pagina regge: il browser ne tiene aperte piu di una e con max_open_sockets = 1 ogni
+  // nuova chiudeva la precedente a meta risposta (guida iniziale sulla C3). 2 e una STIMA della RAM: circa 23 KB per sessione
+  // TLS attiva, 64 KB liberi a https avviato sulla C3; 3 non entrano. Il valore si corregge sulle righe "WEB: connessione"
+  // (esp_http_server riserva 3 socket e lwIP vuole LWIP_MAX_SOCKETS >= max_open_sockets + 3).
+  g_https->ssl_config.httpd.max_open_sockets = 2;
+  g_https->ssl_config.httpd.lru_purge_enable = true;   // finiti i collegamenti chiude il piu vecchio invece di rifiutare il nuovo
+  g_https->onOpen(connAperta);                         // diagnostica: una riga per apertura e per chiusura (vedi sopra)
+  g_https->onClose(connChiusa);
+  g_https->maxRequestBodySize = 48 * 1024;
+  g_https->maxUploadSize = 4UL * 1024 * 1024;
+  g_https->setCertificate(tlsCertPem(), tlsKeyPem());
+  g_rotteModo = primoAvvioMinimo() ? ROTTE_GUIDA : ROTTE_TUTTE;   // finestra della guida: solo i percorsi della guida (risparmia circa 35 KB sulla C3)
+  routes(g_https, true);
+  ramTrace(g_rotteModo == ROTTE_GUIDA ? "rotte-guida" : "rotte");
+  g_tlsUp = g_https->start() == ESP_OK;
+  ramTrace("https");
+  if (g_tlsUp) { g_runHttpsPort = cfg.httpsPort; vlog("WEB: HTTPS avviato sulla porta %u (impronta %.23s...)", (unsigned)cfg.httpsPort, tlsFingerprint()); }
+  else { vlog("WEB: HTTPS non partito, resta solo HTTP"); auditEvent(AUD_YELLOW, "httpsfail", tr("HTTPS non partito (memoria?): la pagina resta senza cifratura")); }
+}
+
+// A guida finita registra i percorsi rimandati. PsychicHttp li cerca in un suo elenco (nel server di IDF restano solo i
+// percorsi "*" per metodo, GET e POST gia presenti), quindi si possono aggiungere a server avviato. Una volta sola.
+// Prima controlla la RAM: la creazione di ogni percorso non sopporta di restare senza memoria.
+static const uint32_t RAM_PER_ROTTE_RESTANTI = 40000;   // misura sulla C3 (1.8.23e): i 151 percorsi restanti costano circa 35 KB, piu un margine
+
+static bool g_rotteVia = false;                       // il task di rete ha detto: la guida e finita davvero (ritardo passato), si puo registrare
+
+static void webRegistraRotteRestanti() {
+  if (g_rotteModo != ROTTE_GUIDA || !g_https || !g_tlsUp || !g_rotteVia) return;
+  if (primoAvvioMinimo()) return;                    // la guida non e ancora finita
+  if (drvHeapFree() < RAM_PER_ROTTE_RESTANTI) {
+    static uint32_t ultimoAvviso = 0;
+    if (!ultimoAvviso || drvMillis() - ultimoAvviso > 60000) { ultimoAvviso = drvMillis() | 1; vlog("WEB: RAM insufficiente per i percorsi rimandati, riprovo"); }
+    return;
   }
+  g_rotteModo = ROTTE_RESTANTI;                      // prima del giro: un secondo chiamante esce subito
+  g_rotteConta = 0;
+  routes(g_https, true);
+  g_rotteModo = ROTTE_TUTTE;
+  ramTrace("rotte-resto");
+  vlog("WEB: rotte restanti registrate (%d), in tabella %d", g_rotteConta, rotteInTabella());
+}
+
+// Fine guida, dal task di rete: registra i percorsi rimandati PRIMA che partano HTTP, DNS del portale e mDNS (costano circa 22 KB).
+// true = tutti registrati (o niente da fare); false = RAM scarsa, il task di rete riprova ogni secondo e intanto non avvia altro.
+bool webRotte() {
+  g_rotteVia = true;
+  webRegistraRotteRestanti();
+  return g_rotteModo != ROTTE_GUIDA || !g_https || !g_tlsUp;
+}
+
+// Avvia i server solo quando la rete e gia inizializzata (chiamata dal task di rete).
+// Si puo richiamare: l'HTTPS parte la prima volta, il redirect HTTP subito dopo (anche nella finestra della prima accensione).
+void webStart() {
+  static bool httpsTried = false;
+  if (!httpsTried) { httpsTried = true; startHttps(); }
+  if (!primoAvvioMinimo() && !primoAvvioPendente()) g_rotteVia = true;   // guida finita da un pezzo (anche con la radio spenta): si puo registrare
+  webRegistraRotteRestanti();                        // guida finita: arrivano anche tutti gli altri percorsi
+  if (g_rotteModo == ROTTE_GUIDA && g_https && g_tlsUp && !primoAvvioMinimo()) return;   // percorsi ancora da registrare: HTTP resta spento finche non ci sono
+  // Prima accensione: il redirect HTTP parte anche nella finestra della guida (serve al portale automatico: i telefoni provano la porta 80;
+  // decisione dell'utente del 15/11/2026). Il blocco sopra non vale qui: in finestra le rotte restanti non si registrano.
+  if (g_runHttpPort) return;                                 // il redirect e gia partito
   if (!cfg.httpOn) vlog("WEB: HTTP spento (scelta dell'utente)");
-  else if (g_tlsUp) startHttpRedirect(cfg.httpPort);
+  else if (g_tlsUp) { startHttpRedirect(cfg.httpPort); ramTrace("http"); }
   else vlog("WEB: HTTPS non in funzione: porta HTTP chiusa, resta solo la seriale");
 }
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_sd_io.cpp (vedi vos_sd.h)
-// File della microSD a byte, a blocchi piccoli (lettura da un punto, scrittura, cancellazione, cartelle). Li usa Berry.
+// File della microSD a byte, a blocchi piccoli (lettura da un punto, scrittura, cancellazione, cartelle). Li usa funzioni VesevOS.
 // I permessi (chi puo scrivere, quali file sono segreti) li decide chi chiama; qui si controlla il percorso e che la scheda sia montata.
 // Niente Arduino: solo C, buffer con lunghezza e il driver vos_drv_sd.
 #include "vos_sd.h"

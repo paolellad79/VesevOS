@@ -48,10 +48,10 @@
  <div class="card adm"><h3>Lingue</h3>
   <div id="lglist"></div>
   <label for="lgf"
-   style="display:block;margin-top:12px">Carica un file di lingua (.json)</label><input type="file"
-   id="lgf" accept=".json">
+   style="display:block;margin-top:12px">Carica i file di una lingua (.vld e .vlp)</label><input type="file"
+   id="lgf" accept=".vld,.vlp" multiple>
   <button class="btn" onclick="upLang()">Carica lingua</button><div id="lgm" class="msg"></div>
-  <p style="color:var(--mut)">Italiano e inglese sono dentro il firmware. Per le altre: un file per lingua, con il nome uguale al codice (per esempio es.json). Lo stesso file traduce la pagina e i messaggi della shell.</p>
+  <p style="color:var(--mut)">Italiano e inglese sono dentro il firmware. Per le altre: due file per lingua, con il nome uguale al codice (per esempio es.vld e es.vlp). Il file .vld traduce i messaggi della scheda e della shell, il file .vlp traduce la pagina (è facoltativo: senza, la pagina resta in italiano). Si possono scegliere insieme.</p>
   <div id="lgsp" style="color:var(--mut)"></div></div>
  <div class="card adm">
   <button class="btn" onclick="lcSave()">Salva</button><button class="btn gray"
@@ -197,7 +197,7 @@
    onclick="bReboot()">Riavvia ora</button>
   <div id="bm" class="msg"></div></div>
  <div class="card"><h3>Programmi con avvio automatico</h3>
-  <p style="color:var(--mut)">Partono da soli dopo i servizi, nell'ordine di questo elenco. Di fabbrica non parte nessun programma. Berry esegue un programma alla volta: se ne scegli piu d'uno, quelli dopo il primo partono solo se il precedente finisce entro 10 secondi.</p>
+  <p style="color:var(--mut)">Partono da soli dopo i servizi, nell'ordine di questo elenco. Di fabbrica non parte nessun programma. Le funzioni VesevOS eseguono un programma alla volta: se ne scegli piu d'uno, quelli dopo il primo partono solo se il precedente finisce entro 10 secondi.</p>
   <div id="bpl"></div>
   <div class="frow adm">
    <select id="bpsel" aria-label="Programma da aggiungere"></select><button class="btn gray"
@@ -256,7 +256,7 @@
   <div class="agrid"><div>
     <label for="wd_nm">Minuti senza rete</label><input type="number" id="wd_nm" min="2" max="1440">
    </div>
-   <div><label for="wd_rk">Soglia RAM (KB)</label><input type="number" id="wd_rk" min="8" max="200">
+   <div><label for="wd_rk">Soglia critica RAM (% usata)</label><input type="number" id="wd_rk" min="80" max="99">
    </div>
    <div><label for="wd_ud">Riavvio dopo N giorni accesa (0 = mai)</label><input type="number"
      id="wd_ud" min="0" max="365"></div>

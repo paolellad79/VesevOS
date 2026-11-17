@@ -9,6 +9,8 @@
 #include "../core/vos_heapbuf.h"
 
 void     netInit();                 // avvia il task di rete
+void     netClientiInit();          // da netInit: ascolta i dispositivi che entrano o escono dall'hotspot
+void     netClientiLog();           // dal task di rete: scrive nel registro le entrate e le uscite
 NetState netState();
 bool     netStatusJson(HeapBuf& out);   // oggetto JSON con modo, ssid, ip, rssi...; false = manca la memoria o supera il tetto
 #define NET_STATUS_JSON_MAX 1024

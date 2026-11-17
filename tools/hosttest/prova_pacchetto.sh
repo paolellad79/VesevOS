@@ -142,7 +142,7 @@ int main(int, char** argv) {
   vero_("nuovo", pacchettoCaricato("/bin/nuovo-1.0.vsb", "/bin/nuovo-1.0.vsb", e, a) && drvFsExists("/bin/nuovo.vsb"));
   scrivi("/note.txt", "ciao");
   vero_("fuori", pacchettoCaricato("/note.txt", "/note.txt", e, a) && drvFsExists("/note.txt"));
-  // solo script e driver Berry: app ed ELF hanno controlli propri, spenti in questa prova
+  // solo script e driver: app ed ELF hanno controlli propri, spenti in questa prova
   ErrBuf b; pacchettoAvviso("/devs/rele.vdb", "[module]\nversione=0.1\n", b);
   vero_("avviso senza versione installata", b.empty());
   printf(ko ? "prova_pacchetto (sostituzione): %d KO\n" : "prova_pacchetto (sostituzione): ok\n", ko);
@@ -150,6 +150,6 @@ int main(int, char** argv) {
 }
 CPP
 mkdir "$T/fs"
-g++ -std=gnu++17 -w -DARDUINO=10800 -DESP32 -DVOS_WITH_BERRY=0 -DVOS_WITH_ELF=0 -I"$R/VesevOS/src" -I"$R/tools/stub" "$T/q.cpp" \
+g++ -std=gnu++17 -w -DARDUINO=10800 -DESP32 -DVOS_WITH_FUNZIONI=0 -DVOS_WITH_ELF=0 -I"$R/VesevOS/src" -I"$R/tools/stub" "$T/q.cpp" \
   "$R/VesevOS/src/packages/vos_pacchetto_nome.cpp" "$R/VesevOS/src/core/vos_pacchetto.cpp" "$R/VesevOS/src/drivers/vos_drv_file.cpp" -o "$T/q"
 "$T/q" "$T/fs"

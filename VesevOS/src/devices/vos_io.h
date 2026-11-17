@@ -7,17 +7,19 @@
 #include "../core/vos_errbuf.h"
 #include "../drivers/vos_drv_string.h"
 #include "../core/vos_heapbuf.h"
+#include "../core/vos_common.h"
 
 #define IO_MAX 16
 #define IO_SD_KHZ_MIN 400                            // frequenza SPI della microSD: da 400 kHz (prova iniziale, fili lunghi) a 20 MHz
 #define IO_SD_KHZ_MAX 20000
 #define IO_SD_KHZ_DEF 1000                           // di fabbrica 1 MHz: prudente per i fili volanti dei moduli economici
 
-enum IoClass : uint8_t { IC_NONE = 0, IC_RELE = 1, IC_LED = 2, IC_PIN = 3, IC_IN = 4, IC_ADC = 5, IC_I2C = 6, IC_SD = 7 };
+enum IoClass : uint8_t { IC_NONE = 0, IC_RELE = 1, IC_LED = 2, IC_PIN = 3, IC_IN = 4, IC_ADC = 5, IC_I2C = 6, IC_SD = 7, IC_PWM = 8, IC_CNT = 9, IC_LEDRGB = 10 };
 #define IOF_INV   1     // attivo basso (acceso = livello 0)
 #define IOF_UP    2     // ingresso con pull-up
 #define IOF_DOWN  4     // ingresso con pull-down
 #define IOF_FAST  8     // i2c a 400 kHz (altrimenti 100 kHz)
+#define IOF_ACCESO 16   // led_rgb: acceso (solo nel file io.cfg; in memoria lo stato sta in IoDev::on)
 
 void   ioInit();                                         // carica /io.cfg (o /io.cfg.bak se illeggibile) e mette tutte le uscite nello stato sicuro (spente); non scrive mai
 int    ioCount();
@@ -47,3 +49,25 @@ int    ioSuggest(uint8_t cls, int n, int* out);          // fino a n pin liberi 
 bool   ioPulse(const char* name, uint32_t ms, int role, ErrBuf& err);   // acceso per ms (100-5000) poi si spegne da solo
 bool   ioBlink(const char* name, uint32_t sec, int role, ErrBuf& err);  // lampeggia per sec (1-10) poi si spegne (non per il rele)
 void   ioTick();                                                          // da chiamare nel loop
+
+// PWM dell'utente (classe "pwm", package VOS_WITH_PWM): un pin, una frequenza (10-40000 Hz) e un duty 0-100%. Dopo il riavvio parte spento (duty 0).
+#if VOS_WITH_PWM
+bool ioPwmSet(const char* name, int hz, int pct, int role, ErrBuf& err);   // hz 0 = invariata (cambiarla: Admin, si salva), pct -1 = invariato (Operatore)
+bool ioPwmAct(const char* name, const char* act, const char* arg, int role, HeapBuf& out, ErrBuf& err);   // azioni di /api/dev/act: get, set "duty[,hz]"
+bool ioPwmGet(const char* name, int& hz, int& pct);                          // frequenza e duty di una periferica PWM; false = non esiste o non e un PWM
+int  ioPwmFree();                                                          // canali PWM ancora liberi
+#endif
+
+// LED a colori WS2812 a mano (classe "led_rgb", package VOS_WITH_LED_RGB_A_MANO): un pin, un LED (un pixel). Acceso/spento con ioSet/ioGet (Operatore); colore RRGGBB e luminosita 0-255 con l'azione "colore"; ordine dei byte con "ordine" (Admin). Si salvano in io.cfg.
+#if VOS_WITH_LED_RGB_A_MANO
+bool ioLedAct(const char* name, const char* act, const char* arg, int role, HeapBuf& out, ErrBuf& err);   // azioni di /api/dev/act: colore "RRGGBB[,luminosita]", ordine "grb|rgb|brg|gbr|rbg|bgr"
+int  ioLedFree();                                                                                          // canali RMT ancora liberi per i LED a mano
+#endif
+
+// Contatore di impulsi dell'utente (classe "contatore", package VOS_WITH_CONTATORE): un pin di ingresso, fronte e filtro; il valore riparte da 0 al riavvio (a 2147483647 torna a 0).
+#if VOS_WITH_CONTATORE
+bool ioCntAct(const char* name, const char* act, HeapBuf& out, int role, ErrBuf& err);   // azioni di /api/dev/act: get, reset (Operatore)
+bool ioCntReset(const char* name, int role, ErrBuf& err);                              // valore e frequenza a zero
+bool ioCntGet(const char* name, int& count, int& mhz);                                 // impulsi e frequenza in millihertz; false = non esiste o non e un contatore
+int  ioCntFree();                                                                      // unita PCNT ancora libere
+#endif

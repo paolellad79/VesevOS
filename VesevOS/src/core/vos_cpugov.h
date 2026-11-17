@@ -20,6 +20,9 @@ struct CpuGovParams {
   uint8_t  down;     // soglia di discesa, % (5..50, sempre piu bassa di up - 10)
   uint16_t hold;     // secondi minimi sotto soglia prima di scendere (2..120)
 };
+// Riferimento di scala per il carico (lavoro in % di 240 MHz): non e un limite, vale per ogni chip.
+static const uint32_t CPUGOV_REF_MHZ = 240;
+
 static const CpuGovParams CPUGOV_DEFAULTS = {80, 20, 10};
 
 // Stato fra un campione e il successivo (parte tutto a zero).

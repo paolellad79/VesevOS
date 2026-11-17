@@ -12,6 +12,8 @@
 #include "vos_shell_complete.h"
 #include "../core/vos_heapbuf.h"
 #include "../core/vos_lock.h"
+#include "../core/vos_risorse_avviso.h"
+#include "../core/vos_risorse_tocco.h"
 #include "../core/vos_strbuf.h"
 #include "../drivers/vos_drv_time.h"
 #include "../drivers/vos_drv_console.h"
@@ -49,7 +51,8 @@ void shellExecSess(const char* lineIn, OutSink& o, int role, uint32_t sess) {
   if (c.cut() || a1.cut()) { o.println(tr("Comando troppo lungo")); return; }
 
   if (role < 0 && authIsSet()) { o.println(tr("Non autorizzato. Fai login.")); return; }
-  if (role < 0) role = ROLE_ADMIN;                       // nessuna password ancora: primo avvio
+  if (role < 0) role = ROLE_ADMIN;
+  if (sess == SESS_NONE) risAttore("shell");             // comando dalla seriale o da regole e programmi (dalla pagina il nome lo ha gia messo userOf)                       // nessuna password ancora: primo avvio
   if (!roleAllows(role, c, a1)) { o.println(tr("Il tuo ruolo non permette questo comando")); return; }   // tabella unica: vos_shell_roles.cpp
 
   ShellSess ss, before;                                  // cartella corrente di questa sessione: copia, poi si risalva se e cambiata
@@ -148,18 +151,14 @@ void shellWelcome(OutSink& o, bool full) {
   if (full) {
     wLine(o, tr("BENVENUTO! Questa scheda non e ancora configurata."));
     wLine(o, "");
-    wLine(o, tr("1. Collegati alla rete Wi-Fi:"));
+    wLine(o, tr("1. Premi il tasto BOOT (una pressione breve): la rete si accende per 10 minuti."));
+    wLine(o, tr("2. Collegati alla rete Wi-Fi aperta (senza password):"));
     snprintf(buf, sizeof buf, "     %s      %s", tr("Nome:"), cfg.apSsid.c_str()); wLine(o, buf);
-    snprintf(buf, sizeof buf, "     %s  %s", tr("Password:"), cfg.apPass.c_str()); wLine(o, buf);
-    snprintf(buf, sizeof buf, "%s      https://192.168.4.1", tr("2. Apri:")); wLine(o, buf);
-    snprintf(buf, sizeof buf, "   %s", tr("(di solito la pagina si apre da sola)")); wLine(o, buf);
-    wLine(o, tr("3. Segui la configurazione guidata."));
+    snprintf(buf, sizeof buf, "%s      https://192.168.4.1", tr("3. Apri:")); wLine(o, buf);
+    wLine(o, tr("4. Segui la configurazione guidata."));
     wLine(o, "");
-    wLine(o, tr("Il QR per il telefono e nella pagina Home."));
+    wLine(o, tr("A guida finita, con la Wi-Fi di casa, l'hotspot resta spento: lo riaccendi dalla pagina (Servizi) o con BOOT 8 secondi. Ha una password diversa per ogni scheda (la vedi nella guida)."));
     wBar(o);
-    wPara(o, tr("Perche una password diversa per ogni scheda? Lo chiedono le leggi sulla sicurezza dei dispositivi: UE (RED/EN 18031, Cyber Resilience Act) e Regno Unito (PSTI). Niente password uguali."));
-    wBar(o);
-    wLine(o, tr("Password persa?  Tasto fisico 8 s  -> la riscrivo qui"));
     wLine(o, tr("Da capo?         Tasto fisico 20 s -> fabbrica"));
     wLine(o, tr("Aiuto: https://192.168.4.1/#aiuto   Comandi: scrivi  help"));
   } else {
@@ -171,6 +170,15 @@ void shellWelcome(OutSink& o, bool full) {
     wLine(o, trf("Paese: %s   Ora: %s", cfg.country.length() ? cfg.country.c_str() : "--", now).c_str());
     int red = auditCount(AUD_RED), yel = auditCount(AUD_YELLOW);
     wLine(o, (red || yel) ? trf("Allarmi: %d rossi, %d gialli -> scrivi audit", red, yel).c_str() : tr("Allarmi: nessuno"));
+    char fnome[RIS_FILE_NOME_MAX + 1];
+    RisStato fstato = RS_OK;
+    int fquanti = 0;
+    if (risorseProblema(fnome, sizeof fnome, fstato, fquanti))
+      wLine(o, trf("Risorse: %s %s (%d da controllare) -> Sicurezza > Aggiornamenti", fnome, fstato == RS_MANCANTE ? tr("mancante") : tr("diverso dall'elenco"), fquanti).c_str());
+    char lcode[LANG_CODE_BUF];
+    int lmotivo = 0;
+    if (langErrore(lcode, sizeof lcode, lmotivo))
+      wLine(o, trf("Lingua: il file %s non e valido, uso l'italiano -> ricaricalo o scegli it", lcode).c_str());
     wLine(o, trf("Avvio: %s (n. %lu)", sysResetText(), (unsigned long)sysBootCount()).c_str());
     const char* fp = tlsFingerprint();
     if (cfg.https && *fp) { snprintf(buf, sizeof buf, "%s %.47s...", tr("Impronta HTTPS:"), fp); wPara(o, buf); }

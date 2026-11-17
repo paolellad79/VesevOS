@@ -11,6 +11,7 @@
 #include "vos_shell_ask.h"
 #include "../drivers/vos_drv_time.h"
 #include "../core/vos_strbuf.h"
+#include "../core/vos_diag.h"
 #include "../drivers/vos_drv_cpu.h"
 #include "../drivers/vos_drv_heap.h"
 #include "../drivers/vos_drv_sys.h"
@@ -58,6 +59,92 @@ static const char* ioClassName(const Word& w) {
   return w.c_str();
 }
 
+#if VOS_WITH_PWM
+// pwm [list] | pwm add <pin> <hz> <duty> [nome] | pwm set <nome> <duty> [hz] | pwm del <nome>   (add e del: Admin; set: Operatore, la frequenza solo Admin)
+static void pwmCmd(const Word& a1, const char* line, OutSink& o, int role) {
+  ErrBuf err;
+  if (a1.empty() || a1 == "list") {
+    for (int i = 0; i < ioCount(); i++) {
+      int hz, pct;
+      if (!ioPwmGet(ioNameAt(i), hz, pct)) continue;
+      char x[48]; StrBuf sb(x, sizeof x);
+      sb.addf("%-12s%6d Hz %4d%%", ioNameAt(i), hz, pct);
+      o.println(x);
+    }
+    o.println(trf("Canali PWM liberi: %d", ioPwmFree()));
+    return;
+  }
+  Word a2 = argAt(line, 2), a3 = argAt(line, 3), a4 = argAt(line, 4), a5 = argAt(line, 5);
+  if ((a1 == "add" || a1 == "del") && role < ROLE_ADMIN) { o.println(tr("Il tuo ruolo non permette questo comando")); return; }
+  if (a1 == "add" && role >= ROLE_ADMIN && !a4.empty()) {
+    char opt[40], nm[16]; StrBuf sb(opt, sizeof opt);
+    sb.addf("hz=%d,duty=%d", a3.toInt(), a4.toInt());
+    if (!ioAdd("pwm", a2.toInt(), a5.c_str(), opt, nm, err)) { o.println(err.c_str()); return; }
+    o.println(trf("Creata: %s", nm));
+    return;
+  }
+  if (a1 == "del" && role >= ROLE_ADMIN) {
+    if (!ioRemove(a2.c_str(), err)) { o.println(err.c_str()); return; }
+    auditEvent(AUD_INFO, "", trf("periferica %s tolta (%s)", a2.c_str(), "terminale").c_str());
+    o.println("ok");
+    return;
+  }
+  bool shortSet = a1 != "set" && a1 != "add" && a1 != "del";          // pwm <nome> <duty> [hz]
+  if (a1 == "set" || shortSet) {
+    const Word& nm = shortSet ? a1 : a2;
+    const Word& duty = shortSet ? a2 : a3;
+    const Word& hz = shortSet ? a3 : a4;
+    if (!duty.empty() && ioPwmSet(nm.c_str(), hz.toInt(), duty.toInt(), role, err)) { o.println("ok"); return; }
+    if (!duty.empty()) { o.println(err.c_str()); return; }
+  }
+  o.println(tr("Uso: pwm [list|add <pin> <hz> <duty> [nome]|set <nome> <duty> [hz]|del <nome>]"));
+}
+#endif
+
+#if VOS_WITH_CONTATORE
+// contatore [list] | add <pin> <salita|discesa|entrambi> [filtro_ns] [nome] [su|giu] | get <nome> | reset <nome> | del <nome>   (add e del: Admin; reset: Operatore)
+static void contatoreCmd(const Word& a1, const char* line, OutSink& o, int role) {
+  ErrBuf err;
+  if (a1.empty() || a1 == "list") {
+    for (int i = 0; i < ioCount(); i++) {
+      int n, mhz;
+      if (!ioCntGet(ioNameAt(i), n, mhz)) continue;
+      char x[64]; StrBuf sb(x, sizeof x);
+      sb.addf("%-12s%11d %5u.%03u Hz", ioNameAt(i), n, (unsigned)(mhz / 1000), (unsigned)(mhz % 1000));
+      o.println(x);
+    }
+    o.println(trf("Unita del contatore libere: %d", ioCntFree()));
+    return;
+  }
+  Word a2 = argAt(line, 2), a3 = argAt(line, 3), a4 = argAt(line, 4), a5 = argAt(line, 5), a6 = argAt(line, 6);
+  a3.lower(); a6.lower();
+  if ((a1 == "add" || a1 == "del") && role < ROLE_ADMIN) { o.println(tr("Il tuo ruolo non permette questo comando")); return; }
+  bool fronteOk = a3 == "salita" || a3 == "discesa" || a3 == "entrambi";
+  if (a1 == "add" && fronteOk) {
+    char opt[48], nm[16]; StrBuf sb(opt, sizeof opt);
+    sb.addf("fronte=%d,filtro=%d", a3 == "discesa" ? 1 : a3 == "entrambi" ? 2 : 0, a4.toInt());
+    if (a6 == "su") sb.add(",up"); else if (a6 == "giu") sb.add(",down");
+    if (!ioAdd("contatore", a2.toInt(), a5.c_str(), opt, nm, err)) { o.println(err.c_str()); return; }
+    o.println(trf("Creata: %s", nm));
+    return;
+  }
+  if (a1 == "del" && !a2.empty()) {
+    if (!ioRemove(a2.c_str(), err)) { o.println(err.c_str()); return; }
+    auditEvent(AUD_INFO, "", trf("periferica %s tolta (%s)", a2.c_str(), "terminale").c_str());
+    o.println("ok");
+    return;
+  }
+  int n, mhz;
+  if (a1 == "get" && ioCntGet(a2.c_str(), n, mhz)) { o.println(trf("%d impulsi, %d mHz", n, mhz)); return; }
+  if (a1 == "reset" && !a2.empty()) {
+    if (!ioCntReset(a2.c_str(), role, err)) { o.println(err.c_str()); return; }
+    o.println("ok");
+    return;
+  }
+  o.println(tr("Uso: contatore [list|add <pin> <salita|discesa|entrambi> [filtro_ns] [nome] [su|giu]|get <nome>|reset <nome>|del <nome>]"));
+}
+#endif
+
 bool shCmdNet(const Word& c, const Word& a1, const char* line, OutSink& o, int role) {
   if (c == "wifi" && a1 == "set") {
     const char* rest = restFrom(line, 2);
@@ -83,12 +170,25 @@ bool shCmdNet(const Word& c, const Word& a1, const char* line, OutSink& o, int r
   }
   else if (c == "wifi" && a1 == "off") { cfg.staEnabled = false; cfgSave(); netReconfigure(); o.println(tr("Wi-Fi di casa scollegata: resta l'hotspot")); }
   else if (c == "setup" && a1 == "done") {            // scheda gia in uso (aggiornata dalla 1.7.1): segna la guida come finita
+    cfgEnsureApPass();
     cfg.setupDone = true; ledSetSetup(false); cfgSetOrigin("seriale setup done");
     o.println(cfgSave() ? tr("Guida segnata come finita.") : tr("Salvataggio fallito: la guida risultera ancora non finita."));
   }
   else if (c == "setup") wzStart(o);
+  else if (c == "diag" && a1 == "codici") o.print(diagTesto().c_str());     // codici dei lampi del LED (solo Admin, come tutto "diag")
+  else if (c == "diag" && a1 == "led") {                                     // prova di un codice sul LED: un giro, anche con il LED spento
+    int dc = atoi(argAt(line, 2).c_str());
+    int dd = atoi(argAt(line, 3).c_str());
+    if (dc < 1 || dc > 9 || dd < 1 || dd > 5) o.println(tr("Uso: diag led <classe 1-9> <dettaglio 1-5>"));
+    else {
+      DiagCodice k = diagNormalizza(DiagCodice{(uint8_t)dc, (uint8_t)dd});
+      diagProva(k.classe, k.dett);
+      if (diagRiservato(k)) o.println(tr("Codice non in tabella: il LED mostra 3 lampi lunghi (codice sconosciuto)"));
+      else o.println(trf("Prova sul LED: un giro del codice D%d%02d (%d lampi, pausa, %d lampi)", (int)k.classe, (int)k.dett, (int)k.classe, (int)k.dett));
+    }
+  }
   else if (c == "diag") {
-    o.println(trf("Guida finita:    %s", cfg.setupDone ? tr("si") : tr("NO (hotspot e HTTP forzati accesi a ogni avvio)")));
+    o.println(trf("Guida finita:    %s", cfg.setupDone ? tr("si") : tr("NO (a ogni avvio radio spenta, hotspot aperto per 10 minuti dopo il tasto BOOT)")));
     o.println(trf("Ultimo salvataggio configurazione: %s", cfgLastSaveOk() ? tr("riuscito") : tr("FALLITO")));
     o.println(trf("Rete: stato %d, modo Wi-Fi %d (1 client, 2 hotspot, 3 entrambi, 0 spento)", (int)netState(), (int)drvWifiMode()));
     o.println(trf("Servizi: hotspot %s, DHCP %s, portale %s, mDNS %s", cfg.apOn ? tr("acceso") : tr("spento"), cfg.dhcpOn ? tr("acceso") : tr("spento"), netCaptive() ? tr("acceso") : tr("spento"), cfg.mdnsOn ? tr("acceso") : tr("spento")));
@@ -264,6 +364,12 @@ bool shCmdNet(const Word& c, const Word& a1, const char* line, OutSink& o, int r
     if (a1 == "get") { int v = 0; if (!ioGet(a2.c_str(), v, err)) { o.println(err.c_str()); return true; } o.println(v); return true; }
     o.println(tr("Uso: io [list|add <classe> <pin> [nome] [inv|up|down|scl=N addr=0x76|sd: mosi=N sck=N miso=N khz=N]|del <nome>|rename <nome> <nuovo>|set <nome> <0|1>|get <nome>]"));
   }
+#if VOS_WITH_PWM
+  else if (c == "pwm") { pwmCmd(a1, line, o, role); }
+#endif
+#if VOS_WITH_CONTATORE
+  else if (c == "contatore") { contatoreCmd(a1, line, o, role); }
+#endif
   else if (c == "btn") {
     if (a1 == "" || a1 == "status") { o.print(btnText().c_str()); return true; }
     if (role < ROLE_ADMIN) { o.println(tr("Il tuo ruolo non permette questo comando")); return true; }
