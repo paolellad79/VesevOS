@@ -1,0 +1,442 @@
+
+
+
+:root {
+  
+  --g-hue-src: var(--p-accent);
+  
+  --g-L-lo: 0.62; --g-L-hi: 1;
+  --g-hue: oklch(from var(--g-hue-src) clamp(var(--g-L-lo), l, var(--g-L-hi)) c
+    calc(h + clamp(0, (h - 262) * 1000, 1) * clamp(0, (338 - h) * 1000, 1)
+      * (250 + clamp(0, (h - 300) * 1000, 1) * 95 - h)));
+  
+  --g-hs: calc(30 - 60 * clamp(0, (h - 40) * 1000, 1) * clamp(0, (330 - h) * 1000, 1));
+  --g-hue-b: oklch(from var(--g-hue) l c calc(h + var(--g-hs)));
+  
+  --g-pool: oklch(from var(--g-hue) 0.8 calc(c * 0.6) h);
+  
+  --g-hue-2: var(--ground-bg, #d9ccb7);
+  
+  --g-hue-t: oklch(from var(--g-hue-2) clamp(var(--g-L-lo), l, var(--g-L-hi)) c h);
+  
+  --g-acc: oklch(from var(--p-accent) 0.7 c calc(h + clamp(0, (h - 262) * 1000, 1) * clamp(0, (338 - h) * 1000, 1)
+    * (250 + clamp(0, (h - 300) * 1000, 1) * 95 - h)));
+  
+  --g-away: oklab(from var(--p-ink) calc(1 - round(l)) 0 0);
+  --g-k: 1; --g-kl: 1; --g-kd: 1; --g-kp: 1;
+
+  
+  --g-dark-bg: var(--p-inv-bg);          --g-dark-surface: var(--p-inv-surface);
+  --g-dark-ink: var(--p-inv-ink);        --g-dark-muted: var(--p-inv-muted);
+  --g-dark-accent: var(--p-inv-accent);  --g-dark-accent-ink: var(--p-inv-accent-ink);
+  --g-dark-action: var(--p-inv-action);  --g-dark-action-ink: var(--p-inv-action-ink);
+  --g-light-bg: var(--p-bg);             --g-light-ink: var(--p-ink);        --g-light-muted: var(--p-muted);
+  --g-light-action: var(--p-action);     --g-light-action-ink: var(--p-action-ink);
+  --g-light-accent: var(--p-accent);     --g-light-accent-ink: var(--p-accent-ink);
+  --g-card: var(--p-bg);                 
+  --g-grain: var(--g-noise-mul); --g-grain-mode: multiply;   
+
+  
+  --g-cover: color-mix(in oklab, var(--bg) calc(100% - 100% * var(--g-k)), transparent);
+  --g-cover-d: color-mix(in oklab, var(--bg) calc(100% - 100% * var(--g-kd)), transparent);
+  --g-fade: 120px;                       
+  --g-edge: 160px;                       
+
+  
+  --g-noise-soft: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='0.6' intercept='.2'/%3E%3CfeFuncG type='linear' slope='0.6' intercept='.2'/%3E%3CfeFuncB type='linear' slope='0.6' intercept='.2'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --g-noise-mul: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='.26' intercept='.84'/%3E%3CfeFuncG type='linear' slope='.26' intercept='.84'/%3E%3CfeFuncB type='linear' slope='.26' intercept='.84'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --g-noise-scr: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='.17' intercept='-.05'/%3E%3CfeFuncG type='linear' slope='.17' intercept='-.05'/%3E%3CfeFuncB type='linear' slope='.17' intercept='-.05'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html[data-mode="dark"] {
+  --g-L-lo: 0; --g-L-hi: 0.55;
+  --g-dark-bg: var(--p-bg);              --g-dark-surface: var(--p-surface);
+  --g-dark-ink: var(--p-ink);            --g-dark-muted: var(--p-muted);
+  --g-dark-accent: var(--p-accent);      --g-dark-accent-ink: var(--p-accent-ink);
+  --g-dark-action: var(--p-action);      --g-dark-action-ink: var(--p-action-ink);
+  --g-light-bg: var(--p-inv-bg);         --g-light-ink: var(--p-inv-ink);    --g-light-muted: var(--p-inv-muted);
+  --g-light-action: var(--p-inv-action); --g-light-action-ink: var(--p-inv-action-ink);
+  --g-light-accent: var(--p-inv-accent); --g-light-accent-ink: var(--p-inv-accent-ink);
+  --g-card: var(--p-surface);            
+  --g-grain: var(--g-noise-scr); --g-grain-mode: screen;
+}
+
+html[data-tint="away"][data-mode="light"] { --g-grain: var(--g-noise-scr); --g-grain-mode: screen; }
+html[data-tint="away"][data-mode="dark"] { --g-grain: var(--g-noise-mul); --g-grain-mode: multiply; }
+html[data-tint="away"] { --g-hue-src: color-mix(in oklab, var(--p-bg) 58%, var(--g-away)); --g-hue-2: color-mix(in oklab, color-mix(in oklab, var(--p-bg) 66%, var(--g-away)) 90%, var(--p-accent)); }
+
+
+.bg-mist, .bg-halo, .bg-grain, .bg-dusk, .bg-ruled, .bg-dots, .bg-arcs,
+.bg-band, .bg-field, .bg-stage, .bg-photo, .bg-horizon, .bg-deep, .bg-liquid {
+  position: relative; isolation: isolate; overflow: clip;
+  --bg: var(--p-bg); --surface: var(--p-surface); --ink: var(--p-ink);
+  
+  --muted: color-mix(in oklab, var(--p-ink) 60%, var(--p-muted));
+  --accent: var(--p-accent); --accent-ink: var(--p-accent-ink);
+  --action: var(--p-action); --action-ink: var(--p-action-ink);
+  --card: var(--g-card);
+  --line: color-mix(in oklab, var(--ink) 11%, transparent);
+  --line-strong: color-mix(in oklab, var(--ink) 20%, transparent);
+  --fx-bg: var(--bg); --fx-surface: var(--surface); --fx-ink: var(--ink); --fx-muted: var(--muted);
+  --fx-accent: var(--accent); --fx-accent-ink: var(--accent-ink);
+  --ui-font: var(--font-text); --ui-mono: var(--font-mono); --ui-radius: var(--r-md);
+  background-color: var(--bg); color: var(--ink);
+}
+
+.bg-paper, .bg-topglow { position: relative; isolation: isolate; }
+.bg-paper { background-color: var(--bg); }   
+
+:is(.bg-mist, .bg-halo, .bg-ruled, .bg-dots, .bg-arcs, .bg-liquid) { background-color: transparent; }
+
+:is(.bg-mist, .bg-halo, .bg-ruled, .bg-dots, .bg-arcs)::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 var(--g-fade), #000 calc(100% - var(--g-fade)), transparent);
+          mask-image: linear-gradient(to bottom, transparent, #000 var(--g-fade), #000 calc(100% - var(--g-fade)), transparent);
+}
+
+
+.bg-horizon, .bg-deep, .bg-photo {
+  --bg: color-mix(in oklab, var(--g-dark-bg) 80%, black);
+  --surface: color-mix(in oklab, var(--g-dark-surface) 80%, black);
+  --ink: var(--g-dark-ink);
+  --muted: color-mix(in oklab, var(--g-dark-ink) 60%, var(--g-dark-muted));
+  --accent: var(--g-dark-accent); --accent-ink: var(--g-dark-accent-ink);
+  --action: var(--g-dark-action); --action-ink: var(--g-dark-action-ink);
+  --card: color-mix(in oklab, var(--bg) 88%, var(--ink));
+  
+  --lit: color-mix(in oklab, color-mix(in oklab, var(--bg) 55%, var(--g-hue)) 68%, var(--ink));
+}
+
+.bg-band, .bg-field {
+  
+  --bg: var(--tone, color-mix(in oklab, var(--ground-bg) 55%, var(--ground-surface)));
+  --surface: var(--ground-surface);
+  --ink: var(--tone-ink, color-mix(in oklab, var(--ground-ink) 85%, black));
+  --muted: color-mix(in oklab, var(--ink) 60%, var(--ground-muted));
+  --accent: var(--ground-accent); --accent-ink: var(--ground-surface);
+  --action: var(--ink); --action-ink: var(--bg);
+  --card: color-mix(in oklab, var(--ground-surface) 70%, white);
+  
+  --t-b: oklch(from var(--bg) l clamp(0, c * 1.6 + 0.022, 0.075) calc(h + var(--g-hs)));
+  --t-c: oklch(from var(--bg) calc(l - 0.032) calc(c * 1.3 + 0.012) h);
+}
+
+
+.bg-inset, html[data-mode="dark"] :is(.bg-band, .bg-field):not(.bg-bleed) { width: min(calc(100% - 2 * var(--pad)), var(--container)); margin-inline: auto; margin-block: var(--s-5); border-radius: var(--r-lg); }
+
+
+.section:is(.bg-band, .bg-field, .bg-grain, .bg-horizon, .bg-deep, .bg-photo):not(.section--hero, .section--flush-top, .section--rule) { padding-block: calc(var(--section-band) * 1.25); }
+.section:is(.bg-mist, .bg-halo, .bg-ruled, .bg-dots, .bg-arcs, .bg-liquid):not(.section--hero, .section--flush-top, .section--rule) { padding-block: calc(var(--section) * 1.5); }
+
+.section--hero:is(.bg-band, .bg-field, .bg-grain, .bg-horizon, .bg-deep, .bg-photo) { padding-bottom: calc(var(--section-band) * 1.25); }
+.section--hero:is(.bg-mist, .bg-halo, .bg-ruled, .bg-dots, .bg-arcs, .bg-liquid) { padding-bottom: calc(var(--section) * 1.5); }
+.section:is(.bg-band, .bg-field, .bg-grain, .bg-dusk, .bg-horizon, .bg-deep):not(.section--hero) { min-height: var(--g-screen, min(88svh, 860px)); display: grid; align-content: center; }
+.section:is(.bg-mist, .bg-halo, .bg-ruled, .bg-dots, .bg-liquid):not(.section--hero) { min-height: var(--g-screen, min(76svh, 760px)); display: grid; align-content: center; }
+
+@media (max-width: 767px) {
+  .section:is(.bg-band, .bg-field, .bg-grain, .bg-dusk, .bg-horizon, .bg-deep, .bg-mist, .bg-halo, .bg-ruled, .bg-dots, .bg-liquid):not(.section--hero) { min-height: var(--g-screen, 0px); }
+}
+
+main > section.section:is(.bg-band, .bg-field, .bg-grain, .bg-deep, .bg-photo):not(.section--hero):last-of-type { padding-bottom: calc(var(--section-band) * 1.25) !important; }
+main > section.section:is(.bg-mist, .bg-halo, .bg-ruled, .bg-dots, .bg-arcs, .bg-liquid):not(.section--hero):last-of-type { padding-bottom: calc(var(--section) * 1.5) !important; }
+main > section.section.bg-horizon:last-of-type { padding-bottom: calc(var(--section-band) * 1.25 + 150px) !important; }
+
+
+.bg-mist::before {
+  background:
+    radial-gradient(54% 70% at 4% 6%, color-mix(in oklab, var(--g-hue) calc(42% * var(--g-k)), transparent), transparent),
+    radial-gradient(46% 62% at 98% 16%, color-mix(in oklab, var(--g-hue-t) calc(48% * var(--g-k)), transparent), transparent),
+    radial-gradient(64% 64% at 66% 116%, color-mix(in oklab, var(--g-hue) calc(24% * var(--g-k)), transparent), transparent),
+    radial-gradient(34% 46% at 22% 104%, color-mix(in oklab, var(--g-hue-b) calc(18% * var(--g-k)), transparent), transparent);
+}
+
+
+.bg-halo { --halo-x: 50%; --halo-y: 38%; }
+.bg-halo::before {
+  background:
+    radial-gradient(34% 40% at var(--halo-x) var(--halo-y), color-mix(in oklab, var(--g-hue) calc(30% * var(--g-k)), transparent), transparent),
+    radial-gradient(70% 76% at var(--halo-x) var(--halo-y), color-mix(in oklab, var(--g-hue) calc(15% * var(--g-k)), transparent), transparent),
+    radial-gradient(30% 34% at calc(var(--halo-x) + 18%) calc(var(--halo-y) + 16%), color-mix(in oklab, var(--g-hue-t) calc(32% * var(--g-k)), transparent), transparent);
+}
+
+
+.bg-grain {
+  --bg: color-mix(in oklab, var(--p-bg) calc(100% - 11% * var(--g-k)), var(--g-hue));
+  --surface: color-mix(in oklab, var(--p-surface) calc(100% - 11% * var(--g-k)), var(--g-hue));
+  background-image:
+    radial-gradient(90% 100% at 0% 0%, color-mix(in oklab, var(--p-bg) 74%, transparent), transparent 70%),
+    radial-gradient(54% 80% at 100% 0%, color-mix(in oklab, var(--g-hue-b) calc(20% * var(--g-k)), transparent), transparent 72%),
+    radial-gradient(80% 90% at 100% 100%, color-mix(in oklab, var(--g-hue) calc(26% * var(--g-k)), transparent), transparent 70%),
+    radial-gradient(46% 70% at 0% 100%, color-mix(in oklab, var(--g-hue-b) calc(12% * var(--g-k)), transparent), transparent 72%),
+    linear-gradient(var(--g-cover), var(--g-cover)),
+    var(--g-grain);
+  background-blend-mode: normal, normal, normal, normal, normal, var(--g-grain-mode);
+}
+
+
+.bg-paper {
+  overflow: visible;
+  background-image:
+    radial-gradient(120% 60vh at 50% 0, color-mix(in oklab, var(--g-hue) calc(9% * var(--g-kp)), transparent), transparent),
+    radial-gradient(60% 50vh at 100% 0, color-mix(in oklab, var(--g-hue-b) calc(6% * var(--g-kp)), transparent), transparent),
+    linear-gradient(to bottom, transparent 70%, color-mix(in oklab, var(--g-hue) calc(6% * var(--g-kp)), transparent)),
+    
+    linear-gradient(color-mix(in oklab, var(--bg) calc(100% - 28% * var(--g-kp)), transparent), color-mix(in oklab, var(--bg) calc(100% - 28% * var(--g-kp)), transparent)),
+    var(--g-grain);
+  background-blend-mode: normal, normal, normal, normal, var(--g-grain-mode);
+}
+
+
+.bg-dusk {
+  
+  --g-from: transparent; --g-to: color-mix(in oklab, var(--p-bg) calc(100% - 15% * var(--g-k)), var(--g-hue)); --g-next: transparent;
+  --bg: var(--g-to);
+  --surface: color-mix(in oklab, var(--p-surface) calc(100% - 15% * var(--g-k)), var(--g-hue));
+  background-color: transparent;
+  background-repeat: no-repeat;
+  
+  background-size: 100% var(--g-edge), 100% var(--g-edge), 100% calc(100% - 2 * var(--g-edge) + 2px);
+  background-position: top, bottom, center;
+  
+  background-image:
+    linear-gradient(to bottom,
+      var(--g-from), color-mix(in oklab, var(--g-to) 4%, var(--g-from)) 12.5%, color-mix(in oklab, var(--g-to) 16%, var(--g-from)) 25%,
+      color-mix(in oklab, var(--g-to) 32%, var(--g-from)) 37.5%, color-mix(in oklab, var(--g-to) 50%, var(--g-from)) 50%,
+      color-mix(in oklab, var(--g-to) 68%, var(--g-from)) 62.5%, color-mix(in oklab, var(--g-to) 84%, var(--g-from)) 75%,
+      color-mix(in oklab, var(--g-to) 96%, var(--g-from)) 87.5%, var(--g-to)),
+    linear-gradient(to top,
+      var(--g-next), color-mix(in oklab, var(--g-to) 4%, var(--g-next)) 12.5%, color-mix(in oklab, var(--g-to) 16%, var(--g-next)) 25%,
+      color-mix(in oklab, var(--g-to) 32%, var(--g-next)) 37.5%, color-mix(in oklab, var(--g-to) 50%, var(--g-next)) 50%,
+      color-mix(in oklab, var(--g-to) 68%, var(--g-next)) 62.5%, color-mix(in oklab, var(--g-to) 84%, var(--g-next)) 75%,
+      color-mix(in oklab, var(--g-to) 96%, var(--g-next)) 87.5%, var(--g-to)),
+    linear-gradient(var(--g-to), var(--g-to));
+}
+.section.bg-dusk:not(.section--hero) { padding-block: calc(var(--section) + var(--g-edge) * .5); }
+
+
+
+.bg-topglow { overflow: visible; }
+.bg-topglow::before {
+  content: ""; position: absolute; z-index: -1; top: 0; left: 0; right: 0; height: min(100%, 720px); pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent, color-mix(in oklab, var(--g-hue) calc(60% * var(--g-kp)), transparent) 50%, transparent) 50% var(--nav-h, 64px) / 62% 1px no-repeat,
+    radial-gradient(62% 470px at 50% var(--nav-h, 64px), color-mix(in oklab, var(--g-hue) calc(27% * var(--g-kp)), transparent), transparent),
+    radial-gradient(42% 380px at 86% calc(var(--nav-h, 64px) + 60px), color-mix(in oklab, var(--g-hue-b) calc(18% * var(--g-kp)), transparent), transparent),
+    radial-gradient(120% 300px at 50% var(--nav-h, 64px), color-mix(in oklab, var(--g-hue) calc(12% * var(--g-kp)), transparent), transparent);
+}
+
+
+
+.bg-ruled::before {
+  background: radial-gradient(50% 44% at 50% 0%, color-mix(in oklab, var(--g-hue) calc(20% * var(--g-k)), transparent), transparent);
+}
+.bg-ruled::after {
+  content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; pointer-events: none; box-sizing: border-box;
+  --rule: color-mix(in oklab, var(--ink) calc(8% * var(--g-kl)), transparent);
+  --cell: 72px;
+  left: max(var(--pad), calc((100% - var(--container)) / 2)); right: max(var(--pad), calc((100% - var(--container)) / 2));
+  border-right: 1px solid var(--rule);
+  background:
+    linear-gradient(90deg, var(--rule) 1px, transparent 1px) 0 0 / var(--cell) var(--cell) space repeat,
+    linear-gradient(var(--rule) 1px, transparent 1px) 0 0 / var(--cell) var(--cell) repeat;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 var(--g-fade), #000 calc(100% - var(--g-fade)), transparent), radial-gradient(ellipse 120% 90% at 50% 40%, #000 30%, transparent 92%), radial-gradient(ellipse 46% 34% at 50% 38%, transparent 40%, #000 100%);
+          mask-image: linear-gradient(to bottom, transparent, #000 var(--g-fade), #000 calc(100% - var(--g-fade)), transparent), radial-gradient(ellipse 120% 90% at 50% 40%, #000 30%, transparent 92%), radial-gradient(ellipse 46% 34% at 50% 38%, transparent 40%, #000 100%);
+  -webkit-mask-composite: source-in; mask-composite: intersect;
+}
+@media (max-width: 767px) { .bg-ruled::after { --cell: 48px; } }
+
+
+
+.bg-dots::before {
+  background:
+    radial-gradient(34% 46% at 6% 34%, color-mix(in oklab, var(--g-hue) calc(16% * var(--g-k)), transparent), transparent),
+    radial-gradient(30% 40% at 96% 70%, color-mix(in oklab, var(--g-hue-t) calc(24% * var(--g-k)), transparent), transparent),
+    radial-gradient(circle at 11px 11px, color-mix(in oklab, var(--ink) calc(26% * var(--g-kl)), transparent) 1.15px, transparent 1.9px) 0 0 / 22px 22px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 var(--g-fade), #000 calc(100% - var(--g-fade)), transparent), radial-gradient(ellipse 58% 70% at 50% 40%, transparent 24%, #000 78%);
+          mask-image: linear-gradient(to bottom, transparent, #000 var(--g-fade), #000 calc(100% - var(--g-fade)), transparent), radial-gradient(ellipse 58% 70% at 50% 40%, transparent 24%, #000 78%);
+  -webkit-mask-composite: source-in; mask-composite: intersect;
+}
+
+
+
+.section.bg-arcs { min-height: clamp(420px, 36vw, 540px); display: grid; align-content: center; }
+.bg-arcs::before {
+  background:
+    radial-gradient(56% 56% at 50% 100%, color-mix(in oklab, var(--g-hue) calc(22% * var(--g-k)), transparent), transparent),
+    radial-gradient(30% 40% at 78% 100%, color-mix(in oklab, var(--g-hue-t) calc(24% * var(--g-k)), transparent), transparent),
+    repeating-radial-gradient(circle at 50% 140%, transparent 0 79px, color-mix(in oklab, var(--ink) calc(22% * var(--g-kl)), transparent) 79px 80px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 var(--g-fade), #000 calc(100% - var(--g-fade)), transparent), radial-gradient(ellipse 84% 94% at 50% 100%, #000 30%, transparent 82%);
+          mask-image: linear-gradient(to bottom, transparent, #000 var(--g-fade), #000 calc(100% - var(--g-fade)), transparent), radial-gradient(ellipse 84% 94% at 50% 100%, #000 30%, transparent 82%);
+  -webkit-mask-composite: source-in; mask-composite: intersect;
+}
+
+
+
+.bg-band {
+  background-image:
+    var(--g-noise-soft),
+    radial-gradient(66% 120% at 0% 0%, color-mix(in oklab, var(--bg) 42%, var(--g-hi, white)), transparent 72%),
+    radial-gradient(52% 96% at 100% 0%, color-mix(in oklab, var(--t-b) 62%, transparent), transparent 76%),
+    radial-gradient(64% 104% at 100% 100%, color-mix(in oklab, var(--t-c) 70%, transparent), transparent 78%);
+  background-blend-mode: soft-light, normal, normal, normal;
+}
+
+
+.bg-tint {
+  --tone: oklch(from var(--g-hue) 0.93 clamp(0.035, c * 0.32, 0.075) h);
+  --tone-ink: color-mix(in oklab, var(--g-light-ink) 58%, black);
+  --accent: var(--g-light-accent); --accent-ink: var(--g-light-accent-ink);
+  --surface: color-mix(in oklab, var(--tone) 60%, white);
+  --card: color-mix(in oklab, var(--g-light-bg) 80%, white);
+}
+
+html[data-mode="dark"] .bg-tint {
+  --tone: oklch(from var(--g-hue) 0.24 clamp(0.04, c * 0.42, 0.09) h);
+  --tone-ink: color-mix(in oklab, var(--p-ink) 92%, white);
+  --muted: color-mix(in oklab, var(--tone-ink) 82%, var(--tone));
+  --accent: var(--p-accent); --accent-ink: var(--p-accent-ink);
+  --surface: color-mix(in oklab, var(--tone) 80%, white);
+  --card: color-mix(in oklab, var(--tone) 86%, black);
+  --action: var(--tone-ink); --action-ink: var(--tone);
+  --g-hi: color-mix(in oklab, var(--tone) 88%, white);   
+}
+
+
+.bg-field {
+  background-image:
+    var(--g-noise-soft),
+    linear-gradient(112deg, transparent 38%, color-mix(in oklab, var(--g-hi, white) 26%, transparent) 50%, transparent 62%),
+    radial-gradient(58% 86% at 8% 0%, color-mix(in oklab, var(--g-hi, white) 58%, transparent), transparent),
+    radial-gradient(54% 80% at 82% 6%, color-mix(in oklab, var(--t-b) 80%, transparent), transparent),
+    radial-gradient(60% 96% at 100% 100%, color-mix(in oklab, var(--t-c) 76%, transparent), transparent),
+    radial-gradient(40% 60% at 0% 100%, color-mix(in oklab, var(--t-b) 50%, transparent), transparent);
+  background-blend-mode: soft-light, normal, normal, normal, normal, normal;
+}
+
+
+
+.bg-stage {
+  --st-src: var(--g-hue);
+  
+  --st-1: oklch(from var(--st-src) calc(0.64 + 0.12 * clamp(0, 1 - max(h - 90, 90 - h) / 45, 1)) clamp(0.07, c * 0.8, 0.14) calc(h - 8 * clamp(0, 1 - max(h - 90, 90 - h) / 45, 1)));
+  --st-2: oklch(from var(--st-src) 0.8 clamp(0.05, c * 0.6, 0.1) calc(h + var(--g-hs)));
+  --st-3: oklch(from var(--st-src) 0.95 0.035 h);
+  
+  --st-4: oklch(from var(--st-src) calc(0.44 + 0.1 * clamp(0, 1 - max(h - 90, 90 - h) / 45, 1)) clamp(0.05, c * 0.7, 0.12) calc(h - 24 * clamp(0, 1 - max(h - 90, 90 - h) / 45, 1)));
+  --stage-pad: clamp(20px, 4.5vw, 64px);
+  display: grid; place-items: center; padding: var(--stage-pad); border-radius: var(--r-lg);
+  background-color: var(--st-1);
+  background-image:
+    var(--g-noise-soft),
+    radial-gradient(58% 78% at 10% 4%, color-mix(in oklab, var(--st-3) 90%, transparent), transparent 72%),
+    radial-gradient(48% 70% at 90% 12%, color-mix(in oklab, var(--st-2) 92%, transparent), transparent 74%),
+    radial-gradient(70% 90% at 78% 112%, color-mix(in oklab, var(--st-4) 94%, transparent), transparent 74%),
+    radial-gradient(46% 62% at 4% 100%, color-mix(in oklab, var(--st-2) 60%, transparent), transparent 72%);
+  background-blend-mode: soft-light, normal, normal, normal, normal;
+}
+html[data-tint="away"] .bg-stage { --st-src: var(--g-acc); }
+html[data-lowchroma] .bg-stage { --st-src: oklch(from var(--ground-accent) l c h); }
+.bg-stage > * { position: relative; width: min(100%, var(--stage-w, 520px)); }
+
+
+
+.bg-photo {
+  --scrim: color-mix(in oklab, var(--g-dark-bg) 70%, black);
+  
+  --scrim-a: color-mix(in oklab, var(--scrim) calc(100% - 12% * var(--g-kd)), transparent);
+  --scrim-b: color-mix(in oklab, var(--scrim) calc(100% - 20% * var(--g-kd)), transparent);
+  --scrim-c: color-mix(in oklab, var(--scrim) calc(100% - 24% * var(--g-kd)), transparent);
+  --scrim-h: 66%; --scrim-w: 56%;
+  min-height: clamp(520px, 52vw, 760px); display: grid; align-content: end;
+  background: var(--g-photo, none) var(--g-photo-pos, center) / cover no-repeat, var(--scrim);
+}
+.bg-photo__img { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; object-position: var(--g-photo-pos, 50% 50%); }
+.bg-photo::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(to top, var(--scrim-a), var(--scrim-b) calc(var(--scrim-h) * .45), var(--scrim-c) var(--scrim-h), transparent calc(var(--scrim-h) + 26%));
+}
+.bg-photo--left { align-content: center; }
+.bg-photo--left::before { background: linear-gradient(to right, var(--scrim-a), var(--scrim-b) calc(var(--scrim-w) * .64), var(--scrim-c) var(--scrim-w), transparent calc(var(--scrim-w) + 26%)); }
+.bg-photo--light {
+  --scrim: var(--g-light-bg);
+  --scrim-a: color-mix(in oklab, var(--scrim) 94%, transparent);
+  --scrim-b: color-mix(in oklab, var(--scrim) 88%, transparent);
+  --scrim-c: color-mix(in oklab, var(--scrim) 76%, transparent);
+  --bg: color-mix(in oklab, var(--g-light-bg) 90%, white); --surface: var(--p-surface); --ink: var(--g-light-ink);
+  --muted: color-mix(in oklab, var(--g-light-ink) 60%, var(--g-light-muted));
+  --accent: var(--g-light-accent); --accent-ink: var(--g-light-accent-ink);
+  --action: var(--g-light-action); --action-ink: var(--g-light-action-ink);
+  --card: var(--g-light-bg);
+}
+@media (max-width: 767px) {
+  .bg-photo { --scrim-h: 86%; min-height: 640px; background-position: var(--g-photo-pos-m, var(--g-photo-pos, center)); }
+  .bg-photo__img { object-position: var(--g-photo-pos-m, var(--g-photo-pos, 50% 50%)); }
+  .bg-photo--left { align-content: end; }
+  .bg-photo--left::before { background: linear-gradient(to top, var(--scrim-a), var(--scrim-b) calc(var(--scrim-h) * .45), var(--scrim-c) var(--scrim-h), transparent calc(var(--scrim-h) + 12%)); }
+}
+
+
+
+.section.bg-horizon:not(.section--flush-top, .section--rule) { padding-bottom: calc(var(--section-band) * 1.25 + 150px); }   
+.bg-horizon::before {
+  content: ""; position: absolute; z-index: -1; left: 0; right: 0; bottom: 0; height: 640px; pointer-events: none;
+  background:
+    radial-gradient(26% 74px at 50% calc(100% - 140px), color-mix(in oklab, var(--lit) calc(70% * var(--g-kd)), transparent), transparent),
+    radial-gradient(54% 76% at 50% 100%, color-mix(in oklab, var(--lit) calc(44% * var(--g-kd)), transparent), transparent 74%),
+    radial-gradient(120% 84% at 50% 100%, color-mix(in oklab, var(--g-hue) calc(22% * var(--g-kd)), transparent), transparent 76%);
+}
+.bg-horizon::after {
+  
+  content: ""; position: absolute; z-index: -1; left: 50%; translate: -50% 0; width: max(170%, 1200px); bottom: -560px; height: 700px; pointer-events: none;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  background: radial-gradient(60% 100% at 50% 0, color-mix(in oklab, var(--lit) 34%, var(--bg)), var(--bg) 72%);
+  border-top: 2px solid color-mix(in oklab, var(--lit) 90%, white);
+  box-shadow: 0 -12px 56px -8px color-mix(in oklab, var(--lit) 62%, transparent), 0 -1px 16px color-mix(in oklab, var(--lit) 70%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent 5%, #000 36%, #000 64%, transparent 95%);
+          mask-image: linear-gradient(90deg, transparent 5%, #000 36%, #000 64%, transparent 95%);
+}
+
+
+.bg-deep {
+  --bg: color-mix(in oklab, var(--g-dark-bg) 70%, black);
+  background-image:
+    radial-gradient(64% 70% at 50% 0%, color-mix(in oklab, var(--g-hue) calc(21% * var(--g-kd)), transparent), transparent 76%),
+    radial-gradient(48% 60% at 100% 100%, color-mix(in oklab, var(--g-hue-t) calc(18% * var(--g-kd)), transparent), transparent 72%),
+    linear-gradient(180deg, color-mix(in oklab, var(--g-dark-surface) calc(40% * var(--g-kd)), var(--bg)), var(--bg) 70%),
+    linear-gradient(var(--g-cover-d), var(--g-cover-d)),
+    var(--g-noise-scr);
+  background-blend-mode: normal, normal, normal, normal, screen;
+}
+
+.bg-deep::before {
+  content: ""; position: absolute; z-index: -1; left: 0; right: 0; top: 0; height: 1px; pointer-events: none;
+  background: linear-gradient(90deg, transparent 6%, color-mix(in oklab, var(--ink) calc(28% * var(--g-kd)), transparent) 50%, transparent 94%);
+}
+
+
+
+.bg-liquid::before, .bg-liquid::after {
+  content: ""; position: absolute; z-index: -1; pointer-events: none; top: 0; bottom: 0; left: -30%; right: -30%; will-change: transform;
+}
+.bg-liquid::before {
+  background:
+    radial-gradient(ellipse 30% 36% at 30% 44%, color-mix(in oklab, var(--g-hue) calc(40% * var(--g-k)), transparent), transparent),
+    radial-gradient(ellipse 22% 24% at 54% 74%, color-mix(in oklab, var(--g-hue-t) calc(44% * var(--g-k)), transparent), transparent);
+  animation: g-liq-a 26s ease-in-out infinite alternate;
+}
+.bg-liquid::after {
+  background:
+    radial-gradient(ellipse 28% 30% at 68% 38%, color-mix(in oklab, var(--g-hue-b) calc(32% * var(--g-k)), transparent), transparent),
+    radial-gradient(ellipse 20% 20% at 44% 26%, color-mix(in oklab, var(--g-hue-t) calc(36% * var(--g-k)), transparent), transparent);
+  animation: g-liq-b 34s ease-in-out infinite alternate;
+}
+@keyframes g-liq-a { from { transform: translate3d(-7%, 0, 0) skewX(-7deg) scaleY(.94); } to { transform: translate3d(8%, 0, 0) skewX(6deg) scaleY(1.05); } }
+@keyframes g-liq-b { from { transform: translate3d(8%, 0, 0) skewX(6deg) scaleY(1.04); } to { transform: translate3d(-9%, 0, 0) skewX(-6deg) scaleY(.92); } }
+.bg-liquid.is-off::before, .bg-liquid.is-off::after, .bg-liquid.is-held::before, .bg-liquid.is-held::after { animation-play-state: paused; }
+
+.bg-liquid > .loop-pause { right: max(var(--pad), calc((100% - var(--container)) / 2)); bottom: 16px; }
+
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-liquid::before, .bg-liquid::after { animation: none; }
+}
+@media print { .bg-liquid::before, .bg-liquid::after { display: none; } }

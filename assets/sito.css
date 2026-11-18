@@ -18,6 +18,7 @@ a{color:var(--act)}
 svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
 body>svg[aria-hidden]{position:absolute;width:0;height:0}
 svg.logo{width:34px;height:34px;display:block}
+img.logo{width:34px;height:34px;display:block}
 
 /* barra in alto, come quella della scheda */
 .top{position:sticky;top:0;z-index:6;min-height:60px;display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;padding:6px 20px;background:var(--side);border-bottom:1px solid var(--bd)}
@@ -98,3 +99,13 @@ footer.pie{max-width:64rem;margin:0 auto;padding:0 16px 30px;color:var(--mut);fo
 .term-card{display:flex;flex-direction:column;height:70vh;min-height:360px}
 .term-card #uscita{flex:1;max-height:none;min-height:0;margin:0 0 8px}
 .term-card #invio{flex:0 0 auto}
+
+
+/* Aspetto della nuova home (17/11/2026): stessi colori, bottoni a pillola e angoli piu netti. Nessun font da fuori: le pagine strumento hanno una regola di sicurezza che non lo permette. */
+body{font-weight:400}
+.wrap h1,.wrap h2,h1,h2{font-weight:500;letter-spacing:-.02em}
+.btn,.filtri button{border-radius:999px}
+.card,.gal figure,.pop{border-radius:8px}
+.card{border:1px solid var(--bd)}
+.top{background:var(--side)}
+.top nav a.on{color:var(--act);background:var(--vbg)}

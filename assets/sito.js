@@ -75,7 +75,7 @@
     var pg = document.body.getAttribute('data-pg') || '';
     var voci = [['home', 'index.html'], ['flash', 'flash/'], ['store', 'store/'], ['lic', 'licenze/'], ['term', 'terminale/']];
     var h = document.querySelector('a.salta:not(.mia)') ? '' : '<a class="salta mia" href="#principale">' + (S.lang === 'it' ? 'Vai al contenuto' : S.lang === 'en' ? 'Skip to content' : S.lang === 'es' ? 'Ir al contenido' : 'Zum Inhalt') + '</a>';
-    h += '<div class="top"><a class="marca" href="' + base + 'index.html"><svg class="logo" aria-hidden="true"><use href="#i-chip"/></svg><span>VesevOS</span></a><nav aria-label="VesevOS">';
+    h += '<div class="top"><a class="marca" href="' + base + 'index.html"><img class="logo" src="' + base + 'logo/vesevos-logo.svg" alt="" width="34" height="34"><span>VesevOS</span></a><nav aria-label="VesevOS">';
     for (var i = 0; i < voci.length; i++) h += '<a href="' + base + voci[i][1] + '"' + (pg === voci[i][0] ? ' class="on" aria-current="page"' : '') + '>' + n[voci[i][0]] + '</a>';
     h += '</nav><span class="sp"></span>';
     if (!$('lingua')) {

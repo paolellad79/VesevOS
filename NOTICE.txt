@@ -85,6 +85,23 @@ Progetto: https://github.com/paolellad79/VesevOS
      esptool-js 0.5.7 (Espressif): Apache-2.0 (testo in
      flash/vendor/LICENSE-esptool-js-Apache-2.0.txt); dentro il suo bundle
      c'e pako 2.1.0 (Nodeca): MIT AND Zlib.
+   - Sito pubblicato (pagina iniziale e pagine strumento, solo browser, nessun
+     codice nel firmware):
+     font Onest (Copyright 2021 The Onest Project Authors,
+     https://github.com/googlefonts/onest): SIL Open Font License 1.1, file
+     ospitati nel sito (testo: licenses/OFL-1.1-Onest.txt);
+     font JetBrains Mono (Copyright 2020 The JetBrains Mono Project Authors,
+     https://github.com/JetBrains/JetBrainsMono): SIL Open Font License 1.1
+     (testo: licenses/OFL-1.1-JetBrainsMono.txt);
+     icone Lucide (Copyright (c) 2026 Lucide Icons and Contributors,
+     https://github.com/lucide-icons/lucide): ISC (testo: licenses/ISC-Lucide.txt);
+     icone Simple Icons (Simple Icons Collaborators,
+     https://github.com/simple-icons/simple-icons): CC0 1.0 (testo:
+     licenses/CC0-1.0.txt); i marchi mostrati (per esempio GitHub) restano dei
+     rispettivi proprietari e sono usati solo per indicare il collegamento;
+     componenti grafici del sito, fogli di stile e script della cartella assets
+     (Copyright (c) 2026 Leonxlnx): MIT (testo: licenses/MIT-componenti-grafici-sito.txt
+     e assets/LICENZA-componenti-grafici.txt nel sito).
    - Recovery 0.5.2 (programma nostro, cartella recovery/VesevOS_Recovery_IDF):
      GPL-3.0-or-later OR licenza commerciale; usa solo ESP-IDF 5.5.5 e
      Mbed TLS (Apache-2.0), senza codice LGPL.

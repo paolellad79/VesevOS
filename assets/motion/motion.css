@@ -1,0 +1,271 @@
+
+
+:root {
+  --m-in: 150ms;                              
+  --m-out: 120ms;                             
+  --m-press: 90ms;                            
+  --m-panel: 200ms;                           
+  --m-close: 120ms;                           
+  --m-slide: 240ms;                           
+  --m-image: 600ms;                           
+  --m-image-out: 400ms;                       
+  --m-ease: var(--ease, cubic-bezier(.2, .8, .2, 1)); 
+  --m-ease-io: cubic-bezier(.65, 0, .35, 1);  
+  --m-ease-enter: cubic-bezier(.22, 1, .36, 1); 
+  --m-cycle: 3.2s;                            
+  --m-lift: -2px;
+}
+
+
+html:not([data-motion="off"]) .btn {
+  position: relative;
+  transition: background-color var(--m-out) var(--m-ease), color var(--m-out) var(--m-ease),
+              border-color var(--m-out) var(--m-ease), box-shadow var(--m-out) var(--m-ease),
+              transform var(--m-press) var(--m-ease);
+}
+
+html:not([data-motion="off"]) .btn--primary:hover { background: color-mix(in oklab, var(--action) 84%, var(--bg)); }
+html:not([data-motion="off"]) .btn--secondary:hover {
+  background: color-mix(in oklab, var(--bg) 92%, var(--ink));
+  border-color: color-mix(in oklab, var(--ink) 32%, transparent);
+}
+html:not([data-motion="off"]) .btn:hover { transition-duration: var(--m-in), var(--m-in), var(--m-in), var(--m-in), var(--m-press); }
+html:not([data-motion="off"]) .btn:active { transform: translateY(1px) scale(.985); }
+
+@media (hover: hover) and (pointer: fine) {
+  html:not([data-motion="off"]) .btn:hover { transform: translateY(-1px); }
+  html:not([data-motion="off"]) .btn--xl:hover { transform: translateY(-2px); }
+  html:not([data-motion="off"]):is([data-buttons="arrow"], [data-buttons="block"]) .btn--secondary:hover { transform: none; }
+  html:not([data-motion="off"]) .btn:active { transform: translateY(1px) scale(.985); }
+  html:not([data-motion="off"]):is([data-buttons="arrow"], [data-buttons="block"]) .btn--secondary:active { transform: scale(.985); }
+}
+
+
+html:not([data-motion="off"]) :is(.btn--arrow, .link)::after { transition: transform var(--m-out) var(--m-ease); }
+html:not([data-motion="off"]) :is(.btn--arrow, .link):focus-visible::after { transform: translateX(3px); transition-duration: var(--m-in); }
+.m-arrow { width: 12px; height: 12px; flex: none; overflow: visible; fill: none; stroke: currentColor; stroke-width: 1.6;
+           stroke-linecap: round; stroke-linejoin: round; }
+.m-arrow__stem { opacity: 0; transform: scaleX(.2); transform-origin: 1px 50%; transform-box: fill-box;
+                 transition: opacity var(--m-out) var(--m-ease), transform var(--m-out) var(--m-ease); }
+.m-arrow__head { transition: transform var(--m-out) var(--m-ease); }
+:is(a, button):focus-visible > .m-arrow .m-arrow__stem { opacity: 1; transform: none; transition-duration: var(--m-in); }
+:is(a, button):focus-visible > .m-arrow .m-arrow__head { transform: translateX(3px); transition-duration: var(--m-in); }
+@media (hover: hover) and (pointer: fine) {
+  html:not([data-motion="off"]) :is(.btn--arrow, .link):hover::after { transform: translateX(3px); transition-duration: var(--m-in); }
+  :is(a, button):hover > .m-arrow .m-arrow__stem { opacity: 1; transform: none; transition-duration: var(--m-in); }
+  :is(a, button):hover > .m-arrow .m-arrow__head { transform: translateX(3px); transition-duration: var(--m-in); }
+}
+
+
+html:not([data-motion="off"]) a.pill { transition: background-color var(--m-out) var(--m-ease), border-color var(--m-out) var(--m-ease); }
+html:not([data-motion="off"]) a.pill:hover { background: color-mix(in oklab, var(--card) 90%, var(--ink)); border-color: var(--line-strong); transition-duration: var(--m-in); }
+
+
+
+html:not([data-motion="off"]) :is(.link, .m-link, p a:not([class]), .footer ul a, .footer .link) {
+  text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor), linear-gradient(var(--m-rest, var(--line-strong)), var(--m-rest, var(--line-strong)));
+  background-repeat: no-repeat; background-size: 0% 1px, 100% 1px;
+  background-position: right 0 bottom 0, 0 100%;
+  transition: background-size var(--m-out) var(--m-ease), color var(--m-out) var(--m-ease);
+  padding-bottom: 2px;
+}
+
+html:not([data-motion="off"]) p a:not([class]) { --m-rest: color-mix(in oklab, currentColor 45%, transparent); }
+html:not([data-motion="off"]) :is(.footer ul a, .m-link--bare):not(:hover, :focus-visible) { background-size: 0% 1px, 0% 1px; }
+html:not([data-motion="off"]) :is(.link, .m-link, p a:not([class]), .footer ul a, .footer .link):is(:hover, :focus-visible) {
+  background-size: 100% 1px, 100% 1px; background-position: left 0 bottom 0, 0 100%; transition-duration: var(--m-in);
+}
+
+html:not([data-motion="off"]) .link { background-size: 0% 1px, calc(100% - 1em - var(--s-2)) 1px; }
+html:not([data-motion="off"]) .link:is(:hover, :focus-visible) { background-size: calc(100% - 1em - var(--s-2)) 1px, calc(100% - 1em - var(--s-2)) 1px; }
+html:not([data-motion="off"]) .link, html:not([data-motion="off"]) .link:is(:hover, :focus-visible) { background-position: 0 100%, 0 100%; }
+html:not([data-motion="off"]) .footer ul a:hover { color: var(--ink); }
+
+
+
+@media (min-width: 1024px) {
+  
+  html:not([data-motion="off"]) .nav__menu {
+    transform: translateY(-6px);
+    transition: opacity var(--m-close) var(--m-ease), transform var(--m-close) var(--m-ease), visibility 0s linear var(--m-close);
+  }
+  html:not([data-motion="off"]) .nav__item:is(:hover, :focus-within) > .nav__menu {
+    transition: opacity var(--m-panel) var(--m-ease) 150ms, transform var(--m-panel) var(--m-ease) 150ms, visibility 0s linear 150ms;
+  }
+  
+  html:not([data-motion="off"]) .nav.m-menu-open .nav__menu,
+  html:not([data-motion="off"]) .nav.m-menu-open .nav__item:is(:hover, :focus-within) > .nav__menu { transition-duration: 0s; transition-delay: 0s; }
+  html:not([data-motion="off"]) .menu-col a { transition: color var(--m-out) var(--m-ease); }
+  html:not([data-motion="off"]) .menu-col a:hover { transition-duration: var(--m-in); }
+  html:not([data-motion="off"]) .menu-card .panel { transition: border-color var(--m-out) var(--m-ease); }
+}
+
+@media (max-width: 1023px) {
+  html:not([data-motion="off"]) .nav.is-open .nav__links { transition: opacity var(--m-panel) var(--m-ease), transform var(--m-panel) var(--m-ease); }
+  @starting-style { html:not([data-motion="off"]) .nav.is-open .nav__links { opacity: 0; transform: translateY(-8px); } }
+}
+
+
+html:not([data-motion="off"]) .tabs.m-has-ind { position: relative; isolation: isolate; }
+html:not([data-motion="off"]) .tabs.m-has-ind .tab { position: relative; z-index: 1; }
+html:not([data-motion="off"]) .tabs.m-has-ind .tab[aria-selected="true"] { background: transparent; border-color: transparent; }
+
+.m-tab-ind {
+  position: absolute; left: 0; top: 0; z-index: 0; width: var(--w, 0px); height: var(--h, 0px);
+  border-radius: var(--r-btn); background: var(--ink); pointer-events: none;
+  transform: translate(var(--x, 0px), var(--y, 0px)) scale(var(--sx, 1), var(--sy, 1)); transform-origin: 0 0;
+  transition: transform var(--m-slide) var(--m-ease-io);
+}
+.m-tab-ind.is-jump { transition: none; }
+html:not([data-motion="off"]) .tab { transition: color var(--m-slide) var(--m-ease), border-color var(--m-out) var(--m-ease), background-color var(--m-out) var(--m-ease); }
+
+
+
+
+
+
+html:not([data-motion="off"]) .card:not(.card--open, .card--plan) {
+  transition: transform var(--m-out) var(--m-ease), border-color var(--m-out) var(--m-ease), box-shadow var(--m-out) var(--m-ease);
+}
+html:not([data-motion="off"]) .card--open > .panel { transition: transform var(--m-out) var(--m-ease), box-shadow var(--m-out) var(--m-ease); }
+@media (hover: hover) and (pointer: fine) {
+  html:not([data-motion="off"]) .card:not(.card--open, .card--plan, .m-nolift):hover {
+    transform: translateY(var(--m-lift));
+    border-color: color-mix(in oklab, var(--ink) 16%, transparent);
+    
+    box-shadow: inset 0 1px 0 var(--c-hi, transparent), 0 1px 2px rgb(0 0 0 / .06),
+                0 14px 32px -18px oklch(from var(--card, #fff) 0 0 0 / calc(0.75 - l * 0.55));
+    transition-duration: 180ms;
+  }
+  html:not([data-motion="off"]) .card--open:not(.m-nolift):hover > .panel {
+    transform: translateY(var(--m-lift)); box-shadow: 0 14px 32px -18px oklch(from var(--bg, #fff) 0 0 0 / calc(0.75 - l * 0.55)); transition-duration: 180ms;
+  }
+}
+
+
+
+.m-zoom { overflow: clip; }
+html:not([data-motion="off"]) :is(.frame__img, .tile__media > img, .m-zoom img, .m-zoom > video) {
+  transition: transform var(--m-image-out) var(--m-ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  html:not([data-motion="off"]) :is(a, .card:has(a), .m-zoom):hover :is(.frame__img, .tile__media > img),
+  html:not([data-motion="off"]) .m-zoom:hover :is(img, video) { transform: scale(1.03); transition-duration: var(--m-image); }
+}
+
+
+html:not([data-motion="off"]) .field :is(input, select, textarea), .m-input {
+  transition: border-color var(--m-out) var(--m-ease), box-shadow var(--m-out) var(--m-ease), background-color var(--m-out) var(--m-ease);
+}
+html:not([data-motion="off"]) .field :is(input, select, textarea):hover, .m-input:hover { border-color: color-mix(in oklab, var(--ink) 48%, transparent); }
+html:not([data-motion="off"]) .field :is(input, select, textarea):focus, .m-input:focus {
+  
+  outline: none; border-color: var(--action);
+  box-shadow: 0 0 0 1px var(--action), 0 0 0 4px color-mix(in oklab, var(--action) 20%, transparent); transition-duration: 0s;
+}
+
+.m-switch {
+  position: relative; flex: none; width: 40px; height: 24px; padding: 0; border: 0; border-radius: 999px; cursor: pointer;
+  background: color-mix(in oklab, var(--ink) 48%, var(--bg));
+  transition: background-color 180ms var(--m-ease);
+}
+.m-switch::before {
+  content: ""; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 999px;
+  background: var(--bg); box-shadow: 0 1px 3px rgb(0 0 0 / .25);
+  transform-origin: 0 50%; transition: transform 180ms var(--m-ease);
+}
+.m-switch[aria-checked="true"] { background: var(--action); }
+.m-switch[aria-checked="true"]::before { transform: translateX(16px); background: var(--action-ink); }
+.m-switch:active::before { transform: scaleX(1.22); transition-duration: var(--m-press); }
+.m-switch[aria-checked="true"]:active::before { transform: translateX(12px) scaleX(1.22); }
+.m-switch:hover:not([aria-checked="true"]) { background: color-mix(in oklab, var(--ink) 58%, var(--bg)); }
+
+.m-check {
+  appearance: none; -webkit-appearance: none; flex: none; margin: 0; width: 20px; height: 20px; border-radius: 6px; cursor: pointer;
+  border: 1px solid color-mix(in oklab, var(--ink) 48%, var(--bg)); background: var(--bg) no-repeat center / 14px 14px;
+  display: inline-grid; place-items: center;
+  transition: background-color var(--m-in) var(--m-ease), border-color var(--m-in) var(--m-ease);
+}
+.m-check::before {
+  content: ""; width: 10px; height: 6px; margin-top: -2px; border: solid var(--action-ink); border-width: 0 0 2px 2px;
+  opacity: 0; transform: rotate(-45deg) scale(.7); transform-origin: 50% 50%;
+  transition: transform 160ms var(--m-ease), opacity 100ms var(--m-ease);
+}
+.m-check:hover:not(:checked) { border-color: color-mix(in oklab, var(--ink) 64%, var(--bg)); }
+.m-check:checked { background-color: var(--action); border-color: var(--action); }
+.m-check:checked::before { opacity: 1; transform: rotate(-45deg) scale(1); }
+
+
+
+
+[data-m-count] { font-variant-numeric: tabular-nums; }
+
+
+
+[data-m-loop] { --m-cycle: 3.2s; --m-still: 0.6; --m-safe: 48px; }
+
+[data-m-loop]:not(:has(> .stage)) { padding-bottom: var(--m-safe); }
+[data-m-loop] > .stage:is(.stage--fade-b, .stage--fade-br) { bottom: var(--m-safe); }
+
+@media (max-width: 639px) {
+  [data-m-loop] * { animation-duration: var(--m-cycle) !important; animation-delay: calc(-1 * var(--m-still) * var(--m-cycle)) !important;
+                    animation-play-state: paused !important; }
+}
+[data-m-loop].is-m-off *, [data-m-loop].is-m-paused * { animation-play-state: paused !important; }
+
+
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  html.m-enter:not(.m-enter-done, [data-motion="off"]) .hero[data-enter]:not([data-enter="off"], .is-entering, .is-entered)
+    :is(h1, h1 ~ *, :has(> h1) ~ *, :has(~ h1)):not([data-enter-media], .hero__bg, .hero__media, .hero__stage, .hero__art, .hero__window, .hero-visual, .ly-collage,
+         :has([data-enter-media], .hero__bg, .hero__media, .hero__stage, .hero__art, .hero__window, .hero-visual, .ly-collage)) { opacity: 0; }
+  
+  html.m-enter.m-enter-done:not([data-motion="off"]) .hero[data-enter]:not([data-enter="off"], .is-entering, .is-entered)
+    :is(h1, h1 ~ *, :has(> h1) ~ *, :has(~ h1)) { transition: opacity 400ms var(--m-ease); }
+  
+  html.m-enter:not([data-motion="off"]) .hero[data-enter]:not([data-enter="off"], .is-still)
+    :is(:is([data-enter-media], .hero__bg, .hero__media, .hero__stage, .hero__art, .hero__window, .hero-visual, .ly-collage):is(img, picture, video),
+        :is([data-enter-media], .hero__bg, .hero__media, .hero__stage, .hero__art, .hero__window, .hero-visual, .ly-collage) > :is(img, picture, video, .frame__img)) {
+    transition: scale 1100ms var(--m-ease-enter), clip-path 1100ms var(--m-ease-enter);
+  }
+  
+  .hero[data-enter] :is([data-enter-media], .hero__bg, .hero__media, .hero__stage, .hero__art, .hero__window, .hero-visual, .ly-collage):is(img, picture, video) { clip-path: inset(0); }
+  html.m-enter:not([data-motion="off"]) .hero[data-enter]:not([data-enter="off"], .is-still)
+    :is([data-enter-media], .hero__bg, .hero__media, .hero__stage, .hero__art, .hero__window, .hero-visual, .ly-collage):not(img, picture, video, :has(> :is(img, picture, video, .frame__img))) {
+    transition: scale 900ms var(--m-ease-enter);
+  }
+  html.m-enter:not(.m-enter-done, [data-motion="off"]) .hero[data-enter]:not([data-enter="off"], .is-entering, .is-entered)
+    :is(:is([data-enter-media], .hero__bg, .hero__media, .hero__stage, .hero__art, .hero__window, .hero-visual, .ly-collage):is(img, picture, video),
+        :is([data-enter-media], .hero__bg, .hero__media, .hero__stage, .hero__art, .hero__window, .hero-visual, .ly-collage) > :is(img, picture, video, .frame__img)) { scale: 1.05; }
+  html.m-enter:not(.m-enter-done, [data-motion="off"]) .hero[data-enter]:not([data-enter="off"], .is-entering, .is-entered)
+    :is([data-enter-media], .hero__bg, .hero__media, .hero__stage, .hero__art, .hero__window, .hero-visual, .ly-collage):is(img, picture, video) { clip-path: inset(2.381%); }   
+  html.m-enter:not(.m-enter-done, [data-motion="off"]) .hero[data-enter]:not([data-enter="off"], .is-entering, .is-entered)
+    :is([data-enter-media], .hero__bg, .hero__media, .hero__stage, .hero__art, .hero__window, .hero-visual, .ly-collage):not(img, picture, video, :has(> :is(img, picture, video, .frame__img))) { scale: .98; }
+  html.m-enter:not([data-motion="off"]) .hero[data-enter]:not([data-enter="off"], .is-entered) { overflow: clip; }
+}
+
+.hero[data-enter] .m-w { display: inline-block; overflow: clip; vertical-align: top; padding-bottom: .12em; margin-bottom: -.12em; }
+.hero[data-enter] .m-w__in { display: inline-block; }
+
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="off"]) .card:hover, html:not([data-motion="off"]) .card--open:hover > .panel,
+  html:not([data-motion="off"]) :is(a, .card:has(a), .m-zoom):hover :is(.frame__img, .tile__media > img, img, video),
+  html:not([data-motion="off"]) .btn:is(:hover, :active), html:not([data-motion="off"]) :is(.btn--arrow, .link):hover::after,
+  :is(a, button):hover > .m-arrow :is(.m-arrow__head, .m-arrow__stem) { transform: none !important; }
+  .m-arrow__stem { opacity: 1; transform: none; }
+  html:not([data-motion="off"]) .nav__menu { transform: none !important; }
+  
+  .m-tab-ind { transition: none; }
+  .m-switch::before { transition-property: background-color; }
+  .m-switch:active::before { transform: none; }
+  .m-switch[aria-checked="true"]::before, .m-switch[aria-checked="true"]:active::before { transform: translateX(16px); }
+  .m-check::before { transform: rotate(-45deg) scale(1); transition-property: opacity; }
+  html:not([data-motion="off"]) :is(.link, .m-link, p a:not([class]), .footer ul a, .footer .link) { transition-property: color, opacity, background-color, border-color; }
+  
+  html:not([data-motion="off"]) .btn--primary:active { background: color-mix(in oklab, var(--action) 74%, var(--bg)); }
+  html:not([data-motion="off"]) .btn--secondary:active { background: color-mix(in oklab, var(--bg) 86%, var(--ink)); }
+  [data-m-loop] * { animation-duration: var(--m-cycle) !important; animation-iteration-count: infinite !important;
+                    animation-delay: calc(-1 * var(--m-still) * var(--m-cycle)) !important; animation-play-state: paused !important; }
+}

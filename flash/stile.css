@@ -97,3 +97,8 @@ footer { color: var(--testo2); font-size: 0.85rem; padding-bottom: 24px; }
 .avvisi-scelta { margin: 0.5rem 0 0; padding-left: 1.2rem; }
 .avvisi-scelta li { background: var(--avviso-sfondo); color: var(--testo); border-left: 4px solid var(--focus); padding: 0.4rem 0.6rem; margin: 0.3rem 0; list-style: none; }
 input.sc { width: 1.2rem; height: 1.2rem; }
+
+/* Aspetto della nuova home (17/11/2026): bottoni a pillola, angoli piu netti. La logica della pagina non cambia. */
+button, select { border-radius: 999px; }
+.riquadro, .registro { border-radius: 8px; }
+h1, h2 { font-weight: 500; letter-spacing: -0.02em; }

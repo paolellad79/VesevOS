@@ -256,6 +256,56 @@
       "copyrightText": "Copyright 2023-2026 Espressif Systems (Shanghai) CO LTD",
       "comment": "Caricatore di moduli ELF (Apache-2.0), compilato di serie sull ESP32-S3 (VOS_WITH_ELF=1) con 2 modifiche nostre dichiarate in VesevOS/src/third_party/elf_loader/. Versione 1.8.16.",
       "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-Package-23",
+      "name": "Onest (font del sito, file ospitati)",
+      "versionInfo": "variabile (peso 400-700); file woff2 scaricati il 17/11/2026",
+      "downloadLocation": "https://github.com/googlefonts/onest",
+      "licenseConcluded": "OFL-1.1",
+      "licenseDeclared": "OFL-1.1",
+      "copyrightText": "Copyright 2021 The Onest Project Authors",
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-Package-24",
+      "name": "JetBrains Mono (font del sito, file ospitato)",
+      "versionInfo": "variabile; file woff2 scaricato il 17/11/2026 dal repository ufficiale",
+      "downloadLocation": "https://github.com/JetBrains/JetBrainsMono",
+      "licenseConcluded": "OFL-1.1",
+      "licenseDeclared": "OFL-1.1",
+      "copyrightText": "Copyright 2020 The JetBrains Mono Project Authors",
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-Package-25",
+      "name": "Lucide (icone del sito)",
+      "versionInfo": "1.2.100",
+      "downloadLocation": "https://github.com/lucide-icons/lucide",
+      "licenseConcluded": "ISC",
+      "licenseDeclared": "ISC",
+      "copyrightText": "Copyright (c) 2026 Lucide Icons and Contributors",
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-Package-26",
+      "name": "Simple Icons (icone del sito)",
+      "versionInfo": "16.30.0",
+      "downloadLocation": "https://github.com/simple-icons/simple-icons",
+      "licenseConcluded": "CC0-1.0",
+      "licenseDeclared": "CC0-1.0",
+      "copyrightText": "Simple Icons Collaborators",
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-Package-27",
+      "name": "Componenti grafici del sito (fogli di stile e script)",
+      "versionInfo": "2.5.1",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "copyrightText": "Copyright (c) 2026 Leonxlnx",
+      "filesAnalyzed": false
     }
   ],
   "relationships": [
@@ -373,6 +423,31 @@
       "spdxElementId": "SPDXRef-Package-0",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-Package-22"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-0",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-23"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-0",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-24"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-0",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-25"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-0",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-26"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-0",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-27"
     }
   ]
 }
