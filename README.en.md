@@ -4,7 +4,7 @@
 
 <p align="center">
   <img alt="License" src="https://img.shields.io/badge/license-GPL%20v3%20%2B%20commercial-3fa7ff">
-  <img alt="Board" src="https://img.shields.io/badge/board-ESP32--S3%20%C2%B7%20ESP32--C6-37e0b0">
+  <img alt="Board" src="https://img.shields.io/badge/board-ESP32--S3%20%C2%B7%20ESP32--C3%20%C2%B7%20ESP32--C6-37e0b0">
   <img alt="ESP-IDF" src="https://img.shields.io/badge/ESP--IDF-5.5-e7352c">
   <img alt="Status" src="https://img.shields.io/badge/status-in%20development-orange">
   <img alt="Languages" src="https://img.shields.io/badge/languages-it%20%C2%B7%20en%20%C2%B7%20es%20%C2%B7%20de-blueviolet">
@@ -12,7 +12,7 @@
 
 <p align="center"><a href="README.md">Italiano</a> · <a href="README.en.md"><b>English</b></a></p>
 
-<p align="center"><b>Turn a few-euro board into a small control centre: easy to use, secure by default, alive even where there is no internet. For ESP32-S3 and ESP32-C6.</b></p>
+<p align="center"><b>Turn a few-euro board into a small control centre: easy to use, secure by default, alive even where there is no internet. For ESP32-S3, ESP32-C3 and ESP32-C6.</b></p>
 
 ---
 
@@ -30,7 +30,40 @@ Wi-Fi, clock, files, LEDs, pins, a shell and much more, all protected by a passw
 </p>
 <p align="center"><sub>Screenshots of the control page (with sample data): Home in dark theme, Automations, startup order with the bottom terminal panel, and the phone layout.</sub></p>
 
-> **Status:** version 1.8.24c, for ESP32-S3 and ESP32-C6. The project grows in stages: see "Where we are going".
+**New Home graphics (1.8.30k)**
+
+<p align="center">
+  <img src="assets/nuova-home-desktop-chiaro.png" alt="New Home, light theme" width="48%">
+  <img src="assets/nuova-home-desktop-scuro.png" alt="New Home, dark theme" width="48%">
+  <img src="assets/nuova-home-telefono-chiaro.png" alt="New Home on the phone, light theme" width="24%">
+  <img src="assets/nuova-home-telefono-scuro.png" alt="New Home on the phone, dark theme" width="24%">
+</p>
+
+
+**More approved graphics (1.8.30k)**
+
+<p align="center">
+  <img src="assets/nuova-login-2026-11-20-desktop-chiaro.png" alt="Login, desktop chiaro" width="48%">
+  <img src="assets/nuova-login-2026-11-20-desktop-scuro.png" alt="Login, desktop scuro" width="48%">
+  <img src="assets/nuova-login-2026-11-20-telefono-chiaro.png" alt="Login, telefono chiaro" width="24%">
+</p>
+
+<p align="center">
+  <img src="assets/nuova-login-2026-11-20-cornetto-grande-desktop-chiaro.png" alt="Login, cornetto grande, desktop chiaro" width="48%">
+  <img src="assets/nuova-login-2026-11-20-cornetto-grande-desktop-scuro.png" alt="Login, cornetto grande, desktop scuro" width="48%">
+  <img src="assets/nuova-login-2026-11-20-cornetto-grande-telefono-chiaro.png" alt="Login, cornetto grande, telefono chiaro" width="24%">
+  <img src="assets/nuova-login-2026-11-20-cornetto-grande-telefono-scuro.png" alt="Login, cornetto grande, telefono scuro" width="24%">
+</p>
+
+<p align="center">
+  <img src="assets/nuova-login-2026-11-20-vesuvio-centrato-desktop-chiaro.png" alt="Login, Vesuvio centrato, desktop chiaro" width="48%">
+  <img src="assets/nuova-login-2026-11-20-vesuvio-centrato-desktop-scuro.png" alt="Login, Vesuvio centrato, desktop scuro" width="48%">
+  <img src="assets/nuova-login-2026-11-20-vesuvio-centrato-telefono-chiaro.png" alt="Login, Vesuvio centrato, telefono chiaro" width="24%">
+  <img src="assets/nuova-login-2026-11-20-vesuvio-centrato-telefono-scuro.png" alt="Login, Vesuvio centrato, telefono scuro" width="24%">
+</p>
+
+
+> **Status:** version 1.8.30k, for ESP32-S3, ESP32-C3 and ESP32-C6. The project grows in stages: see "Where we are going".
 
 ## Why "VesevOS"?
 
@@ -68,6 +101,15 @@ in radio silence when needed, or communicating in alternative ways.
 | 🌍 | **For everyone** | Italian, English, Spanish and German, and a new language is just one file. |
 | 🔋 | **Reliable and frugal** | Built to survive blackouts and to use little power, even on battery. |
 
+## What's new in 1.8.30k
+
+- **Three boards, one system**: VesevOS now also runs on the **ESP32-C3**, besides the ESP32-S3 and the ESP32-C6.
+- **Deep sleep**: `standby profondo tempo <seconds>`. On power-up the board starts from zero, like a scheduled power-on.
+- **Internal graphics rewritten**, with a new look.
+- **Resource files carry their version and dependencies**, new `.vgz` format and an internal SHA-256 fingerprint.
+- **Home page** with the cornet above the VesevOS name.
+- **Build guide for every board**, step by step (in Italian): [docs/COMPILARE.md](docs/COMPILARE.md).
+
 ## What's new in 1.8.24c
 
 - **Two boards, one system**: VesevOS now runs on the **ESP32-S3** and on the **ESP32-C6** (Wi-Fi 6 and Bluetooth 5). Same page, same features, same way of working: pick your board and VesevOS does the rest.
@@ -96,7 +138,7 @@ in radio silence when needed, or communicating in alternative ways.
 - **LED triggers** (flash, wifi, cpu) and colors of your choice. On the LED/QR page the Admin is now recognized (1.8.0b fix).
 - **Minimal HTTP server** for the redirect to HTTPS (less RAM), fix for the panic after changing the host name, wider and editable watchdogs, CPU governor (ondemand/conservative/schedutil).
 - **Recovery 0.5.1**: the one-time token also works for a normal boot, new page, clearer access messages.
-- **[`firmware/`](firmware/LEGGIMI.md) folder**: ready-made firmware and recovery files (1.8.24c for S3 and C6, Recovery 0.5.3, 0.5.2 and 0.5.1, and earlier versions) with SHA-256 and an `indice.json` list (the folder guide is in Italian).
+- **[`firmware/`](firmware/LEGGIMI.md) folder**: ready-made firmware and recovery files (1.8.30k for S3, C3 and C6, Recovery 0.5.4f, 0.5.3, 0.5.2 and 0.5.1, and earlier versions) with SHA-256 and an `indice.json` list (the folder guide is in Italian).
 - **First-install page** in [`flash/`](flash/README.md): writes the board from the browser (Web Serial), checking every file before writing.
 - Built only with ESP-IDF 5.5, no Arduino.
 - **Updates with no cable and no SD card** (since 1.7.45): from the user menu choose *Update via recovery*; the recovery checks the file is really a VesevOS firmware (header, marker, size, SHA-256) before activating it.
@@ -142,7 +184,7 @@ These are ideas and plans, not promises: the order may change.
 
 ## Requirements
 
-- An **ESP32-S3 SuperMini** board (ESP32-S3FH4R2: 4 MB flash, 2 MB PSRAM) or an **ESP32-C6 SuperMini** (4 MB flash).
+- An **ESP32-S3 SuperMini** board (ESP32-S3FH4R2: 4 MB flash, 2 MB PSRAM) an **ESP32-C3 SuperMini** (4 MB flash) or an **ESP32-C6 SuperMini** (4 MB flash).
 - **ESP-IDF 5.5** (VesevOS is pure ESP-IDF; 5.5.5 is used), installed in `~/esp/esp-idf`. Python 3 and a network connection the first time (the component manager downloads `mdns`, `esp_littlefs` and `esp-nimble-cpp`).
 - Components in the project (`idf/components` folder): **PsychicHttp** 3.1.2 (MIT, modified copy) and **aj_json** (ArduinoJson 7.x, MIT).
 - For cable-free updates: Python 3 and `esptool` (only for the first install, see the guide).

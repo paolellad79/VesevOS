@@ -4,7 +4,7 @@
 
 <p align="center">
   <img alt="Licenza" src="https://img.shields.io/badge/licenza-GPL%20v3%20%2B%20commerciale-3fa7ff">
-  <img alt="Scheda" src="https://img.shields.io/badge/scheda-ESP32--S3%20%C2%B7%20ESP32--C6-37e0b0">
+  <img alt="Scheda" src="https://img.shields.io/badge/scheda-ESP32--S3%20%C2%B7%20ESP32--C3%20%C2%B7%20ESP32--C6-37e0b0">
   <img alt="ESP-IDF" src="https://img.shields.io/badge/ESP--IDF-5.5-e7352c">
   <img alt="Stato" src="https://img.shields.io/badge/stato-in%20sviluppo-orange">
   <img alt="Lingue" src="https://img.shields.io/badge/lingue-it%20%C2%B7%20en%20%C2%B7%20es%20%C2%B7%20de-blueviolet">
@@ -12,7 +12,7 @@
 
 <p align="center"><a href="README.md"><b>Italiano</b></a> · <a href="README.en.md">English</a></p>
 
-<p align="center"><b>Trasforma una scheda da pochi euro in un piccolo centro di controllo: semplice da usare, sicuro per impostazione, vivo anche dove internet non c'è. Per ESP32-S3 ed ESP32-C6.</b></p>
+<p align="center"><b>Trasforma una scheda da pochi euro in un piccolo centro di controllo: semplice da usare, sicuro per impostazione, vivo anche dove internet non c'è. Per ESP32-S3, ESP32-C3 ed ESP32-C6.</b></p>
 
 ---
 
@@ -30,7 +30,40 @@ rete Wi-Fi, ora, file, LED, pin, shell e tante altre cose, tutto protetto da una
 </p>
 <p align="center"><sub>Schermate della pagina di controllo (con dati di esempio): Home in tema scuro, Automazioni, ordine di avvio con il terminale a pannello, e la versione per telefono.</sub></p>
 
-> **Stato:** versione 1.8.24c, per ESP32-S3 ed ESP32-C6. Il progetto cresce a fasi: guarda "Dove stiamo andando".
+**Nuova grafica della Home (1.8.30k)**
+
+<p align="center">
+  <img src="assets/nuova-home-desktop-chiaro.png" alt="Nuova Home, tema chiaro" width="48%">
+  <img src="assets/nuova-home-desktop-scuro.png" alt="Nuova Home, tema scuro" width="48%">
+  <img src="assets/nuova-home-telefono-chiaro.png" alt="Nuova Home sul telefono, tema chiaro" width="24%">
+  <img src="assets/nuova-home-telefono-scuro.png" alt="Nuova Home sul telefono, tema scuro" width="24%">
+</p>
+
+
+**Altre grafiche approvate (1.8.30k)**
+
+<p align="center">
+  <img src="assets/nuova-login-2026-11-20-desktop-chiaro.png" alt="Login, desktop chiaro" width="48%">
+  <img src="assets/nuova-login-2026-11-20-desktop-scuro.png" alt="Login, desktop scuro" width="48%">
+  <img src="assets/nuova-login-2026-11-20-telefono-chiaro.png" alt="Login, telefono chiaro" width="24%">
+</p>
+
+<p align="center">
+  <img src="assets/nuova-login-2026-11-20-cornetto-grande-desktop-chiaro.png" alt="Login, cornetto grande, desktop chiaro" width="48%">
+  <img src="assets/nuova-login-2026-11-20-cornetto-grande-desktop-scuro.png" alt="Login, cornetto grande, desktop scuro" width="48%">
+  <img src="assets/nuova-login-2026-11-20-cornetto-grande-telefono-chiaro.png" alt="Login, cornetto grande, telefono chiaro" width="24%">
+  <img src="assets/nuova-login-2026-11-20-cornetto-grande-telefono-scuro.png" alt="Login, cornetto grande, telefono scuro" width="24%">
+</p>
+
+<p align="center">
+  <img src="assets/nuova-login-2026-11-20-vesuvio-centrato-desktop-chiaro.png" alt="Login, Vesuvio centrato, desktop chiaro" width="48%">
+  <img src="assets/nuova-login-2026-11-20-vesuvio-centrato-desktop-scuro.png" alt="Login, Vesuvio centrato, desktop scuro" width="48%">
+  <img src="assets/nuova-login-2026-11-20-vesuvio-centrato-telefono-chiaro.png" alt="Login, Vesuvio centrato, telefono chiaro" width="24%">
+  <img src="assets/nuova-login-2026-11-20-vesuvio-centrato-telefono-scuro.png" alt="Login, Vesuvio centrato, telefono scuro" width="24%">
+</p>
+
+
+> **Stato:** versione 1.8.30k, per ESP32-S3, ESP32-C3 ed ESP32-C6. Il progetto cresce a fasi: guarda "Dove stiamo andando".
 
 ## Perché si chiama VesevOS
 
@@ -68,6 +101,15 @@ una situazione di emergenza, in silenzio radio quando serve, o comunicando in mo
 | 🌍 | **Per tutti** | Italiano, inglese, spagnolo e tedesco, e si può aggiungere una lingua con un solo file. |
 | 🔋 | **Affidabile e frugale** | Pensato per reggere i blackout e per consumare poco, anche con la batteria. |
 
+## Novità della 1.8.30k
+
+- **Tre schede, un solo sistema**: VesevOS gira ora anche su **ESP32-C3**, oltre a ESP32-S3 e ESP32-C6.
+- **Sonno profondo**: `standby profondo tempo <secondi>`. Alla riaccensione la scheda riparte da zero, come una riaccensione programmata.
+- **Grafica interna riscritta**, con un nuovo stile.
+- **File di risorse con versione e dipendenze nel file**, nuovo formato `.vgz` e impronta SHA-256 interna.
+- **Pagina iniziale** con il cornetto sopra la scritta VesevOS.
+- **Guida per compilare ogni scheda**, passo per passo: [docs/COMPILARE.md](docs/COMPILARE.md).
+
 ## Novità della 1.8.24c
 
 - **Due schede, un solo sistema**: VesevOS ora gira su **ESP32-S3** e su **ESP32-C6** (Wi-Fi 6 e Bluetooth 5). Stessa pagina, stesse funzioni, stesso modo di lavorare: scegli la scheda, il resto lo fa VesevOS.
@@ -96,7 +138,7 @@ una situazione di emergenza, in silenzio radio quando serve, o comunicando in mo
 - **LED con trigger** (flash, wifi, cpu) e colori scelti da te. Nella pagina LED/QR l'Admin ora e riconosciuto (correzione della 1.8.0b).
 - **Server HTTP minimo** per il redirect verso HTTPS (meno RAM), correzione del panico dopo il cambio del nome host, watchdog piu larghi e modificabili, governor della CPU (ondemand/conservative/schedutil).
 - **Recovery 0.5.1**: il gettone monouso vale anche per l'avvio normale, pagina nuova, messaggi di accesso piu chiari.
-- **Cartella [`firmware/`](firmware/LEGGIMI.md)**: firmware e recovery gia compilati (1.8.24c per S3 e C6, Recovery 0.5.3, 0.5.2 e 0.5.1, e le versioni precedenti) con SHA-256 e un elenco `indice.json`.
+- **Cartella [`firmware/`](firmware/LEGGIMI.md)**: firmware e recovery gia compilati (1.8.30k per S3, C3 e C6, Recovery 0.5.4f, 0.5.3, 0.5.2 e 0.5.1, e le versioni precedenti) con SHA-256 e un elenco `indice.json`.
 - **Pagina di prima installazione** in [`flash/`](flash/README.md): scrive la scheda dal browser (Web Serial), controllando ogni file prima di scrivere.
 - Costruito solo con ESP-IDF 5.5, senza Arduino.
 - **Aggiornamento senza cavo e senza scheda SD** (dalla 1.7.45): dal menu utente scegli *Aggiorna tramite recovery*; il recovery controlla che il file sia davvero un firmware VesevOS (intestazione, marchio, dimensione, SHA-256) prima di attivarlo.
@@ -142,7 +184,7 @@ Queste sono idee e progetti, non promesse: l'ordine può cambiare.
 
 ## Requisiti
 
-- Scheda **ESP32-S3 SuperMini** (ESP32-S3FH4R2: 4 MB flash, 2 MB PSRAM) oppure **ESP32-C6 SuperMini** (4 MB flash).
+- Scheda **ESP32-S3 SuperMini** (ESP32-S3FH4R2: 4 MB flash, 2 MB PSRAM) **ESP32-C3 SuperMini** (4 MB flash) oppure **ESP32-C6 SuperMini** (4 MB flash).
 - **ESP-IDF 5.5** (VesevOS e ESP-IDF puro; si usa 5.5.5), installato in `~/esp/esp-idf`. Python 3 e rete la prima volta (il gestore dei componenti scarica `mdns`, `esp_littlefs` e `esp-nimble-cpp`).
 - Componenti nel progetto (cartella `idf/components`): **PsychicHttp** 3.1.2 (MIT, copia modificata) e **aj_json** (ArduinoJson 7.x, MIT).
 - Per l'aggiornamento senza cavo: Python 3 ed `esptool` (solo per la prima installazione, vedi la guida).

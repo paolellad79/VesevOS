@@ -1,6 +1,6 @@
 # Cronologia delle versioni
 
-## 1.8.30k (da rilasciare) - Cinque schede, sonno profondo
+## 1.8.30k (rilasciata il 22/11/2026) - Cinque schede, sonno profondo
 
 - Nuova scheda: ESP32-C3, oltre a ESP32-S3 e ESP32-C6.
 - Sonno profondo: `standby profondo tempo <secondi>`. Alla riaccensione la scheda riparte da zero,
