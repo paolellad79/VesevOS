@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_config_export.cpp
 #include "vos_config.h"
+#include "vos_msglogin.h"
 #include <stdio.h>
 #include "vos_config_int.h"
 #include "vos_func_ids.h"
@@ -49,6 +50,9 @@ bool cfgExport(HeapBuf& out, bool withSecrets) {
   s.raw("config system 'system'\n");
   s.opt("hostname", cfg.hostname.c_str());
   s.opt("domain", cfg.domain.c_str());
+  char msgCod[2 * MSGLOGIN_MAX + 1];
+  msgLoginCodifica(cfg.messaggioLogin.c_str(), msgCod, sizeof msgCod);   // gli a capo diventano \n: il file resta una riga per opzione
+  s.opt("messaggiologin", msgCod);
   s.num("cpu", cfg.cpuMhz);
   // governor e parametri solo se diversi dal predefinito: chi non li usa ottiene lo stesso file di prima
   if (cfg.cpuGov != 0) s.num("cpugov", cfg.cpuGov);
@@ -73,6 +77,29 @@ bool cfgExport(HeapBuf& out, bool withSecrets) {
   s.opt("lang", cfg.lang.c_str());
   s.flag("setup", cfg.setupDone);
   s.flag("https", cfg.https);
+  s.section("rec", "rec");
+  s.flag("on", cfg.recOn);
+  s.num("sec", cfg.recSec);
+  s.num("where", cfg.recWhere);
+  s.num("maxkb", cfg.recMaxKb);
+  s.opt("nome", cfg.recNome.c_str());
+  s.num("limite", cfg.recLimite);
+  s.num("azioni", cfg.recAzioni);
+  s.num("evmax", cfg.recEvMax);
+  s.num("sect", cfg.recSecT);
+  s.num("secr", cfg.recSecR);
+  for (int i = 0; i < 4; i++) {
+    char ks[8];
+    snprintf(ks, sizeof ks, "sec%d", i + 1);
+    s.num(ks, cfg.recSecDev[i]);
+  }
+  s.flag("temp", cfg.recT);
+  s.flag("ram", cfg.recR);
+  for (int i = 0; i < 4; i++) {
+    char key[8];
+    snprintf(key, sizeof key, "dev%d", i + 1);
+    s.opt(key, cfg.recDev[i].c_str());
+  }
   s.section("svc", "svc");
   s.flag("apon", cfg.apOn);
   s.flag("captive", cfg.apCaptive);
@@ -148,6 +175,10 @@ bool cfgExport(HeapBuf& out, bool withSecrets) {
   for (int i = 0; i < LEDSRC_COUNT; i++)
     if (cfg.ledSrcColor[i] != kLedSrcDefault[i]) s.unum(kLedSrcKey[i], cfg.ledSrcColor[i]);
   if (cfg.ledCpuThr != LED_CPU_THR_DEFAULT) s.num("cputhr", cfg.ledCpuThr);
+  for (int i = 0; i < 3; i++)
+    if (cfg.ledGain[i] != 255) s.num(kLedGuadKey[i], cfg.ledGain[i]);
+  for (int i = 0; i < LED_STATI; i++)
+    if (cfg.ledStato[i] != kLedStatoDefault[i]) s.unum(kLedStatoKey[i], cfg.ledStato[i]);
   // LED1 (monocromatico di bordo; prima: sezione "led2", ancora letta in import): la sezione compare solo se diversa dal predefinito
   // (spento, soglia 70), cosi chi non lo usa ottiene lo stesso file di prima
   if (cfg.led2Mode != LED_OFF || cfg.led2CpuThr != LED_CPU_THR_DEFAULT || cfg.led2Brightness != 255) {
@@ -187,7 +218,15 @@ bool cfgExport(HeapBuf& out, bool withSecrets) {
   s.opt("tzname", cfg.tzName.c_str());
   s.num("datefmt", cfg.dateFmt);
   s.num("timefmt", cfg.timeFmt);
+  s.num("datalungafmt", cfg.dataLungaFmt);
+  s.num("oralungafmt", cfg.oraLungaFmt);
+  s.flag("oralungasec", cfg.oraLungaSec);
+  s.opt("datacortatesto", cfg.dataCortaTesto.c_str());
+  s.opt("datalungatesto", cfg.dataLungaTesto.c_str());
+  s.opt("oralungatesto", cfg.oraLungaTesto.c_str());
   s.num("tempunit", cfg.tempUnit);
+  s.num("tarsoc", cfg.tempTarSoc);
+  s.num("tarext", cfg.tempTarExt);
   s.section("aggiorna", "aggiorna");
   s.num("modo", cfg.aggModo);
   s.num("freq", cfg.aggFreq);

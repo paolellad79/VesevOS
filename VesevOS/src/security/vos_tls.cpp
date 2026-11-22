@@ -101,7 +101,11 @@ static bool generate(bool apply) {
   mbedtls_pk_free(&key);
   if (!ok) { free(cert); free(kpem); vlog("TLS: creazione del certificato non riuscita"); return false; }
   DrvNvs p;
-  if (p.begin("tls", false)) { p.putString("cert", cert); p.putString("key", kpem); p.putString("name", cfg.hostname.c_str()); p.putBool("custom", false); p.end(); }
+  if (p.begin("tls", false)) {
+    bool salvato = p.putString("cert", cert) && p.putString("key", kpem) && p.putString("name", cfg.hostname.c_str()) && p.putBool("custom", false);
+    p.end();
+    if (!salvato) vlog("TLS: certificato creato ma NON salvato (memoria NVS?): al prossimo avvio se ne crea un altro");
+  } else vlog("TLS: memoria NVS non disponibile: il certificato non si salva");
   if (apply) {                                       // mai mentre il server lo sta usando
     free(g_cert); free(g_key);
     g_cert = cert; g_key = kpem;
@@ -156,7 +160,9 @@ bool tlsSetCustom(const char* certPem, const char* keyPem, ErrBuf& err) {
   if (r != 0) { err = tr("Chiave non valida (deve essere senza password)"); return false; }
   DrvNvs p;
   if (!p.begin("tls", false)) { err = tr("Memoria non disponibile"); return false; }
-  p.putString("cert", certPem); p.putString("key", keyPem); p.putString("name", cfg.hostname.c_str()); p.putBool("custom", true); p.end();
+  bool salvato = p.putString("cert", certPem) && p.putString("key", keyPem) && p.putString("name", cfg.hostname.c_str()) && p.putBool("custom", true);
+  p.end();
+  if (!salvato) { vlog("TLS: certificato dell'utente NON salvato (memoria NVS?)"); err = tr("Memoria non disponibile"); return false; }
   g_pending = true;                                    // il server in funzione usa ancora il vecchio: vale dal riavvio
   vlog("TLS: certificato caricato dall'utente (%.23s), vale dal prossimo riavvio", fp);
   return true;

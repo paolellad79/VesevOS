@@ -180,10 +180,7 @@ function apUp(){
       AUTH&&AUTH.elf?EXT.b+" "+t("oppure")+" "+EXT.e:EXT.b),false);
     return
   }
-  var fd=new FormData();
-  fd.append("file",f);
-  api("/api/fs/up?dir=/bin",
-    {method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){
+  caricaPezzi("/api/fs/pezzo?dir=/bin",f,f.name,null,t("Caricamento non riuscito")).then(function(j){
       msgCaricato("appm",j,t("Caricato"));
       $("apup").value="";
       apLists()

@@ -7,6 +7,7 @@
 #include <freertos/FreeRTOS.h>
 #include "vos_i18n.h"
 #include "vos_util.h"
+#include "vos_time.h"
 #include "vos_sys.h"
 #include "vos_diag_rule.h"
 #include "vos_strbuf.h"
@@ -189,8 +190,8 @@ std::string diaryText(int maxN, bool withLast) {
   StrBuf& o = t.buf();
   for (int i = n - 1, c = 0; i >= 0 && c < maxN; i--, c++) {
     const BootRec& b = r[i];
-    char when[24];
-    if (b.epoch) { time_t tt = (time_t)b.epoch; struct tm tmv; localtime_r(&tt, &tmv); strftime(when, sizeof(when), "%d/%m %H:%M:%S", &tmv); }
+    char when[TIME_FMT_MAX];
+    if (b.epoch) timeFmtEpoch(b.epoch, true, when, sizeof(when));   // l'epoca e salvata: il formato si applica ora
     else snprintf(when, sizeof(when), "%s", tr("ora non nota"));
     char rn[64]; sysResetNameTo(b.reason, rn, sizeof rn);
     o.addf(tr("Avvio n.%u - %s - %s"), (unsigned)b.n, when, rn);

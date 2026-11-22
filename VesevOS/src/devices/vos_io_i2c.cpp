@@ -6,6 +6,8 @@
 #include "vos_io.h"
 #include "vos_io_int.h"
 #include "vos_bmp280.h"
+#include "../core/vos_taratura.h"
+#include "../core/vos_config.h"
 #include "../drivers/vos_drv_i2c.h"
 
 // un solo sensore I2C: misura nel loop (ioI2cTick), la pagina e le app leggono solo l'ultimo valore
@@ -15,7 +17,12 @@ static uint32_t g_i2cKey = 0;                      // SDA, SCL e velocita con cu
 
 void ioI2cReset() { g_i2c = I2cState(); }                                  // il bus lo avvia ioI2cTick
 bool ioI2cHave() { return g_i2c.have; }
-void ioI2cRead(bool& have, int32_t& t100, uint32_t& pPa) { have = g_i2c.have; t100 = g_i2c.t100; pPa = g_i2c.pPa; }
+// Il valore grezzo resta in g_i2c.t100; la taratura si applica qui, una volta sola, per tutti (pagina, app, comandi, registratore)
+void ioI2cRead(bool& have, int32_t& t100, uint32_t& pPa) {
+  have = g_i2c.have;
+  t100 = tempCorrettaCent(g_i2c.t100, (int)cfg.tempTarExt);
+  pPa = g_i2c.pPa;
+}
 
 static void i2cFail(uint32_t now, int r) {
   g_i2c.up = false; g_i2c.err = (uint8_t)r; if (g_i2c.fails < 250) g_i2c.fails++;

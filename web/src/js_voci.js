@@ -42,10 +42,10 @@ var VOCI=[
 
  {id:"ora",testo:"Ora",gruppo:"sys",ruolo:1,apri:loadTime},
  {id:"loc",testo:"Localizzazione",gruppo:"sys",ruolo:1,apri:apriLocalizzazione},
- {id:"power",testo:"Risparmio energia",gruppo:"sys",ruolo:1,apri:pwLoad},
+ {id:"power",testo:"Risparmio energia",gruppo:"sys",ruolo:1,apri:function(){pwLoad();coLoad()}},
  {id:"func",testo:"Funzionalita",gruppo:"sys",ruolo:1,apri:fnLoad},
  {id:"file",testo:"File",gruppo:"sys",ruolo:1,apri:apriFile},
- {id:"acc",testo:"Accessibilita",gruppo:"sys"},
+ {id:"acc",testo:"Accessibilita",gruppo:"sys",apri:temaStato},
  {id:"conf",testo:"Configurazione",gruppo:"sys",ruolo:2},
  {id:"boot",testo:"Avvio",gruppo:"sys",ruolo:1,apri:bLoad},
  {id:"selftest",testo:"Autotest",gruppo:"sys",ruolo:2,apri:stlPoll},
@@ -53,6 +53,7 @@ var VOCI=[
  {id:"wd",testo:"Watchdog",gruppo:"sys",ruolo:1,sezione:3,apri:wdLoad},
  {id:"shell",testo:"Terminale",gruppo:"sys",ruolo:1,sezione:3,apri:apriTerminale},
  {id:"stat",testo:"Statistiche",gruppo:"sys",ruolo:1,sezione:3,apri:apriStatistiche,esci:fermaStatistiche},
+ {id:"rec",testo:"Registratore",gruppo:"sys",ruolo:1,sezione:3,apri:apriRegistratore,esci:fermaRegistratore},
 
  {id:"pass",testo:"Password",gruppo:"sec",apri:fillPass,esci:pwVuota},
  {id:"sec",testo:"Utenti",gruppo:"sec",ruolo:2,apri:usLoad},

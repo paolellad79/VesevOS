@@ -4,6 +4,7 @@
 #include "vos_rules.h"
 #include "../drivers/vos_drv_task.h"
 #include "vos_mqtt.h"
+#include "../core/vos_azioni.h"
 #include "vos_funzioni.h"
 #include "vos_app.h"
 #include "../core/vos_hooks.h"
@@ -382,6 +383,7 @@ static void evalTriggers() {
 }
 
 static void rulesTask(void*) {
+  azioneOrigineImposta(AO_REGOLA);                  // le azioni delle regole portano l'origine "regola"
   uint32_t lastEval = 0;
   for (;;) {
     xSemaphoreTake(g_mx, portMAX_DELAY);
@@ -397,6 +399,7 @@ bool rulesAction(const char* action, ErrBuf& err, const char* who) {
   string_view a = trimView(action ? action : "");
   if (word(a, 0) == "wait") { err = tr("Azione non ammessa"); return false; }
   if (!actionCheck(a, err)) return false;
+  AzioneDa da(AO_REGOLA);
   doAction(a, who);
   return true;
 }

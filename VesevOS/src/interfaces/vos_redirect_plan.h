@@ -15,4 +15,8 @@ namespace webx {
 // methodOk = il metodo e GET o HEAD; path e query senza il '?' (il percorso vuoto vale "/").
 int  redirectPlan(uint32_t ip, bool methodOk, const char* path, const char* query, char* url, size_t cap, const char** text);
 
+// Richiesta HTTPS fatta con un IPv4 al posto del nome: con l'annuncio del nome (mDNS) acceso ritorna 307 e in url l'indirizzo con il nome
+// ("https://nome.local/"), altrimenti 0 (nessun rimando). hostHeader = intestazione Host, serve solo a capire se e un IPv4.
+int  redirectDaIp(uint32_t ip, const char* hostHeader, char* url, size_t cap);
+
 }  // namespace webx

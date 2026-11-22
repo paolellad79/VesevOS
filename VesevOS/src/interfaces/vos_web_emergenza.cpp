@@ -3,13 +3,16 @@
 // VesevOS - vos_web_emergenza.cpp
 // Pagina di emergenza: piccola, dentro il firmware, per quando i file della pagina (.vrs) mancano o non sono validi.
 // Fa solo due cose: l'accesso dell'amministratore (con il login di sempre: sfida con SHA-256, prova di lavoro, codice MFA)
-// e il caricamento di un file .vrs verso POST /api/risorse/carica (vos_web_risorse.cpp).
-// Con la lingua in errore (lingua = true) la stessa pagina avvisa, carica i file .vld/.vlp con POST /api/fs/up?dir=/lang (stessa rotta e stessi
+// e il caricamento di un file .vrs a PEZZI da 4 KB verso POST /api/risorse/pezzo (vos_web_risorse.cpp): sulla C3 un solo invio da 145 KB faceva
+// chiedere al TLS un blocco di 16 KB di RAM contigua che non si trova; con pezzi piccoli il record e piccolo. Il codice di invio e lo stesso della
+// pagina vera (web/src/js_pezzi.js, copiato in vos_pezzi_js.h da tools/mkpezzi.py).
+// Con la lingua in errore (lingua = true) la stessa pagina avvisa, carica i file .vld/.vlp a pezzi con POST /api/fs/pezzo?dir=/lang (stessi
 // controlli della pagina normale) e offre "Usa l'italiano" (POST /api/lang, code=it).
 // Senza amministratore (scheda mai configurata) non offre niente: dice solo cosa fare. Nessun caricamento senza accesso.
 // I testi arrivano dal firmware con tr(): la pagina e uguale in tutte le lingue. Il resto e fisso (JavaScript compatto).
 // Prova del JavaScript: build/tests/risorse/prova_emergenza.js (SHA-256, formula della password, HMAC, uguali al firmware).
 #include "vos_web_int.h"
+#include "vos_pezzi_js.h"
 
 namespace webx {
 
@@ -90,14 +93,12 @@ if(j.mfa){tok=j.tok;$("m").hidden=false;$("k").focus();say("");return}
 say(j.err||L[10])}).catch(function(){say(L[10])})};
 $("v").onsubmit=function(e){
 e.preventDefault();
-var f=[].slice.call($("r").files).sort(function(a,b){return a.name<b.name?-1:1}),m=L[12];
+var f=[].slice.call($("r").files).sort(function(a,b){var x=a.name=="SHA256SUMS"?0:1,y=b.name=="SHA256SUMS"?0:1;return x-y||(a.name<b.name?-1:1)}),u=L[12]?"/api/fs/pezzo?dir=/lang":"/api/risorse/pezzo";
 say(L[11]);
 (function n(i){
 if(i==f.length){say(L[9]);return setTimeout(function(){location.href="/"},1500)}
-var d=new FormData;
-d.append(m?"file":"f",f[i]);
-fetch(m?"/api/fs/up?dir=/lang":"/api/risorse/carica",{method:"POST",body:d}).then(function(r){return r.json()}).then(function(j){
-if(j.ok)n(i+1);else say(j.err||L[10])}).catch(function(){say(L[10])})})(0)};
+caricaPezzi(u,f[i],f[i].name,function(c){say(L[11]+" "+c+"%")},L[13]).then(function(j){
+if(j.ok)n(i+1);else say(j.err||L[13])})})(0)};
 $("z").onclick=function(){
 say(L[11]);
 P("/api/lang",{code:"it"}).then(function(j){
@@ -149,8 +150,11 @@ esp_err_t sendEmergenza(Res* s, bool lingua) {
   aggiungiTesto(p, tr("Errore"));                                                                                   // 10
   aggiungiTesto(p, tr("Attendere..."));                                                                             // 11
   aggiungiTesto(p, lingua ? tr("Usa l'italiano") : "");                                                           // 12: pieno = modo lingua
+  aggiungiTesto(p, tr("Caricamento interrotto: la scheda ha poca memoria libera. Riprova tra qualche secondo."));  // 13
   p.add("]");
-  p.add(kCoda);
+  p.add(";");                                    // chiude l'array L
+  p.add(kPezziJs);                               // caricamento a pezzi: lo stesso codice della pagina vera (web/src/js_pezzi.js)
+  p.add(kCoda + 1);                              // il resto, senza il punto e virgola iniziale
   if (p.oom() || p.over()) return ko(s, tr("Memoria insufficiente"), "off");
   return sendText(s, 200, "text/html; charset=utf-8", p.c_str(), p.length());
 }

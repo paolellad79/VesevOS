@@ -18,10 +18,12 @@ struct AggDisponibile {
   char     verRec[24];     // recovery pubblicato, vuoto se non dichiarato
 };
 
-// Legge aggiorna/latest.json. false = testo non valido, campo obbligatorio mancante o troppo lungo: d non va usato.
-bool aggLeggiUltima(const char* testo, size_t n, AggDisponibile& d);
-// Il primo blocco del file e un'immagine per ESP32-S3? Va bene almeno il byte 0xE9 e il codice del chip.
-bool aggTestaFirmware(const uint8_t* dati, size_t n);
+// Legge aggiorna/latest.json per la scheda con quella sigla ("S3", "C6", "C3": VOS_CPU_SIGLA). Si usa il blocco schede.<sigla>
+// (campi come "firmware", piu "recovery" = versione del recovery di quella scheda); senza quel blocco vale il vecchio "firmware"
+// SOLO per "S3". false = testo non valido, nessun firmware per questa scheda, campo obbligatorio mancante o troppo lungo: d non va usato.
+bool aggLeggiUltima(const char* testo, size_t n, AggDisponibile& d, const char* sigla);
+// Il primo blocco del file e un'immagine per questo chip? Va bene almeno il byte 0xE9 e il codice del chip (idChip = drvImgChipId()).
+bool aggTestaFirmware(const uint8_t* dati, size_t n, uint16_t idChip);
 // Cerca il marchio del firmware a pezzi: pos si conserva tra un blocco e l'altro, parte da 0. true = trovato.
 bool aggMarchio(const uint8_t* dati, size_t n, size_t& pos);
 #define AGG_TENTATIVI_MAX 3

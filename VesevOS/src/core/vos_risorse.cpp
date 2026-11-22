@@ -9,9 +9,62 @@
 #include "vos_files_stream.h"
 #include "vos_risorse_tocco.h"
 #include "vos_i18n.h"
+#include "vos_common.h"
 #include "../drivers/vos_drv_fs.h"
 
 namespace {
+
+// SHA-256 del file intero, calcolato sui byte che il sink scrive davvero: e quello che va nella riga di SHA256SUMS.
+class ImprontaScritta {
+ public:
+  ~ImprontaScritta() { chiudi(nullptr); }
+  void avvia() { chiudi(nullptr); risShaAvvia(&ctx_); aperta_ = true; }
+  void aggiungi(const uint8_t* d, size_t n) { if (aperta_) risShaAggiungi(&ctx_, d, n); }
+  void chiudi(uint8_t* out) {
+    if (!aperta_) return;
+    uint8_t scarto[32];
+    risShaChiudi(&ctx_, out ? out : scarto);
+    aperta_ = false;
+  }
+
+ private:
+  mbedtls_sha256_context ctx_;
+  bool                   aperta_ = false;
+};
+
+// Prepara in ew il nuovo SHA256SUMS con la riga di "nome" (ricalcolata dal file appena scritto). Elenco vecchio mancante o non valido: si riparte
+// da un elenco con la sola riga (un Admin puo gia sostituirlo). false = niente preparato (ew e vuoto): chi chiama NON deve scambiare il file.
+bool preparaElenco(const char* nome, const uint8_t hash[32], FsAtomicWriter& ew) {
+  char vecchio[RIS_ELENCO_MAX];
+  size_t n = 0;
+  if (risElencoLeggi(vecchio, n) != RIS_OK) n = 0;
+  char nuovo[RIS_ELENCO_MAX];
+  size_t m = risElencoSostituisci(vecchio, n, nome, hash, nuovo, sizeof nuovo);
+  if (m == 0) return false;
+  ErrBuf err;                                                    // RisToccoNostro lo tiene gia chi chiama (scambiaConElenco)
+  if (!ew.begin(RIS_DIR "/SHA256SUMS", true, m, err)) return false;
+  if (!ew.write((const uint8_t*)nuovo, m)) { ew.abort(); return false; }
+  return true;
+}
+
+// Scambio del file e (se richiesto) dell'elenco: l'elenco e pronto PRIMA dello scambio del file; se non si prepara il file vecchio resta.
+bool scambiaConElenco(FsAtomicWriter& w, const char* nome, ImprontaScritta& imp, bool aggiornaElenco) {
+  ErrBuf err;
+  RisToccoNostro nostro;
+  if (!aggiornaElenco) {
+    imp.chiudi(nullptr);
+    return w.commit(err);
+  }
+  uint8_t hash[32];
+  imp.chiudi(hash);
+  FsAtomicWriter ew;                                             // il blocco dei salvataggi e ricorsivo: due scrittori nello stesso task vanno bene
+  if (!preparaElenco(nome, hash, ew)) { w.abort(); return false; }
+  if (!w.commit(err)) { ew.abort(); return false; }
+  bool ok = ew.commit(err);                                      // se qui fallisce il file e nuovo e l'elenco vecchio: lo stato del file risulta "diverso"
+  risToccoCaricato("SHA256SUMS");
+  risElencoAvvio();
+  return ok;
+}
 
 // ---- destinazione: file temporaneo + scambio (FsAtomicWriter) ----
 class SinkFs : public RisSink {
@@ -22,23 +75,26 @@ class SinkFs : public RisSink {
     if (!risPercorso(info.nome, path, sizeof path)) return false;
     RisToccoNostro nostro;                                     // la nostra rotta di caricamento non e una manomissione
     if (!fsMkdirs(RIS_DIR, err)) return false;
-    return w_.begin(path, true, (size_t)RIS_INTEST + info.lunghezza, err);
+    snprintf(nome_, sizeof nome_, "%s.vrs", info.nome);
+    if (!w_.begin(path, true, (size_t)RIS_INTEST + info.lunghezza, err)) return false;
+    imp_.avvia();
+    return true;
   }
-  bool scrivi(const uint8_t* d, size_t n) override { return w_.write(d, n); }
+  bool scrivi(const uint8_t* d, size_t n) override { imp_.aggiungi(d, n); return w_.write(d, n); }
   bool conferma() override {
-    ErrBuf err;
-    RisToccoNostro nostro;
-    bool ok = w_.commit(err);
-    if (ok) risToccoCaricato("html.vrs");
+    bool ok = scambiaConElenco(w_, nome_, imp_, true);          // la pagina ha sempre l'impronta nell'intestazione: la sua riga si aggiorna da sola
+    if (ok) risToccoCaricato(nome_);
     return ok;
   }
-  void annulla() override { w_.abort(); }
+  void annulla() override { imp_.chiudi(nullptr); w_.abort(); }
 
  private:
-  FsAtomicWriter w_;
+  FsAtomicWriter  w_;
+  ImprontaScritta imp_;
+  char            nome_[RIS_FILE_NOME_MAX + 1] = "";
 };
 
-// ---- destinazione di un file singolo: stesso schema, nome preso dall'elenco ----
+// ---- destinazione di un file singolo: stesso schema, nome preso dall'elenco chiuso del firmware ----
 class SinkFileFs : public RisFileSink {
  public:
   bool apri(const char* nome, size_t tetto) override {
@@ -50,41 +106,45 @@ class SinkFileFs : public RisFileSink {
     if (!fsMkdirs(RIS_DIR, err)) return false;
     bool ok = w_.begin(path, true, tetto, err);
     spazio_ = !ok && strcmp(err.c_str(), tr("Spazio esaurito")) == 0;
+    if (ok) imp_.avvia();
     return ok;
   }
-  bool scrivi(const uint8_t* d, size_t n) override { return w_.write(d, n); }
-  bool conferma() override {
-    ErrBuf err;
-    RisToccoNostro nostro;
-    bool ok = w_.commit(err);
+  bool scrivi(const uint8_t* d, size_t n) override { imp_.aggiungi(d, n); return w_.write(d, n); }
+  bool conferma(bool aggiornaElenco) override {
+    bool ok = scambiaConElenco(w_, nome_, imp_, aggiornaElenco);
     if (ok) risToccoCaricato(nome_);
     return ok;
   }
-  void annulla() override { w_.abort(); }
+  void annulla() override { imp_.chiudi(nullptr); w_.abort(); }
   bool pieno() const override { return spazio_ || w_.full(); }
 
  private:
-  FsAtomicWriter w_;
-  bool           spazio_ = false;
-  char           nome_[RIS_FILE_NOME_MAX + 1] = "";
+  FsAtomicWriter  w_;
+  ImprontaScritta imp_;
+  bool            spazio_ = false;
+  char            nome_[RIS_FILE_NOME_MAX + 1] = "";
 };
 
 }  // namespace
 
 struct RisFileCarico {
-  mbedtls_sha256_context ctx;
+  mbedtls_sha256_context ctx;                                  // SHA-256 del file intero (riga di SHA256SUMS)
+  mbedtls_sha256_context ctxInt;                               // SHA-256 della parte garantita dal file stesso (impronta interna)
   SinkFileFs             sink;
   RisFileScrittore       scr;
   bool                   elenco = false;
   RisFile                file = RF_N;
-  RisFileCarico() : scr(risShaMbed(&ctx), sink) { memset(&ctx, 0, sizeof ctx); }
+  RisFileCarico() : scr(risShaMbed(&ctx), risShaMbed(&ctxInt), sink, risFwImpacchetta(VOS_VERSION)) {
+    memset(&ctx, 0, sizeof ctx);
+    memset(&ctxInt, 0, sizeof ctxInt);
+  }
 };
 
 struct RisCarico {
   mbedtls_sha256_context ctx;
   SinkFs                 sink;
   RisScrittore           scr;
-  RisCarico() : scr(risShaMbed(&ctx), sink) { memset(&ctx, 0, sizeof ctx); }
+  RisCarico() : scr(risShaMbed(&ctx), sink, RIS_TETTO_BYTE, risFwImpacchetta(VOS_VERSION)) { memset(&ctx, 0, sizeof ctx); }
 };
 
 bool risPercorso(const char* nome, char* out, size_t cap) {
@@ -172,8 +232,8 @@ RisFileCarico* risFileCaricoInizia(const char* nomeInviato, RisEsito& esito) {
     risFileDaNome(nomeInviato, c->file);
     char elenco[RIS_ELENCO_MAX];
     size_t n = 0;
-    esito = risElencoLeggi(elenco, n);
-    if (esito == RIS_OK) esito = c->scr.iniziaFile(elenco, n, nomeInviato, risFileTetto(c->file), risNomeNotoFw);
+    if (risElencoLeggi(elenco, n) != RIS_OK) n = 0;             // elenco mancante o non buono: i file con impronta interna si caricano lo stesso
+    esito = c->scr.iniziaFile(elenco, n, nomeInviato, risFileTetto(c->file), risNomeNotoFw);
   }
   if (esito != RIS_OK) {
     delete c;

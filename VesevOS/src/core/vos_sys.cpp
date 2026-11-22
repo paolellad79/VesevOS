@@ -5,15 +5,17 @@
 #include <math.h>
 #include "../drivers/vos_drv_task.h"
 #include "vos_hooks.h"
+#include "vos_azioni.h"
 #include "vos_sys.h"
 #include "vos_diario.h"
 #include "../drivers/vos_drv_wifi.h"
-#include <esp_sleep.h>
+#include "../drivers/vos_drv_sonno.h"
 #include "vos_i18n.h"
 #include "vos_util.h"
 #include "vos_log.h"
 #include "vos_service.h"
 #include "vos_config.h"
+#include "vos_taratura.h"
 #include "esp_timer.h"
 #include "esp_heap_caps.h"
 #include "esp_system.h"
@@ -38,7 +40,8 @@ static volatile uint32_t g_idle[DRV_CORES_MAX];     // conteggio del gancio di r
 static uint32_t g_maxIdle[DRV_CORES_MAX];
 static volatile int g_cpu = 0;                      // media sui core presenti
 static volatile int g_cpuCore[DRV_CORES_MAX];       // carico di ogni core presente
-static float g_temp = 0;
+static float g_temp = 0;       // temperatura mostrata (con la taratura)
+static float g_tempGrezza = 0; // temperatura vera del sensore: solo per la protezione termica (decisione dell'utente 20/11/2026)
 static uint8_t g_cpuH[HIST], g_cpuHn = 0;
 static uint8_t g_coreH[DRV_CORES_MAX][HIST], g_ramH[HIST], g_psH[HIST], g_flH[HIST];   // storie per i grafici della Home (percentuali)
 static uint8_t g_flPct = 0;                // percentuale file in flash, riletta ogni 30 s (la lettura costa)
@@ -171,7 +174,8 @@ static void monitorTask(void*) {
     int sum = 0;
     for (int c = 0; c < nc; c++) { g_cpuCore[c] = vosClamp(load[c], 0, 100); sum += g_cpuCore[c]; }
     g_cpu = vosClamp(sum / nc, 0, 100);
-    g_temp = drvTempC();
+    g_tempGrezza = drvTempC();
+    g_temp = tempCorretta(g_tempGrezza, (int)cfg.tempTarSoc);
     { static uint32_t ftick = 0; ftick++;                      // ogni 10 s: la RAM e a pezzi troppo piccoli? (avviso in pagina, spento con un po' di margine)
       if (ftick % 10 == 0 && ftick > 30) {
         uint32_t big = drvHeapMaxBlock();
@@ -186,7 +190,7 @@ static void monitorTask(void*) {
                                  g_topName[0] ? g_topName : "-", g_topPct, g_cpu, (unsigned)mhz, (int)g_temp, (unsigned)(drvHeapFree() / 1024), (unsigned)(drvHeapMinFree() / 1024)); }
     { static uint32_t lifeTick = 0; if (++lifeTick >= 600) { lifeTick = 0; lifeSave(); } }   // ogni 10 minuti
     // caldo: livelli, riduzione del massimo della CPU e allarme (soglie e regole in vos_cpupm.cpp)
-    g_hot = hookCpuTick(g_temp, sysCpuMaxCorePercent()) >= 2;   // governor + caldo (gancio verso vos_cpupm): il solo punto che cambia la frequenza; 2 = THERM_REDUCED o peggio
+    g_hot = hookCpuTick(g_tempGrezza, sysCpuMaxCorePercent()) >= 2;   // governor + caldo (gancio verso vos_cpupm): il solo punto che cambia la frequenza; 2 = THERM_REDUCED o peggio
     { // Spazio usato della memoria interna. Il calcolo vero scorre tutto il file system: con tante voci dura piu di 5 s (Task watchdog), quindi lo fa
       // solo qui, di rado (mai nei primi 20 s) e a priorita da idle. Il controllo "monitor" aspetta di piu mentre dura. Gli altri leggono il valore ricordato.
       uint32_t nowS = drvMillis() / 1000;
@@ -230,7 +234,8 @@ void sysInit() {
   p.end();
   resetNameTo((int)esp_reset_reason(), g_reset, sizeof(g_reset));
   for (int c = 0; c < coreCount(); c++) { g_maxIdle[c] = 1; esp_register_freertos_idle_hook_for_cpu(idleHook, c); }
-  g_temp = drvTempC();
+  g_tempGrezza = drvTempC();
+  g_temp = tempCorretta(g_tempGrezza, (int)cfg.tempTarSoc);
   sysTaskRegister("monitor", monitorStart);
   monitorStart();
 }
@@ -243,6 +248,7 @@ int sysCpuMaxCorePercent() {            // regola unica per il governor: vale il
   return m;
 }
 float sysCpuTemp() { return g_temp; }
+float sysCpuTempLetta() { return tempCorretta(drvTempC(), (int)cfg.tempTarSoc); }   // lettura nuova del sensore del chip, con la taratura
 uint64_t sysUptimeSec() { return (uint64_t)(esp_timer_get_time() / 1000000ULL); }
 uint32_t sysBootCount() { return g_boot; }
 const char* sysResetText() { return g_reset; }
@@ -316,10 +322,11 @@ bool sysStatusJson(HeapBuf& j) {
 // (il tasto BOOT no: tenuto premuto al risveglio porterebbe la scheda in modo programmazione).
 void sysSleep() {
   vlog("SISTEMA: sonno profondo (si riaccende con RESET)");
+  azionePubblica(AZ_SONNO, "", 0);
+  hookRecFlush(1500);                                        // dati del registratore in attesa: scritti prima di dormire
   drvConFlush();
   hookCall(g_hooks.ledShutdown);
   drvWifiShutdown();
   drvDelayMs(100);
-  esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
-  esp_deep_sleep_start();
+  drvSonnoProfondo(0, false);
 }

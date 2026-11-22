@@ -1,0 +1,5 @@
+PsychicHttp 3.1.2 - Copyright (c) 2024 Zach Poulter, Rob Smith (hoeken), Carbou (MIT License, vedi LICENSE).
+Copia in src/ dalla cartella ../psychic (sorgente originale non modificato).
+Modifica unica e meccanica: ogni "#ifdef ARDUINO" / "#ifndef ARDUINO" e' diventato "#ifdef/#ifndef PSYCHIC_ARDUINO"
+(macro mai definita in questo progetto), cosi' la libreria usa SEMPRE il suo ramo nativo ESP-IDF anche se il
+resto del firmware vede ancora Arduino. Nessun'altra riga cambiata. Le build con arduino-cli usano la libreria originale.

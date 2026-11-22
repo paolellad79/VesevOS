@@ -10,6 +10,8 @@
 
 bool   ipParse(std::string_view s, uint32_t& out);   // "192.168.1.5" -> numero (spazi ai lati ammessi)
 void   ipTo(uint32_t ip, char* out, size_t n);   // lo stesso in un buffer (16 byte bastano)
+void   maskTo(uint32_t mask, char* out, size_t n);   // maschera di rete in forma a quattro numeri: ipTo() prende 255.x.x.x per un indirizzo finto IPv6 (16 byte bastano)
+struct MaskText { char s[16]; explicit MaskText(uint32_t m) { maskTo(m, s, sizeof s); } };
 struct IpText { char s[16]; explicit IpText(uint32_t ip) { ipTo(ip, s, sizeof s); } };   // per i printf: IpText(ip).s
 bool   maskValid(uint32_t mask);                  // prefisso da 8 a 30
 void   uptimeTo(uint64_t seconds, char* out, size_t n);   // come uptimeStr, in un buffer (max 64 byte bastano)

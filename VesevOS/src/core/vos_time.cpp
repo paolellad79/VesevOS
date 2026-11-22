@@ -27,17 +27,43 @@ static bool g_serving = false;
 
 #define NTP_UNIX_OFFSET 2208988800UL   // secondi tra 1900 e 1970
 
-// Avvia il client NTP (lwIP/esp_sntp): i nomi dei server li tiene lwIP per puntatore, quindi stanno in copie fisse.
-// Il fuso (TZ) lo imposta la libc. Era configTzTime() di Arduino.
+// Server dell'ora: prima quello che da il router (opzione 42 del DHCP: lwIP lo mette nelle voci 0.. e svuota le altre a ogni contratto,
+// anche al rinnovo), poi i nostri come ripiego. I nomi li tiene lwIP per puntatore, quindi stanno in copie fisse.
+// Una voce data dal router ha un indirizzo e nessun nome; le nostre hanno il nome. Guida: esp_netif_programming, "Use Both Static and Dynamic Servers".
+static char g_srv[2][64];
+static const int NTP_VOCI = CONFIG_LWIP_SNTP_MAX_SERVERS;
+
+static bool voceDalRouter(int i) {
+  const ip_addr_t* a = esp_sntp_getserver((u8_t)i);
+  return a && !ip_addr_isany(a) && !esp_sntp_getservername((u8_t)i);
+}
+
+static bool voceNostra(int i, const char* nome) { return nome[0] && esp_sntp_getservername((u8_t)i) == nome; }
+
+// Rimette i nostri server dopo quelli del router. Se il router li riempie tutti, l'ultima voce resta a noi.
+static void ntpMettiNostri() {
+  int k = 0;
+  while (k < NTP_VOCI && voceDalRouter(k)) k++;
+  for (int n = 0; n < 2; n++) {
+    if (!g_srv[n][0]) continue;
+    bool c = false;
+    for (int i = 0; i < NTP_VOCI; i++) c = c || voceNostra(i, g_srv[n]);
+    if (c) continue;
+    esp_sntp_setservername((u8_t)(k < NTP_VOCI ? k : NTP_VOCI - 1), g_srv[n]);
+    if (k < NTP_VOCI) k++;
+  }
+}
+
+// Avvia il client NTP (lwIP/esp_sntp). Il fuso (TZ) lo imposta la libc. Era configTzTime() di Arduino.
 static void ntpStart(const char* tz, const char* s1, const char* s2) {
-  static char srv[2][64];
-  snprintf(srv[0], sizeof srv[0], "%s", s1);
-  snprintf(srv[1], sizeof srv[1], "%s", s2 ? s2 : "");
+  snprintf(g_srv[0], sizeof g_srv[0], "%s", s1);
+  snprintf(g_srv[1], sizeof g_srv[1], "%s", s2 ? s2 : "");
   if (esp_sntp_enabled()) esp_sntp_stop();
   esp_sntp_setoperatingmode(ESP_SNTP_OPMODE_POLL);
-  esp_sntp_setservername(0, srv[0]);
-  if (srv[1][0]) esp_sntp_setservername(1, srv[1]);
+  for (int i = 0; i < NTP_VOCI; i++) if (!voceDalRouter(i)) esp_sntp_setserver((u8_t)i, nullptr);   // via i nostri vecchi (nome e indirizzo trovato): le voci del router restano
+  ntpMettiNostri();
   esp_sntp_init();
+  if (voceDalRouter(0)) vlog("TIME: server dell'ora dal router: %s (i nostri restano di ripiego)", ipaddr_ntoa(esp_sntp_getserver(0)));
   setenv("TZ", tz, 1);
   tzset();
 }
@@ -96,19 +122,6 @@ bool timeSetLocal(const char* s, ErrBuf& err) {
   return true;
 }
 
-void timeNowFmt(char* out, size_t n) {
-  if (!out || !n) return;
-  if (!timeValid()) { snprintf(out, n, "%s", tr("non impostata")); return; }
-  time_t t = time(nullptr);
-  struct tm tmv;
-  localtime_r(&t, &tmv);
-  static const char* dfmt[3] = { "%d/%m/%Y", "%Y-%m-%d", "%m/%d/%Y" };
-  char d[16], h[16];
-  strftime(d, sizeof(d), dfmt[cfg.dateFmt > 2 ? 0 : cfg.dateFmt], &tmv);
-  strftime(h, sizeof(h), cfg.timeFmt ? "%I:%M:%S %p" : "%H:%M:%S", &tmv);
-  snprintf(out, n, "%s %s", d, h);
-}
-
 void timeSetEpoch(uint32_t t) {
   struct timeval tv; tv.tv_sec = t; tv.tv_usec = 0;
   settimeofday(&tv, NULL);
@@ -127,11 +140,15 @@ bool timePubJson(HeapBuf& j) {
   long off = (long)((long long)t - (long long)mktime(&gm));   // scarto dal UTC in secondi (senza tm_gmtoff)
   return j.addf(",\"tv\":%s,\"te\":%lu,\"to\":%ld,\"tn\":\"", v ? "true" : "false", (unsigned long)t, off) &&
          j.addJson(cfg.tzName.c_str()) &&
-         j.addf("\",\"df\":%d,\"tf\":%d", (int)cfg.dateFmt, (int)cfg.timeFmt);
+         j.addf("\",\"df\":%d,\"tf\":%d,\"dl\":%d,\"ts\":%d,\"tl\":%d,\"dft\":\"", (int)cfg.dateFmt, (int)cfg.timeFmt,
+                (int)cfg.dataLungaFmt, cfg.oraLungaSec ? 1 : 0, (int)cfg.oraLungaFmt) &&
+         j.addJson(cfg.dataCortaTesto.c_str()) && j.add("\",\"dlt\":\"") && j.addJson(cfg.dataLungaTesto.c_str()) &&
+         j.add("\",\"tlt\":\"") && j.addJson(cfg.oraLungaTesto.c_str()) && j.add("\"");
 }
 
 bool timeJson(HeapBuf& j) {
-  char now[32]; timeNowFmt(now, sizeof now);
+  char now[TIME_FMT_MAX];
+  timeFmtEpochLungo((uint32_t)time(nullptr), true, now, sizeof now);   // riquadro grande: formato lungo
   return j.addf("{\"valid\":%s,\"now\":\"%s\",\"epoch\":%lu,\"ntp\":%s,\"server\":\"", timeValid() ? "true" : "false", now, (unsigned long)time(nullptr), cfg.ntpOn ? "true" : "false") &&
          j.addJson(cfg.ntpServer.c_str()) && j.add("\",\"server2\":\"") && j.addJson(cfg.ntpServer2.c_str()) &&
          j.addf("\",\"serve\":%s,\"every\":%lu,\"last\":%lu,\"tz\":\"", cfg.ntpServe ? "true" : "false", (unsigned long)cfg.ntpEvery, (unsigned long)g_lastSync) &&
@@ -194,6 +211,7 @@ static void timeTask(void*) {
       setenv("TZ", cfg.tz.c_str(), 1); tzset();           // solo il fuso, ora a mano
       g_ntpStarted = true;
     }
+    if (cfg.ntpOn && g_ntpStarted && ns == NET_CLIENT_OK) ntpMettiNostri();      // il rinnovo del contratto del router svuota i nostri nomi
     if (cfg.ntpServe && !g_serving && (ns == NET_CLIENT_OK || ns == NET_AP)) startServer();
     vTaskDelay(pdMS_TO_TICKS(3000));
   }

@@ -2,13 +2,13 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_drv_boot.cpp (strato 1: avvio della piattaforma e task principale, vedi vos_drv_boot.h)
 #include "vos_drv_boot.h"
+#include "vos_drv_nvs.h"
 #include "vos_drv_ota.h"
 #include "vos_drv_task.h"
 #include <esp_task_wdt.h>
 #include <sdkconfig.h>
 #include <esp_log.h>
 #include <esp_system.h>
-#include <nvs_flash.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
@@ -18,13 +18,9 @@ int drvNvsEraseReason() { return g_nvsEraseWhy; }
 
 bool drvPlatformInit() {
   esp_log_level_set("*", (esp_log_level_t)CONFIG_LOG_DEFAULT_LEVEL);
-  esp_err_t e = nvs_flash_init();
-  if (e == ESP_ERR_NVS_NO_FREE_PAGES || e == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-    g_nvsEraseWhy = (int)e;
-    if (nvs_flash_erase() == ESP_OK) e = nvs_flash_init();
-  }
+  bool nvsPronta = drvNvsAvvia(g_nvsEraseWhy);
   drvOtaConfirmBoot();                               // dopo la NVS: serve per sapere se questo firmware e in prova
-  return e == ESP_OK;
+  return nvsPronta;
 }
 
 int drvResetReason() {

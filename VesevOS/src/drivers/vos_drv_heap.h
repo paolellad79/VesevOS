@@ -31,6 +31,8 @@ inline uint32_t drvHeapMaxBlock() { return heap_caps_get_largest_free_block(MALL
 inline uint32_t drvPsramTotal()   { return heap_caps_get_total_size(MALLOC_CAP_SPIRAM); }
 inline uint32_t drvPsramFree()    { return heap_caps_get_free_size(MALLOC_CAP_SPIRAM); }
 inline bool     drvPsramPresent() { return drvPsramTotal() > 0; }   // la scheda ha la PSRAM?
+// Controllo dell'integrita di tutto l'heap (RAM interna e PSRAM): false se un blocco e rovinato. Lento (decine di ms): solo dopo il sonno.
+inline bool     drvHeapIntegra()  { return heap_caps_check_integrity_all(true); }
 
 // Da ora in poi i blocchi di memoria di almeno `limit` byte (malloc, new) vanno in PSRAM e lasciano libera la RAM interna.
 // Solo con la PSRAM presente (drvPsramTotal() > 0).

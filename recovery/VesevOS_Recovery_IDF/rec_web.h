@@ -1,5 +1,5 @@
 // VesevOS Recovery - server web (esp_http_server). Rotte uguali alla 0.4.4:
-//   GET /  pagina | GET /api/ver | POST /api/start | /api/login | /api/info | /api/boot | /upload
+//   GET /  pagina | GET /tema.css | GET /api/vista (nome e messaggio) | GET /api/ver | POST /api/start | /api/login | /api/info | /api/boot | /upload
 #pragma once
 #include <stdint.h>
 #include <string>

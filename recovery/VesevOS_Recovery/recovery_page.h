@@ -13,7 +13,7 @@ button{background:#2b6cb0;border:0;cursor:pointer}button:disabled{opacity:.5}.m{
 <small>Recovery 0.4.3. Per entrare serve un amministratore di VesevOS.</small></div>
 <div class="c" id="b" hidden><div id="info" class="m"></div>
 <div id="dz"><label>Firmware (file .bin di VesevOS)<input id="f" type="file" accept=".bin"></label><div class="m" id="fn"><small>Trascina qui il file .bin oppure usa il pulsante.</small></div></div>
-<label>SHA-256 atteso (facoltativo: lo trovi nella pagina del rilascio)<input id="sh" autocomplete="off" spellcheck="false" placeholder="64 caratteri esadecimali"></label>
+<label>SHA-256 del file (obbligatorio: lo trovi nella pagina del rilascio)<input id="sh" autocomplete="off" spellcheck="false" placeholder="64 caratteri esadecimali"></label>
 <button id="bu" onclick="up()">Carica e installa</button><progress id="pg" value="0" max="100" hidden></progress><div class="m" id="um"></div>
 <button id="bb" onclick="boot()" style="background:#3a4652">Avvia VesevOS senza aggiornare</button></div>
 </main>
@@ -55,7 +55,7 @@ function chk(buf){var v=new Uint8Array(buf);if(v.length<48)return "File troppo p
  for(var k=0;k+m.length<=v.length&&!ok;k++){if(v[k]!==m[0])continue;var j=1;while(j<m.length&&v[k+j]===m[j])j++;if(j===m.length)ok=true}
  return ok?"":"Non e un firmware VesevOS (manca il marchio)"}
 function up(){var f=$("f").files[0];if(!f){msg("um","Scegli il file .bin",false);return}
- var sh=$("sh").value.trim().toLowerCase();if(sh&&!/^[0-9a-f]{64}$/.test(sh)){msg("um","Lo SHA-256 deve avere 64 caratteri (0-9, a-f)",false);return}
+ var sh=$("sh").value.trim().toLowerCase();if(!/^[0-9a-f]{64}$/.test(sh)){msg("um","Serve lo SHA-256 del file: 64 caratteri (0-9, a-f)",false);return}
  $("bu").disabled=true;$("bb").disabled=true;msg("um","Controllo il file...",true);
  var r=new FileReader();r.onerror=function(){$("bu").disabled=false;$("bb").disabled=false;msg("um","Non riesco a leggere il file",false)};
  r.onload=function(){var e=chk(r.result);if(e){$("bu").disabled=false;$("bb").disabled=false;msg("um",e,false);return}send(f,sh)};r.readAsArrayBuffer(f)}

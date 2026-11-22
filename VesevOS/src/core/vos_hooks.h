@@ -24,6 +24,12 @@ struct VosHooks {
   bool (*mfaOn)(int user);
   int  (*btnWpsClicks)();                           // click del tasto fisico che avviano il WPS (0 = nessuno)
   void (*radiosOff)();                              // modo aereo: ferma ESP-NOW e Bluetooth
+  void (*webSospendi)();                            // sonno: ferma il server HTTPS prima di spegnere la radio
+  void (*webRiprendi)();                            // risveglio: il server HTTPS riparte (la checklist del sonno lo chiede a rete pronta)
+  void (*taskSospendiTutti)();                      // sonno: ferma i task registrati (non il watchdog) e ricorda quali giravano
+  bool (*taskRiprendiUno)();                        // risveglio: rimette in moto UN task fermato dal sonno; true = ne restano altri
+  bool (*heapIntegra)();                            // controllo dell'heap (lento): false = memoria rovinata
+  void (*riavviaPulito)(const char* motivo);        // riavvio ordinato con il motivo nel diario
   // LED, rete, traffico e periferiche stanno sopra il nucleo (devices/, net/): il nucleo li chiede qui
   void (*ledInit)();
   void (*netInit)();
@@ -40,6 +46,7 @@ struct VosHooks {
   int  (*cpuTick)(float tempC, int busyPct);        // un giro al secondo; ritorna lo stato termico (CpuThermal come numero)
   void (*cpuApplyMode)();                           // la scelta della CPU e cambiata: va applicata al prossimo giro
   int  (*cpuStatus)(char* out, size_t n);           // pezzo di JSON dello stato della CPU (campi cpuMhz...cpuChanges); ritorna i byte scritti, -1 se non entra
+  void (*recFlush)(uint32_t maxMs);                 // registratore: scrive subito i dati in attesa (prima di un riavvio o del sonno), al massimo maxMs
   uint32_t (*webIdleSec)();                         // secondi da quando qualcuno ha usato la pagina (senza pagina: nessuno la usa)
 };
 
@@ -60,4 +67,5 @@ inline void hookShellExec(const char* line, OutSink& out, int role) { if (g_hook
 inline int  hookCpuTick(float t, int busy) { return g_hooks.cpuTick ? g_hooks.cpuTick(t, busy) : 0; }
 inline void hookCpuApplyMode() { if (g_hooks.cpuApplyMode) g_hooks.cpuApplyMode(); }
 inline int  hookCpuStatus(char* out, size_t n) { if (g_hooks.cpuStatus) return g_hooks.cpuStatus(out, n); if (n) out[0] = 0; return 0; }
+inline void hookRecFlush(uint32_t maxMs) { if (g_hooks.recFlush) g_hooks.recFlush(maxMs); }
 inline uint32_t hookWebIdleSec() { return g_hooks.webIdleSec ? g_hooks.webIdleSec() : 0xFFFFFFFFUL; }

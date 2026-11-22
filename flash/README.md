@@ -46,9 +46,9 @@ Preimpostazioni (le caselle si possono cambiare una per una):
   | 0x8000 | `bin/partition-table-1.8.16.bin` | uguale nei build di firmware e recovery |
   | 0x9000 | `bin/nvs-vuoto.bin` | 20 KiB di 0xFF: NIENTE dati di nessuna scheda |
   | 0xe000 | `bin/otadata-app0.bin` | primo avvio direttamente su `app0` (stesso contenuto che ha una scheda in uso, solo numero di sequenza e CRC) |
-  | 0x10000 | `../firmware/recovery/0.5.3/VesevOS-Recovery-S3-0.5.3.bin` | recovery |
-  | 0x110000 | `../firmware/1.8.24c/VesevOS-S3-1.8.24c.bin` | firmware |
-  | 0x360000 | `../firmware/risorse/1.8.24/VesevOS-Risorse-1.8.24.bin` | immagine corta dei file di VesevOS (LittleFS, 63 blocchi = 252 KiB; la scheda la estende al primo avvio) |
+  | 0x10000 | `../firmware/recovery/0.5.4f/VesevOS-Recovery-S3-0.5.4f.bin` | recovery |
+  | 0x110000 | `../firmware/1.8.30k/VesevOS-S3-1.8.30k.bin` | firmware |
+  | 0x360000 | `../firmware/risorse/1.8.30k/VesevOS-Risorse-1.8.30k.bin` | immagine corta dei file di VesevOS (LittleFS, 67 blocchi = 268 KiB; la scheda la estende al primo avvio) |
 - **Solo firmware** (0x110000) e **Solo recovery** (0x10000): per recuperare una scheda con tabella e avvio gia buoni.
 - Scelta fatta: file separati, uno per parte, ognuno con il suo SHA-256 e i suoi controlli, al posto di una immagine unica da 4 MB.
   Motivi: si riusano i binari ufficiali senza copie "fuse"; ogni controllo (marchio, slot) e chiaro; niente 4 MB quasi tutti vuoti; il file con i dati di una scheda non esiste.
@@ -88,7 +88,7 @@ Script rapido per rigenerare dimensioni e SHA: vedi il comando in fondo a questo
 ## Controlli consigliati
 Se vuoi rifare le prove, usa prima una scheda di prova e tieni il backup a portata di mano:
 1. Collegamento e reset automatico su tutti i sistemi operativi, con un browser che supporta la porta seriale: scheda in uso, scheda spenta e scheda che non parte.
-2. Installazione completa su scheda nuova, poi avvio: la scheda deve partire su VesevOS 1.8.24c; recovery raggiungibile.
+2. Installazione completa su scheda nuova, poi avvio: la scheda deve partire su VesevOS 1.8.30k; recovery raggiungibile.
 3. "Aggiorna e conserva i dati" su una scheda gia usata: impostazioni, contatore dei riavvii e tempo di vita devono restare. Poi solo firmware e solo recovery.
 3b. Installazione completa su una scheda NUOVA (solo con una scheda di prova e il via del proprietario): dopo il primo avvio `ls /usr/share/vesevos` deve mostrare gli 8 file e il controllo SHA256SUMS dell'avvio non deve dare avvisi; la prima apertura della pagina deve funzionare senza pagina di emergenza. NON ancora provato su scheda.
 4. Rifiuti: file modificato di 1 byte, elenco con SHA sbagliato, firmware messo come recovery, sito non raggiungibile, pagina aperta da disco.

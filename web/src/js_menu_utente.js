@@ -76,7 +76,7 @@ function uRecUp(){
         j.kb))+'</p>'
       +'<label for="rcf">'+esc(t("File del recovery (.bin)"))+
       '</label><input type="file" id="rcf" accept=".bin">'
-      +'<label for="rcs">'+esc(t("Impronta SHA-256 (facoltativa)"))+
+      +'<label for="rcs">'+esc(t("Impronta SHA-256 (obbligatoria)"))+
       '</label><input id="rcs" autocomplete="off" spellcheck="false" maxlength="64">'
       +'<p class="law" style="margin:8px 0 0">'+
       esc(t(
@@ -92,13 +92,10 @@ function uRecUp(){
         if(!f)return t("Scegli il file");
         if(j.nops&&!$("rcc").checked)return t("Spunta la casella per continuare");
         if(f.size>j.kb*1024)return t("File troppo grande per lo spazio del recovery");
-        if(h&&!/^[0-9a-fA-F]{64}$/.test(h))return t(
+        if(!/^[0-9a-fA-F]{64}$/.test(h))return t(
           "L'impronta SHA-256 deve avere 64 cifre esadecimali");
-        var fd=new FormData();
-        fd.append("file",f,f.name);
         msg("dlgm",t("Controllo e scrivo il recovery..."),true);
-        return api("/api/recovery/up"+(h?"?sha="+enc(h):""),
-          {method:"POST",body:fd}).then(function(r){return r.json()}).then(function(k){
+        return caricaPezzi("/api/recovery/pezzo?sha="+enc(h),f,f.name,null,t("Caricamento non riuscito")).then(function(k){
             if(k.ok)setTimeout(function(){
               dlg({title:t("Recovery aggiornato"),
                 body:'<p style="margin:0" role="status">'+

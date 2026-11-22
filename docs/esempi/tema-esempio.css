@@ -1,0 +1,37 @@
+/* Tema di esempio per la pagina di VesevOS.
+   Si carica da Sistema > Accessibilita > Tema della pagina (solo amministratore) e si applica sopra l'aspetto di fabbrica, senza aggiornare il firmware.
+   Regole: al massimo 32 KB; sono rifiutati per intero @import, url(), image-set(), src(), expression(), javascript:, -moz-binding,
+   la barra rovesciata e il carattere minore. Si possono cambiare i colori (le variabili qui sotto), i raggi e la forma dei bottoni.
+   Per tornare all'aspetto di fabbrica: "Tema di fabbrica" nella stessa scheda. */
+
+/* Tema scuro (quello di fabbrica; cambia i valori che vuoi) */
+:root {
+  --bg: #0b1220;       /* sfondo della pagina */
+  --card: #111d31;     /* carte e finestre */
+  --side: #0d1626;     /* barra laterale e intestazione */
+  --tx: #e6edf3;       /* testo */
+  --mut: #9aa8b9;      /* testo secondario */
+  --ac: #3fa7ff;       /* accento: bottoni, indicatori */
+  --acink: #0b1220;    /* testo sopra l'accento */
+  --in: #0e1829;       /* campi di testo */
+  --bd: #1f2e44;       /* linee sottili */
+}
+
+/* Tema chiaro */
+:root[data-theme=light] {
+  --bg: #f4f7fb;
+  --card: #ffffff;
+  --side: #ffffff;
+  --tx: #0b1220;
+  --mut: #4d5c70;
+  --ac: #1466b8;
+  --act: #1466b8;
+  --acink: #ffffff;
+  --in: #eef3f9;
+  --bd: #dbe4ef;
+}
+
+/* Forma: per bottoni quadrati e carte meno arrotondate togli i commenti.
+.btn { border-radius: 8px; }
+.card { border-radius: 8px; }
+*/

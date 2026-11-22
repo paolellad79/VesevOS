@@ -8,6 +8,7 @@
 #include "vos_util.h"
 #include "../drivers/vos_drv_nvs.h"
 #include "../drivers/vos_drv_ota.h"
+#include "../drivers/vos_drv_ip6.h"
 #include "../drivers/vos_drv_fs.h"
 #include "../drivers/vos_drv_sys.h"
 
@@ -59,7 +60,7 @@ bool updUrlAllowed(const char* url, ErrBuf& err) {
     if (c <= 32 || c > 126) { err = tr("Indirizzo non valido: solo caratteri ASCII visibili, niente spazi"); return false; }
     if (c == '@') { err = tr("Indirizzo non valido: niente nome utente e password dentro l'indirizzo"); return false; }
   }
-  if (strstr(url, "..") || strchr(url, '\\')) { err = tr("Indirizzo non valido"); return false; }
+  if (strstr(url, "..") || strchr(url, '\\') || strchr(url, '%')) { err = tr("Indirizzo non valido"); return false; }   // niente "%": "%2e%2e" scavalcherebbe il controllo sui ".."
   if (updUrlUfficiale(url) || matchesFilePrefix(url)) return true;
   err = tr("Indirizzo non consentito: sono ammessi solo i file ufficiali di VesevOS su GitHub");
   return false;
@@ -178,7 +179,9 @@ bool updOrderFile(uint32_t clientIp, char tokenHex[33], ErrBuf& err) {
   if (!clientIp) { err = tr("Indirizzo del computer non riconosciuto"); return false; }
   uint8_t tk[16];
   drvRandomFill(tk, sizeof tk);
-  uint32_t cip = __builtin_bswap32(clientIp);              // il contratto vuole esp_ip4_addr_t.addr (ordine di rete)
+  // Il contratto vuole esp_ip4_addr_t.addr (ordine di rete). Un client IPv6 nativo ha solo un indirizzo FINTO (drvSockPeer): il recovery lo
+  // vede in IPv4 e non coinciderebbe mai, quindi per lui cip = 0 (nessun legame con l'indirizzo: vale il codice casuale, monouso, 15 minuti).
+  uint32_t cip = drvIp6Finto(clientIp) ? 0 : __builtin_bswap32(clientIp);
   DrvNvs n;
   if (!n.begin(NS, false)) { err = tr("Memoria di configurazione non disponibile"); return false; }
   n.clear();

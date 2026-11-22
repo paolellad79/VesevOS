@@ -31,6 +31,7 @@ GET   /api/common  pubblico
 GET   /api/config/download  admin
 POST  /api/config/export  admin
 POST  /api/config/restore  admin
+GET   /api/coproc  operatore
 POST  /api/cpu  admin
 GET   /api/crash  operatore
 GET   /api/dev  operatore
@@ -69,6 +70,7 @@ POST  /api/lang  admin
 GET   /api/langfile  pubblico
 GET   /api/langs  pubblico
 POST  /api/led  operatore
+POST  /api/led/anteprima  operatore
 GET   /api/license  pubblico
 GET   /api/log  ospite
 POST  /api/log/clear  admin
@@ -115,6 +117,8 @@ POST  /api/progdata  admin
 GET   /api/progs  operatore
 POST  /api/progs  admin
 POST  /api/reboot  operatore
+GET   /api/rec  operatore
+POST  /api/rec/set  admin
 GET   /api/recovery  admin
 POST  /api/recovery  admin
 GET   /api/region  ospite
@@ -177,3 +181,8 @@ GET   /api/wifi/test  admin
 POST  /api/wifi/test  admin
 GET   /api/wps  admin
 POST  /api/wps  admin
+GET   /apple-touch-icon.png  pubblico
+GET   /icon-192.png  pubblico
+GET   /icon-512.png  pubblico
+GET   /manifest.webmanifest  pubblico
+GET   /tema.css  pubblico

@@ -9,6 +9,7 @@
 
 #define VOS_BOARD         "ESP32-C6 SuperMini"
 #define VOS_CHIP          "ESP32-C6"
+#define VOS_CPU_SIGLA     "C6"                   // sigla nei nomi dei file e in aggiorna/latest.json (blocco "schede")
 #define VOS_ADDR2LINE     "riscv32-esp-elf-addr2line"
 
 // ---- memoria ----
@@ -94,6 +95,11 @@
 #define VOS_BOARD_PWM 1
 // ---- Contatore di impulsi dell'utente (package VOS_WITH_CONTATORE): serve il blocco PCNT (4 unita sul C6) ----
 #define VOS_BOARD_CONTATORE 1
+// Capacita del chip per il registratore di dati (solo dichiarazioni: il sonno profondo arriva dopo). C6: CPU LP, LP SRAM 16 KB.
+#define VOS_HAS_ULP          0   // coprocessore ULP (solo S3)
+#define VOS_HAS_LP_CPU       1   // CPU a basso consumo (solo C6)
+#define VOS_HAS_PCNT         1   // contatore di impulsi (PCNT)
+#define VOS_RTC_MEM_BYTES    16384   // memoria che resta accesa nel sonno profondo
 // ---- LED a colori WS2812 a mano (classe "led_rgb"): il C6 ha 2 canali RMT di trasmissione, 1 e del LED di bordo: ne resta 1 ----
 #define VOS_BOARD_LED_RGB_MANO 1
 
@@ -164,3 +170,4 @@ static_assert(!VOS_SD_RESERVED(VOS_SD_DEF_CS) && !VOS_SD_RESERVED(VOS_SD_DEF_MOS
 #if defined(VOS_PIN_LED2)
 static_assert(VOS_GPIO_EXISTS(VOS_PIN_LED2) && VOS_PIN_LED2 != VOS_PIN_LED_RGB && VOS_PIN_LED2 != VOS_PIN_BOOT, "LED2: pin non valido");
 #endif
+static_assert(VOS_RTC_MEM_BYTES >= 4096 && !(VOS_HAS_ULP && VOS_HAS_LP_CPU), "capacita del registratore: valori non coerenti");

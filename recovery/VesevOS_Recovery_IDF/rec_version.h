@@ -3,7 +3,7 @@
 // (vedi VesevOS/src/core/vos_imgcheck.h) per aggiornare il recovery e leggerne la versione.
 #pragma once
 
-#define REC_VERSION "0.5.3a"
+#define REC_VERSION "0.5.4f"
 
 // Tempi (millisecondi), uguali alla 0.4.4.
 #define HANDOVER_MS 3000
@@ -23,14 +23,17 @@
 #define REC_LED_PIN 8
 #define REC_CHIP_ID 0x000D
 #define REC_CHIP_NAME "ESP32-C6"
+#define REC_SCHEDA "ESP32-C6 SuperMini"   // nome della scheda, mostrato nella pagina (come VOS_BOARD del firmware)
 #elif defined(CONFIG_IDF_TARGET_ESP32C3)
 #define BOOT_PIN 9
 #define REC_LED_PIN -1
 #define REC_CHIP_ID 0x0005
 #define REC_CHIP_NAME "ESP32-C3"
+#define REC_SCHEDA "ESP32-C3 SuperMini"
 #else
 #define BOOT_PIN 0
 #define REC_LED_PIN 48
 #define REC_CHIP_ID 0x0009
 #define REC_CHIP_NAME "ESP32-S3"
+#define REC_SCHEDA "ESP32-S3 SuperMini"
 #endif

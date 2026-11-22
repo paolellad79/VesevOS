@@ -60,7 +60,7 @@ function suDots(){
 
 function setupDraw(){
   var i=SU.i,d=SU.d,h=
-    '<div class="sw"><div class="hero"><svg class="logo" aria-hidden="true"><use href="#i-chip"/></svg></div><h2 style="margin:0">'+
+    '<div class="sw"><div class="hero"><svg class="logo" aria-hidden="true"><use href="#i-cornetto"/></svg></div><h2 style="margin:0">'+
     esc(t("Prima configurazione"))+'</h2><div class="subt">'+
     esc(tf("Passo {0} di {1}: {2}",i+1,suSteps().length,t(suSteps()[i])))+'</div>'+suDots()+
     '<div class="card">';

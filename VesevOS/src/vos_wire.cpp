@@ -4,6 +4,9 @@
 #include "vos_wire.h"
 #include "core/vos_hooks.h"
 #include "core/vos_cpupm.h"
+#include "core/vos_sys.h"
+#include "core/vos_wd.h"
+#include "drivers/vos_drv_heap.h"
 #include "interfaces/vos_web.h"
 #include "interfaces/vos_shell.h"
 #include "packages/vos_rules.h"
@@ -13,6 +16,7 @@
 #include "packages/vos_mfa.h"
 #include "packages/vos_btn.h"
 #include "packages/vos_dev_pkg.h"
+#include "packages/vos_rec.h"
 #include "devices/vos_led.h"
 #include "devices/vos_dev.h"
 #include "devices/vos_io.h"
@@ -21,6 +25,8 @@
 
 static bool mqttPub(const char* sub, const char* msg) { return mqttPublishRel(sub, msg, false); }
 static void radiosOff() { meshStop(); bleStop(); }
+static bool heapIntegraW() { return drvHeapIntegra(); }
+static void riavviaPulitoW(const char* motivo) { sysReboot(motivo, 0); }
 
 static void shellExecW(const char* line, OutSink& out, int role) { shellExec(line, out, role); }
 static bool devIsOnW(const char* id) { const DevOps* d = devFind(id); return d && d->state && d->state(); }
@@ -30,6 +36,12 @@ static int cpuTickW(float tempC, int busyPct) { cpuPmTick(tempC, busyPct); retur
 void vosWire() {
   g_hooks.webInit      = webInit;
   g_hooks.webStart     = webStart;
+  g_hooks.webSospendi  = webSospendi;
+  g_hooks.webRiprendi  = webRiprendi;
+  g_hooks.taskSospendiTutti = sysTaskSospendiTutti;
+  g_hooks.taskRiprendiUno = sysTaskRiprendiUno;
+  g_hooks.heapIntegra  = heapIntegraW;
+  g_hooks.riavviaPulito = riavviaPulitoW;
   g_hooks.webRotte     = webRotte;
   g_hooks.webHttpsUp   = webHttpsUp;
   g_hooks.webTrimIdle  = webTrimIdle;
@@ -55,5 +67,8 @@ void vosWire() {
   g_hooks.cpuTick      = cpuTickW;
   g_hooks.cpuApplyMode = cpuPmApplyMode;
   g_hooks.cpuStatus    = cpuPmStatusJson;
+#if VOS_WITH_REC
+  g_hooks.recFlush     = recFlushNow;
+#endif
   devPkgRegister();
 }

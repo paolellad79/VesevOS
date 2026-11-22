@@ -47,7 +47,7 @@ static volatile uint8_t g_state = 0;      // 0 mai lanciata, 1 in corso, 2 finit
 static volatile int g_n = 0;              // prova in corso
 static bool g_names = false, g_active = false;
 static uint32_t g_totMs = 0;
-static char g_when[32];
+static char g_when[TIME_FMT_MAX];   // data e ora della diagnosi: stessa misura del formato (prima 32, con i formati lunghi tagliava)
 
 // ---------- aiuti ----------
 static void title(const char* n) { if (g_res) { strncpy(g_res[g_n].name, n, sizeof(g_res[g_n].name) - 1); g_res[g_n].name[sizeof(g_res[g_n].name) - 1] = 0; } }
@@ -192,7 +192,7 @@ static void tTime() {
   title(tr("Ora e data"));
   bool v = timeValid(); uint32_t last = timeLastSync(); uint8_t st = SELF_OK;
   if (!v) st = SELF_WARN; else if (cfg.ntpOn && !last && netState() == NET_CLIENT_OK) st = SELF_WARN;
-  char now[32]; timeNowFmt(now, sizeof now);
+  char now[TIME_FMT_MAX]; timeNowFmt(now, sizeof now);
   repf(st, tr("Ora valida: %s; NTP %s; ultima sincronizzazione: %s; fuso %s"), yn(v), onoff(cfg.ntpOn), last ? now : tr("mai"), cfg.tzName.length() ? cfg.tzName.c_str() : "-");
 }
 static void tSvc() {
@@ -304,7 +304,7 @@ bool selftestStart(bool active, bool names, ErrBuf& err) {
   if (g_res) memset(g_res, 0, NT * sizeof(SelfEntry));
   if (!g_res) { err = tr("Memoria insufficiente"); return false; }
   g_active = active; g_names = names; g_n = 0; g_totMs = 0;
-  char now[32]; timeNowFmt(now, sizeof now);
+  char now[TIME_FMT_MAX]; timeNowFmt(now, sizeof now);
   snprintf(g_when, sizeof(g_when), "%s", timeValid() ? now : tr("ora non valida"));
   g_state = 1;
   if (!drvTaskCreate(selfTask, "selftest", 5120, NULL, 1, NULL, DRV_CORE_ANY)) {   // core: automatico (prima: core 1 fisso)

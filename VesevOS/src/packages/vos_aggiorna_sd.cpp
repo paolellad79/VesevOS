@@ -36,7 +36,7 @@ struct Scrittura {
 bool scriviBlocco(void* ctx, const uint8_t* dati, size_t n) {
   Scrittura* s = (Scrittura*)ctx;
   if (s->primo) {
-    if (!aggTestaFirmware(dati, n)) { snprintf(s->errore, sizeof s->errore, "%s", tr("Il file scaricato non e un firmware valido")); return false; }
+    if (!aggTestaFirmware(dati, n, drvImgChipId())) { snprintf(s->errore, sizeof s->errore, "%s", tr("Il file scaricato non e un firmware valido")); return false; }
     s->primo = false;
   }
   if (!sdUp()) { snprintf(s->errore, sizeof s->errore, "%s", tr("La microSD non e piu disponibile")); return false; }

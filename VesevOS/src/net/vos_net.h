@@ -18,6 +18,8 @@ void     netIpTo(char* out, size_t n);          // indirizzo IP in uso (AP o cli
 void     netMacTo(bool ap, char* out, size_t n);   // MAC Wi-Fi client (false) o Access Point (true), "AA:BB:..." (18 byte)
 std::string netInfoText();             // riassunto rete leggibile (comando net)
 void     netReconfigure();          // applica cfg (dopo salvataggio)
+void     netSospendi();             // prima del sonno: ferma tutto cio che usa la radio e la spegne (come il modo aereo)
+void     netRiprendi();             // al risveglio: la rete riparte dalla configurazione
 void     netApplyServices();        // applica subito DHCP dell'hotspot, portale automatico e mDNS (senza riavvio)
 void     netScanStart();            // avvia scansione asincrona
 void     netTestStart(const char* ssid, const char* pass);   // prova il Wi-Fi di casa tenendo l'hotspot (guida)

@@ -1,6 +1,8 @@
 // VesevOS Recovery - lettura di /etc/vesevos.conf, o di /vesevos.conf se manca (vedi rec_config.h). Formato: righe "config <tipo> '<nome>'" e "option <chiave> '<valore>'".
 #include "rec_config.h"
 #include "rec_util.h"
+#include "rec_vista.h"
+#include "rec_vista_regole.h"
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
@@ -31,7 +33,12 @@ static int toInt(const std::string& v) { return atoi(v.c_str()); }
 // Una riga "option chiave 'valore'" dentro la sezione di tipo "type" (ui = indice dell'utente corrente).
 static void applyOption(const std::string& type, int ui, const std::string& k, const std::string& v) {
   if (type == "system") {
-    if (k == "hostname" && v.size()) rc.host = v;
+    if (k == "hostname" && v.size()) {
+      rc.host = v;
+    } else if (k == "messaggiologin") {
+      std::string pulito;
+      if (recMsgPulisci(recMsgDecodifica(v), pulito)) rc.msgLogin = pulito;
+    }
   } else if (type == "region") {
     if (k == "country") rc.country = v;
   } else if (type == "led") {
@@ -94,6 +101,7 @@ void loadConfig() {
   c.read_only = true;
   esp_err_t e = esp_vfs_littlefs_register(&c);
   if (e != ESP_OK) { printf("[recovery] LittleFS non montato (%s): nessuna configurazione\n", esp_err_to_name(e)); return; }
+  recTemaLeggi("/littlefs/etc/tema.css");                        // stesso file del tema di VesevOS (se manca o non e valido: colori di fabbrica)
   FILE* f = fopen("/littlefs/etc/vesevos.conf", "r");            // VesevOS 1.8.1 e successive
   if (!f) f = fopen("/littlefs/vesevos.conf", "r");              // posto vecchio (VesevOS fino alla 1.8.0)
   if (!f) {

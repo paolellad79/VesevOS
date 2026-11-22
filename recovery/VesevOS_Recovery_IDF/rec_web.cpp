@@ -5,6 +5,7 @@
 #include "rec_config.h"
 #include "rec_util.h"
 #include "rec_version.h"
+#include "rec_vista.h"
 #include "rec_order.h"
 #include "recovery_page.h"
 #include <sys/socket.h>
@@ -101,6 +102,21 @@ static esp_err_t hRoot(httpd_req_t* r) {
   return httpd_resp_send(r, REC_PAGE, HTTPD_RESP_USE_STRLEN);
 }
 
+// Tema della pagina: il file di VesevOS se e valido (letto all'avvio), altrimenti un commento. Come /tema.css di VesevOS: pubblico, solo testo CSS.
+static esp_err_t hTema(httpd_req_t* r) {
+  static const char fabbrica[] = "/* nessun tema: aspetto di fabbrica */\n";
+  securityHeaders(r);
+  httpd_resp_set_hdr(r, "X-Content-Type-Options", "nosniff");
+  httpd_resp_set_type(r, "text/css; charset=utf-8");
+  if (rc.tema.empty()) return httpd_resp_send(r, fabbrica, sizeof fabbrica - 1);
+  return httpd_resp_send(r, rc.tema.c_str(), rc.tema.size());
+}
+
+// Nome della scheda e messaggio del login: dati pubblici, la pagina li mostra come testo.
+static esp_err_t hVista(httpd_req_t* r) {
+  return recSendJson(r, 200, recVistaJson());
+}
+
 static esp_err_t hVer(httpd_req_t* r) {
   RecReply a = recAuthVer();
   return recSendJson(r, a.status, a.json);
@@ -127,7 +143,7 @@ static esp_err_t hInfo(httpd_req_t* r) {
   if (app0Valid(n, sizeof n, v, sizeof v)) a = app0Fw() ? std::string(n) + " " + v : "NON e VesevOS (manca il marchio)";
   const esp_partition_t* p = recApp0();
   return recSendJson(r, 200, "{\"ok\":true,\"app\":\"" + a + "\",\"max\":" + std::to_string(p ? (unsigned long)p->size : 0UL) +
-                           ",\"chipId\":" + std::to_string((unsigned)REC_CHIP_ID) + ",\"chipName\":\"" REC_CHIP_NAME "\"}");
+                           ",\"chipId\":" + std::to_string((unsigned)REC_CHIP_ID) + ",\"chipName\":\"" REC_CHIP_NAME "\",\"board\":\"" REC_SCHEDA "\"}");
 }
 
 static esp_err_t hBoot(httpd_req_t* r) {
@@ -156,7 +172,7 @@ static esp_err_t hNotFound(httpd_req_t* r, httpd_err_code_t) {
 void recWebStart() {
   httpd_config_t cfg = HTTPD_DEFAULT_CONFIG();
   cfg.stack_size = 8192;
-  cfg.max_uri_handlers = 8;
+  cfg.max_uri_handlers = 10;
   cfg.max_open_sockets = 4;
   cfg.lru_purge_enable = true;
   cfg.recv_wait_timeout = 15;
@@ -165,6 +181,8 @@ void recWebStart() {
   if (httpd_start(&srv, &cfg) != ESP_OK) { printf("[recovery] ERRORE: il server web non parte\n"); return; }
   const httpd_uri_t routes[] = {
     {"/",          HTTP_GET,  hRoot,            nullptr},
+    {"/tema.css",  HTTP_GET,  hTema,            nullptr},
+    {"/api/vista", HTTP_GET,  hVista,           nullptr},
     {"/api/ver",   HTTP_GET,  hVer,             nullptr},
     {"/api/start", HTTP_POST, hStart,           nullptr},
     {"/api/login", HTTP_POST, hLogin,           nullptr},

@@ -37,6 +37,9 @@
 #include "packages/vos_aggiorna.h"
 #include "packages/vos_mfa.h"
 #include "packages/vos_power.h"
+#if VOS_WITH_REC
+#include "packages/vos_rec.h"
+#endif
 #include "packages/vos_stats.h"
 #include "core/vos_sys.h"
 #include "devices/vos_led.h"
@@ -163,6 +166,9 @@ static void vosSetup() {
   ramTrace("cfg");
   primoAvvioInit(cfg.setupDone);                   // guida non finita = prima accensione: radio spenta in attesa del tasto BOOT
   logSetLevel(cfg.logLevel);
+#if VOS_WITH_REC
+  recBegin();                                      // registratore di dati: il task parte dopo la lettura della configurazione (spento di fabbrica)
+#endif
   wdSetInit();                                     // tempo salvato del Task watchdog (gia dopo la lettura della config)
   serialApply();                                   // velocita, attesa di scrittura
   setenv("TZ", cfg.tz.c_str(), 1); tzset();         // il fuso subito: cosi le righe del registro hanno l'ora locale fin dall'inizio

@@ -1,56 +1,65 @@
 <!DOCTYPE html>
 <html lang="it"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1220">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="VesevOS">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <title>VesevOS</title>
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADOUlEQVR4nNSXa0gUURTH//fOHVlThkyyl72kIjIqekB9qCiRLPtQQVB9qCioPhdBQUXfiiCCPvQigp5ERBGkVgQFIgWJgqCUJD4KtfW9q6Yzd+7tzIpg5mt3R6UfLMs97LnnP/ecM/csxyTDMcn8PwLCBeJcqMA4Cp8ZVoB+BqPzPWb0r5mSdxlwSH+AwEQI6LJEtuuIR+F8LIsIElAafGOox3yoNRjGW0ByjnzDoKs0M8s78s0q5ZrXPTtF3kfpOAufGPE46Ym/eY/KGDLoK6PPhu+mIR/CJ/45gXC+2NxZILL6FKivfwnSKNXMuSqVeFp/CvPhA0OdgKG0yg7li/OU6uQB4T9yqEKtzZveqrfOuAe4WYiTIYvJ64BwsnhHZ7+1z6Bf06cZnB/2lu2vNIL3PLNcvc5BKfwWEIn5Fkkh1yyk/JeBq14ofsyzB+9otOf1u+m8tbbciTgYtgvYNupE5WRZ253DWvIKLbX+dSd1QPDIr3I/mViNOBhzP5cvxfHuRuuWSEtDd00NdYOGQ+7dSr/Kle5uRBpkHAUQ/LXgV6bNST8FmzLS0kwVzCA0bNORc1dSdhAD0VxGKkmqM2ZD/RsrbQYC5OoJoEJNcIQ4hhiJ+pVaDMwzpqWUGKmpqXZtbcRG6WicassFi6k7ESVRX8drgbrqjrbTXRS2KykJXVAIAzMrBE4iBmK9VNhn03gcyMzc/7uiHAZtw8Fqw7azaAsgo9ko1oGEWsA9gWDTjymz073gnm1+smHkIkpinojWAyHV1LyHCWEzy+ozGvxaNag+o8BAHNxWqn5HuK09sGjJjp5gEJIhpZEj5afS72qoa8ayhx+DBSuaal0IpKdf7KmsjGzIbZlJJ1QxJmf4RIllPWFTEve7ra1ehZTBcTZQx3SP5ufbVJwSCh1xW1vyIguGFTpBPP+A0edH3wQsBHrCttzVodUz7x1hQ29nJr+xF0gcyS+uIhzMfSq8DKVfzGKqiFpzG2d80xqOxPtUlMP5+FYDgykBprsJ4gEDy6GieBmw5cHlQOeECejnixDZjLHLFMmC7WyiwmyYUAEeNCjwYsPIYZwfEMy5tMpG+YQKGIlJ/3P6BwAA//9lV+mLAAAABklEQVQDAOsaK+UAvWBvAAAAAElFTkSuQmCC">
 <link rel="icon" type="image/svg+xml"
- href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%22-8 -8 216 216%22%3E%3Cdefs%3E%3ClinearGradient id=%22g%22 x1=%220%22 y1=%220%22 x2=%221%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%233fa7ff%22/%3E%3Cstop offset=%221%22 stop-color=%22%2337e0b0%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg stroke=%22url(%23g)%22 stroke-width=%226%22 stroke-linecap=%22round%22 fill=%22none%22%3E%3Cpath d=%22M40 -6V22M80 -6V22M120 -6V22M40 178V206M80 178V206M120 178V206M-6 40H22M-6 80H22M-6 120H22M178 40H206M178 80H206M178 120H206%22/%3E%3Crect x=%2220%22 y=%2220%22 width=%22160%22 height=%22160%22 rx=%2222%22 fill=%22%230b1220%22/%3E%3Ccircle cx=%22100%22 cy=%22100%22 r=%2244%22/%3E%3Cpath d=%22M100 56V30M100 170V144M56 100H30M170 100H144%22/%3E%3C/g%3E%3Ccircle cx=%22100%22 cy=%22100%22 r=%2214%22 fill=%22url(%23g)%22/%3E%3C/svg%3E">
+ href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20128%20128%22%3E%3Cg%20transform=%22translate(64%2064)%20scale(0.888)%20translate(-50.1%20-49.5)%22%3E%3Cpath%20d=%22M22.3%2034.8%20L22.8%2035.2%20L23.4%2035.8%20L24.0%2036.3%20L24.6%2036.9%20L25.2%2037.5%20L25.8%2038.1%20L26.4%2038.7%20L27.1%2039.4%20L27.7%2040.1%20L28.3%2040.9%20L28.9%2041.6%20L29.6%2042.4%20L30.2%2043.2%20L30.8%2044.0%20L31.5%2044.9%20L32.1%2045.7%20L32.8%2046.6%20L33.5%2047.5%20L34.1%2048.5%20L34.8%2049.4%20L35.5%2050.4%20L36.2%2051.4%20L36.9%2052.4%20L37.6%2053.4%20L38.3%2054.4%20L39.0%2055.4%20L39.7%2056.5%20L40.4%2057.6%20L41.2%2058.6%20L41.9%2059.7%20L42.7%2060.8%20L43.5%2061.9%20L44.3%2063.0%20L45.1%2064.2%20L45.9%2065.3%20L46.7%2066.4%20L47.6%2067.6%20L48.4%2068.7%20L49.3%2069.9%20L50.2%2071.1%20L51.1%2072.2%20L52.1%2073.4%20L53.0%2074.5%20L54.0%2075.7%20L55.0%2076.9%20L56.0%2078.1%20L57.0%2079.2%20L58.0%2080.4%20L59.1%2081.5%20L60.2%2082.7%20L61.3%2083.9%20L62.4%2085.0%20L63.6%2086.2%20L64.8%2087.3%20L66.0%2088.4%20L67.2%2089.6%20L68.4%2090.7%20L69.7%2091.8%20L71.0%2092.9%20L72.4%2094.0%20L73.7%2095.1%20L75.1%2096.1%20L76.5%2097.2%20L78.0%2098.3%20L79.5%2099.3%20L81.0%20100.3%20L82.5%20101.3%20L84.1%20102.3%20L85.7%20103.3%20L87.3%20104.3%20L89.0%20105.2%20L90.7%20106.1%20L92.4%20107.1%20L94.2%20107.9%20L96.0%20108.8%20L97.8%20109.6%20L99.7%20110.5%20L101.7%20111.2%20L103.6%20112.0%20L105.7%20112.5%20L106.3%20111.5%20L104.7%20110.1%20L103.0%20108.8%20L101.4%20107.6%20L99.8%20106.3%20L98.3%20105.1%20L96.8%20103.9%20L95.3%20102.7%20L93.9%20101.5%20L92.5%20100.3%20L91.1%2099.0%20L89.8%2097.8%20L88.5%2096.6%20L87.2%2095.4%20L86.0%2094.2%20L84.8%2092.9%20L83.7%2091.7%20L82.6%2090.5%20L81.5%2089.3%20L80.4%2088.0%20L79.4%2086.8%20L78.4%2085.6%20L77.4%2084.4%20L76.5%2083.1%20L75.6%2081.9%20L74.7%2080.7%20L73.8%2079.5%20L72.9%2078.2%20L72.1%2077.0%20L71.3%2075.8%20L70.5%2074.6%20L69.8%2073.3%20L69.1%2072.1%20L68.3%2070.9%20L67.6%2069.7%20L67.0%2068.5%20L66.3%2067.3%20L65.6%2066.1%20L65.0%2064.9%20L64.4%2063.6%20L63.8%2062.4%20L63.2%2061.2%20L62.6%2060.0%20L62.0%2058.9%20L61.5%2057.7%20L60.9%2056.5%20L60.4%2055.3%20L59.9%2054.1%20L59.4%2052.9%20L58.8%2051.7%20L58.3%2050.6%20L57.8%2049.4%20L57.3%2048.2%20L56.8%2047.1%20L56.4%2045.9%20L55.9%2044.8%20L55.4%2043.6%20L54.9%2042.5%20L54.4%2041.3%20L53.9%2040.2%20L53.5%2039.0%20L53.0%2037.9%20L52.5%2036.8%20L52.0%2035.6%20L51.5%2034.5%20L51.0%2033.4%20L50.5%2032.3%20L49.9%2031.2%20L49.4%2030.1%20L48.8%2029.0%20L48.3%2027.9%20L47.7%2026.8%20L47.1%2025.7%20L46.5%2024.6%20L45.9%2023.6%20L45.3%2022.5%20L44.6%2021.4%20L43.9%2020.4%20L43.2%2019.3%20L42.5%2018.3%20L41.7%2017.2Z%22%20fill=%22%23CC0605%22/%3E%3Cpath%20d=%22M29.1%2041.8Q42.9%2041.9%2053.1%2038.1%22%20fill=%22none%22%20stroke=%22%236d0302%22%20stroke-width=%222.2%22%20stroke-linecap=%22round%22%20opacity=%220.35%22/%3E%3Cpath%20d=%22M39.9%2056.7Q52.4%2059.1%2061.0%2056.7%22%20fill=%22none%22%20stroke=%22%236d0302%22%20stroke-width=%222.2%22%20stroke-linecap=%22round%22%20opacity=%220.35%22/%3E%3Cpath%20d=%22M53.2%2074.8Q64.6%2077.7%2071.5%2076.0%22%20fill=%22none%22%20stroke=%22%236d0302%22%20stroke-width=%222.2%22%20stroke-linecap=%22round%22%20opacity=%220.35%22/%3E%3Cpath%20d=%22M71.3%2093.1Q82.0%2096.1%2087.5%2095.6%22%20fill=%22none%22%20stroke=%22%236d0302%22%20stroke-width=%222.2%22%20stroke-linecap=%22round%22%20opacity=%220.35%22/%3E%3Cpath%20d=%22M29.7%2034.1%20L30.4%2034.8%20L31.0%2035.6%20L31.6%2036.3%20L32.2%2037.1%20L32.8%2037.9%20L33.4%2038.8%20L34.0%2039.6%20L34.6%2040.5%20L35.3%2041.4%20L35.9%2042.3%20L36.5%2043.2%20L37.1%2044.2%20L37.7%2045.1%20L38.4%2046.1%20L39.0%2047.1%20L39.6%2048.1%20L40.3%2049.1%20L40.9%2050.1%20L41.6%2051.2%20L42.2%2052.2%20L42.9%2053.3%20L43.6%2054.4%20L44.2%2055.5%20L44.9%2056.6%20L45.6%2057.7%20L46.3%2058.8%20L47.1%2059.9%20L47.8%2061.0%20L48.5%2062.2%20L49.3%2063.3%20L50.1%2064.5%20L50.8%2065.6%20L51.6%2066.8%20L52.4%2067.9%20L53.3%2069.1%20L54.1%2070.3%20L55.0%2071.5%20L55.8%2072.6%20L56.7%2073.8%20L57.7%2075.0%20L58.6%2076.2%20L59.5%2077.3%20L60.5%2078.5%20L61.5%2079.7%20L62.5%2080.9%20L63.5%2082.0%22%20fill=%22none%22%20stroke=%22%23fff%22%20stroke-width=%222.6%22%20stroke-linecap=%22round%22%20opacity=%22.35%22/%3E%3Cg%20transform=%22translate(32.0%2026.0)%20rotate(48.0)%22%3E%3Crect%20x=%22-6%22%20y=%22-13.5%22%20width=%2210%22%20height=%2227%22%20rx=%224%22%20fill=%22%23F2B705%22/%3E%3C/g%3E%3Cg%20transform=%22translate(18.0%2010.4)%20rotate(-42.0)%20translate(-18%20-13)%22%20fill=%22%23F2B705%22%3E%3Cpath%20d=%22M0%2026V8l9%208%209-14%209%2014%209-8v18z%22%20stroke-linejoin=%22round%22/%3E%3Ccircle%20cx=%220%22%20cy=%227%22%20r=%222.6%22/%3E%3Ccircle%20cx=%2218%22%20cy=%221.6%22%20r=%222.6%22/%3E%3Ccircle%20cx=%2236%22%20cy=%227%22%20r=%222.6%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E">
 <style>
 :root{
-  --act:var(--ac);--okt:var(--ok);--wat:var(--wa);--kot:var(--ko);--bg:#10151c;--card:#1a222d;
-  --side:#151c26;--tx:#e6edf3;--mut:#8b98a8;--ac:#3fa7ff;--ac2:#37e0b0;--ok:#3ddc84;--wa:#ffcc4d;
-  --ko:#ff5c5c;--in:#121921;--g2:#2a3442;--bd:#263140;--trk:#26303e;--okbg:#14382a;--kobg:#3c1f24;
-  --vbg:#12304a
+  --act:var(--ac);--okt:var(--ok);--wat:var(--wa);--kot:var(--ko);--bg:#0b1220;--card:#111d31;
+  --side:#0d1626;--tx:#e6edf3;--mut:#9aa8b9;--ac:#3fa7ff;--acink:#0b1220;--ac2:#37e0b0;--ok:#3ddc84;
+  --wa:#ffcc4d;--ko:#ff5c5c;--in:#0e1829;--g2:#263752;--bd:#1f2e44;--trk:#243450;--okbg:#14382a;
+  --kobg:#3c1f24;--vbg:#12304a
 }
 :root[data-theme=light]{
-  --act:#0a62a8;--okt:#0b7040;--wat:#7a5600;--kot:#c0262c;--bg:#eef3f6;--card:#fff;--side:#fff;
-  --tx:#1d2a36;--mut:#566676;--ac:#1796e8;--ac2:#14c9a0;--ok:#16a765;--wa:#d99a00;--ko:#e5484d;
-  --in:#f3f6f9;--g2:#e3eaf0;--bd:#e3eaf0;--trk:#e3eaf0;--okbg:#dff5e9;--kobg:#fde6e7;--vbg:#dcefff
+  --act:#1466b8;--okt:#0b7040;--wat:#7a5600;--kot:#c0262c;--bg:#f4f7fb;--card:#fff;--side:#fff;
+  --tx:#0b1220;--mut:#4d5c70;--ac:#1466b8;--acink:#fff;--ac2:#14c9a0;--ok:#16a765;--wa:#d99a00;
+  --ko:#e5484d;--in:#eef3f9;--g2:#d6e0ec;--bd:#dbe4ef;--trk:#e4ebf4;--okbg:#dff5e9;--kobg:#fde6e7;
+  --vbg:#dcebfb
 }
 *{box-sizing:border-box}
 body{
   margin:0;background:var(--bg);color:var(--tx);
-  font:15px system-ui,Arial,"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif
+  font:16px/1.5 system-ui,-apple-system,"Segoe UI",Arial,"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif
 }
 svg.i{
   width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;
   stroke-linejoin:round;display:block
 }
 .side{
-  position:fixed;left:0;top:0;bottom:0;width:72px;background:var(--side);display:flex;
-  flex-direction:column;align-items:center;padding:14px 0;gap:6px;border-right:1px solid var(--bd);
+  position:fixed;left:0;top:60px;bottom:0;width:72px;background:var(--ac);display:flex;
+  flex-direction:column;align-items:center;padding:10px 0;gap:6px;border-right:0;
   z-index:5
 }
-.side .slogo{width:38px;height:38px;margin-bottom:14px}
+:root[data-theme=dark] .side{background:#1466b8}   /* fascia laterale azzurra come il pannello sinistro del login (richiesta dell'utente 21/11/2026) */
 .nb{
-  position:relative;width:60px;padding:10px 0 6px;border:0;background:none;color:var(--mut);
+  position:relative;width:60px;padding:10px 0 6px;border:0;background:none;color:#fff;
   cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;border-radius:12px;
   font-size:10.5px
 }
-.nb:hover{color:var(--tx)}
-.nb.on{color:var(--act)}
+.nb:hover{color:#fff;background:rgba(0,30,70,.22)}
+.nb.on{color:#fff;background:rgba(0,30,70,.38)}   /* evidenza scura: il bianco resta leggibile (contrasto >= 4,5) */
 .nb.on::before{
   content:"";position:absolute;left:-6px;top:10px;bottom:10px;width:3px;border-radius:2px;
-  background:linear-gradient(var(--ac),var(--ac2))
+  background:#fff
 }
 .top{
-  position:sticky;top:0;z-index:6;margin-left:72px;height:60px;display:flex;align-items:center;
+  position:sticky;top:0;z-index:6;height:60px;display:flex;align-items:center;
   gap:10px;padding:0 20px;background:var(--side);border-bottom:1px solid var(--bd)
 }
 .top b{font-size:17px}
+.top .tname{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;line-height:1;font-size:14px}   /* il cornetto sopra la scritta VesevOS, centrato (richiesta dell'utente 21/11/2026) */
 .top .sp{flex:1}
 .bchip{
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:50vw;padding:3px 10px;
-  border-radius:14px;background:linear-gradient(90deg,var(--ac),var(--ac2));color:#06121c;
+  border-radius:14px;background:var(--ac);color:var(--acink);
   font-size:12.5px;font-weight:700
 }
 .ib{
@@ -127,7 +136,7 @@ body.cpo main{padding-bottom:calc(var(--ph,280px) + 24px)}
   border:1px solid var(--g2);background:var(--in);color:var(--mut);border-radius:8px;
   padding:6px 9px;cursor:pointer;font:inherit;font-size:13px;margin:0
 }
-.dsel button.on{background:var(--ac);color:#06121c;border-color:var(--ac);font-weight:700}
+.dsel button.on{background:var(--ac);color:var(--acink);border-color:var(--ac);font-weight:700}
 .arow{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
 .arow select,.arow input{margin:0;width:auto;flex:1;min-width:90px}
 .arow select.ak{flex:0 0 190px}
@@ -135,7 +144,7 @@ body.cpo main{padding-bottom:calc(var(--ph,280px) + 24px)}
 .arow input[type=range]{padding:0;height:38px}
 .arow .ib{width:34px;height:34px;flex:none}
 .rcard h4{
-  margin:14px 0 4px;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--mut)
+  margin:14px 0 4px;font-size:13px;font-weight:600;color:var(--mut)
 }
 .bg{border:1px solid var(--bd);border-radius:12px;margin-bottom:10px;background:var(--in)}
 .bg.drag,.bc.drag{opacity:.55}
@@ -181,7 +190,7 @@ body.cpo main{padding-bottom:calc(var(--ph,280px) + 24px)}
   min-height:84px
 }
 .wid:hover{border-color:var(--ac)}
-.wid .wt{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+.wid .wt{font-size:13px;font-weight:600;color:var(--mut)}
 .wid .wv{font-size:18px;font-weight:700;margin:4px 0 2px;overflow-wrap:anywhere}
 .wid .ws{font-size:12px;color:var(--mut)}
 .hclk{font-size:30px;font-weight:700;margin:2px 0}
@@ -202,7 +211,7 @@ body.cpo main{padding-bottom:calc(var(--ph,280px) + 24px)}
 .hnet{grid-column:span 5}
 .htmp{grid-column:span 7}
 .hl .card{margin:0}
-.hl h3{text-transform:uppercase;letter-spacing:.04em;font-size:12.5px;color:var(--mut)}
+.hl h3{font-size:13px;font-weight:600;color:var(--mut)}
 .big{font-size:20px;font-weight:700}
 .subt{color:var(--mut);font-size:13px}
 .pb{margin:10px 0}
@@ -210,7 +219,7 @@ body.cpo main{padding-bottom:calc(var(--ph,280px) + 24px)}
 .pb .t span:first-child{color:var(--mut)}
 .pb .tr{height:9px;border-radius:5px;background:var(--trk);overflow:hidden}
 .pb i{
-  display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--ac),var(--ac2))
+  display:block;height:100%;border-radius:5px;background:var(--ac)
 }
 .stk{
   display:flex;height:12px;border-radius:6px;background:var(--trk);overflow:hidden;margin:8px 0 4px
@@ -228,7 +237,7 @@ body.cpo main{padding-bottom:calc(var(--ph,280px) + 24px)}
   content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;
   background:#fff;transition:left .15s
 }
-.sw1.on{background:linear-gradient(90deg,var(--ac),var(--ac2))}
+.sw1.on{background:var(--ac)}
 .sw1.on::after{left:21px}
 .tog{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0}
 .sig{display:inline-flex;gap:3px;align-items:flex-end;height:20px;vertical-align:middle}
@@ -239,7 +248,6 @@ body.cpo main{padding-bottom:calc(var(--ph,280px) + 24px)}
     top:auto;right:0;width:auto;height:62px;flex-direction:row;justify-content:space-around;
     padding:4px 6px;border-right:0;border-top:1px solid var(--bd)
   }
-  .side .slogo{display:none}
   .nb{width:auto;flex:1;padding:6px 0}
   .nb.on::before{left:25%;right:25%;top:-5px;bottom:auto;width:auto;height:3px}
   #hd{display:none}
@@ -267,7 +275,7 @@ body.cpo main{padding-bottom:calc(var(--ph,280px) + 24px)}
   .nb{padding:10px 0 8px}
 }
 main{padding:16px 20px;max-width:1180px;margin-left:72px}
-.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;margin-bottom:12px}
 .card h3{margin:0 0 10px;font-size:15px;color:var(--act)}
 .row{
   display:flex;justify-content:space-between;gap:10px;padding:5px 0;
@@ -279,12 +287,12 @@ main{padding:16px 20px;max-width:1180px;margin-left:72px}
 .bar i{display:block;height:100%;background:var(--ac)}
 input,select,textarea{
   width:100%;padding:9px;margin:4px 0 10px;background:var(--in);color:var(--tx);
-  border:1px solid var(--g2);border-radius:8px;font:inherit
+  border:1px solid var(--g2);border-radius:10px;font:inherit
 }
 label{color:var(--mut);font-size:13px}
 .btn{
-  background:var(--ac);color:#06121c;border:0;padding:9px 16px;border-radius:8px;cursor:pointer;
-  font-weight:600;margin-right:6px
+  background:var(--ac);color:var(--acink);border:0;padding:10px 22px;min-height:44px;border-radius:999px;
+  cursor:pointer;font:inherit;font-weight:600;margin-right:6px
 }
 .btn.red{background:var(--ko);color:#06121c}
 :root[data-theme=light] .btn.red{background:var(--kot);color:#fff}
@@ -312,10 +320,10 @@ pre{
 .keys .btn{padding:6px 12px;font-size:13px;margin-bottom:4px}
 .sub{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .sub button{
-  background:var(--g2);color:var(--tx);border:0;padding:7px 14px;border-radius:8px;cursor:pointer;
+  background:var(--g2);color:var(--tx);border:0;padding:7px 14px;border-radius:999px;cursor:pointer;
   font-size:14px
 }
-.sub button.on{background:var(--ac);color:#06121c}
+.sub button.on{background:var(--ac);color:var(--acink)}
 .gsep{
   align-self:center;color:var(--mut);font-size:12px;padding:0 6px;border-left:1px solid var(--g2);
   margin-left:4px
@@ -507,7 +515,7 @@ a{color:var(--act)}
   .bchip{max-width:40vw}
 }
 .skip{
-  position:fixed;left:8px;top:-80px;z-index:100;background:var(--ac);color:#06121c;
+  position:fixed;left:8px;top:-80px;z-index:100;background:var(--ac);color:var(--acink);
   padding:10px 14px;border-radius:8px;font-weight:700;text-decoration:none
 }
 .skip:focus{top:8px}
@@ -529,9 +537,67 @@ a{color:var(--act)}
 .foot{text-align:center;font-size:12px;color:var(--mut);margin:14px 0}
 .foot a{color:var(--mut)}
 .hero{text-align:center;margin:6px 0 10px}
-.hero .logo{width:56px;height:56px;display:block;margin:0 0 6px}
-.hero .mount{width:100%;max-width:300px;aspect-ratio:852/170;display:block;margin:0 auto}
-.hlogo{width:26px;height:26px;display:inline-block;vertical-align:-6px;margin-right:8px}
+.hero .logo{width:104px;height:104px;display:block}   /* misura scelta dall'utente il 20/11/2026 (prima 56) */
+.hero .hname{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;margin:0 0 6px;   /* cornetto al centro e la scritta VesevOS sotto (20/11/2026) */
+  font-size:26px;letter-spacing:.5px}
+.pwf{position:relative;display:flex;align-items:center;margin:4px 0 10px}
+.pwf input{padding-right:42px;margin:0}
+.eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;background:none;
+  color:var(--mut);cursor:pointer;border-radius:8px}
+.eye:hover{color:var(--tx)}
+.btn.lgo{display:block;width:100%;margin:6px 0 0}
+.lclk{text-align:center;margin:14px 0 0;color:var(--mut)}
+.lclk .lt1{font-size:26px;font-weight:600;color:var(--tx);font-variant-numeric:tabular-nums}
+.lclk .lt1 i{font-style:normal}
+.lclk .lt1 i.off{opacity:.15}
+.lclk .lt2,.lclk .lt3{font-size:12px;margin-top:2px}
+.lclk .de{display:none}
+.hero .mount{width:100%;max-width:300px;aspect-ratio:852/170;display:block;margin:0 auto;color:var(--ac)}
+/* Accesso: telefono = una colonna (hero, campi, ora, benvenuto, messaggio); desktop = due colonne a tutto schermo */
+#login:not(.hide){display:flex;flex-direction:column}
+.lpan,.lfrm,.lbasso{display:contents}
+.lbar{display:flex;gap:6px;align-items:center;justify-content:flex-end;align-self:flex-end}
+#a11p{padding:12px;min-width:280px;max-width:min(92vw,340px)}
+#a11p .agrid{display:grid;gap:8px;margin:8px 0 12px}
+.lpan>*,.lbasso>*{order:1}   /* telefono: .lbasso e trasparente, i suoi figli vanno ordinati come gli altri */
+.foot{order:2}
+.lmount{display:none}
+.lben{text-align:center;font-size:20px;font-weight:600;margin:10px 0 0}
+.lmsg{text-align:center;color:var(--mut);margin:6px 0 0;white-space:pre-line;overflow-wrap:anywhere}
+@media(prefers-reduced-motion:reduce){.lclk .lt1 i.off{opacity:1}}
+@media(min-width:821px){
+  #login:not(.hide){
+    position:fixed;inset:0;z-index:8;max-width:none;margin:0;padding:0;border:0;border-radius:0;
+    display:grid;grid-template-columns:1fr 1fr;background:var(--card);overflow:auto
+  }
+  /* pannello a tre righe: ora e data in alto, il Vesuvio esattamente al centro (in verticale e in orizzontale), Benvenuto e messaggio sotto */
+  .lpan{
+    display:grid;grid-template-rows:1fr auto 1fr;justify-items:center;padding:12vh 5vw;
+    background:var(--ac);color:var(--acink)
+  }
+  .lbasso{display:flex;flex-direction:column;align-items:center;align-self:start;padding-top:32px;width:100%}
+  /* tema scuro: stesso azzurro pieno del tema chiaro (accento chiaro con testo scuro non piaceva), scritte e Vesuvio chiari */
+  :root[data-theme=dark] .lpan{background:#1466b8;color:#fff}
+  .lpan>*{order:0}
+  .lfrm{
+    display:flex;flex-direction:column;justify-content:center;
+    padding:48px max(5vw,calc((50vw - 380px)/2))
+  }
+  .foot{order:0}
+  .lbar{position:absolute;top:16px;right:16px;align-self:auto}
+  .lpan .lclk{text-align:center;align-self:start;justify-self:stretch;margin:0;color:inherit}
+  .lpan .lclk .lt1{font-size:clamp(44px,7vw,96px);line-height:1.05;color:inherit}
+  .lpan .lclk .lt2,.lpan .lclk .lt3{font-size:clamp(15px,1.5vw,20px);margin-top:8px}
+  .lpan .lclk .dn,.lpan .lclk .ds{display:none}
+  .lpan .lclk .de{display:inline}
+  .lpan .lclk .dz{display:block;font-size:clamp(12px,1vw,14px);opacity:.85;margin-top:4px}
+  /* aspect-ratio esplicito: in Safari e nei browser con lo stesso motore un svg senza altezza dentro un contenitore flex restava a zero e il Vesuvio spariva */
+  .lmount{display:block;width:min(100%,420px);aspect-ratio:852/170;height:auto;margin:0;align-self:center;color:inherit}
+  .hero .hmount{display:none}
+  .lben{align-self:stretch;text-align:center;font-size:clamp(40px,5vw,72px);font-weight:700;line-height:1.1;margin:0}
+  .lmsg{align-self:center;text-align:center;color:inherit;font-size:clamp(16px,1.5vw,20px);margin:12px 0 0;max-width:36em}
+}
+.hlogo{width:24px;height:24px;display:block;flex:none;margin:0}
 /* 1.7.1: bandiere, ruoli, prima configurazione, mappa, QR */
 .flag{
   width:24px;height:16px;border-radius:2px;display:inline-block;vertical-align:middle;
@@ -547,7 +613,7 @@ body[data-role="0"] .op,body[data-role="0"] .adm,body[data-role="1"] .adm{displa
 .setup .sw{max-width:640px;margin:0 auto}
 .sdots{display:flex;gap:6px;margin:6px 0 16px;flex-wrap:wrap}
 .sdots i{flex:1;min-width:18px;height:5px;border-radius:3px;background:var(--trk)}
-.sdots i.on{background:linear-gradient(90deg,var(--ac),var(--ac2))}
+.sdots i.on{background:var(--ac)}
 .sbt{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .sbt .sp{flex:1}
 .lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
@@ -690,19 +756,12 @@ fieldset legend{padding:0 6px;color:var(--mut)}
 .cfr li.ko{color:var(--kot)}
 .hlp h5{margin:10px 0 2px;font-family:monospace}
 .hlp h5::before{content:attr(data-nome)}
-</style></head>
+</style><link rel="stylesheet" href="/tema.css"></head>
 <body>
 <a href="#main" class="skip"
  onclick="var m=document.querySelector('main');m.setAttribute('tabindex','-1');m.focus();return false">Vai al contenuto</a>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-  <linearGradient id="vg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3fa7ff"/>
-   <stop offset="1" stop-color="#37e0b0"/></linearGradient></defs>
-<symbol id="i-chip" viewBox="-8 -8 216 216">
- <g stroke="url(#vg)" stroke-width="6" stroke-linecap="round" fill="none">
-  <path d="M40 -6V22M80 -6V22M120 -6V22M40 178V206M80 178V206M120 178V206M-6 40H22M-6 80H22M-6 120H22M178 40H206M178 80H206M178 120H206"/>
-  <rect x="20" y="20" width="160" height="160" rx="22" fill="#0b1220"/>
-  <circle cx="100" cy="100" r="44"/><path d="M100 56V30M100 170V144M56 100H30M170 100H144"/></g>
- <circle cx="100" cy="100" r="14" fill="url(#vg)"/></symbol>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-cornetto" viewBox="0 0 128 128"><g transform="translate(64 64) scale(0.888) translate(-53.15 -64.85)"><path d="M22.3 34.8 L22.8 35.2 L23.4 35.8 L24.0 36.3 L24.6 36.9 L25.2 37.5 L25.8 38.1 L26.4 38.7 L27.1 39.4 L27.7 40.1 L28.3 40.9 L28.9 41.6 L29.6 42.4 L30.2 43.2 L30.8 44.0 L31.5 44.9 L32.1 45.7 L32.8 46.6 L33.5 47.5 L34.1 48.5 L34.8 49.4 L35.5 50.4 L36.2 51.4 L36.9 52.4 L37.6 53.4 L38.3 54.4 L39.0 55.4 L39.7 56.5 L40.4 57.6 L41.2 58.6 L41.9 59.7 L42.7 60.8 L43.5 61.9 L44.3 63.0 L45.1 64.2 L45.9 65.3 L46.7 66.4 L47.6 67.6 L48.4 68.7 L49.3 69.9 L50.2 71.1 L51.1 72.2 L52.1 73.4 L53.0 74.5 L54.0 75.7 L55.0 76.9 L56.0 78.1 L57.0 79.2 L58.0 80.4 L59.1 81.5 L60.2 82.7 L61.3 83.9 L62.4 85.0 L63.6 86.2 L64.8 87.3 L66.0 88.4 L67.2 89.6 L68.4 90.7 L69.7 91.8 L71.0 92.9 L72.4 94.0 L73.7 95.1 L75.1 96.1 L76.5 97.2 L78.0 98.3 L79.5 99.3 L81.0 100.3 L82.5 101.3 L84.1 102.3 L85.7 103.3 L87.3 104.3 L89.0 105.2 L90.7 106.1 L92.4 107.1 L94.2 107.9 L96.0 108.8 L97.8 109.6 L99.7 110.5 L101.7 111.2 L103.6 112.0 L105.7 112.5 L106.3 111.5 L104.7 110.1 L103.0 108.8 L101.4 107.6 L99.8 106.3 L98.3 105.1 L96.8 103.9 L95.3 102.7 L93.9 101.5 L92.5 100.3 L91.1 99.0 L89.8 97.8 L88.5 96.6 L87.2 95.4 L86.0 94.2 L84.8 92.9 L83.7 91.7 L82.6 90.5 L81.5 89.3 L80.4 88.0 L79.4 86.8 L78.4 85.6 L77.4 84.4 L76.5 83.1 L75.6 81.9 L74.7 80.7 L73.8 79.5 L72.9 78.2 L72.1 77.0 L71.3 75.8 L70.5 74.6 L69.8 73.3 L69.1 72.1 L68.3 70.9 L67.6 69.7 L67.0 68.5 L66.3 67.3 L65.6 66.1 L65.0 64.9 L64.4 63.6 L63.8 62.4 L63.2 61.2 L62.6 60.0 L62.0 58.9 L61.5 57.7 L60.9 56.5 L60.4 55.3 L59.9 54.1 L59.4 52.9 L58.8 51.7 L58.3 50.6 L57.8 49.4 L57.3 48.2 L56.8 47.1 L56.4 45.9 L55.9 44.8 L55.4 43.6 L54.9 42.5 L54.4 41.3 L53.9 40.2 L53.5 39.0 L53.0 37.9 L52.5 36.8 L52.0 35.6 L51.5 34.5 L51.0 33.4 L50.5 32.3 L49.9 31.2 L49.4 30.1 L48.8 29.0 L48.3 27.9 L47.7 26.8 L47.1 25.7 L46.5 24.6 L45.9 23.6 L45.3 22.5 L44.6 21.4 L43.9 20.4 L43.2 19.3 L42.5 18.3 L41.7 17.2Z" fill="#CC0605"/><path d="M29.1 41.8Q42.9 41.9 53.1 38.1" fill="none" stroke="#6d0302" stroke-width="2.2" stroke-linecap="round" opacity="0.35"/><path d="M39.9 56.7Q52.4 59.1 61.0 56.7" fill="none" stroke="#6d0302" stroke-width="2.2" stroke-linecap="round" opacity="0.35"/><path d="M53.2 74.8Q64.6 77.7 71.5 76.0" fill="none" stroke="#6d0302" stroke-width="2.2" stroke-linecap="round" opacity="0.35"/><path d="M71.3 93.1Q82.0 96.1 87.5 95.6" fill="none" stroke="#6d0302" stroke-width="2.2" stroke-linecap="round" opacity="0.35"/><path d="M29.7 34.1 L30.4 34.8 L31.0 35.6 L31.6 36.3 L32.2 37.1 L32.8 37.9 L33.4 38.8 L34.0 39.6 L34.6 40.5 L35.3 41.4 L35.9 42.3 L36.5 43.2 L37.1 44.2 L37.7 45.1 L38.4 46.1 L39.0 47.1 L39.6 48.1 L40.3 49.1 L40.9 50.1 L41.6 51.2 L42.2 52.2 L42.9 53.3 L43.6 54.4 L44.2 55.5 L44.9 56.6 L45.6 57.7 L46.3 58.8 L47.1 59.9 L47.8 61.0 L48.5 62.2 L49.3 63.3 L50.1 64.5 L50.8 65.6 L51.6 66.8 L52.4 67.9 L53.3 69.1 L54.1 70.3 L55.0 71.5 L55.8 72.6 L56.7 73.8 L57.7 75.0 L58.6 76.2 L59.5 77.3 L60.5 78.5 L61.5 79.7 L62.5 80.9 L63.5 82.0" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity=".35"/><g transform="translate(32.0 26.0) rotate(48.0)"><rect x="-6" y="-13.5" width="10" height="27" rx="4" fill="#F2B705"/></g><g transform="translate(18.0 10.4) rotate(-42.0) translate(-18 -13)" fill="#F2B705"><path d="M0 26V8l9 8 9-14 9 14 9-8v18z" stroke-linejoin="round"/><circle cx="0" cy="7" r="2.6"/><circle cx="18" cy="1.6" r="2.6"/><circle cx="36" cy="7" r="2.6"/></g></g></symbol>
 <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/>
  <path d="M10 19.5v-5h4v5"/></symbol>
 <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M2.5 9.2a14 14 0 0 1 19 0"/>
@@ -724,6 +783,8 @@ fieldset legend{padding:0 6px;color:var(--mut)}
 </symbol>
 <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/>
  <path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+<symbol id="i-occhio" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-occhio-barrato" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M3 3l18 18"/></symbol>
 <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/>
  <path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/>
 </symbol>
@@ -862,7 +923,7 @@ fieldset legend{padding:0 6px;color:var(--mut)}
 <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/>
  <path d="M3 19.5c.6-3.3 3-5 6-5s5.4 1.7 6 5"/><circle cx="17" cy="9" r="2.5"/>
  <path d="M16.5 14.6c2.3.2 4 1.6 4.5 4.4"/></symbol><symbol id="i-vesuvio" viewBox="-6 330 852 170">
- <g fill="none" stroke="url(#vg)" stroke-linecap="round" stroke-linejoin="round">
+ <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
   <path d="M0 456C70 452 130 444 200 432C270 420 340 398 420 370C440 362 452 350 468 347C484 345 492 356 510 362C525 366 536 358 552 349C568 339 584 337 600 338C620 339 635 346 650 354C675 367 705 380 740 388C775 395 805 402 838 410"
    stroke-width="9"/>
   <path d="M208 464C280 458 380 456 470 455C520 455 560 454 592 454M208 464C300 470 380 474 440 477C520 481 610 485 692 488"
@@ -870,18 +931,35 @@ fieldset legend{padding:0 6px;color:var(--mut)}
   <path d="M478 451C520 446 570 445 620 445C690 444 760 444 805 449" stroke-width="7"
    stroke-opacity=".55"/></g></symbol></svg>
 <div id="login" class="card hide">
- <button class="ib lbtn hide" style="float:right" onclick="langPop(event)" aria-haspopup="menu"
-  aria-expanded="false"></button>
- <div class="hero"><svg class="logo" aria-hidden="true"><use href="#i-chip"/>
-  </svg><svg class="mount" aria-hidden="true"><use href="#i-vesuvio"/></svg></div>
+ <div class="lbar">
+  <button class="ib lbtn llang hide" onclick="langPop(event)" aria-haspopup="menu"
+   aria-expanded="false"></button>
+  <button class="ib" id="lthb" onclick="thMenu(event)" aria-haspopup="menu" aria-expanded="false"><svg
+   class="i"><use id="lthu" href="#i-auto"/></svg></button>
+  <button class="ib" id="lab" onclick="a11yPop(event)" aria-haspopup="dialog" aria-expanded="false"
+   title="Accessibilita"><svg class="i"><use href="#i-a11y"/></svg></button>
+ </div>
+ <div class="lpan">
+  <div id="lclk" class="lclk" role="status"></div>
+  <svg class="mount lmount" aria-hidden="true"><use href="#i-vesuvio"/></svg>
+  <div class="lbasso">
+   <div class="lben" id="lben">Benvenuto</div>
+   <div class="lmsg hide" id="lmsg" translate="no"></div>
+  </div>
+ </div>
+ <div class="lfrm">
+ <div class="hero"><div class="hname"><svg class="logo" aria-hidden="true"><use href="#i-cornetto"/>
+  </svg><b>VesevOS</b></div><svg class="mount hmount" aria-hidden="true"><use href="#i-vesuvio"/></svg></div>
  <h3 id="lt">Accesso</h3>
  <div id="lnew" class="hide">
   <p>Primo accesso: scegli la password dell'amministratore (almeno 6 caratteri). Non esiste una password di fabbrica: la scegli tu, e solo tu la conosci.</p>
  </div>
  <label for="lu">Utente</label><input id="lu" autocomplete="username" autocapitalize="off"
   spellcheck="false" value="admin" onkeydown="lKey(event)">
- <label for="lp">Password</label><input type="password" id="lp" autocomplete="current-password"
-  onkeydown="lKey(event)">
+ <label for="lp">Password</label><div class="pwf"><input type="password" id="lp" autocomplete="current-password"
+  onkeydown="lKey(event)"><button type="button" class="eye" id="leye" onclick="pwEye()"
+  aria-label="Mostra la password" aria-pressed="false"><svg class="i" width="20" height="20"
+  aria-hidden="true"><use id="leyes" href="#i-occhio"/></svg></button></div>
  <div id="lp2w" class="hide">
   <label for="lp2">Ripeti la password</label><input type="password" id="lp2"
    autocomplete="new-password" onkeydown="lKey(event)"></div>
@@ -896,19 +974,18 @@ fieldset legend{padding:0 6px;color:var(--mut)}
   <div id="lmfan" class="law hide"></div>
   <button class="btn" id="lmbt" onclick="doMfa()">Conferma</button><button class="btn gray"
    onclick="showLogin()">Annulla</button></div>
- <button class="btn" id="lbt" onclick="doLogin()">Entra</button>
+ <button class="btn lgo" id="lbt" onclick="doLogin()">Entra</button>
  <div id="lm" class="msg"></div>
- <div id="lclk" class="fhint fp" role="status"></div>
- <div id="lhttps" class="fhint fp"></div>
  <div class="foot">
   <a href="/api/license?id=notice" target="_blank">Note legali e licenze</a> &middot; <a
    href="#aiuto" onclick="lHelp();return false">Aiuto</a> &middot; <a
    href="https://github.com/paolellad79/VesevOS" target="_blank" rel="noopener">GitHub</a></div>
+ </div>
 </div>
 
 <div id="app" class="hide">
 <nav class="side" id="nav"></nav>
-<header class="top"><b class="tname"><svg class="hlogo" aria-hidden="true"><use href="#i-chip"/>
+<header class="top"><b class="tname"><svg class="hlogo" aria-hidden="true"><use href="#i-cornetto"/>
   </svg>VesevOS</b><span class="bchip" id="bchip"></span><span class="sp"></span><span id="hd"
   style="color:var(--mut);font-size:13px"></span>
  <span class="who" id="who"></span>
@@ -987,6 +1064,31 @@ fieldset legend{padding:0 6px;color:var(--mut)}
    <label for="l_thr">Soglia di carico della CPU (10-95)</label><input type="number" id="l_thr"
     min="10" max="95">
    <p class="fhint">I lampi sono al massimo 3 al secondo. Il trigger e i suoi colori li cambia solo l'amministratore. Di fabbrica il modo resta quello di sempre.</p>
+  </fieldset>
+  <fieldset id="l_cal"><legend>Test e calibrazione</legend>
+   <p class="fhint">Prova i colori sul LED, correggi i canali se un colore tira troppo verso un altro e scegli la tonalita di ogni stato. Ogni prova dura 20 secondi.</p>
+   <div style="display:flex;flex-wrap:wrap;gap:6px">
+    <button class="btn" onclick="ledProva(0xFF0000)">Rosso</button>
+    <button class="btn" onclick="ledProva(0x00FF00)">Verde</button>
+    <button class="btn" onclick="ledProva(0x0000FF)">Blu</button>
+    <button class="btn" onclick="ledProva(0xFFFFFF)">Bianco</button>
+    <button class="btn" onclick="ledProva(0xFFFF00)">Giallo</button>
+    <button class="btn" onclick="ledProva(0xFF7800)">Arancio</button>
+    <button class="btn" onclick="ledFineProva()">Fine prova</button>
+   </div>
+   <h4>Correzione dei canali (255 = nessuna correzione)</h4>
+   <label for="l_g0">Rosso</label><input type="range" id="l_g0" min="0" max="255" oninput="ledGuad()">
+   <label for="l_g1">Verde</label><input type="range" id="l_g1" min="0" max="255" oninput="ledGuad()">
+   <label for="l_g2">Blu</label><input type="range" id="l_g2" min="0" max="255" oninput="ledGuad()">
+   <h4>Tonalita degli stati</h4>
+   <label for="l_t0">Avvio</label><input type="color" id="l_t0" onchange="ledProva(this)">
+   <label for="l_t1">Hotspot acceso</label><input type="color" id="l_t1" onchange="ledProva(this)">
+   <label for="l_t2">Collegamento in corso</label><input type="color" id="l_t2" onchange="ledProva(this)">
+   <label for="l_t3">Collegato alla rete</label><input type="color" id="l_t3" onchange="ledProva(this)">
+   <label for="l_t4">Modalita aereo</label><input type="color" id="l_t4" onchange="ledProva(this)">
+   <label for="l_t5">Prima accensione, in attesa</label><input type="color" id="l_t5" onchange="ledProva(this)">
+   <button class="btn" onclick="ledCalFabbrica()">Valori di fabbrica</button>
+   <p class="fhint">Le correzioni e le tonalita vanno con il tasto Salva e le cambia solo l'amministratore. Valgono per tutti i colori del LED.</p>
   </fieldset>
   <button class="btn" onclick="saveLed()">Salva</button><div id="lm2" class="msg"></div>
   <div id="al_led_rgb1"></div>
@@ -1285,6 +1387,7 @@ fieldset legend{padding:0 6px;color:var(--mut)}
    id="w_mask">
   <label for="w_gw">Gateway</label><input id="w_gw"><label for="w_d1">DNS 1</label><input
    id="w_d1"><label for="w_d2">DNS 2</label><input id="w_d2">
+  <label for="w_dom">Dominio della rete</label><input id="w_dom" readonly>
   <div id="ipmac" style="margin:6px 0 10px"></div>
   <button class="btn adm" id="ipsave" onclick="saveWifi()">Salva e collega</button>
   <div id="wm2" class="msg"></div></div>
@@ -1319,6 +1422,9 @@ fieldset legend{padding:0 6px;color:var(--mut)}
   <label for="s_host">Nome host</label><input id="s_host" maxlength="32">
   <label for="s_dom">Dominio DNS (facoltativo, es. casa.lan)</label><input id="s_dom"
    maxlength="60">
+  <label for="s_ml">Messaggio nella pagina di accesso (facoltativo, massimo 200 caratteri, senza accenti). Variabili: {nome} {scheda} {data} {ora} {fuso}; {{ per una graffa</label><textarea
+   id="s_ml" rows="3" maxlength="200" spellcheck="false" oninput="mlAnteprima()"></textarea>
+  <div id="s_mlp" style="color:var(--mut);margin:-6px 0 8px;white-space:pre-line"></div>
   <div id="s_dn" style="color:var(--mut);margin:-6px 0 8px"></div>
   <div id="s_fq" style="color:var(--mut);margin-bottom:8px"></div>
   <button class="btn adm" onclick="saveSys()">Salva</button><div id="sm" class="msg"></div>
@@ -1650,21 +1756,47 @@ fieldset legend{padding:0 6px;color:var(--mut)}
    <div><label for="lc_tz">Fuso orario</label><select id="lc_tz" onchange="lcTz()"></select></div>
    <div id="lc_tzc" class="hide">
     <label for="lc_posix">Regola del fuso (formato POSIX)</label><input id="lc_posix"></div>
-   <div><label for="lc_df">Formato data</label><select id="lc_df">
+   <div><label for="lc_df">Data corta</label><select id="lc_df" onchange="lcFmt()">
      <option value="0">GG/MM/AAAA (31/12/2026)</option>
      <option value="1">AAAA-MM-GG (2026-12-31)</option>
-     <option value="2">MM/GG/AAAA (12/31/2026)</option></select></div>
-   <div><label for="lc_tf">Formato ora</label><select id="lc_tf">
-     <option value="0">24 ore (18:30:00)</option><option value="1">12 ore (06:30:00 PM)</option>
-    </select></div>
+     <option value="2">MM/GG/AAAA (12/31/2026)</option>
+     <option value="3">Personalizzata</option></select>
+    <input id="lc_dft" data-tt class="hide" maxlength="32" autocomplete="off" spellcheck="false" oninput="lcFmt()" aria-label="Formato personalizzato della data corta">
+    <div class="fhint" id="lc_dfp" aria-live="polite"></div></div>
+   <div><label for="lc_dl">Data lunga</label><select id="lc_dl" onchange="lcFmt()">
+     <option value="0">Abbreviata (Mar. 3 Nov. 2026)</option>
+     <option value="1">Completa (Martedi 3 novembre 2026)</option>
+     <option value="2">Personalizzata</option></select>
+    <input id="lc_dlt" data-tt class="hide" maxlength="32" autocomplete="off" spellcheck="false" oninput="lcFmt()" aria-label="Formato personalizzato della data lunga">
+    <div class="fhint" id="lc_dlp" aria-live="polite"></div></div>
+   <div><label for="lc_tf">Formato ora</label><select id="lc_tf" onchange="lcFmt()">
+     <option value="0">24 ore (18:30)</option><option value="1">12 ore (6:30 PM)</option>
+    </select>
+    <div class="fhint" id="lc_tfp"></div></div>
+   <div><label for="lc_ts">Secondi nell'ora lunga</label><select id="lc_ts" onchange="lcFmt()">
+     <option value="1">Si</option><option value="0">No</option></select></div>
+   <div><label for="lc_tl">Ora lunga</label><select id="lc_tl" onchange="lcFmt()">
+     <option value="0">Standard</option><option value="1">Personalizzata</option></select>
+    <input id="lc_tlt" data-tt class="hide" maxlength="32" autocomplete="off" spellcheck="false" oninput="lcFmt()" aria-label="Formato personalizzato dell'ora lunga">
+    <div class="fhint" id="lc_tlp" aria-live="polite"></div></div>
+   <p class="fhint" id="lc_fhelp">Formato scritto a mano, come il comando date: %d giorno (%-d senza zero), %m mese (%-m), %b mese abbreviato, %B mese completo, %a giorno abbreviato, %A giorno completo, %Y anno (%y a due cifre), %H ore 0-23 (%-H), %I ore 1-12 (%-I), %M minuti, %S secondi, %p AM/PM, %% il segno di percentuale. Il resto e testo libero, al massimo 32 caratteri. La data e l'ora corte (tabelle, registro, elenchi) hanno ore e minuti; quelle lunghe stanno in testata, nell'accesso e nei riquadri grandi.</p>
    <div><label for="lc_ds">Separatore dei decimali</label><select id="lc_ds">
      <option value="0">Virgola (3,5)</option><option value="1">Punto (3.5)</option></select></div>
    <div><label for="lc_ws">Primo giorno della settimana</label><select id="lc_ws">
      <option value="0">Lunedi</option><option value="1">Domenica</option></select></div>
-   <div><label for="lc_tu">Unita di temperatura</label><select id="lc_tu">
+   <div><label for="lc_tu">Unita di temperatura</label><select id="lc_tu" onchange="lcTarHint()">
      <option value="0">Gradi Celsius (C)</option><option value="1">Gradi Fahrenheit (F)</option>
     </select></div>
   </div></div>
+ <div class="card adm"><h3>Taratura della temperatura</h3>
+  <p class="fhint">Correzione in gradi Celsius, da -20,0 a +20,0, aggiunta alla temperatura letta da ogni sensore. Vale dappertutto: pagina, registratore, soglia del caldo, comandi e funzioni. Il valore grezzo del sensore non si perde. Si salva con il pulsante Salva qui sotto.</p>
+  <div class="agrid">
+   <div><label for="lc_tarsoc">Sensore interno del chip (gradi C)</label><input type="number" id="lc_tarsoc"
+     min="-20" max="20" step="0.1" value="0" oninput="lcTarHint()"></div>
+   <div><label for="lc_tarext">Sensore esterno (gradi C)</label><input type="number" id="lc_tarext"
+     min="-20" max="20" step="0.1" value="0" oninput="lcTarHint()"></div>
+  </div>
+  <p class="fhint" id="lc_tarf"></p></div>
  <div class="card adm"><h3>Lingue</h3>
   <div id="lglist"></div>
   <label for="lgf"
@@ -1678,7 +1810,7 @@ fieldset legend{padding:0 6px;color:var(--mut)}
    onclick="lcDefaults()">Ripristina valori del paese</button><div id="lcm" class="msg"></div></div>
 </section>
 <section id="t_power" class="hide">
- <div class="sub" id="sk_power"><button>Risparmio energia</button><button class="adm">Dormi adesso</button><button class="adm">Velocita CPU</button></div>
+ <div class="sub" id="sk_power"><button>Risparmio energia</button><button class="adm">Dormi adesso</button><button class="adm">Velocita CPU</button><button>Coprocessore</button></div>
  <div class="card"><h3>Risparmio energia</h3>
   <p class="fhint">Tre livelli, da usare insieme: processore piu lento (sotto), Wi-Fi a risparmio massimo, sonno profondo. Il consumo vero dipende dalla scheda: misuralo con un tester prima di fidarti dei numeri.</p>
   <div class="sc" id="sc_power"></div>
@@ -1723,6 +1855,13 @@ fieldset legend{padding:0 6px;color:var(--mut)}
    <button class="btn gray" onclick="setCpuPar()">Salva i parametri</button>
   </div>
   <div id="cpum" class="msg"></div></div>
+ <div class="card"><h3>Coprocessore</h3>
+  <p class="fhint">Cio che la scheda ha per lavorare mentre il processore principale dorme. Qui si vede soltanto lo stato: non si carica nessun programma.</p>
+  <div class="row"><span>Tipo</span><span id="co_tipo"></span></div>
+  <div class="row"><span>Memoria condivisa</span><span id="co_mem"></span></div>
+  <div class="row"><span>Programma caricato</span><span id="co_prog"></span></div>
+  <div class="row"><span>Ultimo risveglio</span><span id="co_wake"></span></div>
+ </div>
 </section>
 <section id="t_func" class="hide">
  <div class="card"><h3>Funzionalita</h3>
@@ -1775,6 +1914,14 @@ fieldset legend{padding:0 6px;color:var(--mut)}
   <button class="btn gray" onclick="a11yReset()">Ripristina</button>
   <p class="fhint">Tastiera: Tab per spostarti, Invio per premere, Esc per chiudere finestre e menu, Ctrl + ` per il terminale. Nell'editor dei file: Ctrl+S salva, Ctrl+M cambia il comportamento del tasto Tab.</p>
   </div>
+ <div class="card adm" id="tema"><h3>Tema della pagina</h3>
+  <p class="fhint">Un file di stile (.css) cambia l'aspetto di questa pagina senza aggiornare il firmware. Vale per tutti i browser che aprono questa scheda. Colori, raggi e forma dei bottoni si cambiano; immagini, caratteri scaricati e indirizzi esterni no (sono rifiutati @import, url(), la barra rovesciata e il carattere &lt;). Al massimo 32 KB.</p>
+  <div class="row"><span>Tema in uso</span><span id="tm_st"></span></div>
+  <input type="file" id="tm_f" accept=".css,text/css" class="hide" onchange="temaCarica(this)">
+  <button class="btn" onclick="$('tm_f').click()">Carica un tema</button>
+  <button class="btn gray" onclick="temaRipristina()">Tema di fabbrica</button>
+  <div id="tm_m" class="msg"></div>
+ </div>
 </section>
 <section id="t_conf" class="hide">
  <div class="sub" id="sk_conf"><button class="adm">Backup e ripristino</button><button class="adm">Ripristino di fabbrica</button></div>
@@ -1921,6 +2068,71 @@ fieldset legend{padding:0 6px;color:var(--mut)}
    download="vesevos-statistiche.csv">Scarica CSV</a><button class="btn gray adm hide" id="st_rst"
    onclick="stReset()">Azzera</button><div id="stm" class="msg"></div>
   <p class="fhint">I pin e il consumo di corrente non sono ancora contati.</p></div>
+</section>
+<section id="t_rec" class="hide">
+ <div class="card"><h3>Registratore</h3>
+  <p class="fhint">Ogni tanto legge le fonti scelte (periferiche, temperatura del chip, RAM libera) e scrive una riga in un file CSV, sulla memoria interna o sulla microSD. Parte spento. Le righe si scrivono a blocchi per non consumare la memoria.</p>
+  <div id="rcst" class="msg" style="margin-bottom:8px"></div>
+  <div id="rc_cap" class="fhint"></div>
+ </div>
+ <div class="card"><h3>Grafico</h3>
+  <svg id="rc_svg" viewBox="0 0 300 120" width="100%" height="160" role="img" aria-label="Grafico del registratore" preserveAspectRatio="none" style="background:var(--in);border-radius:8px"></svg>
+  <div id="rc_leg" class="fhint"></div>
+  <div style="overflow-x:auto"><table id="rc_tab" class="ftab"></table></div>
+ </div>
+ <div class="card"><h3>Dati salvati</h3>
+  <div id="rc_files" class="fhint"></div>
+  <div style="overflow-x:auto"><table id="rc_ftab" class="ftab hide"></table></div>
+  <div id="rc_fsel" class="fhint" role="status" aria-live="polite"></div>
+  <button class="btn gray" id="rc_fdl" onclick="rcScarica()" disabled>Scarica selezionati</button>
+  <button class="btn gray adm" id="rc_fdel" onclick="rcElimina()" disabled>Elimina selezionati</button>
+  <div id="rcm2" class="msg"></div>
+ </div>
+ <div class="card"><h3>Azioni</h3>
+  <p class="fhint">Le azioni non si campionano: si segna l'ora in cui sono state eseguite (uscite, PWM, LED, contatore, programmi, riavvii, sonno, avvio, rete, servizi, microSD). Non si segnano accessi, password o nomi utente. Vanno nel file eventi.csv.</p>
+  <div id="rc_azst" class="fhint"></div>
+  <div style="overflow-x:auto"><table id="rc_aztab" class="ftab"></table></div>
+  <div id="rc_azfiles" class="fhint"></div>
+ </div>
+ <div class="card adm" id="rc_form"><h3>Impostazioni del registratore</h3>
+  <div class="agrid"><div>
+    <label for="rc_on">Stato</label>
+    <select id="rc_on"><option value="0">Spento</option><option value="1">Acceso</option></select></div><div>
+    <label for="rc_sec">Intervallo predefinito (secondi)</label>
+    <input type="number" id="rc_sec" min="1" max="86400"></div><div>
+    <label for="rc_where">Dove salvare</label>
+    <select id="rc_where" onchange="rcWhereUi()"><option value="0">Memoria interna</option><option value="1">microSD</option></select></div><div>
+    <label for="rc_max">Spazio massimo (KB)</label>
+    <input type="number" id="rc_max" min="4" max="65535"></div><div>
+    <label for="rc_nome">Nome dei file (lettere, numeri, _ e -)</label>
+    <input type="text" id="rc_nome" maxlength="24" pattern="[A-Za-z0-9_-]+" autocomplete="off"></div><div>
+    <label for="rc_lim">Il limite vale per</label>
+    <select id="rc_lim"><option value="0">Tutti i file della cartella insieme</option><option value="1">Ogni singolo file</option></select></div></div>
+  <p class="fhint" id="rc_minh"></p>
+  <h4>Fonti</h4>
+  <div class="agrid"><div>
+    <label for="rc_d1">Periferica 1</label><select id="rc_d1"></select></div><div>
+    <label for="rc_d2">Periferica 2</label><select id="rc_d2"></select></div><div>
+    <label for="rc_d3">Periferica 3</label><select id="rc_d3"></select></div><div>
+    <label for="rc_d4">Periferica 4</label><select id="rc_d4"></select></div></div>
+  <label><input type="checkbox" id="rc_t"> Temperatura del chip</label>
+  <label><input type="checkbox" id="rc_r"> RAM libera</label>
+  <h4>Ogni quanto leggere ogni fonte</h4>
+  <p class="fhint">0 = si usa l'intervallo predefinito. Una riga si scrive quando almeno una fonte e scaduta: le altre colonne restano vuote.</p>
+  <div class="agrid"><div>
+    <label for="rc_s1">Periferica 1 (secondi)</label><input type="number" id="rc_s1" min="0" max="86400"></div><div>
+    <label for="rc_s2">Periferica 2 (secondi)</label><input type="number" id="rc_s2" min="0" max="86400"></div><div>
+    <label for="rc_s3">Periferica 3 (secondi)</label><input type="number" id="rc_s3" min="0" max="86400"></div><div>
+    <label for="rc_s4">Periferica 4 (secondi)</label><input type="number" id="rc_s4" min="0" max="86400"></div><div>
+    <label for="rc_st">Temperatura del chip (secondi)</label><input type="number" id="rc_st" min="0" max="86400"></div><div>
+    <label for="rc_sr">RAM libera (secondi)</label><input type="number" id="rc_sr" min="0" max="86400"></div></div>
+  <h4>Azioni da segnare</h4>
+  <div id="rc_acats"></div>
+  <div class="agrid"><div>
+    <label for="rc_evmax">Righe di azioni al giorno al massimo (0 = nessun limite)</label>
+    <input type="number" id="rc_evmax" min="0" max="65535"></div></div>
+  <button class="btn" onclick="rcSave()">Salva</button><div id="rcm" class="msg"></div>
+ </div>
 </section>
 <section id="t_pass" class="hide">
  <div class="card"><h3>Password</h3><div id="pwho" class="fhint"></div>
@@ -2243,6 +2455,9 @@ fieldset legend{padding:0 6px;color:var(--mut)}
   <p>I vecchi nomi niente, aereo, wps e trova restano validi. Cambiare e solo per l'Admin.</p>
   <h5 data-nome="diag"></h5>
   <p>Diagnosi della scheda, solo Admin. Senza argomenti mostra guida, rete, servizi, RAM e flash. "diag codici" elenca i codici dei lampi del LED (classe, pausa, dettaglio); "diag led &lt;classe&gt; &lt;dettaglio&gt;" ne prova uno.</p>
+  <h5 data-nome="rec"></h5>
+  <p>Registratore di dati: ogni tot secondi legge le fonti scelte (periferiche, temperatura, RAM) e scrive una riga CSV su flash o microSD.</p>
+  <p>Di fabbrica e spento. 'rec set' cambia intervallo, posto (flash o sd), spazio massimo e fonti; 'rec clear' cancella i dati.</p>
   <p><a href="https://github.com/paolellad79/VesevOS" target="_blank" rel="noopener">Vai al sito GitHub del progetto per la guida dettagliata e completa</a></p></div>
 </section>
 <section id="t_legal" class="hide">
@@ -2301,6 +2516,26 @@ fieldset legend{padding:0 6px;color:var(--mut)}
   style="border-top:1px solid var(--bd);border-radius:0 0 10px 10px"><svg class="i">
    <use href="#i-a11y"/>
   </svg><span><b>Accessibilita</b><small>Testo grande, contrasto, colori</small></span></button>
+</div>
+<div class="pop hide" id="a11p" role="dialog" aria-label="Accessibilita">
+ <b>Accessibilita</b>
+ <div class="agrid">
+  <div><label for="l_fs">Dimensione del testo</label><select id="l_fs"
+    onchange="a11ySet('fs',+this.value)"><option value="0">Normale</option>
+    <option value="1">Grande</option><option value="2">Molto grande</option></select></div>
+  <div><label for="l_hc">Contrasto alto</label><select id="l_hc"
+    onchange="a11ySet('hc',this.value)">
+    <option value="auto">Automatico (come il dispositivo)</option>
+    <option value="on">Attivo</option><option value="off">Spento</option></select></div>
+  <div><label for="l_cb">Colori adatti ai daltonici</label><select id="l_cb"
+    onchange="a11ySet('cb',+this.value)"><option value="0">Spento</option>
+    <option value="1">Attivo (blu, arancione, giallo)</option></select></div>
+  <div><label for="l_rm">Riduci le animazioni</label><select id="l_rm"
+    onchange="a11ySet('rm',this.value)">
+    <option value="auto">Automatico (come il dispositivo)</option>
+    <option value="on">Attivo</option><option value="off">Spento</option></select></div>
+ </div>
+ <button class="btn gray" onclick="a11yReset()">Ripristina</button>
 </div>
 <div class="cp" id="cp">
  <div class="cph" id="cph"><svg class="i" style="width:18px;height:18px"><use href="#i-term"/>
@@ -2412,10 +2647,10 @@ var VOCI=[
 
  {id:"ora",testo:"Ora",gruppo:"sys",ruolo:1,apri:loadTime},
  {id:"loc",testo:"Localizzazione",gruppo:"sys",ruolo:1,apri:apriLocalizzazione},
- {id:"power",testo:"Risparmio energia",gruppo:"sys",ruolo:1,apri:pwLoad},
+ {id:"power",testo:"Risparmio energia",gruppo:"sys",ruolo:1,apri:function(){pwLoad();coLoad()}},
  {id:"func",testo:"Funzionalita",gruppo:"sys",ruolo:1,apri:fnLoad},
  {id:"file",testo:"File",gruppo:"sys",ruolo:1,apri:apriFile},
- {id:"acc",testo:"Accessibilita",gruppo:"sys"},
+ {id:"acc",testo:"Accessibilita",gruppo:"sys",apri:temaStato},
  {id:"conf",testo:"Configurazione",gruppo:"sys",ruolo:2},
  {id:"boot",testo:"Avvio",gruppo:"sys",ruolo:1,apri:bLoad},
  {id:"selftest",testo:"Autotest",gruppo:"sys",ruolo:2,apri:stlPoll},
@@ -2423,6 +2658,7 @@ var VOCI=[
  {id:"wd",testo:"Watchdog",gruppo:"sys",ruolo:1,sezione:3,apri:wdLoad},
  {id:"shell",testo:"Terminale",gruppo:"sys",ruolo:1,sezione:3,apri:apriTerminale},
  {id:"stat",testo:"Statistiche",gruppo:"sys",ruolo:1,sezione:3,apri:apriStatistiche,esci:fermaStatistiche},
+ {id:"rec",testo:"Registratore",gruppo:"sys",ruolo:1,sezione:3,apri:apriRegistratore,esci:fermaRegistratore},
 
  {id:"pass",testo:"Password",gruppo:"sec",apri:fillPass,esci:pwVuota},
  {id:"sec",testo:"Utenti",gruppo:"sec",ruolo:2,apri:usLoad},
@@ -2715,178 +2951,6 @@ function gOf(id){
   for(var g in GMAP)if(GMAP[g].indexOf(id)>=0)return g;
   return"home"
 }
-var A11Y={fs:0,hc:"auto",cb:0,rm:"auto"};
-try{
-  var _a=JSON.parse(localStorage.getItem("va11y")||"{}");
-  for(var _k in A11Y)if(_a[_k]!==undefined)A11Y[_k]=_a[_k]
-}catch(e){}
-
-function a11yApply(){
-  var d=document.documentElement,mm=function(q){return!!(window.matchMedia&&matchMedia(q).matches)};
-  d.setAttribute("data-fs",A11Y.fs);
-  d.setAttribute("data-hc",
-    (A11Y.hc=="on"||(A11Y.hc=="auto"&&mm("(prefers-contrast: more)")))?"1":"0");
-  d.setAttribute("data-cb",A11Y.cb?"1":"0");
-  d.setAttribute("data-rm",
-    (A11Y.rm=="on"||(A11Y.rm=="auto"&&mm("(prefers-reduced-motion: reduce)")))?"1":"0");
-  ["fs","hc","cb","rm"].forEach(function(k){
-    var e=$("a_"+k);
-    if(e)e.value=A11Y[k]
-  });
-  if(typeof cpApply=="function")try{cpApply()}catch(e){}
-}
-
-function a11ySet(k,v){
-  A11Y[k]=v;
-  try{localStorage.setItem("va11y",JSON.stringify(A11Y))}catch(e){}
-  a11yApply();
-  live(t("Salvato"))
-}
-
-function a11yReset(){
-  A11Y={fs:0,hc:"auto",cb:0,rm:"auto"};
-  try{localStorage.removeItem("va11y")}catch(e){}
-  a11yApply();
-  live(t("Ripristinato"))
-}
-
-function a11yOpen(){
-  $("thm").className="pop hide";
-  show("acc");
-  setTimeout(function(){
-    var e=$("a_fs");
-    if(e){
-      e.scrollIntoView({block:"center"});
-      e.focus()
-    }
-  },60)
-}
-
-function live(x){
-  var e=$("live");
-  if(!e)return;
-  e.textContent="";
-  setTimeout(function(){e.textContent=x},30)
-}
-
-function a11yLabels(){
-  [].forEach.call(document.querySelectorAll("button[title],a[title],label.btn"),function(b){
-    if(!b.getAttribute("aria-label")&&!b.textContent.trim()&&b.title)b.setAttribute("aria-label",
-      b.title)
-  });
-  [].forEach.call(document.querySelectorAll("svg.i:not([aria-hidden])"),function(s){
-    s.setAttribute("aria-hidden","true")
-  });
-  [].forEach.call(document.querySelectorAll(".msg:not([role])"),function(m){
-    m.setAttribute("role","status")
-  });
-  [].forEach.call(document.querySelectorAll("label:not([for])"),function(l){
-    var n=l.nextElementSibling;
-    if(n&&/^(INPUT|SELECT|TEXTAREA)$/.test(n.tagName)&&n.id&&
-      !l.querySelector("input,select,textarea"))l.htmlFor=n.id
-  });
-  [].forEach.call(document.querySelectorAll("input[placeholder]:not([aria-label])"),function(i){
-    if(!(i.labels&&i.labels.length))i.setAttribute("aria-label",i.placeholder)
-  });
-  [].forEach.call(document.querySelectorAll(
-    "[onclick]:not(button):not(a):not(input):not(select):not(textarea):not(label):not([role]):not([tabindex])"),
-    function(e){
-      if(e.closest("svg"))return;
-      e.setAttribute("role","button");
-      e.tabIndex=0;
-      e.setAttribute("data-kb","1")
-    });
-  [].forEach.call(document.querySelectorAll("svg:not([role]):not([aria-label]):not([aria-hidden])"),
-    function(s){
-      s.setAttribute("aria-hidden","true")
-    })
-}
-document.addEventListener("keydown",function(e){
-  var x=e.target;
-  if((e.key=="Enter"||e.key==" ")&&x&&x.getAttribute&&x.getAttribute("data-kb")){
-    e.preventDefault();
-    x.click()
-  }
-});
-(function(){
-  var tm=0;
-  new MutationObserver(function(){
-    clearTimeout(tm);
-    tm=setTimeout(a11yLabels,120)
-  }).observe(document.body,{childList:true,subtree:true});
-  if(window.matchMedia){
-    ["(prefers-contrast: more)","(prefers-reduced-motion: reduce)"].forEach(function(q){
-      var m=matchMedia(q);
-      if(m.addEventListener)m.addEventListener("change",a11yApply)
-    })
-  }
-})();
-a11yApply();
-a11yLabels();
-var THEME="auto";
-try{THEME=localStorage.getItem("vth")||"auto"}catch(e){}
-function themeApply(){
-  var m=THEME;
-  if(m=="auto")m=(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches)?"light"
-    :"dark";
-  document.documentElement.setAttribute("data-theme",m);
-  var nm=THEME=="auto"?t("Automatico"):THEME=="light"?t("Chiaro"):t("Scuro");
-  var u=$("thu");
-  if(u)u.setAttribute("href",THEME=="auto"?"#i-auto":THEME=="light"?"#i-sun":"#i-moon");
-  var b=$("thb");
-  if(b){
-    var nt=tf("Tema: {0}",nm);
-    b.title=nt;
-    b.setAttribute("aria-label",nt)
-  }
-    ["auto","light","dark"].forEach(function(k){
-      var e=$("tm_"+k);
-      if(e)e.className=k==THEME?"on":""
-    });
-  if(typeof cur!="undefined"&&cur=="pin"&&typeof PM!="undefined"&&PM.length)drawPins()
-}
-
-function thOpen(on){
-  var m=$("thm");
-  if(m)m.className=on?"pop":"pop hide";
-  var b=$("thb");
-  if(b)b.setAttribute("aria-expanded",on?"true":"false")
-}
-
-function themeSet(m){
-  THEME=m;
-  try{localStorage.setItem("vth",THEME)}catch(e){}
-  themeApply();
-  thOpen(false)
-}
-
-function thMenu(e){
-  e.stopPropagation();
-  thOpen($("thm").classList.contains("hide"))
-}
-document.addEventListener("click",function(e){
-  var m=$("thm");
-  if(m&&!m.classList.contains("hide")&&!e.target.closest("#thm"))thOpen(false)
-});
-document.addEventListener("keydown",function(e){
-  if(e.key=="Escape"){
-    thOpen(false);
-    var um=$("um");
-    if(um)um.className="pop hide";
-    var al=$("alerts");
-    if(al&&!al.classList.contains("hide"))al.className="alerts hide";
-    langClose()
-  }
-  if(e.ctrlKey&&(e.key=="`"||e.code=="Backquote")&&loggedIn()){
-    e.preventDefault();
-    cpToggle()
-  }
-});
-if(window.matchMedia)try{
-  matchMedia("(prefers-color-scheme: light)").addEventListener("change",function(){
-    if(THEME=="auto")themeApply()
-  })
-}catch(e){}
 var DICT={},LANG="it",LANGS=[{code:"it",name:"Italiano"}];
 function t(s){
   var v=DICT[s];
@@ -2911,6 +2975,7 @@ function applyStatic(){
   list.forEach(function(n){
     var p=n.parentNode;
     if(p&&(p.tagName=="SCRIPT"||p.tagName=="STYLE"))return;
+    if(p&&p.closest&&p.closest("[translate=no]"))return;   /* ora e messaggio dell'accesso: mai tradotti */
     if(n.__o===undefined)n.__o=n.nodeValue;
     var k=n.__o.trim().replace(/\s+/g," ");
     if(!k)return;
@@ -3133,6 +3198,258 @@ window.addEventListener("offline",function(){
   CONN.bad=1;
   connFail()
 });
+/* ===== Aspetto della pagina: accessibilita (testo, contrasto, daltonici, animazioni) e tema chiaro/scuro =====
+   Spostato da js_base.js il 20/11/2026 (il file superava le 500 righe), senza cambiare il comportamento. */
+var A11Y={fs:0,hc:"auto",cb:0,rm:"auto"};
+try{
+  var _a=JSON.parse(localStorage.getItem("va11y")||"{}");
+  for(var _k in A11Y)if(_a[_k]!==undefined)A11Y[_k]=_a[_k]
+}catch(e){}
+
+function a11yApply(){
+  var d=document.documentElement,mm=function(q){return!!(window.matchMedia&&matchMedia(q).matches)};
+  d.setAttribute("data-fs",A11Y.fs);
+  d.setAttribute("data-hc",
+    (A11Y.hc=="on"||(A11Y.hc=="auto"&&mm("(prefers-contrast: more)")))?"1":"0");
+  d.setAttribute("data-cb",A11Y.cb?"1":"0");
+  d.setAttribute("data-rm",
+    (A11Y.rm=="on"||(A11Y.rm=="auto"&&mm("(prefers-reduced-motion: reduce)")))?"1":"0");
+  ["fs","hc","cb","rm"].forEach(function(k){
+    var e=$("a_"+k),l=$("l_"+k);   /* a_ = scheda Sistema, l_ = finestra dell'accesso */
+    if(e)e.value=A11Y[k];
+    if(l)l.value=A11Y[k]
+  });
+  if(typeof cpApply=="function")try{cpApply()}catch(e){}
+}
+
+function a11ySet(k,v){
+  A11Y[k]=v;
+  try{localStorage.setItem("va11y",JSON.stringify(A11Y))}catch(e){}
+  a11yApply();
+  live(t("Salvato"))
+}
+
+function a11yReset(){
+  A11Y={fs:0,hc:"auto",cb:0,rm:"auto"};
+  try{localStorage.removeItem("va11y")}catch(e){}
+  a11yApply();
+  live(t("Ripristinato"))
+}
+
+function a11yOpen(){
+  var lg=$("login");
+  if(lg&&!lg.classList.contains("hide")){   /* nella pagina di accesso non c'e la scheda Sistema: si apre la finestra */
+    thOpen(false);
+    var f=$("a11p");
+    popSotto(f,{currentTarget:$("lab")});
+    f.className="pop";
+    $("lab").setAttribute("aria-expanded","true");
+    $("l_fs").focus();
+    return
+  }
+  $("thm").className="pop hide";
+  show("acc");
+  setTimeout(function(){
+    var e=$("a_fs");
+    if(e){
+      e.scrollIntoView({block:"center"});
+      e.focus()
+    }
+  },60)
+}
+
+function live(x){
+  var e=$("live");
+  if(!e)return;
+  e.textContent="";
+  setTimeout(function(){e.textContent=x},30)
+}
+
+function a11yLabels(){
+  [].forEach.call(document.querySelectorAll("button[title],a[title],label.btn"),function(b){
+    if(!b.getAttribute("aria-label")&&!b.textContent.trim()&&b.title)b.setAttribute("aria-label",
+      b.title)
+  });
+  [].forEach.call(document.querySelectorAll("svg.i:not([aria-hidden])"),function(s){
+    s.setAttribute("aria-hidden","true")
+  });
+  [].forEach.call(document.querySelectorAll(".msg:not([role])"),function(m){
+    m.setAttribute("role","status")
+  });
+  [].forEach.call(document.querySelectorAll("label:not([for])"),function(l){
+    var n=l.nextElementSibling;
+    if(n&&/^(INPUT|SELECT|TEXTAREA)$/.test(n.tagName)&&n.id&&
+      !l.querySelector("input,select,textarea"))l.htmlFor=n.id
+  });
+  [].forEach.call(document.querySelectorAll("input[placeholder]:not([aria-label])"),function(i){
+    if(!(i.labels&&i.labels.length))i.setAttribute("aria-label",i.placeholder)
+  });
+  [].forEach.call(document.querySelectorAll(
+    "[onclick]:not(button):not(a):not(input):not(select):not(textarea):not(label):not([role]):not([tabindex])"),
+    function(e){
+      if(e.closest("svg"))return;
+      e.setAttribute("role","button");
+      e.tabIndex=0;
+      e.setAttribute("data-kb","1")
+    });
+  [].forEach.call(document.querySelectorAll("svg:not([role]):not([aria-label]):not([aria-hidden])"),
+    function(s){
+      s.setAttribute("aria-hidden","true")
+    })
+}
+document.addEventListener("keydown",function(e){
+  var x=e.target;
+  if((e.key=="Enter"||e.key==" ")&&x&&x.getAttribute&&x.getAttribute("data-kb")){
+    e.preventDefault();
+    x.click()
+  }
+});
+(function(){
+  var tm=0;
+  new MutationObserver(function(){
+    clearTimeout(tm);
+    tm=setTimeout(a11yLabels,120)
+  }).observe(document.body,{childList:true,subtree:true});
+  if(window.matchMedia){
+    ["(prefers-contrast: more)","(prefers-reduced-motion: reduce)"].forEach(function(q){
+      var m=matchMedia(q);
+      if(m.addEventListener)m.addEventListener("change",a11yApply)
+    })
+  }
+})();
+a11yApply();
+a11yLabels();
+var THEME="auto";
+try{THEME=localStorage.getItem("vth")||"auto"}catch(e){}
+function themeApply(){
+  var m=THEME;
+  if(m=="auto")m=(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches)?"light"
+    :"dark";
+  document.documentElement.setAttribute("data-theme",m);
+  var nm=THEME=="auto"?t("Automatico"):THEME=="light"?t("Chiaro"):t("Scuro");
+  var u=$("thu");
+  if(u)u.setAttribute("href",THEME=="auto"?"#i-auto":THEME=="light"?"#i-sun":"#i-moon");
+  var lu=$("lthu");
+  if(lu)lu.setAttribute("href",THEME=="auto"?"#i-auto":THEME=="light"?"#i-sun":"#i-moon");
+  ["thb","lthb"].forEach(function(id){
+    var b=$(id);
+    if(!b)return;
+    var nt=tf("Tema: {0}",nm);
+    b.title=nt;
+    b.setAttribute("aria-label",nt)
+  });
+    ["auto","light","dark"].forEach(function(k){
+      var e=$("tm_"+k);
+      if(e)e.className=k==THEME?"on":""
+    });
+  if(typeof cur!="undefined"&&cur=="pin"&&typeof PM!="undefined"&&PM.length)drawPins()
+}
+
+function thOpen(on){
+  var m=$("thm");
+  if(m)m.className=on?"pop":"pop hide";
+  ["thb","lthb"].forEach(function(id){
+    var b=$(id);
+    if(b)b.setAttribute("aria-expanded",on?"true":"false")
+  })
+}
+
+function themeSet(m){
+  THEME=m;
+  try{localStorage.setItem("vth",THEME)}catch(e){}
+  themeApply();
+  thOpen(false)
+}
+
+/* Menu a comparsa sotto il pulsante premuto, solo nella pagina di accesso (nella testata restano al loro posto) */
+function popSotto(m,e){
+  var l=$("login");
+  if(!l||l.classList.contains("hide"))return;
+  var r=e.currentTarget.getBoundingClientRect();
+  m.style.top=(r.bottom+6)+"px";
+  m.style.right=Math.max(8,innerWidth-r.right)+"px"
+}
+
+function thMenu(e){
+  e.stopPropagation();
+  var apri=$("thm").classList.contains("hide");
+  $("a11p").className="pop hide";
+  $("lab").setAttribute("aria-expanded","false");
+  if(apri)popSotto($("thm"),e);
+  thOpen(apri)
+}
+
+function a11yPop(e){
+  e.stopPropagation();
+  var m=$("a11p"),apri=m.classList.contains("hide");
+  thOpen(false);
+  langClose();
+  if(apri)popSotto(m,e);
+  m.className=apri?"pop":"pop hide";
+  $("lab").setAttribute("aria-expanded",apri?"true":"false");
+  if(apri)$("l_fs").focus()
+}
+
+function a11yPopChiudi(){
+  var m=$("a11p");
+  if(!m||m.classList.contains("hide"))return;
+  m.className="pop hide";
+  $("lab").setAttribute("aria-expanded","false")
+}
+document.addEventListener("click",function(e){
+  if(!e.target.closest("#a11p")&&!e.target.closest("#thm"))a11yPopChiudi()
+});
+document.addEventListener("click",function(e){
+  var m=$("thm");
+  if(m&&!m.classList.contains("hide")&&!e.target.closest("#thm"))thOpen(false)
+});
+document.addEventListener("keydown",function(e){
+  if(e.key=="Escape"){
+    thOpen(false);
+    a11yPopChiudi();
+    var um=$("um");
+    if(um)um.className="pop hide";
+    var al=$("alerts");
+    if(al&&!al.classList.contains("hide"))al.className="alerts hide";
+    langClose()
+  }
+  if(e.ctrlKey&&(e.key=="`"||e.code=="Backquote")&&loggedIn()){
+    e.preventDefault();
+    cpToggle()
+  }
+});
+if(window.matchMedia)try{
+  matchMedia("(prefers-color-scheme: light)").addEventListener("change",function(){
+    if(THEME=="auto")themeApply()
+  })
+}catch(e){}
+/* Caricamento a pezzi: UN SOLO codice per tutti i caricamenti. La pagina di emergenza del firmware usa lo stesso testo (tools/mkpezzi.py lo
+   copia in VesevOS/src/interfaces/vos_pezzi_js.h). Il file parte come corpo grezzo a pezzi da 4 KB; la riga dell'indirizzo dice n = nome, t = totale,
+   o = byte gia inviati, e = 1 se e l'ultimo pezzo; dopo ogni pezzo la scheda dice a che punto e ({ok,n}). Un record TLS piccolo non chiede alla
+   scheda il blocco di RAM da 16 KB che sulla C3 non si trova. Se la rete cade si ripete lo STESSO pezzo (5 volte, pausa di 0,8 s); se la scheda dice
+   code "pezzo" (pezzo fuori posto) si riparte dal suo n. Risposta: il JSON dell'ultimo pezzo, uguale a quello dell'invio unico di prima, con s = stato HTTP;
+   se la rete non torna: {ok:false,code:"rete",err:errRete}. url puo avere gia una "?". prog(percentuale) e facoltativa. Nella pagina passa da api() (accesso scaduto, spia di connessione). */
+function caricaPezzi(url,f,nome,prog,errRete){
+  var T=f.size,B=url+(url.indexOf("?")<0?"?":"&")+"n="+encodeURIComponent(nome||f.name)+"&t="+T,Q=typeof api=="function"?api:fetch;
+  function pz(o,k){
+    var e=Math.min(o+4096,T);
+    if(prog)prog(100*e/T|0);
+    return Q(B+"&o="+o+"&e="+(e==T?1:0),{method:"POST",body:f.slice(o,e)}).then(function(r){
+      return r.json().then(function(j){
+        j.s=r.status;
+        return j
+      })
+    }).then(function(j){
+      if(j.ok&&e<T)return pz(e,0);
+      if(j.code=="pezzo"&&k<5&&j.n<T)return pz(j.n,k+1);
+      return j
+    },function(x){
+      if(x===0||k>=5)return{ok:false,code:"rete",err:errRete};
+      return new Promise(function(g){setTimeout(g,800)}).then(function(){return pz(o,k+1)})
+    })
+  }
+  return pz(0,0)
+}
 /* ===== Automazioni ===== */
 var RU={list:[],st:[],ed:null,edi:-1,tm:null,txt:""};
 var DAYS=[["0","Lun"],["1","Mar"],["2","Mer"],["3","Gio"],["4","Ven"],["5","Sab"],["6","Dom"]];
@@ -3315,7 +3632,7 @@ function rDraw(){
     if(st.off)ex='<span class="pill" style="background:var(--kobg);color:var(--kot)">'+
       esc(t("Fermata (troppe esecuzioni)"))+'</span> ';
     else if(st.run)ex='<span class="pill v">'+esc(t("In corso"))+'</span> ';
-    var last=st.last?tf("Ultima volta: {0} ({1} volte)",st.last,st.n)
+    var last=st.q?tf("Ultima volta: {0} ({1} volte)",fmtOraData(st.q),st.n)
       :(st.n?tf("Eseguita {0} volte",st.n):t("Mai eseguita"));
     h+='<div class="ru"><button class="sw1'+(r.on?" on":"")+'" onclick="rToggle('+i+
       ')" aria-label="'+esc(r.name)+'"></button><div class="rb"><b>'+esc(r.name)+
@@ -3893,7 +4210,7 @@ function uRecUp(){
         j.kb))+'</p>'
       +'<label for="rcf">'+esc(t("File del recovery (.bin)"))+
       '</label><input type="file" id="rcf" accept=".bin">'
-      +'<label for="rcs">'+esc(t("Impronta SHA-256 (facoltativa)"))+
+      +'<label for="rcs">'+esc(t("Impronta SHA-256 (obbligatoria)"))+
       '</label><input id="rcs" autocomplete="off" spellcheck="false" maxlength="64">'
       +'<p class="law" style="margin:8px 0 0">'+
       esc(t(
@@ -3909,13 +4226,10 @@ function uRecUp(){
         if(!f)return t("Scegli il file");
         if(j.nops&&!$("rcc").checked)return t("Spunta la casella per continuare");
         if(f.size>j.kb*1024)return t("File troppo grande per lo spazio del recovery");
-        if(h&&!/^[0-9a-fA-F]{64}$/.test(h))return t(
+        if(!/^[0-9a-fA-F]{64}$/.test(h))return t(
           "L'impronta SHA-256 deve avere 64 cifre esadecimali");
-        var fd=new FormData();
-        fd.append("file",f,f.name);
         msg("dlgm",t("Controllo e scrivo il recovery..."),true);
-        return api("/api/recovery/up"+(h?"?sha="+enc(h):""),
-          {method:"POST",body:fd}).then(function(r){return r.json()}).then(function(k){
+        return caricaPezzi("/api/recovery/pezzo?sha="+enc(h),f,f.name,null,t("Caricamento non riuscito")).then(function(k){
             if(k.ok)setTimeout(function(){
               dlg({title:t("Recovery aggiornato"),
                 body:'<p style="margin:0" role="status">'+
@@ -4055,6 +4369,224 @@ function draw(id,a,mn,mx){
   x.font="12px sans-serif";
   x.fillText(mx.toFixed(0),4,12);
   x.fillText(mn.toFixed(0),4,c.height-4)
+}
+/* ===== Data e ora della scheda nei formati scelti in Localizzazione =====
+   Gemella di core/vos_datefmt.cpp e core/vos_timefmt.cpp: le due devono dare lo stesso testo (prova di parita:
+   tools/hosttest/prova_formato_data.sh). Non usare toLocaleString: segue il computer e non la scheda.
+   CORTA (tabelle, registro, elenchi): ore e minuti, mai secondi. LUNGA (testata, accesso, riquadri grandi).
+   Formato scritto a mano, come il comando date: %d %-d %m %-m %Y %y %b %B %a %A %H %-H %I %-I %M %S %p %% (massimo 32 caratteri). */
+var DF_TESTO_MAX=32,
+  DF_PRONTA_CORTA=["%-d/%-m/%Y","%Y-%-m-%-d","%-m/%-d/%Y"],
+  DF_PRONTA_LUNGA="%A %-d %B %Y";
+
+/* 0 = va bene, 1 vuoto, 2 troppo lungo, 3 carattere non ammesso, 4 segno sconosciuto, 5 percentuale isolata in fondo */
+function dfControlla(f){
+  if(!f)return 1;
+  if(f.length>DF_TESTO_MAX)return 2;
+  for(var i=0;i<f.length;i++){
+    var c=f.charCodeAt(i);
+    if(c<32||c>126||c==34||c==92)return 3;
+    if(c!=37)continue;
+    i++;
+    var senzaZero=false;
+    if(f.charAt(i)=="-"){
+      senzaZero=true;
+      i++
+    }
+    if(i>=f.length)return 5;
+    if((senzaZero?"dmHI":"dmHIMSYybBaAp%").indexOf(f.charAt(i))<0)return 4
+  }
+  return 0
+}
+
+function dfMessaggio(e){
+  return[
+    "",
+    t("Formato vuoto: scrivi il formato"),
+    t("Formato troppo lungo (massimo 32 caratteri)"),
+    t("Caratteri non ammessi nel formato (solo ASCII, senza virgolette e senza barra rovesciata)"),
+    t("Segno non riconosciuto dopo il segno di percentuale"),
+    t("Segno di percentuale isolato in fondo al formato")
+  ][e]
+}
+
+function dfTaglia(s){return s.replace(/^[ .,]+/,"").replace(/[ ,]+$/,"")}
+
+/* Mese abbreviato ricavato dalla frase del mese ("%d Nov. %d"): il testo tra i due %d */
+function dfMeseBreve(frase){
+  var a=frase.indexOf("%d"),b=a<0?-1:frase.indexOf("%d",a+2);
+  if(a>=0&&b>=0){
+    var r=dfTaglia(frase.substring(a+2,b));
+    if(r)return r
+  }
+  return dfTaglia(frase.split("%d").join(""))
+}
+
+function dfNum(v,duecifre){return duecifre&&v<10?"0"+v:String(v)}
+
+function dfOre12(o){return o%12||12}
+
+function dfSegno(c,senzaZero,d,n){
+  var z=!senzaZero;
+  switch(c){
+    case"d":return dfNum(d.giorno,z);
+    case"m":return dfNum(d.mese,z);
+    case"H":return dfNum(d.ore,z);
+    case"I":return dfNum(dfOre12(d.ore),z);
+    case"M":return dfNum(d.minuti,true);
+    case"S":return dfNum(d.secondi,true);
+    case"Y":return String(d.anno);
+    case"y":return dfNum(d.anno%100,true);
+    case"p":return d.ore>=12?"PM":"AM";
+    case"%":return"%";
+    case"a":return n?n.giornoBreve[d.giornoSett]:"";
+    case"A":return n?n.giornoLungo[d.giornoSett]:"";
+    case"B":return n?n.meseLungo[d.mese-1]:"";
+    case"b":return n?dfMeseBreve(n.fraseMese[d.mese-1]):""
+  }
+  return""
+}
+
+/* d = {anno,mese(1-12),giorno,giornoSett(0=domenica),ore,minuti,secondi}; n = nomi (o null: i nomi escono vuoti) */
+function dfFormatta(f,d,n){
+  var o="";
+  for(var i=0;i<f.length;i++){
+    if(f.charAt(i)!="%"){
+      o+=f.charAt(i);
+      continue
+    }
+    i++;
+    var senzaZero=false;
+    if(f.charAt(i)=="-"){
+      senzaZero=true;
+      i++
+    }
+    if(i>=f.length)break;
+    o+=dfSegno(f.charAt(i),senzaZero,d,n)
+  }
+  return o
+}
+
+/* "giorno mese anno": il primo %d e il giorno, il secondo l'anno */
+function dfFraseMese(frase,giorno,anno){
+  var k=0,o="";
+  for(var i=0;i<frase.length;i++){
+    if(frase.charAt(i)=="%"&&frase.charAt(i+1)=="d"){
+      o+=k?anno:giorno;
+      k++;
+      i++
+    }
+    else o+=frase.charAt(i)
+  }
+  return o
+}
+
+function dfDataCorta(im,d,n){
+  var scritta=im.dataCorta==3&&dfControlla(im.dataCortaTesto)==0;
+  return dfFormatta(scritta?im.dataCortaTesto:DF_PRONTA_CORTA[im.dataCorta>=0&&im.dataCorta<=2?im.dataCorta:0],d,n)
+}
+
+function dfDataLunga(im,d,n){
+  if(im.dataLunga==2&&dfControlla(im.dataLungaTesto)==0)return dfFormatta(im.dataLungaTesto,d,n);
+  if(im.dataLunga==1)return dfFormatta(DF_PRONTA_LUNGA,d,n);
+  return n.giornoBreve[d.giornoSett]+" "+dfFraseMese(n.fraseMese[d.mese-1],d.giorno,d.anno)
+}
+
+function dfOraCorta(im,d){return dfFormatta(im.ampm?"%-I:%M %p":"%-H:%M",d,null)}
+
+function dfOraLunga(im,d,n){
+  if(im.oraLunga==1&&dfControlla(im.oraLungaTesto)==0)return dfFormatta(im.oraLungaTesto,d,n);
+  var s=im.oraLungaSec;
+  return dfFormatta(im.ampm?(s?"%-I:%M:%S %p":"%-I:%M %p"):(s?"%-H:%M:%S":"%-H:%M"),d,null)
+}
+
+/* Nomi nella lingua in uso, rifatti solo quando cambia il dizionario */
+var DF_NOMI=null,DF_DIZ=null;
+function dfFrase(s){return s.replace("{0}","%d").replace("{1}","%d")}
+
+function dfNomi(){
+  if(DF_NOMI&&DF_DIZ===DICT)return DF_NOMI;
+  DF_DIZ=DICT;
+  DF_NOMI={
+    giornoBreve:[t("Dom."),t("Lun."),t("Mar."),t("Mer."),t("Giov."),t("Ven."),t("Sab.")],
+    giornoLungo:[t("Domenica"),t("Lunedi"),t("Martedi"),t("Mercoledi"),t("Giovedi"),t("Venerdi"),t("Sabato")],
+    meseLungo:[
+      t("gennaio"),t("febbraio"),t("marzo"),t("aprile"),t("maggio"),t("giugno"),
+      t("luglio"),t("agosto"),t("settembre"),t("ottobre"),t("novembre"),t("dicembre")
+    ],
+    fraseMese:[
+      dfFrase(t("{0} Gen. {1}")),dfFrase(t("{0} Feb. {1}")),dfFrase(t("{0} Mar. {1}")),dfFrase(t("{0} Apr. {1}")),
+      dfFrase(t("{0} Mag. {1}")),dfFrase(t("{0} Giu. {1}")),dfFrase(t("{0} Lug. {1}")),dfFrase(t("{0} Ago. {1}")),
+      dfFrase(t("{0} Set. {1}")),dfFrase(t("{0} Ott. {1}")),dfFrase(t("{0} Nov. {1}")),dfFrase(t("{0} Dic. {1}"))
+    ]
+  };
+  return DF_NOMI
+}
+
+/* Scelte della scheda (da /api/auth, /api/home o dal modulo di Localizzazione) */
+function fmtSrc(){
+  if(typeof HW!="undefined"&&HW&&HW.tf!==undefined&&HW.to!==undefined)return HW;
+  return typeof AUTH!="undefined"&&AUTH&&AUTH.to!==undefined?AUTH:{tf:0,df:0,to:0}
+}
+
+function dfImpostDa(A){
+  return{
+    dataCorta:A.df||0,dataCortaTesto:A.dft||"",
+    dataLunga:A.dl||0,dataLungaTesto:A.dlt||"",
+    ampm:!!A.tf,oraLungaSec:A.ts!==0,oraLunga:A.tl||0,oraLungaTesto:A.tlt||""
+  }
+}
+
+/* d = Date gia spostata nel fuso della scheda (si leggono i campi UTC) */
+function dfDaData(d){
+  return{
+    anno:d.getUTCFullYear(),mese:d.getUTCMonth()+1,giorno:d.getUTCDate(),giornoSett:d.getUTCDay(),
+    ore:d.getUTCHours(),minuti:d.getUTCMinutes(),secondi:d.getUTCSeconds()
+  }
+}
+
+function dfDaEpoca(ep){return dfDaData(new Date((ep+(fmtSrc().to||0))*1000))}
+
+/* CORTA: ep = secondi dal 1970 (UTC) */
+function fmtData(ep){return dfDataCorta(dfImpostDa(fmtSrc()),dfDaEpoca(ep),dfNomi())}
+function fmtOra(ep){return dfOraCorta(dfImpostDa(fmtSrc()),dfDaEpoca(ep))}
+function fmtOraData(ep){return fmtData(ep)+" "+fmtOra(ep)}
+
+/* LUNGA, per testata e accesso: [ora, data] di una Date spostata nel fuso della scheda, con le scelte A */
+function fmtLungo(d,A){
+  var im=dfImpostDa(A),p=dfDaData(d),n=dfNomi();
+  return[dfOraLunga(im,p,n),dfDataLunga(im,p,n)]
+}
+/* ===== Variabili nel messaggio della pagina di accesso: {nome} {scheda} {data} {ora} {fuso}, {{ = una graffa ===== */
+function fusoTesto(A){
+  var p=function(n){return(n<10?"0":"")+n},
+    of=A.to/60,sg=of<0?"-":"+",ao=Math.abs(of),
+    tz="UTC"+sg+p(Math.floor(ao/60))+":"+p(ao%60);
+  return(A.tn?A.tn+", ":"")+tz
+}
+
+/* Data spostata nel fuso della scheda, oppure null se l'ora non e impostata */
+function dataSpostata(A){
+  if(!A||!A.tv)return null;
+  var t0=A.t0!==undefined?A.t0:CLK.t0;
+  return new Date((A.te+(Date.now()-t0)/1000+A.to)*1000)
+}
+
+/* Sostituisce le variabili; una variabile sconosciuta resta com'e. Il risultato va mostrato SEMPRE con textContent. */
+function msgVar(testo,A,d,nome){
+  var lg=null;
+  var lungo=function(){
+    if(!lg)lg=fmtLungo(d,A);
+    return lg
+  };
+  return String(testo||"").replace(/\{\{|\{(nome|scheda|data|ora|fuso)\}/g,function(m,k){
+    if(m=="{{")return"{";
+    if(k=="nome")return nome||"";
+    if(k=="scheda")return AUTH&&AUTH.bd?AUTH.bd:"";
+    if(k=="fuso")return A&&A.to!==undefined?fusoTesto(A):"";
+    if(!d)return"-";
+    return k=="data"?lungo()[1]:lungo()[0]
+  })
 }
 /* ===== Home: aggiornamento dei dati, avvisi, schede e widget ===== */
 var PBUSY=0;
@@ -4345,15 +4877,8 @@ function hwFetch(){
 function hClock(){
   var A=HW;
   if(!A||!A.tv)return["--:--:--",t("Ora non impostata")];
-  var p=function(x){return(x<10?"0":"")+x},ms=(A.te+(Date.now()-A.t0)/1000)*1000,
-    d=new Date(ms+A.to*1000),H=d.getUTCHours(),ap="";
-  if(A.tf){
-    ap=H>=12?" PM":" AM";
-    H=H%12||12
-  }
-  var Y=d.getUTCFullYear(),M=p(d.getUTCMonth()+1),D=p(d.getUTCDate());
-  return[p(H)+":"+p(d.getUTCMinutes())+":"+p(d.getUTCSeconds())+ap,
-    A.df==1?Y+"-"+M+"-"+D:A.df==2?M+"/"+D+"/"+Y:D+"/"+M+"/"+Y]
+  var ms=(A.te+(Date.now()-A.t0)/1000)*1000;
+  return fmtLungo(new Date(ms+A.to*1000),A)    /* ora lunga e data lunga */
 }
 setInterval(hdTick,1000);
 function wid(tt,v,sub,go,ic){
@@ -4540,8 +5065,7 @@ function loadTime(){
     $("oranow").textContent=t.valid?t.now:window.t("Ora non impostata");
     svcSt("ntp",t.ntp);
     $("o_ev").value=t.every;
-    var ld=new Date((t.last||0)*1000);
-    $("olast").textContent=t.last?tf("Ultima sincronizzazione: {0}",ld.toLocaleString())
+    $("olast").textContent=t.last?tf("Ultima sincronizzazione: {0}",fmtOraData(t.last))
       :(t.ntp?window.t("Nessuna sincronizzazione ancora")
         :window.t("Sincronizzazione spenta: ora a mano"));
     if(t.valid&&!$("o_md").value){
@@ -4557,7 +5081,7 @@ function loadTime(){
         "Ogni richiesta NTP mostra ai server l'indirizzo IP pubblico della tua rete. Server usati: {0}",
         t.server+(t.server2?", "+t.server2:""));
     if($("ontpst"))$("ontpst").textContent=t.ntp
-      ?(t.last?tf("Ultima sincronizzazione: {0}",ld.toLocaleString())
+      ?(t.last?tf("Ultima sincronizzazione: {0}",fmtOraData(t.last))
         :window.t("Nessuna sincronizzazione ancora")):window.t(
           "Sincronizzazione spenta: ora a mano");
     $("o_serve").value=t.serve?"1":"0";
@@ -4697,7 +5221,7 @@ function bpSave(){
    - pac: uno o piu file, il tipo si capisce dall'estensione (.vsb script, .vab e .vae app, .vdb e .vde driver, e i vecchi .vsc .vap .vel .vdp).
    - ris: uno o piu file di /usr/share/vesevos; SHA256SUMS per primo, poi gli altri. Nome, lunghezza e SHA-256 si controllano QUI
      contro l'elenco della scheda, poi la scheda li ricontrolla. Un file rifiutato non ferma gli altri.
-   Nessuna rotta nuova: pac usa /api/fs/up e /api/mod/save, ris usa /api/risorse/carica. */
+   Nessuna rotta nuova: pac usa /api/fs/pezzo e /api/mod/save, ris usa /api/risorse/pezzo (caricaPezzi, js_pezzi.js). */
 var CF={busy:{}};
 var CF_TIPI={
   fw:{
@@ -4812,6 +5336,7 @@ function cfEsegui(k,l){
   var T=CF_TIPI[k],b=$("cf_b_"+k),r=$("cf_r_"+k),p=$("cf_p_"+k);
   CF.busy[k]=true;
   b.disabled=true;
+  b.textContent=t("Attendere...");                  /* occupato: tasto spento con la scritta, finche la scheda non ha finito */
   b.setAttribute("aria-busy","true");
   r.innerHTML="";
   p.textContent=t("Controllo in corso...");
@@ -4823,9 +5348,10 @@ function cfEsegui(k,l){
     p.textContent=typeof e=="string"?e:t("Caricamento non riuscito")
   }).then(function(){
     return T.dopo()
-  }).then(function(){
+  }).catch(function(){}).then(function(){          /* il tasto torna attivo sempre, anche se la rilettura della scheda fallisce */
     CF.busy[k]=false;
     b.disabled=false;
+    b.textContent=T.et();
     b.removeAttribute("aria-busy");
     b.focus()
   })
@@ -4854,14 +5380,10 @@ function cfPacControlla(f,cx){
 }
 
 function cfPacInvia(f,cx){
-  var r=cx.r,fd,p;
-  if(r.driver)p=f.text().then(function(x){return post("/api/mod/save",{name:r.driver,text:x})});
-  else{
-    fd=new FormData();
-    fd.append("file",f);
-    p=api("/api/fs/up?dir="+r.dir,{method:"POST",body:fd})
-  }
-  return p.then(function(x){return x.json()}).then(function(j){
+  var r=cx.r,p;
+  if(r.driver)p=f.text().then(function(x){return post("/api/mod/save",{name:r.driver,text:x})}).then(function(x){return x.json()});
+  else p=caricaPezzi("/api/fs/pezzo?dir="+r.dir,f,f.name,null,t("Caricamento non riuscito"));
+  return p.then(function(j){
     if(!j.ok)throw (j.err||t("Errore"));
     return j.avviso||t("Caricato")
   },function(){throw t("Caricamento non riuscito")})
@@ -4880,23 +5402,40 @@ function cfRisVoce(r,n){
   r.f.forEach(function(x){if(x.n==n)v=x});
   return v
 }
+/* Nome distribuito (html-5.vrs, comuni-1.vgz, manuale-3.txt) -> nome corto che si installa sulla scheda (html.vrs, comuni.vgz, manuale.txt) */
+function cfRisNome(n){
+  var m=/^([a-z0-9_-]+?)-(\d{1,3}(?:\.\d{1,3})?)\.(vrs|vgz|txt)$/.exec(n);
+  return m?m[1]+"."+m[3]:n
+}
+/* File che garantisce se stesso (firmware 1.8.30 e dopo): VOSR formato 2 (impronta nei byte 64-95) o testo con prima riga "# sha256=" */
+function cfRisInterna(u){
+  if(u.length>5&&u[0]==86&&u[1]==79&&u[2]==83&&u[3]==82)return u[4]>=2;
+  var k="# sha256=";
+  if(u.length<k.length)return false;
+  for(var i=0;i<k.length;i++)if(u[i]!=k.charCodeAt(i))return false;
+  return true
+}
 /* risposta "" = file buono; altrimenti il motivo del rifiuto (nulla parte verso la scheda) */
 function cfRisControlla(f,cx){
-  var r=cx.ris,n=f.name,v=null,tetto=AR_ELENCO_TETTO;
-  if(n!="SHA256SUMS"){
-    if(r.el!=0)return Promise.resolve(t(
-      "L'elenco SHA256SUMS della scheda non e valido: carica prima SHA256SUMS"));
-    v=cfRisVoce(r,n);
-    if(!v)return Promise.resolve(tf("Nome sconosciuto: {0} non e nell'elenco della scheda",n));
-    tetto=v.t
-  }
-  if(!f.size)return Promise.resolve(tf("Dimensione non valida: {0}",n));
-  if(f.size>tetto)return Promise.resolve(tf("File troppo grande: {0} (massimo {1})",n,cfByte(tetto)));
+  var r=cx.ris,n=cfRisNome(f.name),v=null,tetto=AR_ELENCO_TETTO;
+  cx.nome=n;
+  if(!f.size)return Promise.resolve(tf("Dimensione non valida: {0}",f.name));
   return f.arrayBuffer().then(function(b){
-    var u=new Uint8Array(b);
+    var u=new Uint8Array(b),interna=n!="SHA256SUMS"&&cfRisInterna(u);
     cx.dati=u;
+    if(n!="SHA256SUMS"){
+      v=cfRisVoce(r,n);
+      if(!interna){
+        if(r.el!=0)return t("L'elenco SHA256SUMS della scheda non e valido: carica prima SHA256SUMS");
+        if(!v)return tf("Nome sconosciuto: {0} non e nell'elenco della scheda",n)
+      }
+      if(v)tetto=v.t;
+      else tetto=0
+    }
+    if(tetto&&f.size>tetto)return tf("File troppo grande: {0} (massimo {1})",n,cfByte(tetto));
     if(n=="SHA256SUMS")return arElencoOk(u,r)?"":tf(
       "Questo SHA256SUMS non e valido (formato o nomi): {0}",n);
+    if(interna)return "";                                  /* l'impronta e dentro il file: la controlla la scheda */
     return hexb(sha256b(u))==v.h?"":tf("SHA-256 diverso dall'elenco della scheda: {0}",n)
   })
 }
@@ -4910,22 +5449,16 @@ function cfRisSpazio(dim){
 }
 
 function cfRisInvia(f,cx){
-  var fd=new FormData();
-  fd.append("file",new Blob([cx.dati]),f.name);
-  return api("/api/risorse/carica",{method:"POST",body:fd}).then(function(r){
-    return r.json().then(function(j){
-      j.s=r.status;
-      return j
-    })
-  },function(){throw t("Caricamento non riuscito")}).then(function(j){
+  return caricaPezzi("/api/risorse/pezzo",new Blob([cx.dati]),cx.nome||f.name,null,t("Caricamento non riuscito")).then(function(j){
+    if(j.code=="rete")throw j.err;
     if(j.ok){
-      if(f.name!="SHA256SUMS")return t("Caricato");
+      if((cx.nome||f.name)!="SHA256SUMS")return t("Caricato");
       return arRileggi().then(function(){
         cx.ris=AG.d.ris;
         return t("Caricato")
       },function(){return t("Caricato")})
     }
-    if(j.s==409||j.code=="state")return cfRisSpazio(f.size).then(function(m){throw m});
+    if(j.code=="state"||j.s==409&&j.code!="pezzo")return cfRisSpazio(f.size).then(function(m){throw m});
     throw (j.err||t("Errore"))
   })
 }
@@ -5001,7 +5534,7 @@ function updFile(j){
     '</p>'
     +'<p class="law" style="margin:0 0 8px">'+
     esc(t(
-      "Per non chiederti di nuovo la password, l'indirizzo contiene un codice monouso valido 15 minuti e legato a questo computer. Su una rete locale non fidata qualcuno potrebbe vederlo: usa questa strada solo a casa tua."))+
+      "Per non chiederti di nuovo la password, l'indirizzo contiene un codice monouso valido 15 minuti. Su una rete locale non fidata qualcuno potrebbe vederlo: usa questa strada solo a casa tua."))+
     '</p>'
     +'<label class="chk" for="updc"><input type="checkbox" id="updc"><span>'+
     esc(t("Ho capito: la pagina cambia e passa per HTTP"))+'</span></label>',
@@ -5097,7 +5630,7 @@ var AG_REPO={base:"https://raw.githubusercontent.com/paolellad79/VesevOS/main/",
   risorse:"risorse/"};
 var AG_STORE=AG_REPO.base+AG_REPO.store,AG_STORE_TETTO=32768,AG_STORE_VOCI=40;
 function agRiga(e,v){return v?row(e,v):""}
-function agQuando(n){return n?new Date(n*1000).toLocaleString():t("mai")}
+function agQuando(n){return n?fmtOraData(n):t("mai")}
 function agLoad(){
   clearTimeout(AG.tm);
   api("/api/aggiorna").then(function(r){return r.json()}).then(function(d){
@@ -5361,7 +5894,7 @@ function agNota(n){
    Stati (come RisStato nel firmware): 0 da controllare, 1 buono, 2 diverso dall'elenco, 3 mancante, 4 non verificabile (elenco non valido). */
 /* identita: DUE righe distinte. Firmware = versione letta dalla scheda (/api/aggiorna, campo fw); Pagina = numero proprio di html.vrs
    (costante messa da mkweb.py, intero da 1) e prime 8 cifre dello SHA-256 di html.vrs lette dall'elenco della scheda. */
-var PAG_VER="1";
+var PAG_VER="7";
 function pagIdRighe(){
   var d=(typeof AG!="undefined")?AG.d:null;
   var f=((d&&d.ris&&d.ris.f)||[]).filter(function(x){return x.n=="html.vrs"})[0];
@@ -5429,12 +5962,11 @@ function arUno(fw,x,ris){
     if(!r.ok)throw tf("Scarico non riuscito: {0}",x.n);
     return r.arrayBuffer()
   }).then(function(b){
-    var u=new Uint8Array(b),fd=new FormData();
+    var u=new Uint8Array(b);
     if(!u.length||u.length>x.t)throw tf("Dimensione non valida: {0}",x.n);
     if(x.e?!arElencoOk(u,ris):hexb(sha256b(u))!=x.h)throw tf("Il file scaricato non corrisponde all'elenco della scheda: {0}",x.n);
-    fd.append("file",new Blob([u]),x.n);
-    return api("/api/risorse/carica",{method:"POST",body:fd})
-  }).then(function(r){return r.json()}).then(function(j){
+    return caricaPezzi("/api/risorse/pezzo",new Blob([u]),x.n,null,t("Caricamento non riuscito"))
+  }).then(function(j){
     if(!j.ok)throw (j.err||t("Errore"))
   })
 }
@@ -5498,7 +6030,7 @@ function evNomi(){
 
 function evNota(n){if(n)AL.push(["w",tf("Accessi bloccati da guardare: {0}",n),"evs"])}
 function evQuando(x){
-  if(x.q)return new Date(x.q*1000).toLocaleString();
+  if(x.q)return fmtOraData(x.q);
   if(x.s<60)return t("meno di un minuto fa");
   return x.s<3600?tf("{0} minuti fa",Math.floor(x.s/60)):tf("{0} ore fa",Math.floor(x.s/3600))
 }
@@ -5945,11 +6477,8 @@ function fUpload(){
   if(!f)return;
   $("fup").value="";
   var go=function(){
-    var fd=new FormData();
-    fd.append("file",f,f.name);
     msg("fm",tf("Carico {0}...",f.name),true);
-    api("/api/fs/up?dir="+enc(fp),
-      {method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){
+    caricaPezzi("/api/fs/pezzo?dir="+enc(fp),f,f.name,null,t("Caricamento non riuscito")).then(function(j){
         msgCaricato("fm",j,t("Caricato"));
         if(j.ok)fList(fp)
       })
@@ -6399,6 +6928,9 @@ function ipFill(ch){
     $("ipnote").textContent=t("Indirizzo fisso: scrivi i valori.")
   }
   ids.forEach(function(id,i){ipv(id,v[i],!ap&&!dh)});
+  /* dominio dato dal router (DHCP): si mostra soltanto, non si modifica ne si salva */
+  $("w_dom").value=!ap&&dh&&n.st==3?n.dom||"":"";
+  $("w_dom").placeholder=!ap&&dh&&n.st==3?t("Il router non ne comunica uno"):"";
   $("ipmac").innerHTML=macRow(t("MAC client"),n.mac)+macRow(t("MAC punto di accesso"),n.apMac)
 }
 
@@ -6942,6 +7474,8 @@ function ledHex(n){return"#"+("000000"+n.toString(16)).slice(-6)}
 /* i modi 4-6 (lampi flash, wifi, cpu) e i loro colori: li cambia solo l'Admin; gli altri li vedono ma non li toccano */
 function ledShow(){
   var m=+$("l_mode").value,adm=ROLE==2;
+  for(var j=0;j<3;j++)$("l_g"+j).disabled=!adm;
+  for(var j=0;j<6;j++)$("l_t"+j).disabled=!adm;
   $("l_src").className=m>=4?"":"hide";
   for(var i=0;i<5;i++)$("l_s"+i).disabled=!adm;
   $("l_thr").disabled=!adm;
@@ -6957,6 +7491,8 @@ function fillLed(){
     $("l_br").value=c.ledBrightness;
     for(var i=0;i<5;i++)$("l_s"+i).value=ledHex(c["ledSrc"+i]);
     $("l_thr").value=c.ledCpuThr;
+    for(var i=0;i<3;i++)$("l_g"+i).value=c["ledGain"+i];
+    for(var i=0;i<6;i++)$("l_t"+i).value=ledHex(c["ledSt"+i]);
     ledShow()
   })
 }
@@ -6965,11 +7501,36 @@ function saveLed(){
   var d={mode:$("l_mode").value,color:parseInt($("l_col").value.slice(1),16),br:$("l_br").value};
   if(ROLE==2){
     for(var i=0;i<5;i++)d["s"+i]=parseInt($("l_s"+i).value.slice(1),16);
-    d.thr=$("l_thr").value
+    d.thr=$("l_thr").value;
+    for(var i=0;i<3;i++)d["g"+i]=$("l_g"+i).value;
+    for(var i=0;i<6;i++)d["t"+i]=parseInt($("l_t"+i).value.slice(1),16)
   }
   post("/api/led",d).then(function(r){return r.json()}).then(function(j){
     msg("lm2",j.ok?t("Salvato"):j.err,j.ok)
   })
+}
+
+/* Test e calibrazione: il colore si vede sul LED per 20 s senza salvare; ledProva accetta un numero o un selettore di colore */
+var ledUltimo=0xFFFFFF,ledTimer=0;
+function ledAnte(){
+  post("/api/led/anteprima",{c:ledUltimo,g0:$("l_g0").value,g1:$("l_g1").value,g2:$("l_g2").value}).then(function(r){return r.json()}).then(function(j){
+    if(!j.ok)msg("lm2",j.err,false)
+  })
+}
+function ledProva(x){
+  ledUltimo=typeof x=="number"?x:parseInt(x.value.slice(1),16);
+  ledAnte()
+}
+function ledGuad(){
+  clearTimeout(ledTimer);
+  ledTimer=setTimeout(ledAnte,150)
+}
+function ledFineProva(){post("/api/led/anteprima",{fine:1})}
+function ledCalFabbrica(){
+  for(var i=0;i<3;i++)$("l_g"+i).value=255;
+  var f=[0xFF7800,0x0000FF,0xFFFF00,0x00FF00,0xAA00FF,0xFF7800];
+  for(var i=0;i<6;i++)$("l_t"+i).value=ledHex(f[i]);
+  ledAnte()
 }
 /* ===== LED1 (LED monocromatico) =====
    Stessi modi e stessa luminosita (0-255) del LED_RGB1, senza colori. Si legge e si salva con /api/dev (id led1). */
@@ -7003,6 +7564,47 @@ function led2Salva(){
   post("/api/dev/act",{id:"led1",a:"set",arg:arg}).then(function(r){return r.json()}).then(function(j){
     msg("l2_m",j.mode!==undefined?t("Salvato"):j.err,j.mode!==undefined)
   }).catch(function(){})
+}
+/* ===== Tema della pagina: un file di stile caricato dall'amministratore (/etc/tema.css), servito da /tema.css ===== */
+/* Le stesse parole vietate del firmware (core/vos_tema_rule.h): si controlla qui per non salvare un file che la scheda poi rifiuterebbe. */
+var TEMA_VIETATO=/\\|<|@import|url\(|image-set\(|src\(|expression\(|javascript:|-moz-binding/i;
+function temaStato(){
+  fetch("/tema.css",{cache:"no-store"}).then(function(r){
+    var s=r.headers.get("X-VOS-Tema")||"";
+    return r.text().then(function(x){
+      var e=$("tm_st");
+      if(!e)return;
+      if(s=="ok")e.textContent=t("Personalizzato")+" ("+x.length+" byte)";
+      else if(s&&s!="fabbrica")e.textContent=t("Rifiutato dalla scheda: resta quello di fabbrica");
+      else e.textContent=t("Di fabbrica")
+    })
+  }).catch(function(){})
+}
+function temaRicarica(testo){
+  msg("tm_m",testo,true);
+  setTimeout(function(){location.reload()},900)
+}
+function temaCarica(inp){
+  var f=inp.files[0];
+  inp.value="";
+  if(!f)return;
+  if(f.size>32768){msg("tm_m",t("Il tema e troppo grande (32 KB al massimo)"),false);return}
+  f.text().then(function(x){
+    if(!x.length||x.indexOf("\0")>=0||TEMA_VIETATO.test(x)){
+      msg("tm_m",t("Il tema contiene qualcosa di non permesso (@import, url(), barra rovesciata o <)"),false);
+      return
+    }
+    return caricaPezzi("/api/fs/pezzo?dir=/etc",new Blob([x]),"tema.css",null,t("Caricamento non riuscito")).then(function(j){
+      if(!j.ok)msg("tm_m",j.err,false);
+      else temaRicarica(t("Tema caricato: ricarico la pagina"))
+    })
+  })
+}
+function temaRipristina(){
+  post("/api/fs/del",{path:"/etc/tema.css"}).then(function(r){return r.json()}).then(function(j){
+    if(j.ok||/non esiste|not found/i.test(j.err||""))temaRicarica(t("Tema di fabbrica: ricarico la pagina"));
+    else msg("tm_m",j.err,false)
+  })
 }
 /* ===== Pin: stato e dati della scheda ===== */
 var PM=[],PSEL=-1,PWARN=false,PTM=null,PT={gpio:-1};
@@ -7275,10 +7877,7 @@ function scUp(){
     msg("scm",tf("Il file deve finire per {0}",EXT.s),false);
     return
   }
-  var fd=new FormData();
-  fd.append("file",f);
-  api("/api/fs/up?dir=/sbin",
-    {method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){
+  caricaPezzi("/api/fs/pezzo?dir=/sbin",f,f.name,null,t("Caricamento non riuscito")).then(function(j){
       msgCaricato("scm",j,t("Caricato"));
       $("scup").value="";
       scPoll()
@@ -7680,10 +8279,7 @@ function apUp(){
       AUTH&&AUTH.elf?EXT.b+" "+t("oppure")+" "+EXT.e:EXT.b),false);
     return
   }
-  var fd=new FormData();
-  fd.append("file",f);
-  api("/api/fs/up?dir=/bin",
-    {method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){
+  caricaPezzi("/api/fs/pezzo?dir=/bin",f,f.name,null,t("Caricamento non riuscito")).then(function(j){
       msgCaricato("appm",j,t("Caricato"));
       $("apup").value="";
       apLists()
@@ -8289,15 +8885,24 @@ function fillSys(){
   api("/api/settings").then(function(r){return r.json()}).then(function(c){
     $("s_host").value=c.hostname;
     $("s_dom").value=c.domain;
+    $("s_ml").value=c.messaggioLogin||"";
+    mlAnteprima();
     $("s_dn").textContent=c.staDhcp
       ?t("In DHCP il router non comunica il dominio alla scheda: scrivilo tu se serve."):"";
     $("s_fq").textContent=t("Nome completo:")+" "+c.hostname+(c.domain?"."+c.domain:"")
   })
 }
 
+/* Anteprima del messaggio con le variabili gia sostituite (solo testo) */
+function mlAnteprima(){
+  var A=fmtSrc();
+  $("s_mlp").textContent=msgVar($("s_ml").value,A,dataSpostata(A),$("s_host").value)
+}
+
 function saveSys(){
   post("/api/system",{hostname:$("s_host").value,
-    domain:$("s_dom").value}).then(function(r){return r.json()}).then(function(j){
+    domain:$("s_dom").value,
+    messaggiologin:$("s_ml").value}).then(function(r){return r.json()}).then(function(j){
       msg("sm",j.ok?t("Salvato"):j.err,j.ok);
       if(j.ok)fillSys()
     })
@@ -8326,9 +8931,17 @@ function showLic(id){
 var LG={txt:"",tm:null};
 function loadLog(){
   api("/api/log").then(function(r){return r.text()}).then(function(x){
-    LG.txt=x;
+    LG.txt=lgWhen(x);
     lgDraw()
   }).catch(function(){})
+}
+// ogni riga arriva come "<epoca> [I] testo" oppure "u<secondi> [I] testo": data e ora le formatta la pagina (formato di Localizzazione)
+function lgWhen(x){
+  return x.split("\n").map(function(l){
+    var m=l.match(/^(u?)(\d+) (.*)$/);
+    if(!m)return l;
+    return(m[1]?"["+m[2]+"s]":fmtOraData(+m[2]))+" "+m[3]
+  }).join("\n")
 }
 var LGL={E:0,W:1,I:2,D:3},LGC=["lk","lw","",""];
 function lgDraw(){
@@ -8595,6 +9208,16 @@ function authLoad(){
   })
 }
 var CLK={tm:0,t0:0};
+/* Ora lunga: i due punti diventano un elemento che lampeggia ogni secondo (secondi dispari = spento); il resto del testo e quello del formato */
+function clkOra(testo,secondi){
+  var cl=secondi%2?"off":"",pezzi=testo.split(":"),o="";
+  for(var i=0;i<pezzi.length;i++){
+    if(i)o+='<i class="'+cl+'">:</i>';
+    o+=esc(pezzi[i])
+  }
+  return o
+}
+
 function clkDraw(){
   var A=AUTH,e=$("lclk");
   if(!e)return;
@@ -8608,18 +9231,26 @@ function clkDraw(){
   }
   var ms=(A.te+(Date.now()-CLK.t0)/1000)*1000,d=new Date(ms+A.to*1000),
     p=function(n){return(n<10?"0":"")+n},
-    Y=d.getUTCFullYear(),M=p(d.getUTCMonth()+1),D=p(d.getUTCDate()),H=d.getUTCHours(),ap="";
-  if(A.tf){
-    ap=H>=12?" PM":" AM";
-    H=H%12||12
-  }
-  var ds=A.df==1?Y+"-"+M+"-"+D:A.df==2?M+"/"+D+"/"+Y:D+"/"+M+"/"+Y,
-    of=A.to/60,sg=of<0?"-":"+",ao=Math.abs(of),tz="UTC"+sg+p(Math.floor(ao/60))+":"+p(ao%60);
-  var s=tf("Ora della scheda: {0} {1} ({2})",ds,
-    p(H)+":"+p(d.getUTCMinutes())+":"+p(d.getUTCSeconds())+ap,(A.tn?A.tn+", ":"")+tz);
-  if(Math.abs(ms-Date.now())>30000)s+=" - "+
-    t("Differisce dall'ora del tuo dispositivo: controlla data e fuso.");
-  e.textContent=s
+    im=dfImpostDa(A),pd=dfDaData(d),nm=dfNomi(),
+    ora=dfOraCorta(im,pd),                       /* accesso: solo ore e minuti, con i due punti che lampeggiano */
+    dataLunga=fmtLungo(d,A)[1],                  /* telefono: data lunga scelta in Localizzazione */
+    dataEstesa=dfFormatta(DF_PRONTA_LUNGA,pd,nm),/* desktop: data per esteso, con i nomi completi */
+    z=fusoTesto(A),
+    s='<div class="lt1" translate="no">'+clkOra(ora,d.getUTCSeconds())+'</div><div class="lt2"><span class="dn">'+
+    esc(dataLunga)+'</span><span class="de">'+esc(dataEstesa)+'</span><span class="dz"><span class="ds"> &middot; </span>'+
+    z.replace(/&/g,"&amp;").replace(/</g,"&lt;")+"</span></div>";
+  if(Math.abs(ms-Date.now())>30000)s+='<div class="lt3">'+
+    t("Differisce dall'ora del tuo dispositivo: controlla data e fuso.")+"</div>";
+  e.innerHTML=s;
+  if(AUTH.ml)$("lmsg").textContent=msgVar(AUTH.ml,A,d,A.nm)   /* le variabili con l'ora si aggiornano ogni secondo */
+}
+
+function pwEye(){
+  var i=$("lp"),on=i.type=="password";
+  i.type=on?"text":"password";
+  $("leyes").setAttribute("href",on?"#i-occhio-barrato":"#i-occhio");   /* stessa icona, nel disegno con o senza la barra */
+  $("leye").setAttribute("aria-pressed",on?"true":"false");
+  $("leye").setAttribute("aria-label",on?t("Nascondi la password"):t("Mostra la password"))
 }
 
 function clkStart(){
@@ -8632,23 +9263,23 @@ function clkStart(){
 function showLoginText(){
   clkStart();
   $("lt").textContent=AUTH.set?t("Accesso"):t("Primo accesso");
+  var ml=$("lmsg");
+  ml.textContent=msgVar(AUTH.ml,AUTH,dataSpostata(AUTH),AUTH.nm);   /* testo pubblico scritto dall'Admin: sempre textContent, mai HTML */
+  ml.className=AUTH.ml?"lmsg":"lmsg hide";
   var n=!AUTH.set;
   $("lnew").className=n?"":"hide";
   $("lp2w").className=n?"":"hide";
   $("lbt").textContent=n?t("Salva ed entra"):t("Entra");
   $("lu").readOnly=n;
   if(n)$("lu").value=AUTH.first||"admin";
-  $("lp").setAttribute("autocomplete",n?"new-password":"current-password");
-  $("lhttps").textContent=AUTH.https&&!AUTH.secure
-    ?t("Collegamento non cifrato: usi l'hotspot della scheda, protetto dalla sua password Wi-Fi.")
-    :AUTH.secure?tf("Collegamento cifrato (HTTPS). Impronta del certificato: {0}",AUTH.fp):""
+  $("lp").setAttribute("autocomplete",n?"new-password":"current-password")
 }
 
 function showLogin(){
   MFAT=null;
   if($("lmfa")){
     $("lmfa").className="hide";
-    $("lbt").className="btn";
+    $("lbt").className="btn lgo";
     $("lu").disabled=false;
     $("lp").disabled=false
   }
@@ -8795,7 +9426,7 @@ function doMfa(){
         $("lu").disabled=false;
         $("lp").disabled=false;
         $("lmfa").className="hide";
-        $("lbt").className="btn";
+        $("lbt").className="btn lgo";
         loginOk(j)
       }else{
         msg("lm",j.err||t("Errore"),false);
@@ -9010,10 +9641,8 @@ function langInvia(g){
         ok();
         return
       }
-      var f=fl[i++],fd=new FormData();
-      fd.append("file",f,f.name);
-      api("/api/fs/up?dir=/lang",
-        {method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){
+      var f=fl[i++];
+      caricaPezzi("/api/fs/pezzo?dir=/lang",f,f.name,null,t("Caricamento non riuscito")).then(function(j){
           if(!j.ok){
             ko(f.name+": "+(j.err||t("Errore")));
             return
@@ -9091,7 +9720,7 @@ function canSee(id){
 
 function gTabs(g){return GMAP[g].filter(canSee)}
 function buildNav(){
-  var h='<svg class="i slogo" style="stroke:url(#vg)"><use href="#i-chipn"/></svg>';
+  var h='';
   GRP.forEach(function(g){
     if(gTabs(g[0]).length)h+='<button class="nb" id="n_'+g[0]+'" onclick="gGo(\''+g[0]+
       '\')" aria-label="'+esc(t(g[1]))+'" title="'+esc(t(g[1]))+'"><svg class="i"><use href="#'+
@@ -9994,7 +10623,13 @@ function ioModOpen(n){
       esc(t(
         "La scheda propone questi pin liberi. Puoi cambiarli: il sistema controlla che siano ammessi e non gia usati."))+
       '</p>';
+    if(j.ok&&j.ok.length)b+='<p class="fhint">'+esc(t("Il driver ammette solo questi pin per questa scheda."))+'</p>';
     j.sig.forEach(function(s,i){
+      if(j.ok&&j.ok.length){                       // il driver ha la griglia dei pin: menu con tutti i pin ammessi e liberi
+        b+='<label for="io_pn'+i+'">'+esc(s)+'</label><select id="io_pn'+i+'">'+
+          j.ok.map(function(p){return '<option value="'+p+'"'+(p==j.sug[i]?' selected':'')+'>GPIO'+p+'</option>'}).join("")+'</select>';
+        return
+      }
       b+='<label for="io_pn'+i+'">'+esc(s)+'</label><input id="io_pn'+i+
         '" inputmode="numeric" maxlength="2" autocomplete="off" style="width:5em" value="'+
         (j.sug[i]!=null?j.sug[i]:"")+'">'
@@ -10944,17 +11579,82 @@ function lcLoad(){
       $("lc_lang").value=r.lang||LANG;
       LOC.ntp=r.ntp;
       $("lc_df").value=r.dateFmt;
+      $("lc_dft").value=r.dataCortaTesto||"";
+      $("lc_dl").value=r.dataLungaFmt;
+      $("lc_dlt").value=r.dataLungaTesto||"";
       $("lc_tf").value=r.timeFmt;
+      $("lc_ts").value=r.oraLungaSec;
+      $("lc_tl").value=r.oraLungaFmt;
+      $("lc_tlt").value=r.oraLungaTesto||"";
       $("lc_ds").value=r.decSep;
       $("lc_ws").value=r.weekStart;
       $("lc_tu").value=r.tempUnit;
+      $("lc_tarsoc").value=(r.tarSoc/10).toFixed(1);
+      $("lc_tarext").value=(r.tarExt/10).toFixed(1);
+      lcTarHint();
       $("lc_ant").value=r.antExt;
       $("lc_gain").value=r.gain;
       lcAnt();
       lcTzFill(r.tz,r.tzName);
       lcCountry();
+      lcFmt();
       lcRadio(r)
     }).catch(function(){})
+}
+
+/* Formati di data e ora: scelte del modulo (non ancora salvate) */
+function lcImpost(){
+  return{
+    dataCorta:+$("lc_df").value,dataCortaTesto:$("lc_dft").value,
+    dataLunga:+$("lc_dl").value,dataLungaTesto:$("lc_dlt").value,
+    ampm:+$("lc_tf").value==1,oraLungaSec:+$("lc_ts").value==1,
+    oraLunga:+$("lc_tl").value,oraLungaTesto:$("lc_tlt").value
+  }
+}
+
+/* Primo errore dei formati scritti a mano: un testo scelto deve essere valido; se non e scelto, quando c'e, va controllato lo stesso */
+function lcFmtErr(im){
+  var v=[[im.dataCorta==3,im.dataCortaTesto],[im.dataLunga==2,im.dataLungaTesto],[im.oraLunga==1,im.oraLungaTesto]];
+  for(var i=0;i<3;i++){
+    if(!v[i][0]&&!v[i][1])continue;
+    var e=dfControlla(v[i][1]);
+    if(e)return dfMessaggio(e)
+  }
+  return""
+}
+
+/* Anteprima accanto a ogni formato, con l'ora della scheda adesso. Un testo scritto a mano non valido mostra l'errore */
+function lcAnteprima(id,scritta,testo,fa){
+  var e=scritta?dfControlla(testo):0;
+  $(id).textContent=e?dfMessaggio(e):fa()
+}
+
+function lcFmt(){
+  var im=lcImpost(),d=dfDaData(new Date(Date.now()+(fmtSrc().to||0)*1000)),n=dfNomi();
+  $("lc_dft").className=im.dataCorta==3?"":"hide";
+  $("lc_dlt").className=im.dataLunga==2?"":"hide";
+  $("lc_tlt").className=im.oraLunga==1?"":"hide";
+  lcAnteprima("lc_dfp",im.dataCorta==3,im.dataCortaTesto,function(){return dfDataCorta(im,d,n)});
+  lcAnteprima("lc_dlp",im.dataLunga==2,im.dataLungaTesto,function(){return dfDataLunga(im,d,n)});
+  lcAnteprima("lc_tlp",im.oraLunga==1,im.oraLungaTesto,function(){return dfOraLunga(im,d,n)});
+  $("lc_tfp").textContent=dfOraCorta(im,d)
+}
+
+/* Taratura: in decimi di grado Celsius (come la scheda). Fahrenheit: la correzione si moltiplica per 9/5, senza +32 */
+function lcTarDecimi(id){
+  var v=parseFloat($(id).value);
+  return isNaN(v)?0:Math.round(v*10)
+}
+
+function lcTarHint(){
+  var e=$("lc_tarf");
+  if(+$("lc_tu").value!=1){
+    e.textContent="";
+    return
+  }
+  var a=(lcTarDecimi("lc_tarsoc")*9/50).toFixed(1),
+    b=(lcTarDecimi("lc_tarext")*9/50).toFixed(1);
+  e.textContent=tf("Con i gradi Fahrenheit la correzione vale {0} F (chip) e {1} F (esterno): si moltiplica per 9/5, senza aggiungere 32",a,b)
 }
 
 function lcCountry(){
@@ -11023,6 +11723,7 @@ function lcDefaults(keep){
   }
   $("lc_df").value=c.f.d;
   $("lc_tf").value=c.f.h;
+  lcFmt();
   $("lc_ds").value=c.f.s;
   $("lc_ws").value=c.f.w;
   $("lc_tu").value=c.f.t;
@@ -11035,11 +11736,20 @@ function lcDefaults(keep){
 
 function lcSave(mid){
   mid=typeof mid=="string"?mid:"lcm";
+  var fe=lcFmtErr(lcImpost());
+  if(fe){
+    msg(mid,fe,false);
+    return
+  }
   var d={country:LOC.cc,tz:$("lc_posix").value.trim(),
     tzname:+$("lc_tz").value<0?t("Personalizzato"):LOC.tzn,ntp:LOC.ntp,
-    datefmt:$("lc_df").value,timefmt:$("lc_tf").value,decsep:$("lc_ds").value,
+    datefmt:$("lc_df").value,datacortatesto:$("lc_dft").value,
+    datalungafmt:$("lc_dl").value,datalungatesto:$("lc_dlt").value,
+    timefmt:$("lc_tf").value,oralungasec:$("lc_ts").value,
+    oralungafmt:$("lc_tl").value,oralungatesto:$("lc_tlt").value,decsep:$("lc_ds").value,
     weekstart:$("lc_ws").value,tempunit:$("lc_tu").value,antenna:$("lc_ant").value,
-    gain:$("lc_gain").value||0,txpower:$("lc_tx").value};
+    gain:$("lc_gain").value||0,txpower:$("lc_tx").value,
+    tarsoc:lcTarDecimi("lc_tarsoc"),tarext:lcTarDecimi("lc_tarext")};
   var lg=$("lc_lang").value;
   post("/api/region",d).then(function(r){return r.json()}).then(function(j){
     if(j.ok===false){
@@ -11699,6 +12409,332 @@ function pwNow(){
       })
     }})
 }
+/* ===== Coprocessore (sola lettura) ===== */
+function coLoad(){
+  api("/api/coproc").then(function(r){return r.json()}).then(coDraw).catch(function(){})
+}
+
+function coDraw(j){
+  var tipo=j.ulp?t("ULP (RISC-V o FSM)"):j.lp?t("LP CPU (RISC-V)"):t("Nessuno");
+  $("co_tipo").textContent=tipo;
+  $("co_mem").textContent=j.mem>0?tf("{0} byte",j.mem):t("non dichiarata");
+  $("co_prog").textContent=j.prog?t("Programma caricato"):t("Nessun programma caricato");
+  var w=[t("Accensione o riavvio (non dal sonno)"),t("Timer"),t("Piedino (GPIO)"),
+    t("Sensore di tocco"),t("Coprocessore"),t("Porta seriale")];
+  $("co_wake").textContent=j.wake>=0&&j.wake<=5?w[j.wake]:t("Altro")
+}
+/* ===== Registratore di dati ===== */
+var RC=null,RCT=0,RCCOL=["var(--ac)","var(--ac2)","var(--wa)","var(--ko)","var(--ok)","var(--mut)"];
+
+function apriRegistratore(){
+  rcLoad();
+  RCT=setInterval(rcLoad,5000)
+}
+
+function fermaRegistratore(){
+  if(RCT)clearInterval(RCT);
+  RCT=0
+}
+
+function rcLoad(){
+  api("/api/rec").then(function(r){return r.json()}).then(rcDraw).catch(function(){})
+}
+
+function rcVal(c,v){
+  if(v===null)return "-";
+  return c.k==1?(v/100).toFixed(2)+" °C":c.k==2?v+" KB":""+v
+}
+
+function rcTime(p){
+  return p[1]?fmtOraData(p[0]):"+"+durText(p[0])      /* ora e data nel formato scelto in Localizzazione */
+}
+
+function rcYn(v){return v?t("si"):t("no")}
+
+function rcDraw(j){
+  RC=j;
+  var st=j.on?tf("Acceso: intervallo predefinito {0} secondi, {1} punti in memoria",j.sec,j.count):t("Spento");
+  $("rcst").className="msg "+(j.on?"ok":"");
+  $("rcst").style.display="block";
+  $("rcst").textContent=st+(j.err?" · "+j.err:"");
+  if(j.err)$("rcst").className="msg ko";
+  $("rc_cap").textContent=t("Motore: task del firmware")+" · "+
+    tf("Capacita dichiarate del chip: coprocessore ULP {0}, CPU a basso consumo {1}, contatore di impulsi {2}, memoria che resta accesa {3} byte",
+      rcYn(j.caps.ulp),rcYn(j.caps.lp),rcYn(j.caps.pcnt),j.caps.rtc);
+  rcChart(j);
+  rcFiles(j);
+  rcAzDraw(j);
+  rcForm(j)
+}
+
+function rcChart(j){
+  var svg=$("rc_svg"),n=j.pts.length,leg="",h="",i,k;
+  var cols=j.cols,out="";
+  for(k=0;k<cols.length;k++){
+    var mn=1e18,mx=-1e18,p="",last=null;
+    for(i=0;i<n;i++){
+      var v=j.pts[i][2+k];
+      if(v===null)continue;
+      if(v<mn)mn=v;
+      if(v>mx)mx=v
+    }
+    if(mx==mn){mx=mn+1}
+    for(i=0;i<n;i++){
+      var w=j.pts[i][2+k];
+      if(w===null)continue;
+      last=w;
+      p+=(n>1?i*300/(n-1):150).toFixed(1)+","+(112-(w-mn)*104/(mx-mn)).toFixed(1)+" "
+    }
+    if(p)out+='<polyline points="'+p+'" fill="none" style="stroke:'+RCCOL[k%6]+'" stroke-width="2" vector-effect="non-scaling-stroke"/>';
+    leg+='<span style="margin-right:14px"><b style="color:'+RCCOL[k%6]+'">&#9632;</b> '+esc(cols[k].n)+": "+
+      esc(rcVal(cols[k],last))+"</span>"
+  }
+  svg.innerHTML=out;
+  $("rc_leg").innerHTML=leg||esc(t("Nessun punto ancora"));
+  h="<tr><th scope=\"col\">"+esc(t("Quando"))+"</th>";
+  for(k=0;k<cols.length;k++)h+="<th scope=\"col\">"+esc(cols[k].n)+"</th>";
+  h+="</tr>";
+  for(i=n-1;i>=Math.max(0,n-10);i--){
+    h+="<tr><td>"+esc(rcTime(j.pts[i]))+"</td>";
+    for(k=0;k<cols.length;k++)h+="<td>"+esc(rcVal(cols[k],j.pts[i][2+k]))+"</td>";
+    h+="</tr>"
+  }
+  $("rc_tab").innerHTML=h
+}
+
+function rcSel(id,list,cur){
+  var h='<option value="">'+esc(t("(nessuna)"))+"</option>",i;
+  for(i=0;i<list.length;i++)h+='<option value="'+esc(list[i])+'"'+(list[i]==cur?" selected":"")+">"+esc(list[i])+"</option>";
+  $(id).innerHTML=h
+}
+
+function rcForm(j){
+  var x=document.activeElement;
+  if(x&&$("rc_form").contains(x))return;
+  $("rc_on").value=j.on?"1":"0";
+  $("rc_sec").value=j.sec;
+  $("rc_where").value=j.where;
+  $("rc_max").value=j.maxkb;
+  $("rc_lim").value=j.limite;
+  $("rc_nome").value=j.nome;
+  $("rc_t").checked=j.t;
+  $("rc_r").checked=j.r;
+  for(var i=0;i<4;i++){
+    rcSel("rc_d"+(i+1),j.fonti,j.dev[i]);
+    $("rc_s"+(i+1)).value=j.secdev[i]
+  }
+  $("rc_st").value=j.sect;
+  $("rc_sr").value=j.secr;
+  rcAzForm(j);
+  rcWhereUi()
+}
+
+function rcWhereUi(){
+  $("rc_minh").textContent=$("rc_where").value=="1"?t("Sulla microSD: da 1 secondo a 24 ore, spazio fino a 65535 KB."):t("Sulla memoria interna: da 10 secondi a 24 ore, spazio fino a 1024 KB.")
+}
+
+function rcSave(){
+  var d={on:$("rc_on").value,sec:$("rc_sec").value,where:$("rc_where").value,maxkb:$("rc_max").value,
+    t:$("rc_t").checked?1:0,r:$("rc_r").checked?1:0,nome:$("rc_nome").value,limite:$("rc_lim").value,sect:$("rc_st").value,secr:$("rc_sr").value,
+    azioni:rcAzMask(),evmax:$("rc_evmax").value};
+  for(var i=1;i<=4;i++){
+    d["dev"+i]=$("rc_d"+i).value;
+    d["sec"+i]=$("rc_s"+i).value
+  }
+  post("/api/rec/set",d).then(function(r){return r.json()}).then(function(j){
+    if(j.ok===false){
+      msg("rcm",j.err,false);
+      return
+    }
+    msg("rcm",t("Salvato"),true);
+    rcLoad()
+  }).catch(function(){})
+}
+/* ===== Registratore di dati: azioni (eventi.csv) ===== */
+/* un bit per categoria: lo stesso ordine di AzioneCat in core/vos_azioni.h */
+var RCAZ=["uscita","pwm","led","contatore","programma","riavvio","sonno","avvio","rete","servizio","sd"];
+
+function rcAzNome(i){
+  var n=[t("Uscite e rele"),t("PWM"),t("LED"),t("Contatore azzerato"),t("Script, app e programmi"),t("Riavvii"),t("Sonno profondo"),
+    t("Avvio e risvegli"),t("Rete (Wi-Fi e hotspot)"),t("Servizi"),t("microSD")];
+  return n[i]
+}
+
+function rcAzOrigine(o){
+  var m={sistema:t("sistema"),shell:t("shell"),pagina:t("pagina"),script:t("script"),regola:t("regola")};
+  return m[o]||o
+}
+
+function rcAzValore(cat,v,txt){
+  if(cat=="avvio"&&txt)return txt;
+  if(cat=="uscita"||cat=="led"||cat=="servizio")return v?t("acceso"):t("spento");
+  if(cat=="programma")return v==1?t("avviato"):v==2?t("finito con errore"):t("finito");
+  if(cat=="sd")return v==1?t("montata"):v==2?t("formattata"):t("smontata");
+  return ""+v
+}
+
+function rcAzDraw(j){
+  var e=j.ev;
+  if(!e)return;
+  $("rc_azst").textContent=tf("{0} azioni registrate dall'avvio, {1} perse per coda piena, {2} oltre il limite del giorno",e.tot,e.persi,e.scartati)+
+    (e.err?" · "+e.err:"");
+  var h="<tr><th scope=\"col\">"+esc(t("Quando"))+"</th><th scope=\"col\">"+esc(t("Categoria"))+"</th><th scope=\"col\">"+esc(t("Nome"))+
+    "</th><th scope=\"col\">"+esc(t("Valore"))+"</th><th scope=\"col\">"+esc(t("Origine"))+"</th></tr>",i,r;
+  for(i=0;i<e.ultime.length;i++){
+    r=e.ultime[i];
+    h+="<tr><td>"+esc(rcTime(r))+"</td><td>"+esc(rcAzNome(RCAZ.indexOf(r[2])))+"</td><td>"+esc(r[3])+"</td><td>"+
+      esc(rcAzValore(r[2],r[4],r[6]))+"</td><td>"+esc(rcAzOrigine(r[5]))+"</td></tr>"
+  }
+  $("rc_aztab").innerHTML=e.ultime.length?h:"";
+  if(!e.ultime.length)$("rc_azst").textContent+=" · "+t("Nessuna azione ancora");
+  var f=j.files,l="";
+  for(i=0;i<f.length;i++)if(f[i].e)
+    l+='<a href="/api/fs/get?path='+enc(j.dir+"/"+f[i].n)+'" download="'+esc(f[i].n)+'">'+esc(f[i].n)+"</a> ";
+  $("rc_azfiles").innerHTML=l?esc(t("Scarica CSV degli eventi"))+": "+l:""
+}
+
+/* caselle delle categorie e tetto giornaliero: si riempiono solo se non si sta scrivendo nel modulo */
+function rcAzForm(j){
+  var h="",i;
+  for(i=0;i<RCAZ.length;i++)
+    h+='<label><input type="checkbox" id="rc_a'+i+'"'+((j.azioni>>i)&1?" checked":"")+"> "+esc(rcAzNome(i))+"</label>";
+  $("rc_acats").innerHTML=h;
+  $("rc_evmax").value=j.evmax
+}
+
+function rcAzMask(){
+  var m=0,i;
+  for(i=0;i<RCAZ.length;i++)if($("rc_a"+i).checked)m|=1<<i;
+  return m
+}
+/* ===== Registratore di dati: cartella dei dati (elenco, selezione, scarico, eliminazione) ===== */
+var RCSEL={},RCFL=[],RCDIR="",RCSIG="";
+
+/* dimensione con fSize (js_file.js); la data e quella scritta nel nome (-AAAAMMGG), formattata come in Localizzazione */
+function rcFData(f){return f.q?fmtData(f.q):"-"}
+
+function rcFiles(j){
+  var i,nm={};
+  RCFL=j.files;
+  RCDIR=j.dir;
+  for(i=0;i<RCFL.length;i++)nm[RCFL[i].n]=1;
+  for(var k in RCSEL)if(!nm[k])delete RCSEL[k];        /* un file sparito esce dalla selezione */
+  var altri=0;
+  for(i=0;i<RCFL.length;i++)if(RCFL[i].o)altri++;
+  $("rc_files").textContent=(RCFL.length?tf("{0} file in {1}, {2} byte in tutto",RCFL.length,j.dir,j.bytes):tf("Nessun file in {0}",j.dir))+
+    (altri?" · "+tf("{0} file con un altro nome: non si contano nel limite e si tolgono solo da qui",altri):"");
+  var sig=RCDIR+"|"+RCFL.map(function(f){return f.n}).join("|");
+  if(sig!=RCSIG){
+    RCSIG=sig;
+    rcFTab()
+  }else{
+    for(i=0;i<RCFL.length;i++){
+      $("rc_fs"+i).textContent=fSize(RCFL[i].s);         /* stessa lista: si aggiornano solo le dimensioni, cosi il focus resta dov'e */
+      $("rc_fd"+i).textContent=rcFData(RCFL[i])
+    }
+  }
+  rcFBtn()
+}
+
+function rcFTab(){
+  var tb=$("rc_ftab"),x=document.activeElement,keep=x&&tb.contains(x)?x.getAttribute("data-n"):null,h,i,f;
+  if(!RCFL.length){
+    tb.className="ftab hide";
+    tb.innerHTML="";
+    return
+  }
+  tb.className="ftab";
+  tb.setAttribute("aria-label",t("File del registratore"));
+  h='<thead><tr><th scope="col"><input type="checkbox" id="rc_fall" aria-label="'+esc(t("Seleziona tutti i file"))+
+    '" onchange="rcPickAll(this.checked)"></th><th scope="col">'+esc(t("Nome"))+'</th><th scope="col" class="fsz">'+esc(t("Dimensione"))+
+    '</th><th scope="col">'+esc(t("Data (dal nome)"))+"</th></tr></thead><tbody>";
+  for(i=0;i<RCFL.length;i++){
+    f=RCFL[i];
+    h+='<tr><td><input type="checkbox" id="rc_fc'+i+'" data-n="'+esc(f.n)+'" aria-label="'+esc(tf("Seleziona {0}",f.n))+
+      '"'+(RCSEL[f.n]?" checked":"")+' onchange="rcPick('+i+',this.checked)"></td><td>'+esc(f.n)+(f.o?" ("+esc(t("altro nome"))+")":"")+
+      '</td><td class="fsz" id="rc_fs'+i+'">'+esc(fSize(f.s))+'</td><td id="rc_fd'+i+'">'+esc(rcFData(f))+"</td></tr>"
+  }
+  tb.innerHTML=h+"</tbody>";
+  if(keep)for(i=0;i<RCFL.length;i++)if(RCFL[i].n==keep)$("rc_fc"+i).focus()
+}
+
+function rcPick(i,on){
+  if(on)RCSEL[RCFL[i].n]=1;
+  else delete RCSEL[RCFL[i].n];
+  rcFBtn()
+}
+
+function rcPickAll(on){
+  for(var i=0;i<RCFL.length;i++){
+    $("rc_fc"+i).checked=on;
+    if(on)RCSEL[RCFL[i].n]=1;
+    else delete RCSEL[RCFL[i].n]
+  }
+  rcFBtn()
+}
+
+function rcSelNomi(){
+  return RCFL.filter(function(f){return RCSEL[f.n]}).map(function(f){return f.n})
+}
+
+/* conteggio, bottoni attivi solo con una selezione, casella "tutti" (anche a meta) */
+function rcFBtn(){
+  var n=rcSelNomi().length,all=$("rc_fall");
+  $("rc_fsel").textContent=n?tf("{0} file selezionati",n):(RCFL.length?t("Nessun file selezionato"):"");
+  $("rc_fdl").disabled=!n;
+  $("rc_fdel").disabled=!n;
+  if(all){
+    all.checked=n>0&&n==RCFL.length;
+    all.indeterminate=n>0&&n<RCFL.length
+  }
+}
+
+/* uno alla volta con la rotta dei file: i browser accettano lo scarico di piu file se non partono tutti insieme */
+function rcScarica(){
+  var nomi=rcSelNomi(),i=0,dir=RCDIR;
+  if(!nomi.length)return;
+  msg("rcm2",tf("Scarico {0} file",nomi.length),true);
+  (function next(){
+    if(i>=nomi.length)return;
+    var a=document.createElement("a");
+    a.href="/api/fs/get?path="+enc(dir+"/"+nomi[i]);
+    a.download=nomi[i];
+    a.style.display="none";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    i++;
+    setTimeout(next,700)
+  })()
+}
+
+/* solo Admin: la rotta e il suo controllo di ruolo e dei percorsi protetti sono quelli della pagina File */
+function rcElimina(){
+  var nomi=rcSelNomi(),dir=RCDIR;
+  if(!nomi.length)return;
+  dlg({title:t("Eliminare i file selezionati?"),
+    body:'<p style="margin:0">'+esc(tf("Si eliminano {0} file dalla cartella {1}.",nomi.length,dir))+
+      '</p><p style="margin:8px 0 0;color:var(--mut)">'+esc(t("Non si puo annullare."))+"</p>",
+    ok:t("Elimina"),danger:true,
+    onOk:function(){
+      var fatti=0,falliti=[];
+      return nomi.reduce(function(p,n){
+        return p.then(function(){
+          return post("/api/fs/del",{path:dir+"/"+n}).then(function(r){return r.json()}).then(function(j){
+            if(j.ok)fatti++;
+            else falliti.push(n)
+          }).catch(function(){falliti.push(n)})
+        })
+      },Promise.resolve()).then(function(){
+        RCSEL={};
+        RCSIG="";
+        rcLoad();
+        if(falliti.length)return tf("Non si sono eliminati {0} file: {1}",falliti.length,falliti.join(", "));
+        msg("rcm2",tf("Eliminati {0} file",fatti),true);
+        return ""
+      })
+    }})
+}
 /* ===== Autotest ===== */
 var SL={tm:null,seq:0,run:false};
 function stlGo(){
@@ -12221,10 +13257,7 @@ function drvUp(){
   $("drvup").value="";
   var low=f.name.toLowerCase(),e=low.slice(low.lastIndexOf("."));
   if(e==EXT.de){
-    var fd=new FormData();
-    fd.append("file",f);
-    api("/api/fs/up?dir=/devs",
-      {method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){
+    caricaPezzi("/api/fs/pezzo?dir=/devs",f,f.name,null,t("Caricamento non riuscito")).then(function(j){
         msgCaricato("drvm",j,t("Caricato"));
         drvLoad()
       }).catch(function(){});
@@ -12631,7 +13664,7 @@ function suDots(){
 
 function setupDraw(){
   var i=SU.i,d=SU.d,h=
-    '<div class="sw"><div class="hero"><svg class="logo" aria-hidden="true"><use href="#i-chip"/></svg></div><h2 style="margin:0">'+
+    '<div class="sw"><div class="hero"><svg class="logo" aria-hidden="true"><use href="#i-cornetto"/></svg></div><h2 style="margin:0">'+
     esc(t("Prima configurazione"))+'</h2><div class="subt">'+
     esc(tf("Passo {0} di {1}: {2}",i+1,suSteps().length,t(suSteps()[i])))+'</div>'+suDots()+
     '<div class="card">';

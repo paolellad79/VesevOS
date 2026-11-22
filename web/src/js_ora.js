@@ -34,8 +34,7 @@ function loadTime(){
     $("oranow").textContent=t.valid?t.now:window.t("Ora non impostata");
     svcSt("ntp",t.ntp);
     $("o_ev").value=t.every;
-    var ld=new Date((t.last||0)*1000);
-    $("olast").textContent=t.last?tf("Ultima sincronizzazione: {0}",ld.toLocaleString())
+    $("olast").textContent=t.last?tf("Ultima sincronizzazione: {0}",fmtOraData(t.last))
       :(t.ntp?window.t("Nessuna sincronizzazione ancora")
         :window.t("Sincronizzazione spenta: ora a mano"));
     if(t.valid&&!$("o_md").value){
@@ -51,7 +50,7 @@ function loadTime(){
         "Ogni richiesta NTP mostra ai server l'indirizzo IP pubblico della tua rete. Server usati: {0}",
         t.server+(t.server2?", "+t.server2:""));
     if($("ontpst"))$("ontpst").textContent=t.ntp
-      ?(t.last?tf("Ultima sincronizzazione: {0}",ld.toLocaleString())
+      ?(t.last?tf("Ultima sincronizzazione: {0}",fmtOraData(t.last))
         :window.t("Nessuna sincronizzazione ancora")):window.t(
           "Sincronizzazione spenta: ora a mano");
     $("o_serve").value=t.serve?"1":"0";

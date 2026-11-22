@@ -37,8 +37,8 @@ Ultimo aggiornamento: 25 ottobre 2026 (versione 1.8.0b; sezioni 1, 4, 5 e 6 per 
 - Rifacimento di architettura: un passo = una versione, mai due strati insieme.
 
 ## 6. Rilascio
-- Prima il semaforo legale (Riepilogo + semaforo in un messaggio, regole in `docs/progetto/REGOLE-LEGALI.md`) e l'"ok" del proprietario. Poi: registro legale, `NOTICE.txt` (si genera da `licenses/NOTICE.template.txt` con `python3 tools/mklicense.py`: non si modifica a mano), SBOM (`SBOM.spdx.json`) e CHANGELOG; poi i due ZIP: `VesevOS-X.Y.Z.zip` (sorgenti, lingue, NOTICE e LEGGIMI) e `VesevOS-repo.zip` (per GitHub). Il repo pubblicato porta anche `firmware/` (file compilati con `idf.py`, SHA-256 e `indice.json`: ricalcola gli SHA con `shasum -a 256` dai file copiati) e `flash/` (pagina di prima installazione). Il file `.elf` non si pubblica mai.
-- Commit: titolo `X.Y.Z - ...`, descrizione, riga `Controllo legale: verde/giallo/rosso`.
+- Prima il semaforo legale (Riepilogo + semaforo in un messaggio, regole in `docs/progetto/REGOLE-LEGALI.md`) e l'"ok" del proprietario. Poi: registro legale, `NOTICE.txt` (si genera da `licenses/NOTICE.template.txt` con `python3 tools/mklicense.py`: non si modifica a mano), SBOM (`SBOM.spdx.json`) e CHANGELOG; poi UN SOLO zip per GitHub: `python3 tools/mkzip-github.py X.Y.Z`, che scrive `consegna/VesevOS-github-X.Y.Z.zip` (decisione del 20/11/2026: non ci sono piu due zip ne `VesevOS-repo.zip`). Il repo pubblicato porta anche `firmware/` (file compilati con `idf.py`, SHA-256 e `indice.json`: ricalcola gli SHA con `shasum -a 256` dai file copiati) e `flash/` (pagina di prima installazione). Il file `.elf` non si pubblica mai.
+- Commit: titolo `X.Y.Z - ...` e descrizione in positivo, senza riga sul controllo legale (decisione del 17/11/2026: il controllo legale e interno).
 - Il push lo fa il proprietario. Dopo: copia nel Progetto, STATO e da-fare aggiornati.
 - I documenti si pubblicano SEMPRE in italiano e in inglese (file .en.md).
 
@@ -51,4 +51,5 @@ Niente MapSVG, exFAT, password di default uguali per tutti, servizi senza contro
 
 ## 9. Documenti collegati
 - Problemi noti: `docs/KNOWN_ISSUES.md` (italiano), `docs/KNOWN_ISSUES.en.md` (inglese).
+- Compilare per ogni scheda, passo per passo: `docs/COMPILARE.md` (italiano; l'inglese non c'e ancora).
 - Progetto (non pubblicati): checklist di rilascio, semaforo, registro legale, piano giallo-verde, piano email, da-fare, ripartenza.

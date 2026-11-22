@@ -13,7 +13,9 @@
 
 namespace {
 
-const char* const kNomiFile[RF_N] = {"comuni.json.gz", "licenza-apache2.txt.gz", "licenza-bsd3.txt.gz", "licenza-mit.txt.gz", "manuale.txt", "radio.txt", "html.vrs"};
+// Nomi dei file sulla scheda. I quattro .vgz (contenitore VOSR con gzip) hanno ancora il vecchio nome .gz come ripiego, finche non sono stati ricaricati.
+const char* const kNomiFile[RF_N] = {"comuni.vgz", "licenza-apache2.vgz", "licenza-bsd3.vgz", "licenza-mit.vgz", "manuale.txt", "radio.txt", "html.vrs"};
+const char* const kNomiVecchi[RF_N] = {"comuni.json.gz", "licenza-apache2.txt.gz", "licenza-bsd3.txt.gz", "licenza-mit.txt.gz", nullptr, nullptr, nullptr};
 const size_t FILE_TETTO = 64 * 1024;         // un file singolo al massimo (il piu grande oggi: 13 KB)
 std::atomic<uint8_t>  g_stato[RF_N];         // RisStato di ogni file
 std::atomic<uint8_t>  g_elenco{0xFF};        // ultimo esito dell'elenco SHA256SUMS (0xFF = non ancora controllato)
@@ -50,13 +52,22 @@ const char* risFileNome(RisFile f) { return (unsigned)f < RF_N ? kNomiFile[f] : 
 bool risFilePercorso(RisFile f, char* out, size_t cap) {
   if ((unsigned)f >= RF_N || !out) return false;
   int n = snprintf(out, cap, RIS_DIR "/%s", kNomiFile[f]);
-  return n > 0 && (size_t)n < cap;
+  if (n <= 0 || (size_t)n >= cap) return false;
+  if (kNomiVecchi[f] && !drvFsExists(out)) {                              // il nuovo non c'e: se c'e il vecchio .gz si usa quello
+    char vecchio[RIS_PERCORSO_MAX];
+    int m = snprintf(vecchio, sizeof vecchio, RIS_DIR "/%s", kNomiVecchi[f]);
+    if (m > 0 && (size_t)m < sizeof vecchio && drvFsExists(vecchio)) {
+      memcpy(out, vecchio, (size_t)m + 1);
+      return (size_t)m < cap;
+    }
+  }
+  return true;
 }
 
 bool risFileDaNome(const char* nome, RisFile& f) {
   if (!nome) return false;
   for (int i = 0; i < RF_N; i++) {
-    if (strcmp(nome, kNomiFile[i]) != 0) continue;
+    if (strcmp(nome, kNomiFile[i]) != 0 && !(kNomiVecchi[i] && strcmp(nome, kNomiVecchi[i]) == 0)) continue;
     f = (RisFile)i;
     return true;
   }
@@ -93,8 +104,10 @@ RisEsito risFileAtteso(RisFile rf, uint8_t hash[32]) {
   size_t n = 0;
   RisEsito e = risElencoLeggi(buf, n);
   if (e != RIS_OK) return e;
-  if ((unsigned)rf >= RF_N || !risElencoCerca(buf, n, kNomiFile[rf], hash)) return RIS_FORMATO;   // il file non e nell'elenco
-  return RIS_OK;
+  if ((unsigned)rf >= RF_N) return RIS_FORMATO;
+  if (risElencoCerca(buf, n, kNomiFile[rf], hash)) return RIS_OK;
+  if (kNomiVecchi[rf] && risElencoCerca(buf, n, kNomiVecchi[rf], hash)) return RIS_OK;       // elenco vecchio con il nome .gz
+  return RIS_FORMATO;                                                       // il file non e nell'elenco
 }
 
 RisEsito risElencoAvvio() {
@@ -162,3 +175,28 @@ void risFileAzzeraUno(RisFile f) {
 }
 
 uint32_t risFileGen() { return g_gen.load(); }
+
+// Versione e firmware minimo scritti DENTRO il file: contenitore VOSR (byte 6-7 e 60-63) oppure righe "# versione=" e "# dipende=" in cima al testo.
+// Si legge il file senza controllarlo (e un'informazione: il controllo e quello di SHA256SUMS). ver = "" se non dichiarata. false = file non leggibile.
+bool risFileMeta(RisFile f, char* ver, size_t cap, uint32_t* fwMin) {
+  if (ver && cap) ver[0] = 0;
+  if (fwMin) *fwMin = 0;
+  VosFile vf;
+  size_t len = 0;
+  if (risFileApriGrezzo(f, vf, len) != RIS_OK) return false;
+  uint8_t buf[RIS_TESTO_SCAN];
+  size_t n = vf.read(buf, sizeof buf);
+  vf.close();
+  if (n >= 4 && memcmp(buf, "VOSR", 4) == 0) {
+    RisInfo i;
+    if (risIntestazione(buf, n, 0xFFFFFFFFu, i) != RIS_OK) return false;
+    if (ver) risVersioneTesto(i.verMag, i.verMin, ver, cap);
+    if (fwMin) *fwMin = i.fwMin;
+    return true;
+  }
+  RisTesto t = risTestoLeggi((const char*)buf, n);
+  if (!t.ok) return false;
+  if (ver) risVersioneTesto(t.verMag, t.verMin, ver, cap);
+  if (fwMin) *fwMin = t.fwMin;
+  return true;
+}

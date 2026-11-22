@@ -1,23 +1,55 @@
 {
- "schema": 1,
- "updated": "2026-11-17",
- "description": "Ultime versioni pubblicate. 'channel' e 'publisher' sono scritte non firmate: lo SHA-256 dice solo che il file non e rotto.",
- "firmware": {
-  "version": "1.8.24c",
-  "channel": "official",
-  "publisher": "Domenico Paolella",
-  "date": "2026-11-17",
-  "size": 2094224,
-  "sha256": "e13a319239687780dc6cdaaf30a68140b10e2a6ef38c173c8095ed419c7e2319",
-  "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/1.8.24c/VesevOS-S3-1.8.24c.bin",
-  "recovery": "0.5.3"
- },
- "recovery": {
-  "version": "0.5.3",
-  "size": 957824,
-  "sha256": "0944640a7918a01cc2ad1b1844d10657e5f93ab5f5152566e737905b1fa6d93f",
-  "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/recovery/0.5.3/VesevOS-Recovery-S3-0.5.3.bin"
- },
- "indice": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/indice.json",
- "store": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/store/index.json"
+  "schema": 1,
+  "updated": "2026-11-22",
+  "description": "Ultime versioni pubblicate. Il blocco 'schede' ha una voce per ogni scheda (S3, C6, C3...); 'firmware' resta per le versioni vecchie, che sono solo per la S3. 'channel' e 'publisher' sono scritte non firmate: lo SHA-256 dice solo che il file non e rotto.",
+  "firmware": {
+    "version": "1.8.30k",
+    "channel": "official",
+    "publisher": "Domenico Paolella",
+    "date": "2026-11-22",
+    "size": 1978336,
+    "sha256": "944678a392649ad7b51bfdef6ec203bded09cf383eef167c275f0801fe470338",
+    "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/1.8.30k/VesevOS-S3-1.8.30k.bin",
+    "recovery": "0.5.4f"
+  },
+  "recovery": {
+    "version": "0.5.4f",
+    "size": 947472,
+    "sha256": "fad5be03ab4bc8f8688e2636ca8dc6ca1f905ae71508fc9258c54c04cdc57a8f",
+    "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/recovery/0.5.4f/VesevOS-Recovery-S3-0.5.4f.bin"
+  },
+  "schede": {
+    "S3": {
+      "version": "1.8.30k",
+      "channel": "official",
+      "publisher": "Domenico Paolella",
+      "date": "2026-11-22",
+      "size": 1978336,
+      "sha256": "944678a392649ad7b51bfdef6ec203bded09cf383eef167c275f0801fe470338",
+      "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/1.8.30k/VesevOS-S3-1.8.30k.bin",
+      "recovery": "0.5.4f"
+    },
+    "C6": {
+      "version": "1.8.30k",
+      "channel": "official",
+      "publisher": "Domenico Paolella",
+      "date": "2026-11-22",
+      "size": 2127872,
+      "sha256": "4402ecdfdc900f380a322e8ed63619484ef9dde55fe0d1902dd7c5a02602518e",
+      "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/1.8.30k/VesevOS-C6-1.8.30k.bin",
+      "recovery": "0.5.4f"
+    },
+    "C3": {
+      "version": "1.8.30k",
+      "channel": "official",
+      "publisher": "Domenico Paolella",
+      "date": "2026-11-22",
+      "size": 2075072,
+      "sha256": "88ebf80b9728a6366429b6b896e39fcbc4d55b7bd56fb4b7f838d716c0152444",
+      "url": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/1.8.30k/VesevOS-C3-1.8.30k.bin",
+      "recovery": "0.5.4f"
+    }
+  },
+  "indice": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/firmware/indice.json",
+  "store": "https://raw.githubusercontent.com/paolellad79/VesevOS/main/store/index.json"
 }

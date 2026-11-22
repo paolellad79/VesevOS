@@ -114,7 +114,7 @@ void summary(OutSink& o, bool full) {
   repHead(h, TRK("Rete"));
   shNetBrief(h);
   if (netState() == NET_CLIENT_OK) {
-    repRow(h, TRK("Maschera"), IpText(drvWifiMask()).s);
+    repRow(h, TRK("Maschera"), MaskText(drvWifiMask()).s);
     repRow(h, TRK("Gateway"), IpText(drvWifiGateway()).s);
     rowDns(h);
     char dom[64];

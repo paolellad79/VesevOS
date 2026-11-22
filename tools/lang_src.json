@@ -1278,14 +1278,6 @@
    "zh": "时区规则 (POSIX 格式)"
   },
   {
-   "it": "Formato data",
-   "en": "Date format",
-   "es": "Formato de fecha",
-   "de": "Datumsformat",
-   "scope": "web",
-   "zh": "日期格式"
-  },
-  {
    "it": "GG/MM/AAAA (31/12/2026)",
    "en": "DD/MM/YYYY (31/12/2026)",
    "es": "DD/MM/AAAA (31/12/2026)",
@@ -1316,22 +1308,6 @@
    "de": "Zeitformat",
    "scope": "web",
    "zh": "时间格式"
-  },
-  {
-   "it": "24 ore (18:30:00)",
-   "en": "24 hours (18:30:00)",
-   "es": "24 horas (18:30:00)",
-   "de": "24 Stunden (18:30:00)",
-   "scope": "web",
-   "zh": "24 小时制 (18:30:00)"
-  },
-  {
-   "it": "12 ore (06:30:00 PM)",
-   "en": "12 hours (06:30:00 PM)",
-   "es": "12 horas (06:30:00 PM)",
-   "de": "12 Stunden (06:30:00 PM)",
-   "scope": "web",
-   "zh": "12 小时制 (06:30:00 PM)"
   },
   {
    "it": "Unita di temperatura",
@@ -7662,28 +7638,12 @@
    "zh": "用 USB 线将板子连接到电脑并打开串口监视器 (115200)：板子会写入 Wi-Fi 网络名称及其密码。连接到该网络并打开 https://192.168.4.1，配置向导将启动。"
   },
   {
-   "it": "Collegamento cifrato (HTTPS). Impronta del certificato: {0}",
-   "en": "Encrypted connection (HTTPS). Certificate fingerprint: {0}",
-   "es": "Conexión cifrada (HTTPS). Huella del certificado: {0}",
-   "de": "Verschlüsselte Verbindung (HTTPS). Zertifikat-Fingerabdruck: {0}",
-   "scope": "web",
-   "zh": "加密连接 (HTTPS)。证书指纹：{0}"
-  },
-  {
    "it": "Collegamento cifrato (mqtts, di solito porta 8883)",
    "en": "Encrypted connection (mqtts, usually port 8883)",
    "es": "Conexión cifrada (mqtts, normalmente puerto 8883)",
    "de": "Verschlüsselte Verbindung (mqtts, meist Port 8883)",
    "scope": "web",
    "zh": "加密连接 (mqtts，通常是端口 8883)"
-  },
-  {
-   "it": "Collegamento non cifrato: usi l'hotspot della scheda, protetto dalla sua password Wi-Fi.",
-   "en": "Unencrypted connection: you are on the board's hotspot, protected by its Wi-Fi password.",
-   "es": "Conexión sin cifrar: usas el hotspot de la placa, protegido por su contraseña Wi-Fi.",
-   "de": "Unverschlüsselte Verbindung: du nutzt den Hotspot des Boards, geschützt durch sein WLAN-Passwort.",
-   "scope": "web",
-   "zh": "非加密连接：使用板子的热点，由 Wi-Fi 密码保护。"
   },
   {
    "it": "Come si chiama questa scheda?",
@@ -9198,12 +9158,20 @@
    "zh": "开发板时间未设置。将在登录后设置（系统 > 时间）。"
   },
   {
-   "it": "Ora della scheda: {0} {1} ({2})",
-   "en": "Board time: {0} {1} ({2})",
-   "es": "Hora de la placa: {0} {1} ({2})",
-   "de": "Zeit des Boards: {0} {1} ({2})",
+   "it": "Mostra la password",
+   "en": "Show password",
+   "es": "Mostrar la contraseña",
+   "de": "Passwort anzeigen",
    "scope": "web",
-   "zh": "开发板时间：{0} {1} ({2})"
+   "zh": "显示密码"
+  },
+  {
+   "it": "Nascondi la password",
+   "en": "Hide password",
+   "es": "Ocultar la contraseña",
+   "de": "Passwort verbergen",
+   "scope": "web",
+   "zh": "隐藏密码"
   },
   {
    "it": "Differisce dall'ora del tuo dispositivo: controlla data e fuso.",
@@ -15278,12 +15246,12 @@
    "zh": "power: 3V3, 5V, 12V, 24V, 230V 或 none"
   },
   {
-   "it": "pull vale solo per la classe ingresso",
-   "en": "pull applies only to the ingresso (input) class",
-   "es": "pull vale solo para la clase ingresso (entrada)",
-   "de": "pull gilt nur fuer die Klasse ingresso (Eingang)",
+   "it": "pull vale solo per le classi ingresso e ripresa",
+   "en": "pull is only valid for the ingresso and ripresa classes",
+   "es": "pull solo vale para las clases ingresso y ripresa",
+   "de": "pull gilt nur fuer die Klassen ingresso und ripresa",
    "scope": "fw",
-   "zh": "pull 仅适用于输入类"
+   "zh": "pull 仅适用于 ingresso 和 ripresa 类"
   },
   {
    "it": "pull: none, up oppure down",
@@ -16726,12 +16694,12 @@
    "zh": "恢复系统已更新 %s -> %s (%s)"
   },
   {
-   "it": "Uso: recovery update <file.bin> [sha256]  (prima carica il file in Sistema > File)",
-   "en": "Usage: recovery update <file.bin> [sha256]  (first upload the file in System > Files)",
-   "es": "Uso: recovery update <file.bin> [sha256]  (primero carga el archivo en Sistema > Archivos)",
-   "de": "Verwendung: recovery update <file.bin> [sha256]  (Datei zuerst unter System > Dateien hochladen)",
+   "it": "Uso: recovery update <file.bin> <sha256>  (prima carica il file in Sistema > File)",
+   "en": "Usage: recovery update <file.bin> <sha256>  (first upload the file in System > Files)",
+   "es": "Uso: recovery update <file.bin> <sha256>  (primero carga el archivo en Sistema > Archivos)",
+   "de": "Verwendung: recovery update <file.bin> <sha256>  (Datei zuerst unter System > Dateien hochladen)",
    "scope": "fw",
-   "zh": "用法：recovery update <file.bin> [sha256]  （先加载文件到系统 > 文件）"
+   "zh": "用法：recovery update <file.bin> <sha256>  （先加载文件到系统 > 文件）"
   },
   {
    "it": "Controllo e scrivo il recovery: non spegnere la scheda...",
@@ -16814,12 +16782,12 @@
    "zh": "恢复系统文件 (.bin)"
   },
   {
-   "it": "Impronta SHA-256 (facoltativa)",
-   "en": "SHA-256 hash (optional)",
-   "es": "Huella SHA-256 (opcional)",
-   "de": "SHA-256-Hash (optional)",
+   "it": "Impronta SHA-256 (obbligatoria)",
+   "en": "SHA-256 hash (required)",
+   "es": "Huella SHA-256 (obligatoria)",
+   "de": "SHA-256-Hash (erforderlich)",
    "scope": "web",
-   "zh": "SHA-256 指纹（可选）"
+   "zh": "SHA-256 指纹（必填）"
   },
   {
    "it": "Non spegnere la scheda durante l'aggiornamento (pochi secondi). VesevOS continua a funzionare.",
@@ -17998,12 +17966,12 @@
    "zh": "恢复模式显示的说明原因：{0}"
   },
   {
-   "it": "Per non chiederti di nuovo la password, l'indirizzo contiene un codice monouso valido 15 minuti e legato a questo computer. Su una rete locale non fidata qualcuno potrebbe vederlo: usa questa strada solo a casa tua.",
-   "en": "So that you are not asked for the password again, the address contains a one-time code valid for 15 minutes and tied to this computer. On an untrusted local network someone could see it: use this way only at home.",
-   "es": "Para no pedirte de nuevo la contraseña, la dirección contiene un código de un solo uso válido 15 minutos y ligado a este ordenador. En una red local no fiable alguien podría verlo: usa esta vía solo en casa.",
-   "de": "Damit du das Passwort nicht erneut eingeben musst, enthält die Adresse einen Einmalcode, 15 Minuten gültig und an diesen Computer gebunden. In einem nicht vertrauenswürdigen lokalen Netz könnte ihn jemand sehen: nutze diesen Weg nur zu Hause.",
+   "it": "Per non chiederti di nuovo la password, l'indirizzo contiene un codice monouso valido 15 minuti. Su una rete locale non fidata qualcuno potrebbe vederlo: usa questa strada solo a casa tua.",
+   "en": "So that you are not asked for the password again, the address contains a one-time code valid for 15 minutes. On an untrusted local network someone could see it: use this way only at home.",
+   "es": "Para no pedirte de nuevo la contraseña, la dirección contiene un código de un solo uso válido 15 minutos. En una red local no fiable alguien podría verlo: usa esta vía solo en casa.",
+   "de": "Damit du das Passwort nicht erneut eingeben musst, enthält die Adresse einen Einmalcode, 15 Minuten gültig. In einem nicht vertrauenswürdigen lokalen Netz könnte ihn jemand sehen: nutze diesen Weg nur zu Hause.",
    "scope": "web",
-   "zh": "为了避免再次询问密码，地址中包含一个有效的单用代码，有效期为 15 分钟，并与此计算机绑定。在不安全的本地网络上，有人可能会看到它：仅在您的家中使用此方法。"
+   "zh": "为了避免再次询问密码，地址中包含一个有效的单用代码，有效期为 15 分钟。在不安全的本地网络上，有人可能会看到它：仅在您的家中使用此方法。"
   },
   {
    "it": "Riavvia e aggiorna",
@@ -23246,12 +23214,12 @@
    "zh": "从电脑打开：http://%s/#g=%s"
   },
   {
-   "it": "Codice monouso valido 15 minuti, legato a questo computer: non condividerlo. Non verra mostrato di nuovo.",
-   "en": "Single-use code valid for 15 minutes, tied to this computer: do not share it. It will not be shown again.",
-   "es": "Codigo de un solo uso valido 15 minutos, ligado a este ordenador: no lo compartas. No se mostrara de nuevo.",
-   "de": "Einmalcode, 15 Minuten gueltig, an diesen Computer gebunden: nicht weitergeben. Er wird nicht noch einmal angezeigt.",
+   "it": "Codice monouso valido 15 minuti: non condividerlo. Non verra mostrato di nuovo.",
+   "en": "Single-use code valid for 15 minutes: do not share it. It will not be shown again.",
+   "es": "Codigo de un solo uso valido 15 minutos: no lo compartas. No se mostrara de nuevo.",
+   "de": "Einmalcode, 15 Minuten gueltig: nicht weitergeben. Er wird nicht noch einmal angezeigt.",
    "scope": "fw",
-   "zh": "有效的单用码有效期 15 分钟，绑定此电脑：勿共享。将不再显示。"
+   "zh": "有效的单用码有效期 15 分钟：勿共享。将不再显示。"
   },
   {
    "it": "Uso: vesevos-update net <url-https> <sha256> [versione]   (solo indirizzi consentiti; lo SHA-256 sono 64 cifre esadecimali)",
@@ -24254,12 +24222,12 @@
    "zh": "重复的子命令"
   },
   {
-   "it": "Sezione sconosciuta (ammesse: module, signals, icon, wiring, pins, page, code, data, commands, cmd, widget)",
-   "en": "Unknown section (allowed: module, signals, icon, wiring, pins, page, code, data, commands, cmd, widget)",
-   "es": "Seccion desconocida (permitidas: module, signals, icon, wiring, pins, page, code, data, commands, cmd, widget)",
-   "de": "Unbekannter Abschnitt (erlaubt: module, signals, icon, wiring, pins, page, code, data, commands, cmd, widget)",
+   "it": "Sezione sconosciuta (ammesse: module, signals, icon, wiring, pins, griglia, page, code, data, commands, cmd, widget)",
+   "en": "Unknown section (allowed: module, signals, icon, wiring, pins, griglia, page, code, data, commands, cmd, widget)",
+   "es": "Seccion desconocida (permitidas: module, signals, icon, wiring, pins, griglia, page, code, data, commands, cmd, widget)",
+   "de": "Unbekannter Abschnitt (erlaubt: module, signals, icon, wiring, pins, griglia, page, code, data, commands, cmd, widget)",
    "scope": "fw",
-   "zh": "未知部分（允许：module、signals、icon、wiring、pins、page、code、data、commands、cmd、widget）"
+   "zh": "未知段落（允许：module, signals, icon, wiring, pins, griglia, page, code, data, commands, cmd, widget）"
   },
   {
    "it": "Titolo del widget: 1-32 caratteri ASCII, senza < > virgolette o barra",
@@ -27124,6 +27092,22 @@
    "de": "Prüfung läuft...",
    "scope": "web",
    "zh": "正在检查..."
+  },
+  {
+   "it": "Attendere...",
+   "en": "Please wait...",
+   "es": "Espera...",
+   "de": "Bitte warten...",
+   "scope": "web",
+   "zh": "请稍候..."
+  },
+  {
+   "it": "Il sonno leggero e sospeso: lo standby usa il sonno profondo e la scheda riparte da capo al risveglio",
+   "en": "Light sleep is suspended: standby uses deep sleep and the board restarts from scratch on wake-up",
+   "es": "El sueno ligero esta suspendido: el standby usa el sueno profundo y la placa arranca de cero al despertar",
+   "de": "Der leichte Schlaf ist ausgesetzt: Standby nutzt den Tiefschlaf und das Board startet beim Aufwachen neu",
+   "scope": "fw",
+   "zh": "\u8f7b\u5ea6\u4f11\u7720\u5df2\u6682\u505c\uff1a\u5f85\u673a\u4f7f\u7528\u6df1\u5ea6\u4f11\u7720\uff0c\u5524\u9192\u65f6\u677f\u5b50\u4f1a\u4ece\u5934\u542f\u52a8"
   },
   {
    "it": "Esito",
@@ -30748,6 +30732,2486 @@
    "de": "Version",
    "scope": "web",
    "zh": "版本"
+  },
+  {
+   "it": "Caricamento interrotto: la scheda ha poca memoria libera. Riprova tra qualche secondo.",
+   "en": "Upload interrupted: the board has little free memory. Try again in a few seconds.",
+   "es": "Carga interrumpida: la placa tiene poca memoria libre. Vuelve a intentarlo en unos segundos.",
+   "de": "Hochladen unterbrochen: Die Platine hat wenig freien Speicher. Versuche es in ein paar Sekunden erneut.",
+   "scope": "fw",
+   "zh": "上传中断：板子的可用内存很少。请几秒后重试。"
+  },
+  {
+   "it": "Pezzo del file fuori posto",
+   "en": "File piece out of place",
+   "es": "Trozo del archivo fuera de lugar",
+   "de": "Dateiteil an falscher Stelle",
+   "scope": "fw",
+   "zh": "文件分块位置不对"
+  },
+  {
+   "it": "Pezzo del file troppo grande",
+   "en": "File piece too large",
+   "es": "Trozo del archivo demasiado grande",
+   "de": "Dateiteil zu gross",
+   "scope": "fw",
+   "zh": "文件分块太大"
+  },
+  {
+   "it": "Dominio della rete",
+   "en": "Network domain",
+   "es": "Dominio de la red",
+   "de": "Netzwerk-Domain",
+   "scope": "web",
+   "zh": "网络域名"
+  },
+  {
+   "it": "Il router non ne comunica uno",
+   "en": "The router does not provide one",
+   "es": "El router no proporciona ninguno",
+   "de": "Der Router liefert keine",
+   "scope": "web",
+   "zh": "路由器未提供"
+  },
+  {
+   "it": "Arancio",
+   "en": "Orange",
+   "es": "Naranja",
+   "de": "Orange",
+   "scope": "web",
+   "zh": "橙色"
+  },
+  {
+   "it": "Bianco",
+   "en": "White",
+   "es": "Blanco",
+   "de": "Weiss",
+   "scope": "web",
+   "zh": "白色"
+  },
+  {
+   "it": "Blu",
+   "en": "Blue",
+   "es": "Azul",
+   "de": "Blau",
+   "scope": "web",
+   "zh": "蓝色"
+  },
+  {
+   "it": "Rosso",
+   "en": "Red",
+   "es": "Rojo",
+   "de": "Rot",
+   "scope": "web",
+   "zh": "红色"
+  },
+  {
+   "it": "Verde",
+   "en": "Green",
+   "es": "Verde",
+   "de": "Gruen",
+   "scope": "web",
+   "zh": "绿色"
+  },
+  {
+   "it": "Giallo",
+   "en": "Yellow",
+   "es": "Amarillo",
+   "de": "Gelb",
+   "scope": "web",
+   "zh": "黄色"
+  },
+  {
+   "it": "Collegamento in corso",
+   "en": "Connecting",
+   "es": "Conectando",
+   "de": "Verbindung laeuft",
+   "scope": "web",
+   "zh": "正在连接"
+  },
+  {
+   "it": "Collegato alla rete",
+   "en": "Connected to the network",
+   "es": "Conectado a la red",
+   "de": "Mit dem Netzwerk verbunden",
+   "scope": "web",
+   "zh": "已连接到网络"
+  },
+  {
+   "it": "Correzione dei canali (255 = nessuna correzione)",
+   "en": "Channel correction (255 = no correction)",
+   "es": "Correccion de canales (255 = sin correccion)",
+   "de": "Kanalkorrektur (255 = keine Korrektur)",
+   "scope": "web",
+   "zh": "通道校正（255 = 不校正）"
+  },
+  {
+   "it": "Fine prova",
+   "en": "End test",
+   "es": "Fin de la prueba",
+   "de": "Test beenden",
+   "scope": "web",
+   "zh": "结束测试"
+  },
+  {
+   "it": "Hotspot acceso",
+   "en": "Hotspot on",
+   "es": "Punto de acceso encendido",
+   "de": "Hotspot an",
+   "scope": "web",
+   "zh": "热点已开启"
+  },
+  {
+   "it": "Le correzioni e le tonalita vanno con il tasto Salva e le cambia solo l'amministratore. Valgono per tutti i colori del LED.",
+   "en": "Corrections and tones are stored with the Save button and only the administrator can change them. They apply to every LED colour.",
+   "es": "Las correcciones y los tonos se guardan con el boton Guardar y solo los cambia el administrador. Valen para todos los colores del LED.",
+   "de": "Korrekturen und Farbtoene werden mit Speichern uebernommen und nur der Administrator kann sie aendern. Sie gelten fuer alle LED-Farben.",
+   "scope": "web",
+   "zh": "校正和色调通过“保存”按钮保存，仅管理员可更改。适用于LED的所有颜色。"
+  },
+  {
+   "it": "Modalita aereo",
+   "en": "Airplane mode",
+   "es": "Modo avion",
+   "de": "Flugmodus",
+   "scope": "web",
+   "zh": "飞行模式"
+  },
+  {
+   "it": "Prima accensione, in attesa",
+   "en": "First start, waiting",
+   "es": "Primer encendido, en espera",
+   "de": "Erster Start, wartet",
+   "scope": "web",
+   "zh": "首次开机，等待中"
+  },
+  {
+   "it": "Prova i colori sul LED, correggi i canali se un colore tira troppo verso un altro e scegli la tonalita di ogni stato. Ogni prova dura 20 secondi.",
+   "en": "Try the colours on the LED, correct the channels if a colour leans too much toward another, and choose the tone of each state. Each test lasts 20 seconds.",
+   "es": "Prueba los colores en el LED, corrige los canales si un color tira demasiado hacia otro y elige el tono de cada estado. Cada prueba dura 20 segundos.",
+   "de": "Probiere die Farben an der LED aus, korrigiere die Kanaele, wenn eine Farbe zu stark in eine andere kippt, und waehle den Farbton jedes Zustands. Jeder Test dauert 20 Sekunden.",
+   "scope": "web",
+   "zh": "在LED上试验颜色；如果某种颜色偏向另一种，请校正通道，并为每个状态选择色调。每次测试持续20秒。"
+  },
+  {
+   "it": "Test e calibrazione",
+   "en": "Test and calibration",
+   "es": "Prueba y calibracion",
+   "de": "Test und Kalibrierung",
+   "scope": "web",
+   "zh": "测试与校准"
+  },
+  {
+   "it": "Tonalita degli stati",
+   "en": "State tones",
+   "es": "Tonos de los estados",
+   "de": "Farbtoene der Zustaende",
+   "scope": "web",
+   "zh": "状态色调"
+  },
+  {
+   "it": "Valori di fabbrica",
+   "en": "Factory values",
+   "es": "Valores de fabrica",
+   "de": "Werkseinstellungen",
+   "scope": "web",
+   "zh": "出厂值"
+  },
+  {
+   "it": "Questa scheda non ha un LED a colori",
+   "en": "This board has no colour LED",
+   "es": "Esta placa no tiene LED de color",
+   "de": "Diese Platine hat keine Farb-LED",
+   "scope": "fw",
+   "zh": "此板没有彩色LED"
+  },
+  {
+   "it": "Carica un tema",
+   "en": "Upload a theme",
+   "es": "Cargar un tema",
+   "de": "Thema hochladen",
+   "scope": "web",
+   "zh": "上传主题"
+  },
+  {
+   "it": "Di fabbrica",
+   "en": "Factory",
+   "es": "De fabrica",
+   "de": "Werkseinstellung",
+   "scope": "web",
+   "zh": "出厂"
+  },
+  {
+   "it": "Il tema contiene qualcosa di non permesso (@import, url(), barra rovesciata o <)",
+   "en": "The theme contains something not allowed (@import, url(), backslash or <)",
+   "es": "El tema contiene algo no permitido (@import, url(), barra invertida o <)",
+   "de": "Das Thema enthaelt etwas Unzulaessiges (@import, url(), Backslash oder <)",
+   "scope": "web",
+   "zh": "主题包含不允许的内容（@import、url()、反斜杠或 <）"
+  },
+  {
+   "it": "Il tema e troppo grande (32 KB al massimo)",
+   "en": "The theme is too large (32 KB at most)",
+   "es": "El tema es demasiado grande (32 KB como maximo)",
+   "de": "Das Thema ist zu gross (hoechstens 32 KB)",
+   "scope": "web",
+   "zh": "主题太大（最多 32 KB）"
+  },
+  {
+   "it": "Rifiutato dalla scheda: resta quello di fabbrica",
+   "en": "Rejected by the board: the factory one stays",
+   "es": "Rechazado por la placa: se queda el de fabrica",
+   "de": "Von der Platine abgelehnt: es bleibt das Werksthema",
+   "scope": "web",
+   "zh": "板卡已拒绝：保留出厂主题"
+  },
+  {
+   "it": "Tema caricato: ricarico la pagina",
+   "en": "Theme uploaded: reloading the page",
+   "es": "Tema cargado: recargo la pagina",
+   "de": "Thema hochgeladen: Seite wird neu geladen",
+   "scope": "web",
+   "zh": "主题已上传：正在重新加载页面"
+  },
+  {
+   "it": "Tema della pagina",
+   "en": "Page theme",
+   "es": "Tema de la pagina",
+   "de": "Thema der Seite",
+   "scope": "web",
+   "zh": "页面主题"
+  },
+  {
+   "it": "Tema di fabbrica",
+   "en": "Factory theme",
+   "es": "Tema de fabrica",
+   "de": "Werksthema",
+   "scope": "web",
+   "zh": "出厂主题"
+  },
+  {
+   "it": "Tema di fabbrica: ricarico la pagina",
+   "en": "Factory theme: reloading the page",
+   "es": "Tema de fabrica: recargo la pagina",
+   "de": "Werksthema: Seite wird neu geladen",
+   "scope": "web",
+   "zh": "出厂主题：正在重新加载页面"
+  },
+  {
+   "it": "Tema in uso",
+   "en": "Theme in use",
+   "es": "Tema en uso",
+   "de": "Aktives Thema",
+   "scope": "web",
+   "zh": "当前主题"
+  },
+  {
+   "it": "Un file di stile (.css) cambia l'aspetto di questa pagina senza aggiornare il firmware. Vale per tutti i browser che aprono questa scheda. Colori, raggi e forma dei bottoni si cambiano; immagini, caratteri scaricati e indirizzi esterni no (sono rifiutati @import, url(), la barra rovesciata e il carattere <). Al massimo 32 KB.",
+   "en": "A style file (.css) changes the look of this page without updating the firmware. It applies to every browser that opens this board. Colours, radii and button shape can change; images, downloaded fonts and external addresses cannot (@import, url(), the backslash and the < character are rejected). 32 KB at most.",
+   "es": "Un archivo de estilo (.css) cambia el aspecto de esta pagina sin actualizar el firmware. Vale para todos los navegadores que abren esta placa. Se pueden cambiar colores, radios y forma de los botones; imagenes, fuentes descargadas y direcciones externas no (se rechazan @import, url(), la barra invertida y el caracter <). 32 KB como maximo.",
+   "de": "Eine Stildatei (.css) aendert das Aussehen dieser Seite, ohne die Firmware zu aktualisieren. Sie gilt fuer jeden Browser, der diese Platine oeffnet. Farben, Radien und Tastenform lassen sich aendern; Bilder, geladene Schriften und externe Adressen nicht (abgelehnt werden @import, url(), der Backslash und das Zeichen <). Hoechstens 32 KB.",
+   "scope": "web",
+   "zh": "样式文件（.css）无需更新固件即可更改此页面的外观。适用于打开此板卡的所有浏览器。可更改颜色、圆角和按钮形状；图片、下载的字体和外部地址不可用（@import、url()、反斜杠和 < 字符会被拒绝）。最大 32 KB。"
+  },
+  {
+   "it": " nessuna",
+   "en": " none",
+   "es": " ninguna",
+   "de": " keine",
+   "scope": "fw",
+   "zh": " 无"
+  },
+  {
+   "it": "Alcuni file non si sono cancellati",
+   "en": "Some files were not deleted",
+   "es": "Algunos archivos no se borraron",
+   "de": "Einige Dateien wurden nicht geloescht",
+   "scope": "fw",
+   "zh": "部分文件未能删除"
+  },
+  {
+   "it": "Dati del registratore cancellati.",
+   "en": "Recorder data deleted.",
+   "es": "Datos del registrador borrados.",
+   "de": "Daten des Rekorders geloescht.",
+   "scope": "fw",
+   "zh": "记录器数据已删除。"
+  },
+  {
+   "it": "Di fabbrica e spento. 'rec set' cambia intervallo, posto (flash o sd), spazio massimo e fonti; 'rec clear' cancella i dati.",
+   "en": "Off by default. 'rec set' changes interval, place (flash or sd), maximum space and sources; 'rec clear' deletes the data.",
+   "es": "Apagado de fabrica. 'rec set' cambia intervalo, lugar (flash o sd), espacio maximo y fuentes; 'rec clear' borra los datos.",
+   "de": "Werkseitig aus. 'rec set' aendert Intervall, Ort (Flash oder SD), maximalen Platz und Quellen; 'rec clear' loescht die Daten.",
+   "scope": "fw",
+   "zh": "出厂时关闭。'rec set' 可更改间隔、位置（flash 或 sd）、最大空间和数据源；'rec clear' 删除数据。"
+  },
+  {
+   "it": "Di fabbrica e spento. 'rec set' cambia intervallo, posto (flash o sd), spazio massimo e fonti; 'rec clear' cancella i dati.",
+   "en": "Off by default. 'rec set' changes interval, place (flash or sd), maximum space and sources; 'rec clear' deletes the data.",
+   "es": "Apagado de fabrica. 'rec set' cambia intervalo, lugar (flash o sd), espacio maximo y fuentes; 'rec clear' borra los datos.",
+   "de": "Werkseitig aus. 'rec set' aendert Intervall, Ort (Flash oder SD), maximalen Platz und Quellen; 'rec clear' loescht die Daten.",
+   "scope": "web",
+   "zh": "出厂时关闭。'rec set' 可更改间隔、位置（flash 或 sd）、最大空间和数据源；'rec clear' 删除数据。"
+  },
+  {
+   "it": "Impossibile scrivere il file del registratore",
+   "en": "Cannot write the recorder file",
+   "es": "No se puede escribir el archivo del registrador",
+   "de": "Die Datei des Rekorders kann nicht geschrieben werden",
+   "scope": "fw",
+   "zh": "无法写入记录器文件"
+  },
+  {
+   "it": "Intervallo: da 1 secondo a 24 ore",
+   "en": "Interval: from 1 second to 24 hours",
+   "es": "Intervalo: de 1 segundo a 24 horas",
+   "de": "Intervall: von 1 Sekunde bis 24 Stunden",
+   "scope": "fw",
+   "zh": "间隔：1 秒到 24 小时"
+  },
+  {
+   "it": "Motore: task del firmware",
+   "en": "Engine: firmware task",
+   "es": "Motor: tarea del firmware",
+   "de": "Motor: Task der Firmware",
+   "scope": "fw",
+   "zh": "引擎：固件任务"
+  },
+  {
+   "it": "Motore: task del firmware",
+   "en": "Engine: firmware task",
+   "es": "Motor: tarea del firmware",
+   "de": "Motor: Task der Firmware",
+   "scope": "web",
+   "zh": "引擎：固件任务"
+  },
+  {
+   "it": "Periferica ripetuta",
+   "en": "Peripheral repeated",
+   "es": "Periferico repetido",
+   "de": "Peripherie doppelt",
+   "scope": "fw",
+   "zh": "外设重复"
+  },
+  {
+   "it": "Poco spazio libero: il registratore non scrive",
+   "en": "Low free space: the recorder does not write",
+   "es": "Poco espacio libre: el registrador no escribe",
+   "de": "Wenig freier Platz: der Rekorder schreibt nicht",
+   "scope": "fw",
+   "zh": "可用空间不足：记录器不写入"
+  },
+  {
+   "it": "Posto non valido",
+   "en": "Invalid place",
+   "es": "Lugar no valido",
+   "de": "Ungueltiger Ort",
+   "scope": "fw",
+   "zh": "位置无效"
+  },
+  {
+   "it": "Registratore di dati: ogni tot secondi legge le fonti scelte (periferiche, temperatura, RAM) e scrive una riga CSV su flash o microSD.",
+   "en": "Data recorder: every so many seconds it reads the chosen sources (peripherals, temperature, RAM) and writes a CSV row to flash or microSD.",
+   "es": "Registrador de datos: cada cierto numero de segundos lee las fuentes elegidas (perifericos, temperatura, RAM) y escribe una fila CSV en flash o microSD.",
+   "de": "Datenrekorder: alle paar Sekunden liest er die gewaehlten Quellen (Peripherie, Temperatur, RAM) und schreibt eine CSV-Zeile auf Flash oder microSD.",
+   "scope": "fw",
+   "zh": "数据记录器：每隔若干秒读取所选数据源（外设、温度、RAM），并向 flash 或 microSD 写入一行 CSV。"
+  },
+  {
+   "it": "Registratore di dati: ogni tot secondi legge le fonti scelte (periferiche, temperatura, RAM) e scrive una riga CSV su flash o microSD.",
+   "en": "Data recorder: every so many seconds it reads the chosen sources (peripherals, temperature, RAM) and writes a CSV row to flash or microSD.",
+   "es": "Registrador de datos: cada cierto numero de segundos lee las fuentes elegidas (perifericos, temperatura, RAM) y escribe una fila CSV en flash o microSD.",
+   "de": "Datenrekorder: alle paar Sekunden liest er die gewaehlten Quellen (Peripherie, Temperatur, RAM) und schreibt eine CSV-Zeile auf Flash oder microSD.",
+   "scope": "web",
+   "zh": "数据记录器：每隔若干秒读取所选数据源（外设、温度、RAM），并向 flash 或 microSD 写入一行 CSV。"
+  },
+  {
+   "it": "Registratore: %s, un campione ogni %u s, salva su %s (%s)",
+   "en": "Recorder: %s, one sample every %u s, saves to %s (%s)",
+   "es": "Registrador: %s, una muestra cada %u s, guarda en %s (%s)",
+   "de": "Rekorder: %s, ein Messwert alle %u s, speichert auf %s (%s)",
+   "scope": "fw",
+   "zh": "记录器：%s，每 %u 秒一个样本，保存到 %s (%s)"
+  },
+  {
+   "it": "Scegli almeno una fonte",
+   "en": "Choose at least one source",
+   "es": "Elige al menos una fuente",
+   "de": "Waehle mindestens eine Quelle",
+   "scope": "fw",
+   "zh": "请至少选择一个数据源"
+  },
+  {
+   "it": "Spazio massimo non valido",
+   "en": "Invalid maximum space",
+   "es": "Espacio maximo no valido",
+   "de": "Ungueltiger maximaler Platz",
+   "scope": "fw",
+   "zh": "最大空间无效"
+  },
+  {
+   "it": "Sulla memoria interna l'intervallo parte da 10 secondi",
+   "en": "On the internal memory the interval starts at 10 seconds",
+   "es": "En la memoria interna el intervalo empieza en 10 segundos",
+   "de": "Im internen Speicher beginnt das Intervall bei 10 Sekunden",
+   "scope": "fw",
+   "zh": "在内部存储器上，间隔最少为 10 秒"
+  },
+  {
+   "it": "Uso: rec set dev <1-4> <nome periferica|->",
+   "en": "Usage: rec set dev <1-4> <peripheral name|->",
+   "es": "Uso: rec set dev <1-4> <nombre del periferico|->",
+   "de": "Verwendung: rec set dev <1-4> <Name der Peripherie|->",
+   "scope": "fw",
+   "zh": "用法：rec set dev <1-4> <外设名称|->"
+  },
+  {
+   "it": "memoria interna",
+   "en": "internal memory",
+   "es": "memoria interna",
+   "de": "interner Speicher",
+   "scope": "fw",
+   "zh": "内部存储器"
+  },
+  {
+   "it": "(nessuna)",
+   "en": "(none)",
+   "es": "(ninguna)",
+   "de": "(keine)",
+   "scope": "web",
+   "zh": "（无）"
+  },
+  {
+   "it": "Acceso",
+   "en": "On",
+   "es": "Encendido",
+   "de": "Ein",
+   "scope": "web",
+   "zh": "开"
+  },
+  {
+   "it": "Capacita dichiarate del chip: coprocessore ULP {0}, CPU a basso consumo {1}, contatore di impulsi {2}, memoria che resta accesa {3} byte",
+   "en": "Declared chip capabilities: ULP coprocessor {0}, low-power CPU {1}, pulse counter {2}, always-on memory {3} bytes",
+   "es": "Capacidades declaradas del chip: coprocesador ULP {0}, CPU de bajo consumo {1}, contador de pulsos {2}, memoria siempre encendida {3} bytes",
+   "de": "Angegebene Faehigkeiten des Chips: ULP-Coprozessor {0}, Low-Power-CPU {1}, Impulszaehler {2}, dauerhaft versorgter Speicher {3} Byte",
+   "scope": "web",
+   "zh": "芯片声明的能力：ULP 协处理器 {0}，低功耗 CPU {1}，脉冲计数器 {2}，常供电内存 {3} 字节"
+  },
+  {
+   "it": "Dati salvati",
+   "en": "Saved data",
+   "es": "Datos guardados",
+   "de": "Gespeicherte Daten",
+   "scope": "web",
+   "zh": "已保存的数据"
+  },
+  {
+   "it": "Dove salvare",
+   "en": "Where to save",
+   "es": "Donde guardar",
+   "de": "Speicherort",
+   "scope": "web",
+   "zh": "保存位置"
+  },
+  {
+   "it": "Fonti",
+   "en": "Sources",
+   "es": "Fuentes",
+   "de": "Quellen",
+   "scope": "web",
+   "zh": "数据源"
+  },
+  {
+   "it": "Grafico",
+   "en": "Chart",
+   "es": "Grafico",
+   "de": "Diagramm",
+   "scope": "web",
+   "zh": "图表"
+  },
+  {
+   "it": "Impostazioni del registratore",
+   "en": "Recorder settings",
+   "es": "Ajustes del registrador",
+   "de": "Einstellungen des Rekorders",
+   "scope": "web",
+   "zh": "记录器设置"
+  },
+  {
+   "it": "Nessun file in {0}",
+   "en": "No files in {0}",
+   "es": "Ningun archivo en {0}",
+   "de": "Keine Dateien in {0}",
+   "scope": "web",
+   "zh": "{0} 中没有文件"
+  },
+  {
+   "it": "Nessun punto ancora",
+   "en": "No points yet",
+   "es": "Aun no hay puntos",
+   "de": "Noch keine Punkte",
+   "scope": "web",
+   "zh": "暂无数据点"
+  },
+  {
+   "it": "Ogni tanto legge le fonti scelte (periferiche, temperatura del chip, RAM libera) e scrive una riga in un file CSV, sulla memoria interna o sulla microSD. Parte spento. Le righe si scrivono a blocchi per non consumare la memoria.",
+   "en": "From time to time it reads the chosen sources (peripherals, chip temperature, free RAM) and writes a row to a CSV file, on the internal memory or on the microSD. It starts off. Rows are written in blocks to avoid wearing out the memory.",
+   "es": "De vez en cuando lee las fuentes elegidas (perifericos, temperatura del chip, RAM libre) y escribe una fila en un archivo CSV, en la memoria interna o en la microSD. Empieza apagado. Las filas se escriben por bloques para no desgastar la memoria.",
+   "de": "Von Zeit zu Zeit liest er die gewaehlten Quellen (Peripherie, Chip-Temperatur, freier RAM) und schreibt eine Zeile in eine CSV-Datei, im internen Speicher oder auf der microSD. Er startet ausgeschaltet. Die Zeilen werden blockweise geschrieben, um den Speicher zu schonen.",
+   "scope": "web",
+   "zh": "定期读取所选数据源（外设、芯片温度、可用 RAM），并向内部存储器或 microSD 上的 CSV 文件写入一行。默认关闭。数据分块写入，以减少存储器磨损。"
+  },
+  {
+   "it": "Periferica 1",
+   "en": "Peripheral 1",
+   "es": "Periferico 1",
+   "de": "Peripherie 1",
+   "scope": "web",
+   "zh": "外设 1"
+  },
+  {
+   "it": "Periferica 2",
+   "en": "Peripheral 2",
+   "es": "Periferico 2",
+   "de": "Peripherie 2",
+   "scope": "web",
+   "zh": "外设 2"
+  },
+  {
+   "it": "Periferica 3",
+   "en": "Peripheral 3",
+   "es": "Periferico 3",
+   "de": "Peripherie 3",
+   "scope": "web",
+   "zh": "外设 3"
+  },
+  {
+   "it": "Periferica 4",
+   "en": "Peripheral 4",
+   "es": "Periferico 4",
+   "de": "Peripherie 4",
+   "scope": "web",
+   "zh": "外设 4"
+  },
+  {
+   "it": "RAM libera",
+   "en": "Free RAM",
+   "es": "RAM libre",
+   "de": "Freier RAM",
+   "scope": "web",
+   "zh": "可用 RAM"
+  },
+  {
+   "it": "Registratore",
+   "en": "Recorder",
+   "es": "Registrador",
+   "de": "Rekorder",
+   "scope": "web",
+   "zh": "记录器"
+  },
+  {
+   "it": "Sulla memoria interna: da 10 secondi a 24 ore, spazio fino a 1024 KB.",
+   "en": "On the internal memory: from 10 seconds to 24 hours, space up to 1024 KB.",
+   "es": "En la memoria interna: de 10 segundos a 24 horas, espacio hasta 1024 KB.",
+   "de": "Im internen Speicher: von 10 Sekunden bis 24 Stunden, Platz bis 1024 KB.",
+   "scope": "web",
+   "zh": "内部存储器：10 秒到 24 小时，空间最多 1024 KB。"
+  },
+  {
+   "it": "Sulla microSD: da 1 secondo a 24 ore, spazio fino a 65535 KB.",
+   "en": "On the microSD: from 1 second to 24 hours, space up to 65535 KB.",
+   "es": "En la microSD: de 1 segundo a 24 horas, espacio hasta 65535 KB.",
+   "de": "Auf der microSD: von 1 Sekunde bis 24 Stunden, Platz bis 65535 KB.",
+   "scope": "web",
+   "zh": "microSD：1 秒到 24 小时，空间最多 65535 KB。"
+  },
+  {
+   "it": "{0} file in {1}, {2} byte in tutto",
+   "en": "{0} files in {1}, {2} bytes in total",
+   "es": "{0} archivos en {1}, {2} bytes en total",
+   "de": "{0} Dateien in {1}, insgesamt {2} Byte",
+   "scope": "web",
+   "zh": "{1} 中有 {0} 个文件，共 {2} 字节"
+  },
+  {
+   "it": "Azioni registrate: %lu, perse per coda piena: %lu, oltre il limite del giorno: %lu",
+   "en": "Actions recorded: %lu, lost because the queue was full: %lu, over the daily limit: %lu",
+   "es": "Acciones registradas: %lu, perdidas por cola llena: %lu, sobre el limite del dia: %lu",
+   "de": "Aufgezeichnete Aktionen: %lu, verloren wegen voller Warteschlange: %lu, ueber dem Tageslimit: %lu",
+   "scope": "fw",
+   "zh": "已记录动作：%lu，因队列已满丢失：%lu，超过每日上限：%lu"
+  },
+  {
+   "it": "Azioni tracciate:",
+   "en": "Tracked actions:",
+   "es": "Acciones seguidas:",
+   "de": "Verfolgte Aktionen:",
+   "scope": "fw",
+   "zh": "跟踪的动作："
+  },
+  {
+   "it": "Categorie di azioni non valide",
+   "en": "Invalid action categories",
+   "es": "Categorias de acciones no validas",
+   "de": "Ungueltige Aktionskategorien",
+   "scope": "fw",
+   "zh": "动作类别无效"
+  },
+  {
+   "it": "Fonti (ogni quanti secondi):",
+   "en": "Sources (every how many seconds):",
+   "es": "Fuentes (cada cuantos segundos):",
+   "de": "Quellen (alle wie viele Sekunden):",
+   "scope": "fw",
+   "zh": "数据源（每隔多少秒）："
+  },
+  {
+   "it": "Intervallo di una fonte: da 1 secondo a 24 ore, o 0 per quello predefinito",
+   "en": "Interval of a source: from 1 second to 24 hours, or 0 for the default",
+   "es": "Intervalo de una fuente: de 1 segundo a 24 horas, o 0 para el predeterminado",
+   "de": "Intervall einer Quelle: von 1 Sekunde bis 24 Stunden, oder 0 fuer den Standard",
+   "scope": "fw",
+   "zh": "数据源间隔：1 秒到 24 小时，0 表示默认值"
+  },
+  {
+   "it": "Intervallo di una fonte: da 10 secondi a 24 ore, o 0 per quello predefinito",
+   "en": "Interval of a source: from 10 seconds to 24 hours, or 0 for the default",
+   "es": "Intervalo de una fuente: de 10 segundos a 24 horas, o 0 para el predeterminado",
+   "de": "Intervall einer Quelle: von 10 Sekunden bis 24 Stunden, oder 0 fuer den Standard",
+   "scope": "fw",
+   "zh": "数据源间隔：10 秒到 24 小时，0 表示默认值"
+  },
+  {
+   "it": "Nessuna azione ancora",
+   "en": "No actions yet",
+   "es": "Aun no hay acciones",
+   "de": "Noch keine Aktionen",
+   "scope": "fw",
+   "zh": "暂无动作"
+  },
+  {
+   "it": "Spazio massimo %u KB per ogni file, punti in memoria %d",
+   "en": "Maximum space %u KB for each file, points in memory %d",
+   "es": "Espacio maximo %u KB por cada archivo, puntos en memoria %d",
+   "de": "Maximaler Platz %u KB pro Datei, Punkte im Speicher %d",
+   "scope": "fw",
+   "zh": "最大空间 %u KB（每个文件），内存中的点数 %d"
+  },
+  {
+   "it": "Spazio massimo %u KB per tutti i file, punti in memoria %d",
+   "en": "Maximum space %u KB for all files together, points in memory %d",
+   "es": "Espacio maximo %u KB para todos los archivos juntos, puntos en memoria %d",
+   "de": "Maximaler Platz %u KB fuer alle Dateien zusammen, Punkte im Speicher %d",
+   "scope": "fw",
+   "zh": "最大空间 %u KB（所有文件合计），内存中的点数 %d"
+  },
+  {
+   "it": "Tipo di limite non valido",
+   "en": "Invalid limit type",
+   "es": "Tipo de limite no valido",
+   "de": "Ungueltige Art der Begrenzung",
+   "scope": "fw",
+   "zh": "限制类型无效"
+  },
+  {
+   "it": "Uso: rec [status|azioni|on|off|clear|set ...]",
+   "en": "Usage: rec [status|azioni|on|off|clear|set ...]",
+   "es": "Uso: rec [status|azioni|on|off|clear|set ...]",
+   "de": "Verwendung: rec [status|azioni|on|off|clear|set ...]",
+   "scope": "fw",
+   "zh": "用法：rec [status|azioni|on|off|clear|set ...]"
+  },
+  {
+   "it": "Uso: rec set azioni <uscita,pwm,led,contatore,programma,riavvio,sonno,avvio,rete,servizio,sd|tutte|nessuna>",
+   "en": "Usage: rec set azioni <uscita,pwm,led,contatore,programma,riavvio,sonno,avvio,rete,servizio,sd|tutte|nessuna>",
+   "es": "Uso: rec set azioni <uscita,pwm,led,contatore,programma,riavvio,sonno,avvio,rete,servizio,sd|tutte|nessuna>",
+   "de": "Verwendung: rec set azioni <uscita,pwm,led,contatore,programma,riavvio,sonno,avvio,rete,servizio,sd|tutte|nessuna>",
+   "scope": "fw",
+   "zh": "用法：rec set azioni <uscita,pwm,led,contatore,programma,riavvio,sonno,avvio,rete,servizio,sd|tutte|nessuna>"
+  },
+  {
+   "it": "Uso: rec set interval <secondi> | where <flash|sd> | max <KB> | nome <nome> | limite <totale|file> | ogni <fonte> <secondi> | azioni <elenco> | evmax <righe> | temp <on|off> | ram <on|off> | dev <1-4> <nome|->",
+   "en": "Usage: rec set interval <seconds> | where <flash|sd> | max <KB> | nome <nome> | limite <totale|file> | ogni <source> <seconds> | azioni <list> | evmax <rows> | temp <on|off> | ram <on|off> | dev <1-4> <name|->",
+   "es": "Uso: rec set interval <segundos> | where <flash|sd> | max <KB> | nome <nome> | limite <totale|file> | ogni <fuente> <segundos> | azioni <lista> | evmax <filas> | temp <on|off> | ram <on|off> | dev <1-4> <nombre|->",
+   "de": "Verwendung: rec set interval <Sekunden> | where <flash|sd> | max <KB> | nome <nome> | limite <totale|file> | ogni <Quelle> <Sekunden> | azioni <Liste> | evmax <Zeilen> | temp <on|off> | ram <on|off> | dev <1-4> <Name|->",
+   "scope": "fw",
+   "zh": "用法：rec set interval <秒> | where <flash|sd> | max <KB> | nome <nome> | limite <totale|file> | ogni <数据源> <秒> | azioni <列表> | evmax <行数> | temp <on|off> | ram <on|off> | dev <1-4> <名称|->"
+  },
+  {
+   "it": "Uso: rec set limite <totale|file>",
+   "en": "Usage: rec set limite <totale|file>",
+   "es": "Uso: rec set limite <totale|file>",
+   "de": "Verwendung: rec set limite <totale|file>",
+   "scope": "fw",
+   "zh": "用法：rec set limite <totale|file>"
+  },
+  {
+   "it": "Uso: rec set ogni <1-4|temp|ram> <secondi, 0 = predefinito>",
+   "en": "Usage: rec set ogni <1-4|temp|ram> <seconds, 0 = default>",
+   "es": "Uso: rec set ogni <1-4|temp|ram> <segundos, 0 = predeterminado>",
+   "de": "Verwendung: rec set ogni <1-4|temp|ram> <Sekunden, 0 = Standard>",
+   "scope": "fw",
+   "zh": "用法：rec set ogni <1-4|temp|ram> <秒，0 = 默认>"
+  },
+  {
+   "it": "registratore di dati e azioni (grafico e file CSV)",
+   "en": "data and action recorder (chart and CSV files)",
+   "es": "registrador de datos y acciones (grafico y archivos CSV)",
+   "de": "Daten- und Aktionsrekorder (Diagramm und CSV-Dateien)",
+   "scope": "fw",
+   "zh": "数据与动作记录器（图表和 CSV 文件）"
+  },
+  {
+   "it": "0 = si usa l'intervallo predefinito. Una riga si scrive quando almeno una fonte e scaduta: le altre colonne restano vuote.",
+   "en": "0 = the default interval is used. A row is written when at least one source is due: the other columns stay empty.",
+   "es": "0 = se usa el intervalo predeterminado. Se escribe una fila cuando al menos una fuente ha vencido: las otras columnas quedan vacias.",
+   "de": "0 = es gilt das Standardintervall. Eine Zeile wird geschrieben, wenn mindestens eine Quelle faellig ist: die anderen Spalten bleiben leer.",
+   "scope": "web",
+   "zh": "0 = 使用默认间隔。至少有一个数据源到期时写入一行，其他列留空。"
+  },
+  {
+   "it": "Acceso: intervallo predefinito {0} secondi, {1} punti in memoria",
+   "en": "On: default interval {0} seconds, {1} points in memory",
+   "es": "Encendido: intervalo predeterminado {0} segundos, {1} puntos en memoria",
+   "de": "Ein: Standardintervall {0} Sekunden, {1} Punkte im Speicher",
+   "scope": "web",
+   "zh": "开启：默认间隔 {0} 秒，内存中有 {1} 个点"
+  },
+  {
+   "it": "Avvio e risvegli",
+   "en": "Start-ups and wake-ups",
+   "es": "Arranques y despertares",
+   "de": "Starts und Aufwachen",
+   "scope": "web",
+   "zh": "启动与唤醒"
+  },
+  {
+   "it": "Azioni da segnare",
+   "en": "Actions to record",
+   "es": "Acciones a registrar",
+   "de": "Aufzuzeichnende Aktionen",
+   "scope": "web",
+   "zh": "要记录的动作"
+  },
+  {
+   "it": "Contatore azzerato",
+   "en": "Counter reset",
+   "es": "Contador puesto a cero",
+   "de": "Zaehler zurueckgesetzt",
+   "scope": "web",
+   "zh": "计数器清零"
+  },
+  {
+   "it": "Il limite vale per",
+   "en": "The limit applies to",
+   "es": "El limite vale para",
+   "de": "Das Limit gilt fuer",
+   "scope": "web",
+   "zh": "限制适用于"
+  },
+  {
+   "it": "Intervallo predefinito (secondi)",
+   "en": "Default interval (seconds)",
+   "es": "Intervalo predeterminado (segundos)",
+   "de": "Standardintervall (Sekunden)",
+   "scope": "web",
+   "zh": "默认间隔（秒）"
+  },
+  {
+   "it": "Le azioni non si campionano: si segna l'ora in cui sono state eseguite (uscite, PWM, LED, contatore, programmi, riavvii, sonno, avvio, rete, servizi, microSD). Non si segnano accessi, password o nomi utente. Vanno nel file eventi.csv.",
+   "en": "Actions are not sampled: the time they were carried out is noted (outputs, PWM, LEDs, counter, programs, restarts, sleep, start-up, network, services, microSD). Logins, passwords and user names are not recorded. They go into the file eventi.csv.",
+   "es": "Las acciones no se muestrean: se anota la hora en que se ejecutaron (salidas, PWM, LED, contador, programas, reinicios, sueno, arranque, red, servicios, microSD). No se anotan accesos, contrasenas ni nombres de usuario. Van al archivo eventi.csv.",
+   "de": "Aktionen werden nicht abgetastet: es wird die Uhrzeit notiert, zu der sie ausgefuehrt wurden (Ausgaenge, PWM, LEDs, Zaehler, Programme, Neustarts, Schlaf, Start, Netzwerk, Dienste, microSD). Anmeldungen, Passwoerter und Benutzernamen werden nicht aufgezeichnet. Sie kommen in die Datei eventi.csv.",
+   "scope": "web",
+   "zh": "动作不做采样：只记录执行的时间（输出、PWM、LED、计数器、程序、重启、睡眠、启动、网络、服务、microSD）。不记录登录、密码或用户名。数据写入文件 eventi.csv。"
+  },
+  {
+   "it": "Nessuna azione ancora",
+   "en": "No actions yet",
+   "es": "Aun no hay acciones",
+   "de": "Noch keine Aktionen",
+   "scope": "web",
+   "zh": "暂无动作"
+  },
+  {
+   "it": "Ogni quanto leggere ogni fonte",
+   "en": "How often to read each source",
+   "es": "Cada cuanto leer cada fuente",
+   "de": "Wie oft jede Quelle gelesen wird",
+   "scope": "web",
+   "zh": "每个数据源的读取间隔"
+  },
+  {
+   "it": "Ogni singolo file",
+   "en": "Each single file",
+   "es": "Cada archivo por separado",
+   "de": "Jede einzelne Datei",
+   "scope": "web",
+   "zh": "每个单独的文件"
+  },
+  {
+   "it": "Origine",
+   "en": "Origin",
+   "es": "Origen",
+   "de": "Herkunft",
+   "scope": "web",
+   "zh": "来源"
+  },
+  {
+   "it": "PWM",
+   "en": "PWM",
+   "es": "PWM",
+   "de": "PWM",
+   "scope": "web",
+   "zh": "PWM"
+  },
+  {
+   "it": "Periferica 1 (secondi)",
+   "en": "Peripheral 1 (seconds)",
+   "es": "Periferico 1 (segundos)",
+   "de": "Peripherie 1 (Sekunden)",
+   "scope": "web",
+   "zh": "外设 1（秒）"
+  },
+  {
+   "it": "Periferica 2 (secondi)",
+   "en": "Peripheral 2 (seconds)",
+   "es": "Periferico 2 (segundos)",
+   "de": "Peripherie 2 (Sekunden)",
+   "scope": "web",
+   "zh": "外设 2（秒）"
+  },
+  {
+   "it": "Periferica 3 (secondi)",
+   "en": "Peripheral 3 (seconds)",
+   "es": "Periferico 3 (segundos)",
+   "de": "Peripherie 3 (Sekunden)",
+   "scope": "web",
+   "zh": "外设 3（秒）"
+  },
+  {
+   "it": "Periferica 4 (secondi)",
+   "en": "Peripheral 4 (seconds)",
+   "es": "Periferico 4 (segundos)",
+   "de": "Peripherie 4 (Sekunden)",
+   "scope": "web",
+   "zh": "外设 4（秒）"
+  },
+  {
+   "it": "RAM libera (secondi)",
+   "en": "Free RAM (seconds)",
+   "es": "RAM libre (segundos)",
+   "de": "Freier RAM (Sekunden)",
+   "scope": "web",
+   "zh": "可用 RAM（秒）"
+  },
+  {
+   "it": "Rete (Wi-Fi e hotspot)",
+   "en": "Network (Wi-Fi and hotspot)",
+   "es": "Red (Wi-Fi y punto de acceso)",
+   "de": "Netzwerk (WLAN und Hotspot)",
+   "scope": "web",
+   "zh": "网络（Wi-Fi 和热点）"
+  },
+  {
+   "it": "Righe di azioni al giorno al massimo (0 = nessun limite)",
+   "en": "Maximum action rows per day (0 = no limit)",
+   "es": "Maximo de filas de acciones al dia (0 = sin limite)",
+   "de": "Höchstens Aktionszeilen pro Tag (0 = kein Limit)",
+   "scope": "web",
+   "zh": "每天最多动作行数（0 = 不限）"
+  },
+  {
+   "it": "Scarica CSV degli eventi",
+   "en": "Download the events CSV",
+   "es": "Descargar el CSV de eventos",
+   "de": "Ereignis-CSV herunterladen",
+   "scope": "web",
+   "zh": "下载事件 CSV"
+  },
+  {
+   "it": "Script, app e programmi",
+   "en": "Scripts, apps and programs",
+   "es": "Scripts, apps y programas",
+   "de": "Skripte, Apps und Programme",
+   "scope": "web",
+   "zh": "脚本、应用和程序"
+  },
+  {
+   "it": "Sonno profondo",
+   "en": "Deep sleep",
+   "es": "Sueno profundo",
+   "de": "Tiefschlaf",
+   "scope": "web",
+   "zh": "深度睡眠"
+  },
+  {
+   "it": "Spazio massimo (KB)",
+   "en": "Maximum space (KB)",
+   "es": "Espacio maximo (KB)",
+   "de": "Maximaler Platz (KB)",
+   "scope": "web",
+   "zh": "最大空间（KB）"
+  },
+  {
+   "it": "Temperatura del chip (secondi)",
+   "en": "Chip temperature (seconds)",
+   "es": "Temperatura del chip (segundos)",
+   "de": "Chip-Temperatur (Sekunden)",
+   "scope": "web",
+   "zh": "芯片温度（秒）"
+  },
+  {
+   "it": "Tutti i file della cartella insieme",
+   "en": "All the files in the folder together",
+   "es": "Todos los archivos de la carpeta juntos",
+   "de": "Alle Dateien des Ordners zusammen",
+   "scope": "web",
+   "zh": "文件夹中所有文件合计"
+  },
+  {
+   "it": "Uscite e rele",
+   "en": "Outputs and relays",
+   "es": "Salidas y reles",
+   "de": "Ausgaenge und Relais",
+   "scope": "web",
+   "zh": "输出和继电器"
+  },
+  {
+   "it": "avviato",
+   "en": "started",
+   "es": "iniciado",
+   "de": "gestartet",
+   "scope": "web",
+   "zh": "已启动"
+  },
+  {
+   "it": "finito con errore",
+   "en": "finished with an error",
+   "es": "terminado con error",
+   "de": "mit Fehler beendet",
+   "scope": "web",
+   "zh": "因错误结束"
+  },
+  {
+   "it": "formattata",
+   "en": "formatted",
+   "es": "formateada",
+   "de": "formatiert",
+   "scope": "web",
+   "zh": "已格式化"
+  },
+  {
+   "it": "pagina",
+   "en": "page",
+   "es": "pagina",
+   "de": "Seite",
+   "scope": "web",
+   "zh": "网页"
+  },
+  {
+   "it": "regola",
+   "en": "rule",
+   "es": "regla",
+   "de": "Regel",
+   "scope": "web",
+   "zh": "规则"
+  },
+  {
+   "it": "script",
+   "en": "script",
+   "es": "script",
+   "de": "Skript",
+   "scope": "web",
+   "zh": "脚本"
+  },
+  {
+   "it": "shell",
+   "en": "shell",
+   "es": "shell",
+   "de": "Shell",
+   "scope": "web",
+   "zh": "命令行"
+  },
+  {
+   "it": "smontata",
+   "en": "unmounted",
+   "es": "desmontada",
+   "de": "ausgehaengt",
+   "scope": "web",
+   "zh": "已卸载"
+  },
+  {
+   "it": "{0} azioni registrate dall'avvio, {1} perse per coda piena, {2} oltre il limite del giorno",
+   "en": "{0} actions recorded since start-up, {1} lost because the queue was full, {2} over the daily limit",
+   "es": "{0} acciones registradas desde el arranque, {1} perdidas por cola llena, {2} sobre el limite del dia",
+   "de": "{0} Aktionen seit dem Start aufgezeichnet, {1} wegen voller Warteschlange verloren, {2} ueber dem Tageslimit",
+   "scope": "web",
+   "zh": "自启动以来已记录 {0} 个动作，{1} 个因队列已满丢失，{2} 个超过每日上限"
+  },
+  {
+   "it": "Nome del file non valido",
+   "en": "Invalid file name",
+   "es": "Nombre de archivo no valido",
+   "de": "Ungueltiger Dateiname",
+   "scope": "fw",
+   "zh": "文件名无效"
+  },
+  {
+   "it": "Nome del file non valido: da 1 a 24 caratteri, solo lettere, numeri, _ e -",
+   "en": "Invalid file name: 1 to 24 characters, only letters, numbers, _ and -",
+   "es": "Nombre de archivo no valido: de 1 a 24 caracteres, solo letras, numeros, _ y -",
+   "de": "Ungueltiger Dateiname: 1 bis 24 Zeichen, nur Buchstaben, Ziffern, _ und -",
+   "scope": "fw",
+   "zh": "文件名无效：1 到 24 个字符，只能用字母、数字、_ 和 -"
+  },
+  {
+   "it": "Nome dei file: %s",
+   "en": "File name: %s",
+   "es": "Nombre de los archivos: %s",
+   "de": "Dateiname: %s",
+   "scope": "fw",
+   "zh": "文件名：%s"
+  },
+  {
+   "it": "Uso: rec set nome <nome del file, 1-24 caratteri: lettere, numeri, _ e ->",
+   "en": "Usage: rec set nome <file name, 1-24 characters: letters, numbers, _ and ->",
+   "es": "Uso: rec set nome <nombre del archivo, 1-24 caracteres: letras, numeros, _ y ->",
+   "de": "Verwendung: rec set nome <Dateiname, 1-24 Zeichen: Buchstaben, Ziffern, _ und ->",
+   "scope": "fw",
+   "zh": "用法：rec set nome <文件名，1-24 个字符：字母、数字、_ 和 ->"
+  },
+  {
+   "it": "Nome dei file (lettere, numeri, _ e -)",
+   "en": "File name (letters, numbers, _ and -)",
+   "es": "Nombre de los archivos (letras, numeros, _ y -)",
+   "de": "Dateiname (Buchstaben, Ziffern, _ und -)",
+   "scope": "web",
+   "zh": "文件名（字母、数字、_ 和 -）"
+  },
+  {
+   "it": "File del registratore",
+   "en": "Recorder files",
+   "es": "Archivos del registrador",
+   "de": "Dateien des Rekorders",
+   "scope": "web",
+   "zh": "记录器文件"
+  },
+  {
+   "it": "Seleziona tutti i file",
+   "en": "Select all files",
+   "es": "Seleccionar todos los archivos",
+   "de": "Alle Dateien auswaehlen",
+   "scope": "web",
+   "zh": "选择所有文件"
+  },
+  {
+   "it": "Seleziona {0}",
+   "en": "Select {0}",
+   "es": "Seleccionar {0}",
+   "de": "{0} auswaehlen",
+   "scope": "web",
+   "zh": "选择 {0}"
+  },
+  {
+   "it": "Data (dal nome)",
+   "en": "Date (from the name)",
+   "es": "Fecha (del nombre)",
+   "de": "Datum (aus dem Namen)",
+   "scope": "web",
+   "zh": "日期（来自文件名）"
+  },
+  {
+   "it": "altro nome",
+   "en": "other name",
+   "es": "otro nombre",
+   "de": "anderer Name",
+   "scope": "web",
+   "zh": "其他名称"
+  },
+  {
+   "it": "{0} file con un altro nome: non si contano nel limite e si tolgono solo da qui",
+   "en": "{0} files with another name: not counted in the limit, removed only from here",
+   "es": "{0} archivos con otro nombre: no cuentan en el limite, se quitan solo desde aqui",
+   "de": "{0} Dateien mit anderem Namen: zaehlen nicht zum Limit, werden nur von hier entfernt",
+   "scope": "web",
+   "zh": "{0} 个其他名称的文件：不计入限制，只能从这里删除"
+  },
+  {
+   "it": "{0} file selezionati",
+   "en": "{0} files selected",
+   "es": "{0} archivos seleccionados",
+   "de": "{0} Dateien ausgewaehlt",
+   "scope": "web",
+   "zh": "已选择 {0} 个文件"
+  },
+  {
+   "it": "Nessun file selezionato",
+   "en": "No file selected",
+   "es": "Ningun archivo seleccionado",
+   "de": "Keine Datei ausgewaehlt",
+   "scope": "web",
+   "zh": "未选择文件"
+  },
+  {
+   "it": "Scarico {0} file",
+   "en": "Downloading {0} files",
+   "es": "Descargando {0} archivos",
+   "de": "Lade {0} Dateien herunter",
+   "scope": "web",
+   "zh": "正在下载 {0} 个文件"
+  },
+  {
+   "it": "Eliminare i file selezionati?",
+   "en": "Delete the selected files?",
+   "es": "¿Eliminar los archivos seleccionados?",
+   "de": "Ausgewaehlte Dateien loeschen?",
+   "scope": "web",
+   "zh": "要删除所选文件吗？"
+  },
+  {
+   "it": "Si eliminano {0} file dalla cartella {1}.",
+   "en": "{0} files are deleted from the folder {1}.",
+   "es": "Se eliminan {0} archivos de la carpeta {1}.",
+   "de": "{0} Dateien werden aus dem Ordner {1} geloescht.",
+   "scope": "web",
+   "zh": "将从文件夹 {1} 删除 {0} 个文件。"
+  },
+  {
+   "it": "Non si sono eliminati {0} file: {1}",
+   "en": "{0} files were not deleted: {1}",
+   "es": "No se eliminaron {0} archivos: {1}",
+   "de": "{0} Dateien wurden nicht geloescht: {1}",
+   "scope": "web",
+   "zh": "有 {0} 个文件未删除：{1}"
+  },
+  {
+   "it": "Eliminati {0} file",
+   "en": "{0} files deleted",
+   "es": "{0} archivos eliminados",
+   "de": "{0} Dateien geloescht",
+   "scope": "web",
+   "zh": "已删除 {0} 个文件"
+  },
+  {
+   "it": "Scarica selezionati",
+   "en": "Download selected",
+   "es": "Descargar seleccionados",
+   "de": "Auswahl herunterladen",
+   "scope": "web",
+   "zh": "下载所选"
+  },
+  {
+   "it": "Elimina selezionati",
+   "en": "Delete selected",
+   "es": "Eliminar seleccionados",
+   "de": "Auswahl loeschen",
+   "scope": "web",
+   "zh": "删除所选"
+  },
+  {
+   "it": "Coprocessore",
+   "en": "Coprocessor",
+   "es": "Coprocesador",
+   "de": "Coprozessor",
+   "scope": "web",
+   "zh": "协处理器"
+  },
+  {
+   "it": "Memoria condivisa",
+   "en": "Shared memory",
+   "es": "Memoria compartida",
+   "de": "Gemeinsamer Speicher",
+   "scope": "web",
+   "zh": "共享内存"
+  },
+  {
+   "it": "Programma caricato",
+   "en": "Loaded program",
+   "es": "Programa cargado",
+   "de": "Geladenes Programm",
+   "scope": "web",
+   "zh": "已加载程序"
+  },
+  {
+   "it": "Ultimo risveglio",
+   "en": "Last wake-up",
+   "es": "Ultimo despertar",
+   "de": "Letztes Aufwachen",
+   "scope": "web",
+   "zh": "上次唤醒"
+  },
+  {
+   "it": "ULP (RISC-V o FSM)",
+   "en": "ULP (RISC-V or FSM)",
+   "es": "ULP (RISC-V o FSM)",
+   "de": "ULP (RISC-V oder FSM)",
+   "scope": "web",
+   "zh": "ULP（RISC-V 或 FSM）"
+  },
+  {
+   "it": "LP CPU (RISC-V)",
+   "en": "LP CPU (RISC-V)",
+   "es": "LP CPU (RISC-V)",
+   "de": "LP-CPU (RISC-V)",
+   "scope": "web",
+   "zh": "LP CPU（RISC-V）"
+  },
+  {
+   "it": "Nessun programma caricato",
+   "en": "No program loaded",
+   "es": "Ningun programa cargado",
+   "de": "Kein Programm geladen",
+   "scope": "web",
+   "zh": "未加载程序"
+  },
+  {
+   "it": "Accensione o riavvio (non dal sonno)",
+   "en": "Power-on or restart (not from sleep)",
+   "es": "Encendido o reinicio (no desde el sueno)",
+   "de": "Einschalten oder Neustart (nicht aus dem Schlaf)",
+   "scope": "web",
+   "zh": "上电或重启（非睡眠唤醒）"
+  },
+  {
+   "it": "Timer",
+   "en": "Timer",
+   "es": "Temporizador",
+   "de": "Timer",
+   "scope": "web",
+   "zh": "定时器"
+  },
+  {
+   "it": "Piedino (GPIO)",
+   "en": "Pin (GPIO)",
+   "es": "Pin (GPIO)",
+   "de": "Pin (GPIO)",
+   "scope": "web",
+   "zh": "引脚（GPIO）"
+  },
+  {
+   "it": "Sensore di tocco",
+   "en": "Touch sensor",
+   "es": "Sensor tactil",
+   "de": "Touch-Sensor",
+   "scope": "web",
+   "zh": "触摸传感器"
+  },
+  {
+   "it": "Porta seriale",
+   "en": "Serial port",
+   "es": "Puerto serie",
+   "de": "Serielle Schnittstelle",
+   "scope": "web",
+   "zh": "串口"
+  },
+  {
+   "it": "Altro",
+   "en": "Other",
+   "es": "Otro",
+   "de": "Andere",
+   "scope": "web",
+   "zh": "其他"
+  },
+  {
+   "it": "{0} byte",
+   "en": "{0} bytes",
+   "es": "{0} bytes",
+   "de": "{0} Bytes",
+   "scope": "web",
+   "zh": "{0} 字节"
+  },
+  {
+   "it": "Cio che la scheda ha per lavorare mentre il processore principale dorme. Qui si vede soltanto lo stato: non si carica nessun programma.",
+   "en": "What the board has to work while the main processor sleeps. This only shows the status: no program is loaded.",
+   "es": "Lo que la placa tiene para trabajar mientras el procesador principal duerme. Aqui solo se ve el estado: no se carga ningun programa.",
+   "de": "Was die Platine zum Arbeiten hat, waehrend der Hauptprozessor schlaeft. Hier sieht man nur den Zustand: Es wird kein Programm geladen.",
+   "scope": "web",
+   "zh": "主处理器休眠时开发板用来工作的部分。这里只显示状态：不会加载任何程序。"
+  },
+  {
+   "it": "Taratura della temperatura",
+   "en": "Temperature calibration",
+   "es": "Calibracion de la temperatura",
+   "de": "Temperaturkalibrierung",
+   "scope": "web",
+   "zh": "温度校准"
+  },
+  {
+   "it": "Correzione in gradi Celsius, da -20,0 a +20,0, aggiunta alla temperatura letta da ogni sensore. Vale dappertutto: pagina, registratore, soglia del caldo, comandi e funzioni. Il valore grezzo del sensore non si perde. Si salva con il pulsante Salva qui sotto.",
+   "en": "Correction in degrees Celsius, from -20.0 to +20.0, added to the temperature read by each sensor. It applies everywhere: page, recorder, heat threshold, commands and functions. The raw sensor value is not lost. It is saved with the Save button below.",
+   "es": "Correccion en grados Celsius, de -20,0 a +20,0, sumada a la temperatura leida por cada sensor. Vale en todas partes: pagina, registrador, umbral de calor, comandos y funciones. El valor bruto del sensor no se pierde. Se guarda con el boton Guardar de abajo.",
+   "de": "Korrektur in Grad Celsius, von -20,0 bis +20,0, zur Temperatur jedes Sensors addiert. Sie gilt ueberall: Seite, Rekorder, Hitzeschwelle, Befehle und Funktionen. Der Rohwert des Sensors geht nicht verloren. Gespeichert wird mit der Schaltflaeche Speichern unten.",
+   "scope": "web",
+   "zh": "摄氏度校正值，范围 -20.0 至 +20.0，加到每个传感器读取的温度上。适用于所有地方：页面、记录器、高温阈值、命令和函数。传感器原始值不会丢失。点击下方的保存按钮保存。"
+  },
+  {
+   "it": "Sensore interno del chip (gradi C)",
+   "en": "Chip internal sensor (degrees C)",
+   "es": "Sensor interno del chip (grados C)",
+   "de": "Interner Chipsensor (Grad C)",
+   "scope": "web",
+   "zh": "芯片内部传感器（摄氏度）"
+  },
+  {
+   "it": "Sensore esterno (gradi C)",
+   "en": "External sensor (degrees C)",
+   "es": "Sensor externo (grados C)",
+   "de": "Externer Sensor (Grad C)",
+   "scope": "web",
+   "zh": "外部传感器（摄氏度）"
+  },
+  {
+   "it": "Con i gradi Fahrenheit la correzione vale {0} F (chip) e {1} F (esterno): si moltiplica per 9/5, senza aggiungere 32",
+   "en": "In degrees Fahrenheit the correction is {0} F (chip) and {1} F (external): it is multiplied by 9/5, without adding 32",
+   "es": "En grados Fahrenheit la correccion vale {0} F (chip) y {1} F (externo): se multiplica por 9/5, sin sumar 32",
+   "de": "In Grad Fahrenheit betraegt die Korrektur {0} F (Chip) und {1} F (extern): sie wird mit 9/5 multipliziert, ohne 32 zu addieren",
+   "scope": "web",
+   "zh": "华氏度下校正值为 {0} F（芯片）和 {1} F（外部）：乘以 9/5，不加 32"
+  },
+  {
+   "it": "Taratura della temperatura: da -20,0 a +20,0 gradi",
+   "en": "Temperature calibration: from -20.0 to +20.0 degrees",
+   "es": "Calibracion de la temperatura: de -20,0 a +20,0 grados",
+   "de": "Temperaturkalibrierung: von -20,0 bis +20,0 Grad",
+   "scope": "fw",
+   "zh": "温度校准：从 -20.0 到 +20.0 度"
+  },
+  {
+   "it": "Dom.",
+   "en": "Sun",
+   "es": "dom.",
+   "de": "So.",
+   "scope": "fw",
+   "zh": "周日"
+  },
+  {
+   "it": "Lun.",
+   "en": "Mon",
+   "es": "lun.",
+   "de": "Mo.",
+   "scope": "fw",
+   "zh": "周一"
+  },
+  {
+   "it": "Mar.",
+   "en": "Tue",
+   "es": "mar.",
+   "de": "Di.",
+   "scope": "fw",
+   "zh": "周二"
+  },
+  {
+   "it": "Mer.",
+   "en": "Wed",
+   "es": "mie.",
+   "de": "Mi.",
+   "scope": "fw",
+   "zh": "周三"
+  },
+  {
+   "it": "Giov.",
+   "en": "Thu",
+   "es": "jue.",
+   "de": "Do.",
+   "scope": "fw",
+   "zh": "周四"
+  },
+  {
+   "it": "Ven.",
+   "en": "Fri",
+   "es": "vie.",
+   "de": "Fr.",
+   "scope": "fw",
+   "zh": "周五"
+  },
+  {
+   "it": "Sab.",
+   "en": "Sat",
+   "es": "sab.",
+   "de": "Sa.",
+   "scope": "fw",
+   "zh": "周六"
+  },
+  {
+   "it": "%d Gen. %d",
+   "en": "%d Jan %d",
+   "es": "%d ene. %d",
+   "de": "%d. Jan. %d",
+   "scope": "fw",
+   "zh": "1月%d日 %d年"
+  },
+  {
+   "it": "%d Feb. %d",
+   "en": "%d Feb %d",
+   "es": "%d feb. %d",
+   "de": "%d. Feb. %d",
+   "scope": "fw",
+   "zh": "2月%d日 %d年"
+  },
+  {
+   "it": "%d Mar. %d",
+   "en": "%d Mar %d",
+   "es": "%d mar. %d",
+   "de": "%d. Mrz. %d",
+   "scope": "fw",
+   "zh": "3月%d日 %d年"
+  },
+  {
+   "it": "%d Apr. %d",
+   "en": "%d Apr %d",
+   "es": "%d abr. %d",
+   "de": "%d. Apr. %d",
+   "scope": "fw",
+   "zh": "4月%d日 %d年"
+  },
+  {
+   "it": "%d Mag. %d",
+   "en": "%d May %d",
+   "es": "%d may. %d",
+   "de": "%d. Mai %d",
+   "scope": "fw",
+   "zh": "5月%d日 %d年"
+  },
+  {
+   "it": "%d Giu. %d",
+   "en": "%d Jun %d",
+   "es": "%d jun. %d",
+   "de": "%d. Jun. %d",
+   "scope": "fw",
+   "zh": "6月%d日 %d年"
+  },
+  {
+   "it": "%d Lug. %d",
+   "en": "%d Jul %d",
+   "es": "%d jul. %d",
+   "de": "%d. Jul. %d",
+   "scope": "fw",
+   "zh": "7月%d日 %d年"
+  },
+  {
+   "it": "%d Ago. %d",
+   "en": "%d Aug %d",
+   "es": "%d ago. %d",
+   "de": "%d. Aug. %d",
+   "scope": "fw",
+   "zh": "8月%d日 %d年"
+  },
+  {
+   "it": "%d Set. %d",
+   "en": "%d Sep %d",
+   "es": "%d sep. %d",
+   "de": "%d. Sep. %d",
+   "scope": "fw",
+   "zh": "9月%d日 %d年"
+  },
+  {
+   "it": "%d Ott. %d",
+   "en": "%d Oct %d",
+   "es": "%d oct. %d",
+   "de": "%d. Okt. %d",
+   "scope": "fw",
+   "zh": "10月%d日 %d年"
+  },
+  {
+   "it": "%d Nov. %d",
+   "en": "%d Nov %d",
+   "es": "%d nov. %d",
+   "de": "%d. Nov. %d",
+   "scope": "fw",
+   "zh": "11月%d日 %d年"
+  },
+  {
+   "it": "%d Dic. %d",
+   "en": "%d Dec %d",
+   "es": "%d dic. %d",
+   "de": "%d. Dez. %d",
+   "scope": "fw",
+   "zh": "12月%d日 %d年"
+  },
+  {
+   "it": "Dom.",
+   "en": "Sun",
+   "es": "dom.",
+   "de": "So.",
+   "scope": "web",
+   "zh": "周日"
+  },
+  {
+   "it": "Lun.",
+   "en": "Mon",
+   "es": "lun.",
+   "de": "Mo.",
+   "scope": "web",
+   "zh": "周一"
+  },
+  {
+   "it": "Mar.",
+   "en": "Tue",
+   "es": "mar.",
+   "de": "Di.",
+   "scope": "web",
+   "zh": "周二"
+  },
+  {
+   "it": "Mer.",
+   "en": "Wed",
+   "es": "mie.",
+   "de": "Mi.",
+   "scope": "web",
+   "zh": "周三"
+  },
+  {
+   "it": "Giov.",
+   "en": "Thu",
+   "es": "jue.",
+   "de": "Do.",
+   "scope": "web",
+   "zh": "周四"
+  },
+  {
+   "it": "Ven.",
+   "en": "Fri",
+   "es": "vie.",
+   "de": "Fr.",
+   "scope": "web",
+   "zh": "周五"
+  },
+  {
+   "it": "Sab.",
+   "en": "Sat",
+   "es": "sab.",
+   "de": "Sa.",
+   "scope": "web",
+   "zh": "周六"
+  },
+  {
+   "it": "{0} Gen. {1}",
+   "en": "{0} Jan {1}",
+   "es": "{0} ene. {1}",
+   "de": "{0}. Jan. {1}",
+   "scope": "web",
+   "zh": "1月{0}日 {1}年"
+  },
+  {
+   "it": "{0} Feb. {1}",
+   "en": "{0} Feb {1}",
+   "es": "{0} feb. {1}",
+   "de": "{0}. Feb. {1}",
+   "scope": "web",
+   "zh": "2月{0}日 {1}年"
+  },
+  {
+   "it": "{0} Mar. {1}",
+   "en": "{0} Mar {1}",
+   "es": "{0} mar. {1}",
+   "de": "{0}. Mrz. {1}",
+   "scope": "web",
+   "zh": "3月{0}日 {1}年"
+  },
+  {
+   "it": "{0} Apr. {1}",
+   "en": "{0} Apr {1}",
+   "es": "{0} abr. {1}",
+   "de": "{0}. Apr. {1}",
+   "scope": "web",
+   "zh": "4月{0}日 {1}年"
+  },
+  {
+   "it": "{0} Mag. {1}",
+   "en": "{0} May {1}",
+   "es": "{0} may. {1}",
+   "de": "{0}. Mai {1}",
+   "scope": "web",
+   "zh": "5月{0}日 {1}年"
+  },
+  {
+   "it": "{0} Giu. {1}",
+   "en": "{0} Jun {1}",
+   "es": "{0} jun. {1}",
+   "de": "{0}. Jun. {1}",
+   "scope": "web",
+   "zh": "6月{0}日 {1}年"
+  },
+  {
+   "it": "{0} Lug. {1}",
+   "en": "{0} Jul {1}",
+   "es": "{0} jul. {1}",
+   "de": "{0}. Jul. {1}",
+   "scope": "web",
+   "zh": "7月{0}日 {1}年"
+  },
+  {
+   "it": "{0} Ago. {1}",
+   "en": "{0} Aug {1}",
+   "es": "{0} ago. {1}",
+   "de": "{0}. Aug. {1}",
+   "scope": "web",
+   "zh": "8月{0}日 {1}年"
+  },
+  {
+   "it": "{0} Set. {1}",
+   "en": "{0} Sep {1}",
+   "es": "{0} sep. {1}",
+   "de": "{0}. Sep. {1}",
+   "scope": "web",
+   "zh": "9月{0}日 {1}年"
+  },
+  {
+   "it": "{0} Ott. {1}",
+   "en": "{0} Oct {1}",
+   "es": "{0} oct. {1}",
+   "de": "{0}. Okt. {1}",
+   "scope": "web",
+   "zh": "10月{0}日 {1}年"
+  },
+  {
+   "it": "{0} Nov. {1}",
+   "en": "{0} Nov {1}",
+   "es": "{0} nov. {1}",
+   "de": "{0}. Nov. {1}",
+   "scope": "web",
+   "zh": "11月{0}日 {1}年"
+  },
+  {
+   "it": "{0} Dic. {1}",
+   "en": "{0} Dec {1}",
+   "es": "{0} dic. {1}",
+   "de": "{0}. Dez. {1}",
+   "scope": "web",
+   "zh": "12月{0}日 {1}年"
+  },
+  {
+   "it": "Domenica",
+   "en": "Sunday",
+   "es": "domingo",
+   "de": "Sonntag",
+   "scope": "fw",
+   "zh": "星期日"
+  },
+  {
+   "it": "Lunedi",
+   "en": "Monday",
+   "es": "lunes",
+   "de": "Montag",
+   "scope": "fw",
+   "zh": "星期一"
+  },
+  {
+   "it": "Martedi",
+   "en": "Tuesday",
+   "es": "martes",
+   "de": "Dienstag",
+   "scope": "web",
+   "zh": "星期二"
+  },
+  {
+   "it": "Martedi",
+   "en": "Tuesday",
+   "es": "martes",
+   "de": "Dienstag",
+   "scope": "fw",
+   "zh": "星期二"
+  },
+  {
+   "it": "Mercoledi",
+   "en": "Wednesday",
+   "es": "miércoles",
+   "de": "Mittwoch",
+   "scope": "web",
+   "zh": "星期三"
+  },
+  {
+   "it": "Mercoledi",
+   "en": "Wednesday",
+   "es": "miercoles",
+   "de": "Mittwoch",
+   "scope": "fw",
+   "zh": "星期三"
+  },
+  {
+   "it": "Giovedi",
+   "en": "Thursday",
+   "es": "jueves",
+   "de": "Donnerstag",
+   "scope": "web",
+   "zh": "星期四"
+  },
+  {
+   "it": "Giovedi",
+   "en": "Thursday",
+   "es": "jueves",
+   "de": "Donnerstag",
+   "scope": "fw",
+   "zh": "星期四"
+  },
+  {
+   "it": "Venerdi",
+   "en": "Friday",
+   "es": "viernes",
+   "de": "Freitag",
+   "scope": "web",
+   "zh": "星期五"
+  },
+  {
+   "it": "Venerdi",
+   "en": "Friday",
+   "es": "viernes",
+   "de": "Freitag",
+   "scope": "fw",
+   "zh": "星期五"
+  },
+  {
+   "it": "Sabato",
+   "en": "Saturday",
+   "es": "sábado",
+   "de": "Samstag",
+   "scope": "web",
+   "zh": "星期六"
+  },
+  {
+   "it": "Sabato",
+   "en": "Saturday",
+   "es": "sabado",
+   "de": "Samstag",
+   "scope": "fw",
+   "zh": "星期六"
+  },
+  {
+   "it": "gennaio",
+   "en": "January",
+   "es": "enero",
+   "de": "Januar",
+   "scope": "web",
+   "zh": "1月"
+  },
+  {
+   "it": "gennaio",
+   "en": "January",
+   "es": "enero",
+   "de": "Januar",
+   "scope": "fw",
+   "zh": "1月"
+  },
+  {
+   "it": "febbraio",
+   "en": "February",
+   "es": "febrero",
+   "de": "Februar",
+   "scope": "web",
+   "zh": "2月"
+  },
+  {
+   "it": "febbraio",
+   "en": "February",
+   "es": "febrero",
+   "de": "Februar",
+   "scope": "fw",
+   "zh": "2月"
+  },
+  {
+   "it": "marzo",
+   "en": "March",
+   "es": "marzo",
+   "de": "März",
+   "scope": "web",
+   "zh": "3月"
+  },
+  {
+   "it": "marzo",
+   "en": "March",
+   "es": "marzo",
+   "de": "Maerz",
+   "scope": "fw",
+   "zh": "3月"
+  },
+  {
+   "it": "aprile",
+   "en": "April",
+   "es": "abril",
+   "de": "April",
+   "scope": "web",
+   "zh": "4月"
+  },
+  {
+   "it": "aprile",
+   "en": "April",
+   "es": "abril",
+   "de": "April",
+   "scope": "fw",
+   "zh": "4月"
+  },
+  {
+   "it": "maggio",
+   "en": "May",
+   "es": "mayo",
+   "de": "Mai",
+   "scope": "web",
+   "zh": "5月"
+  },
+  {
+   "it": "maggio",
+   "en": "May",
+   "es": "mayo",
+   "de": "Mai",
+   "scope": "fw",
+   "zh": "5月"
+  },
+  {
+   "it": "giugno",
+   "en": "June",
+   "es": "junio",
+   "de": "Juni",
+   "scope": "web",
+   "zh": "6月"
+  },
+  {
+   "it": "giugno",
+   "en": "June",
+   "es": "junio",
+   "de": "Juni",
+   "scope": "fw",
+   "zh": "6月"
+  },
+  {
+   "it": "luglio",
+   "en": "July",
+   "es": "julio",
+   "de": "Juli",
+   "scope": "web",
+   "zh": "7月"
+  },
+  {
+   "it": "luglio",
+   "en": "July",
+   "es": "julio",
+   "de": "Juli",
+   "scope": "fw",
+   "zh": "7月"
+  },
+  {
+   "it": "agosto",
+   "en": "August",
+   "es": "agosto",
+   "de": "August",
+   "scope": "web",
+   "zh": "8月"
+  },
+  {
+   "it": "agosto",
+   "en": "August",
+   "es": "agosto",
+   "de": "August",
+   "scope": "fw",
+   "zh": "8月"
+  },
+  {
+   "it": "settembre",
+   "en": "September",
+   "es": "septiembre",
+   "de": "September",
+   "scope": "web",
+   "zh": "9月"
+  },
+  {
+   "it": "settembre",
+   "en": "September",
+   "es": "septiembre",
+   "de": "September",
+   "scope": "fw",
+   "zh": "9月"
+  },
+  {
+   "it": "ottobre",
+   "en": "October",
+   "es": "octubre",
+   "de": "Oktober",
+   "scope": "web",
+   "zh": "10月"
+  },
+  {
+   "it": "ottobre",
+   "en": "October",
+   "es": "octubre",
+   "de": "Oktober",
+   "scope": "fw",
+   "zh": "10月"
+  },
+  {
+   "it": "novembre",
+   "en": "November",
+   "es": "noviembre",
+   "de": "November",
+   "scope": "web",
+   "zh": "11月"
+  },
+  {
+   "it": "novembre",
+   "en": "November",
+   "es": "noviembre",
+   "de": "November",
+   "scope": "fw",
+   "zh": "11月"
+  },
+  {
+   "it": "dicembre",
+   "en": "December",
+   "es": "diciembre",
+   "de": "Dezember",
+   "scope": "web",
+   "zh": "12月"
+  },
+  {
+   "it": "dicembre",
+   "en": "December",
+   "es": "diciembre",
+   "de": "Dezember",
+   "scope": "fw",
+   "zh": "12月"
+  },
+  {
+   "it": "Formato vuoto: scrivi il formato",
+   "en": "Empty format: write the format",
+   "es": "Formato vacío: escribe el formato",
+   "de": "Leeres Format: Format eingeben",
+   "scope": "web",
+   "zh": "格式为空：请输入格式"
+  },
+  {
+   "it": "Formato vuoto: scrivi il formato",
+   "en": "Empty format: write the format",
+   "es": "Formato vacio: escribe el formato",
+   "de": "Leeres Format: Format eingeben",
+   "scope": "fw",
+   "zh": "格式为空：请输入格式"
+  },
+  {
+   "it": "Formato troppo lungo (massimo 32 caratteri)",
+   "en": "Format too long (32 characters at most)",
+   "es": "Formato demasiado largo (máximo 32 caracteres)",
+   "de": "Format zu lang (höchstens 32 Zeichen)",
+   "scope": "web",
+   "zh": "格式太长（最多 32 个字符）"
+  },
+  {
+   "it": "Formato troppo lungo (massimo 32 caratteri)",
+   "en": "Format too long (32 characters at most)",
+   "es": "Formato demasiado largo (maximo 32 caracteres)",
+   "de": "Format zu lang (hoechstens 32 Zeichen)",
+   "scope": "fw",
+   "zh": "格式太长（最多 32 个字符）"
+  },
+  {
+   "it": "Caratteri non ammessi nel formato (solo ASCII, senza virgolette e senza barra rovesciata)",
+   "en": "Characters not allowed in the format (ASCII only, no double quotes and no backslash)",
+   "es": "Caracteres no permitidos en el formato (solo ASCII, sin comillas y sin barra invertida)",
+   "de": "Unzulässige Zeichen im Format (nur ASCII, keine Anführungszeichen und kein Backslash)",
+   "scope": "web",
+   "zh": "格式中的字符不允许（仅限 ASCII，不能有双引号和反斜杠）"
+  },
+  {
+   "it": "Caratteri non ammessi nel formato (solo ASCII, senza virgolette e senza barra rovesciata)",
+   "en": "Characters not allowed in the format (ASCII only, no double quotes and no backslash)",
+   "es": "Caracteres no permitidos en el formato (solo ASCII, sin comillas y sin barra invertida)",
+   "de": "Unzulaessige Zeichen im Format (nur ASCII, keine Anfuehrungszeichen und kein Backslash)",
+   "scope": "fw",
+   "zh": "格式中的字符不允许（仅限 ASCII，不能有双引号和反斜杠）"
+  },
+  {
+   "it": "Segno non riconosciuto dopo il segno di percentuale",
+   "en": "Unknown sign after the percent sign",
+   "es": "Signo desconocido después del signo de porcentaje",
+   "de": "Unbekanntes Zeichen nach dem Prozentzeichen",
+   "scope": "web",
+   "zh": "百分号后面的符号无法识别"
+  },
+  {
+   "it": "Segno non riconosciuto dopo il segno di percentuale",
+   "en": "Unknown sign after the percent sign",
+   "es": "Signo desconocido despues del signo de porcentaje",
+   "de": "Unbekanntes Zeichen nach dem Prozentzeichen",
+   "scope": "fw",
+   "zh": "百分号后面的符号无法识别"
+  },
+  {
+   "it": "Segno di percentuale isolato in fondo al formato",
+   "en": "Lone percent sign at the end of the format",
+   "es": "Signo de porcentaje suelto al final del formato",
+   "de": "Einzelnes Prozentzeichen am Ende des Formats",
+   "scope": "web",
+   "zh": "格式末尾有孤立的百分号"
+  },
+  {
+   "it": "Segno di percentuale isolato in fondo al formato",
+   "en": "Lone percent sign at the end of the format",
+   "es": "Signo de porcentaje suelto al final del formato",
+   "de": "Einzelnes Prozentzeichen am Ende des Formats",
+   "scope": "fw",
+   "zh": "格式末尾有孤立的百分号"
+  },
+  {
+   "it": "Data corta",
+   "en": "Short date",
+   "es": "Fecha corta",
+   "de": "Kurzes Datum",
+   "scope": "web",
+   "zh": "短日期"
+  },
+  {
+   "it": "Data lunga",
+   "en": "Long date",
+   "es": "Fecha larga",
+   "de": "Langes Datum",
+   "scope": "web",
+   "zh": "长日期"
+  },
+  {
+   "it": "Personalizzata",
+   "en": "Custom",
+   "es": "Personalizada",
+   "de": "Benutzerdefiniert",
+   "scope": "web",
+   "zh": "自定义"
+  },
+  {
+   "it": "Abbreviata (Mar. 3 Nov. 2026)",
+   "en": "Abbreviated (Tue 3 Nov 2026)",
+   "es": "Abreviada (mar. 3 nov. 2026)",
+   "de": "Abgekürzt (Di. 3. Nov. 2026)",
+   "scope": "web",
+   "zh": "缩写 (周二 11月3日 2026年)"
+  },
+  {
+   "it": "Completa (Martedi 3 novembre 2026)",
+   "en": "Full (Tuesday 3 November 2026)",
+   "es": "Completa (martes 3 noviembre 2026)",
+   "de": "Vollständig (Dienstag 3 November 2026)",
+   "scope": "web",
+   "zh": "完整 (星期二 2026年11月3日)"
+  },
+  {
+   "it": "24 ore (18:30)",
+   "en": "24 hours (18:30)",
+   "es": "24 horas (18:30)",
+   "de": "24 Stunden (18:30)",
+   "scope": "web",
+   "zh": "24 小时 (18:30)"
+  },
+  {
+   "it": "12 ore (6:30 PM)",
+   "en": "12 hours (6:30 PM)",
+   "es": "12 horas (6:30 PM)",
+   "de": "12 Stunden (6:30 PM)",
+   "scope": "web",
+   "zh": "12 小时 (6:30 PM)"
+  },
+  {
+   "it": "Secondi nell'ora lunga",
+   "en": "Seconds in the long time",
+   "es": "Segundos en la hora larga",
+   "de": "Sekunden in der langen Uhrzeit",
+   "scope": "web",
+   "zh": "长时间显示秒"
+  },
+  {
+   "it": "Si",
+   "en": "Yes",
+   "es": "Sí",
+   "de": "Ja",
+   "scope": "web",
+   "zh": "是"
+  },
+  {
+   "it": "Ora lunga",
+   "en": "Long time",
+   "es": "Hora larga",
+   "de": "Lange Uhrzeit",
+   "scope": "web",
+   "zh": "长时间"
+  },
+  {
+   "it": "Standard",
+   "en": "Standard",
+   "es": "Estándar",
+   "de": "Standard",
+   "scope": "web",
+   "zh": "标准"
+  },
+  {
+   "it": "Formato personalizzato della data corta",
+   "en": "Custom format for the short date",
+   "es": "Formato personalizado de la fecha corta",
+   "de": "Benutzerdefiniertes Format für das kurze Datum",
+   "scope": "web",
+   "zh": "短日期的自定义格式"
+  },
+  {
+   "it": "Formato personalizzato della data lunga",
+   "en": "Custom format for the long date",
+   "es": "Formato personalizado de la fecha larga",
+   "de": "Benutzerdefiniertes Format für das lange Datum",
+   "scope": "web",
+   "zh": "长日期的自定义格式"
+  },
+  {
+   "it": "Formato personalizzato dell'ora lunga",
+   "en": "Custom format for the long time",
+   "es": "Formato personalizado de la hora larga",
+   "de": "Benutzerdefiniertes Format für die lange Uhrzeit",
+   "scope": "web",
+   "zh": "长时间的自定义格式"
+  },
+  {
+   "it": "Formato scritto a mano, come il comando date: %d giorno (%-d senza zero), %m mese (%-m), %b mese abbreviato, %B mese completo, %a giorno abbreviato, %A giorno completo, %Y anno (%y a due cifre), %H ore 0-23 (%-H), %I ore 1-12 (%-I), %M minuti, %S secondi, %p AM/PM, %% il segno di percentuale. Il resto e testo libero, al massimo 32 caratteri. La data e l'ora corte (tabelle, registro, elenchi) hanno ore e minuti; quelle lunghe stanno in testata, nell'accesso e nei riquadri grandi.",
+   "en": "Hand-written format, like the date command: %d day (%-d without zero), %m month (%-m), %b abbreviated month, %B full month, %a abbreviated weekday, %A full weekday, %Y year (%y two digits), %H hours 0-23 (%-H), %I hours 1-12 (%-I), %M minutes, %S seconds, %p AM/PM, %% the percent sign. Everything else is free text, 32 characters at most. The short date and time (tables, log, lists) have hours and minutes; the long ones appear in the header, at sign-in and in the large panels.",
+   "es": "Formato escrito a mano, como el comando date: %d día (%-d sin cero), %m mes (%-m), %b mes abreviado, %B mes completo, %a día abreviado, %A día completo, %Y año (%y dos cifras), %H horas 0-23 (%-H), %I horas 1-12 (%-I), %M minutos, %S segundos, %p AM/PM, %% el signo de porcentaje. Lo demás es texto libre, máximo 32 caracteres. La fecha y la hora cortas (tablas, registro, listas) tienen horas y minutos; las largas aparecen en la cabecera, en el acceso y en los paneles grandes.",
+   "de": "Von Hand geschriebenes Format, wie der Befehl date: %d Tag (%-d ohne Null), %m Monat (%-m), %b Monat abgekürzt, %B Monat voll, %a Wochentag abgekürzt, %A Wochentag voll, %Y Jahr (%y zweistellig), %H Stunden 0-23 (%-H), %I Stunden 1-12 (%-I), %M Minuten, %S Sekunden, %p AM/PM, %% das Prozentzeichen. Alles andere ist freier Text, höchstens 32 Zeichen. Kurzes Datum und kurze Uhrzeit (Tabellen, Protokoll, Listen) haben Stunden und Minuten; die langen stehen in der Kopfzeile, bei der Anmeldung und in den großen Feldern.",
+   "scope": "web",
+   "zh": "手写格式，与 date 命令相同：%d 日（%-d 不补零）、%m 月（%-m）、%b 月份缩写、%B 月份全称、%a 星期缩写、%A 星期全称、%Y 年（%y 两位）、%H 小时 0-23（%-H）、%I 小时 1-12（%-I）、%M 分钟、%S 秒、%p AM/PM、%% 百分号。其余为自由文本，最多 32 个字符。短日期和短时间（表格、日志、列表）只有小时和分钟；长格式显示在页头、登录页和大面板中。"
+  },
+  {
+   "it": "Benvenuto",
+   "en": "Welcome",
+   "es": "Bienvenido",
+   "de": "Willkommen",
+   "scope": "web",
+   "zh": "欢迎"
+  },
+  {
+   "it": "Messaggio nella pagina di accesso (facoltativo, massimo 200 caratteri, senza accenti). Variabili: {nome} {scheda} {data} {ora} {fuso}; {{ per una graffa",
+   "en": "Message on the sign-in page (optional, up to 200 characters, no accents). Variables: {nome} {scheda} {data} {ora} {fuso}; {{ for a brace",
+   "es": "Mensaje en la pagina de acceso (opcional, maximo 200 caracteres, sin acentos). Variables: {nome} {scheda} {data} {ora} {fuso}; {{ para una llave",
+   "de": "Nachricht auf der Anmeldeseite (optional, hoechstens 200 Zeichen, ohne Akzente). Variablen: {nome} {scheda} {data} {ora} {fuso}; {{ fuer eine Klammer",
+   "scope": "web",
+   "zh": "登录页面上的消息（可选，最多 200 个字符，不含重音符号）。变量：{nome} {scheda} {data} {ora} {fuso}；{{ 表示一个花括号"
+  },
+  {
+   "it": "Messaggio: solo lettere, numeri e segni semplici (senza accenti e senza barra rovesciata)",
+   "en": "Message: only letters, numbers and simple signs (no accents, no backslash)",
+   "es": "Mensaje: solo letras, numeros y signos simples (sin acentos ni barra invertida)",
+   "de": "Nachricht: nur Buchstaben, Zahlen und einfache Zeichen (ohne Akzente und Backslash)",
+   "scope": "fw",
+   "zh": "消息：只能使用字母、数字和简单符号（不含重音符号和反斜杠）"
+  },
+  {
+   "it": "Messaggio troppo lungo (massimo 200 caratteri)",
+   "en": "Message too long (200 characters at most)",
+   "es": "Mensaje demasiado largo (maximo 200 caracteres)",
+   "de": "Nachricht zu lang (hoechstens 200 Zeichen)",
+   "scope": "fw",
+   "zh": "消息太长（最多 200 个字符）"
+  },
+  {
+   "it": "Serve almeno un risveglio: un tempo, un orario o una ripresa installata",
+   "en": "At least one wake source is needed: a time, a clock time or an installed wake button",
+   "es": "Hace falta al menos un despertar: un tiempo, una hora o un boton de reanudacion instalado",
+   "de": "Mindestens ein Weckgrund ist noetig: eine Zeit, eine Uhrzeit oder ein installierter Weckknopf",
+   "scope": "fw",
+   "zh": "至少需要一个唤醒方式：时间、钟点或已安装的唤醒按键"
+  },
+  {
+   "it": "Spegni prima il Bluetooth: nel sonno leggero non resta acceso",
+   "en": "Turn Bluetooth off first: it does not stay on in light sleep",
+   "es": "Apaga antes el Bluetooth: no sigue encendido en el sueno ligero",
+   "de": "Schalte zuerst Bluetooth aus: im leichten Schlaf bleibt es nicht an",
+   "scope": "fw",
+   "zh": "请先关闭蓝牙：浅度睡眠中蓝牙无法保持开启"
+  },
+  {
+   "it": "Standby leggero: la rete si ferma e riparte al risveglio. Procedo?",
+   "en": "Light standby: the network stops and restarts on wake. Proceed?",
+   "es": "Espera ligera: la red se detiene y vuelve al despertar. Continuo?",
+   "de": "Leichter Standby: das Netz stoppt und startet beim Aufwachen neu. Fortfahren?",
+   "scope": "fw",
+   "zh": "浅度待机：网络会停止，唤醒后重新启动。继续吗？"
+  },
+  {
+   "it": "Standby profondo: la scheda si spegne e riparte da capo al risveglio. Procedo?",
+   "en": "Deep standby: the board switches off and restarts from the beginning on wake. Proceed?",
+   "es": "Espera profunda: la placa se apaga y arranca de cero al despertar. Continuo?",
+   "de": "Tiefer Standby: die Platine schaltet ab und startet beim Aufwachen neu. Fortfahren?",
+   "scope": "fw",
+   "zh": "深度待机：开发板会关闭，唤醒后从头启动。继续吗？"
+  },
+  {
+   "it": "Tempo: fino a 7 giorni",
+   "en": "Time: up to 7 days",
+   "es": "Tiempo: hasta 7 dias",
+   "de": "Zeit: bis zu 7 Tage",
+   "scope": "fw",
+   "zh": "时间：最多 7 天"
+  },
+  {
+   "it": "Uso: standby leggero|profondo [tempo <secondi> | alle <HH:MM>]",
+   "en": "Usage: standby leggero|profondo [tempo <seconds> | alle <HH:MM>]",
+   "es": "Uso: standby leggero|profondo [tempo <segundos> | alle <HH:MM>]",
+   "de": "Verwendung: standby leggero|profondo [tempo <Sekunden> | alle <HH:MM>]",
+   "scope": "fw",
+   "zh": "用法：standby leggero|profondo [tempo <秒> | alle <HH:MM>]"
+  },
+  {
+   "it": "Si risveglia anche con il tasto di ripresa",
+   "en": "It also wakes from the wake button",
+   "es": "Tambien despierta con el boton de reanudacion",
+   "de": "Es wacht auch mit dem Weckknopf auf",
+   "scope": "fw",
+   "zh": "也可通过唤醒按键唤醒"
+  },
+  {
+   "it": "sonno leggero o profondo con risveglio a tempo o dal tasto di ripresa (chiede conferma)",
+   "en": "light or deep sleep, waking on a timer or from the wake button (asks for confirmation)",
+   "es": "sueno ligero o profundo, con despertar por tiempo o por el boton de reanudacion (pide confirmacion)",
+   "de": "leichter oder tiefer Schlaf, Aufwachen per Zeit oder Weckknopf (fragt nach)",
+   "scope": "fw",
+   "zh": "浅度或深度睡眠，按时间或唤醒按键唤醒（需确认）"
+  },
+  {
+   "it": "Scegli tempo oppure alle, non tutti e due",
+   "en": "Choose either tempo or alle, not both",
+   "es": "Elige tempo o alle, no los dos",
+   "de": "Waehle tempo oder alle, nicht beides",
+   "scope": "fw",
+   "zh": "请选择 tempo 或 alle，不能同时使用"
+  },
+  {
+   "it": "L'ora non e valida: serve la rete o l'ora impostata",
+   "en": "The time is not valid: network or a set time is needed",
+   "es": "La hora no es valida: hace falta la red o fijar la hora",
+   "de": "Die Uhrzeit ist ungueltig: Netz oder eingestellte Zeit noetig",
+   "scope": "fw",
+   "zh": "时间无效：需要网络或手动设置时间"
+  },
+  {
+   "it": "C'e gia una ripresa: ne serve una sola",
+   "en": "There is already a wake button: only one is needed",
+   "es": "Ya hay un boton de reanudacion: solo hace falta uno",
+   "de": "Es gibt schon einen Weckknopf: einer genuegt",
+   "scope": "fw",
+   "zh": "已有唤醒按键：只需要一个"
+  },
+  {
+   "it": "Questo driver non ha i piedini ammessi per questa scheda",
+   "en": "This driver has no allowed pins for this board",
+   "es": "Este driver no tiene pines permitidos para esta placa",
+   "de": "Dieser Treiber hat fuer diese Platine keine erlaubten Pins",
+   "scope": "fw",
+   "zh": "此驱动没有适用于这块开发板的允许引脚"
+  },
+  {
+   "it": "Il driver non ammette questo piedino su questa scheda",
+   "en": "The driver does not allow this pin on this board",
+   "es": "El driver no admite este pin en esta placa",
+   "de": "Der Treiber erlaubt diesen Pin auf dieser Platine nicht",
+   "scope": "fw",
+   "zh": "此驱动不允许在这块开发板上使用该引脚"
+  },
+  {
+   "it": "griglia: SCHEDA=elenco di pin (esempio S3=1,4-8,21)",
+   "en": "griglia: BOARD=list of pins (example S3=1,4-8,21)",
+   "es": "griglia: PLACA=lista de pines (ejemplo S3=1,4-8,21)",
+   "de": "griglia: PLATINE=Pinliste (Beispiel S3=1,4-8,21)",
+   "scope": "fw",
+   "zh": "griglia：开发板=引脚列表（例如 S3=1,4-8,21）"
+  },
+  {
+   "it": "Il driver ammette solo questi pin per questa scheda.",
+   "en": "The driver only allows these pins on this board.",
+   "es": "El driver solo admite estos pines para esta placa.",
+   "de": "Der Treiber erlaubt auf dieser Platine nur diese Pins.",
+   "scope": "web",
+   "zh": "此驱动在这块开发板上只允许使用这些引脚。"
+  },
+  {
+   "it": "La ripresa si installa dal driver (Schede modulo), non a mano",
+   "en": "The wake button is installed from the driver (module cards), not by hand",
+   "es": "El boton de reanudacion se instala desde el driver (tarjetas de modulo), no a mano",
+   "de": "Der Weckknopf wird ueber den Treiber (Modulkarten) installiert, nicht von Hand",
+   "scope": "fw",
+   "zh": "唤醒按键需通过驱动（模块卡）安装，不能手动添加"
+  },
+  {
+   "it": "Il tasto di ripresa e premuto (o il suo piedino e al livello di risveglio): lo standby si sveglierebbe subito",
+   "en": "The wake button is pressed (or its pin is at the wake level): standby would wake up at once",
+   "es": "El boton de reanudacion esta pulsado (o su pin esta en el nivel de despertar): la espera se despertaria enseguida",
+   "de": "Der Weckknopf ist gedrueckt (oder sein Pin liegt auf dem Weckpegel): der Standby wuerde sofort aufwachen",
+   "scope": "fw",
+   "zh": "唤醒按键已按下（或其引脚处于唤醒电平）：待机会立即唤醒"
+  },
+  {
+   "it": "Standby profondo: parte tra un secondo, la scheda riparte da capo al risveglio",
+   "en": "Deep standby: starts in one second, the board restarts from the beginning on wake",
+   "es": "Espera profunda: empieza en un segundo, la placa arranca de cero al despertar",
+   "de": "Tiefer Standby: startet in einer Sekunde, die Platine startet beim Aufwachen neu",
+   "scope": "fw",
+   "zh": "深度待机：一秒后开始，唤醒后开发板从头启动"
+  },
+  {
+   "it": "Standby leggero: parte tra un secondo, la rete torna da sola al risveglio",
+   "en": "Light standby: starts in one second, the network comes back on its own on wake",
+   "es": "Espera ligera: empieza en un segundo, la red vuelve sola al despertar",
+   "de": "Leichter Standby: startet in einer Sekunde, das Netz kommt beim Aufwachen von selbst zurueck",
+   "scope": "fw",
+   "zh": "浅度待机：一秒后开始，唤醒后网络自动恢复"
+  },
+  {
+   "it": "riga %d: sorgente non valida",
+   "en": "line %d: invalid source",
+   "es": "linea %d: fuente no valida",
+   "de": "Zeile %d: ungueltige Quelle",
+   "scope": "fw",
+   "zh": "行 %d: 来源无效"
+  },
+  {
+   "it": "riga %d: piedino non valido",
+   "en": "line %d: invalid pin",
+   "es": "linea %d: pin no valido",
+   "de": "Zeile %d: ungueltiger Pin",
+   "scope": "fw",
+   "zh": "行 %d: 引脚无效"
+  },
+  {
+   "it": "riga %d: condizione non valida per questa sorgente",
+   "en": "line %d: condition not valid for this source",
+   "es": "linea %d: condicion no valida para esta fuente",
+   "de": "Zeile %d: Bedingung fuer diese Quelle ungueltig",
+   "scope": "fw",
+   "zh": "行 %d: 条件不适用于此来源"
+  },
+  {
+   "it": "riga %d: campioni fuori misura (1-255)",
+   "en": "line %d: samples out of range (1-255)",
+   "es": "linea %d: muestras fuera de rango (1-255)",
+   "de": "Zeile %d: Abtastwerte ausserhalb des Bereichs (1-255)",
+   "scope": "fw",
+   "zh": "行 %d: 采样数超出范围 (1-255)"
+  },
+  {
+   "it": "riga %d: azione non valida",
+   "en": "line %d: invalid action",
+   "es": "linea %d: accion no valida",
+   "de": "Zeile %d: ungueltige Aktion",
+   "scope": "fw",
+   "zh": "行 %d: 动作无效"
+  },
+  {
+   "it": "riga %d: soglie fuori misura (0-4095)",
+   "en": "line %d: thresholds out of range (0-4095)",
+   "es": "linea %d: umbrales fuera de rango (0-4095)",
+   "de": "Zeile %d: Schwellen ausserhalb des Bereichs (0-4095)",
+   "scope": "fw",
+   "zh": "行 %d: 阈值超出范围 (0-4095)"
+  },
+  {
+   "it": "riga %d: isteresi fuori misura (0-4095)",
+   "en": "line %d: hysteresis out of range (0-4095)",
+   "es": "linea %d: histeresis fuera de rango (0-4095)",
+   "de": "Zeile %d: Hysterese ausserhalb des Bereichs (0-4095)",
+   "scope": "fw",
+   "zh": "行 %d: 迟滞超出范围 (0-4095)"
+  },
+  {
+   "it": "riga %d: la prima soglia deve essere minore o uguale alla seconda",
+   "en": "line %d: the first threshold must be less than or equal to the second",
+   "es": "linea %d: el primer umbral debe ser menor o igual que el segundo",
+   "de": "Zeile %d: die erste Schwelle muss kleiner oder gleich der zweiten sein",
+   "scope": "fw",
+   "zh": "行 %d: 第一个阈值必须小于或等于第二个"
+  },
+  {
+   "it": "riga %d: resistenza non valida",
+   "en": "line %d: invalid resistor setting",
+   "es": "linea %d: resistencia no valida",
+   "de": "Zeile %d: ungueltiger Widerstand",
+   "scope": "fw",
+   "zh": "行 %d: 电阻设置无效"
+  },
+  {
+   "it": "il coprocessore non e disponibile su questa scheda",
+   "en": "the coprocessor is not available on this board",
+   "es": "el coprocesador no esta disponible en esta placa",
+   "de": "der Coprozessor ist auf dieser Platine nicht verfuegbar",
+   "scope": "fw",
+   "zh": "此开发板没有协处理器"
+  },
+  {
+   "it": "piedino non adatto al coprocessore (serve un piedino RTC)",
+   "en": "pin not suitable for the coprocessor (an RTC pin is needed)",
+   "es": "pin no apto para el coprocesador (hace falta un pin RTC)",
+   "de": "Pin nicht fuer den Coprozessor geeignet (ein RTC-Pin wird benoetigt)",
+   "scope": "fw",
+   "zh": "引脚不适用于协处理器（需要 RTC 引脚）"
+  },
+  {
+   "it": "l'analogico deve stare su un piedino dell'ADC1",
+   "en": "the analog input must be on an ADC1 pin",
+   "es": "la entrada analogica debe estar en un pin del ADC1",
+   "de": "der Analogeingang muss an einem ADC1-Pin liegen",
+   "scope": "fw",
+   "zh": "模拟输入必须在 ADC1 引脚上"
+  },
+  {
+   "it": "per ora un solo piedino analogico",
+   "en": "only one analog pin for now",
+   "es": "por ahora un solo pin analogico",
+   "de": "vorerst nur ein Analogpin",
+   "scope": "fw",
+   "zh": "目前只支持一个模拟引脚"
+  },
+  {
+   "it": "troppe righe (massimo %d)",
+   "en": "too many rows (maximum %d)",
+   "es": "demasiadas filas (maximo %d)",
+   "de": "zu viele Zeilen (maximal %d)",
+   "scope": "fw",
+   "zh": "行数过多（最多 %d）"
+  },
+  {
+   "it": "il programma del coprocessore non e stato caricato",
+   "en": "the coprocessor program was not loaded",
+   "es": "el programa del coprocesador no se ha cargado",
+   "de": "das Coprozessor-Programm wurde nicht geladen",
+   "scope": "fw",
+   "zh": "协处理器程序未能加载"
+  },
+  {
+   "it": "il coprocessore non si e avviato",
+   "en": "the coprocessor did not start",
+   "es": "el coprocesador no se ha iniciado",
+   "de": "der Coprozessor ist nicht gestartet",
+   "scope": "fw",
+   "zh": "协处理器未能启动"
+  },
+  {
+   "it": "l'ADC non si e preparato per il coprocessore",
+   "en": "the ADC could not be set up for the coprocessor",
+   "es": "el ADC no se ha preparado para el coprocesador",
+   "de": "der ADC konnte nicht fuer den Coprozessor vorbereitet werden",
+   "scope": "fw",
+   "zh": "ADC 未能为协处理器做好准备"
+  },
+  {
+   "it": "riga non valida",
+   "en": "invalid row",
+   "es": "fila no valida",
+   "de": "ungueltige Zeile",
+   "scope": "fw",
+   "zh": "行无效"
+  },
+  {
+   "it": "periodo fuori misura (10-60000 ms)",
+   "en": "period out of range (10-60000 ms)",
+   "es": "periodo fuera de rango (10-60000 ms)",
+   "de": "Zeitraum ausserhalb des Bereichs (10-60000 ms)",
+   "scope": "fw",
+   "zh": "周期超出范围 (10-60000 毫秒)"
+  },
+  {
+   "it": "Questo file richiede un firmware piu nuovo di quello in uso: aggiorna prima il firmware",
+   "en": "This file needs a newer firmware than the one in use: update the firmware first",
+   "es": "Este archivo necesita un firmware mas nuevo que el que esta en uso: actualiza primero el firmware",
+   "de": "Diese Datei benoetigt eine neuere Firmware als die laufende: aktualisiere zuerst die Firmware",
+   "scope": "fw",
+   "zh": "此文件需要比当前更新的固件：请先更新固件"
   }
  ]
 }

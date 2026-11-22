@@ -20,6 +20,7 @@
 #include "vos_diario.h"
 #include "vos_strbuf.h"
 #include "vos_hooks.h"
+#include "vos_azioni.h"
 #include "vos_service.h"
 #include <time.h>
 #include "../drivers/vos_drv_time.h"
@@ -87,6 +88,8 @@ void sysReboot(const char* why, uint32_t waitMs) {
   char b[64];
   snprintf(b, sizeof(b), "Riavvio: %s", why ? why : "?");
   diaryNote(b);
+  azionePubblica(AZ_RIAVVIO, why ? why : "?", 0);
+  hookRecFlush(1500);                                        // il registratore scrive subito cio che ha in attesa (al massimo 1,5 s)
   if (waitMs) vTaskDelay(pdMS_TO_TICKS(waitMs));
   drvSysRestart();
 }
@@ -144,6 +147,9 @@ static void act(const char* why, const char* culprit = nullptr) {
   wdReboot(why);
 }
 
+static const uint32_t WD_SALTO_MS = 10000;   // salto di orologio tra due giri del controllo oltre il quale si parla di sonno
+static uint32_t g_wdPrima = 0;                // drvMillis dell'ultimo giro del controllo
+
 static void wdTask(void*) {
   uint32_t tick = 0;
   for (;;) {
@@ -151,6 +157,14 @@ static void wdTask(void*) {
     tick++;
     if (tick == 10) ramTrace("t+10s"); else if (tick == 30) ramTrace("t+30s"); else if (tick == 60) ramTrace("t+60s"); else if (tick == 150) ramTrace("t+150s");   // traccia dell'avvio
     uint32_t now = drvMillis();
+    // Il tempo di sonno non e un blocco: dopo un sonno leggero l'orologio e avanzato di tutta la durata e nessun servizio ha potuto dare segni di vita.
+    // Se tra due giri passano piu di 10 s (il giro dura 1 s) si rimettono a "adesso" i segni di vita di tutti, cosi nessun servizio viene riavviato a forza.
+    if (g_wdPrima && (uint32_t)(now - g_wdPrima) > WD_SALTO_MS) {
+      for (int i = 0; i < WD_N; i++) if (g_w[i].used) g_w[i].last = now;
+      g_netLost = 0;                              // anche il tempo senza rete riparte da adesso
+      vlog("WATCHDOG: il tempo e avanzato di %lu s tra due controlli (sonno): segni di vita rimessi a adesso", (unsigned long)((now - g_wdPrima) / 1000));
+    }
+    g_wdPrima = now;
     // 1) servizi bloccati: prima si prova a riavviare il servizio, poi la scheda
     if (cfg.wdTask) {
       for (int i = 0; i < WD_N; i++) {
@@ -183,7 +197,7 @@ static void wdTask(void*) {
       time_t t = time(NULL); struct tm lt; localtime_r(&t, &lt);
       int wd = (lt.tm_wday + 6) % 7;                         // 0 = lunedi
       if ((cfg.wdDays >> wd) & 1 && lt.tm_hour * 60 + lt.tm_min == cfg.wdAt && lt.tm_sec < 5) {
-        char b[12]; snprintf(b, sizeof(b), "%02d:%02d", cfg.wdAt / 60, cfg.wdAt % 60);
+        char b[12]; timeFmtMinutes((unsigned)cfg.wdAt, b, sizeof(b));
         wdReboot(trf("riavvio programmato %s", b).c_str());
       }
     }

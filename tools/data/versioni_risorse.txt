@@ -5,8 +5,15 @@
 #   - niente lettere, niente punti, niente numero del firmware (non e 1.8.24 ne 1.8.24b);
 #   - si alza a mano di 1 SOLO quando cambia il contenuto del file.
 # Chiave=valore, una per riga. Letto da tools/versioni_risorse.py (rifiuta valori che non sono solo cifre, >= 1).
+# Dal 21/11/2026 la versione sta DENTRO ogni file (intestazione VOSR byte 6-7, oppure riga '# versione=' nei file di testo) insieme alla dipendenza.
 # pagina = versione della pagina web (mostrata in Informazioni e nella scheda Risorse); radio e manuale = riga "versione=" dentro il file.
-# comuni.json.gz e licenze: nessun numero (non ne hanno oggi, non inventato).
-pagina=1
-radio=1
-manuale=1
+# comuni e licenze: partono da 1 (21/11/2026, con il formato .vgz).
+# firmware_minimo = versione del firmware piu vecchia che sa leggere i file di questa tabella (stessa per tutti; scritta in 'dipende').
+pagina=7
+radio=2
+manuale=3
+comuni=1
+licenza-apache2=1
+licenza-bsd3=1
+licenza-mit=1
+firmware_minimo=1.8.30

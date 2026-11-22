@@ -176,7 +176,7 @@ Hai tre strade (la prima e quella piu semplice per una scheda nuova):
 
 1. **Pagina di prima installazione** ([`flash/`](flash/README.md), da abilitare con GitHub Pages): collega la scheda con un browser che ha la porta seriale (Web Serial), scegli "Aggiorna e conserva i dati" (scheda gia usata) oppure "Installazione completa" (scheda nuova; scrive anche i file di VesevOS nello spazio dei file: pagina, manuale, licenze, dati), puoi anche spuntare le singole parti, e premi Scrivi. L'aggiornamento non tocca mai lo spazio dei file. Controlla ogni file prima di scrivere.
 2. **File pronti in [`firmware/`](firmware/LEGGIMI.md)** con `esptool` (recovery a `0x10000`, firmware a `0x110000`) o, su una scheda gia con VesevOS, dal menu *Aggiorna tramite recovery* (file dal computer, oppure URL + SHA-256 da `indice.json`). Controlla sempre lo SHA-256.
-3. **Compilare tu**: prepara ESP-IDF come sopra, compila VesevOS (cartella `idf/`) e il recovery (cartella `idf-recovery/`, stesso comando) e segui la guida [docs/GUIDA-PREPARARE-LA-SCHEDA.md](docs/GUIDA-PREPARARE-LA-SCHEDA.md).
+3. **Compilare tu**: prepara ESP-IDF come sopra, compila VesevOS (cartella `idf/`) e il recovery (cartella `idf-recovery/`, stesso comando) compila con la guida [docs/COMPILARE.md](docs/COMPILARE.md) (passo per passo, una sezione per ogni scheda) e segui la guida [docs/GUIDA-PREPARARE-LA-SCHEDA.md](docs/GUIDA-PREPARARE-LA-SCHEDA.md).
 
 Dopo la prima installazione aggiorni dalla pagina (*Aggiorna tramite recovery*), senza cavo. Fai un backup prima di ogni aggiornamento. Apri il monitor seriale a 115200 per vedere nome e password dell'hotspot.
 

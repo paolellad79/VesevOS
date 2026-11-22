@@ -72,3 +72,4 @@ static size_t answer(uint32_t ip, char* in, size_t n, char* out, size_t cap) {
 }
 
 bool httpRedirectSrvStart(uint16_t port) { return g_srv.begin(port, answer, "httpmin"); }
+void httpRedirectSrvStop() { g_srv.end(); }

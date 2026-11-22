@@ -12,6 +12,7 @@ class VosMutex {
   void init() { if (!m_) m_ = xSemaphoreCreateRecursiveMutex(); }
   void lock() { if (m_) xSemaphoreTakeRecursive(m_, portMAX_DELAY); }
   void unlock() { if (m_) xSemaphoreGiveRecursive(m_); }
+  bool lockFor(uint32_t ms) { return m_ && xSemaphoreTakeRecursive(m_, pdMS_TO_TICKS(ms)) == pdTRUE; }   // attesa breve: false = non si e riusciti a prenderlo
  private:
   SemaphoreHandle_t m_ = nullptr;
 };

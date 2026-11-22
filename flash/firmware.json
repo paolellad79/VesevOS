@@ -1,101 +1,101 @@
 {
- "schema": 1,
- "aggiornato": "2026-11-17",
- "note": "Elenco dei file ufficiali. La pagina scrive SOLO i file elencati qui, dopo aver controllato lo SHA-256. Recovery e firmware sono gli stessi file di ../firmware/ (stessi SHA-256 di ../firmware/indice.json). 'channel' e 'publisher' sono scritte non firmate. 'risorse' e l'immagine corta del file system (file di /usr/share/vesevos): solo nel pacchetto 'completa' (scheda nuova), mai negli aggiornamenti.",
- "parti": {
-  "bootloader-1.8.16": {
-   "tipo": "bootloader",
-   "file": "bin/bootloader-1.8.16.bin",
-   "indirizzo": 0,
-   "dimensione": 18864,
-   "sha256": "e0b7821332e5f7c74564fcdd501a06eca5a87760640a82b97490383af722f6f3"
+  "schema": 1,
+  "aggiornato": "2026-11-22",
+  "note": "Elenco dei file ufficiali. La pagina scrive SOLO i file elencati qui, dopo aver controllato lo SHA-256. Recovery e firmware sono gli stessi file di ../firmware/ (stessi SHA-256 di ../firmware/indice.json). 'channel' e 'publisher' sono scritte non firmate. 'risorse' e l'immagine corta del file system (file di /usr/share/vesevos): solo nel pacchetto 'completa' (scheda nuova), mai negli aggiornamenti.",
+  "parti": {
+    "bootloader-1.8.16": {
+      "tipo": "bootloader",
+      "file": "bin/bootloader-1.8.16.bin",
+      "indirizzo": 0,
+      "dimensione": 18864,
+      "sha256": "e0b7821332e5f7c74564fcdd501a06eca5a87760640a82b97490383af722f6f3"
+    },
+    "tabella-1.8.16": {
+      "tipo": "tabella",
+      "file": "bin/partition-table-1.8.16.bin",
+      "indirizzo": 32768,
+      "dimensione": 3072,
+      "sha256": "2a80078298fc5bd9b0c6c23f12fb6d606620ad77222b5a12c05f8384ffe18572"
+    },
+    "nvs-vuoto": {
+      "tipo": "nvs",
+      "file": "bin/nvs-vuoto.bin",
+      "indirizzo": 36864,
+      "dimensione": 20480,
+      "sha256": "1f55ffcddc1fce4d4ab43d09da1f8e58730a19bf3aadd78331c3eaaa8b9b4410"
+    },
+    "otadata-app0": {
+      "tipo": "otadata",
+      "file": "bin/otadata-app0.bin",
+      "indirizzo": 57344,
+      "dimensione": 8192,
+      "sha256": "8ba3b110139f45443d4f268d1a3373ef99a1718b71d51664531b83ee2d4b91a3"
+    },
+    "recovery-0.5.4f": {
+      "tipo": "recovery",
+      "file": "../firmware/recovery/0.5.4f/VesevOS-Recovery-S3-0.5.4f.bin",
+      "indirizzo": 65536,
+      "dimensione": 947472,
+      "sha256": "fad5be03ab4bc8f8688e2636ca8dc6ca1f905ae71508fc9258c54c04cdc57a8f"
+    },
+    "firmware-1.8.30k": {
+      "tipo": "firmware",
+      "file": "../firmware/1.8.30k/VesevOS-S3-1.8.30k.bin",
+      "indirizzo": 1114112,
+      "dimensione": 1978336,
+      "sha256": "944678a392649ad7b51bfdef6ec203bded09cf383eef167c275f0801fe470338"
+    },
+    "risorse-1.8.30k": {
+      "tipo": "risorse",
+      "file": "../firmware/risorse/1.8.30k/VesevOS-Risorse-1.8.30k.bin",
+      "indirizzo": 3538944,
+      "dimensione": 274432,
+      "sha256": "7cf7a7c5d70c3ef6f546a181ffa4cec5ac3eb0e399f21498650879cedb23ad9d"
+    }
   },
-  "tabella-1.8.16": {
-   "tipo": "tabella",
-   "file": "bin/partition-table-1.8.16.bin",
-   "indirizzo": 32768,
-   "dimensione": 3072,
-   "sha256": "2a80078298fc5bd9b0c6c23f12fb6d606620ad77222b5a12c05f8384ffe18572"
-  },
-  "nvs-vuoto": {
-   "tipo": "nvs",
-   "file": "bin/nvs-vuoto.bin",
-   "indirizzo": 36864,
-   "dimensione": 20480,
-   "sha256": "1f55ffcddc1fce4d4ab43d09da1f8e58730a19bf3aadd78331c3eaaa8b9b4410"
-  },
-  "otadata-app0": {
-   "tipo": "otadata",
-   "file": "bin/otadata-app0.bin",
-   "indirizzo": 57344,
-   "dimensione": 8192,
-   "sha256": "8ba3b110139f45443d4f268d1a3373ef99a1718b71d51664531b83ee2d4b91a3"
-  },
-  "recovery-0.5.3": {
-   "tipo": "recovery",
-   "file": "../firmware/recovery/0.5.3/VesevOS-Recovery-S3-0.5.3.bin",
-   "indirizzo": 65536,
-   "dimensione": 957824,
-   "sha256": "0944640a7918a01cc2ad1b1844d10657e5f93ab5f5152566e737905b1fa6d93f"
-  },
-  "firmware-1.8.24c": {
-   "tipo": "firmware",
-   "file": "../firmware/1.8.24c/VesevOS-S3-1.8.24c.bin",
-   "indirizzo": 1114112,
-   "dimensione": 2094224,
-   "sha256": "e13a319239687780dc6cdaaf30a68140b10e2a6ef38c173c8095ed419c7e2319"
-  },
-  "risorse-1.8.24c": {
-   "tipo": "risorse",
-   "file": "../firmware/risorse/1.8.24c/VesevOS-Risorse-1.8.24c.bin",
-   "indirizzo": 3538944,
-   "dimensione": 258048,
-   "sha256": "4ef0924ec5abff52d0c9ed2bd23e32fcb176be0a0ed12d447312665741b33911"
-  }
- },
- "pacchetti": [
-  {
-   "id": "aggiorna-1.8.24c",
-   "tipo": "aggiorna",
-   "versione": "1.8.24c",
-   "recovery": "0.5.3",
-   "parti": [
-    "bootloader-1.8.16",
-    "tabella-1.8.16",
-    "recovery-0.5.3",
-    "firmware-1.8.24c"
-   ]
-  },
-  {
-   "id": "completa-1.8.24c",
-   "tipo": "completa",
-   "versione": "1.8.24c",
-   "recovery": "0.5.3",
-   "parti": [
-    "bootloader-1.8.16",
-    "tabella-1.8.16",
-    "nvs-vuoto",
-    "otadata-app0",
-    "recovery-0.5.3",
-    "firmware-1.8.24c",
-    "risorse-1.8.24c"
-   ]
-  },
-  {
-   "id": "solo-firmware-1.8.24c",
-   "tipo": "solo-firmware",
-   "versione": "1.8.24c",
-   "parti": [
-    "firmware-1.8.24c"
-   ]
-  },
-  {
-   "id": "solo-recovery-0.5.3",
-   "tipo": "solo-recovery",
-   "versione": "0.5.3",
-   "parti": [
-    "recovery-0.5.3"
-   ]
-  }
- ]
+  "pacchetti": [
+    {
+      "id": "aggiorna-1.8.30k",
+      "tipo": "aggiorna",
+      "versione": "1.8.30k",
+      "recovery": "0.5.4f",
+      "parti": [
+        "bootloader-1.8.16",
+        "tabella-1.8.16",
+        "recovery-0.5.4f",
+        "firmware-1.8.30k"
+      ]
+    },
+    {
+      "id": "completa-1.8.30k",
+      "tipo": "completa",
+      "versione": "1.8.30k",
+      "recovery": "0.5.4f",
+      "parti": [
+        "bootloader-1.8.16",
+        "tabella-1.8.16",
+        "nvs-vuoto",
+        "otadata-app0",
+        "recovery-0.5.4f",
+        "firmware-1.8.30k",
+        "risorse-1.8.30k"
+      ]
+    },
+    {
+      "id": "solo-firmware-1.8.30k",
+      "tipo": "solo-firmware",
+      "versione": "1.8.30k",
+      "parti": [
+        "firmware-1.8.30k"
+      ]
+    },
+    {
+      "id": "solo-recovery-0.5.4f",
+      "tipo": "solo-recovery",
+      "versione": "0.5.4f",
+      "parti": [
+        "recovery-0.5.4f"
+      ]
+    }
+  ]
 }

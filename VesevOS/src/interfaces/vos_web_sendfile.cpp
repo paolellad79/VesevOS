@@ -16,10 +16,14 @@ static const char* baseName(const char* path) {
   return slash ? slash + 1 : path;
 }
 
-esp_err_t sendFile(Res* s, const char* fsPath, const char* contentType, bool download) {
+esp_err_t sendFile(Res* s, const char* fsPath, const char* contentType, bool download, size_t salta) {
   VosFile f = drvFsOpen(fsPath, "r");
   if (!f || f.isDirectory()) return notFound(s);
   size_t size = f.size();
+  if (salta) {                                       // si saltano i primi byte (intestazione di un file .vgz)
+    if (salta >= size || !f.seek(salta)) return notFound(s);
+    size -= salta;
+  }
 
   char disposition[96 + FS_PATH_MAX];
   snprintf(disposition, sizeof disposition, "%s; filename=\"%s\"", download ? "attachment" : "inline", baseName(fsPath));
@@ -55,6 +59,8 @@ bool sendRisFile(Res* s, RisFile rf, const char* contentType, bool gzip, const c
   VosFile f;
   size_t len = 0;
   RisEsito e = risFileApri(rf, f, len);
+  uint8_t marchio[4] = {0, 0, 0, 0};
+  bool vosr = f.read(marchio, sizeof marchio) == sizeof marchio && memcmp(marchio, "VOSR", 4) == 0;   // .vgz: i dati gzip stanno dopo l'intestazione
   f.close();                                         // il controllo e fatto e ricordato: sendFile riapre il file
   if (e != RIS_OK) {
     vlogl(LG_DBG, "RISORSE: %s non disponibile (%s)", risFileNome(rf), risCodice(e));
@@ -64,7 +70,7 @@ bool sendRisFile(Res* s, RisFile rf, const char* contentType, bool gzip, const c
   if (!risFilePercorso(rf, path, sizeof path)) return false;
   if (gzip) s->addHeader("Content-Encoding", "gzip");
   if (cache) s->addHeader("Cache-Control", cache);
-  err = sendFile(s, path, contentType, false);
+  err = sendFile(s, path, contentType, false, vosr ? RIS_INTEST : 0);
   return true;
 }
 

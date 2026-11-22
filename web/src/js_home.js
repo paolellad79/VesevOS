@@ -287,15 +287,8 @@ function hwFetch(){
 function hClock(){
   var A=HW;
   if(!A||!A.tv)return["--:--:--",t("Ora non impostata")];
-  var p=function(x){return(x<10?"0":"")+x},ms=(A.te+(Date.now()-A.t0)/1000)*1000,
-    d=new Date(ms+A.to*1000),H=d.getUTCHours(),ap="";
-  if(A.tf){
-    ap=H>=12?" PM":" AM";
-    H=H%12||12
-  }
-  var Y=d.getUTCFullYear(),M=p(d.getUTCMonth()+1),D=p(d.getUTCDate());
-  return[p(H)+":"+p(d.getUTCMinutes())+":"+p(d.getUTCSeconds())+ap,
-    A.df==1?Y+"-"+M+"-"+D:A.df==2?M+"/"+D+"/"+Y:D+"/"+M+"/"+Y]
+  var ms=(A.te+(Date.now()-A.t0)/1000)*1000;
+  return fmtLungo(new Date(ms+A.to*1000),A)    /* ora lunga e data lunga */
 }
 setInterval(hdTick,1000);
 function wid(tt,v,sub,go,ic){

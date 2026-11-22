@@ -84,7 +84,7 @@ static void histSave(const char* l) {
 static void hist(const char* line) {
   AudLock L;
   histLoad();
-  char now[32]; timeNowFmt(now, sizeof now);
+  char now[TIME_FMT_MAX]; timeNowFmt(now, sizeof now);
   size_t total = strlen(now) + 2 + strlen(line) + 1;
   char* l = (char*)malloc(total);
   if (!l) return;

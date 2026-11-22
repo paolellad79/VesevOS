@@ -16,10 +16,10 @@ Si consiglia sempre l'ultima versione.
 
 | Versione | Note |
 |---|---|
-| 1.8.x (1.8.0b) | corrente |
+| 1.8.x (ultima pubblicata: 1.8.24c) | corrente |
 | 1.7.x e precedenti | aggiorna alla 1.8.x |
 
-## Misure gia presenti (1.8.0b)
+## Misure gia presenti (1.8.x)
 Password dell'hotspot casuale e diversa per ogni scheda, nessuna password di fabbrica per il pannello,
 accesso con prova HMAC (la password non viaggia), HTTPS con certificato unico, utenti con ruoli controllati
 dalla scheda, blocco dopo troppi errori, filtro IP, controllo della configurazione con allarmi, servizi di rete

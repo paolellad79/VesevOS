@@ -81,6 +81,43 @@ inline bool risElencoCerca(const char* t, size_t n, const char* nome, uint8_t ha
   return false;
 }
 
+// Nuovo testo di SHA256SUMS: la riga di `nome` prende il posto di quella che c'e (o si aggiunge in fondo), le altre restano uguali.
+// t/n = elenco attuale; se manca o non e valido si riparte da un elenco con la sola riga nuova. Ritorna i byte scritti in out, 0 se non entra
+// (cap, RIS_ELENCO_MAX, RIS_ELENCO_RIGHE) o se il nome non e valido. Pura: la scrittura sul disco la fa chi chiama (vos_risorse.cpp).
+inline size_t risElencoSostituisci(const char* t, size_t n, const char* nome, const uint8_t hash[32], char* out, size_t cap) {
+  size_t nl = nome ? strlen(nome) : 0;
+  if (!risNomeFileOk(nome, nl) || !out) return 0;
+  RisRiga r[RIS_ELENCO_RIGHE];
+  int k = (t && n) ? risElencoRighe(t, n, r) : 0;
+  static const char CIFRE[] = "0123456789abcdef";
+  size_t pos = 0;
+  bool trovata = false;
+  for (int i = 0; i <= k; i++) {
+    bool nuova = (i == k);                                    // l'ultimo giro scrive la riga in fondo, solo se non c'era
+    if (nuova && trovata) break;
+    bool questa = nuova || (r[i].nomeLen == nl && memcmp(r[i].nome, nome, nl) == 0);
+    if (!questa) {
+      if (pos + r[i].lunga > cap) return 0;
+      memcpy(out + pos, r[i].riga, r[i].lunga);
+      pos += r[i].lunga;
+      continue;
+    }
+    if (pos + 64 + 2 + nl + 1 > cap) return 0;
+    for (int b = 0; b < 32; b++) {
+      out[pos++] = CIFRE[hash[b] >> 4];
+      out[pos++] = CIFRE[hash[b] & 15];
+    }
+    out[pos++] = ' ';
+    out[pos++] = ' ';
+    memcpy(out + pos, nome, nl);
+    pos += nl;
+    out[pos++] = '\n';
+    trovata = true;
+  }
+  if (k >= RIS_ELENCO_RIGHE && !trovata) return 0;
+  return pos <= RIS_ELENCO_MAX ? pos : 0;
+}
+
 // Il chiamante dice se un nome e conosciuto dal firmware (solo i file di risorse veri: niente percorsi, niente nomi inventati).
 typedef bool (*RisNomeNoto)(const char* nome, size_t lunghezza);
 
@@ -130,6 +167,11 @@ class RisConfronto {
     uint8_t diverso = 0;
     for (int i = 0; i < 32; i++) diverso |= (uint8_t)(h[i] ^ atteso_[i]);
     return diverso == 0;
+  }
+  void chiudi(uint8_t out[32]) {            // fine senza confronto: da' lo SHA-256 (per chi lo confronta con un valore scritto nel file stesso)
+    if (!aperto_) { memset(out, 0, 32); return; }
+    aperto_ = false;
+    sha_.chiudi(sha_.ctx, out);
   }
   void annulla() {                          // si e smesso a meta: libera il contesto SHA
     if (!aperto_) return;

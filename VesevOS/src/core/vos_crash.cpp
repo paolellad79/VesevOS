@@ -96,7 +96,7 @@ void crashPrevDiag(uint8_t* classe, uint8_t* dett) {
 static std::string reportOf(const CrashRtc& c) {
   StrText t(448);
   StrBuf& r = t.buf();
-  char now[32]; timeNowFmt(now, sizeof now);
+  char now[TIME_FMT_MAX]; timeNowFmt(now, sizeof now);
   r.add(now).add("  VesevOS ").add(c.ver).add("  ").add(c.reason).add('\n');
   r.addf("  core %ld, task %s, PC 0x%08lx", (long)c.core, c.task[0] ? c.task : "?", (unsigned long)c.pc);
   r.add("\n  Backtrace:");

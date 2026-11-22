@@ -10,6 +10,7 @@ inline void heap_caps_get_info(multi_heap_info_t* i, uint32_t) { *i = multi_heap
 void* heap_caps_malloc(size_t size, uint32_t caps);
 void* heap_caps_calloc(size_t n, size_t size, uint32_t caps);
 void heap_caps_free(void* p);
+bool heap_caps_check_integrity_all(bool print_errors);
 size_t heap_caps_get_free_size(uint32_t caps);
 size_t heap_caps_get_total_size(uint32_t caps);
 size_t heap_caps_get_largest_free_block(uint32_t caps);

@@ -4,6 +4,8 @@
 #include "vos_mod.h"
 #include <strings.h>
 #include "vos_io.h"
+#include <stdlib.h>
+#include <string>
 #include "vos_mod_line.h"
 #include "../core/vos_i18n.h"
 #include "../core/vos_pacchetto.h"
@@ -54,9 +56,35 @@ bool modColor(const char* vIn, char* hex, char* cname) {
 }
 
 bool modSectionKnown(std::string_view s) {
-  static const char* const N[] = {"module", "signals", "icon", "wiring", "pins", "page", "code", "data", "commands", "cmd", "widget"};
+  static const char* const N[] = {"module", "signals", "icon", "wiring", "pins", "griglia", "page", "code", "data", "commands", "cmd", "widget"};
   for (const char* n : N) if (viewEqI(s, n)) return true;
   return false;
+}
+
+// Elenco di pin della griglia: "0-21" oppure "1,2,4-18,21" -> un bit per pin (0-63). false se non e un elenco valido.
+static bool gridElenco(std::string_view v, uint64_t& mask) {
+  mask = 0;
+  size_t i = 0;
+  while (i < v.size()) {
+    int a = -1, b = -1;
+    size_t k = i;
+    while (k < v.size() && v[k] >= '0' && v[k] <= '9') k++;
+    if (k == i || k - i > 2) return false;
+    a = atoi(std::string(v.substr(i, k - i)).c_str());
+    b = a;
+    if (k < v.size() && v[k] == '-') {
+      size_t k2 = k + 1;
+      while (k2 < v.size() && v[k2] >= '0' && v[k2] <= '9') k2++;
+      if (k2 == k + 1 || k2 - k - 1 > 2) return false;
+      b = atoi(std::string(v.substr(k + 1, k2 - k - 1)).c_str());
+      k = k2;
+    }
+    if (a > b || b > 63) return false;
+    for (int p = a; p <= b; p++) mask |= 1ULL << p;
+    if (k < v.size() && v[k] != ',') return false;
+    i = (k < v.size()) ? k + 1 : k;
+  }
+  return mask != 0;
 }
 
 bool modParse(std::string_view text, const char* fileName, ModInfo& m, ErrBuf& err) {
@@ -64,8 +92,8 @@ bool modParse(std::string_view text, const char* fileName, ModInfo& m, ErrBuf& e
   strcpy(m.power, "-"); strcpy(m.ver, "1"); strcpy(m.who, "admin"); m.khz = IO_SD_KHZ_DEF;
   m.pull = 'n'; m.level = '3'; m.size = text.size(); err = "";
   if (text.size() > MOD_FILE_MAX) { err = tr("File troppo grande (massimo 16 KB)"); return false; }
-  enum { NONE, MOD, SIG, ICO, WIR, PIN, PAG, COD, DAT, CMS, CMC, WGT };
-  int sec = NONE; bool seen[12] = {false}; bool hasPull = false; bool hasFreq = false; bool hasKhz = false;
+  enum { NONE, MOD, SIG, ICO, WIR, PIN, PAG, COD, DAT, CMS, CMC, WGT, GRI };
+  int sec = NONE; bool seen[13] = {false}; bool hasPull = false; bool hasFreq = false; bool hasKhz = false;
   size_t iconLen = 0, wiringLen = 0, codeLen = 0, cmdLen = 0; bool cmdHasCode = false, cmdHasWidget = false;                    // m.icon e m.wiring si riempiono riga per riga; di [code], [page] e [data] si contano solo le righe (le controlla vos_mod_app)
   int pageRows = 0, dataRows = 0;
   char cmdSubs[MOD_CMD_MAX][13];                                     // i sottocomandi gia visti (niente doppioni)
@@ -78,8 +106,8 @@ bool modParse(std::string_view text, const char* fileName, ModInfo& m, ErrBuf& e
     if (t.size() > 1 && t[0] == '[' && t.back() == ']') {
       std::string_view s = t.substr(1, t.size() - 2);
       int ns = viewEqI(s, "module") ? MOD : viewEqI(s, "signals") ? SIG : viewEqI(s, "icon") ? ICO : viewEqI(s, "wiring") ? WIR : viewEqI(s, "pins") ? PIN
-             : viewEqI(s, "page") ? PAG : viewEqI(s, "code") ? COD : viewEqI(s, "data") ? DAT : viewEqI(s, "commands") ? CMS : viewEqI(s, "cmd") ? CMC : viewEqI(s, "widget") ? WGT : NONE;
-      if (ns == NONE && sec != COD && sec != CMC) return utilLineErr(err, line, tr("Sezione sconosciuta (ammesse: module, signals, icon, wiring, pins, page, code, data, commands, cmd, widget)"));
+             : viewEqI(s, "page") ? PAG : viewEqI(s, "code") ? COD : viewEqI(s, "data") ? DAT : viewEqI(s, "commands") ? CMS : viewEqI(s, "cmd") ? CMC : viewEqI(s, "widget") ? WGT : viewEqI(s, "griglia") ? GRI : NONE;
+      if (ns == NONE && sec != COD && sec != CMC) return utilLineErr(err, line, tr("Sezione sconosciuta (ammesse: module, signals, icon, wiring, pins, griglia, page, code, data, commands, cmd, widget)"));
       if (ns != NONE) {                                              // dentro [code] una riga tra parentesi quadre che non e una sezione e codice
         if (seen[ns]) return utilLineErr(err, line, tr("Sezione ripetuta"));
         seen[ns] = true; sec = ns; continue;
@@ -129,6 +157,14 @@ bool modParse(std::string_view text, const char* fileName, ModInfo& m, ErrBuf& e
     }
     size_t q = t.find('=');
     if (q == std::string_view::npos || q < 1) return utilLineErr(err, line, tr("Serve chiave=valore"));
+    if (sec == GRI) {                                                // CHIP=elenco: una riga per scheda (S3, C3, C6, H2); vale quella della scheda in uso
+      std::string_view chip = trimView(t.substr(0, q));
+      uint64_t mk = 0;
+      if (!sigOk(chip) || !gridElenco(trimView(t.substr(q + 1)), mk)) return utilLineErr(err, line, tr("griglia: SCHEDA=elenco di pin (esempio S3=1,4-8,21)"));
+      m.gridAny = true;
+      if (viewEqI(chip, VOS_CPU_SIGLA)) { m.hasGrid = true; m.gridMask = mk; }
+      continue;
+    }
     if (sec == WGT) {
       const char* why = nullptr;
       if (!modWidgetKey(trimView(t.substr(0, q)), trimView(t.substr(q + 1)), m.widget, &why)) return utilLineErr(err, line, why);
@@ -237,7 +273,7 @@ bool modParse(std::string_view text, const char* fileName, ModInfo& m, ErrBuf& e
     }
     for (int s = 0; s < m.nsig; s++) if (!wired[s]) { err = tr("pins: manca il filo di un segnale"); return false; }
   }
-  if (hasPull && strcmp(m.cls, "ingresso")) { err = tr("pull vale solo per la classe ingresso"); return false; }
+  if (hasPull && strcmp(m.cls, "ingresso") && strcmp(m.cls, "ripresa")) { err = tr("pull vale solo per le classi ingresso e ripresa"); return false; }
   if (m.low && !strcmp(m.cls, "analogico")) { err = tr("active=low non vale per la classe analogico"); return false; }
   if (m.title[0] == 0) strcpy(m.title, m.name);
   if (m.widget.on && !m.widget.title[0]) strcpy(m.widget.title, m.title);

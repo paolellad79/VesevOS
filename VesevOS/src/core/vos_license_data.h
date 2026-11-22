@@ -64,8 +64,10 @@ Progetto: https://github.com/paolellad79/VesevOS
      sull'intestazione del file (dati, non codice).
    - PsychicHttp 3.1.2 (Copyright (c) 2024 Jeremy Poulter, Zachary Smith,
      Mathieu Carbou): MIT. Nel progetto
-     c'e una copia modificata: ogni #ifdef ARDUINO diventa PSYCHIC_ARDUINO,
-     nient'altro (vedi NOTICE-PSYCHIC.txt). Testo: "license mit"
+     c'e una copia modificata: ogni #ifdef ARDUINO diventa PSYCHIC_ARDUINO e,
+     dal 16/11/2026, i cicli di ricezione dei file inviati (MultipartProcessor.cpp
+     e PsychicUploadHandler.cpp) escono con errore se la connessione cade
+     (vedi NOTICE-PSYCHIC.txt). Testo: "license mit"
    - ArduinoJson (Benoit Blanchon; copia nel componente aj_json): MIT.
      Testo: "license mit"
    - BMP280 (Bosch Sensortec GmbH, copyright 2012-2014): la compensazione
@@ -88,13 +90,31 @@ Progetto: https://github.com/paolellad79/VesevOS
      esptool-js 0.5.7 (Espressif): Apache-2.0 (testo in
      flash/vendor/LICENSE-esptool-js-Apache-2.0.txt); dentro il suo bundle
      c'e pako 2.1.0 (Nodeca): MIT AND Zlib.
+   - Sito pubblicato (pagina iniziale e pagine strumento, solo browser, nessun
+     codice nel firmware):
+     font Onest (Copyright 2021 The Onest Project Authors,
+     https://github.com/googlefonts/onest): SIL Open Font License 1.1, file
+     ospitati nel sito (testo: licenses/OFL-1.1-Onest.txt);
+     font JetBrains Mono (Copyright 2020 The JetBrains Mono Project Authors,
+     https://github.com/JetBrains/JetBrainsMono): SIL Open Font License 1.1
+     (testo: licenses/OFL-1.1-JetBrainsMono.txt);
+     icone Lucide (Copyright (c) 2026 Lucide Icons and Contributors,
+     https://github.com/lucide-icons/lucide): ISC (testo: licenses/ISC-Lucide.txt);
+     icone Simple Icons (Simple Icons Collaborators,
+     https://github.com/simple-icons/simple-icons): CC0 1.0 (testo:
+     licenses/CC0-1.0.txt); i marchi mostrati (per esempio GitHub) restano dei
+     rispettivi proprietari e sono usati solo per indicare il collegamento;
+     componenti grafici del sito, fogli di stile e script della cartella assets
+     (Copyright (c) 2026 Leonxlnx): MIT (testo: licenses/MIT-componenti-grafici-sito.txt
+     e assets/LICENZA-componenti-grafici.txt nel sito).
    - Recovery 0.5.2 (programma nostro, cartella recovery/VesevOS_Recovery_IDF):
      GPL-3.0-or-later OR licenza commerciale; usa solo ESP-IDF 5.5.5 e
      Mbed TLS (Apache-2.0), senza codice LGPL.
    - Natural Earth (nomi dei paesi): pubblico dominio.
    - IANA tz database (fusi orari, nomi dei paesi): pubblico dominio.
    Chi distribuisce un firmware compilato deve rispettare anche queste
-   licenze: per Apache-2.0, MIT e BSD-3-Clause vuol dire conservare gli
+)VOSLIC"
+R"VOSLIC(   licenze: per Apache-2.0, MIT e BSD-3-Clause vuol dire conservare gli
    avvisi di copyright e i testi delle licenze (qui nel comando "license").
    Nel prodotto non c'e codice LGPL. La
    traccia del panico (drivers/vos_drv_panic.cpp) e il cambio di frequenza
@@ -116,8 +136,7 @@ Progetto: https://github.com/paolellad79/VesevOS
      Eventuali funzioni statistiche future saranno facoltative (opt-in).
    - Prodotti: chi costruisce o vende apparecchi con VesevOS e responsabile
      della loro conformita (marcatura CE), tra cui: Direttiva 2014/53/UE
-)VOSLIC"
-R"VOSLIC(     (apparecchiature radio), Direttiva 2014/30/UE (compatibilita
+     (apparecchiature radio), Direttiva 2014/30/UE (compatibilita
      elettromagnetica), Direttiva 2011/65/UE (RoHS) e, se applicabile,
      Regolamento (UE) 2024/2847 (Cyber Resilience Act), Regolamento
      delegato (UE) 2022/30 con la norma EN 18031; Regno Unito: PSTI Act
@@ -652,7 +671,7 @@ static const uint8_t LIC_TEXT_1[] PROGMEM = {
 
 struct LicDoc { const char* id; const char* title; const char* text; size_t size; size_t zsize; };
 static const LicDoc LIC_DOCS[] = {
-  { "notice", "Note legali e licenza di VesevOS", (const char*)LIC_TEXT_0, 8370, 0 },
+  { "notice", "Note legali e licenza di VesevOS", (const char*)LIC_TEXT_0, 9675, 0 },
   { "gpl3", "GNU General Public License v3.0", (const char*)LIC_TEXT_1, 35149, 12124 },
   { "apache2", "Apache License 2.0", nullptr, 11358, 3968 },
   { "mit", "MIT License (PsychicHttp, ArduinoJson, FreeRTOS, esp_littlefs, posix_tz_db, Berry)", nullptr, 1605, 963 },

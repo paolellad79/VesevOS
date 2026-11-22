@@ -7,6 +7,8 @@
 #include "vos_io_int.h"
 #include "../core/vos_common.h"
 #include "../core/vos_i18n.h"
+#include "../core/vos_azioni.h"
+#include <stdio.h>
 #include <freertos/FreeRTOS.h>
 #include <stdlib.h>
 #include <string.h>
@@ -68,6 +70,7 @@ bool ioPwmSet(const char* name, int hz, int pct, int role, ErrBuf& err) {
   if (!d || d->cls != IC_PWM) { err = tr("Periferica sconosciuta"); return false; }
   if (role < ROLE_OPER) { err = tr("Il tuo ruolo non permette questo comando"); return false; }
   if (pct > 100) { err = tr("Duty PWM: da 0 a 100"); return false; }
+  bool hzCambiata = hz && hz != d->khz;
   if (hz && hz != d->khz) {
     if (role < ROLE_ADMIN) { err = tr("Il tuo ruolo non permette questo comando"); return false; }
     if (!hzOk(hz)) { err = tr("Frequenza PWM: da 10 a 40000 Hz"); return false; }
@@ -87,6 +90,12 @@ bool ioPwmSet(const char* name, int hz, int pct, int role, ErrBuf& err) {
   if (pct >= 0) {
     d->addr = (uint8_t)pct;
     if (d->pwm) drvPwmSet(d->pwm - 1, d->addr, 100);
+    azionePubblica(AZ_PWM, d->name, pct);
+  }
+  if (hzCambiata) {                                  // la frequenza ha un nome suo ("<periferica>_hz"), il duty il nome della periferica
+    char nm[24];
+    snprintf(nm, sizeof nm, "%s_hz", d->name);
+    azionePubblica(AZ_PWM, nm, hz);
   }
   return true;
 }

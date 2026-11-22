@@ -164,7 +164,7 @@ bool shCmdSys(const Word& c, const Word& a1, const char* line, OutSink& o, int r
   }
   // ls, cat, mkdir, rm, mv, cp, write, cd, pwd: vos_shell_files.cpp
   else if (c == "date") {
-    char now[32];
+    char now[TIME_FMT_MAX];
     if (a1 == "set") { ErrBuf err; if (timeSetLocal(restFrom(line, 2), err)) { timeNowFmt(now, sizeof now); o.println(now); } else o.println(err.c_str()); }
     else { timeNowFmt(now, sizeof now); o.print(now); o.printf("  (%s)\r\n", cfg.tzName.c_str()); }
   }

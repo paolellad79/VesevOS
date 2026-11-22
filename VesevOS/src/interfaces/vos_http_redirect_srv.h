@@ -7,3 +7,4 @@
 #include <stdint.h>
 
 bool httpRedirectSrvStart(uint16_t port);   // false se la porta o la memoria non bastano
+void httpRedirectSrvStop();                 // ferma il server (sonno); si puo far ripartire con httpRedirectSrvStart

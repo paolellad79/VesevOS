@@ -8,20 +8,19 @@
   "vos_shell,vos_shell_int,vos_web,vos_web_int": 1
  },
  "e_idf": {
-  "vos_funzioni.cpp": 1,
-  "vos_funzioni_mem.cpp": 1,
-  "vos_funzioni_scripts.cpp": 1,
   "vos_crash.cpp": 1,
   "vos_crypt.cpp": 1,
   "vos_dev.cpp": 1,
   "vos_diario.cpp": 1,
+  "vos_funzioni.cpp": 1,
+  "vos_funzioni_mem.cpp": 1,
+  "vos_funzioni_scripts.cpp": 1,
   "vos_net.cpp": 1,
   "vos_pins.cpp": 1,
-  "vos_power.cpp": 2,
   "vos_ram.cpp": 1,
   "vos_selftest.cpp": 1,
   "vos_shell_int.h": 1,
-  "vos_sys.cpp": 5,
+  "vos_sys.cpp": 4,
   "vos_time.cpp": 1,
   "vos_tls.cpp": 1,
   "vos_traffic.cpp": 1,
@@ -45,5 +44,22 @@
  "s_chip": {
   "vos_crash.cpp": 1,
   "vos_recupd.cpp": 1
+ },
+ "salti": {
+  "core->boards": 12,
+  "devices->core": 123,
+  "devices->drivers": 46,
+  "interfaces->core": 159,
+  "interfaces->devices": 28,
+  "interfaces->drivers": 66,
+  "interfaces->net": 8,
+  "interfaces->security": 10,
+  "net->core": 43,
+  "net->drivers": 17,
+  "packages->core": 337,
+  "packages->devices": 48,
+  "packages->drivers": 100,
+  "packages->security": 5,
+  "security->drivers": 6
  }
 }

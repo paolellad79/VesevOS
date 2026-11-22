@@ -17,4 +17,5 @@ void ledSetAlarm(int level);          // 0 nessuno, 1 giallo (lampo arancione), 
 void ledScript(int32_t rgb);          // colore deciso da uno script (0..0xFFFFFF); -1 = di nuovo il modo normale. NON salva nulla in flash
 void ledSetWps(int stage);            // WPS: 0 no, 1 in attesa (blu lento e morbido), 2 riuscito (verde fisso), 3 errore (rosso fisso)
 void ledTest();                        // prova dei colori: rosso, verde, blu, bianco (2 s ciascuno), scritti sulla seriale; poi torna il modo normale
+void ledAnteprima(int32_t rgb, int gr, int gv, int gb);   // pannello di calibrazione: mostra il colore (0..0xFFFFFF) con questi guadagni (0..255) per 20 s; rgb < 0 = fine. NON salva nulla
 void ledSetHold(int stage);           // tasto fisico tenuto: 0 no, 1 >=2 s (azzurro), 2 >=8 s (giallo), 3 >=20 s (rosso)

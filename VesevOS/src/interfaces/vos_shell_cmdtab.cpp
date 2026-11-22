@@ -93,6 +93,9 @@ const shx::CmdInfo kCmds[] = {
   {"ram", "", "ram [mark|diff|audit]", TRK("stack dei task e costo dei servizi"), "mark diff audit", 0},
   {"reboot", "", "reboot", TRK("riavvia la scheda"), "", 0},
   {"reboots", "", "reboots [clear]", TRK("diario degli ultimi 20 riavvii"), "clear", 0},
+#if VOS_WITH_REC
+  {"rec", "", "rec [status|azioni|on|off|clear|set interval|where|max|nome|limite|ogni|azioni|evmax|temp|ram|dev <valore>]", TRK("registratore di dati e azioni (grafico e file CSV)"), "status azioni on off clear set", 0},
+#endif
   {"recovery", "", "recovery [now|update <file>]", TRK("recovery: stato, avvio, aggiornamento"), "now update", 0},
   {"region", "locale", "region [country XX|tx <dBm>|antenna int|ext <dBi>]", TRK("paese, potenza e antenna della radio"), "country tx antenna", 0},
   {"rm", "", "rm <nome>", TRK("elimina un file o una cartella"), "", 0},
@@ -106,6 +109,7 @@ const shx::CmdInfo kCmds[] = {
   {"serial-auth", "", "serial-auth [on|off]", TRK("login sulla seriale: mostra o cambia"), "on off", 0},
   {"setup", "", "setup [done]", TRK("configurazione guidata da seriale"), "done", 0},
   {"sleep", "", "sleep [minuti]", TRK("vecchio nome di 'suspend'"), "", H},
+  {"standby", "", "standby leggero|profondo [tempo <secondi> | alle <HH:MM>]", TRK("sonno leggero o profondo con risveglio a tempo o dal tasto di ripresa (chiede conferma)"), "leggero profondo tempo alle yes", 0},
   {"start", "restart", "start <nome>", TRK("avvia o riavvia un task fermato"), "", 0},
   {"stats", "", "stats [on|off|reset]", TRK("statistiche locali (spente di fabbrica)"), "on off reset", 0},
   {"suspend", "", "suspend [minuti]", TRK("sonno profondo (chiede conferma)"), "yes", 0},

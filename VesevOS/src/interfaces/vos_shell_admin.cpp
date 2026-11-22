@@ -5,6 +5,7 @@
 #include "vos_shell_int.h"
 #include "vos_shell_ask.h"
 #include "../packages/vos_prog_kind.h"
+#include "../packages/vos_rec_file.h"
 #include "../drivers/vos_drv_time.h"
 #include "../drivers/vos_drv_heap.h"
 #include "../core/vos_clamp.h"
@@ -214,6 +215,49 @@ bool shCmdAdmin(const Word& c, const Word& a1, const char* line, OutSink& o, int
     if (m) { o.println(trf("Sonno profondo per %d minuti: poi la scheda riparte da sola (o con RESET)", m)); drvDelayMs(300); powerSleepNow((uint32_t)m * 60UL); }
     else { o.println(tr("Sonno profondo: si riaccende con il tasto RESET")); drvDelayMs(300); sysSleep(); }
   }
+  else if (c == "standby") {
+    // standby <leggero|profondo> [tempo <secondi> | alle <HH:MM>]: il sonno con risveglio a tempo e/o da un piedino.
+    // Il risveglio dal tasto non si scrive qui: se e installato il driver "ripresa", lo standby la trova e la usa da solo.
+    bool profondo = (a1 == "profondo");
+    if (!profondo && a1 != "leggero") { o.println(tr("Uso: standby leggero|profondo [tempo <secondi> | alle <HH:MM>]")); return true; }
+    long sec = 0;
+    int alle = -1;
+    for (int i = 2; ; i++) {
+      Word w = argAt(line, i);
+      if (w.empty()) break;
+      if (w == "yes") continue;
+      if (w == "tempo") { sec = argAt(line, ++i).toInt(); continue; }
+      if (w == "alle") {
+        int hh = -1, mm = -1;
+        Word hm = argAt(line, ++i);
+        if (sscanf(hm.c_str(), "%d:%d", &hh, &mm) != 2 || hh < 0 || hh > 23 || mm < 0 || mm > 59) { o.println(tr("Orario non valido")); return true; }
+        alle = hh * 60 + mm;
+        continue;
+      }
+      o.println(tr("Uso: standby leggero|profondo [tempo <secondi> | alle <HH:MM>]"));
+      return true;
+    }
+    if (sec < 0) { o.println(tr("Tempo: fino a 7 giorni")); return true; }
+    if (alle >= 0) {
+      if (sec) { o.println(tr("Scegli tempo oppure alle, non tutti e due")); return true; }
+      sec = (long)powerSecondiAllOra((unsigned)alle);
+      if (!sec) { o.println(tr("L'ora non e valida: serve la rete o l'ora impostata")); return true; }
+    }
+    if (!profondo && (sec == 0 || sec > POWER_LEGGERO_MAX_S)) {
+      profondo = true;
+      o.println(tr("Il sonno leggero e sospeso: lo standby usa il sonno profondo e la scheda riparte da capo al risveglio"));
+    }
+    bool conRipresa = powerRipresaPresente();                         // lo standby sa solo se c'e un tasto di ripresa, non il suo piedino
+    ErrBuf e;
+    if (!powerStandbyControlla(profondo, (uint32_t)sec, conRipresa, e)) { o.println(e.c_str()); return true; }   // prima i controlli, senza dormire
+    bool asked = needConfirm(line, o, profondo ? tr("Standby profondo: la scheda si spegne e riparte da capo al risveglio. Procedo?")
+                                                : tr("Standby leggero: la rete si ferma e riparte al risveglio. Procedo?"));
+    if (asked) return true;
+    if (conRipresa) o.println(tr("Si risveglia anche con il tasto di ripresa"));
+    ErrBuf e2;
+    if (!powerStandby(profondo, (uint32_t)sec, e2)) { o.println(e2.c_str()); return true; }
+    o.println(profondo ? tr("Standby profondo: parte tra un secondo, la scheda riparte da capo al risveglio") : tr("Standby leggero: parte tra un secondo, la rete torna da sola al risveglio"));
+  }
   else if (c == "selftest") {
     ErrBuf e;
     bool act = strstr(line, "active") != nullptr, nm = strstr(line, "names") != nullptr;
@@ -243,6 +287,82 @@ bool shCmdAdmin(const Word& c, const Word& a1, const char* line, OutSink& o, int
     if (a1 != "" && a1 != "status") { cfgSave(); o.println(tr("Salvato e applicato.")); }
     o.print(powerText().c_str());
   }
+#if VOS_WITH_REC
+  else if (c == "rec") {
+    // rec [status] | azioni | on | off | clear | set <interval|where|max|limite|ogni|azioni|evmax|temp|ram|dev> <valore>
+    // (dev vuole anche il numero 1-4 e il nome, "-" = nessuna; ogni vuole la fonte 1-4, temp o ram e i secondi, 0 = predefinito)
+    RecSettings v;
+    recSettingsGet(v);
+    ErrBuf e;
+    bool change = false;
+    if (a1 == "on") { v.on = true; change = true; }
+    else if (a1 == "off") { v.on = false; change = true; }
+    else if (a1 == "azioni") { o.print(recAzioniText().c_str()); return true; }
+    else if (a1 == "clear") { recClear(e); o.println(e.length() ? e.c_str() : tr("Dati del registratore cancellati.")); return true; }
+    else if (a1 == "set") {
+      Word k = argAt(line, 2), val = argAt(line, 3);
+      k.lower(); val.lower();
+      if (k == "interval") v.sec = (uint16_t)val.toInt();
+      else if (k == "where") v.where = val == "sd" ? 1 : (val == "flash" ? 0 : 9);
+      else if (k == "max") v.maxKb = (uint16_t)val.toInt();
+      else if (k == "limite") {
+        if (val != "totale" && val != "file") { o.println(tr("Uso: rec set limite <totale|file>")); return true; }
+        v.limite = val == "file" ? 1 : 0;
+      }
+      else if (k == "nome") {
+        Word nm = argAt(line, 3);                        // il nome tiene maiuscole e minuscole: val e gia in minuscolo
+        if (nm.length() > REC_NOME_MAX) { o.println(tr("Uso: rec set nome <nome del file, 1-24 caratteri: lettere, numeri, _ e ->")); return true; }
+        snprintf(v.nome, sizeof v.nome, "%s", nm.c_str());
+      }
+      else if (k == "evmax") v.evMax = (uint16_t)val.toInt();
+      else if (k == "ogni") {
+        long s = argAt(line, 4).toInt();
+        if (s < 0 || s > 86400) { o.println(tr("Uso: rec set ogni <1-4|temp|ram> <secondi, 0 = predefinito>")); return true; }
+        if (val == "temp") v.secT = (uint16_t)s;
+        else if (val == "ram") v.secR = (uint16_t)s;
+        else if (val.toInt() >= 1 && val.toInt() <= REC_DEV_MAX) v.secDev[val.toInt() - 1] = (uint16_t)s;
+        else { o.println(tr("Uso: rec set ogni <1-4|temp|ram> <secondi, 0 = predefinito>")); return true; }
+      }
+      else if (k == "azioni") {
+        // elenco di categorie separate da virgola (uscita,pwm,led,contatore,programma,riavvio,sonno,avvio,rete,servizio,sd), "tutte" o "nessuna"
+        uint16_t m = 0;
+        if (val == "tutte") m = 0x7FF;
+        else if (val != "nessuna") {
+          const char* p = val.c_str();
+          while (*p) {
+            const char* q = strchr(p, ',');
+            size_t n = q ? (size_t)(q - p) : strlen(p);
+            int found = -1;
+            for (int c2 = 0; c2 < AZ_N; c2++) if (strlen(azioneNomeCat(c2)) == n && strncmp(azioneNomeCat(c2), p, n) == 0) found = c2;
+            if (found < 0) { o.println(tr("Uso: rec set azioni <uscita,pwm,led,contatore,programma,riavvio,sonno,avvio,rete,servizio,sd|tutte|nessuna>")); return true; }
+            m |= (uint16_t)(1u << found);
+            p += n + (q ? 1 : 0);
+          }
+        }
+        v.azioni = m;
+      }
+      else if (k == "temp") v.t = (val == "on");
+      else if (k == "ram") v.r = (val == "on");
+      else if (k == "dev") {
+        long n = val.toInt();
+        Word nm = argAt(line, 4);
+        if (n < 1 || n > REC_DEV_MAX || nm.length() > 15) { o.println(tr("Uso: rec set dev <1-4> <nome periferica|->")); return true; }
+        snprintf(v.dev[n - 1], sizeof v.dev[n - 1], "%s", nm == "-" ? "" : nm.c_str());
+      }
+      else { o.println(tr("Uso: rec set interval <secondi> | where <flash|sd> | max <KB> | nome <nome> | limite <totale|file> | ogni <fonte> <secondi> | azioni <elenco> | evmax <righe> | temp <on|off> | ram <on|off> | dev <1-4> <nome|->")); return true; }
+      change = true;
+    }
+    else if (a1 != "" && a1 != "status") { o.println(tr("Uso: rec [status|azioni|on|off|clear|set ...]")); return true; }
+    if (change) {
+      recSet(v, e);
+      if (e.length()) { o.println(e.c_str()); return true; }
+      cfgSetOrigin("registratore");
+      cfgSave();
+      o.println(tr("Salvato e applicato."));
+    }
+    o.print(recText().c_str());
+  }
+#endif
   else if (c == "reboot") { o.println(tr("Riavvio...")); sysReboot("comando reboot", 300); }
   else if (c == "script" || c == "vsh") {
     // script: elenco, avvio, stop, uscita degli script salvati in /sbin (.vsb).  vsh <codice>: prova al volo.
@@ -299,11 +419,12 @@ bool shCmdAdmin(const Word& c, const Word& a1, const char* line, OutSink& o, int
     if (a1 == "update") {
       Word f = argAt(line, 2);
       char from[16], to[16]; ErrBuf err;
-      if (f.empty()) { o.println(tr("Uso: recovery update <file.bin> [sha256]  (prima carica il file in Sistema > File)")); return true; }
+      if (f.empty()) { o.println(tr("Uso: recovery update <file.bin> <sha256>  (prima carica il file in Sistema > File)")); return true; }
       if (!drvPsramPresent() && needConfirm(line, o, tr("Questa scheda non ha PSRAM: il recovery viene scritto direttamente. Se si interrompe, il recovery resta inutilizzabile finche non lo riscrivi. Continuare?"))) return true;
       o.println(tr("Controllo e scrivo il recovery: non spegnere la scheda..."));
       Word shaW = argAt(line, 3);
       if (shaW == "yes") shaW = Word();                                 // "yes" in fondo e la conferma, non l'impronta
+      if (shaW.length() != 64) { o.println(tr("L'impronta SHA-256 deve avere 64 cifre esadecimali")); return true; }   // obbligatoria (20/11/2026)
       if (recUpFromFile(f.c_str(), shaW.c_str(), "shell", from, to, sizeof from, err)) o.println(trf("Recovery aggiornato: %s -> %s", from[0] ? from : "?", to));
       else o.println(err.c_str());
       return true;

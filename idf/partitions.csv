@@ -1,0 +1,8 @@
+# VesevOS - tabella partizioni 4 MB con RECOVERY (strada B2), 0.2.0
+# Nome,   Tipo, Sottotipo, Indirizzo, Dimensione
+# rec = recovery 1 MB (Wi-Fi + pagina di caricamento); app0 = VesevOS 2,31 MB; spiffs = file (come prima, stesso indirizzo)
+nvs,      data, nvs,       0x9000,    0x5000
+otadata,  data, ota,       0xe000,    0x2000
+rec,      app,  factory,   0x10000,   0x100000
+app0,     app,  ota_0,     0x110000,  0x250000
+spiffs,   data, spiffs,    0x360000,  0xA0000

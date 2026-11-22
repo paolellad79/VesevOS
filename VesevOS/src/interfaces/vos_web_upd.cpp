@@ -9,6 +9,19 @@
 // "confirm=1" e la conferma esplicita della pagina (dopo l'avviso): senza, nessun ordine
 static bool confirmed(Req* r) { return Pis(r, "confirm", "1"); }
 
+// IPv4 con cui raggiungere la scheda dopo il riavvio nel recovery. Se nella configurazione c'e un indirizzo fisso valido
+// (Wi-Fi di casa, DHCP spento) si usa quello, perche e lo stesso che usera il recovery. Altrimenti quello in uso adesso.
+// Cosi il passaggio funziona anche se la pagina di VesevOS era aperta in IPv6.
+static void ipPerRecovery(char* out, size_t n) {
+  uint32_t ip = 0;
+  bool fisso = netState() != NET_AP && !cfg.staDhcp && ipParse(cfg.ip.view(), ip) && ip != 0;
+  if (fisso) {
+    ipTo(ip, out, n);
+    return;
+  }
+  netIpTo(out, n);
+}
+
 void routesUpd(PsychicHttpServer* S, bool sec) {
   // ultimo esito e dati utili alla pagina (sola lettura). Chi lo legge lo "vede": non e piu nuovo.
   add(S, sec, "/api/updorder", HTTP_GET, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
@@ -35,7 +48,7 @@ void routesUpd(PsychicHttpServer* S, bool sec) {
     char w[96]; whoTo(c, w, sizeof w);
     vlog("SISTEMA: riavvio nel recovery per caricare un file (%s)", w);                   // il gettone non va mai nel registro
     auditEvent(AUD_INFO, "", trf("aggiornamento tramite recovery (file dal computer) richiesto da %s", w).c_str());
-    char ip[16]; netIpTo(ip, sizeof ip);
+    char ip[16]; ipPerRecovery(ip, sizeof ip);
     HeapBuf j(256);
     j.add("{\"ok\":true,\"min\":15");
     char u[128];
@@ -66,7 +79,7 @@ void routesUpd(PsychicHttpServer* S, bool sec) {
     char w[96]; whoTo(c, w, sizeof w);
     vlog("SISTEMA: riavvio nel recovery per scaricare l'aggiornamento (%s)", w);          // l'indirizzo non va nel registro
     auditEvent(AUD_INFO, "", trf("aggiornamento tramite recovery (rete) richiesto da %s: versione %s, SHA-256 %.12s", w, v[0] ? v : "?", h).c_str());
-    char ip[16], body[64]; netIpTo(ip, sizeof ip);
+    char ip[16], body[64]; ipPerRecovery(ip, sizeof ip);
     snprintf(body, sizeof body, "{\"ok\":true,\"ip\":\"%s\"}", ip);
     esp_err_t res = sendJson(s, body);
     sysRebootLater("recovery per aggiornamento", 800);

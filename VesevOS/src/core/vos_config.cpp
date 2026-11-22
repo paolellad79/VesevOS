@@ -27,7 +27,7 @@
 VosConfig cfg;
 
 void cfgDefaults() {
-  cfg.hostname = "vesevos"; cfg.domain = ""; cfg.lang = "it";
+  cfg.hostname = "vesevos"; cfg.domain = ""; cfg.messaggioLogin = ""; cfg.lang = "it";
   cfg.setupDone = false;
   cfg.apSsid = "VesevOS";
   cfg.serialAuth = true; cfg.serialIdleMin = 0;
@@ -51,6 +51,8 @@ void cfgDefaults() {
   cfg.ledPin = VOS_PIN_LED_RGB;
   for (int i = 0; i < LEDSRC_COUNT; i++) cfg.ledSrcColor[i] = kLedSrcDefault[i];
   cfg.ledCpuThr = LED_CPU_THR_DEFAULT;
+  for (int i = 0; i < 3; i++) cfg.ledGain[i] = 255;
+  for (int i = 0; i < LED_STATI; i++) cfg.ledStato[i] = kLedStatoDefault[i];
   cfg.led2Mode = VOS_HAS_LED_RGB ? LED_OFF : LED_STATE;   // di fabbrica spento (C6: come prima); senza LED RGB (C3) e l'unico LED: dice lo stato
   cfg.led2CpuThr = LED_CPU_THR_DEFAULT;
   cfg.led2Brightness = 255;
@@ -61,7 +63,12 @@ void cfgDefaults() {
   cfg.ntpServer = "pool.ntp.org"; cfg.ntpServer2 = "";   // nessun secondo server di fabbrica (niente Google)
   cfg.tz = "CET-1CEST,M3.5.0,M10.5.0/3"; cfg.tzName = "Europe/Rome";
   cfg.cpuMhz = 0; cfg.cpuGov = 0; cfg.cpuUp = 80; cfg.cpuDown = 20; cfg.cpuHold = 10; cfg.logLevel = 2; cfg.statOn = false; cfg.pwMode = 0; cfg.pwAwake = 15; cfg.pwSleep = 10;
-  cfg.dateFmt = 0; cfg.timeFmt = 0; cfg.tempUnit = 0; cfg.weekStart = 0; cfg.decSep = 0;
+  cfg.recOn = false; cfg.recSec = 60; cfg.recWhere = 0; cfg.recMaxKb = 256; cfg.recT = true; cfg.recR = false;
+  for (int i = 0; i < 4; i++) { cfg.recDev[i] = ""; cfg.recSecDev[i] = 0; }
+  cfg.recNome = "rec"; cfg.recLimite = 0; cfg.recSecT = 0; cfg.recSecR = 0; cfg.recAzioni = 0x7FF; cfg.recEvMax = 2000;
+  cfg.dateFmt = 0; cfg.timeFmt = 0; cfg.dataLungaFmt = 0; cfg.oraLungaFmt = 0; cfg.oraLungaSec = true;
+  cfg.dataCortaTesto = ""; cfg.dataLungaTesto = ""; cfg.oraLungaTesto = "";
+  cfg.tempUnit = 0; cfg.tempTarSoc = 0; cfg.tempTarExt = 0; cfg.weekStart = 0; cfg.decSep = 0;
   cfg.country = ""; cfg.antExt = 0; cfg.antGain = 0; cfg.txDbm = 0;
   cfg.fwMode = 0; cfg.fwNtp = false; cfg.fwN = 0;
   cfg.meshAuto = false; cfg.meshRole = 0; cfg.meshKey = ""; cfg.meshCh = 1;

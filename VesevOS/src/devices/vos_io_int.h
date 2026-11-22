@@ -32,6 +32,7 @@ inline int ioOptNum(const char* opt, const char* key, int def) {
   return q ? (int)strtol(q + strlen(key), nullptr, 10) : def;
 }
 
+IoDev* ioDevPerNome(const char* name);   // la periferica con quel nome (nullptr se non c'e); solo per i file di devices/
 const char* ioCfgSave(const IoDev* list, int n, int skip, const IoDev* extra);   // scrive io.cfg (lista + righe tenute + extra, senza "skip"); nullptr = fatto, altrimenti il motivo. Chiamare con il blocco di vos_io
 bool ioCfgParseRiga(const char* l, char* nm, size_t nmCap, unsigned& c, int& g, unsigned& fl, int& g2, unsigned& ad, unsigned& dr, unsigned& kh);   // legge una riga; false = da saltare
 void ioCfgKeepRow(const char* row);      // riga valida ma non caricata (pin occupato): resta nel file

@@ -7,7 +7,7 @@ function evNomi(){
 
 function evNota(n){if(n)AL.push(["w",tf("Accessi bloccati da guardare: {0}",n),"evs"])}
 function evQuando(x){
-  if(x.q)return new Date(x.q*1000).toLocaleString();
+  if(x.q)return fmtOraData(x.q);
   if(x.s<60)return t("meno di un minuto fa");
   return x.s<3600?tf("{0} minuti fa",Math.floor(x.s/60)):tf("{0} ore fa",Math.floor(x.s/3600))
 }

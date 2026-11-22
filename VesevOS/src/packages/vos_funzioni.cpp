@@ -6,6 +6,7 @@
 #include "vos_funzioni.h"
 #include "../devices/vos_io.h"
 #include "../core/vos_common.h"
+#include "../core/vos_azioni.h"
 #if VOS_WITH_FUNZIONI
 #include "../third_party/funzioni/src/funzioni.h"
 #include <time.h>
@@ -253,6 +254,7 @@ static bool loadScript(const char* n, HeapBuf& code, ErrBuf& err) {   // legge /
 
 // ---------- il task che esegue lo script ----------
 static void runTask(void*) {
+ azioneOrigineImposta(AO_SCRIPT);                  // le azioni di uno script o di un'app portano l'origine "script"
  for (;;) {
   g_peak = g_used = 0;
   g_lastYield = drvMillis();
@@ -314,6 +316,7 @@ static void runTask(void*) {
   ledScript(-1);                                           // fine script: il LED torna al modo normale
   g_lastMs = drvMillis() - t0; g_lastPeak = (uint32_t)g_peak; g_lastLeak = (uint32_t)funzioniLiberaTutto();   // dopo be_vm_delete di solito non resta nulla
   g_lastOk = g_runOk; g_runs++;
+  if (g_bg && !g_cmd) azionePubblica(AZ_PROGRAMMA, g_name, g_runOk ? 0 : 2);
   if (g_bg) {
     char first[81]; size_t k = 0;                          // prima riga dell'errore, per il registro
     while (k < sizeof(first) - 1 && g_ebuf[k] && g_ebuf[k] != '\n') { first[k] = g_ebuf[k]; k++; }
@@ -331,6 +334,7 @@ static void runTask(void*) {
       if (!g_code) { vlog("SCRIPT: script %s dalla coda non avviato: memoria", nm); continue; }
       memcpy(g_code, code.c_str(), code.length() + 1);
       prepGlobals(true, 0, nm);
+      azionePubblica(AZ_PROGRAMMA, nm, 1);
       vlog("SCRIPT: script %s avviato da %s (dalla coda)", nm, who);
       next = true; break;
     }
@@ -338,6 +342,7 @@ static void runTask(void*) {
   }
   if (g_abandoned || g_bg) { portENTER_CRITICAL(&g_mux); g_busy = false; portEXIT_CRITICAL(&g_mux); }
   g_done = true;
+  azioneOrigineImposta(AO_SISTEMA);                 // si libera la voce prima che il task sparisca
   vTaskDelete(NULL);
   return;
  }
@@ -358,6 +363,7 @@ static bool startRun(const char* code, size_t len, bool bg, uint32_t maxMs, cons
   if (!drvTaskCreate(runTask, "funzioni", FUNZIONI_STACK_DIM, NULL, 1, NULL, DRV_CORE_ANY)) {   // core: automatico (prima: core 1 fisso)
     free(g_code); g_code = NULL; g_busy = false; err = tr("Non riesco ad avviare lo script"); return false;
   }
+  if (bg && !call) azionePubblica(AZ_PROGRAMMA, name, 1);       // chi avvia e il task che chiama (shell, pagina, regola)
   return true;
 }
 

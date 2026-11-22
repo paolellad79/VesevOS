@@ -1,5 +1,17 @@
 # Cronologia delle versioni
 
+## 1.8.30k (da rilasciare) - Cinque schede, sonno profondo
+
+- Nuova scheda: ESP32-C3, oltre a ESP32-S3 e ESP32-C6.
+- Sonno profondo: `standby profondo tempo <secondi>`. Alla riaccensione la scheda riparte da zero,
+  come una riaccensione programmata.
+- Riscritta la grafica interna al firmware, con un nuovo stile grafico.
+- Risolte alcune complicazioni del codice.
+- File di risorse con versione e dipendenze nel file; nuovo formato `.vgz`.
+- Impronta SHA-256 dentro il file: la scheda aggiorna da sola `SHA256SUMS`.
+- Pagina iniziale: cornetto sopra la scritta VesevOS.
+- Richiede firmware 1.8.30 o piu nuovo per i nuovi file di risorse.
+
 ## 1.8.24c (rilasciata il 17/11/2026) - Due schede, un solo sistema
 
 - Nuova scheda: VesevOS gira ora anche su **ESP32-C6**, oltre che su ESP32-S3.

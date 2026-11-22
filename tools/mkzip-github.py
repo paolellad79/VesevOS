@@ -2,14 +2,14 @@
 # VesevOS - tools/mkzip-github.py
 # Prepara UN SOLO zip per GitHub: sorgenti del repo (filtrati) + sito (cartella sito-github/ accanto al repo).
 # Uso (dalla cartella del repo): python3 tools/mkzip-github.py <versione>
-# Scrive ../consegna/VesevOS-github-<versione>.zip, stampa dimensione, SHA-256, controlli e file sospetti (solo nomi).
+# Scrive ../consegna/github/VesevOS-github-<versione>.zip, stampa dimensione, SHA-256, controlli e file sospetti (solo nomi).
 # Lista completa dei passi: docs/progetto/lista-prima-di-pubblicare.md
 import hashlib, json, os, re, shutil, sys, tempfile, zipfile
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE = os.path.dirname(REPO)
 SITO = os.path.join(BASE, 'sito-github')
-OUT_DIR = os.path.join(BASE, 'consegna')
+OUT_DIR = os.path.join(BASE, 'consegna', 'github')   # struttura dal 21/11/2026
 RISORSE = os.path.join(BASE, 'build', 'risorse', 'usr-share-vesevos')   # file di /usr/share/vesevos scritti da tools/mkrisorse.py
 IMMAGINE = os.path.join(BASE, 'build', 'risorse', 'immagine')           # immagine LittleFS corta scritta da tools/mkimmaginerisorse.py
 
@@ -40,6 +40,24 @@ def copia(src, dst):
             os.makedirs(os.path.join(dst, rel_d), exist_ok=True)
             shutil.copy2(os.path.join(d, f), os.path.join(dst, rel_d, f))
 
+
+# Progetto ESP-IDF (fuori dal repo: ../idf): senza questo chi scarica da GitHub non puo compilare. Si copiano solo i file sorgente,
+# mai le cartelle di build, i componenti scaricati (managed_components*), i log e le configurazioni di prova (arduino, qemu).
+IDF = os.path.join(BASE, 'idf')
+IDF_FILE = ('CMakeLists.txt', 'partitions.csv', 'sdkconfig.defaults.vesevos', 'sdkconfig.defaults.c3', 'sdkconfig.defaults.c6',
+            'dependencies.lock', 'dependencies.lock.c3', 'dependencies.lock.c6', 'lwip_dhcp_fix.h')
+IDF_CARTELLE = ('main', 'components')
+
+def copia_idf(stage):
+    dst = os.path.join(stage, 'idf')
+    os.makedirs(dst, exist_ok=True)
+    for nome in IDF_FILE:
+        src = os.path.join(IDF, nome)
+        if not os.path.isfile(src):
+            sys.exit('manca idf/%s: il progetto ESP-IDF non e completo' % nome)
+        shutil.copy2(src, os.path.join(dst, nome))
+    for cart in IDF_CARTELLE:
+        copia(os.path.join(IDF, cart), os.path.join(dst, cart))
 
 def versione_firmware():
     # VOS_VERSION in core/vos_common.h: la cartella risorse/<versione>/ deve avere quella del firmware, perche e la pagina a costruire l'indirizzo
@@ -116,6 +134,7 @@ def main():
         for rel in ESCLUDI_PERCORSI:
             shutil.rmtree(os.path.join(stage, rel), ignore_errors=True)
         copia(SITO, stage)
+        copia_idf(stage)
         ver_ris, n_ris = copia_risorse(stage)
         nome_img, byte_img, sha_img = copia_immagine(stage)
         # controlli

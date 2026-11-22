@@ -18,22 +18,27 @@ public:
   bool     begin(const char* ns, bool readOnly = false);
   void     end();
   uint32_t getUInt(const char* k, uint32_t d = 0);
-  void     putUInt(const char* k, uint32_t v);
+  bool     putUInt(const char* k, uint32_t v);          // le put* dicono se la scrittura (e il commit) sono riuscite; chi non controlla continua a funzionare come prima
   uint8_t  getUChar(const char* k, uint8_t d = 0);
-  void     putUChar(const char* k, uint8_t v);
+  bool     putUChar(const char* k, uint8_t v);
   bool     getBool(const char* k, bool d = false);
-  void     putBool(const char* k, bool v);
+  bool     putBool(const char* k, bool v);
   // Legge un testo in un buffer: ritorna i caratteri letti (0 se manca o non ci sta; il buffer resta com'era)
   size_t   getString(const char* k, char* out, size_t cap);
-  void     putString(const char* k, const char* v);
+  bool     putString(const char* k, const char* v);
   // Dati binari di lunghezza fissa: getBlob e true solo se la chiave esiste e ha ESATTAMENTE n byte (altrimenti out resta com'era)
   bool     getBlob(const char* k, void* out, size_t n);
-  void     putBlob(const char* k, const void* v, size_t n);
+  bool     putBlob(const char* k, const void* v, size_t n);
   bool     has(const char* k);               // la chiave esiste (di qualunque tipo)?
   void     remove(const char* k);
   void     clear();
+  static uint32_t errori();                  // quante scritture sono fallite dall'avvio (per la diagnosi); ogni errore e anche scritto sulla console
 private:
   uint32_t h_ = 0;           // nvs_handle_t
   bool     open_ = false;
   bool     ro_ = false;
 };
+
+// Avvio della NVS al boot: se la NVS e piena o di versione nuova la cancella e riparte. Ritorna true se e pronta.
+// motivoCancellazione: 0 se non e stata cancellata, altrimenti il codice d'errore che l'ha fatta cancellare.
+bool drvNvsAvvia(int& motivoCancellazione);

@@ -16,7 +16,7 @@
 // RAM (un bit per file). File mancante o non valido: l'errore dice quale, e chi chiama usa il suo ripiego.
 enum RisFile : uint8_t { RF_COMUNI, RF_LIC_APACHE2, RF_LIC_BSD3, RF_LIC_MIT, RF_MANUALE, RF_RADIO, RF_HTML, RF_N };
 
-const char* risFileNome(RisFile f);                                     // "comuni.json.gz", "manuale.txt", ...
+const char* risFileNome(RisFile f);                                     // "comuni.vgz", "manuale.txt", ... (i .vgz si leggono anche col vecchio nome .gz)
 bool        risNomeNotoFw(const char* nome, size_t lunghezza);          // il nome (non terminato) e un file di risorse conosciuto
 bool        risFilePercorso(RisFile f, char* out, size_t cap);          // "/usr/share/vesevos/<nome>"
 
@@ -47,3 +47,6 @@ void     risFileAzzera();
 void     risFileAzzeraUno(RisFile f);
 uint32_t risFileGen();                                   // cambia a ogni azzeramento: chi controlla a pezzi riparte da capo
 
+
+// Versione propria e firmware minimo del file, letti dentro il file (vedi vos_risorse_rule.h). ver almeno 8 byte, "" se non dichiarata. false = file non leggibile.
+bool risFileMeta(RisFile f, char* ver, size_t cap, uint32_t* fwMin);

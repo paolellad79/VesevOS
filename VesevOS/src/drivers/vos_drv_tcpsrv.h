@@ -20,6 +20,7 @@ class DrvTcpMini {
 public:
   bool begin(uint16_t port, DrvTcpHandler h, const char* taskName);   // false se la porta non e disponibile o manca la memoria
   bool running() const { return task_ != nullptr; }
+  void end();                                                         // ferma il server: chiude il socket e aspetta che il task finisca (al massimo 4 s)
   // Byte di stack che il task che chiama non ha MAI usato (minimo storico, ESP-IDF uxTaskGetStackHighWaterMark). Si chiama dal gestore.
   static uint32_t stackFreeMin();
 private:
@@ -28,6 +29,7 @@ private:
   int           sock_ = -1;
   DrvTcpHandler handler_ = nullptr;
   void*         task_ = nullptr;      // TaskHandle_t
+  volatile bool fermare_ = false;     // end() chiede al task di finire
   char          in_[TCPSRV_IN_MAX + 1];   // buffer fuori dallo stack del task (una connessione alla volta, quindi bastano questi)
   char          out_[TCPSRV_OUT_MAX];
 };

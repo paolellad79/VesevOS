@@ -3,11 +3,11 @@
 // VesevOS - vos_drv_contatore.cpp
 // Contatore di impulsi con PCNT (vedi vos_drv_contatore.h): un canale per unita, solo il pin degli impulsi.
 #include "vos_drv_contatore.h"
+#include "vos_drv_gpio.h"
 #include <soc/soc_caps.h>
 
 #if SOC_PCNT_SUPPORTED
 #include <driver/pulse_cnt.h>
-#include <driver/gpio.h>
 
 struct Unita { pcnt_unit_handle_t unit; pcnt_channel_handle_t canale; };
 
@@ -23,8 +23,7 @@ static void libera(int h) {
 
 // Il pin lo configura pcnt_new_channel (con la resistenza verso l'alto): qui si porta al valore scelto.
 static void tiraPin(int gpio, uint8_t pull) {
-  if (pull == DRV_CONT_PULL_SU) gpio_pullup_en((gpio_num_t)gpio); else gpio_pullup_dis((gpio_num_t)gpio);
-  if (pull == DRV_CONT_PULL_GIU) gpio_pulldown_en((gpio_num_t)gpio); else gpio_pulldown_dis((gpio_num_t)gpio);
+  drvGpioResistenze(gpio, pull == DRV_CONT_PULL_SU, pull == DRV_CONT_PULL_GIU);
 }
 
 int drvContatoreApri(int gpio, uint8_t fronte, uint16_t filtroNs, uint8_t pull) {

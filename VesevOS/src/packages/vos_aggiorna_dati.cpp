@@ -262,10 +262,11 @@ bool impronta(const char* s) {
 
 }  // namespace
 
-bool aggLeggiUltima(const char* testo, size_t n, AggDisponibile& d) {
-  memset(&d, 0, sizeof d);
-  uint32_t schema = 0;
-  Campo firmware[] = {
+namespace {
+
+// I campi di un blocco firmware; scrivono in d. recupero = versione del recovery dichiarata nel blocco (solo per i blocchi di scheda).
+void campiFirmware(Campo (&c)[8], AggDisponibile& d, bool conRecovery) {
+  Campo f[8] = {
     {"version", d.ver, sizeof d.ver, nullptr, nullptr, 0, false},
     {"url", d.url, sizeof d.url, nullptr, nullptr, 0, false},
     {"sha256", d.sha, sizeof d.sha, nullptr, nullptr, 0, false},
@@ -273,12 +274,36 @@ bool aggLeggiUltima(const char* testo, size_t n, AggDisponibile& d) {
     {"date", d.data, sizeof d.data, nullptr, nullptr, 0, false},
     {"publisher", d.chi, sizeof d.chi, nullptr, nullptr, 0, false},
     {"channel", d.canale, sizeof d.canale, nullptr, nullptr, 0, false},
+    {"recovery", conRecovery ? d.verRec : nullptr, conRecovery ? sizeof d.verRec : 0, nullptr, nullptr, 0, false},
   };
-  Campo recovery[] = {{"version", d.verRec, sizeof d.verRec, nullptr, nullptr, 0, false}};
+  for (int i = 0; i < 8; i++) c[i] = f[i];
+}
+
+// Il blocco e usabile? (tutti i campi obbligatori, indirizzo https, versione leggibile)
+bool bloccoValido(const AggDisponibile& d) {
+  if (!d.dim || !d.ver[0] || !impronta(d.sha) || !testoVisibile(d.url) || strncmp(d.url, "https://", 8) != 0) return false;
+  return pacConfrontaFirmware(d.ver, d.ver) == 0;
+}
+
+}  // namespace
+
+bool aggLeggiUltima(const char* testo, size_t n, AggDisponibile& d, const char* sigla) {
+  memset(&d, 0, sizeof d);
+  uint32_t schema = 0;
+  AggDisponibile vecchio;                          // blocco "firmware" (solo S3)
+  AggDisponibile scheda;                           // blocco "schede.<sigla>"
+  memset(&vecchio, 0, sizeof vecchio);
+  memset(&scheda, 0, sizeof scheda);
+  Campo firmware[8], perScheda[8];
+  campiFirmware(firmware, vecchio, false);
+  campiFirmware(perScheda, scheda, true);
+  Campo recovery[] = {{"version", vecchio.verRec, sizeof vecchio.verRec, nullptr, nullptr, 0, false}};
+  Campo schede[] = {{sigla, nullptr, 0, nullptr, perScheda, 8, false}};
   Campo radice[] = {
     {"schema", nullptr, 0, &schema, nullptr, 0, false},
-    {"firmware", nullptr, 0, nullptr, firmware, sizeof firmware / sizeof firmware[0], false},
+    {"firmware", nullptr, 0, nullptr, firmware, 7, false},
     {"recovery", nullptr, 0, nullptr, recovery, 1, false},
+    {"schede", nullptr, 0, nullptr, schede, 1, false},
   };
   Lettore l = {testo, testo + n};
   saltaSpazi(l);
@@ -287,8 +312,14 @@ bool aggLeggiUltima(const char* testo, size_t n, AggDisponibile& d) {
   saltaSpazi(l);
   if (l.p != l.fine) return false;                 // altro testo dopo la fine: non e un elenco valido
   if (schema != 1) return false;
-  if (!d.dim || !d.ver[0] || !impronta(d.sha) || !testoVisibile(d.url) || strncmp(d.url, "https://", 8) != 0) return false;
-  return pacConfrontaFirmware(d.ver, d.ver) == 0;
+  if (schede[0].visto) {                           // c'e il blocco di questa scheda: vale solo quello
+    d = scheda;
+    if (!d.verRec[0] && !strcmp(sigla, "S3")) snprintf(d.verRec, sizeof d.verRec, "%s", vecchio.verRec);
+    return bloccoValido(d);
+  }
+  if (strcmp(sigla, "S3") != 0) return false;      // il vecchio blocco "firmware" e per la S3: le altre schede non lo usano
+  d = vecchio;
+  return bloccoValido(d);
 }
 
 bool aggSpazioRiserva(uint32_t liberiKb, uint32_t byteImmagine) {
@@ -310,8 +341,8 @@ bool aggOrarioGiusto(const struct tm& t, uint8_t freq, uint8_t giorno, uint16_t 
   return true;
 }
 
-bool aggTestaFirmware(const uint8_t* dati, size_t n) {
-  return n >= 14 && dati[0] == 0xE9 && dati[12] == 0x09 && dati[13] == 0x00;
+bool aggTestaFirmware(const uint8_t* dati, size_t n, uint16_t idChip) {
+  return n >= 14 && dati[0] == 0xE9 && dati[12] == (idChip & 0xFF) && dati[13] == (idChip >> 8);
 }
 
 bool aggMarchio(const uint8_t* dati, size_t n, size_t& pos) {

@@ -4,6 +4,7 @@
 #include "vos_log.h"
 #include "vos_serial.h"
 #include "vos_util.h"
+#include "vos_time.h"
 #include "vos_diario.h"
 #include "vos_ramstorico.h"
 #include <stdarg.h>
@@ -15,9 +16,12 @@
 
 #define LOG_LINES VOS_LOG_RIGHE   // 150 (C3: 40), vedi boards/vos_board.h
 #define LOG_LEN   120
+#define Q_BOOT    0x80000000u   // bit alto: il valore e "secondi dall'avvio", non un'epoca
+#define STAMP_MAX TIME_FMT_MAX   // data e ora al massimo (formato scritto a mano compreso, tagliato se piu lungo)
 
 // il registro (18 KB, C3: 4,8 KB) sta nella PSRAM se c'e: cosi la RAM interna resta libera per Wi-Fi e connessioni cifrate
 static char     (*g_lines)[LOG_LEN] = nullptr;
+static uint32_t g_q[LOG_LINES];          // quando: epoca; con il bit alto acceso = secondi dall'avvio (ora non valida). 4 byte per riga
 static uint16_t g_head = 0;
 static uint16_t g_count = 0;
 static volatile int g_level = LG_INFO;
@@ -49,14 +53,11 @@ static void put(int lv, const char* buf) {
   if (lv <= LG_WARN) diaryNote(buf);
   if (!g_mx || !g_lines) return;
   if (xSemaphoreTake(g_mx, pdMS_TO_TICKS(50)) == pdTRUE) {
-    char stamp[24];
     time_t now = time(NULL);
-    if (now > 1700000000) {                       // ora valida: data e ora vere
-      struct tm tmv; localtime_r(&now, &tmv);
-      strftime(stamp, sizeof(stamp), "%d/%m %H:%M:%S ", &tmv);
-    } else snprintf(stamp, sizeof(stamp), "[%lus] ", (unsigned long)(drvMillis() / 1000));
+    // si salva solo il numero: il formato di data e ora si applica quando si mostra la riga
+    g_q[g_head] = now > 1700000000 ? (uint32_t)now : (Q_BOOT | (uint32_t)(drvMillis() / 1000));
     static const char TAG[4] = {'E', 'W', 'I', 'D'};
-    snprintf(g_lines[g_head], LOG_LEN, "%s[%c] %s", stamp, TAG[lv & 3], buf);
+    snprintf(g_lines[g_head], LOG_LEN, "[%c] %s", TAG[lv & 3], buf);
     g_head = (g_head + 1) % LOG_LINES;
     if (g_count < LOG_LINES) g_count++;
     xSemaphoreGive(g_mx);
@@ -83,22 +84,39 @@ void vlogl(int lv, const char* fmt, ...) {
   put(vosClamp(lv, 0, 3), buf);
 }
 
-std::string logGet(int maxLines) {
+// Tempo di una riga come testo: data e ora nel formato scelto, oppure "[Ns]" se l'ora non era valida
+static void whenText(uint32_t q, char* out, size_t n) {
+  if (q & Q_BOOT) { snprintf(out, n, "[%lus]", (unsigned long)(q & ~Q_BOOT)); return; }
+  timeFmtEpoch(q, true, out, n);
+}
+
+// raw = false: "<data ora> [I] testo"; raw = true (per la pagina): "<epoca> [I] testo" oppure "u<secondi> [I] testo"
+static std::string logRead(int maxLines, bool raw) {
   std::string r;
   if (!g_mx || !g_lines) return r;
   if (xSemaphoreTake(g_mx, pdMS_TO_TICKS(100)) != pdTRUE) return r;
   int n = g_count < maxLines ? g_count : maxLines;
   int start = (g_head - n + LOG_LINES * 2) % LOG_LINES;
   size_t total = 0;                                   // prima si misura, poi si prende la memoria una volta sola
-  for (int i = 0; i < n; i++) total += strlen(g_lines[(start + i) % LOG_LINES]) + 1;
+  for (int i = 0; i < n; i++) total += strlen(g_lines[(start + i) % LOG_LINES]) + STAMP_MAX + 2;
   r.reserve(total);
   for (int i = 0; i < n; i++) {
-    r.append(g_lines[(start + i) % LOG_LINES]);
+    int k = (start + i) % LOG_LINES;
+    char when[STAMP_MAX];
+    if (!raw) whenText(g_q[k], when, sizeof when);
+    else if (g_q[k] & Q_BOOT) snprintf(when, sizeof when, "u%lu", (unsigned long)(g_q[k] & ~Q_BOOT));
+    else snprintf(when, sizeof when, "%lu", (unsigned long)g_q[k]);
+    r.append(when);
+    r.push_back(' ');
+    r.append(g_lines[k]);
     r.push_back('\n');
   }
   xSemaphoreGive(g_mx);
   return r;
 }
+
+std::string logGet(int maxLines) { return logRead(maxLines, false); }
+std::string logGetRaw(int maxLines) { return logRead(maxLines, true); }
 
 int logCount() { return g_count; }
 

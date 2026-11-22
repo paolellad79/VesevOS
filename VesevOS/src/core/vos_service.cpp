@@ -4,6 +4,7 @@
 // Registro dei servizi: nessuna dipendenza dall'hardware (si prova sul computer).
 #include "vos_service.h"
 #include "vos_eventbus.h"
+#include "vos_azioni.h"
 #include <string.h>
 
 static const ServiceOps* g_svc[VOS_MAX_SERVICES];
@@ -29,6 +30,7 @@ bool serviceStart(const char* id, ErrBuf& err) {
   if (!s) { err = "servizio sconosciuto"; return false; }
   bool r = s->begin(err);
   EventBus::publish("svc.state", s->id, s->state());
+  azionePubblica(AZ_SERVIZIO, s->id, s->state());
   return r;
 }
 bool serviceStop(const char* id, ErrBuf& err) {
@@ -36,6 +38,7 @@ bool serviceStop(const char* id, ErrBuf& err) {
   if (!s) { err = "servizio sconosciuto"; return false; }
   s->stop();
   EventBus::publish("svc.state", s->id, s->state());
+  azionePubblica(AZ_SERVIZIO, s->id, s->state());
   return true;
 }
 bool serviceRestart(const char* id, ErrBuf& err) {
@@ -45,6 +48,7 @@ bool serviceRestart(const char* id, ErrBuf& err) {
   if (s->restart) r = s->restart(err);
   else { s->stop(); r = s->begin(err); }
   EventBus::publish("svc.state", s->id, s->state());
+  azionePubblica(AZ_SERVIZIO, s->id, s->state());
   return r;
 }
 uint32_t serviceRam(const char* id) { const ServiceOps* s = serviceFind(id); return (s && s->ramBytes) ? s->ramBytes() : 0; }

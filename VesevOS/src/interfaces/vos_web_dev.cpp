@@ -15,6 +15,7 @@
 #include "vos_mod_app.h"
 #include "../packages/vos_btn.h"
 #include "../core/vos_clamp.h"
+#include "../core/vos_msglogin.h"
 
 // Copia in out (cap compreso lo zero) il testo in minuscolo; chi chiama ha gia controllato che ci stia
 static void lowerCopy(std::string_view v, char* out, size_t cap) {
@@ -182,7 +183,7 @@ void routesDev(PsychicHttpServer* S, bool sec) {
     return pinTestRequest((int)Pint(r, "gpio"), Pc(r, "action"), Pc(r, "pull"), err) ? ok(s) : ko(s, err);
   });
   add(S, sec, "/api/log", HTTP_GET, L_GUEST, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
-    std::string g = logGet(150);
+    std::string g = logGetRaw(150);
     return sendText(s, 200, "text/plain; charset=utf-8", g.c_str(), g.size());
   });
   add(S, sec, "/api/log/clear", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
@@ -383,6 +384,13 @@ void routesDev(PsychicHttpServer* S, bool sec) {
       char key[4] = {'s', (char)('0' + i), 0};
       if (Pc(r, key)[0]) hasSrc = true;
     }
+    // calibrazione (guadagni g0..g2 e tonalita degli stati t0..t5): solo Admin, come i colori del trigger
+    bool hasCal = false;
+    for (int i = 0; i < 9; i++) {
+      char key[4] = {(char)(i < 3 ? 'g' : 't'), (char)('0' + (i < 3 ? i : i - 3)), 0};
+      if (Pc(r, key)[0]) hasCal = true;
+    }
+    if (hasCal && c.role < ROLE_ADMIN) return ko(s, tr("Serve il livello Admin"));
     bool newTrigger = m >= LED_FLASH && m != cfg.ledMode;
     if ((hasSrc || newTrigger) && c.role < ROLE_ADMIN) return ko(s, tr("Serve il livello Admin"));
     long thr = Pc(r, "thr")[0] ? Pint(r, "thr") : cfg.ledCpuThr;
@@ -391,20 +399,43 @@ void routesDev(PsychicHttpServer* S, bool sec) {
       char key[4] = {'s', (char)('0' + i), 0};
       if (Pc(r, key)[0]) cfg.ledSrcColor[i] = (uint32_t)strtoul(Pc(r, key), NULL, 10) & 0xFFFFFF;
     }
+    for (int i = 0; i < 3; i++) {
+      char key[3] = {'g', (char)('0' + i), 0};
+      if (Pc(r, key)[0]) cfg.ledGain[i] = (uint8_t)vosClamp(Pint(r, key), 0, 255);
+    }
+    for (int i = 0; i < LED_STATI; i++) {
+      char key[3] = {'t', (char)('0' + i), 0};
+      if (Pc(r, key)[0]) cfg.ledStato[i] = (uint32_t)strtoul(Pc(r, key), NULL, 10) & 0xFFFFFF;
+    }
     cfg.ledCpuThr = (uint8_t)thr;
     cfg.ledMode = m; cfg.ledBrightness = b;
     cfg.ledColor = (uint32_t)strtoul(Pc(r, "color"), NULL, 10) & 0xFFFFFF;
     ledApplyConfig(); cfgSave(); return ok(s);
   });
 
+  // Pannello "Test e calibrazione": mostra il colore c con i guadagni g0..g2 senza salvare; fine=1 chiude la prova
+  add(S, sec, "/api/led/anteprima", HTTP_POST, L_OPER, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    if (!VOS_HAS_LED_RGB) return ko(s, tr("Questa scheda non ha un LED a colori"));
+    long g[3] = {Pc(r, "g0")[0] ? Pint(r, "g0") : cfg.ledGain[0], Pc(r, "g1")[0] ? Pint(r, "g1") : cfg.ledGain[1], Pc(r, "g2")[0] ? Pint(r, "g2") : cfg.ledGain[2]};
+    ledAnteprima(Pc(r, "fine")[0] ? -1 : (int32_t)Pint(r, "c"), (int)g[0], (int)g[1], (int)g[2]);
+    return ok(s);
+  });
+
   add(S, sec, "/api/system", HTTP_POST, L_ADMIN, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
     std::string_view hv = Pt(r, "hostname"), dv = Pt(r, "domain");
     if (!hostnameValid(hv)) return ko(s, tr("Nome host non valido (1-32 caratteri: lettere, numeri, trattino; non all'inizio o alla fine)"));
     if (!domainValid(dv)) return ko(s, tr("Dominio non valido (nomi separati da punti, solo lettere, numeri e trattino)"));
+    char msg[MSGLOGIN_MAX + 1];                                           // messaggio della pagina di accesso (facoltativo: senza il campo resta com'e)
+    bool conMsg = has(r, "messaggiologin");
+    if (conMsg) {
+      ErrBuf me;
+      if (!msgLoginControlla(Pc(r, "messaggiologin"), msg, sizeof msg, me)) return ko(s, me);
+    }
     char hn[40], dm[64];                                                  // gia controllati: hostname fino a 32, dominio fino a 60
     lowerCopy(hv, hn, sizeof hn); lowerCopy(dv, dm, sizeof dm);
     bool changed = (cfg.hostname != hn);
     cfg.hostname = hn; cfg.domain = dm;
+    if (conMsg) cfg.messaggioLogin = msg;
     cfgSave();
     if (changed) {
       if (netState() == NET_AP) netApplyServices();   // hotspot acceso: solo il nome mDNS, l'hotspot e i client restano

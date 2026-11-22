@@ -386,11 +386,8 @@ function fUpload(){
   if(!f)return;
   $("fup").value="";
   var go=function(){
-    var fd=new FormData();
-    fd.append("file",f,f.name);
     msg("fm",tf("Carico {0}...",f.name),true);
-    api("/api/fs/up?dir="+enc(fp),
-      {method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){
+    caricaPezzi("/api/fs/pezzo?dir="+enc(fp),f,f.name,null,t("Caricamento non riuscito")).then(function(j){
         msgCaricato("fm",j,t("Caricato"));
         if(j.ok)fList(fp)
       })

@@ -68,7 +68,7 @@ function updFile(j){
     '</p>'
     +'<p class="law" style="margin:0 0 8px">'+
     esc(t(
-      "Per non chiederti di nuovo la password, l'indirizzo contiene un codice monouso valido 15 minuti e legato a questo computer. Su una rete locale non fidata qualcuno potrebbe vederlo: usa questa strada solo a casa tua."))+
+      "Per non chiederti di nuovo la password, l'indirizzo contiene un codice monouso valido 15 minuti. Su una rete locale non fidata qualcuno potrebbe vederlo: usa questa strada solo a casa tua."))+
     '</p>'
     +'<label class="chk" for="updc"><input type="checkbox" id="updc"><span>'+
     esc(t("Ho capito: la pagina cambia e passa per HTTP"))+'</span></label>',

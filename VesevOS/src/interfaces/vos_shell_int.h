@@ -41,6 +41,10 @@
 #include "../security/vos_tls.h"
 #include "vos_web.h"
 #include "../packages/vos_power.h"
+#if VOS_WITH_REC
+#include "../packages/vos_rec.h"
+#include "../core/vos_azioni.h"
+#endif
 #include "../packages/vos_stats.h"
 #include "../packages/vos_funzioni.h"
 #include "../packages/vos_app.h"

@@ -26,11 +26,13 @@ def verifica(dati):
         raise ValueError('troncato: meno di %d byte' % INTEST)
     if dati[0:4] != b'VOSR':
         raise ValueError('marchio sbagliato')
-    versione, codifica, riservato = struct.unpack('<BBH', dati[4:8])
-    if versione != 1:
+    versione, codifica, ver_mag, ver_min = struct.unpack('<BBBB', dati[4:8])
+    if versione not in (1, 2):
         raise ValueError('versione del formato %d non supportata' % versione)
-    if codifica not in (0, 1) or riservato != 0:
+    if codifica not in (0, 1) or (versione == 1 and (ver_mag or ver_min)):
         raise ValueError('codifica o byte riservati non validi')
+    if versione == 2 and ver_mag == 0 and ver_min == 0:
+        raise ValueError('formato 2 senza versione della risorsa')
     idr = dati[8:24].decode('ascii', 'replace')
     if not ID_OK.match(idr):
         raise ValueError('id non valido')
@@ -43,9 +45,11 @@ def verifica(dati):
     nome = nome.decode('ascii', 'replace')
     if not NOME_OK.match(nome):
         raise ValueError('nome non valido')
-    lunghezza, riservato2 = struct.unpack('<II', dati[56:64])
-    if riservato2 != 0 or lunghezza == 0:
+    lunghezza, dipende = struct.unpack('<I4s', dati[56:64])
+    if lunghezza == 0 or (versione == 1 and dipende != b'\0\0\0\0'):
         raise ValueError('lunghezza zero o byte riservati non validi')
+    if versione == 2 and dipende[3] > 26:
+        raise ValueError('firmware minimo non valido (lettera)')
     if len(dati) < INTEST + lunghezza:
         raise ValueError('troncato: dati %d byte, ne servono %d' % (len(dati) - INTEST, lunghezza))
     if len(dati) > INTEST + lunghezza:
@@ -73,11 +77,25 @@ def verifica_cartella(cartella):
         if hashlib.sha256(open(os.path.join(cartella, nome), 'rb').read()).hexdigest() != esa:
             print('RIFIUTATO %s: SHA-256 diverso dall\'elenco' % nome)
             return 1
-    try:
-        verifica(open(os.path.join(cartella, 'html.vrs'), 'rb').read())
-    except (ValueError, OSError) as e:
-        print('RIFIUTATO html.vrs: %s' % e)
-        return 1
+    for nome in sorted(voci):
+        dati = open(os.path.join(cartella, nome), 'rb').read()
+        try:
+            if nome.endswith(('.vrs', '.vgz')):
+                interno, _ = verifica(dati)
+                if nome.endswith('.vgz') and (dati[5] != 1 or dati[INTEST:INTEST + 2] != b'\x1f\x8b'):
+                    raise ValueError('un .vgz deve avere codifica 1 e dati gzip')
+                if dati[4] != 2:
+                    raise ValueError('formato 1: manca versione e dipendenza')
+            elif nome.endswith('.txt'):
+                m = re.match(rb'^# sha256=([0-9a-f]{64})\n', dati)
+                if not m or hashlib.sha256(dati[74:]).hexdigest() != m.group(1).decode():
+                    raise ValueError('manca la prima riga "# sha256=" oppure l\'impronta non corrisponde al testo che la segue')
+                testa = dati[:1024].decode('ascii', 'replace')
+                if not re.search(r'^# versione=\d{1,3}(\.\d{1,3})?$', testa, re.M) or not re.search(r'^# dipende=firmware>=\d+\.\d+\.\d+[a-z]?$', testa, re.M):
+                    raise ValueError('mancano le righe "# versione=" e "# dipende=" nei primi 1024 byte')
+        except (ValueError, OSError) as e:
+            print('RIFIUTATO %s: %s' % (nome, e))
+            return 1
     print('ok cartella %s: %d file' % (cartella, len(voci)))
     return 0
 

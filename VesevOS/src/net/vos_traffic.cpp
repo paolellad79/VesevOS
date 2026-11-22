@@ -20,6 +20,9 @@ static netif_linkoutput_fn g_origOut[TR_IF];
 static uint32_t g_inH[TR_HIST], g_outH[TR_HIST];
 static int      g_n = 0;
 static uint32_t g_lastIn = 0, g_lastOut = 0;
+static volatile bool g_pausa = false;      // radio in spegnimento o spenta: non si toccano le interfacce
+static volatile bool g_occupato = false;   // un giro di trafficTick e in corso
+static volatile int  g_attesa = 0;         // secondi da aspettare dopo la ripresa, prima di riagganciare
 
 // I contatori stanno nel driver (vos_drv_activity.h): li legge anche il LED per il trigger "wifi".
 template <int I> static err_t inWrap(struct pbuf* p, struct netif* n) {
@@ -43,9 +46,26 @@ static void hook(int i, const char* key) {
   g_nf[i] = n;
 }
 
+void trafficPausa(bool pausa) {
+  if (pausa) {
+    g_pausa = true;
+    return;
+  }
+  g_nf[0] = g_nf[1] = nullptr;             // le interfacce vecchie non esistono piu: si riagganciano quelle nuove
+  g_attesa = 5;                            // il Wi-Fi ha bisogno di qualche secondo per ricrearle
+  g_pausa = false;
+}
+
+bool trafficOccupato() { return g_occupato; }
+
 void trafficTick() {
-  hook(0, "WIFI_STA_DEF");
-  hook(1, "WIFI_AP_DEF");
+  if (g_pausa) return;
+  g_occupato = true;
+  if (g_attesa > 0) g_attesa = g_attesa - 1;
+  else {
+    hook(0, "WIFI_STA_DEF");
+    hook(1, "WIFI_AP_DEF");
+  }
   uint32_t i = drvActGet(ACT_WIFI_RX), o = drvActGet(ACT_WIFI_TX);   // totali (si riavvolgono: si usa la differenza)
   uint32_t di = i - g_lastIn, dout = o - g_lastOut;
   g_lastIn = i; g_lastOut = o;
@@ -55,6 +75,7 @@ void trafficTick() {
     g_n = TR_HIST - 1;
   }
   g_inH[g_n] = di; g_outH[g_n] = dout; g_n++;
+  g_occupato = false;
 }
 
 static void arr(StrBuf& j, const uint32_t* a, int n) {

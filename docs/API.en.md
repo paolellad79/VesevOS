@@ -25,13 +25,14 @@ API version: **1** (`apiVersion` field in `/api/status` and `/api/common`). It c
 - **Limits:** body up to 48 KB; file list 200 items, network scan 40 networks (beyond: `more:true`). Dates in Unix seconds (UTC), durations in seconds, sizes in bytes.
 - **Parameters:** `application/x-www-form-urlencoded`. API rule 12: an invalid value must change nothing.
 - **File upload** (`multipart/form-data`, admin only, not in the table): `POST /api/fs/up?dir=` (file in internal memory; a package replacing an installed one is checked first, and `avviso` in the answer reports a lower version); `POST /api/recovery/up?sha=` (new recovery: all of it goes to PSRAM, it is checked and only then written; answers `{"ok":true,"from":"0.4.3","to":"0.4.4"}`; `sha` optional); `POST /api/risorse/carica` (a page `.vrs` file: header, id, 256 KB cap, length and SHA-256 are checked before replacing the installed one, which stays untouched if the new one is not valid; or a single file of `/usr/share/vesevos` whose name is in the board's `SHA256SUMS` list (the name comes from the list, not from the sender), accepted only if its SHA-256 matches its line, with a 64 KB cap and an atomic write; or `SHA256SUMS` itself, only with the firmware id; without room for two copies the file is refused; answers `{"ok":true}` or `{"ok":false,"err":...,"code":...}`).
+- **Upload in pieces** (admin only, not in the table; the page uses it for every upload, because on boards with little contiguous RAM a single send fails): `POST /api/risorse/pezzo?n=<name>&o=<bytes already sent>&e=<1 if last>` (resources, same checks as `/api/risorse/carica`), `POST /api/fs/pezzo?dir=&n=&o=&e=` (files, same checks as `/api/fs/up`) and `POST /api/recovery/pezzo?t=<file bytes>&o=&e=&sha=` (recovery, like `/api/recovery/up`); raw body of at most 8 KB (the page sends 4 KB); the piece with `o=0` starts over, the others must follow the accepted ones: answer `{"ok":true,"n":accepted bytes}`, or `code:"state"` with `n` (restart from there).
 - The **Parameters** and **Errors** columns are read from the code (indicative: the errors listed are those the route gives explicitly, besides the general ones above).
 
-## Routes (179)
+## Routes (188)
 
 | Method | Path | Level | What it does | Parameters | Errors |
 |---|---|---|---|---|---|
-| GET | `/` | public | The web page (from the /usr/share/vesevos/html.vrs file, gzip); if the file is missing or not valid, or if the language file in use is in error, the emergency page | - | - |
+| GET | `/` | public | The web page (from the /usr/share/vesevos/html.vrs file, gzip); if the file is missing or not valid, or if the language file in use is in error, the emergency page | `ip` | - |
 | GET | `/api/aggiorna` | admin | Updates page (Admin only): installed versions, check settings, result, published version found and the state of the files in /usr/share/vesevos (ris: el, f[n, s, h, t]) | - | `off` |
 | POST | `/api/aggiorna/imposta` | admin | Check settings (modo, freq, giorno, ora in minutes). confirm=1 is needed when leaving off. Admin only | `confirm` | `bad_request`, `error` |
 | POST | `/api/aggiorna/installa` | admin | Installs the version found (confirm=1): official and higher only; order to the recovery and restart. Admin only | `confirm` | `bad_request`, `state` |
@@ -48,7 +49,7 @@ API version: **1** (`apiVersion` field in `/api/status` and `/api/common`). It c
 | GET | `/api/apps` | operator | Apps: list of /apps/*.vab with format check (n, ok, t title, v version, a author, w who may use, u permissions, c controls, icon, e error). The operator sees only valid apps with who=oper | - | `error` |
 | GET | `/api/audit` | operator | Configuration alarms and history | - | `off` |
 | POST | `/api/audit/ack` | operator | Mark an alarm as read | `n` | - |
-| GET | `/api/auth` | public | Login state: user, role, packages present, certificate fingerprint | - | `off` |
+| GET | `/api/auth` | public | Login state: user, role, packages present, certificate fingerprint; ml = login page message (public text, empty if none) | - | `off` |
 | GET | `/api/ban` | admin | Blocked IPs and ban rules | - | - |
 | POST | `/api/ban/set` | admin | Set failed attempts and ban seconds | `fails`, `secs` | `error` |
 | POST | `/api/ban/unban` | admin | Unblock an IP | `ip` | `notfound` |
@@ -64,6 +65,7 @@ API version: **1** (`apiVersion` field in `/api/status` and `/api/common`). It c
 | GET | `/api/config/download` | admin | Download the prepared configuration | - | `error` |
 | POST | `/api/config/export` | admin | Prepare the configuration to download (acc, pw) | `acc`, `pw` | `error` |
 | POST | `/api/config/restore` | admin | Restore configuration from a file (t = text, pw = passphrase) | `pw`, `t` | `error`, `toobig` |
+| GET | `/api/coproc` | operator | Coprocessor (read only): ulp, lp, mem (bytes), prog, wake (last wake-up cause) | - | - |
 | POST | `/api/cpu` | admin | CPU mode (auto or fixed) | `down`, `gov`, `hold`, `mode`, `up` | `error` |
 | GET | `/api/crash` | operator | Reports of the last crashes (reason, task, PC, backtrace), text | - | - |
 | GET | `/api/dev` | operator | Device Manager list, or one device (id) | `id` | `error` |
@@ -101,7 +103,8 @@ API version: **1** (`apiVersion` field in `/api/status` and `/api/common`). It c
 | POST | `/api/lang` | admin | Board language | - | `error` |
 | GET | `/api/langfile` | public | Page phrases of a language (.vlp file, gzip) | `code` | - |
 | GET | `/api/langs` | public | Available languages | - | `error` |
-| POST | `/api/led` | operator | LED colour, mode, brightness | `br`, `color`, `mode`, `thr` | `error` |
+| POST | `/api/led` | operator | LED colour, mode, brightness, channel correction and state tones | `br`, `color`, `mode`, `thr` | `error` |
+| POST | `/api/led/anteprima` | operator | Try a colour on the LED without saving (calibration, 20 s) | `c`, `fine`, `g0`, `g1`, `g2` | `error` |
 | GET | `/api/license` | public | Licence text (id) or list; notice and gpl3 are in the firmware, apache2, mit and bsd3 in the /usr/share/vesevos files (if the file is missing or not valid the text is a message) | `id` | - |
 | GET | `/api/log` | guest | Log (text) | - | - |
 | POST | `/api/log/clear` | admin | Clear the log | - | - |
@@ -148,10 +151,12 @@ API version: **1** (`apiVersion` field in `/api/status` and `/api/common`). It c
 | GET | `/api/progs` | operator | b/e, nome, secondi, memoria, permessi) e sottosistemi vdb e vde (acceso, quanti, memoria) / Running programs (scripts, apps: k s/b/e, name, seconds, memory, permissions) and the vdb and vde subsystems (on, how many, memory) | - | - |
 | POST | `/api/progs` | admin | b/e, name; start usa i permessi che il programma chiede) / One program: act=stop (name), start or restart (k s/b/e, name; start uses the permissions the program asks for) | - | - |
 | POST | `/api/reboot` | operator | Reboot the board | - | - |
+| GET | `/api/rec` | operator | Data recorder: state, settings, sources, files, chart points and latest actions | - | - |
+| POST | `/api/rec/set` | admin | Change the recorder settings (on, sec, where, maxkb, limite, t, r, dev1-dev4, sec1-sec4, sect, secr, azioni, evmax) | - | `error` |
 | GET | `/api/recovery` | admin | Tells whether the recovery is present and its version (present 0/1, kb, ver) | - | - |
 | POST | `/api/recovery` | admin | Reboots into the recovery to upload a new firmware (answers with ip) | - | `state` |
 | GET | `/api/region` | guest | Country, time zone, language, radio | - | `error` |
-| POST | `/api/region` | admin | Change country, zone, formats, antenna, power | `antenna`, `country`, `datefmt`, `decsep`, `gain`, `ntp`, `tempunit`, `timefmt`, `txpower`, `tz`, `tzname`, `weekstart` | `error` |
+| POST | `/api/region` | admin | Change country, zone, date and time formats (also hand-written, checked before saving), temperature calibration, antenna, power | `antenna`, `country`, `datacortatesto`, `datalungafmt`, `datalungatesto`, `datefmt`, `decsep`, `gain`, `ntp`, `oralungafmt`, `oralungasec`, `oralungatesto`, `tarext`, `tarsoc`, `tempunit`, `timefmt`, `txpower`, `tz`, `tzname`, `weekstart` | `error` |
 | GET | `/api/rules` | operator | Automation text | - | `off` |
 | POST | `/api/rules` | operator | Save automations | `text` | `error` |
 | POST | `/api/rules/run` | operator | Run a rule (i) | `i` | `error` |
@@ -177,7 +182,7 @@ API version: **1** (`apiVersion` field in `/api/status` and `/api/common`). It c
 | POST | `/api/sub` | admin | 1 (spegnere ferma i suoi programmi e blocca nuovi avvii; lo stato si salva) / vdb or vde subsystem: id, on=0/1 (turning off stops its programs and blocks new starts; the state is saved) | - | - |
 | GET | `/api/svc` | guest | Network services | - | - |
 | POST | `/api/svc` | admin | Change network services | `apOn`, `captive`, `dhcpOn`, `elf`, `httpOn`, `httpPort`, `httpsOn`, `httpsPort`, `lease`, `mdnsOn` | `error`, `state` |
-| POST | `/api/system` | admin | Board name (hostname) and domain | - | `error` |
+| POST | `/api/system` | admin | Board name (hostname) and domain; messaggiologin (optional): login page message, at most 200 ASCII characters with line breaks, no backslash; missing = kept, empty = removed | `messaggiologin` | `error` |
 | POST | `/api/taskkill` | admin | Stop a task (name) | `name` | `error` |
 | GET | `/api/tasklist` | operator | Tasks as JSON | - | `error` |
 | POST | `/api/taskrestart` | admin | Restart a task (name) | `name` | `error` |
@@ -210,3 +215,8 @@ API version: **1** (`apiVersion` field in `/api/status` and `/api/common`). It c
 | POST | `/api/wifi/test` | admin | Test a connection without saving | `pass`, `ssid` | `error` |
 | GET | `/api/wps` | admin | WPS status (Admin only): avail, on (service on), allowed, pinOk (PIN method allowed), btn (how many BOOT button clicks start WPS, 0 = none), setup (first setup), net, state (0 idle, 1 waiting, 2 done, 3 error), method (pbc or pin), left (seconds left), pin (only while waiting with the PIN), ssid (after success, never the password), err | - | - |
 | POST | `/api/wps` | admin | pin (avvia: la scheda riceve nome e password della Wi-Fi di casa dal router entro 2 minuti), stop=1 (annulla); ritorna lo stato / WPS (Admin only): on (turns the service on or off), pinOk (setting), start=pbc/pin (starts: the board receives the home Wi-Fi name and password from the router within 2 minutes), stop=1 (cancels); returns the status | `on`, `pinOk`, `start`, `stop` | `error`, `state` |
+| GET | `/apple-touch-icon.png` | public | 180x180 PNG icon for the iPhone and iPad home screen, inside the firmware. Public | - | - |
+| GET | `/icon-192.png` | public | 192x192 PNG icon of the web app, inside the firmware. Public | - | - |
+| GET | `/icon-512.png` | public | 512x512 PNG icon of the web app, inside the firmware. Public | - | - |
+| GET | `/manifest.webmanifest` | public | Web app manifest with the board name (name, short_name, start_url, standalone display, 192 and 512 icons). Public | - | - |
+| GET | `/tema.css` | public | The page theme (file /etc/tema.css, only if valid: 32 KB at most, no @import, url(), backslash or <); otherwise a comment and the factory look. Public (the login screen needs it too). X-VOS-Tema header: ok, fabbrica or the reason for refusal | - | - |

@@ -53,6 +53,31 @@
     min="10" max="95">
    <p class="fhint">I lampi sono al massimo 3 al secondo. Il trigger e i suoi colori li cambia solo l'amministratore. Di fabbrica il modo resta quello di sempre.</p>
   </fieldset>
+  <fieldset id="l_cal"><legend>Test e calibrazione</legend>
+   <p class="fhint">Prova i colori sul LED, correggi i canali se un colore tira troppo verso un altro e scegli la tonalita di ogni stato. Ogni prova dura 20 secondi.</p>
+   <div style="display:flex;flex-wrap:wrap;gap:6px">
+    <button class="btn" onclick="ledProva(0xFF0000)">Rosso</button>
+    <button class="btn" onclick="ledProva(0x00FF00)">Verde</button>
+    <button class="btn" onclick="ledProva(0x0000FF)">Blu</button>
+    <button class="btn" onclick="ledProva(0xFFFFFF)">Bianco</button>
+    <button class="btn" onclick="ledProva(0xFFFF00)">Giallo</button>
+    <button class="btn" onclick="ledProva(0xFF7800)">Arancio</button>
+    <button class="btn" onclick="ledFineProva()">Fine prova</button>
+   </div>
+   <h4>Correzione dei canali (255 = nessuna correzione)</h4>
+   <label for="l_g0">Rosso</label><input type="range" id="l_g0" min="0" max="255" oninput="ledGuad()">
+   <label for="l_g1">Verde</label><input type="range" id="l_g1" min="0" max="255" oninput="ledGuad()">
+   <label for="l_g2">Blu</label><input type="range" id="l_g2" min="0" max="255" oninput="ledGuad()">
+   <h4>Tonalita degli stati</h4>
+   <label for="l_t0">Avvio</label><input type="color" id="l_t0" onchange="ledProva(this)">
+   <label for="l_t1">Hotspot acceso</label><input type="color" id="l_t1" onchange="ledProva(this)">
+   <label for="l_t2">Collegamento in corso</label><input type="color" id="l_t2" onchange="ledProva(this)">
+   <label for="l_t3">Collegato alla rete</label><input type="color" id="l_t3" onchange="ledProva(this)">
+   <label for="l_t4">Modalita aereo</label><input type="color" id="l_t4" onchange="ledProva(this)">
+   <label for="l_t5">Prima accensione, in attesa</label><input type="color" id="l_t5" onchange="ledProva(this)">
+   <button class="btn" onclick="ledCalFabbrica()">Valori di fabbrica</button>
+   <p class="fhint">Le correzioni e le tonalita vanno con il tasto Salva e le cambia solo l'amministratore. Valgono per tutti i colori del LED.</p>
+  </fieldset>
   <button class="btn" onclick="saveLed()">Salva</button><div id="lm2" class="msg"></div>
   <div id="al_led_rgb1"></div>
   <p style="color:var(--mut)">Colori di stato: arancio = avvio, blu = AP, giallo = connessione, verde = client collegato, rosso lampeggiante = errore.</p>

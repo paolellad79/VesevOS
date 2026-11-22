@@ -25,13 +25,14 @@ Versione API: **1** (campo `apiVersion` in `/api/status` e `/api/common`). Cambi
 - **Limiti:** corpo massimo 48 KB; elenco file 200 voci, ricerca reti 40 reti (oltre: `more:true`). Date in secondi Unix (UTC), durate in secondi, dimensioni in byte.
 - **Parametri:** `application/x-www-form-urlencoded`. Regola API 12: un valore non valido non deve cambiare nulla.
 - **Caricamento file** (`multipart/form-data`, solo admin, fuori dalla tabella): `POST /api/fs/up?dir=` (file in memoria interna; un pacchetto che ne sostituisce uno installato si controlla prima, e `avviso` nella risposta segnala una versione piu bassa); `POST /api/recovery/up?sha=` (nuovo recovery: va tutto in PSRAM, si controlla e solo dopo si scrive; risponde `{"ok":true,"from":"0.4.3","to":"0.4.4"}`; `sha` facoltativo); `POST /api/risorse/carica` (un file `.vrs` della pagina: controlla intestazione, id, tetto di 256 KB, lunghezza e SHA-256 prima di sostituire quello installato, che resta intatto se il nuovo non e valido; oppure un file singolo di `/usr/share/vesevos` il cui nome e nell'elenco `SHA256SUMS` della scheda (il nome lo da l'elenco, non chi invia), accettato solo se lo SHA-256 coincide con la sua riga, con tetto di 64 KB e scrittura atomica; oppure `SHA256SUMS` stesso, solo con l'id del firmware; senza spazio per due copie il file e rifiutato; risponde `{"ok":true}` oppure `{"ok":false,"err":...,"code":...}`).
+- **Caricamento a pezzi** (solo admin, fuori dalla tabella; la pagina lo usa per tutti i caricamenti, perche sulle schede con poca RAM contigua un invio unico fallisce): `POST /api/risorse/pezzo?n=<nome>&o=<byte gia inviati>&e=<1 se ultimo>` (risorse, stessi controlli di `/api/risorse/carica`), `POST /api/fs/pezzo?dir=&n=&o=&e=` (file, stessi controlli di `/api/fs/up`) e `POST /api/recovery/pezzo?t=<byte del file>&o=&e=&sha=` (recovery, come `/api/recovery/up`); corpo grezzo di al massimo 8 KB (la pagina ne manda 4 KB); il pezzo con `o=0` ricomincia, gli altri devono seguire quelli accettati: risposta `{"ok":true,"n":byte accettati}`, oppure `code:"state"` con `n` (si riparte da li).
 - La colonna **Parametri** e la **Errori** sono lette dal codice (indicative: gli errori elencati sono quelli esplicitamente dati dalla rotta, oltre a quelli generali sopra).
 
-## Rotte (179)
+## Rotte (188)
 
 | Metodo | Percorso | Livello | Cosa fa | Parametri | Errori |
 |---|---|---|---|---|---|
-| GET | `/` | pubblico | La pagina web (dal file /usr/share/vesevos/html.vrs, compressa); se il file manca o non e valido, o se il file della lingua in uso e in errore, la pagina di emergenza | - | - |
+| GET | `/` | pubblico | La pagina web (dal file /usr/share/vesevos/html.vrs, compressa); se il file manca o non e valido, o se il file della lingua in uso e in errore, la pagina di emergenza | `ip` | - |
 | GET | `/api/aggiorna` | admin | Pagina Aggiornamenti (solo Admin): versioni installate, scelte del controllo, esito, versione pubblicata trovata (fw, rec, recOk, modo, freq, giorno, ora, oraOk, corso, ult, esito, motivo, trovato, nuovo, uff, ver, dim, data, chi, verRec) e stato dei file di /usr/share/vesevos (ris: el, f[n, s, h, t]) | - | `off` |
 | POST | `/api/aggiorna/imposta` | admin | Scelte del controllo (modo 0 spento, 1 notifica, 2 installa da solo; freq 0 giorno, 1 settimana, 2 mese; giorno; ora in minuti). Da spento serve confirm=1. Solo Admin | `confirm` | `bad_request`, `error` |
 | POST | `/api/aggiorna/installa` | admin | Installa la versione trovata (confirm=1): solo ufficiale e piu alta; ordine al recovery e riavvio. Solo Admin | `confirm` | `bad_request`, `state` |
@@ -48,7 +49,7 @@ Versione API: **1** (campo `apiVersion` in `/api/status` e `/api/common`). Cambi
 | GET | `/api/apps` | operatore | App: elenco di /apps/*.vab con controllo del formato (n, ok, t titolo, v versione, a autore, w chi la usa, u permessi, c controlli, icon, e errore). L'operatore vede solo le app valide con who=oper | - | `error` |
 | GET | `/api/audit` | operatore | Allarmi di configurazione e storico | - | `off` |
 | POST | `/api/audit/ack` | operatore | Segna come letto un allarme | `n` | - |
-| GET | `/api/auth` | pubblico | Stato dell'accesso: utente, ruolo, pacchetti presenti, impronta del certificato | - | `off` |
+| GET | `/api/auth` | pubblico | Stato dell'accesso: utente, ruolo, pacchetti presenti, impronta del certificato; ml = messaggio della pagina di accesso (testo pubblico, vuoto se non c'e); nm = nome della scheda e bd = modello, per le variabili del messaggio | - | `off` |
 | GET | `/api/ban` | admin | Elenco IP bloccati e regole di blocco | - | - |
 | POST | `/api/ban/set` | admin | Imposta tentativi e secondi di blocco | `fails`, `secs` | `error` |
 | POST | `/api/ban/unban` | admin | Sblocca un IP | `ip` | `notfound` |
@@ -64,6 +65,7 @@ Versione API: **1** (campo `apiVersion` in `/api/status` e `/api/common`). Cambi
 | GET | `/api/config/download` | admin | Scarica la configurazione preparata | - | `error` |
 | POST | `/api/config/export` | admin | Prepara la configurazione da scaricare (acc = accetto avviso, pw = frase per i segreti) | `acc`, `pw` | `error` |
 | POST | `/api/config/restore` | admin | Ripristina la configurazione da file (t = testo, pw = frase) | `pw`, `t` | `error`, `toobig` |
+| GET | `/api/coproc` | operatore | Coprocessore (sola lettura): ulp, lp, mem (byte), prog, wake (causa dell'ultimo risveglio) | - | - |
 | POST | `/api/cpu` | admin | Modo CPU (automatico o fisso) | `down`, `gov`, `hold`, `mode`, `up` | `error` |
 | GET | `/api/crash` | operatore | Rapporti degli ultimi crash (motivo, task, PC, backtrace), testo | - | - |
 | GET | `/api/dev` | operatore | Elenco periferiche del Device Manager, o una sola (id) | `id` | `error` |
@@ -101,7 +103,8 @@ Versione API: **1** (campo `apiVersion` in `/api/status` e `/api/common`). Cambi
 | POST | `/api/lang` | admin | Lingua della scheda | - | `error` |
 | GET | `/api/langfile` | pubblico | Frasi della pagina in una lingua (file .vlp, gzip) | `code` | - |
 | GET | `/api/langs` | pubblico | Lingue disponibili | - | `error` |
-| POST | `/api/led` | operatore | Colore, modo, luminosita del LED | `br`, `color`, `mode`, `thr` | `error` |
+| POST | `/api/led` | operatore | Colore, modo, luminosita, correzione dei canali e tonalita degli stati del LED | `br`, `color`, `mode`, `thr` | `error` |
+| POST | `/api/led/anteprima` | operatore | Prova di un colore sul LED senza salvare (calibrazione, 20 s) | `c`, `fine`, `g0`, `g1`, `g2` | `error` |
 | GET | `/api/license` | pubblico | Testo di una licenza (id) o elenco; notice e gpl3 sono nel firmware, apache2, mit e bsd3 nei file di /usr/share/vesevos (se il file manca o non e valido il testo e un messaggio) | `id` | - |
 | GET | `/api/log` | ospite | Registro (testo) | - | - |
 | POST | `/api/log/clear` | admin | Svuota il registro | - | - |
@@ -148,10 +151,12 @@ Versione API: **1** (campo `apiVersion` in `/api/status` e `/api/common`). Cambi
 | GET | `/api/progs` | operatore | Programmi in corso (script, app VesevOS, app ELF: k s | - | - |
 | POST | `/api/progs` | admin | Un programma: act=stop (name), start o restart (k s | - | - |
 | POST | `/api/reboot` | operatore | Riavvia la scheda | - | - |
+| GET | `/api/rec` | operatore | Registratore di dati: stato, impostazioni, fonti, file, punti del grafico e ultime azioni | - | - |
+| POST | `/api/rec/set` | admin | Cambia le impostazioni del registratore (on, sec, where, maxkb, limite, t, r, dev1-dev4, sec1-sec4, sect, secr, azioni, evmax) | - | `error` |
 | GET | `/api/recovery` | admin | Dice se il recovery e presente e la sua versione (present 0/1, kb, ver) | - | - |
 | POST | `/api/recovery` | admin | Riavvia nel recovery per caricare un nuovo firmware (risponde con ip) | - | `state` |
 | GET | `/api/region` | ospite | Paese, fuso, lingua, radio | - | `error` |
-| POST | `/api/region` | admin | Cambia paese, fuso, formati, antenna, potenza | `antenna`, `country`, `datefmt`, `decsep`, `gain`, `ntp`, `tempunit`, `timefmt`, `txpower`, `tz`, `tzname`, `weekstart` | `error` |
+| POST | `/api/region` | admin | Cambia paese, fuso, formati di data e ora (anche scritti a mano, controllati prima di salvare), taratura della temperatura, antenna, potenza | `antenna`, `country`, `datacortatesto`, `datalungafmt`, `datalungatesto`, `datefmt`, `decsep`, `gain`, `ntp`, `oralungafmt`, `oralungasec`, `oralungatesto`, `tarext`, `tarsoc`, `tempunit`, `timefmt`, `txpower`, `tz`, `tzname`, `weekstart` | `error` |
 | GET | `/api/rules` | operatore | Testo delle automazioni | - | `off` |
 | POST | `/api/rules` | operatore | Salva le automazioni | `text` | `error` |
 | POST | `/api/rules/run` | operatore | Esegue una regola (i) | `i` | `error` |
@@ -177,7 +182,7 @@ Versione API: **1** (campo `apiVersion` in `/api/status` e `/api/common`). Cambi
 | POST | `/api/sub` | admin | Sottosistema vdb o vde: id, on=0 | - | - |
 | GET | `/api/svc` | ospite | Servizi di rete: hotspot, HTTP, HTTPS, porte, DHCP, mDNS | - | - |
 | POST | `/api/svc` | admin | Cambia i servizi di rete | `apOn`, `captive`, `dhcpOn`, `elf`, `httpOn`, `httpPort`, `httpsOn`, `httpsPort`, `lease`, `mdnsOn` | `error`, `state` |
-| POST | `/api/system` | admin | Nome della scheda (hostname) e dominio | - | `error` |
+| POST | `/api/system` | admin | Nome della scheda (hostname) e dominio; messaggiologin (facoltativo): messaggio della pagina di accesso, al massimo 200 caratteri ASCII con a capo, senza barra rovesciata; assente = resta com'e, vuoto = lo toglie | `messaggiologin` | `error` |
 | POST | `/api/taskkill` | admin | Ferma un task (name) | `name` | `error` |
 | GET | `/api/tasklist` | operatore | Task in JSON | - | `error` |
 | POST | `/api/taskrestart` | admin | Riavvia un task (name) | `name` | `error` |
@@ -210,3 +215,8 @@ Versione API: **1** (campo `apiVersion` in `/api/status` e `/api/common`). Cambi
 | POST | `/api/wifi/test` | admin | Prova la connessione a una rete senza salvare | `pass`, `ssid` | `error` |
 | GET | `/api/wps` | admin | Stato del WPS (solo Admin): avail, on (servizio acceso), allowed, pinOk (metodo PIN consentito), btn (con quanti click del tasto BOOT parte il WPS, 0 = nessuno), setup (prima configurazione), net, state (0 fermo, 1 in attesa, 2 riuscito, 3 errore), method (pbc o pin), left (secondi rimasti), pin (solo mentre aspetta con il PIN), ssid (dopo il successo, mai la password), err | - | - |
 | POST | `/api/wps` | admin | WPS (solo Admin): on (accende o spegne il servizio), pinOk (impostazione), start=pbc | `on`, `pinOk`, `start`, `stop` | `error`, `state` |
+| GET | `/apple-touch-icon.png` | pubblico | Icona PNG 180x180 per la schermata Home di iPhone e iPad, dentro il firmware. Pubblica | - | - |
+| GET | `/icon-192.png` | pubblico | Icona PNG 192x192 dell'app web, dentro il firmware. Pubblica | - | - |
+| GET | `/icon-512.png` | pubblico | Icona PNG 512x512 dell'app web, dentro il firmware. Pubblica | - | - |
+| GET | `/manifest.webmanifest` | pubblico | Manifest dell'app web, con il nome della scheda (name, short_name, start_url, display standalone, icone 192 e 512). Pubblico | - | - |
+| GET | `/tema.css` | pubblico | Il tema della pagina (file /etc/tema.css, solo se valido: al massimo 32 KB, senza @import, url(), barra rovesciata e <); altrimenti un commento e l'aspetto di fabbrica. Pubblica (serve anche alla schermata di accesso). Intestazione X-VOS-Tema: ok, fabbrica o il motivo del rifiuto | - | - |

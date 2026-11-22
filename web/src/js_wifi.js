@@ -79,6 +79,9 @@ function ipFill(ch){
     $("ipnote").textContent=t("Indirizzo fisso: scrivi i valori.")
   }
   ids.forEach(function(id,i){ipv(id,v[i],!ap&&!dh)});
+  /* dominio dato dal router (DHCP): si mostra soltanto, non si modifica ne si salva */
+  $("w_dom").value=!ap&&dh&&n.st==3?n.dom||"":"";
+  $("w_dom").placeholder=!ap&&dh&&n.st==3?t("Il router non ne comunica uno"):"";
   $("ipmac").innerHTML=macRow(t("MAC client"),n.mac)+macRow(t("MAC punto di accesso"),n.apMac)
 }
 

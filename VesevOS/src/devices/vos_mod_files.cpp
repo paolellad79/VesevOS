@@ -136,15 +136,24 @@ bool modInfoJson(const char* name, HeapBuf& out) {
     return !full(out);
   }
   int pins[MOD_SIG_MAX]; uint8_t c = 0; ioParseCls(m->cls, c);
-  int k = ioSuggest(c, m->nsig, pins);
+  uint64_t griglia = m->hasGrid ? m->gridMask : ~0ULL;
+  int k = ioSuggest(c, m->nsig, pins, griglia);
   out.add("{\"ok\":true,"); headJson(*m, out);
   out.add(",\"icon\":\""); addJ(out, m->icon); out.add("\",\"wiring\":\""); addJ(out, m->wiring);
   heapAddf(out, "\",\"lv\":\"%s\",\"parts\":", m->level == '5' ? "5V" : "3V3"); partsJson(*m, out);
   out.add(",\"pins\":"); wiresJson(*m, out);
   heapAddf(out, ",\"free\":%d,\"sug\":[", k >= m->nsig ? 1 : 0);
   for (int i = 0; i < k; i++) heapAddf(out, "%s%d", i ? "," : "", pins[i]);
+  out.add("]");
+  if (m->hasGrid) {                                                           // il driver ha la griglia: la pagina offre un menu con tutti i pin ammessi e liberi
+    int tutti[64];
+    int kt = ioSuggest(c, 64, tutti, griglia);
+    out.add(",\"ok\":[");
+    for (int i = 0; i < kt; i++) heapAddf(out, "%s%d", i ? "," : "", tutti[i]);
+    out.add("]");
+  }
   delete m;
-  out.add("]}");
+  out.add("}");
   return !full(out);
 }
 
@@ -168,7 +177,10 @@ bool modInstall(const char* name, const char* prefixIn, const char* pinsCsv, Hea
   int pins[MOD_SIG_MAX];
   int chosen = pinsFromText(pinsCsv, pins, MOD_SIG_MAX);                    // pin scelti dall'utente, altrimenti quelli proposti
   if (chosen < 0 || (chosen > 0 && chosen != m->nsig)) { err = tr("Pin non validi: servono tanti numeri quanti sono i segnali"); delete m; return false; }
-  if (chosen == 0 && ioSuggest(c, m->nsig, pins) < m->nsig) { err = tr("Non ci sono abbastanza pin liberi per questo modulo"); delete m; return false; }
+  if (m->gridAny && !m->hasGrid) { err = tr("Questo driver non ha i piedini ammessi per questa scheda"); delete m; return false; }
+  uint64_t griglia = m->hasGrid ? m->gridMask : ~0ULL;                      // piedini ammessi dal driver su questa scheda (tutti, se il driver non ha la griglia)
+  for (int i = 0; i < chosen; i++) if (pins[i] < 0 || pins[i] > 63 || !((griglia >> pins[i]) & 1)) { err = tr("Il driver non ammette questo piedino su questa scheda"); delete m; return false; }
+  if (chosen == 0 && ioSuggest(c, m->nsig, pins, griglia) < m->nsig) { err = tr("Non ci sono abbastanza pin liberi per questo modulo"); delete m; return false; }
   char prefix[112];                                             // prefisso: senza spazi ai lati, minuscolo
   if (!viewCopyLower(prefix, sizeof prefix, trimView(std::string_view(prefixIn ? prefixIn : "")))) { err = tr("Nome non valido"); delete m; return false; }
   if (!strcmp(m->cls, "i2c") || !strcmp(m->cls, "sd")) {        // un solo dispositivo su piu pin: sensore I2C (SDA, SCL) o lettore microSD (CS, MOSI, SCK, MISO), nell'ordine di [signals]
@@ -200,7 +212,7 @@ bool modInstall(const char* name, const char* prefixIn, const char* pinsCsv, Hea
     char nm1[128] = "";                                         // nome della periferica: prefisso, con il numero se i segnali sono piu d'uno
     if (prefix[0]) { if (m->nsig == 1) snprintf(nm1, sizeof nm1, "%s", prefix); else snprintf(nm1, sizeof nm1, "%s%d", prefix, i + 1); }
     char out[16];
-    if (!ioAdd(m->cls, pins[i], nm1, opt, out, err)) { ok = false; break; }
+    if (!ioAdd(m->cls, pins[i], nm1, opt, out, err, true)) { ok = false; break; }
     strcpy(made[nm++], out);
     heapAddf(res, "%s{\"s\":\"%s\",\"n\":\"%s\",\"g\":%d}", i ? "," : "", m->sig[i], out, pins[i]);
   }
@@ -255,7 +267,7 @@ void modInfoText(const char* name, HeapBuf& out) {
   ModInfo* m = new ModInfo(); ErrBuf err;
   if (!load(name, *m, err)) heapAddf(out, "%s: %s\n", tr("ERRORE"), err.c_str());
   else {
-    uint8_t c = 0; ioParseCls(m->cls, c); int pins[MOD_SIG_MAX]; int k = ioSuggest(c, m->nsig, pins);
+    uint8_t c = 0; ioParseCls(m->cls, c); int pins[MOD_SIG_MAX]; int k = ioSuggest(c, m->nsig, pins, m->hasGrid ? m->gridMask : ~0ULL);
     heapAddf(out, "%s (%s)  v%s\n", m->title, m->name, m->ver);
     heapAddf(out, "%s: %s  %s: %s%s\n", tr("Classe del modulo"), m->cls, tr("Alimentazione"), m->power, m->low ? "  active=low" : "");
     for (int i = 0; i < m->nsig; i++) {

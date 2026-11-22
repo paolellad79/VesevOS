@@ -54,7 +54,7 @@ void areaRegion(OutSink& o) {
 
 void areaTime(OutSink& o) {
   HeapBuf h(AREA_OUT_MAX);
-  char now[32], every[40];
+  char now[TIME_FMT_MAX], every[40];
   timeNowFmt(now, sizeof now);
   if (cfg.ntpEvery) snprintf(every, sizeof every, "%s %lu min", tr("ogni"), (unsigned long)cfg.ntpEvery);
   else snprintf(every, sizeof every, "%s", tr("solo all'avvio"));

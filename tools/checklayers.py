@@ -3,9 +3,13 @@
 # Per ogni famiglia di chiamate hardware conta le righe di codice (commenti e testi tra virgolette esclusi) fuori dal driver.
 # Seconda parte: la DIPENDENZA DA ARDUINO (String, Serial, millis/micros/delay, Arduino.h). Dalla fase 5 (Arduino tolto come componente)
 # non e ammessa da nessuna parte (solo third_party/); il debito in baseline deve essere vuoto.
+# 21/11/2026 (decisione dell'utente): REGOLA DI ADIACENZA. Un livello include solo quello subito sotto, mai uno piu lontano e mai verso l'alto (verso l'alto: ganci). La famiglia
+# "salti" conta gli include che saltano uno o piu strati, per coppia da->a; il debito di partenza sta in baseline e puo solo scendere. "ordine" = include verso l'alto: sempre errore.
+# La tabella ALLOWED e ora quella stretta (solo il livello subito sotto). Prova del controllo stesso: python3 tools/checklayers.py --prova
 # Il "debito" di oggi sta in tools/layers_baseline.json: puo solo calare. Un file nuovo o un conteggio piu alto = errore.
 # Uso:  python3 tools/checklayers.py            (controlla)
-#       python3 tools/checklayers.py --update   (riscrive il debito dopo aver tolto accessi; mai per aumentarlo)
+#       python3 tools/checklayers.py --update   (riscrive il debito dopo aver tolto accessi; SI RIFIUTA se qualcosa e salito o e nuovo: uscita 1, niente scritto)
+#       python3 tools/checklayers.py --prova    (prova il controllo su file finti: deve dire OK)
 import json, os, re, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); SRC = os.path.join(HERE, '..', 'VesevOS')
 BASE = os.path.join(HERE, 'layers_baseline.json')
@@ -39,16 +43,7 @@ INC_UP = re.compile(r'^\s*#\s*include\s*"(?:\.\./)*(?:packages|interfaces)/')
 # una coppia nuova = errore. Per aprire una coppia nuova si cambia la tabella QUI e in REGOLE-ARCHITETTURA.md, di proposito.
 # Fuori scala: third_party/ (lo usano tutti), src/vos_wire.* e src/vos_main.cpp (livello 8, collegano tutto).
 LEVEL = {'boards': 0, 'drivers': 1, 'core': 2, 'security': 3, 'devices': 4, 'net': 5, 'packages': 6, 'interfaces': 7}
-ALLOWED = {
-  'boards':     set(),
-  'drivers':    {'boards'},
-  'core':       {'boards', 'drivers'},
-  'security':   {'core', 'drivers'},
-  'devices':    {'core', 'drivers'},
-  'net':        {'core', 'drivers', 'devices'},
-  'packages':   {'core', 'drivers', 'security', 'devices', 'net'},
-  'interfaces': {'core', 'drivers', 'security', 'devices', 'net', 'packages'},
-}
+ALLOWED = {c: ({n for n in LEVEL if LEVEL[n] == LEVEL[c] - 1}) for c in LEVEL}   # REGOLA DI ADIACENZA: ogni livello puo includere SOLO quello subito sotto
 INC_DIR = re.compile(r'^\s*#\s*include\s*"(?:\.\./)*(\w+)/')
 # NUOVI CONTROLLI (15/10/2026), tutti con debito di partenza in baseline (puo solo calare):
 #  e_idf  = include di ESP-IDF (esp_*.h, driver/*.h) fuori da drivers/, boards/ e third_party/: l'IDF si tocca solo dai driver
@@ -130,8 +125,10 @@ def scan():
                 out.setdefault('strati', {}); out['strati'][f] = out['strati'].get(f, 0) + 1
             m = INC_DIR.match(line)
             me = os.path.relpath(path, os.path.join(SRC, 'src')).split(os.sep)[0]
-            if m and me in LEVEL and m.group(1) in LEVEL and m.group(1) != me and m.group(1) not in ALLOWED[me]:
+            if m and me in LEVEL and m.group(1) in LEVEL and LEVEL[m.group(1)] > LEVEL[me]:   # verso l'alto: mai (si usano i ganci); i salti verso il basso stanno in 'salti'
                 out.setdefault('ordine', {}); k = me + '->' + m.group(1); out['ordine'][k] = out['ordine'].get(k, 0) + 1
+            if m and me in LEVEL and m.group(1) in LEVEL and LEVEL[me] - LEVEL[m.group(1)] > 1:      # SALTO: un livello include uno strato che non e quello subito sotto
+                out.setdefault('salti', {}); k = me + '->' + m.group(1); out['salti'][k] = out['salti'].get(k, 0) + 1
             if INC_IDF.match(line) and top not in IDF_OK_DIRS:
                 out.setdefault('e_idf', {}); out['e_idf'][f] = out['e_idf'].get(f, 0) + 1
             n = len(RTOS.findall(c)) if top not in RTOS_OK_DIRS else 0
@@ -159,52 +156,173 @@ def scan():
     for k in ('cicli', 'cicli_cart'):
         if not out[k]: del out[k]
     return out
-cur = scan()
-if '--update' in sys.argv:
-    json.dump(cur, open(BASE, 'w'), indent=1, sort_keys=True); print('debito riscritto:', {k: sum(v.values()) for k, v in cur.items()}); sys.exit(0)
-base = json.load(open(BASE)) if os.path.exists(BASE) else {}
-bad = 0
-for fam in RULES:
-    for f, n in cur.get(fam, {}).items():
-        b = base.get(fam, {}).get(f, 0)
-        if n > b: print(f'KO {fam}: {f} tocca l\'hardware {n} volte (ammesso {b}). Usa il driver.'); bad += 1
-for f, n in cur.get('strati', {}).items():
-    print(f'KO strati: {f} include packages/ o interfaces/ {n} volte. Lo strato basso usa core/vos_hooks.h o il registro dei servizi; il collegamento sta in src/vos_wire.cpp.'); bad += 1
-for k, n in sorted(cur.get('ordine', {}).items()):
-    b = base.get('ordine', {}).get(k, 0)
-    if n > b: print(f'KO ordine: {k} coppia non in tabella (ALLOWED) {n} volte (ammesso {b}). Verso l alto usa core/vos_hooks.h o il registro dei servizi (il collegamento sta in src/vos_wire.cpp); una apertura voluta si scrive nella tabella e in REGOLE-ARCHITETTURA.md.'); bad += 1
-for f, n in cur.get('e_idf', {}).items():
-    b = base.get('e_idf', {}).get(f, 0)
-    if n > b: print(f'KO e_idf: {f} include {n} header di ESP-IDF (esp_*.h, driver/*.h) fuori dai driver (ammesso {b}). Metti la chiamata in un driver (vos_drv_*).'); bad += 1
-for f, n in cur.get('f_rtos', {}).items():
-    b = base.get('f_rtos', {}).get(f, 0)
-    if n > b: print(f'KO f_rtos: {f} usa primitive FreeRTOS {n} volte fuori da drivers/ e core/ (ammesso {b}). Task, code e semafori si creano nel driver o nel nucleo.'); bad += 1
-for fam, nome in (('cicli', 'moduli'), ('cicli_cart', 'cartelle')):
-    bc = [set(k.split(',')) for k in base.get(fam, {})]
-    for k in cur.get(fam, {}):
-        if not any(set(k.split(',')) <= b for b in bc): print(f'KO {fam}: ciclo tra {nome} nuovo o piu grande: {k.replace(",", " <-> ")}. Si rompe con un gancio (core/vos_hooks.h) o spostando il pezzo comune sotto.'); bad += 1
-for fam in ARDUINO:
-    for f, n in cur.get(fam, {}).items():
-        b = base.get(fam, {}).get(f, 0)
-        if n > b: print(f'KO {fam}: {f} usa Arduino ({HINT[fam]}) {n} volte (ammesso {b}). Non aggiungere dipendenze da Arduino fuori dai driver: metti il codice nuovo in un driver (vos_drv_*) o senza Arduino.'); bad += 1
-for fam in SCHEDA:
-    for f, n in cur.get(fam, {}).items():
-        b = base.get(fam, {}).get(f, 0)
-        if n > b: print(f'KO {fam}: {f} ha {n} valori della scheda scritti a mano ({SHINT[fam]}; ammessi {b}). Mettili nel file di scheda (VesevOS/src/boards/).'); bad += 1
-tot = {fam: sum(cur.get(fam, {}).values()) for fam in list(RULES) + list(ARDUINO) + list(SCHEDA)}
-old = {fam: sum(base.get(fam, {}).values()) for fam in list(RULES) + list(ARDUINO) + list(SCHEDA)}
-print('accessi hardware fuori dai driver (ora / debito di partenza):', ', '.join(f'{k} {tot[k]}/{old[k]}' for k in RULES))
-print('include verso strati alti da core/devices/net/security/drivers/boards:', sum(cur.get('strati', {}).values()), '(deve essere 0)')
-print('ordine dei livelli, coppie fuori tabella ALLOWED (ora / debito di partenza):', sum(cur.get('ordine', {}).values()), '/', sum(base.get('ordine', {}).values()), '-', ', '.join(f'{k} {n}/{base.get("ordine", {}).get(k, 0)}' for k, n in sorted(cur.get('ordine', {}).items())))
-print('include di ESP-IDF fuori dai driver (ora / debito di partenza):', sum(cur.get('e_idf', {}).values()), '/', sum(base.get('e_idf', {}).values()), 'in', len(cur.get('e_idf', {})), 'file;', 'primitive FreeRTOS fuori da drivers/ e core/:', sum(cur.get('f_rtos', {}).values()), '/', sum(base.get('f_rtos', {}).values()), 'in', len(cur.get('f_rtos', {})), 'file')
-print('cicli tra moduli (gruppi, ora / debito di partenza):', len(cur.get('cicli', {})), '/', len(base.get('cicli', {})), ' cicli tra cartelle:', len(cur.get('cicli_cart', {})), '(deve essere 0)')
-for k in cur.get('cicli', {}): print('  ciclo:', k.replace(',', ' <-> '))
-print('dipendenza da Arduino fuori dai driver (ora / debito di partenza):', ', '.join(f'{k[2:]} {tot[k]}/{old[k]}' for k in ARDUINO))
-print('valori della scheda scritti a mano fuori da boards/ (ora / debito di partenza):', ', '.join(f'{k[2:]} {tot[k]}/{old[k]}' for k in SCHEDA))
-for fam in SCHEDA:
-    peggio = sorted(cur.get(fam, {}).items(), key=lambda x: -x[1])[:10]
-    print(f'  {fam[2:]} ({len(cur.get(fam, {}))} file): ' + ', '.join(f'{f} {n}' for f, n in peggio))
-for fam in ARDUINO:
-    peggio = sorted(cur.get(fam, {}).items(), key=lambda x: -x[1])[:10]
-    print(f'  {fam[2:]} ({len(cur.get(fam, {}))} file): ' + ', '.join(f'{f} {n}' for f, n in peggio))
-sys.exit(1 if bad else 0)
+def rapporto(cur, base):
+    """Confronta il conteggio di oggi con il debito di partenza. Ritorna (errori, righe di riepilogo)."""
+    err, righe = [], []
+    for fam in RULES:
+        for f, n in cur.get(fam, {}).items():
+            b = base.get(fam, {}).get(f, 0)
+            if n > b: err.append(f"KO {fam}: {f} tocca l'hardware {n} volte (ammesso {b}). Usa il driver.")
+    for f, n in cur.get('strati', {}).items():
+        err.append(f'KO strati: {f} include packages/ o interfaces/ {n} volte. Lo strato basso usa core/vos_hooks.h o il registro dei servizi; il collegamento sta in src/vos_wire.cpp.')
+    for k, n in sorted(cur.get('ordine', {}).items()):
+        b = base.get('ordine', {}).get(k, 0)
+        if n > b: err.append(f'KO ordine: {k} include verso l alto {n} volte (ammesso {b}). Verso l alto usa core/vos_hooks.h o il registro dei servizi (il collegamento sta in src/vos_wire.cpp).')
+    for k, n in sorted(cur.get('salti', {}).items()):
+        b = base.get('salti', {}).get(k, 0)
+        if n > b: err.append(f"KO salti: {k} salta uno o piu strati {n} volte (ammesso {b}). Regola dell'utente (21/11/2026): un livello parla solo con quello adiacente, passando da ganci, API e interfacce.")
+    for f, n in cur.get('e_idf', {}).items():
+        b = base.get('e_idf', {}).get(f, 0)
+        if n > b: err.append(f'KO e_idf: {f} include {n} header di ESP-IDF (esp_*.h, driver/*.h) fuori dai driver (ammesso {b}). Metti la chiamata in un driver (vos_drv_*).')
+    for f, n in cur.get('f_rtos', {}).items():
+        b = base.get('f_rtos', {}).get(f, 0)
+        if n > b: err.append(f'KO f_rtos: {f} usa primitive FreeRTOS {n} volte fuori da drivers/ e core/ (ammesso {b}). Task, code e semafori si creano nel driver o nel nucleo.')
+    for fam, nome in (('cicli', 'moduli'), ('cicli_cart', 'cartelle')):
+        bc = [set(k.split(',')) for k in base.get(fam, {})]
+        for k in cur.get(fam, {}):
+            if not any(set(k.split(',')) <= b for b in bc): err.append(f'KO {fam}: ciclo tra {nome} nuovo o piu grande: {k.replace(",", " <-> ")}. Si rompe con un gancio (core/vos_hooks.h) o spostando il pezzo comune sotto.')
+    for fam in ARDUINO:
+        for f, n in cur.get(fam, {}).items():
+            b = base.get(fam, {}).get(f, 0)
+            if n > b: err.append(f'KO {fam}: {f} usa Arduino ({HINT[fam]}) {n} volte (ammesso {b}). Non aggiungere dipendenze da Arduino fuori dai driver: metti il codice nuovo in un driver (vos_drv_*) o senza Arduino.')
+    for fam in SCHEDA:
+        for f, n in cur.get(fam, {}).items():
+            b = base.get(fam, {}).get(f, 0)
+            if n > b: err.append(f'KO {fam}: {f} ha {n} valori della scheda scritti a mano ({SHINT[fam]}; ammessi {b}). Mettili nel file di scheda (VesevOS/src/boards/).')
+    tot = {fam: sum(cur.get(fam, {}).values()) for fam in list(RULES) + list(ARDUINO) + list(SCHEDA)}
+    old = {fam: sum(base.get(fam, {}).values()) for fam in list(RULES) + list(ARDUINO) + list(SCHEDA)}
+    righe.append('accessi hardware fuori dai driver (ora / debito di partenza): ' + ', '.join(f'{k} {tot[k]}/{old[k]}' for k in RULES))
+    righe.append('include verso strati alti da core/devices/net/security/drivers/boards: ' + str(sum(cur.get('strati', {}).values())) + ' (deve essere 0)')
+    righe.append('include verso l alto, coppie (ora / debito di partenza): ' + str(sum(cur.get('ordine', {}).values())) + ' / ' + str(sum(base.get('ordine', {}).values())) + ' - ' + ', '.join(f'{k} {n}/{base.get("ordine", {}).get(k, 0)}' for k, n in sorted(cur.get('ordine', {}).items())))
+    righe.append('salti di strato, regola "un livello alla volta" (ora / debito di partenza): ' + str(sum(cur.get('salti', {}).values())) + ' / ' + str(sum(base.get('salti', {}).values())) + ' - ' + ', '.join(f'{k} {n}/{base.get("salti", {}).get(k, 0)}' for k, n in sorted(cur.get('salti', {}).items(), key=lambda x: -x[1])))
+    righe.append('include di ESP-IDF fuori dai driver (ora / debito di partenza): ' + str(sum(cur.get('e_idf', {}).values())) + ' / ' + str(sum(base.get('e_idf', {}).values())) + ' in ' + str(len(cur.get('e_idf', {}))) + ' file; primitive FreeRTOS fuori da drivers/ e core/: ' + str(sum(cur.get('f_rtos', {}).values())) + ' / ' + str(sum(base.get('f_rtos', {}).values())) + ' in ' + str(len(cur.get('f_rtos', {}))) + ' file')
+    righe.append('cicli tra moduli (gruppi, ora / debito di partenza): ' + str(len(cur.get('cicli', {}))) + ' / ' + str(len(base.get('cicli', {}))) + '  cicli tra cartelle: ' + str(len(cur.get('cicli_cart', {}))) + ' (deve essere 0)')
+    for k in cur.get('cicli', {}): righe.append('  ciclo: ' + k.replace(',', ' <-> '))
+    righe.append('dipendenza da Arduino fuori dai driver (ora / debito di partenza): ' + ', '.join(f'{k[2:]} {tot[k]}/{old[k]}' for k in ARDUINO))
+    righe.append('valori della scheda scritti a mano fuori da boards/ (ora / debito di partenza): ' + ', '.join(f'{k[2:]} {tot[k]}/{old[k]}' for k in SCHEDA))
+    for fam in list(SCHEDA) + list(ARDUINO):
+        peggio = sorted(cur.get(fam, {}).items(), key=lambda x: -x[1])[:10]
+        righe.append(f'  {fam[2:]} ({len(cur.get(fam, {}))} file): ' + ', '.join(f'{f} {n}' for f, n in peggio))
+    return err, righe
+
+def debito_aperto(cur):
+    return sum(sum(v.values()) for k, v in cur.items() if k not in ('cicli', 'cicli_cart')) + len(cur.get('cicli', {}))
+
+def saliti(cur, base):
+    """Voci SALITE rispetto alla baseline: lista di (famiglia, voce, prima, dopo). Una voce nuova ha prima = 0.
+    Vale per ogni famiglia (conteggi per file o per coppia). Per i cicli conta un gruppo nuovo (non contenuto in uno gia in baseline)."""
+    out = []
+    for fam in sorted(cur):
+        if fam in ('cicli', 'cicli_cart'):
+            bc = [set(k.split(',')) for k in base.get(fam, {})]
+            for k in sorted(cur[fam]):
+                if not any(set(k.split(',')) <= b for b in bc): out.append((fam, k.replace(',', ' <-> '), 0, 1))
+            continue
+        for voce, n in sorted(cur[fam].items()):
+            prima = base.get(fam, {}).get(voce, 0)
+            if n > prima: out.append((fam, voce, prima, n))
+    return out
+
+def totali(dati):
+    """Totale per famiglia (per i cicli: numero di gruppi)."""
+    return {fam: (len(v) if fam in ('cicli', 'cicli_cart') else sum(v.values())) for fam, v in dati.items()}
+
+def aggiorna(cur):
+    """--update: riscrive la baseline SOLO se nessuna voce e salita e nessuna voce e nuova. Altrimenti non scrive niente e ritorna 1.
+    Senza baseline esistente la base e vuota: se c'e debito, ogni voce e "nuova" e si rifiuta; con debito zero si scrive.
+    Nessuna opzione per forzare (non richiesta dall'utente): per accettare un salto si cambia il codice, non la baseline."""
+    base = json.load(open(BASE)) if os.path.exists(BASE) else {}
+    su = saliti(cur, base)
+    if su:
+        print('Voci SALITE rispetto alla baseline (famiglia, voce, prima -> dopo):')
+        for fam, voce, prima, dopo in su: print(f'  {fam}  {voce}  {prima} -> {dopo}')
+        print(f'RISULTATO checklayers --update: RIFIUTATO ({len(su)} voci salite)')
+        return 1
+    prima, dopo = totali(base), totali(cur)
+    for fam in sorted(set(prima) | set(dopo)):
+        if dopo.get(fam, 0) < prima.get(fam, 0): print(f'  sceso {fam}: {prima.get(fam, 0)} -> {dopo.get(fam, 0)}')
+    with open(BASE, 'w') as f: json.dump(cur, f, indent=1, sort_keys=True)
+    print('RISULTATO checklayers --update: scritto')
+    return 0
+
+def prova():
+    """Prova il controllo stesso su file finti (cartella temporanea): include giusti, salti, include verso l'alto, commenti, baseline, --update."""
+    import tempfile, shutil, io, contextlib
+    global SRC, BASE
+    vecchio = (SRC, BASE)
+    d = tempfile.mkdtemp(prefix='prova_checklayers_')
+    esiti = []
+    def scrivi(rel, testo):
+        p = os.path.join(d, 'src', rel); os.makedirs(os.path.dirname(p), exist_ok=True); open(p, 'w').write(testo)
+    def attendi(nome, ok): esiti.append((nome, ok)); print(('ok   ' if ok else 'KO   ') + nome)
+    try:
+        for c in LEVEL: scrivi(f'{c}/vos_{c}.h', '#pragma once\n')
+        scrivi('net/giusto.cpp', '#include "../devices/vos_devices.h"\n')                    # adiacente verso il basso: va bene
+        scrivi('packages/salto.cpp', '#include "../core/vos_core.h"\n#include "../net/vos_net.h"\n')   # packages -> core salta 3 strati
+        scrivi('core/su.cpp', '#include "../drivers/vos_drivers.h"\n#include "../security/vos_security.h"\n')   # core -> security: verso l'alto
+        scrivi('interfaces/commenti.cpp', '// #include "../core/vos_core.h"\n/* #include "../drivers/vos_drivers.h" */\n#include "../packages/vos_packages.h"\n')   # commenti ignorati
+        scrivi('devices/idf.cpp', '#include <esp_sleep.h>\n')                                    # ESP-IDF fuori dai driver
+        SRC = d; BASE = os.path.join(d, 'baseline.json')
+        cur = scan()
+        attendi("adiacente verso il basso (net -> devices) non e un salto", 'net->devices' not in cur.get('salti', {}) and 'net->devices' not in cur.get('ordine', {}))
+        attendi("packages -> core e un salto (e solo quello)", cur.get('salti', {}).get('packages->core') == 1 and len(cur.get('salti', {})) == 1)
+        attendi("core -> security e un include verso l'alto", cur.get('ordine', {}).get('core->security') == 1)
+        attendi("include dentro i commenti ignorati", 'interfaces->core' not in cur.get('salti', {}) and 'interfaces->drivers' not in cur.get('salti', {}))
+        attendi("esp_sleep.h fuori dai driver contato", cur.get('e_idf', {}).get('idf.cpp') == 1)
+        err, _ = rapporto(cur, {})
+        attendi("senza baseline: salto, verso l'alto ed ESP-IDF danno KO", any('KO salti' in e for e in err) and any('KO ordine' in e for e in err) and any('KO e_idf' in e for e in err))
+        err, _ = rapporto(cur, cur)
+        attendi("con la baseline uguale al conteggio: nessun errore", not err)
+        peggio = json.loads(json.dumps(cur)); peggio['salti']['packages->core'] = 2
+        err, _ = rapporto(peggio, cur)
+        attendi("un salto in piu rispetto alla baseline: KO", any('KO salti' in e for e in err))
+        meglio = json.loads(json.dumps(cur)); del meglio['salti']
+        err, _ = rapporto(meglio, cur)
+        attendi("un salto in meno rispetto alla baseline: va bene", not any('KO salti' in e for e in err))
+        # --- prove di --update (file di baseline temporaneo: BASE punta alla cartella finta, mai a tools/layers_baseline.json) ---
+        def leggi(): return open(BASE, 'rb').read() if os.path.exists(BASE) else None
+        def esegui():
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf): codice = aggiorna(scan())
+            return codice, buf.getvalue().strip().splitlines()[-1]
+        open(BASE, 'w').write(json.dumps(cur, indent=1, sort_keys=True))
+        prima = leggi(); codice, ultima = esegui()
+        attendi("update (a): baseline uguale al conteggio -> scrive, uscita 0", codice == 0 and ultima.endswith(': scritto') and leggi() == prima)
+        scrivi('packages/salto.cpp', '#include "../core/vos_core.h"\n#include "../core/vos_core.h"\n#include "../net/vos_net.h"\n')   # packages -> core: 2 invece di 1
+        prima = leggi(); codice, ultima = esegui()
+        attendi("update (b): un salto in piu -> RIFIUTATO (1 voci), uscita 1, baseline identica", codice == 1 and ultima.endswith('RIFIUTATO (1 voci salite)') and leggi() == prima)
+        scrivi('packages/salto.cpp', '#include "../net/vos_net.h"\n')                       # packages -> core sparisce
+        prima = leggi(); codice, ultima = esegui()
+        attendi("update (c): un salto in meno -> scrive, uscita 0, baseline cambiata", codice == 0 and ultima.endswith(': scritto') and leggi() != prima and 'packages->core' not in json.loads(leggi()).get('salti', {}))
+        scrivi('devices/idf2.cpp', '#include <esp_log.h>\n')                                # voce nuova: file nuovo con include IDF
+        prima = leggi(); codice, ultima = esegui()
+        attendi("update (d): voce nuova (file nuovo con include IDF) -> RIFIUTATO, baseline identica", codice == 1 and 'RIFIUTATO' in ultima and leggi() == prima)
+        os.remove(BASE); codice, ultima = esegui()
+        attendi("update (e1): senza baseline e con debito -> RIFIUTATO, file non creato", codice == 1 and 'RIFIUTATO' in ultima and leggi() is None)
+        d2 = tempfile.mkdtemp(prefix='prova_checklayers_pulito_')
+        try:
+            os.makedirs(os.path.join(d2, 'src', 'net')); open(os.path.join(d2, 'src', 'net', 'pulito.cpp'), 'w').write('int x;\n')
+            SRC = d2; codice, ultima = esegui()
+            attendi("update (e2): senza baseline e senza debito -> scrive, file creato", codice == 0 and ultima.endswith(': scritto') and leggi() is not None)
+        finally:
+            shutil.rmtree(d2, ignore_errors=True)
+    finally:
+        SRC, BASE = vecchio
+        shutil.rmtree(d, ignore_errors=True)
+    print('RISULTATO prova checklayers:', 'OK' if all(o for _, o in esiti) else 'KO', f'({sum(1 for _, o in esiti if o)}/{len(esiti)})')
+    return 0 if all(o for _, o in esiti) else 1
+
+def principale():
+    cur = scan()
+    if '--update' in sys.argv:
+        return aggiorna(cur)
+    base = json.load(open(BASE)) if os.path.exists(BASE) else {}
+    err, righe = rapporto(cur, base)
+    for e in err: print(e)
+    for r in righe: print(r)
+    # Ultima riga SEMPRE: l'esito. Prima il controllo si leggeva solo dalle ultime righe e un KO in testa passava inosservato (21/11/2026).
+    print(f'RISULTATO checklayers: {"KO, " + str(len(err)) + " errori" if err else "OK"}; debito tollerato dalla baseline ancora aperto: {debito_aperto(cur)} voci (non e "pulito": e il limite che non deve crescere)')
+    return 1 if err else 0
+
+if __name__ == '__main__':
+    sys.exit(prova() if '--prova' in sys.argv else principale())

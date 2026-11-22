@@ -233,10 +233,8 @@ static bool streamFinish(const char* shaIn, const char* who, char* from, char* t
   uint8_t h[32];
   mbedtls_sha256_finish(&g_sha, h);
   std::string_view want = trimView(shaIn ? shaIn : "");
-  if (!want.empty()) {
-    if (want.size() != 64) { err = tr("L'impronta SHA-256 deve avere 64 cifre esadecimali"); return false; }
-    if (!hexSame(h, want)) { err = tr("Impronta SHA-256 diversa: il file non e quello atteso"); return false; }
-  }
+  if (want.size() != 64) { err = tr("L'impronta SHA-256 deve avere 64 cifre esadecimali"); return false; }   // obbligatoria (20/11/2026)
+  if (!hexSame(h, want)) { err = tr("Impronta SHA-256 diversa: il file non e quello atteso"); return false; }
   if (g_sec > 0) {
     int w = streamPut(g_sec, g_cur, g_fill);
     if (w != REC_W_OK) { err = writeErr(w); vlog("ERRORE: aggiornamento del recovery non riuscito (codice %d)", w); return false; }
@@ -275,11 +273,9 @@ bool recUpFinish(const char* shaIn, const char* who, char* from, char* to, size_
     char ver[16];
     if (!imgRecVersion(g_buf, g_len, ver, sizeof ver)) { err = tr("Non e un recovery VesevOS (manca il marchio): forse e il firmware?"); break; }
     std::string_view want = trimView(shaIn ? shaIn : "");
-    if (!want.empty()) {
-      if (want.size() != 64) { err = tr("L'impronta SHA-256 deve avere 64 cifre esadecimali"); break; }
-      sha256(g_buf, g_len, h);
-      if (!hexSame(h, want)) { err = tr("Impronta SHA-256 diversa: il file non e quello atteso"); break; }
-    }
+    if (want.size() != 64) { err = tr("L'impronta SHA-256 deve avere 64 cifre esadecimali"); break; }   // obbligatoria (20/11/2026)
+    sha256(g_buf, g_len, h);
+    if (!hexSame(h, want)) { err = tr("Impronta SHA-256 diversa: il file non e quello atteso"); break; }
     snprintf(from, verLen, "%s", recVersion()); snprintf(to, verLen, "%s", ver);
     vlog("SISTEMA: scrivo il recovery %s (%lu byte, %s)", ver, (unsigned long)g_len, who);
     int w = drvRecoveryWrite(g_buf, g_len);

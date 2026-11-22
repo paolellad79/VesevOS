@@ -166,7 +166,7 @@ void shx::wzLine(OutSink& o, char* l) {
     case WZ_TIME:
       if (!skip) {
         if (!timeSetLocal(l, err)) { o.println(err.c_str()); wzAsk(o); return; }
-        char now[32]; timeNowFmt(now, sizeof now); o.println(now);
+        char now[TIME_FMT_MAX]; timeNowFmt(now, sizeof now); o.println(now);
       }
       break;
   }

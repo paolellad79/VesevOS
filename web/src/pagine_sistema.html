@@ -30,21 +30,47 @@
    <div><label for="lc_tz">Fuso orario</label><select id="lc_tz" onchange="lcTz()"></select></div>
    <div id="lc_tzc" class="hide">
     <label for="lc_posix">Regola del fuso (formato POSIX)</label><input id="lc_posix"></div>
-   <div><label for="lc_df">Formato data</label><select id="lc_df">
+   <div><label for="lc_df">Data corta</label><select id="lc_df" onchange="lcFmt()">
      <option value="0">GG/MM/AAAA (31/12/2026)</option>
      <option value="1">AAAA-MM-GG (2026-12-31)</option>
-     <option value="2">MM/GG/AAAA (12/31/2026)</option></select></div>
-   <div><label for="lc_tf">Formato ora</label><select id="lc_tf">
-     <option value="0">24 ore (18:30:00)</option><option value="1">12 ore (06:30:00 PM)</option>
-    </select></div>
+     <option value="2">MM/GG/AAAA (12/31/2026)</option>
+     <option value="3">Personalizzata</option></select>
+    <input id="lc_dft" data-tt class="hide" maxlength="32" autocomplete="off" spellcheck="false" oninput="lcFmt()" aria-label="Formato personalizzato della data corta">
+    <div class="fhint" id="lc_dfp" aria-live="polite"></div></div>
+   <div><label for="lc_dl">Data lunga</label><select id="lc_dl" onchange="lcFmt()">
+     <option value="0">Abbreviata (Mar. 3 Nov. 2026)</option>
+     <option value="1">Completa (Martedi 3 novembre 2026)</option>
+     <option value="2">Personalizzata</option></select>
+    <input id="lc_dlt" data-tt class="hide" maxlength="32" autocomplete="off" spellcheck="false" oninput="lcFmt()" aria-label="Formato personalizzato della data lunga">
+    <div class="fhint" id="lc_dlp" aria-live="polite"></div></div>
+   <div><label for="lc_tf">Formato ora</label><select id="lc_tf" onchange="lcFmt()">
+     <option value="0">24 ore (18:30)</option><option value="1">12 ore (6:30 PM)</option>
+    </select>
+    <div class="fhint" id="lc_tfp"></div></div>
+   <div><label for="lc_ts">Secondi nell'ora lunga</label><select id="lc_ts" onchange="lcFmt()">
+     <option value="1">Si</option><option value="0">No</option></select></div>
+   <div><label for="lc_tl">Ora lunga</label><select id="lc_tl" onchange="lcFmt()">
+     <option value="0">Standard</option><option value="1">Personalizzata</option></select>
+    <input id="lc_tlt" data-tt class="hide" maxlength="32" autocomplete="off" spellcheck="false" oninput="lcFmt()" aria-label="Formato personalizzato dell'ora lunga">
+    <div class="fhint" id="lc_tlp" aria-live="polite"></div></div>
+   <p class="fhint" id="lc_fhelp">Formato scritto a mano, come il comando date: %d giorno (%-d senza zero), %m mese (%-m), %b mese abbreviato, %B mese completo, %a giorno abbreviato, %A giorno completo, %Y anno (%y a due cifre), %H ore 0-23 (%-H), %I ore 1-12 (%-I), %M minuti, %S secondi, %p AM/PM, %% il segno di percentuale. Il resto e testo libero, al massimo 32 caratteri. La data e l'ora corte (tabelle, registro, elenchi) hanno ore e minuti; quelle lunghe stanno in testata, nell'accesso e nei riquadri grandi.</p>
    <div><label for="lc_ds">Separatore dei decimali</label><select id="lc_ds">
      <option value="0">Virgola (3,5)</option><option value="1">Punto (3.5)</option></select></div>
    <div><label for="lc_ws">Primo giorno della settimana</label><select id="lc_ws">
      <option value="0">Lunedi</option><option value="1">Domenica</option></select></div>
-   <div><label for="lc_tu">Unita di temperatura</label><select id="lc_tu">
+   <div><label for="lc_tu">Unita di temperatura</label><select id="lc_tu" onchange="lcTarHint()">
      <option value="0">Gradi Celsius (C)</option><option value="1">Gradi Fahrenheit (F)</option>
     </select></div>
   </div></div>
+ <div class="card adm"><h3>Taratura della temperatura</h3>
+  <p class="fhint">Correzione in gradi Celsius, da -20,0 a +20,0, aggiunta alla temperatura letta da ogni sensore. Vale dappertutto: pagina, registratore, soglia del caldo, comandi e funzioni. Il valore grezzo del sensore non si perde. Si salva con il pulsante Salva qui sotto.</p>
+  <div class="agrid">
+   <div><label for="lc_tarsoc">Sensore interno del chip (gradi C)</label><input type="number" id="lc_tarsoc"
+     min="-20" max="20" step="0.1" value="0" oninput="lcTarHint()"></div>
+   <div><label for="lc_tarext">Sensore esterno (gradi C)</label><input type="number" id="lc_tarext"
+     min="-20" max="20" step="0.1" value="0" oninput="lcTarHint()"></div>
+  </div>
+  <p class="fhint" id="lc_tarf"></p></div>
  <div class="card adm"><h3>Lingue</h3>
   <div id="lglist"></div>
   <label for="lgf"
@@ -58,7 +84,7 @@
    onclick="lcDefaults()">Ripristina valori del paese</button><div id="lcm" class="msg"></div></div>
 </section>
 <section id="t_power" class="hide">
- <div class="sub" id="sk_power"><button>Risparmio energia</button><button class="adm">Dormi adesso</button><button class="adm">Velocita CPU</button></div>
+ <div class="sub" id="sk_power"><button>Risparmio energia</button><button class="adm">Dormi adesso</button><button class="adm">Velocita CPU</button><button>Coprocessore</button></div>
  <div class="card"><h3>Risparmio energia</h3>
   <p class="fhint">Tre livelli, da usare insieme: processore piu lento (sotto), Wi-Fi a risparmio massimo, sonno profondo. Il consumo vero dipende dalla scheda: misuralo con un tester prima di fidarti dei numeri.</p>
   <div class="sc" id="sc_power"></div>
@@ -103,6 +129,13 @@
    <button class="btn gray" onclick="setCpuPar()">Salva i parametri</button>
   </div>
   <div id="cpum" class="msg"></div></div>
+ <div class="card"><h3>Coprocessore</h3>
+  <p class="fhint">Cio che la scheda ha per lavorare mentre il processore principale dorme. Qui si vede soltanto lo stato: non si carica nessun programma.</p>
+  <div class="row"><span>Tipo</span><span id="co_tipo"></span></div>
+  <div class="row"><span>Memoria condivisa</span><span id="co_mem"></span></div>
+  <div class="row"><span>Programma caricato</span><span id="co_prog"></span></div>
+  <div class="row"><span>Ultimo risveglio</span><span id="co_wake"></span></div>
+ </div>
 </section>
 <section id="t_func" class="hide">
  <div class="card"><h3>Funzionalita</h3>
@@ -155,6 +188,14 @@
   <button class="btn gray" onclick="a11yReset()">Ripristina</button>
   <p class="fhint">Tastiera: Tab per spostarti, Invio per premere, Esc per chiudere finestre e menu, Ctrl + ` per il terminale. Nell'editor dei file: Ctrl+S salva, Ctrl+M cambia il comportamento del tasto Tab.</p>
   </div>
+ <div class="card adm" id="tema"><h3>Tema della pagina</h3>
+  <p class="fhint">Un file di stile (.css) cambia l'aspetto di questa pagina senza aggiornare il firmware. Vale per tutti i browser che aprono questa scheda. Colori, raggi e forma dei bottoni si cambiano; immagini, caratteri scaricati e indirizzi esterni no (sono rifiutati @import, url(), la barra rovesciata e il carattere &lt;). Al massimo 32 KB.</p>
+  <div class="row"><span>Tema in uso</span><span id="tm_st"></span></div>
+  <input type="file" id="tm_f" accept=".css,text/css" class="hide" onchange="temaCarica(this)">
+  <button class="btn" onclick="$('tm_f').click()">Carica un tema</button>
+  <button class="btn gray" onclick="temaRipristina()">Tema di fabbrica</button>
+  <div id="tm_m" class="msg"></div>
+ </div>
 </section>
 <section id="t_conf" class="hide">
  <div class="sub" id="sk_conf"><button class="adm">Backup e ripristino</button><button class="adm">Ripristino di fabbrica</button></div>

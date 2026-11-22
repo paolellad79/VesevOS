@@ -33,6 +33,11 @@ esp_err_t recUploadHandler(httpd_req_t* r) {
   bool authed = recAuthedReq(r, &byGrant);
   std::string denyMsg;                 // perche e stato rifiutato (solo se non autorizzato)
   RecImage img(want, byGrant ? recOrder().size : 0);
+  {                                    // l'impronta SHA-256 e OBBLIGATORIA (20/11/2026): si rifiuta PRIMA di toccare la memoria
+    bool shaOk = want.size() == 64;
+    for (char c : want) if (!isxdigit((unsigned char)c)) shaOk = false;
+    if (authed && !shaOk) img.fail(RES_SHA, "Manca lo SHA-256 del file (64 caratteri): incollalo nel campo e riprova");
+  }
   RecMultipart mp;
   bool formOk = mp.begin(boundaryOf(recReqHeader(r, "Content-Type")), &img);
   if (authed) {

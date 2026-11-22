@@ -1,0 +1,90 @@
+# Casi della prova di parita tra firmware (core/vos_datefmt.cpp) e pagina (web/src/js_dataora.js).
+# Una riga per caso, campi separati da TAB: tipo, scelta, testo scritto a mano, data (anno mese giorno giornoSett ore minuti secondi), atteso.
+# Tipi: F formato scritto a mano (nella colonna della scelta) (atteso !N = errore di dfControlla, 1 vuoto 2 lungo 3 carattere 4 segno 5 percentuale finale);
+#       DC data corta (scelta = 0..3); DL data lunga (scelta = 0..2); OC ora corta (scelta = 0 o 1 per AM/PM);
+#       OL ora lunga (scelta = 'ampm sec formato'); M mese abbreviato dalla frase; N* nomi in uso da qui in avanti
+#       (NB giorni abbreviati, NL giorni lunghi, NM mesi lunghi, NF dodici frasi dei mesi separate da ';').
+# Gli attesi sono scritti a mano, non generati dal codice. 3/11/2026 e un martedi (giornoSett 2).
+NB	Dom.,Lun.,Mar.,Mer.,Giov.,Ven.,Sab.			
+NL	Domenica,Lunedi,Martedi,Mercoledi,Giovedi,Venerdi,Sabato			
+NM	gennaio,febbraio,marzo,aprile,maggio,giugno,luglio,agosto,settembre,ottobre,novembre,dicembre			
+NF	%d Gen. %d;%d Feb. %d;%d Mar. %d;%d Apr. %d;%d Mag. %d;%d Giu. %d;%d Lug. %d;%d Ago. %d;%d Set. %d;%d Ott. %d;%d Nov. %d;%d Dic. %d			
+# data corta
+DC	0		2026 11 3 2 21 5 9	3/11/2026
+DC	1		2026 11 3 2 21 5 9	2026-11-3
+DC	2		2026 11 3 2 21 5 9	11/3/2026
+DC	0		2026 3 5 4 7 8 0	5/3/2026
+DC	3	%d.%m.%y	2026 11 3 2 21 5 9	03.11.26
+DC	3	%-d/%-m/%Y %a	2026 11 3 2 21 5 9	3/11/2026 Mar.
+DC	3	%q	2026 11 3 2 21 5 9	3/11/2026
+DC	3		2026 11 3 2 21 5 9	3/11/2026
+DC	9		2026 11 3 2 21 5 9	3/11/2026
+# data lunga
+DL	0		2026 11 3 2 21 5 9	Mar. 3 Nov. 2026
+DL	0		2027 1 1 5 0 0 0	Ven. 1 Gen. 2027
+DL	1		2026 11 3 2 21 5 9	Martedi 3 novembre 2026
+DL	1		2026 12 31 4 12 30 0	Giovedi 31 dicembre 2026
+DL	2	%a %d %b %Y, ore %H	2026 11 3 2 21 5 9	Mar. 03 Nov. 2026, ore 21
+DL	2	%A%%	2026 11 3 2 21 5 9	Martedi%
+DL	2	%B %-d, %y	2026 11 3 2 21 5 9	novembre 3, 26
+DL	2	%	2026 11 3 2 21 5 9	Mar. 3 Nov. 2026
+# ora corta
+OC	0		2026 11 3 2 21 5 9	21:05
+OC	1		2026 11 3 2 21 5 9	9:05 PM
+OC	1		2026 11 3 2 0 7 0	12:07 AM
+OC	1		2026 11 3 2 12 30 0	12:30 PM
+OC	0		2026 3 5 4 7 8 0	7:08
+OC	0		2026 11 3 2 0 7 0	0:07
+# ora lunga: scelta = 'ampm secondi formato'
+OL	0 1 0		2026 11 3 2 21 5 9	21:05:09
+OL	0 0 0		2026 11 3 2 21 5 9	21:05
+OL	1 1 0		2026 11 3 2 21 5 9	9:05:09 PM
+OL	1 0 0		2026 11 3 2 21 5 9	9:05 PM
+OL	0 1 1	%H.%M.%S	2026 11 3 2 21 5 9	21.05.09
+OL	1 1 1	%-I:%M%p	2026 11 3 2 21 5 9	9:05PM
+OL	0 1 1	%I:%M %p	2026 11 3 2 0 7 0	12:07 AM
+OL	0 1 1	%-H h %M min	2026 3 5 4 7 8 0	7 h 08 min
+OL	0 1 1	%A %-H:%M	2026 11 3 2 21 5 9	Martedi 21:05
+OL	0 1 1	%q	2026 11 3 2 21 5 9	21:05:09
+# formato scritto a mano
+F	%-d/%-m/%y		2026 11 3 2 21 5 9	3/11/26
+F	%d %B %Y		2026 11 3 2 21 5 9	03 novembre 2026
+F	100%%		2026 11 3 2 21 5 9	100%
+F	%H:%M:%S		2026 11 3 2 0 7 0	00:07:00
+F	%I %-I		2026 11 3 2 21 5 9	09 9
+F	%I %-I		2026 11 3 2 0 7 0	12 12
+F	%m/%d		2026 3 5 4 7 8 0	03/05
+F	%-m/%-d		2026 3 5 4 7 8 0	3/5
+F	%Y%y		2026 11 3 2 21 5 9	202626
+F	ore %p		2026 11 3 2 12 30 0	ore PM
+F	ore %p		2026 11 3 2 0 7 0	ore AM
+F	%a%A%b%B		2026 11 3 2 21 5 9	Mar.MartediNov.novembre
+F	12345678901234567890123456789012		2026 11 3 2 21 5 9	12345678901234567890123456789012
+F	123456789012345678901234567890123		2026 11 3 2 21 5 9	!2
+F			2026 11 3 2 21 5 9	!1
+F	%		2026 11 3 2 21 5 9	!5
+F	abc%-		2026 11 3 2 21 5 9	!5
+F	%-Y		2026 11 3 2 21 5 9	!4
+F	%-M		2026 11 3 2 21 5 9	!4
+F	%q		2026 11 3 2 21 5 9	!4
+F	%E		2026 11 3 2 21 5 9	!4
+F	a"b		2026 11 3 2 21 5 9	!3
+F	a\b		2026 11 3 2 21 5 9	!3
+# mese abbreviato dalla frase
+M	%d Nov. %d			Nov.
+M	%d. Nov. %d			Nov.
+M	%d Nov %d			Nov
+M	%d nov. %d			nov.
+M	Nov %d, %d			Nov
+M	%d%d			
+M	11月%d日 %d年			日
+# un'altra lingua: da qui in avanti i nomi sono tedeschi
+NB	So.,Mo.,Di.,Mi.,Do.,Fr.,Sa.			
+NL	Sonntag,Montag,Dienstag,Mittwoch,Donnerstag,Freitag,Samstag			
+NM	Januar,Februar,Maerz,April,Mai,Juni,Juli,August,September,Oktober,November,Dezember			
+NF	%d. Jan. %d;%d. Feb. %d;%d. Mrz. %d;%d. Apr. %d;%d. Mai %d;%d. Jun. %d;%d. Jul. %d;%d. Aug. %d;%d. Sep. %d;%d. Okt. %d;%d. Nov. %d;%d. Dez. %d			
+DL	0		2026 11 3 2 21 5 9	Di. 3. Nov. 2026
+DL	1		2026 11 3 2 21 5 9	Dienstag 3 November 2026
+DL	2	%b %a	2026 11 3 2 21 5 9	Nov. Di.
+DL	0		2026 3 5 4 7 8 0	Do. 5. Mrz. 2026
+DL	2	%B	2026 3 5 4 7 8 0	Maerz

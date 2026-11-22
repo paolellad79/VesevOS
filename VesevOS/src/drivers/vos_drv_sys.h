@@ -24,3 +24,13 @@ const char* drvSdkVersion();       // versione di ESP-IDF
 uint32_t    drvFlashSize();        // dimensione fisica della flash in byte (0 se non si legge)
 void        drvBuildDateTo(char* out, size_t n);   // data e ora in cui il programma e stato compilato ("Oct 23 2026 10:15:00"; "" se non si legge)
 float       drvTempC();            // temperatura interna del chip in gradi C (NAN se il sensore non risponde)
+
+// Causa dell'ultimo risveglio dal sonno (esp_sleep_get_wakeup_cause, ESP-IDF 5.5.5, api-reference sleep_modes). Codici nostri:
+#define DRV_WAKE_NESSUNO  0   // accensione o riavvio: la scheda non si e svegliata dal sonno (ESP_SLEEP_WAKEUP_UNDEFINED)
+#define DRV_WAKE_TIMER    1
+#define DRV_WAKE_GPIO     2   // piedino (anche EXT0 ed EXT1)
+#define DRV_WAKE_TOCCO    3   // sensore di tocco
+#define DRV_WAKE_COPROC   4   // coprocessore (ULP o LP CPU)
+#define DRV_WAKE_SERIALE  5   // UART
+#define DRV_WAKE_ALTRO    9
+int drvWakeCause();

@@ -9,7 +9,9 @@
 #include "../core/vos_i18n.h"
 #include "../drivers/vos_drv_dhcp.h"
 #include "../net/vos_net.h"
+#include "../core/vos_util.h"
 #include <stdio.h>
+#include <string.h>
 
 namespace webx {
 
@@ -53,6 +55,30 @@ int redirectPlan(uint32_t ip, bool methodOk, const char* path, const char* query
   if (!cleanUri(url)) { *text = tr("Richiesta non valida"); return 400; }    // difesa in piu: nome o dominio con caratteri strani
   *text = "";
   return 307;
+}
+
+// Una richiesta HTTPS che arriva con un IPv4 al posto del nome (https://192.168.1.5/): se l'annuncio del nome (mDNS) e acceso si va al nome,
+// cosi il certificato corrisponde e l'indirizzo resta quello giusto anche se l'IP cambia. La destinazione nasce SOLO dalle impostazioni della
+// scheda, MAI dal Host (che serve solo a capire se e un IPv4). Dall'hotspot non si rimanda (il nome li non e detto che si risolva).
+int redirectDaIp(uint32_t ip, const char* hostHeader, char* url, size_t cap) {
+  if (!cfg.mdnsOn || netOnAp(ip) || !hostHeader) return 0;
+  char h[24];
+  size_t n = 0;
+  while (hostHeader[n] && hostHeader[n] != ':' && n < sizeof h - 1) {
+    char c = hostHeader[n];
+    if (!((c >= '0' && c <= '9') || c == '.')) return 0;              // non e un indirizzo a numeri: un nome o un IPv6, si lascia stare
+    h[n] = c;
+    n++;
+  }
+  h[n] = 0;
+  uint32_t v = 0;
+  if (!n || (hostHeader[n] && hostHeader[n] != ':') || !ipParse(h, v)) return 0;
+  char host[96], port[8] = "";
+  targetHost(host, sizeof host);
+  if (strcmp(host, h) == 0) return 0;                                  // la destinazione sarebbe lo stesso indirizzo: niente giro
+  if (cfg.httpsPort != 443) snprintf(port, sizeof port, ":%u", (unsigned)cfg.httpsPort);
+  int len = snprintf(url, cap, "https://%s%s/", host, port);
+  return (len > 0 && len < (int)cap) ? 307 : 0;
 }
 
 }  // namespace webx

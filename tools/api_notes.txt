@@ -1,5 +1,10 @@
 # Descrizione di ogni rotta API: "METODO /percorso | italiano | english". Usato da tools/mkapidoc.py. Una rotta senza riga = errore di tools/checkapi.py.
 GET / | La pagina web (dal file /usr/share/vesevos/html.vrs, compressa); se il file manca o non e valido, o se il file della lingua in uso e in errore, la pagina di emergenza | The web page (from the /usr/share/vesevos/html.vrs file, gzip); if the file is missing or not valid, or if the language file in use is in error, the emergency page
+GET /tema.css | Il tema della pagina (file /etc/tema.css, solo se valido: al massimo 32 KB, senza @import, url(), barra rovesciata e <); altrimenti un commento e l'aspetto di fabbrica. Pubblica (serve anche alla schermata di accesso). Intestazione X-VOS-Tema: ok, fabbrica o il motivo del rifiuto | The page theme (file /etc/tema.css, only if valid: 32 KB at most, no @import, url(), backslash or <); otherwise a comment and the factory look. Public (the login screen needs it too). X-VOS-Tema header: ok, fabbrica or the reason for refusal
+GET /manifest.webmanifest | Manifest dell'app web, con il nome della scheda (name, short_name, start_url, display standalone, icone 192 e 512). Pubblico | Web app manifest with the board name (name, short_name, start_url, standalone display, 192 and 512 icons). Public
+GET /icon-192.png | Icona PNG 192x192 dell'app web, dentro il firmware. Pubblica | 192x192 PNG icon of the web app, inside the firmware. Public
+GET /icon-512.png | Icona PNG 512x512 dell'app web, dentro il firmware. Pubblica | 512x512 PNG icon of the web app, inside the firmware. Public
+GET /apple-touch-icon.png | Icona PNG 180x180 per la schermata Home di iPhone e iPad, dentro il firmware. Pubblica | 180x180 PNG icon for the iPhone and iPad home screen, inside the firmware. Public
 POST /api/airplane | Modo aereo: spegne o riaccende la radio (on, exit) | Airplane mode: radio off or on (on, exit)
 GET /api/app | App: dettaglio e controllo di un file /apps/<name>.vab (permessi u, controlli ctl, icona, byte). L'operatore solo se who=oper | App: details and check of a file /apps/<name>.vab (permissions u, controls ctl, icon, bytes). Operator only if who=oper
 GET /api/apps | App: elenco di /apps/*.vab con controllo del formato (n, ok, t titolo, v versione, a autore, w chi la usa, u permessi, c controlli, icon, e errore). L'operatore vede solo le app valide con who=oper | Apps: list of /apps/*.vab with format check (n, ok, t title, v version, a author, w who may use, u permissions, c controls, icon, e error). The operator sees only valid apps with who=oper
@@ -7,7 +12,7 @@ GET /api/ap | Hotspot: nome, stato, client | Hotspot: name, state, clients
 POST /api/ap | Cambia nome/password/QR dell'hotspot (new = nuova password casuale) | Change hotspot name/password/QR (new = new random password)
 GET /api/audit | Allarmi di configurazione e storico | Configuration alarms and history
 POST /api/audit/ack | Segna come letto un allarme | Mark an alarm as read
-GET /api/auth | Stato dell'accesso: utente, ruolo, pacchetti presenti, impronta del certificato | Login state: user, role, packages present, certificate fingerprint
+GET /api/auth | Stato dell'accesso: utente, ruolo, pacchetti presenti, impronta del certificato; ml = messaggio della pagina di accesso (testo pubblico, vuoto se non c'e); nm = nome della scheda e bd = modello, per le variabili del messaggio | Login state: user, role, packages present, certificate fingerprint; ml = login page message (public text, empty if none)
 GET /api/ban | Elenco IP bloccati e regole di blocco | Blocked IPs and ban rules
 POST /api/ban/set | Imposta tentativi e secondi di blocco | Set failed attempts and ban seconds
 POST /api/ban/unban | Sblocca un IP | Unblock an IP
@@ -49,7 +54,8 @@ POST /api/btn | Tasto BOOT (solo Admin): c1, c2, c3 = azione (0-3) per 1, 2, 3 c
 POST /api/lang | Lingua della scheda | Board language
 GET /api/langfile | Frasi della pagina in una lingua (file .vlp, gzip) | Page phrases of a language (.vlp file, gzip)
 GET /api/langs | Lingue disponibili | Available languages
-POST /api/led | Colore, modo, luminosita del LED | LED colour, mode, brightness
+POST /api/led | Colore, modo, luminosita, correzione dei canali e tonalita degli stati del LED | LED colour, mode, brightness, channel correction and state tones
+POST /api/led/anteprima | Prova di un colore sul LED senza salvare (calibrazione, 20 s) | Try a colour on the LED without saving (calibration, 20 s)
 GET /api/license | Testo di una licenza (id) o elenco; notice e gpl3 sono nel firmware, apache2, mit e bsd3 nei file di /usr/share/vesevos (se il file manca o non e valido il testo e un messaggio) | Licence text (id) or list; notice and gpl3 are in the firmware, apache2, mit and bsd3 in the /usr/share/vesevos files (if the file is missing or not valid the text is a message)
 GET /api/log | Registro (testo) | Log (text)
 POST /api/log/clear | Svuota il registro | Clear the log
@@ -84,11 +90,12 @@ GET /api/pintest | Stato della prova pin | Pin test state
 POST /api/pintest | Prova un pin (action, gpio, pull) | Test a pin
 GET /api/power | Risparmio energia: modo e tempi | Power saving: mode and times
 POST /api/power | Cambia modo e tempi | Change mode and times
+GET /api/coproc | Coprocessore (sola lettura): ulp, lp, mem (byte), prog, wake (causa dell'ultimo risveglio) | Coprocessor (read only): ulp, lp, mem (bytes), prog, wake (last wake-up cause)
 POST /api/reboot | Riavvia la scheda | Reboot the board
 GET /api/recovery | Dice se il recovery e presente e la sua versione (present 0/1, kb, ver) | Tells whether the recovery is present and its version (present 0/1, kb, ver)
 POST /api/recovery | Riavvia nel recovery per caricare un nuovo firmware (risponde con ip) | Reboots into the recovery to upload a new firmware (answers with ip)
 GET /api/region | Paese, fuso, lingua, radio | Country, time zone, language, radio
-POST /api/region | Cambia paese, fuso, formati, antenna, potenza | Change country, zone, formats, antenna, power
+POST /api/region | Cambia paese, fuso, formati di data e ora (anche scritti a mano, controllati prima di salvare), taratura della temperatura, antenna, potenza | Change country, zone, date and time formats (also hand-written, checked before saving), temperature calibration, antenna, power
 GET /api/rules | Testo delle automazioni | Automation text
 POST /api/rules | Salva le automazioni | Save automations
 POST /api/rules/run | Esegue una regola (i) | Run a rule (i)
@@ -113,7 +120,7 @@ GET /api/stats.csv | Statistiche in CSV | Statistics as CSV
 GET /api/status | Stato completo (versione, apiVersion, RAM, rete, CPU; per l'Admin anche agg, ris = file di risorse con problemi: k, n, s, lerr = lingua in errore: k (0 o 1), c (codice), m (motivo 1-5), ed evb) | Full status (version, apiVersion, RAM, network, CPU)
 GET /api/svc | Servizi di rete: hotspot, HTTP, HTTPS, porte, DHCP, mDNS | Network services
 POST /api/svc | Cambia i servizi di rete | Change network services
-POST /api/system | Nome della scheda (hostname) e dominio | Board name (hostname) and domain
+POST /api/system | Nome della scheda (hostname) e dominio; messaggiologin (facoltativo): messaggio della pagina di accesso, al massimo 200 caratteri ASCII con a capo, senza barra rovesciata; assente = resta com'e, vuoto = lo toglie | Board name (hostname) and domain; messaggiologin (optional): login page message, at most 200 ASCII characters with line breaks, no backslash; missing = kept, empty = removed
 POST /api/taskkill | Ferma un task (name) | Stop a task (name)
 GET /api/tasklist | Task in JSON | Tasks as JSON
 POST /api/taskrestart | Riavvia un task (name) | Restart a task (name)
@@ -181,3 +188,5 @@ GET /api/progdata | Dove le app tengono i dati: sd = la microSD si puo usare ade
 POST /api/progdata | Sceglie dove una app salva i dati: k=b|e, name, where=flash|sd (solo app che dichiarano di salvare dati, non in corso; sd solo con la microSD montata) | Chooses where an app saves its data: k=b|e, name, where=flash|sd (only apps that declare saving data, not running; sd only with the microSD mounted)
 GET /api/ip6 | IPv6 della Wi-Fi di casa (Operatore): presente (il firmware ha IPv6), acceso, fisso (modo con indirizzo fisso in piu), ind (indirizzo fisso), collegato, prefisso (sempre 64), elenco (a = indirizzo, t = 0 locale / 1 globale / 2 privato / 3 altro, p = in uso). gw e dns = gateway e DNS IPv6 scritti a mano (vuoti = automatici, dal router) | Home Wi-Fi IPv6 (Operator): presente (firmware has IPv6), acceso (on), fisso (mode with one extra fixed address), ind (fixed address), collegato (connected), prefisso (always 64), elenco (a = address, t = 0 local / 1 global / 2 private / 3 other, p = in use), gw and dns = IPv6 gateway and DNS typed by hand (empty = automatic, from the router)
 POST /api/ip6 | IPv6 (solo Admin): acceso=0|1, fisso=0|1, ind (indirizzo fisso, solo globale 2000::/3 o privato fc00::/7, prefisso /64), gw (gateway: fe80::/10 oppure della stessa /64 della scheda; vuoto = automatico), dns (DNS di riserva, globale o privato; vuoto = automatico); salva nella configurazione, applica entro un secondo e ritorna lo stato come il GET | IPv6 (Admin only): acceso=0|1 (on), fisso=0|1 (fixed), ind (fixed address, global 2000::/3 or private fc00::/7 only, prefix /64), gw (gateway: fe80::/10 or in the board's /64; empty = automatic), dns (fallback DNS, global or private; empty = automatic); saves to the configuration, applies within a second and returns the status like GET
+GET /api/rec | Registratore di dati: stato, impostazioni, fonti, file, punti del grafico e ultime azioni | Data recorder: state, settings, sources, files, chart points and latest actions
+POST /api/rec/set | Cambia le impostazioni del registratore (on, sec, where, maxkb, limite, t, r, dev1-dev4, sec1-sec4, sect, secr, azioni, evmax) | Change the recorder settings (on, sec, where, maxkb, limite, t, r, dev1-dev4, sec1-sec4, sect, secr, azioni, evmax)

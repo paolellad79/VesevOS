@@ -16,7 +16,7 @@ static void vero(bool c, const char* nome) { if (!c) { printf("KO %s\n", nome); 
 
 static const char* SHA = "2bce5a99e14c54912d8772f966cf4d7ecc77d420c910c604ddaf96d56962cf22";
 
-static bool leggi(const char* t, AggDisponibile& d) { return aggLeggiUltima(t, strlen(t), d); }
+static bool leggi(const char* t, AggDisponibile& d) { return aggLeggiUltima(t, strlen(t), d, "S3"); }
 
 int main() {
   // versioni del firmware
@@ -75,10 +75,10 @@ int main() {
   // firmware scaricato sulla microSD: intestazione e marchio a pezzi
   uint8_t testa[16] = {0xE9};
   testa[12] = 0x09;
-  vero(aggTestaFirmware(testa, sizeof testa), "testa buona");
-  vero(!aggTestaFirmware(testa, 8), "testa corta");
+  vero(aggTestaFirmware(testa, sizeof testa, 9), "testa buona");
+  vero(!aggTestaFirmware(testa, 8, 9), "testa corta");
   testa[12] = 0x05;
-  vero(!aggTestaFirmware(testa, sizeof testa), "altro chip");
+  vero(!aggTestaFirmware(testa, sizeof testa, 9), "altro chip");
   size_t pos = 0;
   vero(!aggMarchio((const uint8_t*)"xx{FW:Ves", 9, pos), "marchio a meta");
   vero(aggMarchio((const uint8_t*)"evOS}yy", 7, pos), "marchio tra due blocchi");
@@ -154,12 +154,12 @@ int main() {
   snprintf(t, sizeof t, "{\"schema\":1,\"a\":[1,-2.5e3,true,false,null,{\"b\":[]}],\"firmware\":{\"version\":\"1.8.19\",\"size\":7,\"sha256\":\"%s\",\"url\":\"https://x/y\",\"publisher\":\"a\\u00e8\"},\"recovery\":{\"version\":\"0.5.3\"}}", SHA);
   vero(leggi(t, d) && !strcmp(d.verRec, "0.5.3"), "elenco con tutti i tipi");
   size_t tutto = strlen(t);
-  for (size_t i = 0; i < tutto; i++) vero(!aggLeggiUltima(t, i, d), "tagliato in un punto qualunque");
+  for (size_t i = 0; i < tutto; i++) vero(!aggLeggiUltima(t, i, d, "S3"), "tagliato in un punto qualunque");
   for (size_t i = 0; i <= tutto; i++) {                 // nessun byte puo far leggere oltre o accettare il rotto: gira con i controlli di memoria
     char copia[900];
     memcpy(copia, t, tutto);
     copia[i < tutto ? i : tutto - 1] = '\x01';
-    aggLeggiUltima(copia, tutto, d);
+    aggLeggiUltima(copia, tutto, d, "S3");
   }
   snprintf(t, sizeof t, "{\"schema\":1,\"firmware\":{\"version\":\"1.8.19\",\"size\":1,\"size\":2,\"sha256\":\"%s\",\"url\":\"https://x/y\"}}", SHA);
   vero(!leggi(t, d), "campo doppio");
@@ -176,6 +176,20 @@ int main() {
   vero(!leggi("{\"schema\":1,\"a\":tru", d), "parola tagliata");
   vero(!leggi("{", d), "solo graffa");
   vero(!leggi("{\"schema\"", d), "chiave senza valore");
+
+  // blocco per scheda: schede.<sigla> vale per la sua scheda; il vecchio "firmware" vale solo per la S3
+  snprintf(t, sizeof t, "{\"schema\":1,\"firmware\":{\"version\":\"1.8.19\",\"size\":1,\"sha256\":\"%s\",\"url\":\"https://x/s3\"},\"recovery\":{\"version\":\"0.5.3\"},"
+    "\"schede\":{\"C6\":{\"version\":\"1.8.20\",\"size\":2,\"sha256\":\"%s\",\"url\":\"https://x/c6\",\"recovery\":\"0.5.4\"}}}", SHA, SHA);
+  vero(aggLeggiUltima(t, strlen(t), d, "C6") && !strcmp(d.ver, "1.8.20") && !strcmp(d.url, "https://x/c6") && !strcmp(d.verRec, "0.5.4"), "C6 legge il suo blocco");
+  vero(aggLeggiUltima(t, strlen(t), d, "S3") && !strcmp(d.ver, "1.8.19") && !strcmp(d.verRec, "0.5.3"), "S3 senza blocco usa il vecchio firmware");
+  vero(!aggLeggiUltima(t, strlen(t), d, "C3"), "C3 senza blocco: niente (il vecchio firmware e della S3)");
+  snprintf(t, sizeof t, "{\"schema\":1,\"firmware\":{\"version\":\"1.8.19\",\"size\":1,\"sha256\":\"%s\",\"url\":\"https://x/s3\"},"
+    "\"schede\":{\"S3\":{\"version\":\"1.8.21\",\"size\":3,\"sha256\":\"%s\",\"url\":\"https://x/s3b\"}}}", SHA, SHA);
+  vero(aggLeggiUltima(t, strlen(t), d, "S3") && !strcmp(d.ver, "1.8.21"), "S3 con blocco: vale il blocco, non il vecchio");
+  snprintf(t, sizeof t, "{\"schema\":1,\"schede\":{\"C3\":{\"version\":\"1.8.20\",\"size\":0,\"sha256\":\"%s\",\"url\":\"https://x/c3\"}}}", SHA);
+  vero(!aggLeggiUltima(t, strlen(t), d, "C3"), "blocco di scheda senza dimensione: rifiutato");
+  uint8_t tc6[16] = {0xE9}; tc6[12] = 0x0D;
+  vero(aggTestaFirmware(tc6, sizeof tc6, 0x000D) && !aggTestaFirmware(tc6, sizeof tc6, 0x0009), "testa C6: solo per il chip C6");
 
   // orario: mercoledi 5 novembre, 03:30
   struct tm o = {};

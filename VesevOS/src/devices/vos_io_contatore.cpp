@@ -7,6 +7,7 @@
 #include "vos_io_int.h"
 #include "../core/vos_common.h"
 #include "../core/vos_i18n.h"
+#include "../core/vos_azioni.h"
 #include "../drivers/vos_drv_time.h"
 #include <freertos/FreeRTOS.h>
 
@@ -91,6 +92,7 @@ bool ioCntReset(const char* name, int role, ErrBuf& err) {
   if (role < ROLE_OPER) { err = tr("Il tuo ruolo non permette questo comando"); return false; }
   if (d->cnt) drvContatoreAzzera(d->cnt - 1);
   zero(*d);
+  azionePubblica(AZ_CONTATORE, d->name, 0);
   return true;
 }
 

@@ -17,7 +17,8 @@ void     sysSleep();                // sonno profondo: LED e Wi-Fi spenti, si ri
 int      sysCpuPercent();           // 0..100
 int      sysCpuCorePercent(int core);   // carico di un core (0..100; core inesistente = 0)
 int      sysCpuMaxCorePercent();        // il carico del core piu carico (per il governor)
-float    sysCpuTemp();              // gradi C (sensore interno del chip)
+float    sysCpuTempLetta();         // lettura nuova del sensore del chip, con la taratura (NAN se non risponde)
+float    sysCpuTemp();              // gradi C (sensore interno del chip), gia con la taratura (vos_taratura.h)
 uint64_t sysUptimeSec();            // dall'avvio del sistema
 uint32_t sysBootCount();
 uint32_t sysLifeSec();              // contaore totale di vita della scheda (secondi, salvato ogni 10 min)
@@ -36,3 +37,5 @@ typedef void (*SysTaskStart)();
 void     sysTaskRegister(const char* name, SysTaskStart start, SysTaskStart stop = nullptr);   // task che si puo fermare e riavviare (stop = arresto pulito)
 bool     sysTaskRestart(const char* name, char* err, size_t errLen);   // ferma (se gira) e fa ripartire
 bool     sysTaskRunning(const char* name);
+void     sysTaskSospendiTutti();     // sonno: ferma tutti i task registrati (non il watchdog), in ordine inverso, e ricorda quali giravano
+bool     sysTaskRiprendiUno();       // risveglio: rimette in moto UN task fermato dal sonno, true = ne restano altri

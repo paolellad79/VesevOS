@@ -1,0 +1,35 @@
+# Scheda periferica VesevOS (dati propri, licenza CC0). Controlla sempre i collegamenti sul tuo pulsante.
+# Stato: DA PROVARE (classe ripresa, nuova nel sorgente, non ancora compilata ne provata su scheda).
+# Tasto di ripresa: un pulsante che risveglia la scheda dallo standby. Lo standby lo trova da solo se e installato: non serve altro.
+# Ne basta uno. Un solo file per tutte le schede: la [griglia] elenca, per ogni scheda, i piedini che risvegliano lo standby profondo (guida ESP-IDF 5.5.5,
+# sleep_modes). Il firmware propone e accetta solo quelli, tra i piedini liberi (toglie da solo avvio, USB e gia usati), quindi il tasto funziona
+# sia con lo standby leggero sia con quello profondo. Il tasto BOOT di bordo non si puo usare.
+#
+# FILI ([pins]: pin del modulo = dove va sulla scheda, colore del filo)
+#   IN   -> un piedino libero      giallo  (un capo del pulsante)
+#   GND  -> GND                    nero    (l'altro capo del pulsante)
+# Il pulsante tiene il piedino a massa quando e premuto: la resistenza interna lo tiene alto a riposo (pull-up).
+[module]
+name=ripresa
+title=Tasto di ripresa (standby)
+class=ripresa
+power=NONE
+level=3V3
+active=low
+pull=up
+author=VesevOS
+version=1.0
+license=CC0
+warn=Pulsante verso massa, senza altra alimentazione. Non usare il tasto BOOT.
+[griglia]
+S3=0-21
+C3=0-5
+C6=0-7
+H2=7-14
+[signals]
+IN
+[pins]
+GND=gnd,black
+IN=IN,yellow
+[icon]
+<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="#2c6fbb" stroke-width="2"/><path d="M12 7v5" stroke="#2c6fbb" stroke-width="2" stroke-linecap="round"/><path d="M8.5 9a5 5 0 1 0 7 0" fill="none" stroke="#2c6fbb" stroke-width="2" stroke-linecap="round"/></svg>

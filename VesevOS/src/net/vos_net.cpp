@@ -6,10 +6,12 @@
 #include "../core/vos_primo_avvio.h"
 #include "../drivers/vos_drv_task.h"
 #include "../core/vos_eventbus.h"
+#include "../core/vos_azioni.h"
 #include "../core/vos_i18n.h"
 #include "../core/vos_config.h"
 #include "../core/vos_util.h"
 #include "../core/vos_log.h"
+#include "../core/vos_time.h"
 #include "../core/vos_cpuboost.h"
 #include "../devices/vos_led.h"
 #include "../core/vos_hooks.h"
@@ -46,6 +48,7 @@ static void setState(NetState s) {
   bool chg = (g_state != s);
   g_state = s; ledSetNetState(s);
   if (chg) EventBus::publish("net.state", "", (int)s);     // evento: la rete ha cambiato stato (valore = NetState)
+  if (chg) azionePubblica(AZ_RETE, "stato", (int)s);
 }
 static volatile int g_apCh = 0;            // 0 = canale di partenza della rete schede
 static volatile bool g_apChReq = false;
@@ -119,7 +122,7 @@ std::string netAirplaneText() {
     long left = (cfg.airUntil > 1700000000UL) ? (long)cfg.airUntil - (long)now : (long)cfg.airUntil - (long)(drvMillis() / 1000);
     snprintf(w, sizeof(w), tr("tra %ld s"), left < 0 ? 0L : left);
   } else if (cfg.airExit == 2) {
-    char b[8]; snprintf(b, sizeof(b), "%02u:%02u", cfg.airAt / 60, cfg.airAt % 60);
+    char b[12]; timeFmtMinutes(cfg.airAt, b, sizeof(b));
     snprintf(w, sizeof(w), tr("alle %s"), b);
   }
   else snprintf(w, sizeof(w), "%s", tr("solo a mano"));
@@ -150,6 +153,9 @@ static void airEnter() {
   drvWifiSetMode(DW_OFF);
   setState(NET_AIR);
 }
+// Sonno: stessa chiusura del modo aereo (WPS, ESP-NOW, Bluetooth, portale, mDNS, radio); al risveglio la rete riparte dalla configurazione
+void netSospendi() { hookCall(g_hooks.webSospendi); airEnter(); }
+void netRiprendi() { netReconfigure(); }
 
 void netIpTo(char* out, size_t n) {
   ipTo(g_state == NET_AP ? drvWifiApIp() : drvWifiLocalIp(), out, n);   // AP anche durante la scansione (modo AP+STA)
@@ -185,7 +191,7 @@ bool netStatusJson(HeapBuf& j) {
     jStr(j, "ssid", drvWifiSsid().s);
     jNum(j, "rssi", drvWifiRssi());
     if (drvWifiGateway()) ipTo(drvWifiGateway(), gw, sizeof gw);
-    if (drvWifiMask())    ipTo(drvWifiMask(), mk, sizeof mk);
+    if (drvWifiMask())    maskTo(drvWifiMask(), mk, sizeof mk);
     if (drvWifiDns(0))    ipTo(drvWifiDns(0), d1, sizeof d1);
     if (drvWifiDns(1))    ipTo(drvWifiDns(1), d2, sizeof d2);
   } else {
@@ -193,6 +199,9 @@ bool netStatusJson(HeapBuf& j) {
     if (g_state == NET_AP) { ipTo(drvWifiApIp(), gw, sizeof gw); snprintf(mk, sizeof mk, "255.255.255.0"); }
   }
   jStr(j, "gw", gw); jStr(j, "mask", mk); jStr(j, "dns", d1); jStr(j, "dns2", d2);
+  char dom[64] = "";                                   // dominio della rete dato dal router (opzione 15 del DHCP): vuoto se non c'e o con IP fisso
+  if (g_state == NET_CLIENT_OK) drvDhcpDomain(dom, sizeof dom);
+  jStr(j, "dom", dom);
   jNum(j, "ch", (int)drvWifiChannel());
   if (g_state == NET_AP) jNum(j, "clients", (int)drvWifiApClients());
   jBool(j, "staFail", g_staFail && cfg.staEnabled);

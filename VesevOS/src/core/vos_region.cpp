@@ -116,10 +116,13 @@ void regionApplyRadio() {
 
 bool regionJson(HeapBuf& j) {
   return j.add("{\"country\":\"") && j.addJson(cfg.country.c_str()) &&
-         j.addf("\",\"ch\":%d,\"limit\":%d,\"max\":%d,\"tx\":%d,\"txSet\":%d,\"antExt\":%d,\"gain\":%d,\"weekStart\":%d,\"decSep\":%d,\"dateFmt\":%d,\"timeFmt\":%d,\"tempUnit\":%d,\"tz\":\"",
+         j.addf("\",\"ch\":%d,\"limit\":%d,\"max\":%d,\"tx\":%d,\"txSet\":%d,\"antExt\":%d,\"gain\":%d,\"weekStart\":%d,\"decSep\":%d,\"dateFmt\":%d,\"timeFmt\":%d,\"tempUnit\":%d,\"tarSoc\":%d,\"tarExt\":%d,\"tz\":\"",
                 regionChannels(), regionLimitDbm(), regionMaxDbm(), regionTxDbm(), (int)cfg.txDbm, (int)cfg.antExt, (int)cfg.antGain,
-                (int)cfg.weekStart, (int)cfg.decSep, (int)cfg.dateFmt, (int)cfg.timeFmt, (int)cfg.tempUnit) &&
+                (int)cfg.weekStart, (int)cfg.decSep, (int)cfg.dateFmt, (int)cfg.timeFmt, (int)cfg.tempUnit, (int)cfg.tempTarSoc, (int)cfg.tempTarExt) &&
          j.addJson(cfg.tz.c_str()) && j.add("\",\"tzName\":\"") && j.addJson(cfg.tzName.c_str()) &&
+         j.addf("\",\"dataLungaFmt\":%d,\"oraLungaFmt\":%d,\"oraLungaSec\":%d,\"dataCortaTesto\":\"", (int)cfg.dataLungaFmt, (int)cfg.oraLungaFmt, cfg.oraLungaSec ? 1 : 0) &&
+         j.addJson(cfg.dataCortaTesto.c_str()) && j.add("\",\"dataLungaTesto\":\"") && j.addJson(cfg.dataLungaTesto.c_str()) &&
+         j.add("\",\"oraLungaTesto\":\"") && j.addJson(cfg.oraLungaTesto.c_str()) &&
          j.add("\",\"ntp\":\"") && j.addJson(cfg.ntpServer.c_str()) && j.add("\",\"lang\":\"") && j.addJson(cfg.lang.c_str()) && j.add("\"}");
 }
 

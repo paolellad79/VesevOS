@@ -11,6 +11,7 @@
 #include "vos_heapbuf.h"
 #include "vos_common.h"
 #include "vos_wd_limits.h"
+#include "vos_datefmt.h"
 
 struct VosUser {
   FixedStr<21>  name;            // 3-20 caratteri
@@ -47,10 +48,17 @@ inline void fwRuleSetName(FwRule& r, const char* text) { fwRuleSetName(r, text, 
 constexpr uint32_t kLedSrcDefault[LEDSRC_COUNT] = {0x00A0FF, 0xFF8000, 0xFFFFFF, 0xFF00FF, 0xFF0000};
 constexpr const char* kLedSrcKey[LEDSRC_COUNT] = {"colfr", "colfw", "colrx", "coltx", "colcpu"};
 constexpr uint8_t LED_CPU_THR_DEFAULT = 70;
+// LED a colori: tonalita dei sei stati di rete (stessi numeri di NetState: avvio, hotspot, collegamento, collegato, aereo, attesa)
+// e guadagno dei tre canali (rosso, verde, blu: 255 = nessuna correzione). Servono a cfgDefaults, import ed export e alla pagina.
+constexpr int LED_STATI = 6;
+constexpr uint32_t kLedStatoDefault[LED_STATI] = {0xFF7800, 0x0000FF, 0xFFFF00, 0x00FF00, 0xAA00FF, 0xFF7800};
+constexpr const char* kLedStatoKey[LED_STATI] = {"stavvio", "stap", "stcoll", "stok", "staereo", "statt"};
+constexpr const char* kLedGuadKey[3] = {"guadr", "guadv", "guadb"};
 
 struct VosConfig {
   FixedStr<64> hostname;         // 1-32 caratteri
   FixedStr<64> domain;           // fino a 60
+  FixedStr<201> messaggioLogin;  // messaggio della pagina di accesso, pubblico, fino a 200 caratteri (vedi vos_msglogin.h)
   bool   setupDone;              // prima configurazione completata
   FixedStr<33> apSsid;           // max 32
   FixedStr<65> apPass;           // max 63; apPass: unica e casuale per ogni scheda (creata al primo avvio)
@@ -96,6 +104,8 @@ struct VosConfig {
   uint8_t  ledPin;
   uint32_t ledSrcColor[LEDSRC_COUNT];   // colori per sorgente dei trigger flash, wifi e cpu (0xRRGGBB)
   uint8_t  ledCpuThr;            // soglia di carico CPU (percento) oltre la quale il trigger cpu cambia colore
+  uint8_t  ledGain[3];           // calibrazione: guadagno 0..255 di rosso, verde e blu (255 = nessuna correzione)
+  uint32_t ledStato[LED_STATI];  // tonalita (0xRRGGBB) degli stati di rete mostrati dal LED a colori
   uint8_t  led2Mode;             // LED2 (un solo colore): stesso elenco dei modi del LED1 (LedMode), senza colori
   uint8_t  led2CpuThr;           // LED2: soglia di carico CPU (percento) del modo cpu
   uint8_t  led2Brightness;       // LED2: luminosita 0..255 (PWM), di fabbrica 255 = come prima che l'avesse
@@ -104,7 +114,12 @@ struct VosConfig {
   uint32_t ntpEvery;             // minuti tra due sincronizzazioni NTP (0 = solo all'avvio)
   FixedStr<64> ntpServer, ntpServer2, tz;   // max 60
   FixedStr<64> tzName;           // server, secondo server (vuoto = nessuno), fuso (formato POSIX), nome
-  uint8_t dateFmt, timeFmt, tempUnit;   // data: 0 GG/MM/AAAA 1 AAAA-MM-GG 2 MM/GG/AAAA; ora: 0=24h 1=12h; temp: 0=C 1=F
+  uint8_t dateFmt, timeFmt, tempUnit;   // data corta: 0 GG/MM/AAAA 1 AAAA-MM-GG 2 MM/GG/AAAA 3 scritta a mano (dataCortaTesto); ora: 0=24h 1=12h; temp: 0=C 1=F
+  uint8_t dataLungaFmt;          // data lunga: 0 abbreviata ("Mar. 3 Nov. 2026"), 1 completa ("Martedi 3 novembre 2026"), 2 scritta a mano (dataLungaTesto)
+  uint8_t oraLungaFmt;           // ora lunga: 0 pronta, 1 scritta a mano (oraLungaTesto)
+  bool    oraLungaSec;           // l'ora lunga ha i secondi (l'ora corta non li ha mai)
+  FixedStr<DF_TESTO_MAX + 1> dataCortaTesto, dataLungaTesto, oraLungaTesto;   // formati scritti a mano (sintassi in vos_datefmt.h), al massimo 32 caratteri
+  int16_t tempTarSoc, tempTarExt;   // taratura della temperatura in decimi di grado Celsius (-200..200): sensore del chip, sensore esterno
   uint8_t weekStart, decSep;     // 0 = lunedi / 1 = domenica; 0 = virgola / 1 = punto
   FixedStr<4> country;             // paese (ISO 3166, es. "IT"); vuoto = non scelto (regole prudenti)
   uint8_t antExt;                // 0 = antenna interna, 1 = antenna esterna
@@ -114,6 +129,18 @@ struct VosConfig {
   bool     statOn;               // statistiche d'uso (spente di fabbrica)
   uint8_t  pwMode;               // risparmio energia: 0 spento, 1 Wi-Fi a risparmio massimo, 2 sonno profondo a cicli
   uint16_t pwAwake, pwSleep;     // minuti sveglia / minuti di sonno (modo 2)
+  bool     recOn;                // registratore di dati: spento di fabbrica
+  uint16_t recSec;               // secondi tra due campioni (1-86400; sulla flash almeno 10)
+  uint8_t  recWhere;             // dove salva: 0 memoria interna (/var/lib/rec), 1 microSD (/media/sd/rec)
+  uint16_t recMaxKb;             // tetto di un file CSV in KB (flash 4-1024, microSD 4-65535)
+  bool     recT, recR;           // fonti: temperatura del chip, RAM libera
+  FixedStr<16> recDev[4];        // fonti: nomi di periferiche (vuoto = nessuna)
+  FixedStr<25> recNome;          // nome dei file del registratore (a-z A-Z 0-9 _ -, 1-24 caratteri; di fabbrica "rec")
+  uint8_t  recLimite;            // spazio massimo: 0 = totale di tutti i file della cartella, 1 = per ogni singolo file
+  uint16_t recSecDev[4];         // secondi tra due letture di ogni periferica (0 = usa recSec)
+  uint16_t recSecT, recSecR;     // lo stesso per temperatura del chip e RAM libera
+  uint16_t recAzioni;            // categorie di azioni tracciate (un bit per categoria, vedi core/vos_azioni.h)
+  uint16_t recEvMax;             // righe di azioni al giorno al massimo (0 = nessun limite)
   uint16_t cpuMhz;               // 0 = governor (cpuGov), altrimenti velocita fissa 80/160/240
   uint8_t  cpuGov;               // governor quando cpuMhz = 0: 0 ondemand, 1 conservative, 2 schedutil (vedi vos_cpugov.h)
   uint8_t  cpuUp, cpuDown;       // soglie di salita e discesa (%) dei governor

@@ -9,6 +9,7 @@
 #include "vos_web_int.h"
 #include "vos_web_tabella.h"
 #include "../core/vos_apwin.h"
+#include "../core/vos_azioni.h"
 #include "../drivers/vos_drv_time.h"
 
 #define ROTTE_MAX 208   // 177 percorsi oggi (checkapi): margine per quelli nuovi
@@ -48,6 +49,7 @@ static esp_err_t smista(Req* r, Res* s, int method) {
     if (c.role + 1 < lvl) return ko(s, tr("Il tuo ruolo non permette questa operazione"), "forbidden");   // HTTP 403
   }
   if (method == HTTP_POST) { char w[96]; whoTo(c, w, sizeof w); cfgSetOrigin(w); }
+  AzioneDa da(AO_PAGINA);                          // le azioni fatte da questa richiesta portano l'origine "pagina"
   return v->funzione(r, s, c);
 }
 static esp_err_t smistaGet(Req* r, Res* s) { return smista(r, s, HTTP_GET); }

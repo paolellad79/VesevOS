@@ -72,12 +72,11 @@ function arUno(fw,x,ris){
     if(!r.ok)throw tf("Scarico non riuscito: {0}",x.n);
     return r.arrayBuffer()
   }).then(function(b){
-    var u=new Uint8Array(b),fd=new FormData();
+    var u=new Uint8Array(b);
     if(!u.length||u.length>x.t)throw tf("Dimensione non valida: {0}",x.n);
     if(x.e?!arElencoOk(u,ris):hexb(sha256b(u))!=x.h)throw tf("Il file scaricato non corrisponde all'elenco della scheda: {0}",x.n);
-    fd.append("file",new Blob([u]),x.n);
-    return api("/api/risorse/carica",{method:"POST",body:fd})
-  }).then(function(r){return r.json()}).then(function(j){
+    return caricaPezzi("/api/risorse/pezzo",new Blob([u]),x.n,null,t("Caricamento non riuscito"))
+  }).then(function(j){
     if(!j.ok)throw (j.err||t("Errore"))
   })
 }

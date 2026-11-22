@@ -2,9 +2,17 @@
 var LG={txt:"",tm:null};
 function loadLog(){
   api("/api/log").then(function(r){return r.text()}).then(function(x){
-    LG.txt=x;
+    LG.txt=lgWhen(x);
     lgDraw()
   }).catch(function(){})
+}
+// ogni riga arriva come "<epoca> [I] testo" oppure "u<secondi> [I] testo": data e ora le formatta la pagina (formato di Localizzazione)
+function lgWhen(x){
+  return x.split("\n").map(function(l){
+    var m=l.match(/^(u?)(\d+) (.*)$/);
+    if(!m)return l;
+    return(m[1]?"["+m[2]+"s]":fmtOraData(+m[2]))+" "+m[3]
+  }).join("\n")
 }
 var LGL={E:0,W:1,I:2,D:3},LGC=["lk","lw","",""];
 function lgDraw(){

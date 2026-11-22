@@ -1,0 +1,181 @@
+# sha256=6feaad6023fdaeb86054cd2b89ca89fc69d4cc50ad5a53ec1dc41ade46576bf1
+# VesevOS: manuale dei comandi (generato da tools/mkrisorse.py, non modificare a mano)
+# versione=3
+# dipende=firmware>=1.8.30
+@man
+Mostra il manuale di un comando: descrizione, uso, opzioni, alias e ruolo minimo.
+Vedi solo i comandi che il tuo ruolo puo usare. Con 'help' senza nome trovi l'elenco.
+$ man ls
+$ man cpu
+@help
+Senza nome elenca i comandi che il tuo ruolo puo usare, in ordine alfabetico.
+Con un nome mostra sintassi, descrizione breve, alias e ruolo minimo; 'man' da' di piu.
+$ help
+$ help df
+@time
+>
+$ time ls /sbin
+$ time wifi-scan
+@ping
+>
+$ ping 192.168.1.1
+$ ping -c 3 -i 0.5 stanza.local
+$ time ping -c 2 192.168.1.1
+@unzip
+>
+$ unzip -l dati.zip
+$ unzip -d /lang dati.zip
+$ unzip -o dati.zip config.txt
+@zip
+>
+$ zip -r bk.zip scripts
+$ zip -qj lingue.zip lang/en.vld lang/en.vlp
+$ zip -f -0 tutto.zip notes.txt
+@tar
+>
+$ tar -cf bk.tar scripts
+$ tar -tvf bk.tar
+$ tar -xf bk.tar -C /ripristino
+@run
+>
+$ run prova
+$ run prova.vsb
+$ run /sbin/prova
+$ prova
+$ run prova ?
+@which
+Dice cosa partirebbe scrivendo quel nome, senza avviare niente: un comando interno oppure il percorso del file (script o app).
+Cerca come 'run'. Un comando interno vince sempre su un file con lo stesso nome. Solo Admin.
+$ which ls
+$ which prova
+@whoami
+Scrive il nome dell'utente con cui hai fatto login in questa sessione.
+Senza utente (regole, script, primo avvio senza password) scrive 'sistema'.
+$ whoami
+@id
+>
+$ id
+@echo
+Scrive il testo che segue, cosi com'e. Con -n non va a capo alla fine.
+Solo testo: niente variabili ($NOME), niente apici o jolly, niente redirezione. Per scrivere un file usa 'write'.
+$ echo ciao a tutti
+$ echo -n senza a capo
+@df
+>
+$ df
+$ df -h
+@uname
+Senza opzioni scrive nome, versione e core del sistema. Con le opzioni, come il comando uname classico.
+-s nome del sistema, -n nome host, -r versione di VesevOS, -v versione di ESP-IDF, -m chip, -a tutto insieme.
+$ uname
+$ uname -a
+$ uname -r
+@exit
+Chiude la sessione della seriale: poi serve di nuovo il login. Anche Ctrl+D a riga vuota fa lo stesso. logout e uguale.
+Dalla pagina web non chiude niente: usa il menu utente e Logout.
+$ exit
+@ls
+Elenca file e cartelle. Senza percorso usa la cartella corrente; i percorsi possono essere relativi.
+-l formato lungo (senza data), -a anche i nomi nascosti, -h dimensioni in K o M, -1 una voce per riga.
+$ ls
+$ ls -l /sbin
+$ ls -lah ..
+@cd
+Cambia la cartella corrente. Senza nome torna alla radice (~). '..' sale di un livello, '-' torna alla cartella di prima.
+I percorsi senza / iniziale partono dalla cartella corrente. La cartella e per sessione e si perde con il logout.
+$ cd /sbin
+$ cd ..
+$ cd -
+@cat
+Mostra il contenuto di un file di testo. Il percorso puo essere relativo alla cartella corrente.
+Non mostra i file binari ne' quelli sopra 32 KB; i file protetti del sistema non si aprono.
+$ cat notes.txt
+@led_rgb1
+>
+$ led_rgb1
+$ led_rgb1 trigger flash
+$ led_rgb1 color flash-write ff8800
+$ led_rgb1 threshold 80
+@region
+Mostra o cambia paese, potenza di trasmissione e antenna della radio Wi-Fi. Cambiare e solo per l'Admin.
+Il paese fissa canali e potenza ammessi dalla legge: la scheda non va oltre. 'locale' e il vecchio nome e resta valido.
+$ region
+$ region country IT
+$ region antenna ext 3
+@vesevos-config
+>
+$ vesevos-config
+$ vesevos-config region
+$ vesevos-config region country IT
+$ vesevos-config network wifi set casa
+$ vesevos-config setup
+@vesevos-led_control
+Alias di 'led_rgb1': fa esattamente la stessa cosa, con gli stessi argomenti e gli stessi ruoli (lettura all'Operatore, cambi all'Admin tranne cio che le regole usano). Il manuale completo e quello di 'led_rgb1': man led_rgb1.
+$ vesevos-led_control
+$ vesevos-led_control trigger heartbeat
+@vesevos-cleaner
+>
+$ vesevos-cleaner
+$ vesevos-cleaner tmp crash
+$ vesevos-cleaner -y tmp
+@lspin
+>
+$ lspin
+$ lspin -v
+$ lspin -vv
+$ lspin -s 12
+$ lspin -k sd1
+@vesevos-driver
+>
+$ vesevos-driver
+$ vesevos-driver info sd-spi
+$ vesevos-driver install sd-spi 10,11,12,13
+$ vesevos-driver pins bmp280 21,22
+$ vesevos-driver remove microsd
+@vesevos-drive_manager
+>
+$ vesevos-drive_manager
+$ vesevos-drive_manager mount
+$ vesevos-drive_manager unmount
+$ vesevos-drive_manager format microsd FORMATTA [--attendi]
+@vesevos-network
+>
+$ vesevos-network
+$ vesevos-network -f
+$ vesevos-network scan
+$ vesevos-network ping 192.168.1.1
+@vesevos-backup
+>
+$ vesevos-backup
+$ vesevos-backup create prima-della-prova
+$ vesevos-backup restore prima-della-prova
+$ vesevos-backup delete prima-della-prova
+@vesevos-update
+>
+$ vesevos-update
+$ vesevos-update file 192.168.1.20
+$ vesevos-update net https://github.com/paolellad79/VesevOS/releases/download/v1.7.71/VesevOS-1.7.71.bin <sha256>
+@vesevos-elf
+>
+$ vesevos-elf run -u log,sd sensore
+$ vesevos-elf driver install bmp1.vde 21,22
+$ vesevos-elf ps
+$ vesevos-elf kill sensore
+$ vesevos-elf install /media/sd/sensore.vae
+$ vesevos-elf test -t 10 -u log prova.vae uno due
+@btn
+Mostra o cambia l'azione di 1, 2 o 3 click sul tasto fisico: none (niente), airplane (modo aereo), wps, find (trova la scheda).
+I vecchi nomi niente, aereo, wps e trova restano validi. Cambiare e solo per l'Admin.
+$ btn
+$ btn 2 airplane
+@diag
+Diagnosi della scheda, solo Admin. Senza argomenti mostra guida, rete, servizi, RAM e flash. "diag codici" elenca i codici dei lampi del LED (classe, pausa, dettaglio); "diag led <classe> <dettaglio>" ne prova uno.
+$ diag
+$ diag codici
+$ diag led 3 1
+@rec
+Registratore di dati: ogni tot secondi legge le fonti scelte (periferiche, temperatura, RAM) e scrive una riga CSV su flash o microSD.
+Di fabbrica e spento. 'rec set' cambia intervallo, posto (flash o sd), spazio massimo e fonti; 'rec clear' cancella i dati.
+$ rec set interval 60
+$ rec set dev 1 sensore1
+$ rec on

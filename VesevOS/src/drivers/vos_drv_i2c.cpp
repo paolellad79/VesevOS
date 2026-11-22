@@ -5,7 +5,8 @@
 #include "vos_drv_i2c.h"
 #include <string.h>
 #include <driver/i2c_master.h>
-#include <driver/gpio.h>
+#include <driver/gpio.h>        // solo il tipo gpio_num_t dei campi di configurazione del bus
+#include "vos_drv_gpio.h"
 
 static const int      MAX_DEVS = 4;           // sul bus ci sono pochi sensori
 static const int      TIMEOUT_MS = 20;
@@ -19,8 +20,8 @@ static void releaseBus() {
   for (int i = 0; i < g_ndev; i++) i2c_master_bus_rm_device(g_dev[i].h);
   g_ndev = 0;
   if (g_bus) { i2c_del_master_bus(g_bus); g_bus = nullptr; }
-  if (g_sda >= 0) gpio_reset_pin((gpio_num_t)g_sda);
-  if (g_scl >= 0) gpio_reset_pin((gpio_num_t)g_scl);
+  drvGpioRilascia(g_sda);
+  drvGpioRilascia(g_scl);
   g_sda = g_scl = -1;
 }
 

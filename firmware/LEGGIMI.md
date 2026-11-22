@@ -6,10 +6,13 @@ Valutazione e avvisi: questo testo NON e consulenza legale; le norme citate potr
 ## Cosa c'e
 | Cartella | Contenuto |
 |---|---|
+| `1.8.30k/` | firmware VesevOS 1.8.30k per ESP32-S3, ESP32-C3 e ESP32-C6 (`.bin` + `.sha256`) |
+| `risorse/1.8.30k/` | immagine dei file di VesevOS (pagina, manuale, lingue, licenze) |
 | `1.8.24c/` | firmware VesevOS 1.8.24c per ESP32-S3 e ESP32-C6 (`.bin` + `.sha256`) |
-| `risorse/1.8.24c/` | immagine dei file di VesevOS (pagina, manuale, lingue, licenze) |
+| `risorse/1.8.24c/` | immagine dei file della 1.8.24c |
 | `1.8.16/` | firmware VesevOS 1.8.16 (`.bin` + `.sha256`) |
 | `1.8.0b/` | firmware VesevOS 1.8.0b (`.bin` + `.sha256`) |
+| `recovery/0.5.4f/` | Recovery 0.5.4f per ESP32-S3, ESP32-C3 e ESP32-C6 (`.bin` + `.sha256`) |
 | `recovery/0.5.3/` | Recovery 0.5.3 per ESP32-S3 (`.bin`) |
 | `recovery/0.5.2/` | Recovery 0.5.2 (`.bin` + `.sha256`) |
 | `recovery/0.5.1/` | Recovery 0.5.1 (`.bin` + `.sha256`) |
@@ -30,8 +33,8 @@ NON dice chi lo ha fatto. Scarica solo da questo repository, controlla l'indiriz
 
 ## Controllare lo SHA-256 prima di usare un file
 Dalla cartella del file:
-- macOS: `shasum -a 256 VesevOS-S3-1.8.24c.bin`
-- Altri sistemi: `sha256sum VesevOS-S3-1.8.24c.bin`
+- macOS: `shasum -a 256 VesevOS-S3-1.8.30k.bin`
+- Altri sistemi: `sha256sum VesevOS-S3-1.8.30k.bin`
 - Controllo automatico: `sha256sum -c VesevOS-S3-1.8.24c.bin.sha256` (su macOS: `shasum -a 256 -c VesevOS-S3-1.8.24c.bin.sha256`)
 Il numero deve essere uguale a quello del file `.sha256` e a quello di `indice.json`. Se e diverso, NON usare il file.
 

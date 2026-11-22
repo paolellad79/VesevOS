@@ -99,7 +99,7 @@ void cmdFile(const char* line, OutSink& o) {
   netIpTo(addr, sizeof addr);
   o.println(tr("Ordine scritto: la scheda si riavvia nel recovery tra un attimo."));
   o.println(trf("Apri dal computer: http://%s/#g=%s", addr, tok));
-  o.println(tr("Codice monouso valido 15 minuti, legato a questo computer: non condividerlo. Non verra mostrato di nuovo."));
+  o.println(tr("Codice monouso valido 15 minuti: non condividerlo. Non verra mostrato di nuovo."));
   memset(tok, 0, sizeof tok);
   sysRebootLater("recovery per aggiornamento", kBootDelayMs);
 }

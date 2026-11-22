@@ -153,10 +153,8 @@ function langInvia(g){
         ok();
         return
       }
-      var f=fl[i++],fd=new FormData();
-      fd.append("file",f,f.name);
-      api("/api/fs/up?dir=/lang",
-        {method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){
+      var f=fl[i++];
+      caricaPezzi("/api/fs/pezzo?dir=/lang",f,f.name,null,t("Caricamento non riuscito")).then(function(j){
           if(!j.ok){
             ko(f.name+": "+(j.err||t("Errore")));
             return

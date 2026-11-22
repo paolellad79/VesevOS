@@ -1,4 +1,4 @@
-// VesevOS Recovery - rete Wi-Fi e mDNS (vedi rec_net.h).
+// VesevOS Recovery - rete Wi-Fi (e mDNS, oggi spento: vedi REC_CON_MDNS sotto) (vedi rec_net.h).
 #include "rec_net.h"
 #include "rec_auth.h"
 #include "rec_config.h"
@@ -11,7 +11,14 @@
 #include <esp_netif.h>
 #include <esp_event.h>
 #include <esp_random.h>
+// mDNS spento dal 20/11/2026 su tutte le schede, SOLO per liberare spazio per la C6 (vedi idf-recovery/main/CMakeLists.txt, REC_CON_MDNS).
+// Per riaccenderlo: REC_CON_MDNS a 1 nel CMake (non qui).
+#ifndef REC_CON_MDNS
+#define REC_CON_MDNS 0
+#endif
+#if REC_CON_MDNS
 #include <mdns.h>
+#endif
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/event_groups.h>
@@ -44,7 +51,11 @@ std::string recNetIp() {
 void recNetInfo() {
   if (!g_net) { printf("[recovery] rete non avviata\n"); return; }
   if (g_ap) printf("[recovery] HOTSPOT 'VesevOS-recovery' password %s - apri http://%s\n", g_apPass.c_str(), recNetIp().c_str());
+#if REC_CON_MDNS
   else printf("[recovery] rete di casa: apri http://%s oppure http://%s.local\n", recNetIp().c_str(), recNetName().c_str());
+#else
+  else printf("[recovery] rete di casa: apri http://%s (il nome .local non c'e: mDNS spento nel recovery)\n", recNetIp().c_str());
+#endif
   if (!rc.adminOk) printf("[recovery] nessun amministratore: nella pagina scrivi il codice %s\n", recAuthCode().c_str());
 }
 
@@ -117,9 +128,11 @@ static void startHotspot() {
   if (!g_ap) printf("[recovery] ERRORE: hotspot non partito\n");
 }
 
+#if REC_CON_MDNS
 static void startMdns(const std::string& name) {
   if (mdns_init() != ESP_OK || mdns_hostname_set(name.c_str()) != ESP_OK) printf("[recovery] mDNS non partito: il nome %s.local non sara visibile\n", name.c_str());
 }
+#endif
 
 void recNetStart() {
   recAuthNewCode();
@@ -143,7 +156,9 @@ void recNetStart() {
   }
   if (home) {
     esp_wifi_set_ps(WIFI_PS_NONE);                     // pagina piu pronta durante il caricamento
+#if REC_CON_MDNS
     startMdns(name);
+#endif
   } else startHotspot();
   recNetInfo();
 }

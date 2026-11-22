@@ -36,6 +36,10 @@ void ipTo(uint32_t ip, char* out, size_t n) {
   snprintf(out, n, "%u.%u.%u.%u", (unsigned)((ip >> 24) & 255), (unsigned)((ip >> 16) & 255), (unsigned)((ip >> 8) & 255), (unsigned)(ip & 255));
 }
 
+void maskTo(uint32_t m, char* out, size_t n) {          // una maschera comincia con 255: non e un indirizzo finto, quindi niente "v6:"
+  snprintf(out, n, "%u.%u.%u.%u", (unsigned)((m >> 24) & 255), (unsigned)((m >> 16) & 255), (unsigned)((m >> 8) & 255), (unsigned)(m & 255));
+}
+
 bool maskValid(uint32_t m) {
   if (m == 0) return false;
   uint32_t inv = ~m;

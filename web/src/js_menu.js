@@ -8,7 +8,7 @@ function canSee(id){
 
 function gTabs(g){return GMAP[g].filter(canSee)}
 function buildNav(){
-  var h='<svg class="i slogo" style="stroke:url(#vg)"><use href="#i-chipn"/></svg>';
+  var h='';
   GRP.forEach(function(g){
     if(gTabs(g[0]).length)h+='<button class="nb" id="n_'+g[0]+'" onclick="gGo(\''+g[0]+
       '\')" aria-label="'+esc(t(g[1]))+'" title="'+esc(t(g[1]))+'"><svg class="i"><use href="#'+

@@ -111,10 +111,7 @@ function drvUp(){
   $("drvup").value="";
   var low=f.name.toLowerCase(),e=low.slice(low.lastIndexOf("."));
   if(e==EXT.de){
-    var fd=new FormData();
-    fd.append("file",f);
-    api("/api/fs/up?dir=/devs",
-      {method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){
+    caricaPezzi("/api/fs/pezzo?dir=/devs",f,f.name,null,t("Caricamento non riuscito")).then(function(j){
         msgCaricato("drvm",j,t("Caricato"));
         drvLoad()
       }).catch(function(){});

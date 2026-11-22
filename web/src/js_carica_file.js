@@ -4,7 +4,7 @@
    - pac: uno o piu file, il tipo si capisce dall'estensione (.vsb script, .vab e .vae app, .vdb e .vde driver, e i vecchi .vsc .vap .vel .vdp).
    - ris: uno o piu file di /usr/share/vesevos; SHA256SUMS per primo, poi gli altri. Nome, lunghezza e SHA-256 si controllano QUI
      contro l'elenco della scheda, poi la scheda li ricontrolla. Un file rifiutato non ferma gli altri.
-   Nessuna rotta nuova: pac usa /api/fs/up e /api/mod/save, ris usa /api/risorse/carica. */
+   Nessuna rotta nuova: pac usa /api/fs/pezzo e /api/mod/save, ris usa /api/risorse/pezzo (caricaPezzi, js_pezzi.js). */
 var CF={busy:{}};
 var CF_TIPI={
   fw:{
@@ -119,6 +119,7 @@ function cfEsegui(k,l){
   var T=CF_TIPI[k],b=$("cf_b_"+k),r=$("cf_r_"+k),p=$("cf_p_"+k);
   CF.busy[k]=true;
   b.disabled=true;
+  b.textContent=t("Attendere...");                  /* occupato: tasto spento con la scritta, finche la scheda non ha finito */
   b.setAttribute("aria-busy","true");
   r.innerHTML="";
   p.textContent=t("Controllo in corso...");
@@ -130,9 +131,10 @@ function cfEsegui(k,l){
     p.textContent=typeof e=="string"?e:t("Caricamento non riuscito")
   }).then(function(){
     return T.dopo()
-  }).then(function(){
+  }).catch(function(){}).then(function(){          /* il tasto torna attivo sempre, anche se la rilettura della scheda fallisce */
     CF.busy[k]=false;
     b.disabled=false;
+    b.textContent=T.et();
     b.removeAttribute("aria-busy");
     b.focus()
   })
@@ -161,14 +163,10 @@ function cfPacControlla(f,cx){
 }
 
 function cfPacInvia(f,cx){
-  var r=cx.r,fd,p;
-  if(r.driver)p=f.text().then(function(x){return post("/api/mod/save",{name:r.driver,text:x})});
-  else{
-    fd=new FormData();
-    fd.append("file",f);
-    p=api("/api/fs/up?dir="+r.dir,{method:"POST",body:fd})
-  }
-  return p.then(function(x){return x.json()}).then(function(j){
+  var r=cx.r,p;
+  if(r.driver)p=f.text().then(function(x){return post("/api/mod/save",{name:r.driver,text:x})}).then(function(x){return x.json()});
+  else p=caricaPezzi("/api/fs/pezzo?dir="+r.dir,f,f.name,null,t("Caricamento non riuscito"));
+  return p.then(function(j){
     if(!j.ok)throw (j.err||t("Errore"));
     return j.avviso||t("Caricato")
   },function(){throw t("Caricamento non riuscito")})
@@ -187,23 +185,40 @@ function cfRisVoce(r,n){
   r.f.forEach(function(x){if(x.n==n)v=x});
   return v
 }
+/* Nome distribuito (html-5.vrs, comuni-1.vgz, manuale-3.txt) -> nome corto che si installa sulla scheda (html.vrs, comuni.vgz, manuale.txt) */
+function cfRisNome(n){
+  var m=/^([a-z0-9_-]+?)-(\d{1,3}(?:\.\d{1,3})?)\.(vrs|vgz|txt)$/.exec(n);
+  return m?m[1]+"."+m[3]:n
+}
+/* File che garantisce se stesso (firmware 1.8.30 e dopo): VOSR formato 2 (impronta nei byte 64-95) o testo con prima riga "# sha256=" */
+function cfRisInterna(u){
+  if(u.length>5&&u[0]==86&&u[1]==79&&u[2]==83&&u[3]==82)return u[4]>=2;
+  var k="# sha256=";
+  if(u.length<k.length)return false;
+  for(var i=0;i<k.length;i++)if(u[i]!=k.charCodeAt(i))return false;
+  return true
+}
 /* risposta "" = file buono; altrimenti il motivo del rifiuto (nulla parte verso la scheda) */
 function cfRisControlla(f,cx){
-  var r=cx.ris,n=f.name,v=null,tetto=AR_ELENCO_TETTO;
-  if(n!="SHA256SUMS"){
-    if(r.el!=0)return Promise.resolve(t(
-      "L'elenco SHA256SUMS della scheda non e valido: carica prima SHA256SUMS"));
-    v=cfRisVoce(r,n);
-    if(!v)return Promise.resolve(tf("Nome sconosciuto: {0} non e nell'elenco della scheda",n));
-    tetto=v.t
-  }
-  if(!f.size)return Promise.resolve(tf("Dimensione non valida: {0}",n));
-  if(f.size>tetto)return Promise.resolve(tf("File troppo grande: {0} (massimo {1})",n,cfByte(tetto)));
+  var r=cx.ris,n=cfRisNome(f.name),v=null,tetto=AR_ELENCO_TETTO;
+  cx.nome=n;
+  if(!f.size)return Promise.resolve(tf("Dimensione non valida: {0}",f.name));
   return f.arrayBuffer().then(function(b){
-    var u=new Uint8Array(b);
+    var u=new Uint8Array(b),interna=n!="SHA256SUMS"&&cfRisInterna(u);
     cx.dati=u;
+    if(n!="SHA256SUMS"){
+      v=cfRisVoce(r,n);
+      if(!interna){
+        if(r.el!=0)return t("L'elenco SHA256SUMS della scheda non e valido: carica prima SHA256SUMS");
+        if(!v)return tf("Nome sconosciuto: {0} non e nell'elenco della scheda",n)
+      }
+      if(v)tetto=v.t;
+      else tetto=0
+    }
+    if(tetto&&f.size>tetto)return tf("File troppo grande: {0} (massimo {1})",n,cfByte(tetto));
     if(n=="SHA256SUMS")return arElencoOk(u,r)?"":tf(
       "Questo SHA256SUMS non e valido (formato o nomi): {0}",n);
+    if(interna)return "";                                  /* l'impronta e dentro il file: la controlla la scheda */
     return hexb(sha256b(u))==v.h?"":tf("SHA-256 diverso dall'elenco della scheda: {0}",n)
   })
 }
@@ -217,22 +232,16 @@ function cfRisSpazio(dim){
 }
 
 function cfRisInvia(f,cx){
-  var fd=new FormData();
-  fd.append("file",new Blob([cx.dati]),f.name);
-  return api("/api/risorse/carica",{method:"POST",body:fd}).then(function(r){
-    return r.json().then(function(j){
-      j.s=r.status;
-      return j
-    })
-  },function(){throw t("Caricamento non riuscito")}).then(function(j){
+  return caricaPezzi("/api/risorse/pezzo",new Blob([cx.dati]),cx.nome||f.name,null,t("Caricamento non riuscito")).then(function(j){
+    if(j.code=="rete")throw j.err;
     if(j.ok){
-      if(f.name!="SHA256SUMS")return t("Caricato");
+      if((cx.nome||f.name)!="SHA256SUMS")return t("Caricato");
       return arRileggi().then(function(){
         cx.ris=AG.d.ris;
         return t("Caricato")
       },function(){return t("Caricato")})
     }
-    if(j.s==409||j.code=="state")return cfRisSpazio(f.size).then(function(m){throw m});
+    if(j.code=="state"||j.s==409&&j.code!="pezzo")return cfRisSpazio(f.size).then(function(m){throw m});
     throw (j.err||t("Errore"))
   })
 }

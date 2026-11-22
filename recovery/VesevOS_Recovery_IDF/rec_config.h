@@ -13,6 +13,8 @@ struct RecCfg {
   int nUsers = 0;
   bool adminOk = false;                         // c'e almeno un amministratore valido
   bool read = false;                            // il file e stato letto davvero
+  std::string tema;                             // /etc/tema.css se valido (vedi rec_vista.h), altrimenti vuoto
+  std::string msgLogin;                         // messaggio del login (messaggiologin), gia controllato; vuoto se manca o non e valido
 };
 
 extern RecCfg rc;

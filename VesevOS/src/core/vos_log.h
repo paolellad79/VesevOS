@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later (licenza commerciale alternativa: vedi COMMERCIAL.md)
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_log.h
-// Log circolare in RAM, testo sempre pulito (ASCII). Ogni riga porta il livello: [E] [W] [I] [D].
+// Log circolare in RAM, testo sempre pulito (ASCII). Il tempo di ogni riga si salva come numero e si formatta solo quando si mostra. Ogni riga porta il livello: [E] [W] [I] [D].
 #pragma once
 #include <string>
 
@@ -12,6 +12,7 @@ void   vlogl(int lv, const char* fmt, ...);   // livello esplicito (LG_DBG per i
 void   logSetLevel(int lv);            // cosa si registra: 0 errori, 1 + attenzioni, 2 + info (di fabbrica), 3 + dettagli
 int    logLevel();
 std::string logGet(int maxLines);      // ultime righe, separate da \n (un solo blocco di memoria, calcolato prima)
+std::string logGetRaw(int maxLines);   // come logGet, ma il tempo e un numero ("<epoca>" oppure "u<secondi dall'avvio>"): lo formatta la pagina
 int    logCount();                     // quante righe ci sono nel registro in RAM (0..150)
 void   logClear();                     // svuota il registro in RAM
 void   ramTrace(const char* fase);     // traccia dell'avvio: annota la RAM (vos_ramstorico.h) e scrive "RAM: <fase> libera X KB blocco massimo Y KB" (solo numeri)

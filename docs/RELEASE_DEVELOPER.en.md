@@ -37,8 +37,8 @@ Last update: 25 October 2026 (version 1.8.0b; sections 1, 4, 5 and 6 for ESP-IDF
 - Architecture refactoring: one step = one version, never two layers at once.
 
 ## 6. Release
-- First the legal traffic light (summary + light in one message, rules in `docs/progetto/REGOLE-LEGALI.md`) and the owner's "ok". Then: legal register, `NOTICE.txt` (generated from `licenses/NOTICE.template.txt` with `python3 tools/mklicense.py`: never edited by hand), SBOM (`SBOM.spdx.json`) and CHANGELOG; then the two ZIPs: `VesevOS-X.Y.Z.zip` (sources, languages, NOTICE and LEGGIMI) and `VesevOS-repo.zip` (for GitHub). The published repo also carries `firmware/` (files built with `idf.py`, SHA-256 and `indice.json`: recompute the SHAs with `shasum -a 256` from the copied files) and `flash/` (first-install page). The `.elf` file is never published.
-- Commit: title `X.Y.Z - ...`, description, line `Controllo legale: green/yellow/red`.
+- First the legal traffic light (summary + light in one message, rules in `docs/progetto/REGOLE-LEGALI.md`) and the owner's "ok". Then: legal register, `NOTICE.txt` (generated from `licenses/NOTICE.template.txt` with `python3 tools/mklicense.py`: never edited by hand), SBOM (`SBOM.spdx.json`) and CHANGELOG; then ONE zip for GitHub only: `python3 tools/mkzip-github.py X.Y.Z`, which writes `consegna/VesevOS-github-X.Y.Z.zip` (decision of 20/11/2026: there are no longer two zips or `VesevOS-repo.zip`). The published repo also carries `firmware/` (files built with `idf.py`, SHA-256 and `indice.json`: recompute the SHAs with `shasum -a 256` from the copied files) and `flash/` (first-install page). The `.elf` file is never published.
+- Commit: title `X.Y.Z - ...` and a positive description, without a legal-check line (decision of 17/11/2026: the legal check is internal).
 - The owner does the push. Afterwards: copy to the Project, update STATE and to-do.
 - Documents are published in Italian and English every time.
 

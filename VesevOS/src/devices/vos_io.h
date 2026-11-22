@@ -14,7 +14,7 @@
 #define IO_SD_KHZ_MAX 20000
 #define IO_SD_KHZ_DEF 1000                           // di fabbrica 1 MHz: prudente per i fili volanti dei moduli economici
 
-enum IoClass : uint8_t { IC_NONE = 0, IC_RELE = 1, IC_LED = 2, IC_PIN = 3, IC_IN = 4, IC_ADC = 5, IC_I2C = 6, IC_SD = 7, IC_PWM = 8, IC_CNT = 9, IC_LEDRGB = 10 };
+enum IoClass : uint8_t { IC_NONE = 0, IC_RELE = 1, IC_LED = 2, IC_PIN = 3, IC_IN = 4, IC_ADC = 5, IC_I2C = 6, IC_SD = 7, IC_PWM = 8, IC_CNT = 9, IC_LEDRGB = 10, IC_WAKE = 11 };
 #define IOF_INV   1     // attivo basso (acceso = livello 0)
 #define IOF_UP    2     // ingresso con pull-up
 #define IOF_DOWN  4     // ingresso con pull-down
@@ -24,8 +24,11 @@ enum IoClass : uint8_t { IC_NONE = 0, IC_RELE = 1, IC_LED = 2, IC_PIN = 3, IC_IN
 void   ioInit();                                         // carica /io.cfg (o /io.cfg.bak se illeggibile) e mette tutte le uscite nello stato sicuro (spente); non scrive mai
 int    ioCount();
 const char* ioNameAt(int i);   // nome della periferica i ("" se non c'e); vale finche la periferica esiste
+// Ripresa (classe "ripresa", installata dal driver "ripresa"): un tasto che risveglia la scheda dallo standby. Ne basta uno. I piedini ammessi per ogni
+// scheda stanno nella griglia del driver ([griglia] di ripresa.vdb), non nel firmware. "inv" = attivo basso, "up"/"down" = resistenza interna.
+// Quando viene preparata si presenta da sola al driver del sonno (drvSonnoRipresa); lo standby sa solo se c'e (drvSonnoRipresaPresente).
 bool   ioHas(const char* name);                           // i nomi e i testi in ingresso sono const char* (non nullo, terminato): una funzione che modifica l'elenco li copia prima
-bool   ioAdd(const char* cls, int gpio, const char* name, const char* opt, char* outName, ErrBuf& err);   // name vuoto = automatico; outName >= 16 byte
+bool   ioAdd(const char* cls, int gpio, const char* name, const char* opt, char* outName, ErrBuf& err, bool daDriver = false);   // daDriver: solo l'installazione di un driver lo mette a true (la classe "ripresa" non si crea a mano). name vuoto = automatico; outName >= 16 byte
 #define IO_ERR_MAX 160
 bool   ioAddI2c(const char* drv, int sda, int scl, int addr, bool fast, const char* name, char* outName, char* err);   // un solo sensore I2C (un bus); outName >= 16 byte, err >= IO_ERR_MAX byte
 bool   ioAddSd(int cs, int mosi, int sck, int miso, int khz, const char* name, char* outName, char* err);   // una sola microSD (4 pin, controllati come gli altri); outName >= 16 byte, err >= IO_ERR_MAX byte
@@ -45,7 +48,7 @@ bool   ioText(HeapBuf& out);                             // per la shell. false 
 bool   ioNameOk(const char* n, ErrBuf& err);             // forma e parole riservate
 bool   ioParseCls(const char* s, uint8_t& c);
 bool   ioHasI2c();                                        // c'e il sensore I2C a classi (tiene il bus): i driver ELF non lo usano
-int    ioSuggest(uint8_t cls, int n, int* out);          // fino a n pin liberi consigliati per la classe; ritorna quanti ne ha trovati
+int    ioSuggest(uint8_t cls, int n, int* out, uint64_t soloQuesti = ~0ULL);          // fino a n pin liberi consigliati per la classe; soloQuesti = griglia del driver (un bit per pin: sono ammessi solo quelli); ritorna quanti ne ha trovati
 bool   ioPulse(const char* name, uint32_t ms, int role, ErrBuf& err);   // acceso per ms (100-5000) poi si spegne da solo
 bool   ioBlink(const char* name, uint32_t sec, int role, ErrBuf& err);  // lampeggia per sec (1-10) poi si spegne (non per il rele)
 void   ioTick();                                                          // da chiamare nel loop

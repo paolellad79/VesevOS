@@ -13,6 +13,7 @@
 #include "../core/vos_i18n.h"
 #include "../core/vos_wd.h"
 #include "../core/vos_diag.h"
+#include "../core/vos_azioni.h"
 #include <math.h>
 #include "../drivers/vos_drv_time.h"
 #include "../drivers/vos_drv_led.h"
@@ -27,7 +28,7 @@ void ledSetNetState(NetState s) { g_net = s; led2SetNetState(s); }
 void ledSetFault(bool on) { g_fault = on; led2SetFault(on); }
 static volatile uint32_t g_identUntil = 0;   // 0 = spento, altrimenti millis() di fine
 void ledIdentify(uint32_t ms) { g_identUntil = drvMillis() + ms; if (!g_identUntil) g_identUntil = 1; }
-void ledApplyConfig() { g_reconf = true; }
+void ledApplyConfig() { g_reconf = true; azionePubblica(AZ_LED, "led", cfg.ledMode); }
 static volatile bool g_setup = false;
 static volatile int g_alarm = 0, g_hold = 0;
 void ledSetSetup(bool on) { g_setup = on; led2SetSetup(on); }
@@ -39,7 +40,22 @@ static volatile int32_t g_script = -1;         // colore imposto da uno script (
 // Prova dei colori (shell "led test"): rosso, verde, blu e bianco puri, 2 s ciascuno, e sulla seriale quale colore si invia.
 static volatile uint32_t g_testAt = 0;           // millis() di inizio; 0 = nessuna prova
 void ledTest() { g_testAt = drvMillis(); if (!g_testAt) g_testAt = 1; }
-void ledScript(int32_t rgb) { g_script = rgb < 0 ? -1 : (rgb & 0xFFFFFF); }
+// Anteprima della calibrazione: colore e guadagni provati dalla pagina prima di salvarli; finisce da sola dopo 20 s
+static volatile uint32_t g_prevUntil = 0;
+static volatile int32_t g_prevRgb = 0;
+static volatile uint8_t g_prevGain[3] = {255, 255, 255};
+void ledAnteprima(int32_t rgb, int gr, int gv, int gb) {
+  if (rgb < 0) { g_prevUntil = 0; return; }
+  g_prevRgb = rgb & 0xFFFFFF;
+  g_prevGain[0] = vosClamp(gr, 0, 255); g_prevGain[1] = vosClamp(gv, 0, 255); g_prevGain[2] = vosClamp(gb, 0, 255);
+  g_prevUntil = drvMillis() + 20000;
+  if (!g_prevUntil) g_prevUntil = 1;
+}
+static uint8_t guadagno(int i) {
+  uint32_t fine = g_prevUntil;
+  return (fine && (int32_t)(fine - drvMillis()) > 0) ? g_prevGain[i] : cfg.ledGain[i];
+}
+void ledScript(int32_t rgb) { g_script = rgb < 0 ? -1 : (rgb & 0xFFFFFF); azionePubblica(AZ_LED, "led_script", rgb < 0 ? 0 : (rgb & 0xFFFFFF)); }
 
 // tinta 0..359 -> colore pieno
 static void hue(uint32_t h, uint8_t& r, uint8_t& g, uint8_t& b) {
@@ -55,9 +71,10 @@ static void hue(uint32_t h, uint8_t& r, uint8_t& g, uint8_t& b) {
 }
 
 static void put(uint8_t r, uint8_t g, uint8_t b, uint8_t bright) {
-  uint16_t R = (uint16_t)r * bright / 255;
-  uint16_t G = (uint16_t)g * bright / 255;
-  uint16_t B = (uint16_t)b * bright / 255;
+  // luminosita e guadagno di canale (calibrazione): 255 e 255 = nessun cambiamento
+  uint16_t R = (uint32_t)r * bright * guadagno(0) / 65025;
+  uint16_t G = (uint32_t)g * bright * guadagno(1) / 65025;
+  uint16_t B = (uint32_t)b * bright * guadagno(2) / 65025;
   drvLedWrite(g_pin, R, G, B);
   static int s_loggedPin = -1;                       // un solo messaggio per pin, quando il driver si arrende
   if (drvLedAbsent() && s_loggedPin != g_pin) {
@@ -67,14 +84,9 @@ static void put(uint8_t r, uint8_t g, uint8_t b, uint8_t bright) {
 }
 
 static void stateColor(NetState s, uint8_t& r, uint8_t& g, uint8_t& b) {
-  switch (s) {
-    case NET_BOOT:       r = 255; g = 120; b = 0;   break;  // arancio
-    case NET_AP:         r = 0;   g = 0;   b = 255; break;  // blu
-    case NET_CLIENT_TRY: r = 255; g = 255; b = 0;   break;  // giallo
-    case NET_CLIENT_OK:  r = 0;   g = 255; b = 0;   break;  // verde
-    case NET_AIR:        r = 170; g = 0;   b = 255; break;  // viola (modalita aereo)
-    case NET_ATTESA:     r = 255; g = 120; b = 0;   break;  // arancio (prima accensione: in attesa del tasto)
-  }
+  // tonalita scelte nella pagina (di fabbrica: arancio avvio, blu hotspot, giallo collegamento, verde collegato, viola aereo, arancio attesa)
+  uint32_t c = cfg.ledStato[(int)s < LED_STATI ? (int)s : 0];
+  r = (c >> 16) & 255; g = (c >> 8) & 255; b = c & 255;
 }
 
 // I modi che mostrano lo stato di rete come colore di fondo (e quindi anche gli allarmi): stato, flash, wifi, cpu
@@ -117,6 +129,13 @@ static void ledTask(void*) {
       }
       g_testAt = 0; s_step = -1;
       vlog(tr("LED prova finita: torna il modo normale"));
+    }
+    if (g_prevUntil) {                                  // anteprima dalla pagina di calibrazione
+      if ((int32_t)(g_prevUntil - now) > 0) {
+        put((g_prevRgb >> 16) & 255, (g_prevRgb >> 8) & 255, g_prevRgb & 255, cfg.ledBrightness < 60 ? 60 : cfg.ledBrightness);
+        drvDelayMs(30); continue;
+      }
+      g_prevUntil = 0;
     }
     if (g_identUntil) {
       if ((int32_t)(g_identUntil - now) > 0) {

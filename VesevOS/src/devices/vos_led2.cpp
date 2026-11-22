@@ -10,6 +10,7 @@
 #include "../core/vos_sys.h"
 #include "../core/vos_apwin.h"
 #include "../core/vos_diag.h"
+#include "../core/vos_azioni.h"
 #include <string.h>
 #include <stdlib.h>
 #ifdef VOS_PIN_LED2
@@ -111,6 +112,7 @@ void led2Shutdown() {
 bool led2Set(uint8_t mode) {
   if (!g_ready || mode > LED2_AUTO) return false;
   g_manual = mode;
+  azionePubblica(AZ_LED, "led2", mode);
   return true;
 }
 
@@ -143,6 +145,7 @@ bool led2SetBrightness(int v) {
   if (!led2Present() || v < 0 || v > 255) return false;
   cfg.led2Brightness = (uint8_t)v;
   cfgSave();
+  azionePubblica(AZ_LED, "led2_lum", v);
   return true;
 }
 

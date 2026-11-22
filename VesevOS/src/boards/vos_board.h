@@ -54,6 +54,8 @@
 #include "vos_board_c6_supermini.h"
 #elif defined(CONFIG_IDF_TARGET_ESP32C3)
 #include "vos_board_c3_supermini.h"
+#elif defined(CONFIG_IDF_TARGET_ESP32H2)
+#include "vos_board_h2_supermini.h"
 #else
 #include "vos_board_s3_supermini.h"
 #endif
@@ -92,6 +94,18 @@
 #endif
 #ifndef VOS_BOARD_LED_RGB_MANO
 #define VOS_BOARD_LED_RGB_MANO 0   // la scheda non dice nulla: LED a colori WS2812 a mano dell'utente spento
+#endif
+#ifndef VOS_HAS_ULP
+#define VOS_HAS_ULP 0         // coprocessore ULP (S3): dichiarazione, usata dal registratore di dati
+#endif
+#ifndef VOS_HAS_LP_CPU
+#define VOS_HAS_LP_CPU 0      // CPU a basso consumo (C6)
+#endif
+#ifndef VOS_HAS_PCNT
+#define VOS_HAS_PCNT 0        // contatore di impulsi hardware
+#endif
+#ifndef VOS_RTC_MEM_BYTES
+#define VOS_RTC_MEM_BYTES 0   // memoria RTC/LP che resta accesa nel sonno profondo, in byte
 #endif
 #ifndef VOS_RAM_MINIMA
 #define VOS_RAM_MINIMA 0      // 1 = scheda con poca RAM interna e senza PSRAM (C3): HTTPS a 1 connessione, niente riavvio per RAM, registro delle modifiche senza copia in RAM, avviso in Funzionalita

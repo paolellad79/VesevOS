@@ -8,6 +8,7 @@ pagine_dispositivi.html
 pagine_rete.html
 pagine_programmi.html
 pagine_sistema.html
+pagine_registratore.html
 pagine_sicurezza.html
 pagine_informazioni.html
 piede_pagina.html
@@ -16,11 +17,15 @@ script_inizio.html
 js_voci.js
 js_alias.js
 js_base.js
+js_aspetto.js
+js_pezzi.js
 js_regole.js
 js_regole_editor.js
 js_avvio.js
 js_menu_utente.js
 js_util.js
+js_dataora.js
+js_variabili.js
 js_home.js
 js_seriale.js
 js_ora.js
@@ -39,6 +44,7 @@ js_terminale.js
 js_task.js
 js_led.js
 js_led2.js
+js_tema.js
 js_pin_dati.js
 js_pin_tab.js
 js_script.js
@@ -73,6 +79,10 @@ js_https.js
 js_widget_drv.js
 js_servizi.js
 js_energia.js
+js_coproc.js
+js_registratore.js
+js_registratore_az.js
+js_registratore_file.js
 js_autotest.js
 js_statistiche.js
 js_mfa.js

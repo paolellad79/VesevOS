@@ -180,7 +180,7 @@ function rDraw(){
     if(st.off)ex='<span class="pill" style="background:var(--kobg);color:var(--kot)">'+
       esc(t("Fermata (troppe esecuzioni)"))+'</span> ';
     else if(st.run)ex='<span class="pill v">'+esc(t("In corso"))+'</span> ';
-    var last=st.last?tf("Ultima volta: {0} ({1} volte)",st.last,st.n)
+    var last=st.q?tf("Ultima volta: {0} ({1} volte)",fmtOraData(st.q),st.n)
       :(st.n?tf("Eseguita {0} volte",st.n):t("Mai eseguita"));
     h+='<div class="ru"><button class="sw1'+(r.on?" on":"")+'" onclick="rToggle('+i+
       ')" aria-label="'+esc(r.name)+'"></button><div class="rb"><b>'+esc(r.name)+

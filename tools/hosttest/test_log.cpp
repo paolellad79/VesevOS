@@ -49,7 +49,7 @@ int main() {
   g = logGet(150);
   int righe = 0; for (char ch : g) if (ch == '\n') righe++;
   CHECK(righe == 150);
-  CHECK(g.size() <= 150 * 120);                                       // mai piu di LOG_LINES * LOG_LEN
+  CHECK(g.size() <= 150 * (120 + 36));                                // mai piu di LOG_LINES * (LOG_LEN + data e ora)
   CHECK(g.back() == '\n');
   CHECK(has(g, "riga lunga 399"));                                    // l'ultima riga c'e
   CHECK(!has(g, "riga lunga 249 "));                                  // le piu vecchie sono state scartate

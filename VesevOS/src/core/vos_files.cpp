@@ -177,7 +177,7 @@ static bool addError(HeapBuf& j, const char* text) {
   return !j.oom() && !j.over();
 }
 
-bool fsListBuild(std::string_view raw, HeapBuf& j) {
+bool fsListBuild(std::string_view raw, HeapBuf& j, bool nascondiSegreti) {
   WorkPtr w;
   if (!w) return false;
   if (!fsCleanTo(raw, w->a, PATH_BUF)) return addError(j, tr("Percorso non valido"));
@@ -193,7 +193,8 @@ bool fsListBuild(std::string_view raw, HeapBuf& j) {
     drvTaskPause();                                        // idem: elencare una cartella piena non deve affamare il task idle
     const char* name = baseName(f.name());
     size_t full = joinName(w->a, plen, name);              // 0 = percorso troppo lungo: non puo essere un file di sistema
-    if (!(full && fsProtected(w->a))) {
+    const bool segreto = nascondiSegreti && full && pathIsSecret(w->a);   // chiavi, certificati e backup: solo per l'Admin
+    if (!(full && fsProtected(w->a)) && !segreto) {
       if (cnt >= FS_LIST_MAX || j.length() >= FS_JSON_SOFT) { more = true; w->a[plen] = 0; break; }   // regola API 13: ogni lista ha un limite e dice se e troncata
       cnt++;
       bool dir = f.isDirectory();

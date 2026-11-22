@@ -1,0 +1,65 @@
+<section id="t_rec" class="hide">
+ <div class="card"><h3>Registratore</h3>
+  <p class="fhint">Ogni tanto legge le fonti scelte (periferiche, temperatura del chip, RAM libera) e scrive una riga in un file CSV, sulla memoria interna o sulla microSD. Parte spento. Le righe si scrivono a blocchi per non consumare la memoria.</p>
+  <div id="rcst" class="msg" style="margin-bottom:8px"></div>
+  <div id="rc_cap" class="fhint"></div>
+ </div>
+ <div class="card"><h3>Grafico</h3>
+  <svg id="rc_svg" viewBox="0 0 300 120" width="100%" height="160" role="img" aria-label="Grafico del registratore" preserveAspectRatio="none" style="background:var(--in);border-radius:8px"></svg>
+  <div id="rc_leg" class="fhint"></div>
+  <div style="overflow-x:auto"><table id="rc_tab" class="ftab"></table></div>
+ </div>
+ <div class="card"><h3>Dati salvati</h3>
+  <div id="rc_files" class="fhint"></div>
+  <div style="overflow-x:auto"><table id="rc_ftab" class="ftab hide"></table></div>
+  <div id="rc_fsel" class="fhint" role="status" aria-live="polite"></div>
+  <button class="btn gray" id="rc_fdl" onclick="rcScarica()" disabled>Scarica selezionati</button>
+  <button class="btn gray adm" id="rc_fdel" onclick="rcElimina()" disabled>Elimina selezionati</button>
+  <div id="rcm2" class="msg"></div>
+ </div>
+ <div class="card"><h3>Azioni</h3>
+  <p class="fhint">Le azioni non si campionano: si segna l'ora in cui sono state eseguite (uscite, PWM, LED, contatore, programmi, riavvii, sonno, avvio, rete, servizi, microSD). Non si segnano accessi, password o nomi utente. Vanno nel file eventi.csv.</p>
+  <div id="rc_azst" class="fhint"></div>
+  <div style="overflow-x:auto"><table id="rc_aztab" class="ftab"></table></div>
+  <div id="rc_azfiles" class="fhint"></div>
+ </div>
+ <div class="card adm" id="rc_form"><h3>Impostazioni del registratore</h3>
+  <div class="agrid"><div>
+    <label for="rc_on">Stato</label>
+    <select id="rc_on"><option value="0">Spento</option><option value="1">Acceso</option></select></div><div>
+    <label for="rc_sec">Intervallo predefinito (secondi)</label>
+    <input type="number" id="rc_sec" min="1" max="86400"></div><div>
+    <label for="rc_where">Dove salvare</label>
+    <select id="rc_where" onchange="rcWhereUi()"><option value="0">Memoria interna</option><option value="1">microSD</option></select></div><div>
+    <label for="rc_max">Spazio massimo (KB)</label>
+    <input type="number" id="rc_max" min="4" max="65535"></div><div>
+    <label for="rc_nome">Nome dei file (lettere, numeri, _ e -)</label>
+    <input type="text" id="rc_nome" maxlength="24" pattern="[A-Za-z0-9_-]+" autocomplete="off"></div><div>
+    <label for="rc_lim">Il limite vale per</label>
+    <select id="rc_lim"><option value="0">Tutti i file della cartella insieme</option><option value="1">Ogni singolo file</option></select></div></div>
+  <p class="fhint" id="rc_minh"></p>
+  <h4>Fonti</h4>
+  <div class="agrid"><div>
+    <label for="rc_d1">Periferica 1</label><select id="rc_d1"></select></div><div>
+    <label for="rc_d2">Periferica 2</label><select id="rc_d2"></select></div><div>
+    <label for="rc_d3">Periferica 3</label><select id="rc_d3"></select></div><div>
+    <label for="rc_d4">Periferica 4</label><select id="rc_d4"></select></div></div>
+  <label><input type="checkbox" id="rc_t"> Temperatura del chip</label>
+  <label><input type="checkbox" id="rc_r"> RAM libera</label>
+  <h4>Ogni quanto leggere ogni fonte</h4>
+  <p class="fhint">0 = si usa l'intervallo predefinito. Una riga si scrive quando almeno una fonte e scaduta: le altre colonne restano vuote.</p>
+  <div class="agrid"><div>
+    <label for="rc_s1">Periferica 1 (secondi)</label><input type="number" id="rc_s1" min="0" max="86400"></div><div>
+    <label for="rc_s2">Periferica 2 (secondi)</label><input type="number" id="rc_s2" min="0" max="86400"></div><div>
+    <label for="rc_s3">Periferica 3 (secondi)</label><input type="number" id="rc_s3" min="0" max="86400"></div><div>
+    <label for="rc_s4">Periferica 4 (secondi)</label><input type="number" id="rc_s4" min="0" max="86400"></div><div>
+    <label for="rc_st">Temperatura del chip (secondi)</label><input type="number" id="rc_st" min="0" max="86400"></div><div>
+    <label for="rc_sr">RAM libera (secondi)</label><input type="number" id="rc_sr" min="0" max="86400"></div></div>
+  <h4>Azioni da segnare</h4>
+  <div id="rc_acats"></div>
+  <div class="agrid"><div>
+    <label for="rc_evmax">Righe di azioni al giorno al massimo (0 = nessun limite)</label>
+    <input type="number" id="rc_evmax" min="0" max="65535"></div></div>
+  <button class="btn" onclick="rcSave()">Salva</button><div id="rcm" class="msg"></div>
+ </div>
+</section>

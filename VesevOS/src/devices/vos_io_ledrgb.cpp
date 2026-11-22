@@ -8,6 +8,7 @@
 #include "vos_io_int.h"
 #include "../core/vos_common.h"
 #include "../core/vos_i18n.h"
+#include "../core/vos_azioni.h"
 #include "../drivers/vos_drv_led.h"
 #include <freertos/FreeRTOS.h>
 #include <ctype.h>
@@ -129,6 +130,7 @@ static bool applica(IoDev& d, bool on, uint32_t col, uint8_t lum, uint8_t ord, E
     return false;
   }
   scrivi(d);
+  azionePubblica(AZ_LED, d.name, d.on ? 1 : 0);
   return true;
 }
 

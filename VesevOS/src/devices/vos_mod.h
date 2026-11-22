@@ -59,11 +59,12 @@ struct ModInfo {
   ModWidget widget;                  // widget della Home (sezione [widget]): titolo, testo alternativo, chi lo vede; i valori vivi li da' on_widget()
   bool hasCmd; int ncmd; char cmdWord[13];   // comandi del driver: ha [commands] e [cmd], quante righe, la parola del comando (vedi vos_mod_cmd.h)
   struct WirePin { char lab[9]; char dst[9]; char hex[8]; char cname[8]; } wp[MOD_PINS_MAX]; int nwp;   // fili: etichetta del pin, destinazione, colore (#rrggbb e nome base)
+  uint64_t gridMask; bool hasGrid, gridAny;   // [griglia]: pin ammessi dal driver su QUESTA scheda (un bit per pin); gridAny = il driver ha una griglia, hasGrid = ce n'e una per questa scheda
   size_t size;
 };
 
 int    modScan(char (*names)[MOD_NAME_BUF], int mx);          // nomi dei file /devs/*.vdb e *.vdp (senza estensione, senza doppioni) nei primi mx posti; ritorna quanti ce ne sono in tutto
-bool   modSectionKnown(std::string_view name);                    // name (senza parentesi) e una sezione di un driver? (module, signals, icon, wiring, pins, page, code, data, commands, cmd, widget)
+bool   modSectionKnown(std::string_view name);                    // name (senza parentesi) e una sezione di un driver? (module, signals, icon, wiring, pins, griglia, page, code, data, commands, cmd, widget)
 bool   modColor(const char* v, char* hex, char* cname);   // nome (red, rosso...) o #rrggbb -> #rrggbb; cname = nome base inglese o vuoto
 bool   modParse(std::string_view text, const char* fileName, ModInfo& m, ErrBuf& err);   // false = err "Riga N: motivo"
 bool   modListJson(HeapBuf& out);                              // GET /api/mods  {"ok":true,"list":[{n,ok,t,c,p,ns,v,a,l,w,icon,e}]}. false = manca la memoria o il tetto (out da buttare)

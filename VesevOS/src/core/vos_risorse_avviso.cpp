@@ -180,8 +180,10 @@ bool risorseJson(HeapBuf& j) {
     if (buono && risElencoCerca(elenco, n, risFileNome((RisFile)i), h)) {
       for (int b = 0; b < 32; b++) snprintf(hex + b * 2, 3, "%02x", h[b]);
     }
-    j.addf("%s{\"n\":\"%s\",\"s\":%d,\"h\":\"%s\",\"t\":%lu}", i ? "," : "", risFileNome((RisFile)i), (int)risFileStato((RisFile)i), hex,
-           (unsigned long)risFileTetto((RisFile)i));
+    char ver[8] = "";
+    risFileMeta((RisFile)i, ver, sizeof ver, nullptr);       // versione scritta dentro il file ("" = non dichiarata o file non leggibile)
+    j.addf("%s{\"n\":\"%s\",\"s\":%d,\"h\":\"%s\",\"t\":%lu,\"v\":\"%s\"}", i ? "," : "", risFileNome((RisFile)i), (int)risFileStato((RisFile)i), hex,
+           (unsigned long)risFileTetto((RisFile)i), ver);
   }
   return j.add("]}");
 }

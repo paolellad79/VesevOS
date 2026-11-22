@@ -2,8 +2,8 @@
   "spdxVersion": "SPDX-2.3",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "name": "VesevOS-1.8.24c",
-  "documentNamespace": "https://github.com/paolellad79/VesevOS/spdx/1.8.24c",
+  "name": "VesevOS-1.8.30k",
+  "documentNamespace": "https://github.com/paolellad79/VesevOS/spdx/1.8.30k",
   "creationInfo": {
     "created": "2026-11-17T00:00:00Z",
     "creators": [
@@ -27,7 +27,7 @@
     {
       "SPDXID": "SPDXRef-Package-0",
       "name": "VesevOS",
-      "versionInfo": "1.8.24c",
+      "versionInfo": "1.8.30k",
       "downloadLocation": "https://github.com/paolellad79/VesevOS",
       "licenseConcluded": "GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial",
       "licenseDeclared": "GPL-3.0-or-later OR LicenseRef-VesevOS-Commercial",

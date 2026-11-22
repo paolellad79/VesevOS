@@ -30,6 +30,8 @@ static bool                      s_staticIp = false;    // l'IP del client e fis
 static volatile DrvWifiSta       s_status = DWS_OTHER;
 static volatile bool             s_connected = false;   // associato al router (anche senza IP)
 static volatile bool             s_apUp = false;        // hotspot partito
+static volatile bool             s_staStopEv = false;   // evento STA_STOP elaborato (serve a radioDown prima di distruggere le interfacce)
+static volatile bool             s_apStopEv = false;    // evento AP_STOP elaborato
 static volatile bool             s_want = false;        // e stata chiesta una connessione e non e stata annullata
 static volatile bool             s_first = true;        // primo errore dopo la richiesta: si riprova sempre
 static volatile uint8_t          s_tries = 0;           // tentativi falliti di fila
@@ -77,11 +79,11 @@ static void onEvent(void*, esp_event_base_t base, int32_t id, void* data) {
   if (base == WIFI_EVENT) {
     switch (id) {
       case WIFI_EVENT_STA_START:        s_status = DWS_OTHER; esp_wifi_set_ps(WIFI_PS_MIN_MODEM); break;
-      case WIFI_EVENT_STA_STOP:         s_status = DWS_OTHER; s_connected = false; break;
+      case WIFI_EVENT_STA_STOP:         s_status = DWS_OTHER; s_connected = false; s_staStopEv = true; break;
       case WIFI_EVENT_STA_CONNECTED:    s_connected = true; s_status = DWS_IDLE; break;
       case WIFI_EVENT_STA_DISCONNECTED: onStaDisconnected(data ? ((wifi_event_sta_disconnected_t*)data)->reason : 0); break;
       case WIFI_EVENT_AP_START:         s_apUp = true; break;
-      case WIFI_EVENT_AP_STOP:          s_apUp = false; break;
+      case WIFI_EVENT_AP_STOP:          s_apUp = false; s_apStopEv = true; break;
       case WIFI_EVENT_AP_STACONNECTED:
         if (s_apClientFn && data) { const wifi_event_ap_staconnected_t* e = (const wifi_event_ap_staconnected_t*)data; s_apClientFn(true, e->mac, e->aid, 0); }
         break;
@@ -127,7 +129,19 @@ static void radioDown() {
   if (!s_up) return;
   s_want = false;
   if (s_retryTimer) esp_timer_stop(s_retryTimer);
-  if (s_started) { esp_wifi_stop(); s_started = false; }
+  if (s_started) {
+    // Si aspetta che gli eventi di stop siano stati elaborati (i gestori predefiniti delle interfacce girano prima dei nostri),
+    // poi si distruggono le interfacce: cosi nessun gestore usa un'interfaccia gia liberata. Al massimo mezzo secondo.
+    wifi_mode_t m = WIFI_MODE_NULL;
+    esp_wifi_get_mode(&m);
+    bool aspSta = (m == WIFI_MODE_STA || m == WIFI_MODE_APSTA);
+    bool aspAp = (m == WIFI_MODE_AP || m == WIFI_MODE_APSTA);
+    s_staStopEv = false;
+    s_apStopEv = false;
+    esp_wifi_stop();
+    s_started = false;
+    for (int i = 0; i < 50 && ((aspSta && !s_staStopEv) || (aspAp && !s_apStopEv)); i++) vTaskDelay(pdMS_TO_TICKS(10));
+  }
   if (s_wifiEv) { esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, s_wifiEv); s_wifiEv = nullptr; }
   if (s_ipEv) { esp_event_handler_instance_unregister(IP_EVENT, ESP_EVENT_ANY_ID, s_ipEv); s_ipEv = nullptr; }
   if (s_apIf) { esp_netif_destroy_default_wifi(s_apIf); s_apIf = nullptr; }

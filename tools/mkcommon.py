@@ -13,7 +13,7 @@
 # Non e consulenza legale: le regole radio sono semplificate e prudenti; vanno ricontrollate prima della vendita.
 import os, sys, re, json, gzip, math
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from versioni_risorse import versione_risorsa
+from versioni_risorse import versione_risorsa, righe_testo
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, 'tools', 'data', 'common_src.json')
@@ -186,7 +186,7 @@ def testo_radio(table):
              '# Per questioni legali: chi modifica questo file ne risponde. Un file modificato puo essere rifiutato dalla scheda,',
              '# che allora usa valori prudenti (canali 1-11).',
              '# VesevOS: tabella radio 2,4 GHz dei paesi (generata da tools/mkcommon.py, non modificare a mano)',
-             '# data_regole=%s versione=%s' % (RADIO_DATA, versione_risorsa('radio')),
+             '# data_regole=%s' % RADIO_DATA] + righe_testo('radio') + [
              '# Una riga per paese: codice ISO a due lettere, canali massimi, limite in dBm EIRP. Non e consulenza legale: valori prudenti.']
     righe += ['%s %d %d' % t for t in table]
     return '\n'.join(righe) + '\n'

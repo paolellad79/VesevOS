@@ -27,6 +27,26 @@
    <use href="#i-a11y"/>
   </svg><span><b>Accessibilita</b><small>Testo grande, contrasto, colori</small></span></button>
 </div>
+<div class="pop hide" id="a11p" role="dialog" aria-label="Accessibilita">
+ <b>Accessibilita</b>
+ <div class="agrid">
+  <div><label for="l_fs">Dimensione del testo</label><select id="l_fs"
+    onchange="a11ySet('fs',+this.value)"><option value="0">Normale</option>
+    <option value="1">Grande</option><option value="2">Molto grande</option></select></div>
+  <div><label for="l_hc">Contrasto alto</label><select id="l_hc"
+    onchange="a11ySet('hc',this.value)">
+    <option value="auto">Automatico (come il dispositivo)</option>
+    <option value="on">Attivo</option><option value="off">Spento</option></select></div>
+  <div><label for="l_cb">Colori adatti ai daltonici</label><select id="l_cb"
+    onchange="a11ySet('cb',+this.value)"><option value="0">Spento</option>
+    <option value="1">Attivo (blu, arancione, giallo)</option></select></div>
+  <div><label for="l_rm">Riduci le animazioni</label><select id="l_rm"
+    onchange="a11ySet('rm',this.value)">
+    <option value="auto">Automatico (come il dispositivo)</option>
+    <option value="on">Attivo</option><option value="off">Spento</option></select></div>
+ </div>
+ <button class="btn gray" onclick="a11yReset()">Ripristina</button>
+</div>
 <div class="cp" id="cp">
  <div class="cph" id="cph"><svg class="i" style="width:18px;height:18px"><use href="#i-term"/>
   </svg><b>Terminale</b>

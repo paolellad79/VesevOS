@@ -8,7 +8,7 @@ var AG_REPO={base:"https://raw.githubusercontent.com/paolellad79/VesevOS/main/",
   risorse:"risorse/"};
 var AG_STORE=AG_REPO.base+AG_REPO.store,AG_STORE_TETTO=32768,AG_STORE_VOCI=40;
 function agRiga(e,v){return v?row(e,v):""}
-function agQuando(n){return n?new Date(n*1000).toLocaleString():t("mai")}
+function agQuando(n){return n?fmtOraData(n):t("mai")}
 function agLoad(){
   clearTimeout(AG.tm);
   api("/api/aggiorna").then(function(r){return r.json()}).then(function(d){

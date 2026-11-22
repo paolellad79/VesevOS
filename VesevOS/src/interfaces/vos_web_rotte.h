@@ -26,6 +26,11 @@ struct RottaGuida {
 // js_base.js, js_paesi.js, js_guida.js, js_home.js e dal collegamento "Note legali" della schermata di accesso).
 static const RottaGuida ROTTE_DELLA_GUIDA[] = {
   {"/",               RG_GET},                  // pagina (vos_web.cpp)
+  {"/tema.css",       RG_GET},                  // tema della pagina (vos_web_tema.cpp)
+  {"/manifest.webmanifest", RG_GET},            // app web (vos_web_pwa.cpp)
+  {"/icon-192.png",   RG_GET},
+  {"/icon-512.png",   RG_GET},
+  {"/apple-touch-icon.png", RG_GET},
   {"/api/common",     RG_GET},                  // paesi e regole radio (vos_web.cpp)
   {"/api/auth",       RG_GET},                  // stato dell'accesso (vos_web.cpp)
   {"/api/license",    RG_GET},                  // note legali, pubbliche (vos_web.cpp)

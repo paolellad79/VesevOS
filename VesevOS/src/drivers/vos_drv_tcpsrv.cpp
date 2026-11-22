@@ -24,7 +24,7 @@ bool DrvTcpMini::begin(uint16_t port, DrvTcpHandler h, const char* taskName) {
   a.sin_addr.s_addr = htonl(INADDR_ANY);
   a.sin_port = htons(port);
   if (lwip_bind(s, (struct sockaddr*)&a, sizeof a) != 0 || lwip_listen(s, BACKLOG) != 0) { lwip_close(s); return false; }
-  sock_ = s; handler_ = h;
+  sock_ = s; handler_ = h; fermare_ = false;
   TaskHandle_t t = nullptr;
   if (!drvTaskCreate(run, taskName, TASK_STACK, this, TASK_PRIO, &t, DRV_CORE_ANY)) {   // core: automatico, come tutti i task nostri (vedi vos_drv_task.h)
     lwip_close(s); sock_ = -1; return false; }
@@ -40,9 +40,22 @@ void DrvTcpMini::run(void* self) {
     struct sockaddr_in from;
     socklen_t fl = sizeof from;
     int c = lwip_accept(d->sock_, (struct sockaddr*)&from, &fl);
+    if (d->fermare_) break;                                   // end(): il socket e stato chiuso, si esce
     if (c < 0) { vTaskDelay(pdMS_TO_TICKS(50)); continue; }   // niente socket liberi o errore passeggero: si riprova senza girare a vuoto
     d->serve(c, ntohl(from.sin_addr.s_addr), d->in_, d->out_);
   }
+  d->task_ = nullptr;
+  vTaskDelete(nullptr);
+}
+
+// Ferma il server: il socket in ascolto si chiude (accept torna con errore), il task vede fermare_ e finisce da solo.
+void DrvTcpMini::end() {
+  if (!task_) return;
+  fermare_ = true;
+  int s = sock_;
+  sock_ = -1;
+  if (s >= 0) lwip_close(s);
+  for (int i = 0; i < 400 && task_; i++) vTaskDelay(pdMS_TO_TICKS(10));
 }
 
 // Legge la richiesta (fino alla riga vuota, a TCPSRV_IN_MAX byte o a TCPSRV_READ_MS), chiede la risposta al gestore, la invia e chiude.

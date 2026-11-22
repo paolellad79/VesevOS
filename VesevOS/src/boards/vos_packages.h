@@ -41,6 +41,9 @@
 #ifndef VOS_WITH_WPS
 #define VOS_WITH_WPS 1      // collegamento alla Wi-Fi di casa con il WPS (pulsante o PIN). Se il link fallisce per simboli mancanti: mettere 0
 #endif
+#ifndef VOS_WITH_REC
+#define VOS_WITH_REC 1      // registratore di dati (campiona periferiche, temperatura e RAM; CSV su flash o microSD; spento di fabbrica)
+#endif
 #ifndef VOS_WITH_SD
 #define VOS_WITH_SD 1       // scheda microSD (modulo SPI, FAT32): montaggio a richiesta, mai nell'avvio
 #endif
@@ -52,6 +55,9 @@
 #endif
 #if !defined(VOS_WITH_LED_RGB_A_MANO) && defined(VOS_BOARD_LED_RGB_MANO)   // come il PWM: vale dopo vos_board.h
 #define VOS_WITH_LED_RGB_A_MANO VOS_BOARD_LED_RGB_MANO   // LED a colori WS2812 a mano dell'utente (periferica "led_rgb"): serve almeno un canale RMT di trasmissione libero oltre a quello del LED di bordo. Lo decide il file di scheda (VOS_BOARD_LED_RGB_MANO)
+#endif
+#if !defined(VOS_WITH_ULP_SOGLIE) && defined(VOS_HAS_ULP)   // come il PWM: vale dopo vos_board.h
+#define VOS_WITH_ULP_SOGLIE VOS_HAS_ULP   // soglie del coprocessore ULP-RISC-V (tabella scritta dalla CPU, programma fisso nostro che sveglia la CPU). Solo S3: serve CONFIG_ULP_COPROC_TYPE_RISCV
 #endif
 #ifndef VOS_WITH_ELF
 #if defined(CONFIG_IDF_TARGET_ESP32S3)

@@ -10,17 +10,82 @@ function lcLoad(){
       $("lc_lang").value=r.lang||LANG;
       LOC.ntp=r.ntp;
       $("lc_df").value=r.dateFmt;
+      $("lc_dft").value=r.dataCortaTesto||"";
+      $("lc_dl").value=r.dataLungaFmt;
+      $("lc_dlt").value=r.dataLungaTesto||"";
       $("lc_tf").value=r.timeFmt;
+      $("lc_ts").value=r.oraLungaSec;
+      $("lc_tl").value=r.oraLungaFmt;
+      $("lc_tlt").value=r.oraLungaTesto||"";
       $("lc_ds").value=r.decSep;
       $("lc_ws").value=r.weekStart;
       $("lc_tu").value=r.tempUnit;
+      $("lc_tarsoc").value=(r.tarSoc/10).toFixed(1);
+      $("lc_tarext").value=(r.tarExt/10).toFixed(1);
+      lcTarHint();
       $("lc_ant").value=r.antExt;
       $("lc_gain").value=r.gain;
       lcAnt();
       lcTzFill(r.tz,r.tzName);
       lcCountry();
+      lcFmt();
       lcRadio(r)
     }).catch(function(){})
+}
+
+/* Formati di data e ora: scelte del modulo (non ancora salvate) */
+function lcImpost(){
+  return{
+    dataCorta:+$("lc_df").value,dataCortaTesto:$("lc_dft").value,
+    dataLunga:+$("lc_dl").value,dataLungaTesto:$("lc_dlt").value,
+    ampm:+$("lc_tf").value==1,oraLungaSec:+$("lc_ts").value==1,
+    oraLunga:+$("lc_tl").value,oraLungaTesto:$("lc_tlt").value
+  }
+}
+
+/* Primo errore dei formati scritti a mano: un testo scelto deve essere valido; se non e scelto, quando c'e, va controllato lo stesso */
+function lcFmtErr(im){
+  var v=[[im.dataCorta==3,im.dataCortaTesto],[im.dataLunga==2,im.dataLungaTesto],[im.oraLunga==1,im.oraLungaTesto]];
+  for(var i=0;i<3;i++){
+    if(!v[i][0]&&!v[i][1])continue;
+    var e=dfControlla(v[i][1]);
+    if(e)return dfMessaggio(e)
+  }
+  return""
+}
+
+/* Anteprima accanto a ogni formato, con l'ora della scheda adesso. Un testo scritto a mano non valido mostra l'errore */
+function lcAnteprima(id,scritta,testo,fa){
+  var e=scritta?dfControlla(testo):0;
+  $(id).textContent=e?dfMessaggio(e):fa()
+}
+
+function lcFmt(){
+  var im=lcImpost(),d=dfDaData(new Date(Date.now()+(fmtSrc().to||0)*1000)),n=dfNomi();
+  $("lc_dft").className=im.dataCorta==3?"":"hide";
+  $("lc_dlt").className=im.dataLunga==2?"":"hide";
+  $("lc_tlt").className=im.oraLunga==1?"":"hide";
+  lcAnteprima("lc_dfp",im.dataCorta==3,im.dataCortaTesto,function(){return dfDataCorta(im,d,n)});
+  lcAnteprima("lc_dlp",im.dataLunga==2,im.dataLungaTesto,function(){return dfDataLunga(im,d,n)});
+  lcAnteprima("lc_tlp",im.oraLunga==1,im.oraLungaTesto,function(){return dfOraLunga(im,d,n)});
+  $("lc_tfp").textContent=dfOraCorta(im,d)
+}
+
+/* Taratura: in decimi di grado Celsius (come la scheda). Fahrenheit: la correzione si moltiplica per 9/5, senza +32 */
+function lcTarDecimi(id){
+  var v=parseFloat($(id).value);
+  return isNaN(v)?0:Math.round(v*10)
+}
+
+function lcTarHint(){
+  var e=$("lc_tarf");
+  if(+$("lc_tu").value!=1){
+    e.textContent="";
+    return
+  }
+  var a=(lcTarDecimi("lc_tarsoc")*9/50).toFixed(1),
+    b=(lcTarDecimi("lc_tarext")*9/50).toFixed(1);
+  e.textContent=tf("Con i gradi Fahrenheit la correzione vale {0} F (chip) e {1} F (esterno): si moltiplica per 9/5, senza aggiungere 32",a,b)
 }
 
 function lcCountry(){
@@ -89,6 +154,7 @@ function lcDefaults(keep){
   }
   $("lc_df").value=c.f.d;
   $("lc_tf").value=c.f.h;
+  lcFmt();
   $("lc_ds").value=c.f.s;
   $("lc_ws").value=c.f.w;
   $("lc_tu").value=c.f.t;
@@ -101,11 +167,20 @@ function lcDefaults(keep){
 
 function lcSave(mid){
   mid=typeof mid=="string"?mid:"lcm";
+  var fe=lcFmtErr(lcImpost());
+  if(fe){
+    msg(mid,fe,false);
+    return
+  }
   var d={country:LOC.cc,tz:$("lc_posix").value.trim(),
     tzname:+$("lc_tz").value<0?t("Personalizzato"):LOC.tzn,ntp:LOC.ntp,
-    datefmt:$("lc_df").value,timefmt:$("lc_tf").value,decsep:$("lc_ds").value,
+    datefmt:$("lc_df").value,datacortatesto:$("lc_dft").value,
+    datalungafmt:$("lc_dl").value,datalungatesto:$("lc_dlt").value,
+    timefmt:$("lc_tf").value,oralungasec:$("lc_ts").value,
+    oralungafmt:$("lc_tl").value,oralungatesto:$("lc_tlt").value,decsep:$("lc_ds").value,
     weekstart:$("lc_ws").value,tempunit:$("lc_tu").value,antenna:$("lc_ant").value,
-    gain:$("lc_gain").value||0,txpower:$("lc_tx").value};
+    gain:$("lc_gain").value||0,txpower:$("lc_tx").value,
+    tarsoc:lcTarDecimi("lc_tarsoc"),tarext:lcTarDecimi("lc_tarext")};
   var lg=$("lc_lang").value;
   post("/api/region",d).then(function(r){return r.json()}).then(function(j){
     if(j.ok===false){

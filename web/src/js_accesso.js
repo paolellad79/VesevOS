@@ -14,6 +14,16 @@ function authLoad(){
   })
 }
 var CLK={tm:0,t0:0};
+/* Ora lunga: i due punti diventano un elemento che lampeggia ogni secondo (secondi dispari = spento); il resto del testo e quello del formato */
+function clkOra(testo,secondi){
+  var cl=secondi%2?"off":"",pezzi=testo.split(":"),o="";
+  for(var i=0;i<pezzi.length;i++){
+    if(i)o+='<i class="'+cl+'">:</i>';
+    o+=esc(pezzi[i])
+  }
+  return o
+}
+
 function clkDraw(){
   var A=AUTH,e=$("lclk");
   if(!e)return;
@@ -27,18 +37,26 @@ function clkDraw(){
   }
   var ms=(A.te+(Date.now()-CLK.t0)/1000)*1000,d=new Date(ms+A.to*1000),
     p=function(n){return(n<10?"0":"")+n},
-    Y=d.getUTCFullYear(),M=p(d.getUTCMonth()+1),D=p(d.getUTCDate()),H=d.getUTCHours(),ap="";
-  if(A.tf){
-    ap=H>=12?" PM":" AM";
-    H=H%12||12
-  }
-  var ds=A.df==1?Y+"-"+M+"-"+D:A.df==2?M+"/"+D+"/"+Y:D+"/"+M+"/"+Y,
-    of=A.to/60,sg=of<0?"-":"+",ao=Math.abs(of),tz="UTC"+sg+p(Math.floor(ao/60))+":"+p(ao%60);
-  var s=tf("Ora della scheda: {0} {1} ({2})",ds,
-    p(H)+":"+p(d.getUTCMinutes())+":"+p(d.getUTCSeconds())+ap,(A.tn?A.tn+", ":"")+tz);
-  if(Math.abs(ms-Date.now())>30000)s+=" - "+
-    t("Differisce dall'ora del tuo dispositivo: controlla data e fuso.");
-  e.textContent=s
+    im=dfImpostDa(A),pd=dfDaData(d),nm=dfNomi(),
+    ora=dfOraCorta(im,pd),                       /* accesso: solo ore e minuti, con i due punti che lampeggiano */
+    dataLunga=fmtLungo(d,A)[1],                  /* telefono: data lunga scelta in Localizzazione */
+    dataEstesa=dfFormatta(DF_PRONTA_LUNGA,pd,nm),/* desktop: data per esteso, con i nomi completi */
+    z=fusoTesto(A),
+    s='<div class="lt1" translate="no">'+clkOra(ora,d.getUTCSeconds())+'</div><div class="lt2"><span class="dn">'+
+    esc(dataLunga)+'</span><span class="de">'+esc(dataEstesa)+'</span><span class="dz"><span class="ds"> &middot; </span>'+
+    z.replace(/&/g,"&amp;").replace(/</g,"&lt;")+"</span></div>";
+  if(Math.abs(ms-Date.now())>30000)s+='<div class="lt3">'+
+    t("Differisce dall'ora del tuo dispositivo: controlla data e fuso.")+"</div>";
+  e.innerHTML=s;
+  if(AUTH.ml)$("lmsg").textContent=msgVar(AUTH.ml,A,d,A.nm)   /* le variabili con l'ora si aggiornano ogni secondo */
+}
+
+function pwEye(){
+  var i=$("lp"),on=i.type=="password";
+  i.type=on?"text":"password";
+  $("leyes").setAttribute("href",on?"#i-occhio-barrato":"#i-occhio");   /* stessa icona, nel disegno con o senza la barra */
+  $("leye").setAttribute("aria-pressed",on?"true":"false");
+  $("leye").setAttribute("aria-label",on?t("Nascondi la password"):t("Mostra la password"))
 }
 
 function clkStart(){
@@ -51,23 +69,23 @@ function clkStart(){
 function showLoginText(){
   clkStart();
   $("lt").textContent=AUTH.set?t("Accesso"):t("Primo accesso");
+  var ml=$("lmsg");
+  ml.textContent=msgVar(AUTH.ml,AUTH,dataSpostata(AUTH),AUTH.nm);   /* testo pubblico scritto dall'Admin: sempre textContent, mai HTML */
+  ml.className=AUTH.ml?"lmsg":"lmsg hide";
   var n=!AUTH.set;
   $("lnew").className=n?"":"hide";
   $("lp2w").className=n?"":"hide";
   $("lbt").textContent=n?t("Salva ed entra"):t("Entra");
   $("lu").readOnly=n;
   if(n)$("lu").value=AUTH.first||"admin";
-  $("lp").setAttribute("autocomplete",n?"new-password":"current-password");
-  $("lhttps").textContent=AUTH.https&&!AUTH.secure
-    ?t("Collegamento non cifrato: usi l'hotspot della scheda, protetto dalla sua password Wi-Fi.")
-    :AUTH.secure?tf("Collegamento cifrato (HTTPS). Impronta del certificato: {0}",AUTH.fp):""
+  $("lp").setAttribute("autocomplete",n?"new-password":"current-password")
 }
 
 function showLogin(){
   MFAT=null;
   if($("lmfa")){
     $("lmfa").className="hide";
-    $("lbt").className="btn";
+    $("lbt").className="btn lgo";
     $("lu").disabled=false;
     $("lp").disabled=false
   }
@@ -214,7 +232,7 @@ function doMfa(){
         $("lu").disabled=false;
         $("lp").disabled=false;
         $("lmfa").className="hide";
-        $("lbt").className="btn";
+        $("lbt").className="btn lgo";
         loginOk(j)
       }else{
         msg("lm",j.err||t("Errore"),false);

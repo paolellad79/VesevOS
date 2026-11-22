@@ -8,6 +8,8 @@
 void webInit();     // registra i percorsi (non avvia il server)
 bool webRotte();    // fine guida: registra i percorsi rimandati (true = tutti registrati o niente da fare)
 void webStart();    // avvia i server (80 e 443): chiamare dopo l'avvio del Wi-Fi
+void webSospendi();   // prima del sonno: ferma il server HTTPS
+void webRiprendi();    // al risveglio: il server HTTPS riparte dopo qualche secondo (lo fa webTrimIdle, dopo un controllo)
 void webAllowFirstPass();   // dopo il reset con BOOT: 10 minuti per scegliere la password anche dalla rete di casa
 bool webHttpsUp();
 void     webTrimIdle();               // RAM a pezzi e pagina ferma: chiude i collegamenti HTTPS aperti

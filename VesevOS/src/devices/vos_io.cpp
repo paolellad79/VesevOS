@@ -7,6 +7,7 @@
 #include "vos_dev.h"
 #include "../core/vos_common.h"
 #include "../core/vos_i18n.h"
+#include "../core/vos_azioni.h"
 #include "../core/vos_log.h"
 #include "../core/vos_util.h"
 #include "../core/vos_parse.h"
@@ -14,6 +15,7 @@
 #include "../core/vos_alias.h"
 #include "../drivers/vos_drv_gpio.h"
 #include "../drivers/vos_drv_i2c.h"
+#include "../drivers/vos_drv_sonno.h"
 #include "../drivers/vos_drv_fs.h"
 #if VOS_WITH_SD
 #include "../drivers/vos_drv_sd.h"
@@ -42,8 +44,8 @@ struct IoLock {
 
 [[maybe_unused]] static void ioKeys() { tr("Periferiche"); }
 
-static const char* const CN[] = {"", "rele", "led", "pin", "ingresso", "analogico", "i2c", "sd", "pwm", "contatore", "led_rgb"};
-static const char* const PFX[] = {"", "rele", "led", "pin", "in", "adc", "bmp", "sd", "pwm", "cnt", "led_rgb"};
+static const char* const CN[] = {"", "rele", "led", "pin", "ingresso", "analogico", "i2c", "sd", "pwm", "contatore", "led_rgb", "ripresa"};
+static const char* const PFX[] = {"", "rele", "led", "pin", "in", "adc", "bmp", "sd", "pwm", "cnt", "led_rgb", "ripresa"};
 #define DRV_BMP280 1
 
 // un solo sensore I2C: misura nel loop (ioTick), la pagina e le app leggono solo l'ultimo valore
@@ -53,6 +55,7 @@ bool ioParseCls(const char* s, uint8_t& c) {
   if (VOS_WITH_PWM && !strcmp(s, "pwm")) { c = IC_PWM; return true; }
   if (VOS_WITH_CONTATORE && !strcmp(s, "contatore")) { c = IC_CNT; return true; }
   if (VOS_WITH_LED_RGB_A_MANO && !strcmp(s, "led_rgb")) { c = IC_LEDRGB; return true; }
+  if (!strcmp(s, "ripresa")) { c = IC_WAKE; return true; }
   if (!strcmp(s, "relay")) { c = IC_RELE; return true; }
   if (!strcmp(s, "in") || !strcmp(s, "input")) { c = IC_IN; return true; }
   if (!strcmp(s, "adc")) { c = IC_ADC; return true; }
@@ -87,6 +90,10 @@ static void hwSetup(IoDev& d) {
   else if (d.cls == IC_LEDRGB) ioLedOpen(d);                                // torna com'era (colore, luminosita, acceso); se non si apre la periferica resta senza segnale
   else if (d.cls == IC_PWM) ioPwmOpen(d);                                   // al riavvio parte spento (duty 0); se non si apre la periferica resta senza segnale
   else if (d.cls == IC_SD) {}                                              // i pin li prende lo SPI quando si monta la scheda (vos_sd): qui non si toccano
+  else if (d.cls == IC_WAKE) {                                              // la ripresa si presenta da sola al sonno: lo standby non cerca mai il suo pin
+    drvGpioMode(d.gpio, (d.flags & IOF_UP) ? DG_INPUT_PULLUP : (d.flags & IOF_DOWN) ? DG_INPUT_PULLDOWN : DG_INPUT);
+    drvSonnoRipresa(d.gpio, !(d.flags & IOF_INV));
+  }
   else if (d.cls == IC_IN) drvGpioMode(d.gpio, (d.flags & IOF_UP) ? DG_INPUT_PULLUP : (d.flags & IOF_DOWN) ? DG_INPUT_PULLDOWN : DG_INPUT);
   else drvGpioMode(d.gpio, DG_INPUT);
 }
@@ -174,8 +181,8 @@ void ioInit() {
     // riga: <nome> <classe> <gpio> <opzioni> (lettura a mano, vedi ioCfgParseRiga in vos_io_cfg.cpp)
     char nm[16]; unsigned c = 0, fl = 0, ad = 0, dr = 0, kh = 1000; int g = -1, g2 = -1;
     if (!ioCfgParseRiga(l, nm, sizeof nm, c, g, fl, g2, ad, dr, kh)) continue;
-    if (c >= 1 && c <= IC_LEDRGB && ioMigraNomeBordo(nm, PFX[c], find, nm)) ioCfgPend(8);   // nome ora di un LED di bordo: rinominata, vedi vos_io_migra.cpp
-    if (c < 1 || c > IC_LEDRGB || ioNameCheck(nm) || find(nm) >= 0) { vlog("IO: riga scartata (%s)", l); continue; }
+    if (c >= 1 && c <= IC_WAKE && ioMigraNomeBordo(nm, PFX[c], find, nm)) ioCfgPend(8);   // nome ora di un LED di bordo: rinominata, vedi vos_io_migra.cpp
+    if (c < 1 || c > IC_WAKE || ioNameCheck(nm) || find(nm) >= 0) { vlog("IO: riga scartata (%s)", l); continue; }
     if ((c == IC_SD && !VOS_WITH_SD) || (c == IC_PWM && !VOS_WITH_PWM) || (c == IC_CNT && !VOS_WITH_CONTATORE) || (c == IC_LEDRGB && !VOS_WITH_LED_RGB_A_MANO)) { vlog("IO: %s richiede una funzione che questo firmware non ha (la riga resta nel file)", nm); ioCfgKeepRow(l); continue; }
     if (c == IC_PWM && (kh < DRV_PWM_HZ_MIN || kh > DRV_PWM_HZ_MAX)) { vlog("IO: riga scartata (%s)", l); continue; }
     if (c == IC_CNT && !ioCntCfgOk(ad, kh)) { vlog("IO: riga scartata (%s)", l); continue; }
@@ -214,10 +221,11 @@ static const char* pickName(const char* nameIn, uint8_t c, char* name) {
   return find(name) >= 0 ? tr("Nome gia usato") : nullptr;
 }
 
-bool ioAdd(const char* cls, int gpio, const char* nameIn, const char* opt, char* outName, ErrBuf& err) {
+bool ioAdd(const char* cls, int gpio, const char* nameIn, const char* opt, char* outName, ErrBuf& err, bool daDriver) {
   IoLock L;
   uint8_t c;
   if (!ioParseCls(cls, c)) { err = tr("Classe non valida (rele, led, pin, ingresso, analogico, i2c, sd)"); return false; }
+  if (c == IC_WAKE && !daDriver) { err = tr("La ripresa si installa dal driver (Schede modulo), non a mano"); return false; }
   if (c == IC_SD) {                                     // opzioni: mosi=N sck=N miso=N (il pin e CS)
     int v[4] = {-1, -1, -1, IO_SD_KHZ_DEF}; static const char* const K[4] = {"mosi=", "sck=", "miso=", "khz="}; char o[16] = "", eb[IO_ERR_MAX] = "";
     if (nameIn[0] && !ioNameOk(nameIn, err)) return false;           // il nome della microSD, se dato, deve essere gia valido (minuscole e numeri)
@@ -237,12 +245,13 @@ bool ioAdd(const char* cls, int gpio, const char* nameIn, const char* opt, char*
   if (g_n >= IO_MAX) { err = tr("Troppe periferiche (massimo 16)"); return false; }
   const char* why = gpioBlock(gpio, c);
   if (why) { err = why; return false; }
+  if (c == IC_WAKE) { for (int q = 0; q < g_n; q++) if (g_io[q].cls == IC_WAKE) { err = tr("C'e gia una ripresa: ne serve una sola"); return false; } }
   char name[IO_NAME_MAX + 1];
   const char* bad = pickName(nameIn, c, name);
   if (bad) { err = bad; return false; }
   uint8_t fl = 0;
-  if (strstr(opt, "inv") && (isOut(c) || c == IC_IN)) fl |= IOF_INV;
-  if (c == IC_IN || c == IC_CNT) { if (strstr(opt, "up")) fl |= IOF_UP; else if (strstr(opt, "down")) fl |= IOF_DOWN; }
+  if (strstr(opt, "inv") && (isOut(c) || c == IC_IN || c == IC_WAKE)) fl |= IOF_INV;
+  if (c == IC_IN || c == IC_CNT || c == IC_WAKE) { if (strstr(opt, "up")) fl |= IOF_UP; else if (strstr(opt, "down")) fl |= IOF_DOWN; }
   IoDev& d = g_io[g_n];
   memset(&d, 0, sizeof d);
   strncpy(d.name, name, sizeof(d.name) - 1); d.cls = c; d.gpio = (int8_t)gpio; d.flags = fl;
@@ -341,6 +350,7 @@ bool ioRemove(const char* nameIn, ErrBuf& err) {
   if (d.cls == IC_SD) drvSdEnd();                          // prima si smonta la scheda, poi si liberano i pin
 #endif
   if (d.cls != IC_I2C && d.cls != IC_SD) drvGpioMode(d.gpio, DG_INPUT);       // i pin del bus li lascia liberi ioTick quando ferma Wire
+  if (d.cls == IC_WAKE) drvSonnoRipresa(-1, false);                      // senza ripresa lo standby va solo a tempo
   releaseDev(d);
   for (int k = i; k < g_n - 1; k++) g_io[k] = g_io[k + 1];
   g_n--;
@@ -383,6 +393,7 @@ bool ioSet(const char* name, int val, int role, ErrBuf& err) {
   if (on == d.on) return true;
   if (on && d.cls == IC_RELE && d.last && drvMillis() - d.last < IO_MIN_SWITCH_MS) { err = tr("Troppo presto: il rele si riaccende al massimo una volta al secondo"); return false; }
   outWrite(d, on);
+  azionePubblica(AZ_USCITA, d.name, on ? 1 : 0);
   vlog("IO: %s %s", d.name, on ? "acceso" : "spento");
   return true;
 }
@@ -400,7 +411,7 @@ static const char* getIdx(int i, bool aux, int& val) {
   if (d.cls == IC_CNT) { val = ioCntRead(d); return nullptr; }    // impulsi
   if (d.cls == IC_LEDRGB) { val = d.on ? 1 : 0; return nullptr; } // acceso
   if (isOut(d.cls)) val = d.on ? 1 : 0;
-  else if (d.cls == IC_IN) { bool lv = drvGpioRead(d.gpio); val = ((d.flags & IOF_INV) ? !lv : lv) ? 1 : 0; }
+  else if (d.cls == IC_IN || d.cls == IC_WAKE) { bool lv = drvGpioRead(d.gpio); val = ((d.flags & IOF_INV) ? !lv : lv) ? 1 : 0; }
   else val = drvGpioAnalog(d.gpio);
   return nullptr;
 }
@@ -434,7 +445,7 @@ const char* ioClsName(uint8_t cls) { return CN[cls]; }
 const char* ioValueAt(int i, int& v) { return getIdx(i, false, v); }
 
 // pin consigliati, in ordine: prima quelli comodi del bordo, per ultimi quelli meno usati. Salta vietati, gia usati e quelli che l'utente ha segnato nell'inventario.
-int ioSuggest(uint8_t cls, int n, int* out) {
+int ioSuggest(uint8_t cls, int n, int* out, uint64_t soloQuesti) {
   static constexpr int8_t C[] = VOS_GPIO_SUGGEST;
   static constexpr int8_t CI[] = VOS_GPIO_SUGGEST_I2C;   // I2C: prima SDA e SCL (i pin di fabbrica di Wire)
   static_assert(sizeof(C) == sizeof(CI), "le due liste dei pin consigliati devono avere la stessa lunghezza");
@@ -449,6 +460,7 @@ int ioSuggest(uint8_t cls, int n, int* out) {
   int k = 0;
   for (size_t i = 0; i < sizeof(C) && k < n; i++) {
     int g = L[i];
+    if (g < 64 && !((soloQuesti >> g) & 1)) continue;                // la griglia del driver: solo i pin che il driver ammette su questa scheda
     if (gpioBlock(g, cls)) continue;
     if (cfg.pinNote[g].length()) continue;
     out[k++] = g;
@@ -456,27 +468,7 @@ int ioSuggest(uint8_t cls, int n, int* out) {
   return k;
 }
 
-// prove dalla pagina: impulso (si spegne da solo) e lampeggio (solo led e pin: il rele non si fa lampeggiare, si consuma)
-bool ioPulse(const char* name, uint32_t ms, int role, ErrBuf& err) {
-  int i = find(name);
-  if (i < 0) { err = tr("Periferica sconosciuta"); return false; }
-  if (ms < 100 || ms > 5000) { err = tr("Valori non validi"); return false; }
-  if (!isOut(g_io[i].cls)) { err = tr("Questa periferica non e un'uscita"); return false; }
-  if (!ioSet(name, 1, role, err)) return false;
-  g_io[i].offAt = drvMillis() + ms; if (!g_io[i].offAt) g_io[i].offAt = 1;
-  return true;
-}
-bool ioBlink(const char* name, uint32_t sec, int role, ErrBuf& err) {
-  int i = find(name);
-  if (i < 0) { err = tr("Periferica sconosciuta"); return false; }
-  if (g_io[i].cls == IC_RELE) { err = tr("Il rele non si fa lampeggiare"); return false; }
-  if (!isOut(g_io[i].cls)) { err = tr("Questa periferica non e un'uscita"); return false; }
-  if (role < ROLE_OPER) { err = tr("Il tuo ruolo non permette questo comando"); return false; }
-  if (sec < 1 || sec > 10) { err = tr("Valori non validi"); return false; }
-  IoDev& d = g_io[i]; d.offAt = 0;
-  d.blinkEnd = drvMillis() + sec * 1000UL; if (!d.blinkEnd) d.blinkEnd = 1; d.blinkNext = drvMillis();
-  return true;
-}
+IoDev* ioDevPerNome(const char* name) { int i = find(name); return i < 0 ? nullptr : &g_io[i]; }   // per vos_io_prove.cpp
 void ioTick() {                                    // da chiamare spesso (nel loop)
   ioCfgPendFlush();                                // avvisi dell'avvio: l'audit parte dopo ioInit
   IoLock L(0);                                     // se una modifica sta scrivendo, questo giro si salta

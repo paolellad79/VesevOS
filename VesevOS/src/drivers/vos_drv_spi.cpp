@@ -4,7 +4,6 @@
 #include "vos_drv_spi.h"
 #include <string.h>
 #include <driver/spi_master.h>
-#include <driver/gpio.h>
 #include "vos_drv_gpio.h"
 
 #if SOC_SPI_PERIPH_NUM > 2
@@ -21,10 +20,10 @@ static uint8_t g_rx[DRV_SPI_MAX] __attribute__((aligned(4)));
 void drvSpiEnd() {
   if (g_dev) { spi_bus_remove_device(g_dev); g_dev = nullptr; }
   if (g_bus) { spi_bus_free(HOST); g_bus = false; }
-  if (g_cs >= 0) { drvGpioMode(g_cs, DG_INPUT); gpio_reset_pin((gpio_num_t)g_cs); }
-  if (g_mosi >= 0) gpio_reset_pin((gpio_num_t)g_mosi);
-  if (g_miso >= 0) gpio_reset_pin((gpio_num_t)g_miso);
-  if (g_sck >= 0) gpio_reset_pin((gpio_num_t)g_sck);
+  if (g_cs >= 0) { drvGpioMode(g_cs, DG_INPUT); drvGpioRilascia(g_cs); }
+  drvGpioRilascia(g_mosi);
+  drvGpioRilascia(g_miso);
+  drvGpioRilascia(g_sck);
   g_cs = g_mosi = g_miso = g_sck = -1;
 }
 

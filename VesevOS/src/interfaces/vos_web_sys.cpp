@@ -3,12 +3,15 @@
 // VesevOS - vos_web_sys.cpp
 // Percorsi del server web: MQTT, autodiagnosi, ora/NTP, localizzazione. Aiuti e tipi condivisi: vos_web_int.h.
 #include "vos_web_int.h"
+#include "vos_web_pezzi.h"
 #include "../core/vos_ramwd.h"
 #include "../security/vos_auth.h"
 #include "../core/vos_cpupm.h"
 #include "../packages/vos_drvwidget.h"
 #include "../core/vos_clamp.h"
+#include "../core/vos_taratura.h"
 #include "../drivers/vos_drv_heap.h"
+#include "../drivers/vos_drv_dhcp.h"
 
 // statistiche per la pagina
 static esp_err_t statsReply(Res* s) {
@@ -43,20 +46,47 @@ static esp_err_t riavviaDopo(Res* s, const char* motivo) {
   return e;
 }
 
+// Fine del caricamento del recovery: controlla tutto e scrive (uguale per l'invio unico e per l'ultimo pezzo).
+static esp_err_t recEsito(Req* r, Res* s, int u) {
+  char from[16], to[16], w[64], sha[80]; ErrBuf e;
+  snprintf(w, sizeof w, "web %s %s", cfg.users[u].name.c_str(), IpText(ipOf(r)).s);
+  qparamTo(r, "sha", sha, sizeof sha);
+  if (!recUpFinish(sha, w, from, to, sizeof from, e)) return ko(s, e);
+  HeapBuf j(128);
+  j.add("{\"ok\":true,\"from\":\""); j.addJson(from, strlen(from));
+  j.add("\",\"to\":\""); j.addJson(to, strlen(to)); j.add("\"}");
+  return sendJson(s, j);
+}
+
+static bool recAccesso(Req* r, bool sec) {
+  if (!fwAllow(ipOf(r), false)) return false;
+  if (csrfBlocked(r)) return false;                                          // caricamento partito da un altro sito
+  int u = userOf(r);
+  if (u < 0 || cfg.users[u].role < ROLE_ADMIN) return false;
+  if (!sec && g_tlsUp && cfg.https) return false;
+  ramBusyTouch(60);                                                           // caricamento in corso: niente riavvio per RAM
+  return true;
+}
+
+// L'impronta SHA-256 del recovery e OBBLIGATORIA (decisione del 20/11/2026, esame di sicurezza S-02/S-04): 64 cifre esadecimali nell'indirizzo.
+static bool shaRecoveryOk(Req* r) {
+  char sha[80];
+  qparamTo(r, "sha", sha, sizeof sha);
+  size_t n = strlen(sha);
+  if (n != 64) return false;
+  for (size_t i = 0; i < n; i++) if (!isxdigit((unsigned char)sha[i])) return false;
+  return true;
+}
+
 static void routeRecoveryCarica(PsychicHttpServer* S, bool sec) {
   // aggiornamento del recovery: il file va in PSRAM, si controlla tutto e solo dopo si scrive; senza PSRAM si scrive a blocchi (vos_recupd). Accesso controllato anche durante l'invio.
   static ErrBuf s_recErr;
   PsychicUploadHandler* ru = new PsychicUploadHandler();
   ru->onUpload([sec](Req* r, const auto& filename, uint64_t index, uint8_t* data, size_t len, bool final) -> esp_err_t {
-    uint32_t ip = ipOf(r);
-    if (!fwAllow(ip, false)) return ESP_FAIL;
-    if (csrfBlocked(r)) return ESP_FAIL;                                       // caricamento partito da un altro sito
-    int u = userOf(r);
-    if (u < 0 || cfg.users[u].role < ROLE_ADMIN) return ESP_FAIL;
-    if (!sec && g_tlsUp && cfg.https) return ESP_FAIL;
-    ramBusyTouch(60);                                                           // caricamento in corso: niente riavvio per RAM
+    if (!recAccesso(r, sec)) return ESP_FAIL;
     if (index == 0) {
       s_recErr.clear();
+      if (!shaRecoveryOk(r)) { s_recErr = tr("L'impronta SHA-256 deve avere 64 cifre esadecimali"); return ESP_OK; }   // prima di toccare qualunque cosa
       if (r->contentLength() > drvRecoverySize() + 4096) { s_recErr = tr("File troppo grande per lo spazio del recovery"); return ESP_OK; }   // si capisce subito (es. il firmware)
       ErrBuf e; if (!recUpBegin(e)) { s_recErr = e.c_str(); return ESP_OK; }
     }
@@ -68,16 +98,47 @@ static void routeRecoveryCarica(PsychicHttpServer* S, bool sec) {
     int u = userOf(r);
     if (u < 0 || cfg.users[u].role < ROLE_ADMIN) { recUpAbort(); return sendJson(s, "{\"ok\":false,\"err\":\"non autorizzato\"}", 401); }
     if (!s_recErr.empty()) return ko(s, s_recErr);
-    char from[16], to[16], w[64], sha[80]; ErrBuf e;
-    snprintf(w, sizeof w, "web %s %s", cfg.users[u].name.c_str(), IpText(ipOf(r)).s);
-    qparamTo(r, "sha", sha, sizeof sha);
-    if (!recUpFinish(sha, w, from, to, sizeof from, e)) return ko(s, e);
-    HeapBuf j(128);
-    j.add("{\"ok\":true,\"from\":\""); j.addJson(from, strlen(from));
-    j.add("\",\"to\":\""); j.addJson(to, strlen(to)); j.add("\"}");
-    return sendJson(s, j);
+    return recEsito(r, s, u);
   });
   S->on("/api/recovery/up", HTTP_POST, ru);
+
+  // a pezzi (vedi vos_web_pezzi.h): ?t=<byte del file>&o=<byte gia inviati>&e=<1 se ultimo>&sha=<facoltativo>
+  static bool s_attivo = false, s_fuori = false, s_ultimo = false, s_troppo = false;
+  static uint32_t s_pos = 0;
+  PsychicUploadHandler* pz = new PsychicUploadHandler();
+  pz->onUpload([sec](Req* r, const auto& filename, uint64_t index, uint8_t* data, size_t len, bool final) -> esp_err_t {
+    (void)filename; (void)final;
+    if (!recAccesso(r, sec)) return ESP_FAIL;
+    if (index == 0) {
+      PezzoQ q = pezzoQuery(r);
+      s_ultimo = q.ultimo; s_fuori = false; s_troppo = q.troppo;
+      if (!q.troppo && q.off == 0) {
+        char t[12];
+        qparamTo(r, "t", t, sizeof t);
+        s_recErr.clear(); s_pos = 0;
+        if (s_attivo) recUpAbort();
+        s_attivo = false;
+        if (!shaRecoveryOk(r)) s_recErr = tr("L'impronta SHA-256 deve avere 64 cifre esadecimali");   // prima di toccare qualunque cosa
+        else if ((uint32_t)strtoul(t, nullptr, 10) > drvRecoverySize() + 4096) s_recErr = tr("File troppo grande per lo spazio del recovery");
+        else { ErrBuf e; if (recUpBegin(e)) s_attivo = true; else s_recErr = e.c_str(); }
+      } else if (!q.troppo && (!s_attivo || q.off != s_pos)) s_fuori = true;       // non e il pezzo che si aspetta la scheda
+    }
+    if (s_fuori || s_troppo || !s_attivo || !s_recErr.empty()) return ESP_OK;       // da scartare, o errore gia deciso
+    recUpAdd(data, len);
+    s_pos += (uint32_t)len;
+    return ESP_OK;
+  });
+  pz->onRequest([](Req* r, Res* s) -> esp_err_t {
+    int u = userOf(r);
+    if (u < 0 || cfg.users[u].role < ROLE_ADMIN) { recUpAbort(); s_attivo = false; return sendJson(s, "{\"ok\":false,\"err\":\"non autorizzato\"}", 401); }
+    if (s_fuori) return pezzoFuoriPosto(s, s_attivo ? s_pos : 0);
+    if (s_troppo) return ko(s, tr("Pezzo del file troppo grande"), "toobig");
+    if (!s_recErr.empty()) { if (s_attivo) recUpAbort(); s_attivo = false; return ko(s, s_recErr); }
+    if (!s_ultimo) return pezzoAccettato(s, s_pos);
+    s_attivo = false;                                                               // recUpFinish chiude e libera
+    return recEsito(r, s, u);
+  });
+  S->on("/api/recovery/pezzo", HTTP_POST, pz);
 }
 
 void routesSys(PsychicHttpServer* S, bool sec) {
@@ -163,7 +224,9 @@ void routesSys(PsychicHttpServer* S, bool sec) {
     char w[96]; whoTo(c, w, sizeof w);
     vlog("SISTEMA: riavvio nel recovery dalla pagina (%s)", w);
     char ip[16], host[96]; netIpTo(ip, sizeof ip);
-    if (cfg.domain.length()) snprintf(host, sizeof host, "%.32s.%.60s", cfg.hostname.c_str(), cfg.domain.c_str());   // come targetHost del redirect (nome 32 + dominio 60 stanno nei 96)
+    char routerDomain[64];                           // dominio dato dal router (DHCP): si usa solo se non ne hai impostato uno (come targetHost del redirect)
+    if (cfg.domain.length()) snprintf(host, sizeof host, "%.32s.%.60s", cfg.hostname.c_str(), cfg.domain.c_str());   // nome 32 + dominio 60 stanno nei 96
+    else if (drvDhcpDomain(routerDomain, sizeof routerDomain)) snprintf(host, sizeof host, "%.32s.%.60s", cfg.hostname.c_str(), routerDomain);
     else snprintf(host, sizeof host, "%.32s", cfg.hostname.c_str());
     HeapBuf body(192);
     body.add("{\"ok\":true");
@@ -299,9 +362,27 @@ void routesSys(PsychicHttpServer* S, bool sec) {
       setenv("TZ", cfg.tz.c_str(), 1); tzset();
     }
     if (has(r, "ntp")) { std::string_view srv = Pt(r, "ntp"); if (srv.size() >= 1 && srv.size() <= 60) cfg.ntpServer = srv; }
-    if (has(r, "datefmt")) cfg.dateFmt = vosClamp((int)Pint(r, "datefmt"), 0, 2);
+    {                                                                   // formati di data e ora: prima si controlla tutto, poi si salva
+      int dc = has(r, "datefmt") ? vosClamp((int)Pint(r, "datefmt"), 0, 3) : (int)cfg.dateFmt;
+      int dl = has(r, "datalungafmt") ? vosClamp((int)Pint(r, "datalungafmt"), 0, 2) : (int)cfg.dataLungaFmt;
+      int ol = has(r, "oralungafmt") ? vosClamp((int)Pint(r, "oralungafmt"), 0, 1) : (int)cfg.oraLungaFmt;
+      const char* tc = has(r, "datacortatesto") ? Pc(r, "datacortatesto") : cfg.dataCortaTesto.c_str();
+      const char* tl = has(r, "datalungatesto") ? Pc(r, "datalungatesto") : cfg.dataLungaTesto.c_str();
+      const char* to = has(r, "oralungatesto") ? Pc(r, "oralungatesto") : cfg.oraLungaTesto.c_str();
+      ErrBuf fe;
+      if (!timeFmtControlla(dc, tc, dl, tl, ol, to, fe)) return ko(s, fe);
+      cfg.dateFmt = dc;
+      cfg.dataLungaFmt = dl;
+      cfg.oraLungaFmt = ol;
+      if (has(r, "datacortatesto")) cfg.dataCortaTesto = tc;
+      if (has(r, "datalungatesto")) cfg.dataLungaTesto = tl;
+      if (has(r, "oralungatesto")) cfg.oraLungaTesto = to;
+      if (has(r, "oralungasec")) cfg.oraLungaSec = Pis(r, "oralungasec", "1");
+    }
     if (has(r, "timefmt")) cfg.timeFmt = vosClamp((int)Pint(r, "timefmt"), 0, 1);
     if (has(r, "tempunit")) cfg.tempUnit = vosClamp((int)Pint(r, "tempunit"), 0, 1);
+    if (has(r, "tarsoc")) { int d = (int)Pint(r, "tarsoc"); if (d < -TEMP_TAR_MAX || d > TEMP_TAR_MAX) return ko(s, tr("Taratura della temperatura: da -20,0 a +20,0 gradi")); cfg.tempTarSoc = (int16_t)d; }
+    if (has(r, "tarext")) { int d = (int)Pint(r, "tarext"); if (d < -TEMP_TAR_MAX || d > TEMP_TAR_MAX) return ko(s, tr("Taratura della temperatura: da -20,0 a +20,0 gradi")); cfg.tempTarExt = (int16_t)d; }
     if (has(r, "weekstart")) cfg.weekStart = Pis(r, "weekstart", "1") ? 1 : 0;
     if (has(r, "decsep")) cfg.decSep = Pis(r, "decsep", "1") ? 1 : 0;
     if (has(r, "antenna")) { uint8_t a = Pis(r, "antenna", "1") ? 1 : 0; if (a != cfg.antExt) radio = true; cfg.antExt = a; }

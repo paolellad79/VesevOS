@@ -10,6 +10,7 @@
 #include "vos_web_int.h"
 #include "vos_web_csrf.h"
 #include "vos_http_redirect_srv.h"
+#include "vos_redirect_plan.h"
 #include "../core/vos_ram.h"
 #include "../core/vos_risorse_tocco.h"
 #include "../core/vos_primo_avvio.h"
@@ -165,6 +166,7 @@ bool settingsJson(HeapBuf& j) {
   j.add("{\"hostname\":\""); j.addJson(cfg.hostname.c_str(), cfg.hostname.length());
   j.add("\"");
   jsonStr(j, "domain", cfg.domain.c_str());
+  jsonStr(j, "messaggioLogin", cfg.messaggioLogin.c_str());
   jsonBool(j, "serialAuth", cfg.serialAuth);
   jsonStr(j, "staSsid", cfg.staSsid.c_str());
   jsonBool(j, "staDhcp", cfg.staDhcp);
@@ -174,6 +176,8 @@ bool settingsJson(HeapBuf& j) {
   jsonNum(j, "ledMode", cfg.ledMode); jsonNum(j, "ledColor", cfg.ledColor); jsonNum(j, "ledBrightness", cfg.ledBrightness);
   for (int i = 0; i < LEDSRC_COUNT; i++) { char key[12]; snprintf(key, sizeof key, "ledSrc%d", i); jsonNum(j, key, cfg.ledSrcColor[i]); }
   jsonNum(j, "ledCpuThr", cfg.ledCpuThr);
+  for (int i = 0; i < 3; i++) { char key[12]; snprintf(key, sizeof key, "ledGain%d", i); jsonNum(j, key, cfg.ledGain[i]); }
+  for (int i = 0; i < LED_STATI; i++) { char key[12]; snprintf(key, sizeof key, "ledSt%d", i); jsonNum(j, key, cfg.ledStato[i]); }
   j.add(",\"alias\":");                                  // nome vero -> {a: alias, d: descrizione} di ogni periferica (decisione B del 13/11/2026)
   aliasJson(j);
   return j.add('}') && !j.oom() && !j.over();
@@ -220,6 +224,27 @@ uint32_t webIdleSec() { return (drvMillis() - g_lastReq) / 1000; }
 // Il browser li riapre da solo quando serve. Chiamata dal monitor ogni 10 s.
 static void webRegistraRotteRestanti();
 
+// Sonno: il server HTTPS (senza modalita di sonno) si ferma prima della radio; la checklist del sonno (vos_power.cpp) lo riaccende a rete pronta.
+static bool g_webSospeso = false;
+static void startHttpRedirect(uint16_t port);
+void webSospendi() {
+  if (g_runHttpPort) {
+    httpRedirectSrvStop();
+    g_runHttpPort = 0;
+  }
+  if (!g_https || !g_tlsUp) return;
+  g_https->stop();
+  g_tlsUp = false;
+  g_webSospeso = true;
+  vlog("WEB: HTTPS fermato per il sonno");
+}
+void webRiprendi() {
+  if (!g_webSospeso || !g_https) return;
+  g_tlsUp = g_https->start() == ESP_OK;
+  g_webSospeso = false;
+  vlog("WEB: HTTPS %s dopo il sonno", g_tlsUp ? "ripartito" : "NON ripartito");
+  if (g_tlsUp && cfg.httpOn && !g_runHttpPort) startHttpRedirect(cfg.httpPort);
+}
 void webTrimIdle() {
   webRegistraRotteRestanti();                        // riprova se la RAM non bastava (solo dopo che il task di rete ha dato il via)
   if (!g_https || !g_tlsUp || !g_https->server) return;
@@ -232,7 +257,21 @@ void webTrimIdle() {
 
 // ---------------- tutti i percorsi (registrati su entrambi i server) ----------------
 static void routesCore(PsychicHttpServer* S, bool sec) {
-  add(S, sec, "/", HTTP_GET, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendPage(s); });   // la pagina da /usr/share/vesevos/html.vrs, o quella di emergenza se il file manca o non e valido (vos_web_pagina.cpp)
+  add(S, sec, "/manifest.webmanifest", HTTP_GET, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendManifest(s); });   // app web (vos_web_pwa.cpp)
+  add(S, sec, "/icon-192.png", HTTP_GET, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendIcona(s, 192); });
+  add(S, sec, "/icon-512.png", HTTP_GET, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendIcona(s, 512); });
+  add(S, sec, "/apple-touch-icon.png", HTTP_GET, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendIcona(s, 180); });
+  add(S, sec, "/tema.css", HTTP_GET, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t { return sendTema(s); });   // tema della pagina, anche prima dell'accesso
+  add(S, sec, "/", HTTP_GET, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
+    char url[160];
+    // Aperta con l'IPv4 e con il nome mDNS acceso: si va al nome. "/?ip" lascia l'indirizzo com'e (se il nome non si risolve sul tuo computer).
+    if (!has(r, "ip") && r->hasHeader("Host") && redirectDaIp(c.ip, r->headerCStr("Host"), url, sizeof url) == 307) {
+      s->setCode(307);
+      s->addHeader("Cache-Control", "no-store");
+      return s->redirect(url);
+    }
+    return sendPage(s);
+  });   // la pagina da /usr/share/vesevos/html.vrs, o quella di emergenza se il file manca o non e valido (vos_web_pagina.cpp)
 
   // dati comuni (paesi, mappa, regole radio, elenco librerie): pubblici, uguali per tutti, conservati dal browser
   add(S, sec, "/api/common", HTTP_GET, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
@@ -243,10 +282,13 @@ static void routesCore(PsychicHttpServer* S, bool sec) {
 
   add(S, sec, "/api/auth", HTTP_GET, L_PUB, [](Req* r, Res* s, Ctx& c) -> esp_err_t {
     int u = userOf(r);
-    HeapBuf j(2048);
+    HeapBuf j(2560);
     j.add("{\"set\":"); j.add(authIsSet() ? "true" : "false");
     jsonBool(j, "setup", cfg.setupDone);
     jsonStr(j, "lang", cfg.lang.c_str());
+    jsonStr(j, "ml", cfg.messaggioLogin.c_str());                     // messaggio della pagina di accesso (pubblico, testo semplice)
+    jsonStr(j, "nm", cfg.hostname.c_str());                           // variabili del messaggio ({nome}, {scheda}): solo cose gia pubbliche
+    jsonStr(j, "bd", VOS_BOARD);
     jsonBool(j, "secure", c.secure);
     jsonBool(j, "https", g_tlsUp && cfg.https);
     jsonStr(j, "fp", g_tlsUp ? tlsFingerprint() : "");
@@ -255,8 +297,8 @@ static void routesCore(PsychicHttpServer* S, bool sec) {
     jsonBool(j, "elf", true);                                         // il firmware ha i moduli ELF: la pagina mostra la scheda (assente = non c'e)
 #endif
     char pk[160];
-    snprintf(pk, sizeof pk, ",\"pk\":{\"ble\":%d,\"mqtt\":%d,\"mesh\":%d,\"mfa\":%d,\"stat\":%d,\"wps\":%d,\"script\":%d,\"app\":%d},\"hp\":%u,\"sp\":%u",
-             VOS_WITH_BLE, VOS_WITH_MQTT, VOS_WITH_MESH, VOS_WITH_MFA, VOS_WITH_STATS, VOS_WITH_WPS, VOS_WITH_FUNZIONI, VOS_WITH_FUNZIONI, (unsigned)g_runHttpPort, (unsigned)g_runHttpsPort);
+    snprintf(pk, sizeof pk, ",\"pk\":{\"ble\":%d,\"mqtt\":%d,\"mesh\":%d,\"mfa\":%d,\"stat\":%d,\"wps\":%d,\"script\":%d,\"app\":%d,\"rec\":%d},\"hp\":%u,\"sp\":%u",
+             VOS_WITH_BLE, VOS_WITH_MQTT, VOS_WITH_MESH, VOS_WITH_MFA, VOS_WITH_STATS, VOS_WITH_WPS, VOS_WITH_FUNZIONI, VOS_WITH_FUNZIONI, VOS_WITH_REC, (unsigned)g_runHttpPort, (unsigned)g_runHttpsPort);
     j.add(pk);
     timePubJson(j);                                                   // pezzo JSON gia pronto dall'ora (comincia con la virgola)
     if (!authIsSet()) { int a = authFirstAdmin(); jsonStr(j, "first", a >= 0 ? cfg.users[a].name.c_str() : "admin"); }
@@ -323,7 +365,11 @@ static void routes(PsychicHttpServer* S, bool sec) {
   routesApp(S, sec);
   routesUpd(S, sec);
   routesAgg(S, sec);
+#if VOS_WITH_REC
+  routesRec(S, sec);
+#endif
   routesEventi(S, sec);
+  routesCoproc(S, sec);
   if (rottaSi("/api/risorse/carica", HTTP_POST)) routeRisorse(S, sec);
 }
 

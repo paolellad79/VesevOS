@@ -5,6 +5,21 @@
 #include "vos_drv_nvs.h"
 #include <nvs.h>
 #include <nvs_flash.h>
+#include <esp_log.h>
+
+static const char* TAG = "nvs";
+static uint32_t g_errori = 0;
+
+// Esito di una scrittura: se e riuscita si fa il commit; ogni errore si conta e si scrive sulla console (prima si perdeva in silenzio).
+static bool esito(nvs_handle_t h, esp_err_t e, const char* k, const char* cosa) {
+  if (e == ESP_OK) e = nvs_commit(h);
+  if (e == ESP_OK) return true;
+  g_errori++;
+  ESP_LOGW(TAG, "%s della chiave \"%s\" non riuscita: %s", cosa, k ? k : "?", esp_err_to_name(e));
+  return false;
+}
+
+uint32_t DrvNvs::errori() { return g_errori; }
 
 bool DrvNvs::begin(const char* ns, bool readOnly) {
   if (open_) return false;
@@ -47,21 +62,21 @@ size_t DrvNvs::getString(const char* k, char* out, size_t cap) {
   return len - 1;
 }
 
-void DrvNvs::putUInt(const char* k, uint32_t v) {
-  if (!open_ || ro_) return;
-  if (nvs_set_u32((nvs_handle_t)h_, k, v) == ESP_OK) nvs_commit((nvs_handle_t)h_);
+bool DrvNvs::putUInt(const char* k, uint32_t v) {
+  if (!open_ || ro_) return false;
+  return esito((nvs_handle_t)h_, nvs_set_u32((nvs_handle_t)h_, k, v), k, "scrittura");
 }
 
-void DrvNvs::putUChar(const char* k, uint8_t v) {
-  if (!open_ || ro_) return;
-  if (nvs_set_u8((nvs_handle_t)h_, k, v) == ESP_OK) nvs_commit((nvs_handle_t)h_);
+bool DrvNvs::putUChar(const char* k, uint8_t v) {
+  if (!open_ || ro_) return false;
+  return esito((nvs_handle_t)h_, nvs_set_u8((nvs_handle_t)h_, k, v), k, "scrittura");
 }
 
-void DrvNvs::putBool(const char* k, bool v) { putUChar(k, v ? 1 : 0); }
+bool DrvNvs::putBool(const char* k, bool v) { return putUChar(k, v ? 1 : 0); }
 
-void DrvNvs::putString(const char* k, const char* v) {
-  if (!open_ || ro_ || !v) return;
-  if (nvs_set_str((nvs_handle_t)h_, k, v) == ESP_OK) nvs_commit((nvs_handle_t)h_);
+bool DrvNvs::putString(const char* k, const char* v) {
+  if (!open_ || ro_ || !v) return false;
+  return esito((nvs_handle_t)h_, nvs_set_str((nvs_handle_t)h_, k, v), k, "scrittura");
 }
 
 bool DrvNvs::getBlob(const char* k, void* out, size_t n) {
@@ -71,9 +86,9 @@ bool DrvNvs::getBlob(const char* k, void* out, size_t n) {
   return nvs_get_blob((nvs_handle_t)h_, k, out, &len) == ESP_OK;
 }
 
-void DrvNvs::putBlob(const char* k, const void* v, size_t n) {
-  if (!open_ || ro_ || !v) return;
-  if (nvs_set_blob((nvs_handle_t)h_, k, v, n) == ESP_OK) nvs_commit((nvs_handle_t)h_);
+bool DrvNvs::putBlob(const char* k, const void* v, size_t n) {
+  if (!open_ || ro_ || !v) return false;
+  return esito((nvs_handle_t)h_, nvs_set_blob((nvs_handle_t)h_, k, v, n), k, "scrittura");
 }
 
 bool DrvNvs::has(const char* k) {
@@ -90,4 +105,14 @@ void DrvNvs::remove(const char* k) {
 void DrvNvs::clear() {
   if (!open_ || ro_) return;
   if (nvs_erase_all((nvs_handle_t)h_) == ESP_OK) nvs_commit((nvs_handle_t)h_);
+}
+
+bool drvNvsAvvia(int& motivoCancellazione) {
+  motivoCancellazione = 0;
+  esp_err_t e = nvs_flash_init();
+  if (e == ESP_ERR_NVS_NO_FREE_PAGES || e == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+    motivoCancellazione = (int)e;
+    if (nvs_flash_erase() == ESP_OK) e = nvs_flash_init();
+  }
+  return e == ESP_OK;
 }

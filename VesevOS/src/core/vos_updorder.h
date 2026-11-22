@@ -6,7 +6,7 @@
 // meccanismo di "recovery now") e il recovery lo esegue. Nessuna password passa al recovery. Il riavvio lo fa il chiamante.
 //   Modo 1: il recovery scarica da un indirizzo HTTPS e controlla lunghezza e SHA-256 (senza pagina e senza login).
 //   Modo 3: il recovery legge dalla microSD il file gia scaricato da VesevOS, senza rete.
-//   Modo 2: il recovery apre la sua pagina e accetta UN caricamento senza login, con un gettone casuale (16 byte) legato all'IP.
+//   Modo 2: il recovery apre la sua pagina e accetta UN caricamento senza login, con un gettone casuale (16 byte) legato all'IP (per un client IPv6, che ha solo un indirizzo finto, senza legame: cip = 0).
 // All'avvio dopo l'aggiornamento VesevOS legge l'esito scritto dal recovery, lo mette nel registro e nell'audit, e lo cancella.
 #pragma once
 #include "vos_errbuf.h"

@@ -11,6 +11,7 @@
 #include "vos_io.h"
 #include "../core/vos_i18n.h"
 #include "../core/vos_log.h"
+#include "../core/vos_azioni.h"
 #include "../drivers/vos_drv_sd.h"
 
 static const int SD_TEST_BYTES = 4096;     // dimensione del file della prova
@@ -113,6 +114,7 @@ static bool mountCore(char* err, size_t en) {
     g_autoLogged = false;
     mounted = true;
     vlog("SD: montata, %u MB", (unsigned)(drvSdCardBytes() / (1024ULL * 1024ULL)));
+    azionePubblica(AZ_SD, "sd", 1);
   }
 
   __sync_lock_release(&g_busy);
@@ -161,6 +163,7 @@ bool sdUnmount(char* err, size_t en) {
 
   if (drvSdUp()) {
     vlog("SD: smontata");
+    azionePubblica(AZ_SD, "sd", 0);
   }
 
   drvSdEnd();
@@ -200,6 +203,7 @@ bool sdFormat(char* err, size_t en) {
 
   if (r == DSFM_OK) {
     vlog("SD: formattata FAT32, %u MB", (unsigned)(drvSdCardBytes() / (1024ULL * 1024ULL)));
+    azionePubblica(AZ_SD, "sd", 2);
     return true;
   }
 

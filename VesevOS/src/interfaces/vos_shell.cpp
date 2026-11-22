@@ -5,6 +5,7 @@
 // le parole sono Word (vos_shell_line.h), il resto della riga un puntatore. La guida da seriale e in vos_shell_wiz.cpp.
 #include "vos_shell.h"
 #include "vos_shell_int.h"
+#include "../core/vos_azioni.h"
 #include "vos_shell_ask.h"
 #include "vos_shell_login.h"
 #include "vos_shell_sess.h"
@@ -34,6 +35,7 @@ void shellExec(const char* lineIn, OutSink& o, int role) { shellExecSess(lineIn,
 
 void shellExecSess(const char* lineIn, OutSink& o, int role, uint32_t sess) {
   if (!lineIn) return;
+  AzioneDa da(AO_SHELL, true);              // origine "shell", salvo che la richiesta arrivi dalla pagina o da una regola
   while (isspace((unsigned char)*lineIn)) lineIn++;
   size_t n = strlen(lineIn);
   while (n && isspace((unsigned char)lineIn[n - 1])) n--;
@@ -166,7 +168,7 @@ void shellWelcome(OutSink& o, bool full) {
     char ip[16]; netIpTo(ip, sizeof ip);
     if (netState() == NET_CLIENT_OK) wLine(o, trf("Wi-Fi casa: %s  %s  %d dBm", drvWifiSsid().s, ip, (int)drvWifiRssi()).c_str());
     else wLine(o, trf("Hotspot: %s  %s", cfg.apSsid.c_str(), ip).c_str());
-    char now[32]; timeNowFmt(now, sizeof now);
+    char now[TIME_FMT_MAX]; timeNowFmt(now, sizeof now);
     wLine(o, trf("Paese: %s   Ora: %s", cfg.country.length() ? cfg.country.c_str() : "--", now).c_str());
     int red = auditCount(AUD_RED), yel = auditCount(AUD_YELLOW);
     wLine(o, (red || yel) ? trf("Allarmi: %d rossi, %d gialli -> scrivi audit", red, yel).c_str() : tr("Allarmi: nessuno"));

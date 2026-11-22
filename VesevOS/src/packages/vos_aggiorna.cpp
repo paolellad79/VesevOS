@@ -96,7 +96,7 @@ Esito leggiUltima(AggDisponibile& d) {
   if (e == HTTPS_E_MEMORIA) esito = ESITO_RAM;
   else if (e == HTTPS_E_TROPPO) esito = ESITO_DATI;
   else if (e != HTTPS_OK) esito = ESITO_COLLEGAMENTO;
-  else if (!aggLeggiUltima(buf, n, d)) esito = ESITO_DATI;
+  else if (!aggLeggiUltima(buf, n, d, VOS_CPU_SIGLA)) esito = ESITO_DATI;
   if (esito != ESITO_OK) vlog("AGGIORNAMENTI: elenco non letto (rete %d, HTTP %d)", (int)e, stato);
   free(buf);
   return esito;

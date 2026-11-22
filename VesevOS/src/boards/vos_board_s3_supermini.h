@@ -7,6 +7,7 @@
 
 #define VOS_BOARD         "ESP32-S3 SuperMini"   // nome mostrato (tabella dei piedini nella pagina)
 #define VOS_CHIP          "ESP32-S3"             // nome del chip
+#define VOS_CPU_SIGLA     "S3"                   // sigla nei nomi dei file e in aggiorna/latest.json (blocco "schede")
 #define VOS_ADDR2LINE     "xtensa-esp32s3-elf-addr2line"   // programma che trasforma gli indirizzi di un crash in file e riga
 
 // ---- memoria ----
@@ -100,6 +101,11 @@
 // ---- Contatore di impulsi dell'utente (package VOS_WITH_CONTATORE): il chip ha PCNT (4 unita), codice ~8-9 KB stimati.
 // ACCESO (decisione dell'utente 13/11/2026: "Aggiungi il contatore"): dopo la 1.8.22 il margine di app0 e 143.248 byte.
 #define VOS_BOARD_CONTATORE 1
+// Capacita del chip per il registratore di dati (solo dichiarazioni: il sonno profondo arriva dopo). S3: ULP, RTC 8 KB.
+#define VOS_HAS_ULP          1   // coprocessore ULP (solo S3)
+#define VOS_HAS_LP_CPU       0   // CPU a basso consumo (solo C6)
+#define VOS_HAS_PCNT         1   // contatore di impulsi (PCNT)
+#define VOS_RTC_MEM_BYTES    8192   // memoria che resta accesa nel sonno profondo
 // ---- LED a colori WS2812 a mano (classe "led_rgb", package VOS_WITH_LED_RGB_A_MANO): l'S3 ha 4 canali RMT di trasmissione, 1 e del LED di bordo (SOC_RMT_TX_CANDIDATES_PER_GROUP, soc_caps.h IDF 5.5.5) ----
 #define VOS_BOARD_LED_RGB_MANO 1
 
@@ -173,3 +179,4 @@ static_assert(VOS_ADC_FIRST <= VOS_ADC_LAST && VOS_GPIO_EXISTS(VOS_ADC_FIRST) &&
 static_assert(VOS_GPIO_EXISTS(VOS_SD_DEF_CS) && VOS_GPIO_EXISTS(VOS_SD_DEF_MOSI) && VOS_GPIO_EXISTS(VOS_SD_DEF_SCK) && VOS_GPIO_EXISTS(VOS_SD_DEF_MISO), "microSD: pin inesistenti");
 static_assert(VOS_SD_DEF_CS != VOS_SD_DEF_MOSI && VOS_SD_DEF_CS != VOS_SD_DEF_SCK && VOS_SD_DEF_CS != VOS_SD_DEF_MISO && VOS_SD_DEF_MOSI != VOS_SD_DEF_SCK && VOS_SD_DEF_MOSI != VOS_SD_DEF_MISO && VOS_SD_DEF_SCK != VOS_SD_DEF_MISO, "microSD: i quattro pin devono essere diversi");
 static_assert(!VOS_SD_RESERVED(VOS_SD_DEF_CS) && !VOS_SD_RESERVED(VOS_SD_DEF_MOSI) && !VOS_SD_RESERVED(VOS_SD_DEF_SCK) && !VOS_SD_RESERVED(VOS_SD_DEF_MISO), "microSD: pin riservati dal sistema");
+static_assert(VOS_RTC_MEM_BYTES >= 4096 && !(VOS_HAS_ULP && VOS_HAS_LP_CPU), "capacita del registratore: valori non coerenti");

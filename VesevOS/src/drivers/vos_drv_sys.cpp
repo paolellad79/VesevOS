@@ -9,6 +9,7 @@
 #include <esp_flash.h>
 #include <driver/temperature_sensor.h>
 #include <esp_app_desc.h>
+#include <esp_sleep.h>
 
 void drvSysRestart() { esp_restart(); }
 
@@ -60,4 +61,29 @@ float drvTempC() {
   float c = NAN;
   if (temperature_sensor_get_celsius(h, &c) != ESP_OK) return NAN;
   return c;
+}
+
+int drvWakeCause() {
+  switch (esp_sleep_get_wakeup_cause()) {
+    case ESP_SLEEP_WAKEUP_UNDEFINED:
+      return DRV_WAKE_NESSUNO;
+    case ESP_SLEEP_WAKEUP_TIMER:
+      return DRV_WAKE_TIMER;
+    case ESP_SLEEP_WAKEUP_GPIO:
+    case ESP_SLEEP_WAKEUP_EXT0:
+    case ESP_SLEEP_WAKEUP_EXT1:
+      return DRV_WAKE_GPIO;
+    case ESP_SLEEP_WAKEUP_TOUCHPAD:
+      return DRV_WAKE_TOCCO;
+    case ESP_SLEEP_WAKEUP_ULP:
+    case ESP_SLEEP_WAKEUP_COCPU:
+    case ESP_SLEEP_WAKEUP_COCPU_TRAP_TRIG:
+      return DRV_WAKE_COPROC;
+    case ESP_SLEEP_WAKEUP_UART:
+    case ESP_SLEEP_WAKEUP_UART1:
+    case ESP_SLEEP_WAKEUP_UART2:
+      return DRV_WAKE_SERIALE;
+    default:
+      return DRV_WAKE_ALTRO;
+  }
 }

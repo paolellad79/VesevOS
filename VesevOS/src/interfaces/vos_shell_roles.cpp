@@ -67,11 +67,14 @@ const RoleRule kRoles[] = {
   {"wd", "", OPE}, {"wd", "status", OPE}, {"wd", "*", ADM},
   {"log", "clear", ADM}, {"log", "level", ADM}, {"log", "*", OPE},
   {"reboots", "clear", ADM}, {"reboots", "*", OPE},
+#if VOS_WITH_REC
+  {"rec", "", OPE}, {"rec", "status", OPE}, {"rec", "azioni", OPE}, {"rec", "*", ADM},                 // lo stato lo vede l'Operatore; accendere, cambiare e cancellare e dell'Admin
+#endif
   {"mqtt", "", OPE}, {"mqtt", "status", OPE}, {"mqtt", "pub", OPE}, {"mqtt", "*", ADM},
   {"mesh", "", OPE}, {"mesh", "status", OPE}, {"mesh", "send", OPE}, {"mesh", "cmd", OPE}, {"mesh", "*", ADM},
   {"dev", "", OPE}, {"dev", "list", OPE}, {"dev", "status", OPE}, {"dev", "act", OPE}, {"dev", "*", ADM},   // dev act controlla poi il ruolo di ogni periferica
   // --- solo Admin (elenco per chiarezza: lo sarebbero anche senza riga) ---
-  {"suspend", "*", ADM}, {"sleep", "*", ADM}, {"poweroff", "*", ADM},      // sonno profondo / spegnimento
+  {"suspend", "*", ADM}, {"sleep", "*", ADM}, {"poweroff", "*", ADM}, {"standby", "*", ADM},      // sonno profondo / spegnimento
   {"ping", "*", ADM},                                                      // solo Admin: genera traffico di rete verso indirizzi scelti dall'utente (rischio di sondare/inondare); con limiti di conteggio, intervallo e durata
   {"unzip", "*", ADM}, {"zip", "*", ADM}, {"tar", "*", ADM},   // solo Admin come i comandi sui file: scrivono e tolgono file e usano tempo di CPU (tetti in vos_shell_arch.h)
   {"run", "*", ADM}, {"which", "*", ADM},                                  // avviano e cercano programmi (.vsb, .vab): stessi permessi di "script run" e "app start"; il lancio diretto del solo nome passa da qui con ADM

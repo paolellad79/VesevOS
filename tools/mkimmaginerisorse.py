@@ -37,8 +37,8 @@ BLOCCHI_PARTIZIONE = 160            # spiffs 0xA0000 / 4096 (idf/partitions.csv)
 MARGINE_BLOCCHI = 8                 # blocchi liberi lasciati nell'immagine corta (servono a lfs_fs_grow per aggiornare il superblocco)
 ELENCO = 'SHA256SUMS'
 RIGA_OK = re.compile(r'^([0-9a-f]{64})  ([a-z0-9._-]{1,63})$')
-FILE_ATTESI = ['comuni.json.gz', 'html.vrs', 'licenza-apache2.txt.gz', 'licenza-bsd3.txt.gz',
-               'licenza-mit.txt.gz', 'manuale.txt', 'radio.txt']
+FILE_ATTESI = ['comuni.vgz', 'html.vrs', 'licenza-apache2.vgz', 'licenza-bsd3.vgz',
+               'licenza-mit.vgz', 'manuale.txt', 'radio.txt']
 
 
 def errore(testo):

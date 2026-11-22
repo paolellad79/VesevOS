@@ -11,6 +11,9 @@
 #   $ <esempio>        esempio di comando (non si traduce)
 # Dimensione di una voce = byte UTF-8 delle righe di descrizione unite da un a-capo (gli esempi non contano).
 import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from versioni_risorse import firmware_minimo
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SORGENTE = os.path.join(ROOT, 'tools', 'data', 'manuale_src.txt')
@@ -54,7 +57,8 @@ def righe_brevi(voci):
 def testo_manuale(voci, versione):
     """Contenuto del file manuale.txt: voci brevi con le loro righe, voci lunghe solo con '>' (rimando) e gli esempi."""
     out = ['# VesevOS: manuale dei comandi (generato da tools/mkrisorse.py, non modificare a mano)',
-           '# versione=%s' % versione]
+           '# versione=%s' % versione,
+           '# dipende=firmware>=%s' % firmware_minimo()]
     for v in voci:
         out.append('@' + v['nome'])
         if lunga(v):

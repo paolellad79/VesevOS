@@ -89,7 +89,7 @@ void secRegion(HeapBuf& h) {
 }
 
 void secTime(HeapBuf& h) {
-  char now[32];
+  char now[TIME_FMT_MAX];
   timeNowFmt(now, sizeof now);
   repHead(h, TRK("Ora e fuso"));
   repRow(h, TRK("Ora"), now);

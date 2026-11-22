@@ -48,6 +48,7 @@
    id="w_mask">
   <label for="w_gw">Gateway</label><input id="w_gw"><label for="w_d1">DNS 1</label><input
    id="w_d1"><label for="w_d2">DNS 2</label><input id="w_d2">
+  <label for="w_dom">Dominio della rete</label><input id="w_dom" readonly>
   <div id="ipmac" style="margin:6px 0 10px"></div>
   <button class="btn adm" id="ipsave" onclick="saveWifi()">Salva e collega</button>
   <div id="wm2" class="msg"></div></div>
@@ -82,6 +83,9 @@
   <label for="s_host">Nome host</label><input id="s_host" maxlength="32">
   <label for="s_dom">Dominio DNS (facoltativo, es. casa.lan)</label><input id="s_dom"
    maxlength="60">
+  <label for="s_ml">Messaggio nella pagina di accesso (facoltativo, massimo 200 caratteri, senza accenti). Variabili: {nome} {scheda} {data} {ora} {fuso}; {{ per una graffa</label><textarea
+   id="s_ml" rows="3" maxlength="200" spellcheck="false" oninput="mlAnteprima()"></textarea>
+  <div id="s_mlp" style="color:var(--mut);margin:-6px 0 8px;white-space:pre-line"></div>
   <div id="s_dn" style="color:var(--mut);margin:-6px 0 8px"></div>
   <div id="s_fq" style="color:var(--mut);margin-bottom:8px"></div>
   <button class="btn adm" onclick="saveSys()">Salva</button><div id="sm" class="msg"></div>

@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Domenico Paolella
 // VesevOS - vos_config_import.cpp
 #include "vos_config.h"
+#include "vos_taratura.h"
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,6 +12,7 @@
 #include "vos_log.h"
 #include "vos_audit.h"
 #include "vos_config_int.h"
+#include "vos_msglogin.h"
 #include "vos_func_ids.h"
 #include "vos_cpugov.h"
 #include "vos_alias.h"
@@ -19,7 +21,16 @@
 
 using std::string_view;
 
-#define CFG_VAL_MAX 192   // un valore piu lungo non e valido per nessuna chiave: l'opzione si ignora
+#define CFG_VAL_MAX 416   // un valore piu lungo non e valido per nessuna chiave: l'opzione si ignora (il messaggio di accesso: 200 caratteri, a capo da 2)
+
+// Formato di data o ora scritto a mano: solo se e valido (vedi vos_datefmt.h)
+static bool formatoDataOk(string_view v) {
+  if (v.size() > DF_TESTO_MAX) return false;
+  char b[DF_TESTO_MAX + 1];
+  memcpy(b, v.data(), v.size());
+  b[v.size()] = 0;
+  return dfControlla(b) == DF_OK;
+}
 
 static long clampL(long v, long lo, long hi) { return v < lo ? lo : (v > hi ? hi : v); }
 
@@ -63,10 +74,16 @@ static void applyKey(string_view sec, string_view k, string_view v) {
   if (sec == "system") {
     if (k == "hostname" && hostnameValid(v)) cfg.hostname = v;
     else if (k == "domain" && domainValid(v)) cfg.domain = v;
+    else if (k == "messaggiologin") {
+      char dec[2 * MSGLOGIN_MAX + 1], pul[MSGLOGIN_MAX + 1];
+      ErrBuf e;
+      msgLoginDecodifica(v, dec, sizeof dec);
+      if (msgLoginControlla(dec, pul, sizeof pul, e)) cfg.messaggioLogin = pul;
+    }
     else if (k == "stat") cfg.statOn = (v == "1");
     else if (k == "btn1" || k == "btn2" || k == "btn3") { int a = viewToLong(v); if (a >= 0 && a <= 3) cfg.btnAct[k[3] - '1'] = (uint8_t)a; }
     else if (k == "serbaud") { uint32_t b = (uint32_t)viewToLong(v); if (b >= 1200 && b <= 2000000) cfg.serBaud = b; }
-    else if (k == "sereol") cfg.serEol = (uint8_t)clampL(viewToLong(v), 0, 2);
+    else if (k == "sereol") cfg.serEol = (uint8_t)clampL(viewToLong(v), 0, 3);
     else if (k == "sertx") cfg.serTx = (uint8_t)clampL(viewToLong(v), 0, 200);
     else if (k == "serecho") cfg.serEcho = (v != "0");
     else if (k == "serin") cfg.serIn = (v != "0");
@@ -90,6 +107,30 @@ static void applyKey(string_view sec, string_view k, string_view v) {
   }
   else if (sec == "pins") {
     if (k.size() >= 2 && k[0] == 'n') { int g = viewToLong(k.substr(1)); if (g >= 0 && g < VOS_GPIO_COUNT && v.size() <= 24) cfg.pinNote[g] = v; }
+  }
+  else if (sec == "rec") {
+    if (k == "on") cfg.recOn = (v == "1");
+    else if (k == "sec") cfg.recSec = (uint16_t)clampL(viewToLong(v), 1, 86400);
+    else if (k == "where") cfg.recWhere = (uint8_t)clampL(viewToLong(v), 0, 1);
+    else if (k == "maxkb") cfg.recMaxKb = (uint16_t)clampL(viewToLong(v), 4, 65535);
+    else if (k == "nome") {
+      bool good = v.size() >= 1 && v.size() <= 24;      // solo lettere, numeri, _ e -: mai punti o barre
+      for (char ch : v) if (!(isalnum((unsigned char)ch) || ch == '_' || ch == '-')) good = false;
+      if (good) cfg.recNome = v;
+    }
+    else if (k == "limite") cfg.recLimite = (uint8_t)clampL(viewToLong(v), 0, 1);
+    else if (k == "azioni") cfg.recAzioni = (uint16_t)clampL(viewToLong(v), 0, 0x7FF);
+    else if (k == "evmax") cfg.recEvMax = (uint16_t)clampL(viewToLong(v), 0, 65535);
+    else if (k == "sect") cfg.recSecT = (uint16_t)clampL(viewToLong(v), 0, 86400);
+    else if (k == "secr") cfg.recSecR = (uint16_t)clampL(viewToLong(v), 0, 86400);
+    else if (k.size() == 4 && k.substr(0, 3) == "sec" && k[3] >= '1' && k[3] <= '4') cfg.recSecDev[k[3] - '1'] = (uint16_t)clampL(viewToLong(v), 0, 86400);
+    else if (k == "temp") cfg.recT = (v == "1");
+    else if (k == "ram") cfg.recR = (v == "1");
+    else if (k.size() == 4 && k.substr(0, 3) == "dev" && k[3] >= '1' && k[3] <= '4') {
+      bool good = v.size() <= 15;                      // solo lettere, numeri, _ e -
+      for (char ch : v) if (!(isalnum((unsigned char)ch) || ch == '_' || ch == '-')) good = false;
+      if (good) cfg.recDev[k[3] - '1'] = v;
+    }
   }
   else if (sec == "svc") {
     if (k == "apon") cfg.apOn = (v != "0");
@@ -172,6 +213,10 @@ static void applyKey(string_view sec, string_view k, string_view v) {
     else {
       for (int i = 0; i < LEDSRC_COUNT; i++)
         if (k == kLedSrcKey[i]) cfg.ledSrcColor[i] = (uint32_t)strtoul(v.data(), NULL, 10) & 0xFFFFFF;
+      for (int i = 0; i < 3; i++)
+        if (k == kLedGuadKey[i]) cfg.ledGain[i] = clampL(viewToLong(v), 0, 255);
+      for (int i = 0; i < LED_STATI; i++)
+        if (k == kLedStatoKey[i]) cfg.ledStato[i] = (uint32_t)strtoul(v.data(), NULL, 10) & 0xFFFFFF;
     }
   } else if (sec == "led1" || sec == "led2") {          // "led2" = nome vecchio, ancora letto
     if (sec == "led2") avvisoSezioneVecchia();
@@ -210,9 +255,17 @@ static void applyKey(string_view sec, string_view k, string_view v) {
     else if (k == "server2") cfg.ntpServer2.set(v);
     else if (k == "tz" && !v.empty()) cfg.tz.set(v);
     else if (k == "tzname" && !v.empty()) cfg.tzName.set(v);
-    else if (k == "datefmt") cfg.dateFmt = clampL(viewToLong(v), 0, 2);
+    else if (k == "datefmt") cfg.dateFmt = clampL(viewToLong(v), 0, 3);
+    else if (k == "datalungafmt") cfg.dataLungaFmt = clampL(viewToLong(v), 0, 2);
+    else if (k == "oralungafmt") cfg.oraLungaFmt = clampL(viewToLong(v), 0, 1);
+    else if (k == "oralungasec") cfg.oraLungaSec = (v == "1");
+    else if (k == "datacortatesto" && formatoDataOk(v)) cfg.dataCortaTesto.set(v);
+    else if (k == "datalungatesto" && formatoDataOk(v)) cfg.dataLungaTesto.set(v);
+    else if (k == "oralungatesto" && formatoDataOk(v)) cfg.oraLungaTesto.set(v);
     else if (k == "timefmt") cfg.timeFmt = clampL(viewToLong(v), 0, 1);
     else if (k == "tempunit") cfg.tempUnit = clampL(viewToLong(v), 0, 1);
+    else if (k == "tarsoc") cfg.tempTarSoc = (int16_t)clampL(viewToLong(v), -TEMP_TAR_MAX, TEMP_TAR_MAX);
+    else if (k == "tarext") cfg.tempTarExt = (int16_t)clampL(viewToLong(v), -TEMP_TAR_MAX, TEMP_TAR_MAX);
   } else if (sec == "aggiorna") {
     if (k == "modo") cfg.aggModo = clampL(viewToLong(v), 0, 2);
     else if (k == "freq") cfg.aggFreq = clampL(viewToLong(v), 0, 2);

@@ -24,6 +24,35 @@ static int defOf(const char* name) {
 }
 bool sysTaskRunning(const char* name) { return xTaskGetHandle(name) != NULL; }
 
+// Sonno: i task registrati si fermano prima e si riaccendono uno per volta dopo (la checklist sta in packages/vos_power.cpp).
+// Il watchdog resta acceso: un servizio fermato apposta non e un blocco (vedi vos_wd.cpp).
+static bool g_fermatoDalSonno[12];
+
+void sysTaskSospendiTutti() {
+  for (int i = g_ndefs - 1; i >= 0; i--) {
+    g_fermatoDalSonno[i] = false;
+    if (strcmp(g_defs[i].n, "wd") == 0) continue;
+    TaskHandle_t h = xTaskGetHandle(g_defs[i].n);
+    if (!h) continue;
+    g_fermatoDalSonno[i] = true;
+    if (g_defs[i].stop) g_defs[i].stop(); else vTaskDelete(h);
+    vlog("SONNO: task '%s' fermato", g_defs[i].n);
+  }
+  vTaskDelay(pdMS_TO_TICKS(100));
+}
+
+bool sysTaskRiprendiUno() {
+  for (int i = 0; i < g_ndefs; i++) {
+    if (!g_fermatoDalSonno[i]) continue;
+    g_fermatoDalSonno[i] = false;
+    if (!xTaskGetHandle(g_defs[i].n)) g_defs[i].f();
+    vlog("SONNO: task '%s' riacceso", g_defs[i].n);
+    for (int j = i + 1; j < g_ndefs; j++) if (g_fermatoDalSonno[j]) return true;
+    return false;
+  }
+  return false;
+}
+
 // Scrive un testo formattato (printf) nel HeapBuf: i pezzi di questo file sono tutti corti.
 static bool addFmt(HeapBuf& o, const char* fmt, ...) __attribute__((format(printf, 2, 3)));
 static bool addFmt(HeapBuf& o, const char* fmt, ...) {

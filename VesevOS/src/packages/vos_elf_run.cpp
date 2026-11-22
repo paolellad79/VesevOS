@@ -11,6 +11,7 @@
 #include <string.h>
 #include "vos_elf.h"
 #include "../core/vos_lock.h"
+#include "../core/vos_azioni.h"
 #include "../core/vos_i18n.h"
 #include "../drivers/vos_drv_task.h"
 #include "../drivers/vos_drv_time.h"
@@ -32,7 +33,9 @@ int           g_nUltimi = 0;                         // piu recente in cima (ind
 void taskModulo(void* arg) {
   vos_elf_proc_t* p = (vos_elf_proc_t*)arg;
   snprintf(p->mod.nome, sizeof p->mod.nome, "%s", p->nome);      // l'app si riconosce dal nome (cartella dei dati)
+  azioneOrigineImposta(AO_SCRIPT);                   // le azioni di un programma ELF portano l'origine "script"
   vos_elf_esegui(&p->mod, p->argc, p->argv, &p->ritorno);
+  azioneOrigineImposta(AO_SISTEMA);
   p->finito = true;
   vTaskSuspend(nullptr);                             // lo elimina il supervisore
 }
@@ -54,7 +57,8 @@ void ricordaFinito(const vos_elf_proc_t* p, int uscita) {
 // Ferma il task, scarica il modulo, libera il posto. Con il blocco preso.
 void raccogli(vos_elf_proc_t* p, int uscita) {
   bool forzato = !p->finito;
-  if (p->task) vTaskDelete((TaskHandle_t)p->task);
+  azionePubblica(AZ_PROGRAMMA, p->nome, (uscita == VOS_ELF_USCITA_SCADUTO || (uscita == VOS_ELF_USCITA_NORMALE && p->ritorno != 0)) ? 2 : 0);
+  if (p->task) { azioneOrigineLibera(p->task); vTaskDelete((TaskHandle_t)p->task); }
   if (forzato) drvDelayMs(50);                       // l'altro core puo essere ancora dentro il modulo per un attimo: non si scarica subito
   vos_elf_scarica_forza(&p->mod);
   free(p->img);
@@ -145,6 +149,7 @@ int vos_elf_run(const char* nome, uint8_t* img, size_t len, const vos_elf_run_pa
     return VOS_ELF_E_MEM;
   }
   if (id) *id = p->id;
+  azionePubblica(AZ_PROGRAMMA, nome, 1);
   return VOS_ELF_OK;                                 // il file e ora del processo
 }
 

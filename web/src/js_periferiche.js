@@ -246,7 +246,13 @@ function ioModOpen(n){
       esc(t(
         "La scheda propone questi pin liberi. Puoi cambiarli: il sistema controlla che siano ammessi e non gia usati."))+
       '</p>';
+    if(j.ok&&j.ok.length)b+='<p class="fhint">'+esc(t("Il driver ammette solo questi pin per questa scheda."))+'</p>';
     j.sig.forEach(function(s,i){
+      if(j.ok&&j.ok.length){                       // il driver ha la griglia dei pin: menu con tutti i pin ammessi e liberi
+        b+='<label for="io_pn'+i+'">'+esc(s)+'</label><select id="io_pn'+i+'">'+
+          j.ok.map(function(p){return '<option value="'+p+'"'+(p==j.sug[i]?' selected':'')+'>GPIO'+p+'</option>'}).join("")+'</select>';
+        return
+      }
       b+='<label for="io_pn'+i+'">'+esc(s)+'</label><input id="io_pn'+i+
         '" inputmode="numeric" maxlength="2" autocomplete="off" style="width:5em" value="'+
         (j.sug[i]!=null?j.sug[i]:"")+'">'

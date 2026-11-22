@@ -29,7 +29,7 @@ bool   fsProtected(const char* cleanPath);
 size_t fsFreeAt(const char* cleanPath);       // file di sistema nascosti e tutto cio che sta sotto /media (non e memoria interna)
 // Elenco {"ok":true,"path":"/","list":[{n,d,s}],"more":false,...} scritto in j (che ha il tetto FS_JSON_MAX).
 // Un percorso non valido o una cartella che manca danno un JSON {"ok":false,"err":...} e ritornano true: false solo se manca la memoria.
-bool   fsListBuild(std::string_view path, HeapBuf& j);
+bool   fsListBuild(std::string_view path, HeapBuf& j, bool nascondiSegreti = false);   // nascondiSegreti: tolgono anche chiavi, certificati e backup (per chi non e Admin)
 const char* fsRoomFor(std::string_view path);          // si puo creare questa voce? nullptr = si (anche se esiste gia: si sovrascrive); altrimenti il testo dell'errore
 bool   fsMkdir(std::string_view path, ErrBuf& err);
 bool   fsRemove(std::string_view path, ErrBuf& err);   // anche cartelle (con contenuto)

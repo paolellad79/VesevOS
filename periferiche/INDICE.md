@@ -12,4 +12,6 @@ Aggiornato per VesevOS 1.7.61 (classe i2c, driver BMP280, sezione `[pins]` con i
   SHA-256: de484a4d3f5d1c104737797464838ecc7a1d1f25ab93c4626b8a18877b3c8f50
 - bmp280-77.vdb: Sensore BMP280 (indirizzo 0x77) - stato: FUNZIONA dalla 1.7.61, da provare su un modulo vero - licenza CC0 - versione 2.0
   SHA-256: 451e00adf6a95bf4f7b79722b1c70d2d18c729db7140894cdd44791320dde496
+- ripresa.vdb: Tasto di ripresa (standby) - stato: DA PROVARE (classe nuova nel sorgente, non compilata) - licenza CC0 - versione 1.0
+  SHA-256: f4a6f8be69d17e394cd05f2d8c4f651f4cbee1ed42e3da718868970d553ff1dc
 Dal 1.8.11 l'estensione dei file e .vdb (il firmware legge ancora i vecchi .vdp).

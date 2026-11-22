@@ -221,3 +221,9 @@ Diagnosi della scheda, solo Admin. Senza argomenti mostra guida, rete, servizi, 
 $ diag
 $ diag codici
 $ diag led 3 1
+@rec
+Registratore di dati: ogni tot secondi legge le fonti scelte (periferiche, temperatura, RAM) e scrive una riga CSV su flash o microSD.
+Di fabbrica e spento. 'rec set' cambia intervallo, posto (flash o sd), spazio massimo e fonti; 'rec clear' cancella i dati.
+$ rec set interval 60
+$ rec set dev 1 sensore1
+$ rec on

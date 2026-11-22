@@ -5,6 +5,10 @@
 // Va chiamato da un solo task alla volta (il ciclo principale), come prima.
 #include "vos_drv_gpio.h"
 #include <driver/gpio.h>
+#include <soc/soc_caps.h>
+#if SOC_RTCIO_PIN_COUNT > 0
+#include <driver/rtc_io.h>
+#endif
 #include <esp_adc/adc_oneshot.h>
 #include <esp_adc/adc_cali.h>
 #include <esp_adc/adc_cali_scheme.h>
@@ -34,6 +38,16 @@ static bool adcPrepare(int gpio, adc_unit_t& unit, adc_channel_t& ch) {
     if (adc_oneshot_config_channel(g_unit[unit], ch, &cc) != ESP_OK) return false;
     g_chanReady |= 1ULL << gpio;
   }
+  return true;
+}
+
+bool drvGpioCanaleAdc(int gpio, int& unita, int& canale) {
+  adc_unit_t u;
+  adc_channel_t ch;
+  if (gpio < 0 || gpio >= GPIO_NUM_MAX) return false;
+  if (adc_oneshot_io_to_channel(gpio, &u, &ch) != ESP_OK) return false;
+  unita = (int)u + 1;
+  canale = (int)ch;
   return true;
 }
 
@@ -85,5 +99,85 @@ void drvGpioMode(int gpio, DrvGpioMode m) {
   gpio_config(&c);
   g_chanReady &= ~(1ULL << gpio);         // il pin torna digitale: la prossima lettura analogica lo riconfigura
 }
+void drvGpioResistenze(int gpio, bool su, bool giu) {
+  if (gpio < 0 || gpio >= GPIO_NUM_MAX) return;
+  gpio_num_t g = (gpio_num_t)gpio;
+  if (su) gpio_pullup_en(g); else gpio_pullup_dis(g);
+  if (giu) gpio_pulldown_en(g); else gpio_pulldown_dis(g);
+}
+void drvGpioRilascia(int gpio) {
+  if (gpio < 0 || gpio >= GPIO_NUM_MAX) return;
+  gpio_reset_pin((gpio_num_t)gpio);
+}
 void drvGpioWrite(int gpio, bool high) { gpio_set_level((gpio_num_t)gpio, high ? 1 : 0); }
 bool drvGpioRead(int gpio) { return gpio_get_level((gpio_num_t)gpio) != 0; }
+
+// ---- dominio RTC e risveglio (sonno) ----
+#if SOC_RTCIO_PIN_COUNT > 0
+bool drvGpioHaRtc(int gpio) {
+  return gpio >= 0 && gpio < GPIO_NUM_MAX && rtc_gpio_is_valid_gpio((gpio_num_t)gpio);
+}
+
+void drvGpioRtcResistenza(int gpio, bool alto) {
+  if (!drvGpioHaRtc(gpio)) return;
+  gpio_num_t g = (gpio_num_t)gpio;
+  if (alto) {
+    rtc_gpio_pullup_dis(g);
+    rtc_gpio_pulldown_en(g);
+  } else {
+    rtc_gpio_pulldown_dis(g);
+    rtc_gpio_pullup_en(g);
+  }
+}
+
+void drvGpioRtcRilascia(int gpio) {
+  if (!drvGpioHaRtc(gpio)) return;
+  rtc_gpio_hold_dis((gpio_num_t)gpio);
+  rtc_gpio_deinit((gpio_num_t)gpio);
+}
+#else
+// Chip senza piedini RTC (C3, H2): niente funzione RTC; per il risveglio dal sonno profondo valgono le resistenze digitali.
+bool drvGpioHaRtc(int gpio) { (void)gpio; return false; }
+
+void drvGpioRtcResistenza(int gpio, bool alto) {
+  if (gpio < 0 || gpio >= GPIO_NUM_MAX) return;
+  drvGpioResistenze(gpio, !alto, alto);
+}
+
+void drvGpioRtcRilascia(int gpio) { (void)gpio; }
+#endif
+
+void drvGpioRisveglioLivello(int gpio, bool alto) {
+  if (gpio < 0 || gpio >= GPIO_NUM_MAX) return;
+  gpio_wakeup_enable((gpio_num_t)gpio, alto ? GPIO_INTR_HIGH_LEVEL : GPIO_INTR_LOW_LEVEL);
+}
+
+void drvGpioRisveglioSpegni(int gpio) {
+  if (gpio < 0 || gpio >= GPIO_NUM_MAX) return;
+  gpio_wakeup_disable((gpio_num_t)gpio);
+}
+
+#if SOC_RTCIO_PIN_COUNT > 0
+void drvGpioRtcIngresso(int gpio, DrvGpioRes r) {
+  if (!drvGpioHaRtc(gpio)) return;
+  gpio_num_t g = (gpio_num_t)gpio;
+  rtc_gpio_init(g);
+  rtc_gpio_set_direction(g, RTC_GPIO_MODE_INPUT_ONLY);
+  if (r == DG_RES_SU) {
+    rtc_gpio_pulldown_dis(g);
+    rtc_gpio_pullup_en(g);
+  } else if (r == DG_RES_GIU) {
+    rtc_gpio_pullup_dis(g);
+    rtc_gpio_pulldown_en(g);
+  } else {
+    rtc_gpio_pullup_dis(g);
+    rtc_gpio_pulldown_dis(g);
+  }
+  rtc_gpio_hold_en(g);
+}
+#else
+void drvGpioRtcIngresso(int gpio, DrvGpioRes r) {
+  (void)gpio;
+  (void)r;
+}
+#endif

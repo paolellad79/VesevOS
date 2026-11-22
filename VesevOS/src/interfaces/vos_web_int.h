@@ -109,7 +109,7 @@ esp_err_t   okAvviso(Res* s, const ErrBuf& avviso);              // come ok(), c
 esp_err_t   ko(Res* s, const char* e, const char* code = "error");   // codice HTTP dal "code" (regole API 10-11)
 inline esp_err_t ko(Res* s, const ErrBuf& e, const char* code = "error") { return ko(s, e.c_str(), code); }
 esp_err_t   notFound(Res* s);
-esp_err_t   sendFile(Res* s, const char* fsPath, const char* contentType, bool download);   // un file della memoria interna (vos_web_sendfile.cpp)
+esp_err_t   sendFile(Res* s, const char* fsPath, const char* contentType, bool download, size_t salta = 0);   // un file della memoria interna (vos_web_sendfile.cpp)
 bool        sendRisFile(Res* s, RisFile rf, const char* contentType, bool gzip, const char* cache, esp_err_t& err);   // un file di /usr/share/vesevos controllato con SHA256SUMS; false = manca o non e valido (vos_web_sendfile.cpp)
 void        tokenTo(Req* r, char* out, size_t cap);             // cookie di sessione in out ("" se manca)
 bool        csrfBlocked(Req* r);                                // true = richiesta partita da un altro sito (CSRF): da rifiutare
@@ -121,6 +121,9 @@ std::string svcJson(int role);   // role: i dettagli dei moduli ELF (solo con VO
 bool        settingsJson(HeapBuf& out);                         // false = manca la memoria o supera il tetto
 void        delayedRestart(void*);
 void        delayedSleep(void*);
+esp_err_t   sendManifest(Res* s);                                 // "/manifest.webmanifest": il manifest dell'app web con il nome della scheda (vos_web_pwa.cpp)
+esp_err_t   sendIcona(Res* s, int which);                      // "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png" (which = 192, 512 o 180)
+esp_err_t   sendTema(Res* s);                                     // "/tema.css": il tema scelto (/etc/tema.css) se valido, altrimenti un commento (vos_web_tema.cpp)
 esp_err_t   sendPage(Res* s);                                     // "/": la pagina da /usr/share/vesevos/html.vrs, altrimenti quella di emergenza (vos_web_pagina.cpp)
 void        paginaEsitoAzzera();                                  // dopo un caricamento .vrs riuscito: il prossimo "/" ricontrolla il file per intero
 esp_err_t   sendEmergenza(Res* s, bool lingua = false);                // pagina di emergenza (vos_web_emergenza.cpp); lingua = file di lingua in errore
@@ -147,6 +150,10 @@ void routesElf(PsychicHttpServer* S, bool sec);     // vos_web_elf.cpp: moduli E
 void routesProg(PsychicHttpServer* S, bool sec);    // vos_web_prog.cpp: programmi in corso, sottosistemi vdb e vde, Funzionalita, avvio automatico
 void routesScript(PsychicHttpServer* S, bool sec);  // vos_web_script.cpp: pagina Script (elenco, stato, avvio, stop)
 void routesApp(PsychicHttpServer* S, bool sec);     // vos_web_app.cpp: pagina App (elenco e controllo dei file .vab)
+#if VOS_WITH_REC
+void routesRec(PsychicHttpServer* S, bool sec);    // vos_web_rec.cpp: pagina Registratore
+#endif
+void routesCoproc(PsychicHttpServer* S, bool sec);  // vos_web_coproc.cpp: pagina Coprocessore (sola lettura)
 void routesAgg(PsychicHttpServer* S, bool sec);     // vos_web_agg.cpp: pagina Aggiornamenti
 void routesEventi(PsychicHttpServer* S, bool sec);  // vos_web_eventi.cpp: pagina Eventi di sicurezza
 void routesUpd(PsychicHttpServer* S, bool sec);     // vos_web_upd.cpp: aggiornamento tramite recovery (ordine in NVS, esito)

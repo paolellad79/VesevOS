@@ -1,0 +1,11 @@
+# Componenti scaricati dal registro di Espressif. Dalla fase 5 NON c'e piu espressif/arduino-esp32:
+# littlefs e mdns, che prima arrivavano come sue dipendenze, sono dichiarati qui (versioni di dependencies.lock).
+dependencies:
+  idf: "5.5.5"
+  h2zero/esp-nimble-cpp:
+    version: "*"
+    rules:
+      # chip con Bluetooth LE (soc_caps.h: SOC_BLE_SUPPORTED); la lista va tenuta uguale a quella letta da CMakeLists.txt
+      - if: "target in [esp32s3, esp32c6, esp32c3, esp32h2]"
+  joltwallet/littlefs: "1.22.3"
+  espressif/mdns: "1.14.0"

@@ -10,6 +10,7 @@
 
 #define VOS_BOARD         "ESP32-C3 SuperMini"
 #define VOS_CHIP          "ESP32-C3"
+#define VOS_CPU_SIGLA     "C3"                   // sigla nei nomi dei file e in aggiorna/latest.json (blocco "schede")
 #define VOS_ADDR2LINE     "riscv32-esp-elf-addr2line"
 
 // ---- memoria ----
@@ -109,6 +110,11 @@
 #define VOS_BOARD_PWM 1
 // ---- Contatore di impulsi dell'utente: il C3 NON ha il blocco PCNT (SOC_PCNT_SUPPORTED assente): spento ----
 #define VOS_BOARD_CONTATORE 0
+// Capacita del chip per il registratore di dati (solo dichiarazioni: il sonno profondo arriva dopo). C3: nessun coprocessore, niente PCNT, RTC 8 KB.
+#define VOS_HAS_ULP          0   // coprocessore ULP (solo S3)
+#define VOS_HAS_LP_CPU       0   // CPU a basso consumo (solo C6)
+#define VOS_HAS_PCNT         0   // contatore di impulsi (PCNT)
+#define VOS_RTC_MEM_BYTES    8192   // memoria che resta accesa nel sonno profondo
 // ---- LED a colori WS2812 a mano (classe "led_rgb"): il C3 ha 2 canali RMT di trasmissione e nessun LED a colori di bordo: ne restano 2 ----
 #define VOS_BOARD_LED_RGB_MANO 1
 
@@ -167,3 +173,4 @@ static_assert(VOS_SD_DEF_CS != VOS_SD_DEF_MOSI && VOS_SD_DEF_CS != VOS_SD_DEF_SC
 static_assert(!VOS_SD_RESERVED(VOS_SD_DEF_CS) && !VOS_SD_RESERVED(VOS_SD_DEF_MOSI) && !VOS_SD_RESERVED(VOS_SD_DEF_SCK) && !VOS_SD_RESERVED(VOS_SD_DEF_MISO), "microSD: pin riservati dal sistema");
 static_assert(VOS_GPIO_EXISTS(VOS_PIN_LED2) && VOS_PIN_LED2 != VOS_PIN_BOOT, "LED2: pin non valido");
 static_assert(!VOS_HAS_LED_RGB && VOS_PIN_LED_RGB == VOS_PIN_LED2, "C3: nessun LED RGB, VOS_PIN_LED_RGB e solo il pin del LED di bordo");
+static_assert(VOS_RTC_MEM_BYTES >= 4096 && !(VOS_HAS_ULP && VOS_HAS_LP_CPU), "capacita del registratore: valori non coerenti");

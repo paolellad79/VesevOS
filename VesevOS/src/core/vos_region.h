@@ -18,7 +18,7 @@ int    regionMaxDbm();                      // massimo al chip: min(limite - gua
 int    regionTxDbm();                       // potenza in uso (scelta dall'utente, mai oltre il massimo)
 bool   regionChannelOk(int ch);
 void   regionApplyRadio();                  // applica paese e potenza al Wi-Fi (dopo WiFi.mode)
-#define REGION_JSON_MAX 768
+#define REGION_JSON_MAX 1280   // con tre formati scritti a mano di 32 caratteri
 bool   regionJson(HeapBuf& out);            // stato per la pagina (JSON aggiunto in coda)
 std::string regionText();                   // stato per la shell
 // Avviso in audit (solo avviso, i valori restano applicati) se la tabella radio ha una riga oltre 20 dBm o oltre 13 canali. Si chiama una volta,
